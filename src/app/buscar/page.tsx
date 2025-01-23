@@ -16,9 +16,9 @@ export default function SearchPage() {
     : mockData
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-gradient-to-b from-primary-900 to-primary-950">
       {/* Barra de búsqueda fija */}
-      <div className="sticky top-0 bg-primary-900 pt-20 pb-4 z-30">
+      <div className="sticky top-0 bg-gradient-to-b from-primary-900/95 to-primary-900/80 backdrop-blur-sm pt-20 pb-4 z-30">
         <div className="container mx-auto px-4">
           <SearchBar onSearch={() => {}} />
           <CategoryFilters 
@@ -29,27 +29,50 @@ export default function SearchPage() {
       </div>
 
       {/* Feed de contenido */}
-      <motion.div 
-        layout
-        className="py-6 space-y-8"
-      >
-        {Object.entries(filteredData).map(([type, data]) => (
-          <motion.div
-            key={type}
-            layout
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-          >
-            <AdisoSection
-              type={type as AdisoType}
-              title={data.title}
-              categories={data.categories}
-              adisos={data.adisos}
-              featured={type === 'featured'}
-            />
-          </motion.div>
-        ))}
-      </motion.div>
+      <div className="container mx-auto px-4">
+        <motion.div 
+          layout
+          className="py-6 space-y-12"
+        >
+          {/* Sección Featured siempre visible al inicio */}
+          {!selectedType && mockData.featured && (
+            <motion.div
+              layout
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="pt-8"
+            >
+              <AdisoSection
+                type="featured"
+                title="Destacados"
+                categories={[]}
+                adisos={mockData.featured.adisos}
+                featured={true}
+              />
+            </motion.div>
+          )}
+
+          {/* Resto de secciones */}
+          {Object.entries(filteredData)
+            .filter(([type]) => type !== 'featured')
+            .map(([type, data]) => (
+              <motion.div
+                key={type}
+                layout
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+              >
+                <AdisoSection
+                  type={type as AdisoType}
+                  title={data.title}
+                  categories={data.categories}
+                  adisos={data.adisos}
+                  featured={false}
+                />
+              </motion.div>
+            ))}
+        </motion.div>
+      </div>
     </div>
   )
 } 

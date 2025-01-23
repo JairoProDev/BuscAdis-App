@@ -337,3 +337,23 @@ body {
   transform: scale(1.1);
   text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.2);
 }
+
+/* Ocultar scrollbar pero mantener funcionalidad */
+.hide-scrollbar {
+  -ms-overflow-style: none;  /* IE and Edge */
+  scrollbar-width: none;  /* Firefox */
+}
+
+.hide-scrollbar::-webkit-scrollbar {
+  display: none; /* Chrome, Safari and Opera */
+}
+
+/* Snap Scrolling */
+.snap-x {
+  scroll-snap-type: x mandatory;
+  -webkit-overflow-scrolling: touch;
+}
+
+.snap-start {
+  scroll-snap-align: start;
+}

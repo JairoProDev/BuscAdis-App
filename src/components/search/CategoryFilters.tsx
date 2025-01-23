@@ -1,123 +1,58 @@
 'use client'
 
+import { motion } from 'framer-motion'
+import { AdisoType } from '@/types/marketplace'
+
 interface CategoryFiltersProps {
-  category: string;
+  selectedType: AdisoType | null
+  onSelectType: (type: AdisoType | null) => void
 }
 
-export function CategoryFilters({ category }: CategoryFiltersProps) {
-  switch (category.toLowerCase()) {
-    case 'inmuebles':
-      return (
-        <div className="space-y-4">
-          <h3 className="font-medium">Características del inmueble</h3>
-          <div className="grid grid-cols-2 gap-4">
-            <div>
-              <label htmlFor="rooms" className="block text-sm text-gray-600 mb-1">
-                Habitaciones
-              </label>
-              <select
-                id="rooms"
-                className="w-full p-2 border rounded"
-              >
-                <option value="">Cualquiera</option>
-                <option value="1">1+</option>
-                <option value="2">2+</option>
-                <option value="3">3+</option>
-                <option value="4">4+</option>
-              </select>
-            </div>
-            <div>
-              <label htmlFor="bathrooms" className="block text-sm text-gray-600 mb-1">
-                Baños
-              </label>
-              <select
-                id="bathrooms"
-                className="w-full p-2 border rounded"
-              >
-                <option value="">Cualquiera</option>
-                <option value="1">1+</option>
-                <option value="2">2+</option>
-                <option value="3">3+</option>
-              </select>
-            </div>
-          </div>
-        </div>
-      );
+const ADISO_TYPES: { type: AdisoType; icon: string }[] = [
+  { type: 'Empleos', icon: '💼' },
+  { type: 'Inmuebles', icon: '🏠' },
+  { type: 'Vehículos', icon: '🚗' },
+  { type: 'Servicios', icon: '🛠' },
+  { type: 'Productos', icon: '🛍' },
+  { type: 'Eventos', icon: '🎉' },
+  { type: 'Educación', icon: '📚' },
+  { type: 'Turismo', icon: '✈️' },
+  { type: 'Mascotas', icon: '🐾' }
+]
 
-    case 'vehiculos':
-      return (
-        <div className="space-y-4">
-          <h3 className="font-medium">Características del vehículo</h3>
-          <div className="grid grid-cols-2 gap-4">
-            <div>
-              <label htmlFor="year" className="block text-sm text-gray-600 mb-1">
-                Año
-              </label>
-              <select
-                id="year"
-                className="w-full p-2 border rounded"
-              >
-                <option value="">Cualquiera</option>
-                {Array.from({ length: 30 }, (_, i) => new Date().getFullYear() - i).map(year => (
-                  <option key={year} value={year}>{year}</option>
-                ))}
-              </select>
-            </div>
-            <div>
-              <label htmlFor="transmission" className="block text-sm text-gray-600 mb-1">
-                Transmisión
-              </label>
-              <select
-                id="transmission"
-                className="w-full p-2 border rounded"
-              >
-                <option value="">Cualquiera</option>
-                <option value="manual">Manual</option>
-                <option value="automatica">Automática</option>
-              </select>
-            </div>
-          </div>
-        </div>
-      );
-
-    case 'empleos':
-      return (
-        <div className="space-y-4">
-          <h3 className="font-medium">Detalles del empleo</h3>
-          <div className="grid grid-cols-2 gap-4">
-            <div>
-              <label htmlFor="type" className="block text-sm text-gray-600 mb-1">
-                Tipo de empleo
-              </label>
-              <select
-                id="type"
-                className="w-full p-2 border rounded"
-              >
-                <option value="">Cualquiera</option>
-                <option value="full-time">Tiempo completo</option>
-                <option value="part-time">Medio tiempo</option>
-                <option value="freelance">Freelance</option>
-              </select>
-            </div>
-            <div>
-              <label htmlFor="experience" className="block text-sm text-gray-600 mb-1">
-                Experiencia
-              </label>
-              <select
-                id="experience"
-                className="w-full p-2 border rounded"
-              >
-                <option value="">Cualquiera</option>
-                <option value="junior">Junior</option>
-                <option value="mid">Semi-senior</option>
-                <option value="senior">Senior</option>
-              </select>
-            </div>
-          </div>
-        </div>
-      );
-
-    default:
-      return null;
-  }
+export default function CategoryFilters({ selectedType, onSelectType }: CategoryFiltersProps) {
+  return (
+    <div className="mt-4 -mb-2">
+      <div className="flex overflow-x-auto hide-scrollbar gap-2 pb-4">
+        <motion.button
+          onClick={() => onSelectType(null)}
+          className={`flex-none px-4 py-2 rounded-full text-sm font-medium transition-colors ${
+            selectedType === null
+              ? 'bg-white text-primary-900'
+              : 'bg-primary-800 text-white hover:bg-primary-700'
+          }`}
+          whileHover={{ scale: 1.05 }}
+          whileTap={{ scale: 0.95 }}
+        >
+          🌟 Todos
+        </motion.button>
+        
+        {ADISO_TYPES.map(({ type, icon }) => (
+          <motion.button
+            key={type}
+            onClick={() => onSelectType(type)}
+            className={`flex-none px-4 py-2 rounded-full text-sm font-medium transition-colors ${
+              selectedType === type
+                ? 'bg-white text-primary-900'
+                : 'bg-primary-800 text-white hover:bg-primary-700'
+            }`}
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.95 }}
+          >
+            {icon} {type}
+          </motion.button>
+        ))}
+      </div>
+    </div>
+  )
 } 
