@@ -1,53 +1,55 @@
 'use client'
 
 import { useState } from 'react'
+import { motion } from 'framer-motion'
 import SearchBar from '@/components/search/SearchBar'
+import AdisoSection from '@/components/home/AdisoSection'
+import CategoryFilters from '@/components/search/CategoryFilters'
+import { AdisoType } from '@/types/marketplace'
+import { mockData } from '@/data/mockData'
 
-export default function BuscarPage() {
-  const [searchResults, setSearchResults] = useState([])
-  const [loading, setLoading] = useState(false)
+export default function SearchPage() {
+  const [selectedType, setSelectedType] = useState<AdisoType | null>(null)
 
-  const handleSearch = async (query: string) => {
-    setLoading(true)
-    try {
-      // Aquí implementaremos la búsqueda real
-      console.log('Buscando:', query)
-      // Simular resultados por ahora
-      await new Promise(resolve => setTimeout(resolve, 1000))
-      setSearchResults([])
-    } catch (error) {
-      console.error('Error en la búsqueda:', error)
-    } finally {
-      setLoading(false)
-    }
-  }
+  const filteredData = selectedType
+    ? { [selectedType]: mockData[selectedType] }
+    : mockData
 
   return (
-    <div className="container mx-auto px-4 py-8">
-      <h1 className="text-3xl font-bold text-primary-800 mb-8">
-        Buscar Adisos
-      </h1>
-
-      <div className="mb-8">
-        <SearchBar onSearch={handleSearch} />
+    <div className="min-h-screen bg-gray-50">
+      {/* Barra de búsqueda fija */}
+      <div className="sticky top-0 bg-primary-900 pt-20 pb-4 z-30">
+        <div className="container mx-auto px-4">
+          <SearchBar onSearch={() => {}} />
+          <CategoryFilters 
+            selectedType={selectedType}
+            onSelectType={setSelectedType}
+          />
+        </div>
       </div>
 
-      <div className="space-y-4">
-        {loading ? (
-          <div className="text-center py-8">
-            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary-600 mx-auto"></div>
-            <p className="mt-4 text-primary-600">Buscando resultados...</p>
-          </div>
-        ) : searchResults.length > 0 ? (
-          <div>
-            {/* Aquí mostraremos los resultados */}
-          </div>
-        ) : (
-          <div className="text-center py-8 text-gray-500">
-            Comienza a buscar para ver resultados
-          </div>
-        )}
-      </div>
+      {/* Feed de contenido */}
+      <motion.div 
+        layout
+        className="py-6 space-y-8"
+      >
+        {Object.entries(filteredData).map(([type, data]) => (
+          <motion.div
+            key={type}
+            layout
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+          >
+            <AdisoSection
+              type={type as AdisoType}
+              title={data.title}
+              categories={data.categories}
+              adisos={data.adisos}
+              featured={type === 'featured'}
+            />
+          </motion.div>
+        ))}
+      </motion.div>
     </div>
   )
 } 
