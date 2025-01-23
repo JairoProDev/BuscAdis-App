@@ -6,7 +6,7 @@ import Footer from '@/components/Footer'
 const inter = Inter({ subsets: ['latin'] })
 
 export const metadata = {
-  title: 'BuacAdis - Encuentra las mejores oportunidades',
+  title: 'BuscAdis - Encuentra las mejores oportunidades',
   description: 'Plataforma premium de avisos clasificados. Conectamos a quienes buscan con quienes ofrecen oportunidades de calidad.',
 }
 
