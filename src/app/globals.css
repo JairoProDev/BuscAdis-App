@@ -357,3 +357,43 @@ body {
 .snap-start {
   scroll-snap-align: start;
 }
+
+/* Mejoras para scroll horizontal en móvil */
+@media (max-width: 640px) {
+  .snap-x {
+    scroll-padding: 1rem;
+  }
+  
+  .hide-scrollbar {
+    -webkit-overflow-scrolling: touch;
+    scroll-behavior: smooth;
+  }
+}
+
+/* Efecto de desvanecimiento en los bordes del scroll horizontal */
+.fade-edges {
+  mask-image: linear-gradient(
+    to right,
+    transparent,
+    black 10%,
+    black 90%,
+    transparent
+  );
+  -webkit-mask-image: linear-gradient(
+    to right,
+    transparent,
+    black 10%,
+    black 90%,
+    transparent
+  );
+}
+
+/* Animaciones suaves para los filtros */
+.filter-transition {
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.filter-active {
+  @apply bg-primary-600 text-white shadow-lg;
+  transform: translateY(-1px);
+}

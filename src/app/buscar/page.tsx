@@ -5,6 +5,7 @@ import { motion } from 'framer-motion'
 import SearchBar from '@/components/search/SearchBar'
 import AdisoSection from '@/components/home/AdisoSection'
 import CategoryFilters from '@/components/search/CategoryFilters'
+import SearchFilters from '@/components/search/SearchFilters'
 import { AdisoType } from '@/types/marketplace'
 import { mockData } from '@/data/mockData'
 
@@ -20,7 +21,12 @@ export default function SearchPage() {
       {/* Barra de búsqueda fija */}
       <div className="sticky top-0 bg-gradient-to-b from-primary-900/95 to-primary-900/80 backdrop-blur-sm pt-20 pb-4 z-30">
         <div className="container mx-auto px-4">
-          <SearchBar onSearch={() => {}} />
+          <div className="flex items-center gap-2">
+            <div className="flex-1">
+              <SearchBar onSearch={() => {}} />
+            </div>
+            <SearchFilters />
+          </div>
           <CategoryFilters 
             selectedType={selectedType}
             onSelectType={setSelectedType}

@@ -14,16 +14,13 @@ interface FeaturedAdsProps {
 export default function FeaturedAds({ ads, featured = false }: FeaturedAdsProps) {
   return (
     <div className="py-4">
-      <h3 className="text-lg font-semibold text-primary-800 px-4 mb-3 flex items-center">
-        <PremiumIcon className="w-5 h-5 text-yellow-500 mr-2" />
-        Anuncios Destacados
-      </h3>
-
       <div className="flex overflow-x-auto hide-scrollbar snap-x snap-mandatory gap-4 px-4">
         {ads.map((ad) => (
           <InteractiveCard
             key={ad.id}
-            className="flex-none w-72 snap-start first:ml-0 last:mr-4 bg-white rounded-xl shadow-lg"
+            className={`flex-none snap-start first:ml-0 last:mr-4 bg-primary-800/50 backdrop-blur-sm rounded-xl shadow-lg hover:shadow-2xl transition-all duration-300 ${
+              featured ? 'w-80 md:w-96' : 'w-72'
+            }`}
           >
             <div className="relative aspect-[4/3]">
               <Image
@@ -33,37 +30,41 @@ export default function FeaturedAds({ ads, featured = false }: FeaturedAdsProps)
                 className="object-cover rounded-t-xl"
               />
               {ad.isPremium && (
-                <div className="absolute top-2 right-2 bg-yellow-500 text-white text-xs px-2 py-1 rounded-full flex items-center">
+                <div className="absolute top-2 right-2 bg-gradient-to-r from-yellow-500 to-yellow-600 text-white text-xs px-3 py-1 rounded-full flex items-center shadow-lg">
                   <PremiumIcon className="w-3 h-3 mr-1" />
                   Premium
                 </div>
               )}
+              <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
+              <div className="absolute bottom-0 left-0 right-0 p-4">
+                <h4 className="font-bold text-white text-lg line-clamp-2 mb-2">{ad.title}</h4>
+                <div className="flex items-center justify-between text-white/90">
+                  <span className="text-sm">{ad.location}</span>
+                  <span className="text-sm">{ad.category.name}</span>
+                </div>
+              </div>
             </div>
             
             <div className="p-4">
-              <div className="flex items-start justify-between mb-2">
-                <h4 className="font-medium text-primary-800 line-clamp-2">{ad.title}</h4>
+              <div className="flex items-center justify-between mb-4">
+                <span className="text-2xl font-bold text-white">
+                  ${ad.price.toLocaleString()}
+                </span>
                 {ad.isVerified && (
-                  <VerifiedIcon className="w-5 h-5 text-primary-500 flex-shrink-0" />
+                  <div className="flex items-center text-primary-200">
+                    <VerifiedIcon className="w-5 h-5 mr-1" />
+                    <span className="text-sm">Verificado</span>
+                  </div>
                 )}
               </div>
               
-              <div className="flex items-center text-sm text-primary-600 mb-3">
-                <span>{ad.location}</span>
-                <span className="mx-2">•</span>
-                <span>{ad.category.name}</span>
-              </div>
-              
               <div className="flex items-center justify-between">
-                <span className="text-lg font-bold text-primary-800">
-                  ${ad.price.toLocaleString()}
-                </span>
                 <div className="flex items-center">
                   {[...Array(5)].map((_, i) => (
                     <svg
                       key={i}
                       className={`w-4 h-4 ${
-                        i < ad.rating ? 'text-yellow-400' : 'text-gray-300'
+                        i < ad.rating ? 'text-yellow-400' : 'text-primary-700'
                       }`}
                       fill="currentColor"
                       viewBox="0 0 20 20"
@@ -72,6 +73,13 @@ export default function FeaturedAds({ ads, featured = false }: FeaturedAdsProps)
                     </svg>
                   ))}
                 </div>
+                <motion.button
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
+                  className="px-4 py-2 bg-primary-600 text-white rounded-lg text-sm font-medium hover:bg-primary-500 transition-colors"
+                >
+                  Ver más
+                </motion.button>
               </div>
             </div>
           </InteractiveCard>
