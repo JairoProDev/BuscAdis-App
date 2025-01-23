@@ -5,10 +5,11 @@ import { motion, AnimatePresence } from 'framer-motion'
 import { MicrophoneIcon, CameraIcon, FilterIcon } from '@/components/icons'
 
 const SUGGESTIONS = [
-  { text: 'Apartamentos en venta', category: 'Inmuebles' },
-  { text: 'Desarrollador frontend', category: 'Empleos' },
+  { text: 'Promotor de ventas', category: 'Empleos' },
+  { text: 'Apartamentos en alquiler', category: 'Inmuebles' },
   { text: 'Toyota Corolla', category: 'Vehículos' },
-  { text: 'iPhone 13', category: 'Electrónicos' },
+  { text: 'Limpieza de hogar', category: 'Servicios' },
+  { text: 'iPhone 15 Pro Max', category: 'Productos' }
 ] as const
 
 export default function SearchBar({ onSearch }: { onSearch: (query: string) => void }) {
