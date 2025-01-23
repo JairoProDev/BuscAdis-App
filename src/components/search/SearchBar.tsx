@@ -2,32 +2,57 @@
 
 import { useState, useRef, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { useDebounce } from '@/hooks/useDebounce'
 import { MicrophoneIcon, CameraIcon, FilterIcon } from '@/components/icons'
+
+const SUGGESTIONS = [
+  { text: 'Apartamentos en venta', category: 'Inmuebles' },
+  { text: 'Desarrollador frontend', category: 'Empleos' },
+  { text: 'Toyota Corolla', category: 'Vehículos' },
+  { text: 'iPhone 13', category: 'Electrónicos' },
+] as const
 
 export default function SearchBar({ onSearch }: { onSearch: (query: string) => void }) {
   const [query, setQuery] = useState('')
   const [isFocused, setIsFocused] = useState(false)
-  const debouncedQuery = useDebounce(query, 300)
+  const [filteredSuggestions, setFilteredSuggestions] = useState(SUGGESTIONS)
   const inputRef = useRef<HTMLInputElement>(null)
   const suggestionsRef = useRef<HTMLDivElement>(null)
 
-  const suggestions = [
-    { text: 'Apartamentos en venta', category: 'Inmuebles' },
-    { text: 'Desarrollador frontend', category: 'Empleos' },
-    { text: 'Toyota Corolla', category: 'Vehículos' },
-    { text: 'iPhone 13', category: 'Electrónicos' },
-  ]
+  useEffect(() => {
+    if (query) {
+      const filtered = SUGGESTIONS.filter(suggestion =>
+        suggestion.text.toLowerCase().includes(query.toLowerCase()) ||
+        suggestion.category.toLowerCase().includes(query.toLowerCase())
+      )
+      setFilteredSuggestions(filtered)
+    } else {
+      setFilteredSuggestions(SUGGESTIONS)
+    }
+  }, [query])
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
-      if (suggestionsRef.current && !suggestionsRef.current.contains(event.target as Node)) {
+      if (
+        !inputRef.current?.contains(event.target as Node) &&
+        !suggestionsRef.current?.contains(event.target as Node)
+      ) {
+        setIsFocused(false)
+      }
+    }
+
+    const handleEscape = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') {
         setIsFocused(false)
       }
     }
 
     document.addEventListener('mousedown', handleClickOutside)
-    return () => document.removeEventListener('mousedown', handleClickOutside)
+    document.addEventListener('keydown', handleEscape)
+    
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside)
+      document.removeEventListener('keydown', handleEscape)
+    }
   }, [])
 
   return (
@@ -59,22 +84,16 @@ export default function SearchBar({ onSearch }: { onSearch: (query: string) => v
         {isFocused && (
           <motion.div
             ref={suggestionsRef}
-            initial={{ opacity: 0, y: -10 }}
+            initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -10 }}
-            className={`
-              absolute w-full bg-white shadow-xl border border-primary-100 overflow-hidden z-50
-              md:top-full md:rounded-2xl md:mt-2 md:max-h-[400px]
-              fixed bottom-0 left-0 right-0 rounded-t-2xl max-h-[50vh]
-              md:static md:transform-none
-              overflow-y-auto
-            `}
+            exit={{ opacity: 0, y: 10 }}
+            className="absolute left-0 right-0 top-[calc(100%+0.5rem)] bg-white shadow-xl border border-primary-100 rounded-2xl overflow-hidden z-50 max-h-[300px] overflow-y-auto"
           >
             <div className="sticky top-0 bg-white p-4 border-b border-primary-100">
               <div className="text-sm font-medium text-primary-600">Sugerencias populares</div>
             </div>
             <div className="p-4 space-y-2">
-              {suggestions.map((suggestion, index) => (
+              {filteredSuggestions.map((suggestion, index) => (
                 <button
                   key={index}
                   onClick={() => {
@@ -85,7 +104,7 @@ export default function SearchBar({ onSearch }: { onSearch: (query: string) => v
                   className="w-full flex items-center justify-between p-3 hover:bg-primary-50 rounded-lg transition-colors"
                 >
                   <span className="text-primary-800">{suggestion.text}</span>
-                  <span className="text-sm text-primary-500 bg-primary-50 px-2 py-1 rounded-full">
+                  <span className="text-sm text-primary-500 bg-primary-50/50 px-2 py-1 rounded-full">
                     {suggestion.category}
                   </span>
                 </button>

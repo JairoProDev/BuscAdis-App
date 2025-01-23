@@ -120,7 +120,7 @@ export default function Home() {
         </div>
       </section>
 
-      {/* Categorías Populares con Interactividad */}
+      {/* Categorías Populares */}
       <section id="categories" className="py-20 bg-white">
         <div className="container mx-auto px-4">
           <motion.h2 
@@ -193,7 +193,7 @@ export default function Home() {
       </section>
 
       {/* Por qué BuscAdis */}
-      <section className="py-16 bg-primary-50/30">
+      <section className="py-16 bg-white">
         <div className="container mx-auto px-4">
           <h2 className="text-3xl font-bold text-primary-800 text-center mb-12">
             ¿Por qué elegir BuscAdis?
@@ -296,7 +296,7 @@ export default function Home() {
       </section>
 
       {/* Testimonios */}
-      <section className="py-24 bg-gradient-to-b from-primary-50/30 to-white">
+      <section className="py-24 bg-white">
         <div className="container mx-auto px-4">
           <motion.h2 
             className="text-4xl font-bold text-primary-800 text-center mb-16"
@@ -381,10 +381,7 @@ export default function Home() {
       </section>
 
       {/* Estadísticas */}
-      <section 
-        ref={statsRef}
-        className="py-24 bg-primary-900 text-white"
-      >
+      <section ref={statsRef} className="py-24 bg-primary-900 text-white">
         <div className="container mx-auto px-4">
           <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
             {[
@@ -418,7 +415,7 @@ export default function Home() {
       </section>
 
       {/* CTA Final */}
-      <section className="py-24 bg-gradient-to-br from-primary-600 to-primary-800 text-white">
+      <section className="py-24 bg-primary-800 text-white">
         <div className="container mx-auto px-4 text-center">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
