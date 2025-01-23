@@ -39,7 +39,7 @@ export default function Home() {
   }
 
   return (
-    <div className="space-y-12 md:space-y-24">
+    <div className="">
       {/* Hero Section */}
       <section className="relative min-h-[calc(100vh-4rem)] md:min-h-screen bg-primary-900">
         <div className="absolute inset-0">
@@ -193,7 +193,7 @@ export default function Home() {
       </section>
 
       {/* Por qué BuscAdis */}
-      <section className="py-16 bg-white">
+      <section className="py-16 bg-primary-200">
         <div className="container mx-auto px-4">
           <h2 className="text-3xl font-bold text-primary-800 text-center mb-12">
             ¿Por qué elegir BuscAdis?
@@ -296,7 +296,7 @@ export default function Home() {
       </section>
 
       {/* Testimonios */}
-      <section className="py-24 bg-white">
+      <section className="py-24 bg-primary-200">
         <div className="container mx-auto px-4">
           <motion.h2 
             className="text-4xl font-bold text-primary-800 text-center mb-16"
