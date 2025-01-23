@@ -1,87 +1,173 @@
 'use client'
 
+import { useState, useEffect } from "react"
 import Image from "next/image";
 import Link from "next/link";
 import SearchBar from "@/components/search/SearchBar";
+import { motion } from "framer-motion";
+import CountUp from 'react-countup';
+import { useInView } from 'react-intersection-observer';
 
 export default function Home() {
+  const [activeTestimonial, setActiveTestimonial] = useState(0)
+  const { ref: statsRef, inView: statsInView } = useInView()
+  const { ref: featuresRef, inView: featuresInView } = useInView()
+
   const handleSearch = async (query: string) => {
     console.log('Búsqueda:', query)
     // Aquí implementaremos la lógica de búsqueda
   }
 
   return (
-    <div className="space-y-16">
-      {/* Hero Section con Buscador */}
-      <section className="text-center py-16 px-4">
-        <h1 className="text-4xl md:text-6xl font-bold text-primary-800 mb-6">
-          Conecta con las mejores oportunidades
-        </h1>
-        <p className="text-xl text-primary-600 mb-8 max-w-2xl mx-auto">
-          Encuentra todo lo que buscas en un solo lugar, rápido, fácil y seguro.
-        </p>
-        
-        {/* Buscador Principal */}
-        <div className="max-w-4xl mx-auto mb-8">
-          <SearchBar onSearch={handleSearch} />
+    <div className="space-y-24">
+      {/* Hero Section con Video de Fondo */}
+      <section className="relative min-h-screen flex items-center">
+        <div className="absolute inset-0 overflow-hidden">
+          <video
+            autoPlay
+            loop
+            muted
+            playsInline
+            className="w-full h-full object-cover"
+          >
+            <source src="/videos/hero-background.mp4" type="video/mp4" />
+          </video>
+          <div className="absolute inset-0 bg-gradient-to-b from-primary-900/70 to-primary-800/70 backdrop-blur-sm" />
         </div>
 
-        <div className="flex flex-col sm:flex-row gap-4 justify-center mt-8">
-          <Link 
-            href="/buscar"
-            className="px-8 py-3 bg-primary-600 text-white rounded-lg hover:bg-primary-700 transition text-lg font-semibold"
+        <div className="relative container mx-auto px-4 text-center text-white">
+          <motion.h1 
+            className="text-5xl md:text-7xl font-bold mb-6"
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.8 }}
           >
-            Buscar Adisos
-          </Link>
-          <Link 
-            href="/publicar"
-            className="px-8 py-3 bg-white text-primary-600 border-2 border-primary-600 rounded-lg hover:bg-primary-50 transition text-lg font-semibold"
+            Conecta con las mejores oportunidades
+          </motion.h1>
+          <motion.p 
+            className="text-xl md:text-2xl mb-12 max-w-3xl mx-auto"
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.8, delay: 0.2 }}
           >
-            Publicar Adiso
-          </Link>
+            Encuentra todo lo que buscas en un solo lugar, rápido, fácil y seguro.
+          </motion.p>
+          
+          <motion.div 
+            className="max-w-4xl mx-auto mb-12"
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.8, delay: 0.4 }}
+          >
+            <SearchBar onSearch={handleSearch} />
+          </motion.div>
+
+          <motion.div 
+            className="flex flex-wrap justify-center gap-8 text-center"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ duration: 0.8, delay: 0.6 }}
+          >
+            {[
+              { number: '1M+', label: 'Usuarios activos' },
+              { number: '500K+', label: 'Anuncios publicados' },
+              { number: '98%', label: 'Satisfacción' },
+              { number: '24/7', label: 'Soporte' }
+            ].map((stat, index) => (
+              <div key={index} className="flex flex-col items-center">
+                <span className="text-4xl font-bold mb-2">{stat.number}</span>
+                <span className="text-primary-100">{stat.label}</span>
+              </div>
+            ))}
+          </motion.div>
         </div>
+
+        <motion.div 
+          className="absolute bottom-8 left-1/2 -translate-x-1/2"
+          animate={{ y: [0, 10, 0] }}
+          transition={{ duration: 1.5, repeat: Infinity }}
+        >
+          <button 
+            onClick={() => document.getElementById('categories')?.scrollIntoView({ behavior: 'smooth' })}
+            className="text-white"
+            aria-label="Scroll para ver más"
+          >
+            <svg className="w-8 h-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 14l-7 7m0 0l-7-7m7 7V3" />
+            </svg>
+          </button>
+        </motion.div>
       </section>
 
-      {/* Categorías Populares */}
-      <section className="py-16">
-        <h2 className="text-3xl font-bold text-primary-800 text-center mb-12">
-          Categorías Populares
-        </h2>
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
-          {[
-            {
-              name: 'Inmuebles',
-              description: 'Encuentra las mejores ofertas en inmuebles',
-              icon: '🏠'
-            },
-            {
-              name: 'Vehículos',
-              description: 'Encuentra las mejores ofertas en vehículos',
-              icon: '🚗'
-            },
-            {
-              name: 'Empleos',
-              description: 'Encuentra las mejores ofertas en empleos',
-              icon: '💼'
-            },
-            {
-              name: 'Servicios',
-              description: 'Encuentra las mejores ofertas en servicios',
-              icon: '🛠️'
-            }
-          ].map((categoria) => (
-            <Link 
-              href={`/categorias/${categoria.name.toLowerCase()}`}
-              key={categoria.name} 
-              className="bg-white rounded-xl p-6 shadow-lg hover:shadow-xl transition group"
-            >
-              <div className="text-4xl mb-4">{categoria.icon}</div>
-              <h3 className="text-xl font-semibold text-primary-700 mb-2 group-hover:text-primary-800">
-                {categoria.name}
-              </h3>
-              <p className="text-primary-600">{categoria.description}</p>
-            </Link>
-          ))}
+      {/* Categorías Populares con Interactividad */}
+      <section id="categories" className="py-20 bg-gradient-to-b from-white to-primary-50">
+        <div className="container mx-auto px-4">
+          <motion.h2 
+            className="text-4xl font-bold text-primary-800 text-center mb-16"
+            ref={featuresRef}
+            initial={{ opacity: 0, y: 20 }}
+            animate={featuresInView ? { opacity: 1, y: 0 } : {}}
+            transition={{ duration: 0.8 }}
+          >
+            Explora nuestras categorías
+          </motion.h2>
+
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
+            {[
+              {
+                name: 'Inmuebles',
+                description: 'Encuentra tu próximo hogar',
+                icon: '🏠',
+                stats: ['10K+ propiedades', '500+ agentes', 'Cobertura nacional']
+              },
+              {
+                name: 'Vehículos',
+                description: 'Las mejores ofertas en vehículos',
+                icon: '🚗',
+                stats: ['5K+ vehículos', 'Todas las marcas', 'Financiación disponible']
+              },
+              {
+                name: 'Empleos',
+                description: 'Oportunidades laborales premium',
+                icon: '💼',
+                stats: ['2K+ empleos', 'Empresas top', 'Salarios competitivos']
+              },
+              {
+                name: 'Servicios',
+                description: 'Servicios profesionales verificados',
+                icon: '🛠️',
+                stats: ['8K+ profesionales', 'Reseñas verificadas', 'Garantía de servicio']
+              }
+            ].map((categoria, index) => (
+              <motion.div
+                key={categoria.name}
+                initial={{ opacity: 0, y: 20 }}
+                animate={featuresInView ? { opacity: 1, y: 0 } : {}}
+                transition={{ duration: 0.8, delay: index * 0.2 }}
+              >
+                <Link 
+                  href={`/categorias/${categoria.name.toLowerCase()}`}
+                  className="block bg-white rounded-2xl p-8 shadow-lg hover:shadow-xl transform hover:-translate-y-1 transition-all duration-300"
+                >
+                  <div className="text-5xl mb-6">{categoria.icon}</div>
+                  <h3 className="text-2xl font-semibold text-primary-800 mb-4">
+                    {categoria.name}
+                  </h3>
+                  <p className="text-primary-600 mb-6">{categoria.description}</p>
+                  <ul className="space-y-2 text-sm text-primary-500">
+                    {categoria.stats.map((stat, i) => (
+                      <li key={i} className="flex items-center">
+                        <svg className="w-4 h-4 mr-2 text-primary-600" fill="currentColor" viewBox="0 0 20 20">
+                          <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                        </svg>
+                        {stat}
+                      </li>
+                    ))}
+                  </ul>
+                </Link>
+              </motion.div>
+            ))}
+          </div>
         </div>
       </section>
 
@@ -116,6 +202,230 @@ export default function Home() {
               </div>
             ))}
           </div>
+        </div>
+      </section>
+
+      {/* Cómo funciona */}
+      <section className="py-24 bg-white">
+        <div className="container mx-auto px-4">
+          <motion.h2 
+            className="text-4xl font-bold text-primary-800 text-center mb-20"
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.8 }}
+          >
+            ¿Cómo funciona BuscAdis?
+          </motion.h2>
+
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-12">
+            {[
+              {
+                step: 1,
+                title: 'Busca lo que necesitas',
+                description: 'Utiliza nuestro buscador inteligente con filtros avanzados',
+                icon: '🔍'
+              },
+              {
+                step: 2,
+                title: 'Conecta directamente',
+                description: 'Contacta con vendedores verificados de forma segura',
+                icon: '🤝'
+              },
+              {
+                step: 3,
+                title: 'Concreta el trato',
+                description: 'Realiza transacciones seguras con garantía BuscAdis',
+                icon: '✨'
+              }
+            ].map((step, index) => (
+              <motion.div
+                key={step.step}
+                className="relative"
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ duration: 0.8, delay: index * 0.2 }}
+              >
+                <div className="bg-primary-50 rounded-full w-20 h-20 flex items-center justify-center text-4xl mb-6 mx-auto">
+                  {step.icon}
+                </div>
+                <div className="text-center">
+                  <div className="text-2xl font-bold text-primary-800 mb-4">
+                    Paso {step.step}
+                  </div>
+                  <h3 className="text-xl font-semibold text-primary-700 mb-3">
+                    {step.title}
+                  </h3>
+                  <p className="text-primary-600">
+                    {step.description}
+                  </p>
+                </div>
+                {index < 2 && (
+                  <div className="hidden md:block absolute top-1/4 right-0 transform translate-x-1/2">
+                    <svg className="w-12 h-12 text-primary-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 8l4 4m0 0l-4 4m4-4H3" />
+                    </svg>
+                  </div>
+                )}
+              </motion.div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Testimonios */}
+      <section className="py-24 bg-gradient-to-b from-primary-50 to-white">
+        <div className="container mx-auto px-4">
+          <motion.h2 
+            className="text-4xl font-bold text-primary-800 text-center mb-16"
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.8 }}
+          >
+            Lo que dicen nuestros usuarios
+          </motion.h2>
+
+          <div className="relative">
+            <div className="overflow-hidden">
+              <motion.div
+                className="flex"
+                animate={{ x: `-${activeTestimonial * 100}%` }}
+                transition={{ type: "spring", stiffness: 300, damping: 30 }}
+              >
+                {[
+                  {
+                    name: "María González",
+                    role: "Vendedora Inmobiliaria",
+                    text: "BuscAdis ha revolucionado la forma en que hago negocios. La calidad de los leads es excepcional.",
+                    image: "/testimonials/maria.jpg"
+                  },
+                  {
+                    name: "Carlos Rodríguez",
+                    role: "Comprador",
+                    text: "Encontré mi departamento ideal en tiempo récord. El proceso fue simple y seguro.",
+                    image: "/testimonials/carlos.jpg"
+                  },
+                  {
+                    name: "Ana Martínez",
+                    role: "Reclutadora IT",
+                    text: "La mejor plataforma para encontrar talento tecnológico. Los filtros avanzados son geniales.",
+                    image: "/testimonials/ana.jpg"
+                  }
+                ].map((testimonial, index) => (
+                  <div
+                    key={index}
+                    className="w-full flex-shrink-0 px-4"
+                  >
+                    <div className="bg-white rounded-2xl p-8 shadow-lg max-w-2xl mx-auto">
+                      <div className="flex items-center mb-6">
+                        <Image
+                          src={testimonial.image}
+                          alt={testimonial.name}
+                          width={60}
+                          height={60}
+                          className="rounded-full"
+                        />
+                        <div className="ml-4">
+                          <div className="font-semibold text-primary-800">
+                            {testimonial.name}
+                          </div>
+                          <div className="text-primary-600 text-sm">
+                            {testimonial.role}
+                          </div>
+                        </div>
+                      </div>
+                      <p className="text-primary-700 italic">"{testimonial.text}"</p>
+                    </div>
+                  </div>
+                ))}
+              </motion.div>
+            </div>
+
+            <div className="flex justify-center mt-8 gap-2">
+              {[0, 1, 2].map((index) => (
+                <button
+                  key={index}
+                  onClick={() => setActiveTestimonial(index)}
+                  className={`w-3 h-3 rounded-full transition-colors ${
+                    activeTestimonial === index ? 'bg-primary-600' : 'bg-primary-200'
+                  }`}
+                  aria-label={`Ver testimonio ${index + 1}`}
+                />
+              ))}
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* Estadísticas */}
+      <section 
+        ref={statsRef}
+        className="py-24 bg-primary-900 text-white"
+      >
+        <div className="container mx-auto px-4">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
+            {[
+              { value: 1000000, label: 'Usuarios activos', suffix: '+' },
+              { value: 500000, label: 'Anuncios publicados', suffix: '+' },
+              { value: 98, label: 'Satisfacción', suffix: '%' },
+              { value: 15, label: 'Años de experiencia', suffix: '+' }
+            ].map((stat, index) => (
+              <motion.div
+                key={index}
+                className="text-center"
+                initial={{ opacity: 0, y: 20 }}
+                animate={statsInView ? { opacity: 1, y: 0 } : {}}
+                transition={{ duration: 0.8, delay: index * 0.2 }}
+              >
+                <div className="text-4xl md:text-5xl font-bold mb-2">
+                  {statsInView && (
+                    <CountUp
+                      end={stat.value}
+                      duration={2.5}
+                      separator=","
+                      suffix={stat.suffix}
+                    />
+                  )}
+                </div>
+                <div className="text-primary-200">{stat.label}</div>
+              </motion.div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* CTA Final */}
+      <section className="py-24 bg-gradient-to-br from-primary-600 to-primary-800 text-white">
+        <div className="container mx-auto px-4 text-center">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.8 }}
+          >
+            <h2 className="text-4xl md:text-5xl font-bold mb-8">
+              ¿Listo para empezar?
+            </h2>
+            <p className="text-xl mb-12 max-w-2xl mx-auto">
+              Únete a la comunidad líder en clasificados premium y descubre un mundo de oportunidades.
+            </p>
+            <div className="flex flex-col sm:flex-row gap-4 justify-center">
+              <Link
+                href="/publicar"
+                className="px-8 py-4 bg-white text-primary-600 rounded-lg text-lg font-semibold hover:bg-primary-50 transition"
+              >
+                Publicar Anuncio
+              </Link>
+              <Link
+                href="/buscar"
+                className="px-8 py-4 bg-primary-700 text-white rounded-lg text-lg font-semibold hover:bg-primary-600 transition"
+              >
+                Explorar Anuncios
+              </Link>
+            </div>
+          </motion.div>
         </div>
       </section>
     </div>
