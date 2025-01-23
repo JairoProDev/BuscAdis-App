@@ -45,7 +45,7 @@ export default function Navigation() {
                 key={item.href}
                 href={item.href}
                 className={`relative group ${
-                  pathname === item.href ? 'text-primary-600' : 'text-gray-600'
+                  pathname === item.href ? 'text-primary-600' : 'text-white-600'
                 }`}
               >
                 {item.label}
