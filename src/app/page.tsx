@@ -15,10 +15,10 @@ export default function Home() {
       {/* Hero Section con Buscador */}
       <section className="text-center py-16 px-4">
         <h1 className="text-4xl md:text-6xl font-bold text-primary-800 mb-6">
-          Encuentra las mejores oportunidades
+          Conecta con las mejores oportunidades
         </h1>
         <p className="text-xl text-primary-600 mb-8 max-w-2xl mx-auto">
-          BuscAdis conecta a quienes buscan con quienes ofrecen oportunidades premium y de calidad.
+          Encuentra todo lo que buscas en un solo lugar, rápido, fácil y seguro.
         </p>
         
         {/* Buscador Principal */}
