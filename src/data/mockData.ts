@@ -1,10 +1,3 @@
-import { 
-  JobIcon, 
-  RealEstateIcon, 
-  VehicleIcon, 
-  ServiceIcon 
-} from '@/components/icons'
-import { AdisoType, Category, Adiso } from '@/types/marketplace'
 import { CategoryId } from '@/types/marketplace'
 
 interface SectionData {
@@ -127,6 +120,77 @@ export const mockData: MockDataType = {
         rating: 4.9
       }
     ]
+  },
+  eventos: {
+    title: "Eventos",
+    categories: [],
+    adisos: [
+      {
+        id: '7',
+        title: 'Festival de Música en Vivo',
+        price: 50,
+        image: '/images/events/festival-1.jpg',
+        location: 'Lima',
+        category: 'eventos',
+        subType: 'conciertos',
+        isPremium: true,
+        isVerified: true,
+        rating: 4.7
+      }
+    ]
+  },
+  educacion: {
+    title: "Educación",
+    categories: [],
+    adisos: [
+      {
+        id: '8',
+        title: 'Curso de Programación Web',
+        price: 299,
+        image: '/images/education/programming-1.jpg',
+        location: 'Online',
+        category: 'educacion',
+        subType: 'cursos',
+        isPremium: true,
+        isVerified: true,
+        rating: 4.8
+      }
+    ]
+  },
+  turismo: {
+    title: "Turismo",
+    categories: [],
+    adisos: [
+      {
+        id: '9',
+        title: 'Tour Machu Picchu Premium',
+        price: 599,
+        image: '/images/tourism/machupicchu-1.jpg',
+        location: 'Cusco',
+        category: 'turismo',
+        subType: 'tours',
+        isPremium: true,
+        isVerified: true,
+        rating: 4.9
+      }
+    ]
+  },
+  mascotas: {
+    title: "Mascotas",
+    categories: [],
+    adisos: [
+      {
+        id: '10',
+        title: 'Servicio de Peluquería Canina',
+        price: 45,
+        image: '/images/pets/grooming-1.jpg',
+        location: 'Miraflores',
+        category: 'mascotas',
+        subType: 'servicios',
+        isPremium: false,
+        isVerified: true,
+        rating: 4.6
+      }
+    ]
   }
-  // ... Agregar el resto de categorías con sus respectivos anuncios
 } 
