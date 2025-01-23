@@ -1,7 +1,10 @@
 import './globals.css'
 import { Inter } from 'next/font/google'
-import Navbar from '@/components/Navbar'
-import Footer from '@/components/Footer'
+import { ThemeProvider } from '@/components/theme/ThemeProvider'
+import Navigation from '@/components/layout/Navigation'
+import { Loader } from '@/components/ui/Loader'
+import Footer from '@/components/layout/Footer'
+import { Suspense } from 'react'
 
 const inter = Inter({ subsets: ['latin'] })
 
@@ -16,13 +19,19 @@ export default function RootLayout({
   children: React.ReactNode
 }) {
   return (
-    <html lang="es">
-      <body className={`${inter.className} min-h-screen bg-gradient-to-br from-primary-50 to-primary-100`}>
-        <Navbar />
-        <main className="container mx-auto px-4 py-8">
-          {children}
-        </main>
-        <Footer />
+    <html lang="es" suppressHydrationWarning>
+      <body className={`${inter.className} min-h-screen`}>
+        <ThemeProvider>
+          <div className="flex flex-col min-h-screen">
+            <Suspense fallback={<Loader />}>
+              <Navigation />
+              <main className="flex-grow">
+                {children}
+              </main>
+              <Footer />
+            </Suspense>
+          </div>
+        </ThemeProvider>
       </body>
     </html>
   )

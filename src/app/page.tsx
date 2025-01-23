@@ -1,17 +1,37 @@
 'use client'
 
-import { useState, useEffect } from "react"
+import { useState } from "react"
 import Image from "next/image";
 import Link from "next/link";
 import SearchBar from "@/components/search/SearchBar";
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 import CountUp from 'react-countup';
 import { useInView } from 'react-intersection-observer';
+import Scene3D from "@/components/3d/Scene";
 
 export default function Home() {
   const [activeTestimonial, setActiveTestimonial] = useState(0)
   const { ref: statsRef, inView: statsInView } = useInView()
   const { ref: featuresRef, inView: featuresInView } = useInView()
+  const [currentSlide, setCurrentSlide] = useState(0)
+
+  const heroSlides = [
+    {
+      title: "Busca y conecta con las mejores oportunidades",
+      subtitle: "Encuentra todo lo que buscas y necesitas en un solo lugar, rápido, fácil y seguro.	",
+      bgColor: "from-primary-900/80 via-primary-800/70 to-success-900/60",
+    },
+    {
+      title: "Publica y destaca tu anuncio",
+      subtitle: "Llega a miles de compradores calificados",
+      bgColor: "from-success-900/80 via-success-800/70 to-primary-900/60",
+    },
+    {
+      title: "Tecnología que impulsa resultados",
+      subtitle: "Inteligencia artificial a tu servicio",
+      bgColor: "from-accent-900/80 via-accent-800/70 to-primary-900/60",
+    }
+  ]
 
   const handleSearch = async (query: string) => {
     console.log('Búsqueda:', query)
@@ -20,83 +40,109 @@ export default function Home() {
 
   return (
     <div className="space-y-24">
-      {/* Hero Section con Video de Fondo */}
-      <section className="relative min-h-screen flex items-center">
+      {/* Hero Section */}
+      <section className="relative min-h-screen">
         <div className="absolute inset-0 overflow-hidden">
-          <video
-            autoPlay
-            loop
-            muted
-            playsInline
-            className="w-full h-full object-cover"
-          >
-            <source src="/videos/hero-background.mp4" type="video/mp4" />
-          </video>
-          <div className="absolute inset-0 bg-gradient-to-b from-primary-900/70 to-primary-800/70 backdrop-blur-sm" />
+          <AnimatePresence mode="wait">
+            <motion.div
+              key={currentSlide}
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 1 }}
+              className={`relative h-full bg-gradient-to-br ${heroSlides[currentSlide].bgColor}`}
+            >
+              <div className="absolute inset-0 bg-[url('/patterns/grid.svg')] opacity-20" />
+            </motion.div>
+          </AnimatePresence>
         </div>
 
-        <div className="relative container mx-auto px-4 text-center text-white">
-          <motion.h1 
-            className="text-5xl md:text-7xl font-bold mb-6"
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8 }}
-          >
-            Conecta con las mejores oportunidades
-          </motion.h1>
-          <motion.p 
-            className="text-xl md:text-2xl mb-12 max-w-3xl mx-auto"
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8, delay: 0.2 }}
-          >
-            Encuentra todo lo que buscas en un solo lugar, rápido, fácil y seguro.
-          </motion.p>
-          
-          <motion.div 
-            className="max-w-4xl mx-auto mb-12"
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8, delay: 0.4 }}
-          >
-            <SearchBar onSearch={handleSearch} />
-          </motion.div>
+        <div className="relative container mx-auto px-4 h-screen flex flex-col justify-center">
+          <div className="grid lg:grid-cols-2 gap-12 items-center">
+            {/* Texto y CTA */}
+            <motion.div
+              initial={{ opacity: 0, x: -50 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ duration: 0.8 }}
+              className="text-white space-y-8"
+            >
+              <AnimatePresence mode="wait">
+                <motion.h1
+                  key={`title-${currentSlide}`}
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -20 }}
+                  transition={{ duration: 0.5 }}
+                  className="text-5xl md:text-7xl font-bold leading-tight"
+                >
+                  {heroSlides[currentSlide].title}
+                </motion.h1>
+                <motion.p
+                  key={`subtitle-${currentSlide}`}
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -20 }}
+                  transition={{ duration: 0.5, delay: 0.2 }}
+                  className="text-xl md:text-2xl text-primary-100"
+                >
+                  {heroSlides[currentSlide].subtitle}
+                </motion.p>
+              </AnimatePresence>
 
-          <motion.div 
-            className="flex flex-wrap justify-center gap-8 text-center"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ duration: 0.8, delay: 0.6 }}
-          >
-            {[
-              { number: '1M+', label: 'Usuarios activos' },
-              { number: '500K+', label: 'Anuncios publicados' },
-              { number: '98%', label: 'Satisfacción' },
-              { number: '24/7', label: 'Soporte' }
-            ].map((stat, index) => (
-              <div key={index} className="flex flex-col items-center">
-                <span className="text-4xl font-bold mb-2">{stat.number}</span>
-                <span className="text-primary-100">{stat.label}</span>
+              {/* Buscador */}
+              <motion.div
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.8, delay: 0.4 }}
+                className="relative"
+              >
+                <SearchBar onSearch={handleSearch} />
+              </motion.div>
+
+              {/* Estadísticas flotantes */}
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-12">
+                {[
+                  { number: '1M+', label: 'Usuarios activos' },
+                  { number: '500K+', label: 'Anuncios publicados' },
+                  { number: '98%', label: 'Satisfacción' },
+                  { number: '24/7', label: 'Soporte' }
+                ].map((stat, index) => (
+                  <motion.div
+                    key={index}
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ duration: 0.8, delay: 0.6 + index * 0.1 }}
+                    className="bg-white/10 backdrop-blur-sm rounded-lg p-4 text-center hover:bg-white/20 transition-all duration-300 transform hover:-translate-y-1"
+                  >
+                    <span className="block text-3xl font-bold mb-1">{stat.number}</span>
+                    <span className="text-sm text-primary-100">{stat.label}</span>
+                  </motion.div>
+                ))}
               </div>
-            ))}
-          </motion.div>
+            </motion.div>
+
+            {/* Escena 3D */}
+            <div className="hidden lg:block">
+              <Scene3D />
+            </div>
+          </div>
         </div>
 
-        <motion.div 
-          className="absolute bottom-8 left-1/2 -translate-x-1/2"
-          animate={{ y: [0, 10, 0] }}
-          transition={{ duration: 1.5, repeat: Infinity }}
-        >
-          <button 
-            onClick={() => document.getElementById('categories')?.scrollIntoView({ behavior: 'smooth' })}
-            className="text-white"
-            aria-label="Scroll para ver más"
-          >
-            <svg className="w-8 h-8" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 14l-7 7m0 0l-7-7m7 7V3" />
-            </svg>
-          </button>
-        </motion.div>
+        {/* Navegación del slider */}
+        <div className="absolute bottom-8 left-1/2 -translate-x-1/2 flex space-x-4">
+          {heroSlides.map((_, index) => (
+            <button
+              key={index}
+              onClick={() => setCurrentSlide(index)}
+              className={`w-3 h-3 rounded-full transition-all duration-300 ${
+                currentSlide === index 
+                  ? 'bg-white scale-125' 
+                  : 'bg-white/50 hover:bg-white/75'
+              }`}
+              aria-label={`Ir a slide ${index + 1}`}
+            />
+          ))}
+        </div>
       </section>
 
       {/* Categorías Populares con Interactividad */}
@@ -116,7 +162,7 @@ export default function Home() {
             {[
               {
                 name: 'Inmuebles',
-                description: 'Encuentra tu próximo hogar',
+                description: 'Encuentra tu próximo hogar, local, terreno u oficina',
                 icon: '🏠',
                 stats: ['10K+ propiedades', '500+ agentes', 'Cobertura nacional']
               },
@@ -128,7 +174,7 @@ export default function Home() {
               },
               {
                 name: 'Empleos',
-                description: 'Oportunidades laborales premium',
+                description: 'Oportunidades laborales personalizadas',
                 icon: '💼',
                 stats: ['2K+ empleos', 'Empresas top', 'Salarios competitivos']
               },
@@ -367,10 +413,10 @@ export default function Home() {
         <div className="container mx-auto px-4">
           <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
             {[
-              { value: 1000000, label: 'Usuarios activos', suffix: '+' },
-              { value: 500000, label: 'Anuncios publicados', suffix: '+' },
-              { value: 98, label: 'Satisfacción', suffix: '%' },
-              { value: 15, label: 'Años de experiencia', suffix: '+' }
+              { value: 10000, label: 'Usuarios activos', suffix: '+' },
+              { value: 5000, label: 'Anuncios publicados', suffix: '+' },
+              { value: 150, label: 'Conexiones diarias', suffix: '+' },
+              { value: 98, label: 'Satisfacción', suffix: '%' }
             ].map((stat, index) => (
               <motion.div
                 key={index}

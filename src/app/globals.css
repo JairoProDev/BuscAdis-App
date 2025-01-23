@@ -2,20 +2,338 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Temas */
 :root {
-  --background: #ffffff;
-  --foreground: #000000;
+  --background: 255 255 255;
+  --foreground: 0 0 0;
+  --primary: 14 165 233;
+  --success: 16 185 129;
+  --accent: 249 115 22;
+}
+
+[data-theme="dark"] {
+  --background: 0 0 0;
+  --foreground: 255 255 255;
+  --primary: 56 189 248;
+  --success: 52 211 153;
+  --accent: 251 146 60;
 }
 
 @media (prefers-color-scheme: dark) {
   :root {
-    --background: #000000;
-    --foreground: #ffffff;
+    --background: 0 0 0;
+    --foreground: 255 255 255;
+    --primary: 56 189 248;
+    --success: 52 211 153;
+    --accent: 251 146 60;
   }
 }
 
 body {
-  color: rgb(var(--foreground-rgb));
-  background: var(--background);
+  color: rgb(var(--foreground));
+  background: rgb(var(--background));
   font-family: Arial, Helvetica, sans-serif;
+}
+
+/* Cursor personalizado */
+.custom-cursor {
+  width: 8px;
+  height: 8px;
+  background: theme('colors.primary.500');
+  border-radius: 50%;
+  position: fixed;
+  pointer-events: none;
+  z-index: 9999;
+  transform: translate(-50%, -50%);
+}
+
+.cursor-follower {
+  width: 40px;
+  height: 40px;
+  background: rgba(14, 165, 233, 0.1);
+  border: 1px solid theme('colors.primary.500');
+  border-radius: 50%;
+  position: fixed;
+  pointer-events: none;
+  z-index: 9998;
+  transform: translate(-50%, -50%);
+  transition: width 0.3s, height 0.3s;
+}
+
+.custom-cursor.active {
+  transform: translate(-50%, -50%) scale(1.5);
+}
+
+.cursor-follower.active {
+  width: 60px;
+  height: 60px;
+  background: rgba(14, 165, 233, 0.2);
+}
+
+/* Efectos de scroll */
+.scroll-section {
+  @apply will-change-transform;
+}
+
+/* Efectos de hover */
+.hover-card {
+  @apply transition-all duration-300;
+}
+
+.hover-card:hover {
+  @apply transform -translate-y-2;
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+}
+
+/* Animaciones de fondo */
+.animated-gradient {
+  background: linear-gradient(
+    45deg,
+    theme('colors.primary.500'),
+    theme('colors.success.500'),
+    theme('colors.accent.500')
+  );
+  background-size: 200% 200%;
+  animation: gradient 15s ease infinite;
+}
+
+@keyframes gradient {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
+/* Efectos de glassmorphism */
+.glass {
+  @apply backdrop-blur-lg bg-white/10;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+/* Animaciones de entrada */
+.fade-up {
+  animation: fadeUp 0.8s ease forwards;
+  opacity: 0;
+}
+
+@keyframes fadeUp {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* Scroll horizontal para mobile */
+.scroll-container {
+  @apply flex overflow-x-auto snap-x snap-mandatory;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+.scroll-container::-webkit-scrollbar {
+  display: none;
+}
+
+.scroll-item {
+  @apply snap-center flex-shrink-0;
+}
+
+/* Efectos de partículas */
+.particles {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 0;
+}
+
+/* Efectos de texto */
+.text-gradient {
+  @apply bg-clip-text text-transparent;
+  background-image: linear-gradient(
+    45deg,
+    theme('colors.primary.500'),
+    theme('colors.success.500')
+  );
+}
+
+/* Efectos de botones */
+.btn-primary {
+  @apply relative overflow-hidden;
+}
+
+.btn-primary::after {
+  content: '';
+  @apply absolute inset-0 bg-white/20 transform scale-x-0 origin-left transition-transform duration-300;
+}
+
+.btn-primary:hover::after {
+  @apply scale-x-100;
+}
+
+/* Efectos de carga */
+.loading-dots::after {
+  content: '...';
+  animation: dots 1.5s steps(4, end) infinite;
+}
+
+@keyframes dots {
+  0%, 20% { content: '.'; }
+  40% { content: '..'; }
+  60% { content: '...'; }
+  80%, 100% { content: ''; }
+}
+
+/* Efectos de parallax */
+.parallax-container {
+  @apply overflow-hidden relative;
+}
+
+.parallax-element {
+  @apply will-change-transform;
+  transform: translateZ(0);
+}
+
+/* Efectos de hover avanzados */
+.hover-glow {
+  position: relative;
+  isolation: isolate;
+}
+
+.hover-glow::before {
+  content: '';
+  position: absolute;
+  inset: -10px;
+  background: radial-gradient(
+    circle at var(--mouse-x, 50%) var(--mouse-y, 50%),
+    rgba(var(--primary), 0.15),
+    transparent 50%
+  );
+  opacity: 0;
+  transition: opacity 0.3s;
+  z-index: -1;
+  pointer-events: none;
+}
+
+.hover-glow:hover::before {
+  opacity: 1;
+}
+
+.hover-lift {
+  transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.hover-lift:hover {
+  transform: translateY(-8px);
+}
+
+.hover-scale {
+  transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.hover-scale:hover {
+  transform: scale(1.05);
+}
+
+.hover-rotate {
+  transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+.hover-rotate:hover {
+  transform: rotate(5deg);
+}
+
+.hover-shine {
+  position: relative;
+  overflow: hidden;
+}
+
+.hover-shine::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -75%;
+  width: 50%;
+  height: 100%;
+  background: linear-gradient(
+    to right,
+    transparent,
+    rgba(255, 255, 255, 0.3),
+    transparent
+  );
+  transform: skewX(-25deg);
+  transition: 0.5s;
+}
+
+.hover-shine:hover::before {
+  left: 125%;
+}
+
+.hover-border {
+  position: relative;
+}
+
+.hover-border::before,
+.hover-border::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(45deg, 
+    var(--primary), 
+    var(--success), 
+    var(--accent), 
+    var(--primary)
+  );
+  background-size: 400%;
+  z-index: -1;
+  animation: border-animate 20s linear infinite;
+  opacity: 0;
+  transition: opacity 0.3s;
+}
+
+.hover-border::after {
+  filter: blur(5px);
+}
+
+.hover-border:hover::before,
+.hover-border:hover::after {
+  opacity: 1;
+}
+
+@keyframes border-animate {
+  0% { background-position: 0 0; }
+  50% { background-position: 400% 0; }
+  100% { background-position: 0 0; }
+}
+
+/* Efectos de texto */
+.hover-text-gradient {
+  background-clip: text;
+  -webkit-background-clip: text;
+  color: transparent;
+  background-image: linear-gradient(
+    45deg,
+    var(--primary),
+    var(--success)
+  );
+  background-size: 200%;
+  transition: background-position 0.3s;
+}
+
+.hover-text-gradient:hover {
+  background-position: right;
+}
+
+.hover-text-pop {
+  transition: transform 0.2s;
+}
+
+.hover-text-pop:hover {
+  transform: scale(1.1);
+  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.2);
 }
