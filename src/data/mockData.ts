@@ -5,15 +5,16 @@ import {
   ServiceIcon 
 } from '@/components/icons'
 import { AdisoType, Category, Adiso } from '@/types/marketplace'
+import { CategoryId } from '@/types/marketplace'
 
 interface SectionData {
   title: string
-  categories: Category[]
-  adisos: Adiso[]
+  categories: any[] // Temporalmente any hasta que definamos la estructura completa
+  adisos: any[] // Temporalmente any hasta que definamos la estructura completa
 }
 
 type MockDataType = {
-  [key in AdisoType]?: SectionData
+  [key in CategoryId]?: SectionData
 } & {
   featured: SectionData
 }
@@ -29,35 +30,17 @@ export const mockData: MockDataType = {
         price: 250000,
         image: '/images/real-estate/apartment-1.jpg',
         location: 'Miraflores',
-        category: {
-          id: '1',
-          name: 'Apartamentos',
-          icon: RealEstateIcon,
-          count: 567,
-          color: 'bg-green-600',
-          type: 'Inmuebles'
-        },
+        category: 'inmuebles',
+        subType: 'apartamentos',
         isPremium: true,
         isVerified: true,
-        rating: 4.5,
-        type: 'Inmuebles'
-      },
-      // Más anuncios destacados...
+        rating: 4.5
+      }
     ]
   },
-  Empleos: {
+  empleos: {
     title: "Empleos",
-    categories: [
-      {
-        id: '1',
-        name: 'Tecnología',
-        icon: JobIcon,
-        count: 1234,
-        color: 'bg-blue-600',
-        type: 'Empleos'
-      },
-      // Más categorías...
-    ],
+    categories: [],
     adisos: [
       {
         id: '2',
@@ -65,55 +48,85 @@ export const mockData: MockDataType = {
         price: 5000,
         image: '/images/jobs/tech-1.jpg',
         location: 'Remoto',
-        category: {
-          id: '1',
-          name: 'Tecnología',
-          icon: JobIcon,
-          count: 1234,
-          color: 'bg-blue-600',
-          type: 'Empleos'
-        },
+        category: 'empleos',
+        subType: 'tecnologia',
         isPremium: true,
         isVerified: true,
-        rating: 4.8,
-        type: 'Empleos'
-      },
-      // Más empleos...
+        rating: 4.8
+      }
     ]
   },
-  Inmuebles: {
+  inmuebles: {
     title: "Inmuebles",
-    categories: [
-      {
-        id: '1',
-        name: 'Apartamentos',
-        icon: RealEstateIcon,
-        count: 567,
-        color: 'bg-green-600',
-        type: 'Inmuebles'
-      },
-      // Más categorías...
-    ],
+    categories: [],
     adisos: [
-      // Anuncios de inmuebles...
+      {
+        id: '3',
+        title: 'Casa moderna en zona residencial',
+        price: 350000,
+        image: '/images/real-estate/house-1.jpg',
+        location: 'San Isidro',
+        category: 'inmuebles',
+        subType: 'casas',
+        isPremium: true,
+        isVerified: true,
+        rating: 4.7
+      }
     ]
   },
-  Servicios: {
-    title: "Servicios",
-    categories: [
-      {
-        id: '1',
-        name: 'Profesionales',
-        icon: ServiceIcon,
-        count: 789,
-        color: 'bg-purple-600',
-        type: 'Servicios'
-      },
-      // Más categorías...
-    ],
+  vehiculos: {
+    title: "Vehículos",
+    categories: [],
     adisos: [
-      // Anuncios de servicios...
+      {
+        id: '4',
+        title: 'Toyota Corolla 2023',
+        price: 25000,
+        image: '/images/vehicles/car-1.jpg',
+        location: 'Lima',
+        category: 'vehiculos',
+        subType: 'autos',
+        isPremium: true,
+        isVerified: true,
+        rating: 4.9
+      }
+    ]
+  },
+  servicios: {
+    title: "Servicios",
+    categories: [],
+    adisos: [
+      {
+        id: '5',
+        title: 'Servicio de Limpieza Profesional',
+        price: 50,
+        image: '/images/services/cleaning-1.jpg',
+        location: 'Lima',
+        category: 'servicios',
+        subType: 'limpieza',
+        isPremium: false,
+        isVerified: true,
+        rating: 4.6
+      }
+    ]
+  },
+  productos: {
+    title: "Productos",
+    categories: [],
+    adisos: [
+      {
+        id: '6',
+        title: 'iPhone 15 Pro Max',
+        price: 1200,
+        image: '/images/products/phone-1.jpg',
+        location: 'Lima',
+        category: 'productos',
+        subType: 'electronica',
+        isPremium: true,
+        isVerified: true,
+        rating: 4.9
+      }
     ]
   }
-  // Continuar con el resto de tipos...
+  // ... Agregar el resto de categorías con sus respectivos anuncios
 } 

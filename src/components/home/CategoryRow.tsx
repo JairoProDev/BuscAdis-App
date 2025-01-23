@@ -1,16 +1,7 @@
 'use client'
 
 import { motion } from 'framer-motion'
-import { IconType } from '@/components/icons'
-import InteractiveCard from '@/components/ui/InteractiveCard'
-
-interface Category {
-  id: string
-  name: string
-  icon: IconType
-  count: number
-  color: string
-}
+import { Category } from '@/types/marketplace'
 
 interface CategoryRowProps {
   title: string
@@ -20,38 +11,30 @@ interface CategoryRowProps {
 export default function CategoryRow({ title, categories }: CategoryRowProps) {
   return (
     <div className="py-4">
-      <h3 className="text-lg font-semibold text-primary-800 px-4 mb-3 flex items-center">
-        {title}
-        <motion.button
-          whileHover={{ x: 5 }}
-          className="ml-auto text-sm text-primary-600 flex items-center"
-        >
-          Ver más
-          <svg className="w-4 h-4 ml-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-          </svg>
-        </motion.button>
-      </h3>
+      {title && (
+        <h3 className="text-lg font-semibold text-white px-4 mb-3">
+          {title}
+        </h3>
+      )}
       
-      <div className="flex overflow-x-auto hide-scrollbar snap-x snap-mandatory gap-3 px-4">
-        {categories.map((category) => (
-          <InteractiveCard
-            key={category.id}
-            className="flex-none w-40 snap-start first:ml-0 last:mr-4"
-            hover3D={false}
-          >
-            <motion.div
+      <div className="flex overflow-x-auto hide-scrollbar gap-2 px-4">
+        {categories.map((category) => {
+          const Icon = category.icon
+          return (
+            <motion.button
+              key={category.id}
+              className={`flex-none px-4 py-2 rounded-xl bg-gradient-to-br ${category.color} text-white`}
               whileHover={{ scale: 1.05 }}
-              className={`p-4 rounded-xl ${category.color} aspect-square flex flex-col justify-between`}
+              whileTap={{ scale: 0.95 }}
             >
-              <category.icon className="w-8 h-8 text-white" />
-              <div>
-                <h4 className="text-sm font-medium text-white">{category.name}</h4>
-                <p className="text-xs text-white/80">{category.count} anuncios</p>
+              <div className="flex items-center space-x-2">
+                <Icon className="w-5 h-5" />
+                <span>{category.name}</span>
+                <span className="text-xs opacity-75">({category.count})</span>
               </div>
-            </motion.div>
-          </InteractiveCard>
-        ))}
+            </motion.button>
+          )
+        })}
       </div>
     </div>
   )

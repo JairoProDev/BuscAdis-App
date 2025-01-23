@@ -1,14 +1,12 @@
 'use client'
 
 import { motion } from 'framer-motion'
-import { AdisoType, Category, Adiso } from '@/types/marketplace'
+import { CategoryId, Adiso } from '@/types/marketplace'
 import FeaturedAds from './FeaturedAds'
-import CategoryRow from './CategoryRow'
 
 interface AdisoSectionProps {
-  type: AdisoType | 'featured'
+  type: CategoryId | 'featured'
   title: string
-  categories: Category[]
   adisos: Adiso[]
   featured?: boolean
 }
@@ -16,7 +14,6 @@ interface AdisoSectionProps {
 export default function AdisoSection({ 
   type, 
   title, 
-  categories, 
   adisos,
   featured = false 
 }: AdisoSectionProps) {
@@ -44,14 +41,6 @@ export default function AdisoSection({
           </svg>
         </motion.button>
       </div>
-
-      {/* Categorías (si existen) */}
-      {categories.length > 0 && (
-        <CategoryRow 
-          title="" 
-          categories={categories} 
-        />
-      )}
 
       {/* Adisos */}
       <FeaturedAds 

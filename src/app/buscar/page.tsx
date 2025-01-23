@@ -6,14 +6,16 @@ import SearchBar from '@/components/search/SearchBar'
 import AdisoSection from '@/components/home/AdisoSection'
 import CategoryFilters from '@/components/search/CategoryFilters'
 import SearchFilters from '@/components/search/SearchFilters'
-import { AdisoType } from '@/types/marketplace'
+import { CategoryId } from '@/types/marketplace'
+import { categories } from '@/data/mockCategories'
 import { mockData } from '@/data/mockData'
 
 export default function SearchPage() {
-  const [selectedType, setSelectedType] = useState<AdisoType | null>(null)
+  const [selectedCategory, setSelectedCategory] = useState<CategoryId | null>(null)
+  const [selectedType, setSelectedType] = useState<string | null>(null)
 
-  const filteredData = selectedType
-    ? { [selectedType]: mockData[selectedType] }
+  const filteredData = selectedCategory
+    ? { [selectedCategory]: mockData[selectedCategory] }
     : mockData
 
   return (
@@ -28,7 +30,9 @@ export default function SearchPage() {
             <SearchFilters />
           </div>
           <CategoryFilters 
+            selectedCategory={selectedCategory}
             selectedType={selectedType}
+            onSelectCategory={setSelectedCategory}
             onSelectType={setSelectedType}
           />
         </div>
@@ -41,7 +45,7 @@ export default function SearchPage() {
           className="py-6 space-y-12"
         >
           {/* Sección Featured siempre visible al inicio */}
-          {!selectedType && mockData.featured && (
+          {!selectedCategory && mockData.featured && (
             <motion.div
               layout
               initial={{ opacity: 0, y: 20 }}
@@ -69,7 +73,7 @@ export default function SearchPage() {
                 animate={{ opacity: 1, y: 0 }}
               >
                 <AdisoSection
-                  type={type as AdisoType}
+                  type={type as CategoryId}
                   title={data.title}
                   categories={data.categories}
                   adisos={data.adisos}

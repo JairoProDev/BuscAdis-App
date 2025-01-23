@@ -13,10 +13,15 @@ export default function Footer() {
           <div>
             <h4 className="text-lg font-bold mb-4">Categorías</h4>
             <ul className="space-y-2">
+              <li><a href="/categorias/empleos" className="text-primary-200 hover:text-white">Empleos</a></li>
               <li><a href="/categorias/inmuebles" className="text-primary-200 hover:text-white">Inmuebles</a></li>
               <li><a href="/categorias/vehiculos" className="text-primary-200 hover:text-white">Vehículos</a></li>
-              <li><a href="/categorias/empleos" className="text-primary-200 hover:text-white">Empleos</a></li>
               <li><a href="/categorias/servicios" className="text-primary-200 hover:text-white">Servicios</a></li>
+              <li><a href="/categorias/productos" className="text-primary-200 hover:text-white">Productos</a></li>
+              <li><a href="/categorias/eventos" className="text-primary-200 hover:text-white">Eventos</a></li>
+              <li><a href="/categorias/educacion" className="text-primary-200 hover:text-white">Educación</a></li>
+              <li><a href="/categorias/turismo" className="text-primary-200 hover:text-white">Turismo</a></li>
+              <li><a href="/categorias/mascotas" className="text-primary-200 hover:text-white">Mascotas</a></li>
             </ul>
           </div>
           

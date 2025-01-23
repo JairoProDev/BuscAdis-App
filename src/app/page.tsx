@@ -374,7 +374,7 @@ export default function Home() {
                   >
                     <div className="bg-white rounded-2xl p-8 shadow-lg max-w-2xl mx-auto">
                       <div className="flex items-center mb-6">
-                        <Image
+          <Image
                           src={testimonial.image}
                           alt={testimonial.name}
                           width={60}

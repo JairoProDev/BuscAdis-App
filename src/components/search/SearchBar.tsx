@@ -3,14 +3,29 @@
 import { useState, useRef, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { MicrophoneIcon, CameraIcon, FilterIcon } from '@/components/icons'
+import { categories } from '@/data/mockCategories'
 
-const SUGGESTIONS = [
-  { text: 'Promotor de ventas', category: 'Empleos' },
-  { text: 'Apartamentos en alquiler', category: 'Inmuebles' },
-  { text: 'Toyota Corolla', category: 'Vehículos' },
-  { text: 'Limpieza de hogar', category: 'Servicios' },
-  { text: 'iPhone 15 Pro Max', category: 'Productos' }
-] as const
+interface Suggestion {
+  text: string
+  categoryId: string
+  subTypeId: string
+}
+
+const generateSuggestions = () => {
+  const suggestions: Suggestion[] = []
+  categories.forEach(category => {
+    category.types.forEach(type => {
+      suggestions.push({
+        text: `${type.name} en ${category.name}`,
+        categoryId: category.id,
+        subTypeId: type.id
+      })
+    })
+  })
+  return suggestions.slice(0, 5) // Limitamos a 5 sugerencias
+}
+
+const SUGGESTIONS = generateSuggestions()
 
 export default function SearchBar({ onSearch }: { onSearch: (query: string) => void }) {
   const [query, setQuery] = useState('')
@@ -23,7 +38,8 @@ export default function SearchBar({ onSearch }: { onSearch: (query: string) => v
     if (query) {
       const filtered = SUGGESTIONS.filter(suggestion =>
         suggestion.text.toLowerCase().includes(query.toLowerCase()) ||
-        suggestion.category.toLowerCase().includes(query.toLowerCase())
+        suggestion.categoryId.toLowerCase().includes(query.toLowerCase()) ||
+        suggestion.subTypeId.toLowerCase().includes(query.toLowerCase())
       )
       setFilteredSuggestions(filtered)
     } else {
@@ -106,7 +122,7 @@ export default function SearchBar({ onSearch }: { onSearch: (query: string) => v
                 >
                   <span className="text-primary-800">{suggestion.text}</span>
                   <span className="text-sm text-primary-500 bg-primary-50/50 px-2 py-1 rounded-full">
-                    {suggestion.category}
+                    {suggestion.categoryId}
                   </span>
                 </button>
               ))}

@@ -43,22 +43,24 @@ export default function Navigation() {
       }`}
     >
       <nav className="container mx-auto px-4 py-2">
-        <div className="flex items-center justify-between">
-          {/* Logo */}
-          <Link href="/" className="text-2xl font-bold text-primary-600">
-            BuscAdis
-          </Link>
+        <div className="flex items-center">
+          {/* Logo - 25% del espacio */}
+          <div className="w-1/4">
+            <Link href="/" className="text-2xl font-bold text-primary-600">
+              BuscAdis
+            </Link>
+          </div>
 
-          {/* Menú central de navegación */}
-          <div className="hidden md:flex items-center justify-center flex-1 px-8">
-            <div className="flex space-x-1">
+          {/* Menú central - 50% del espacio */}
+          <div className="hidden md:flex flex-1 justify-center w-2/4">
+            <div className="flex space-x-2">
               {menuItems.map((item) => (
                 <Link
                   key={item.href}
                   href={item.href}
-                  className={`relative group px-6 py-2 rounded-lg transition-colors ${
+                  className={`relative group px-8 py-2 rounded-lg transition-colors ${
                     pathname === item.href 
-                      ? 'bg-primary-50 text-primary-600' 
+                      ? 'bg-white/10 text-primary-600' 
                       : 'hover:bg-gray-100'
                   }`}
                 >
@@ -77,8 +79,8 @@ export default function Navigation() {
             </div>
           </div>
 
-          {/* Menú derecho */}
-          <div className="hidden md:flex items-center space-x-2">
+          {/* Menú derecho - 25% del espacio */}
+          <div className="hidden md:flex justify-end items-center space-x-2 w-1/4">
             <button className="p-2 hover:bg-gray-100 rounded-full">
               <LocationIcon className="w-6 h-6" />
             </button>

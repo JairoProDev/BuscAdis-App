@@ -4,11 +4,24 @@ import { useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { FilterIcon } from '@/components/icons'
 
+interface FilterState {
+  priceRange: [number, number]
+  sortBy: string
+  location: string
+}
+
 export default function SearchFilters() {
   const [isOpen, setIsOpen] = useState(false)
-  const [priceRange, setPriceRange] = useState([0, 1000000])
-  const [sortBy, setSortBy] = useState('recent')
-  const [location, setLocation] = useState('')
+  const [filters, setFilters] = useState<FilterState>({
+    priceRange: [0, 1000000],
+    sortBy: 'recent',
+    location: ''
+  })
+
+  const handleApplyFilters = () => {
+    // Implementar lógica de filtros
+    setIsOpen(false)
+  }
 
   return (
     <div className="relative">
@@ -38,16 +51,22 @@ export default function SearchFilters() {
                 <div className="flex items-center space-x-2">
                   <input
                     type="number"
-                    value={priceRange[0]}
-                    onChange={(e) => setPriceRange([+e.target.value, priceRange[1]])}
+                    value={filters.priceRange[0]}
+                    onChange={(e) => setFilters({
+                      ...filters,
+                      priceRange: [+e.target.value, filters.priceRange[1]]
+                    })}
                     className="w-full bg-primary-700 text-white rounded-lg px-3 py-2"
                     placeholder="Mín"
                   />
                   <span className="text-white">-</span>
                   <input
                     type="number"
-                    value={priceRange[1]}
-                    onChange={(e) => setPriceRange([priceRange[0], +e.target.value])}
+                    value={filters.priceRange[1]}
+                    onChange={(e) => setFilters({
+                      ...filters,
+                      priceRange: [filters.priceRange[0], +e.target.value]
+                    })}
                     className="w-full bg-primary-700 text-white rounded-lg px-3 py-2"
                     placeholder="Máx"
                   />
@@ -59,8 +78,8 @@ export default function SearchFilters() {
                   Ordenar por
                 </label>
                 <select
-                  value={sortBy}
-                  onChange={(e) => setSortBy(e.target.value)}
+                  value={filters.sortBy}
+                  onChange={(e) => setFilters({ ...filters, sortBy: e.target.value })}
                   className="w-full bg-primary-700 text-white rounded-lg px-3 py-2"
                 >
                   <option value="recent">Más recientes</option>
@@ -76,8 +95,8 @@ export default function SearchFilters() {
                 </label>
                 <input
                   type="text"
-                  value={location}
-                  onChange={(e) => setLocation(e.target.value)}
+                  value={filters.location}
+                  onChange={(e) => setFilters({ ...filters, location: e.target.value })}
                   className="w-full bg-primary-700 text-white rounded-lg px-3 py-2"
                   placeholder="Ej: Lima, Miraflores"
                 />
@@ -95,6 +114,7 @@ export default function SearchFilters() {
                 <motion.button
                   whileHover={{ scale: 1.05 }}
                   whileTap={{ scale: 0.95 }}
+                  onClick={handleApplyFilters}
                   className="px-4 py-2 bg-primary-600 text-white rounded-lg text-sm font-medium hover:bg-primary-500"
                 >
                   Aplicar
