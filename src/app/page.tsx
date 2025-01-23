@@ -17,8 +17,8 @@ export default function Home() {
 
   const heroSlides = [
     {
-      title: "Busca y conecta con las mejores oportunidades",
-      subtitle: "Encuentra todo lo que buscas y necesitas en un solo lugar, rápido, fácil y seguro.	",
+      title: "Busca mejores oportunidades",
+      subtitle: "Encuentra todo lo que necesitas en un solo lugar, rápido, fácil y seguro.	",
       bgColor: "from-primary-900/80 via-primary-800/70 to-success-900/60",
     },
     {
@@ -39,102 +39,77 @@ export default function Home() {
   }
 
   return (
-    <div className="space-y-24">
+    <div className="space-y-12 md:space-y-24">
       {/* Hero Section */}
-      <section className="relative min-h-screen">
-        <div className="absolute inset-0 overflow-hidden">
-          <AnimatePresence mode="wait">
-            <motion.div
-              key={currentSlide}
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              transition={{ duration: 1 }}
-              className={`relative h-full bg-gradient-to-br ${heroSlides[currentSlide].bgColor}`}
-            >
-              <div className="absolute inset-0 bg-[url('/patterns/grid.svg')] opacity-20" />
-            </motion.div>
-          </AnimatePresence>
+      <section className="relative min-h-[calc(100vh-4rem)] md:min-h-screen bg-primary-900">
+        <div className="absolute inset-0">
+          <div className="absolute inset-0 bg-[url('/patterns/grid.svg')] opacity-10" />
         </div>
 
-        <div className="relative container mx-auto px-4 h-screen flex flex-col justify-center">
-          <div className="grid lg:grid-cols-2 gap-12 items-center">
-            {/* Texto y CTA */}
-            <motion.div
-              initial={{ opacity: 0, x: -50 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ duration: 0.8 }}
-              className="text-white space-y-8"
-            >
-              <AnimatePresence mode="wait">
-                <motion.h1
-                  key={`title-${currentSlide}`}
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, y: -20 }}
-                  transition={{ duration: 0.5 }}
-                  className="text-5xl md:text-7xl font-bold leading-tight"
-                >
-                  {heroSlides[currentSlide].title}
-                </motion.h1>
-                <motion.p
-                  key={`subtitle-${currentSlide}`}
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, y: -20 }}
-                  transition={{ duration: 0.5, delay: 0.2 }}
-                  className="text-xl md:text-2xl text-primary-100"
-                >
-                  {heroSlides[currentSlide].subtitle}
-                </motion.p>
-              </AnimatePresence>
-
-              {/* Buscador */}
+        <div className="relative h-full flex flex-col justify-center pt-16 md:pt-24">
+          <div className="container mx-auto px-4 md:px-6 lg:px-8">
+            <div className="grid lg:grid-cols-2 gap-8 lg:gap-12 items-center">
+              {/* Texto y CTA */}
               <motion.div
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.8, delay: 0.4 }}
-                className="relative"
+                initial={{ opacity: 0, x: -50 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ duration: 0.8 }}
+                className="text-white space-y-6 md:space-y-8"
               >
-                <SearchBar onSearch={handleSearch} />
+                <h1 className="text-4xl md:text-5xl lg:text-7xl font-bold leading-tight">
+                  Busca mejores oportunidades
+                </h1>
+                <p className="text-lg md:text-xl lg:text-2xl text-blue-100">
+                  Encuentra todo lo que necesitas en un solo lugar
+                </p>
+
+                {/* Buscador */}
+                <motion.div
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ duration: 0.8, delay: 0.4 }}
+                  className="relative w-full max-w-2xl"
+                >
+                  <SearchBar onSearch={handleSearch} />
+                </motion.div>
+
+                {/* Estadísticas flotantes */}
+                <div className="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4 mt-8 md:mt-12">
+                  {[
+                    { number: '10K+', label: 'Usuarios' },
+                    { number: '5K+', label: 'Anuncios' },
+                    { number: '98%', label: 'Satisfacción' },
+                    { number: '24/7', label: 'Soporte' }
+                  ].map((stat, index) => (
+                    <motion.div
+                      key={index}
+                      initial={{ opacity: 0, y: 20 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ duration: 0.8, delay: 0.6 + index * 0.1 }}
+                      className="bg-white/10 backdrop-blur-sm rounded-lg p-3 md:p-4 text-center hover:bg-white/20 transition-all duration-300 transform hover:-translate-y-1"
+                    >
+                      <span className="block text-2xl md:text-3xl font-bold mb-1">{stat.number}</span>
+                      <span className="text-xs md:text-sm text-primary-100">{stat.label}</span>
+                    </motion.div>
+                  ))}
+                </div>
               </motion.div>
 
-              {/* Estadísticas flotantes */}
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-12">
-                {[
-                  { number: '1M+', label: 'Usuarios activos' },
-                  { number: '500K+', label: 'Anuncios publicados' },
-                  { number: '98%', label: 'Satisfacción' },
-                  { number: '24/7', label: 'Soporte' }
-                ].map((stat, index) => (
-                  <motion.div
-                    key={index}
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ duration: 0.8, delay: 0.6 + index * 0.1 }}
-                    className="bg-white/10 backdrop-blur-sm rounded-lg p-4 text-center hover:bg-white/20 transition-all duration-300 transform hover:-translate-y-1"
-                  >
-                    <span className="block text-3xl font-bold mb-1">{stat.number}</span>
-                    <span className="text-sm text-primary-100">{stat.label}</span>
-                  </motion.div>
-                ))}
+              {/* Escena 3D */}
+              <div className="hidden lg:block">
+                <Scene3D />
               </div>
-            </motion.div>
-
-            {/* Escena 3D */}
-            <div className="hidden lg:block">
-              <Scene3D />
             </div>
           </div>
         </div>
 
         {/* Navegación del slider */}
-        <div className="absolute bottom-8 left-1/2 -translate-x-1/2 flex space-x-4">
+        <div className="absolute bottom-4 md:bottom-8 left-1/2 -translate-x-1/2 flex space-x-4">
           {heroSlides.map((_, index) => (
             <button
               key={index}
               onClick={() => setCurrentSlide(index)}
-              className={`w-3 h-3 rounded-full transition-all duration-300 ${
+              className={`w-2 md:w-3 h-2 md:h-3 rounded-full transition-all duration-300 ${
                 currentSlide === index 
                   ? 'bg-white scale-125' 
                   : 'bg-white/50 hover:bg-white/75'
@@ -146,7 +121,7 @@ export default function Home() {
       </section>
 
       {/* Categorías Populares con Interactividad */}
-      <section id="categories" className="py-20 bg-gradient-to-b from-white to-primary-50">
+      <section id="categories" className="py-20 bg-white">
         <div className="container mx-auto px-4">
           <motion.h2 
             className="text-4xl font-bold text-primary-800 text-center mb-16"
@@ -218,7 +193,7 @@ export default function Home() {
       </section>
 
       {/* Por qué BuscAdis */}
-      <section className="py-16 bg-primary-50 rounded-3xl">
+      <section className="py-16 bg-primary-50/30">
         <div className="container mx-auto px-4">
           <h2 className="text-3xl font-bold text-primary-800 text-center mb-12">
             ¿Por qué elegir BuscAdis?
@@ -321,7 +296,7 @@ export default function Home() {
       </section>
 
       {/* Testimonios */}
-      <section className="py-24 bg-gradient-to-b from-primary-50 to-white">
+      <section className="py-24 bg-gradient-to-b from-primary-50/30 to-white">
         <div className="container mx-auto px-4">
           <motion.h2 
             className="text-4xl font-bold text-primary-800 text-center mb-16"
