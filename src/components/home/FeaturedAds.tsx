@@ -4,20 +4,14 @@ import { motion } from 'framer-motion'
 import Image from 'next/image'
 import InteractiveCard from '@/components/ui/InteractiveCard'
 import { VerifiedIcon, PremiumIcon } from '@/components/icons'
+import { Adiso } from '@/types/marketplace'
 
-interface Ad {
-  id: string
-  title: string
-  price: number
-  image: string
-  location: string
-  category: string
-  isPremium: boolean
-  isVerified: boolean
-  rating: number
+interface FeaturedAdsProps {
+  ads: Adiso[]
+  featured?: boolean
 }
 
-export default function FeaturedAds({ ads }: { ads: Ad[] }) {
+export default function FeaturedAds({ ads, featured = false }: FeaturedAdsProps) {
   return (
     <div className="py-4">
       <h3 className="text-lg font-semibold text-primary-800 px-4 mb-3 flex items-center">
@@ -57,7 +51,7 @@ export default function FeaturedAds({ ads }: { ads: Ad[] }) {
               <div className="flex items-center text-sm text-primary-600 mb-3">
                 <span>{ad.location}</span>
                 <span className="mx-2">•</span>
-                <span>{ad.category}</span>
+                <span>{ad.category.name}</span>
               </div>
               
               <div className="flex items-center justify-between">
