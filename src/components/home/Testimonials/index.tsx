@@ -1,7 +1,7 @@
 'use client'
 
 import { useState, useEffect } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion } from 'framer-motion';
 import Container from '@/components/shared/Container';
 
 const testimonials = [
@@ -73,29 +73,27 @@ const testimonials = [
 
 export default function Testimonials() {
   const [activeIndex, setActiveIndex] = useState(0);
-  const [isAutoPlay, setIsAutoPlay] = useState(true);
-  const itemsPerView = 3;
-  const maxIndex = testimonials.length - itemsPerView;
+  const itemsPerView = {
+    mobile: 1,
+    tablet: 2,
+    desktop: 3
+  };
+  const maxIndex = testimonials.length - itemsPerView.desktop;
 
   useEffect(() => {
-    let interval: NodeJS.Timeout;
-    if (isAutoPlay) {
-      interval = setInterval(() => {
-        setActiveIndex((current) => 
-          current >= maxIndex ? 0 : current + 1
-        );
-      }, 5000);
-    }
+    const interval = setInterval(() => {
+      setActiveIndex((current) => 
+        current >= maxIndex ? 0 : current + 1
+      );
+    }, 5000);
     return () => clearInterval(interval);
-  }, [isAutoPlay, maxIndex]);
+  }, [maxIndex]);
 
   const handlePrev = () => {
-    setIsAutoPlay(false);
     setActiveIndex((current) => Math.max(current - 1, 0));
   };
 
   const handleNext = () => {
-    setIsAutoPlay(false);
     setActiveIndex((current) => Math.min(current + 1, maxIndex));
   };
 
@@ -108,10 +106,10 @@ export default function Testimonials() {
           transition={{ duration: 0.6 }}
           className="text-center mb-12"
         >
-          <h2 className="text-4xl font-bold text-white mb-4">
+          <h2 className="text-3xl md:text-4xl font-bold text-white mb-4">
             Lo que dicen nuestros usuarios
           </h2>
-          <p className="text-xl text-blue-100">
+          <p className="text-lg md:text-xl text-blue-100">
             Miles de personas confían en BuscAdis para sus necesidades
           </p>
         </motion.div>
@@ -119,8 +117,9 @@ export default function Testimonials() {
         <div className="relative">
           <button 
             onClick={handlePrev}
-            className="absolute left-0 top-1/2 -translate-y-1/2 -translate-x-4 z-10 bg-white p-2 rounded-full shadow-lg hover:bg-primary-50"
+            className="absolute left-0 top-1/2 -translate-y-1/2 -translate-x-4 z-10 bg-white p-2 rounded-full shadow-lg hover:bg-primary-50 disabled:opacity-50 disabled:cursor-not-allowed"
             disabled={activeIndex === 0}
+            aria-label="Anterior testimonio"
           >
             <svg className="w-6 h-6 text-primary-900" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
@@ -129,8 +128,9 @@ export default function Testimonials() {
 
           <button 
             onClick={handleNext}
-            className="absolute right-0 top-1/2 -translate-y-1/2 translate-x-4 z-10 bg-white p-2 rounded-full shadow-lg hover:bg-primary-50"
+            className="absolute right-0 top-1/2 -translate-y-1/2 translate-x-4 z-10 bg-white p-2 rounded-full shadow-lg hover:bg-primary-50 disabled:opacity-50 disabled:cursor-not-allowed"
             disabled={activeIndex === maxIndex}
+            aria-label="Siguiente testimonio"
           >
             <svg className="w-6 h-6 text-primary-900" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
@@ -140,33 +140,33 @@ export default function Testimonials() {
           <div className="overflow-hidden mx-8">
             <motion.div
               className="flex gap-4"
-              animate={{ x: `-${activeIndex * (100 / itemsPerView)}%` }}
+              animate={{ x: `-${activeIndex * (100 / itemsPerView.desktop)}%` }}
               transition={{ type: "spring", stiffness: 300, damping: 30 }}
             >
               {testimonials.map((testimonial) => (
                 <motion.div
                   key={testimonial.id}
-                  className="w-1/3 flex-shrink-0"
+                  className="w-full md:w-1/2 lg:w-1/3 flex-shrink-0"
                   initial={{ opacity: 0, scale: 0.9 }}
                   animate={{ opacity: 1, scale: 1 }}
                   transition={{ duration: 0.5 }}
                 >
-                  <div className="bg-white rounded-xl p-6 shadow-lg h-full">
+                  <div className="bg-white rounded-xl p-4 md:p-6 shadow-lg h-full">
                     <div className="flex items-center mb-4">
-                      <div className="w-12 h-12 rounded-full bg-primary-100 flex items-center justify-center text-lg">
+                      <div className="w-10 h-10 md:w-12 md:h-12 rounded-full bg-primary-100 flex items-center justify-center text-base md:text-lg">
                         {testimonial.name.charAt(0)}
                       </div>
                       <div className="ml-3">
-                        <h3 className="text-lg font-semibold text-primary-900">
+                        <h3 className="text-base md:text-lg font-semibold text-primary-900">
                           {testimonial.name}
                         </h3>
-                        <p className="text-sm text-primary-600">{testimonial.role}</p>
+                        <p className="text-xs md:text-sm text-primary-600">{testimonial.role}</p>
                       </div>
                     </div>
-                    <p className="text-sm text-primary-700 mb-4">
+                    <p className="text-xs md:text-sm text-primary-700 mb-4">
                       &ldquo;{testimonial.content}&rdquo;
                     </p>
-                    <div className="flex text-yellow-400 text-sm">
+                    <div className="flex text-yellow-400 text-xs md:text-sm">
                       {[...Array(testimonial.rating)].map((_, i) => (
                         <span key={i}>⭐</span>
                       ))}
@@ -177,30 +177,17 @@ export default function Testimonials() {
             </motion.div>
           </div>
 
-          <div className="flex justify-center items-center mt-8 space-x-4">
-            <button
-              onClick={() => setIsAutoPlay(!isAutoPlay)}
-              className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors ${
-                isAutoPlay ? 'bg-white text-primary-900' : 'bg-primary-700 text-white'
-              }`}
-            >
-              {isAutoPlay ? 'Pausar' : 'Reproducir'}
-            </button>
-            <div className="flex space-x-2">
-              {[...Array(maxIndex + 1)].map((_, index) => (
-                <button
-                  key={index}
-                  onClick={() => {
-                    setIsAutoPlay(false);
-                    setActiveIndex(index);
-                  }}
-                  className={`w-2 h-2 rounded-full transition-colors ${
-                    index === activeIndex ? 'bg-white' : 'bg-white/30'
-                  }`}
-                  aria-label={`Ver testimonio ${index + 1}`}
-                />
-              ))}
-            </div>
+          <div className="flex justify-center mt-6 space-x-2">
+            {[...Array(maxIndex + 1)].map((_, index) => (
+              <button
+                key={index}
+                onClick={() => setActiveIndex(index)}
+                className={`w-2 h-2 rounded-full transition-colors ${
+                  index === activeIndex ? 'bg-white' : 'bg-white/30'
+                }`}
+                aria-label={`Ver testimonio ${index + 1}`}
+              />
+            ))}
           </div>
         </div>
       </Container>
