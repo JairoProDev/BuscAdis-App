@@ -16,7 +16,7 @@ export default function Home() {
     <main>
       <Hero />
       <CategorySlider />
-      <Features />
+      {/* <Features /> */}
       <Benefits />
       <Tools />
       <HowItWorks />
