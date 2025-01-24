@@ -102,20 +102,17 @@ export default function MobileNavigation() {
   return (
     <>
       <motion.nav 
-        className="fixed bottom-0 left-0 right-0 h-16 bg-primary-950 md:hidden z-50"
+        className="fixed bottom-0 left-0 right-0 h-16 bg-[#004d7f] md:hidden z-50"
         initial={false}
         animate={{
           y: isVisible ? 0 : 100,
         }}
         transition={{
           duration: 0.4,
-          ease: [0.4, 0, 0.2, 1] // Curva de animación más suave
+          ease: [0.4, 0, 0.2, 1]
         }}
       >
-        {/* Efecto de profundidad base mejorado */}
-        <div className="absolute inset-x-0 top-0 h-16 bg-gradient-to-b from-primary-900/20 to-primary-950/40">
-          <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-primary-500/20 to-transparent" />
-        </div>
+        {/* Removemos el efecto de profundidad base ya que queremos un color sólido */}
         
         <div className="relative container mx-auto px-4 h-full flex items-end justify-around pb-2">
           {navItems.map((item) => {
@@ -126,13 +123,34 @@ export default function MobileNavigation() {
             return (
               <motion.button
                 key={item.id}
-                className="relative flex flex-col items-center justify-end pb-1 w-16"
+                className="relative flex flex-col items-center justify-end w-16"
                 onClick={() => router.push(item.path)}
                 onHoverStart={() => setHoveredItem(item.id)}
                 onHoverEnd={() => setHoveredItem(null)}
                 {...bindLongPress(item.id)}
               >
-                {/* Hendidura mejorada bajo el hexágono activo */}
+                {/* Ajustamos los colores del texto e iconos para mejor contraste */}
+                <motion.div
+                  className={`flex flex-col items-center ${
+                    isActive ? 'opacity-0' : 'opacity-100'
+                  }`}
+                  animate={{
+                    scale: isHovered ? 1.1 : 1,
+                    y: isHovered ? -2 : 0
+                  }}
+                  transition={{
+                    type: "spring",
+                    stiffness: 500,
+                    damping: 15
+                  }}
+                >
+                  <Icon className={`w-6 h-6 text-white`} />
+                  <span className="text-sm font-medium mt-1.5 text-white">
+                    {item.label}
+                  </span>
+                </motion.div>
+
+                {/* Mantenemos el resto del código igual */}
                 {isActive && (
                   <motion.div
                     className="absolute -top-6 w-full"
@@ -152,7 +170,6 @@ export default function MobileNavigation() {
                   </motion.div>
                 )}
 
-                {/* Hexágono con efectos mejorados */}
                 <AnimatePresence>
                   {isActive && (
                     <motion.div
@@ -216,41 +233,20 @@ export default function MobileNavigation() {
                     </motion.div>
                   )}
                 </AnimatePresence>
-
-                {/* Icono y etiqueta base mejorados */}
-                <motion.div
-                  className={`flex flex-col items-center ${
-                    isActive ? 'opacity-0' : 'opacity-100'
-                  }`}
-                  animate={{
-                    scale: isHovered ? 1.1 : 1,
-                    y: isHovered ? -2 : 0
-                  }}
-                  transition={{
-                    type: "spring",
-                    stiffness: 500,
-                    damping: 15
-                  }}
-                >
-                  <Icon className={`w-6 h-6 text-primary-200`} />
-                  <span className="text-sm font-medium mt-1.5 text-primary-200 drop-shadow">
-                    {item.label}
-                  </span>
-                </motion.div>
               </motion.button>
             )
           })}
         </div>
       </motion.nav>
 
-      {/* Submenú mejorado */}
+      {/* Submenu con el mismo color de fondo */}
       <AnimatePresence>
         {activeSubMenu && (
           <motion.div
             initial={{ opacity: 0, y: 100 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: 100 }}
-            className="fixed bottom-16 left-0 right-0 bg-primary-950/98 backdrop-blur-xl md:hidden z-40 border-t border-primary-800/30"
+            className="fixed bottom-16 left-0 right-0 bg-[#004d7f] md:hidden z-40 border-t border-white/10"
           >
             <div className="container mx-auto p-4">
               <div className="grid grid-cols-2 gap-3">
@@ -267,7 +263,7 @@ export default function MobileNavigation() {
                       whileHover={{ scale: 1.02, y: -2 }}
                       whileTap={{ scale: 0.98 }}
                     >
-                      <option.icon className="w-5 h-5 mr-3 text-primary-400" />
+                      <option.icon className="w-5 h-5 mr-3 text-white" />
                       <span className="text-sm font-medium text-white">{option.label}</span>
                     </motion.button>
                   ))}
