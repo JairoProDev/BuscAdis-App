@@ -24,8 +24,8 @@ const navItems = [
     icon: ArticleIcon,
     label: 'Blog',
     path: '/blog',
-    gradient: 'from-violet-500 via-violet-400 to-violet-600',
-    glow: 'rgba(139, 92, 246, 0.5)',
+    gradient: 'from-primary-500 via-primary-400 to-primary-600',
+    glow: 'rgba(14, 165, 233, 0.5)',
     subOptions: [
       { id: 'news', label: 'Noticias', path: '/blog/noticias', icon: ArticleIcon },
       { id: 'guides', label: 'Guías', path: '/blog/guias', icon: ArticleIcon }
@@ -36,8 +36,8 @@ const navItems = [
     icon: SearchNavIcon,
     label: 'Buscar',
     path: '/buscar',
-    gradient: 'from-sky-500 via-sky-400 to-sky-600',
-    glow: 'rgba(56, 189, 248, 0.5)',
+    gradient: 'from-primary-500 via-primary-400 to-primary-600',
+    glow: 'rgba(14, 165, 233, 0.5)',
     subOptions: [
       { id: 'categories', label: 'Categorías', path: '/categorias', icon: SearchNavIcon },
       { id: 'near', label: 'Cerca de mí', path: '/cerca', icon: SearchNavIcon }
@@ -46,10 +46,10 @@ const navItems = [
   {
     id: 'bot',
     icon: BotIcon,
-    label: 'Chatbot',
+    label: 'ADIS',
     path: '/chatbot',
-    gradient: 'from-emerald-500 via-emerald-400 to-emerald-600',
-    glow: 'rgba(16, 185, 129, 0.5)',
+    gradient: 'from-primary-500 via-primary-400 to-primary-600',
+    glow: 'rgba(14, 165, 233, 0.5)',
     subOptions: [
       { id: 'assistant', label: 'Asistente', path: '/chatbot', icon: BotIcon },
       { id: 'help', label: 'Ayuda', path: '/ayuda', icon: BotIcon }
@@ -60,14 +60,18 @@ const navItems = [
     icon: MegaphoneIcon,
     label: 'Publicar',
     path: '/publicar',
-    gradient: 'from-amber-500 via-amber-400 to-amber-600',
-    glow: 'rgba(245, 158, 11, 0.5)',
+    gradient: 'from-primary-500 via-primary-400 to-primary-600',
+    glow: 'rgba(14, 165, 233, 0.5)',
     subOptions: [
       { id: 'new', label: 'Nuevo Adiso', path: '/publicar/nuevo', icon: MegaphoneIcon },
       { id: 'drafts', label: 'Borradores', path: '/publicar/borradores', icon: MegaphoneIcon }
     ]
   }
-]
+].sort((a, b) => {
+  // Ordenar para que ADIS esté en el centro
+  const order = ['home', 'blog', 'bot', 'search', 'publish']
+  return order.indexOf(a.id) - order.indexOf(b.id)
+})
 
 export default function MobileNavigation() {
   const pathname = usePathname()
@@ -163,11 +167,11 @@ export default function MobileNavigation() {
                       exit={{ scale: 0.5, rotate: -180 }}
                       transition={{
                         type: "spring",
-                        stiffness: 80,
-                        damping: 12,
+                        stiffness: 150,
+                        damping: 13,
                         y: {
                           repeat: Infinity,
-                          duration: 4,
+                          duration: 2,
                           ease: "easeInOut"
                         }
                       }}
@@ -205,9 +209,9 @@ export default function MobileNavigation() {
                         </svg>
                       </motion.div>
 
-                      {/* Icono centrado */}
+                      {/* Icono centrado sin rotación */}
                       <div className="absolute inset-0 flex items-center justify-center">
-                        <Icon className="w-7 h-7 text-white transform -rotate-45" />
+                        <Icon className="w-8 h-8 text-white drop-shadow-lg" />
                       </div>
                     </motion.div>
                   )}
@@ -224,12 +228,12 @@ export default function MobileNavigation() {
                   }}
                   transition={{
                     type: "spring",
-                    stiffness: 300,
-                    damping: 20
+                    stiffness: 500,
+                    damping: 15
                   }}
                 >
                   <Icon className={`w-6 h-6 text-primary-200`} />
-                  <span className="text-sm font-medium mt-1.5 text-primary-200">
+                  <span className="text-sm font-medium mt-1.5 text-primary-200 drop-shadow">
                     {item.label}
                   </span>
                 </motion.div>
