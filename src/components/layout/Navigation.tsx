@@ -70,7 +70,7 @@ export default function Navigation() {
                 </button>
               </div>
             ) : (
-              <div className="flex items-center space-x-2">
+              <div className="flex items-center">
                 <Link
                   href="/login"
                   className="px-4 py-2 text-primary-600 hover:bg-primary-50 rounded-lg transition-colors text-sm sm:text-base"
