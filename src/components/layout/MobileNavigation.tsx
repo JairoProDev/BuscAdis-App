@@ -104,12 +104,14 @@ export default function MobileNavigation() {
           y: isVisible ? 0 : 100,
         }}
         transition={{
-          duration: 0.3,
-          ease: "easeInOut"
+          duration: 0.4,
+          ease: [0.4, 0, 0.2, 1] // Curva de animación más suave
         }}
       >
-        {/* Efecto de profundidad base */}
-        <div className="absolute inset-x-0 top-0 h-16 bg-gradient-to-b from-primary-900/20 to-primary-950/40" />
+        {/* Efecto de profundidad base mejorado */}
+        <div className="absolute inset-x-0 top-0 h-16 bg-gradient-to-b from-primary-900/20 to-primary-950/40">
+          <div className="absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-primary-500/20 to-transparent" />
+        </div>
         
         <div className="relative container mx-auto px-4 h-full flex items-end justify-around pb-2">
           {navItems.map((item) => {
@@ -120,26 +122,33 @@ export default function MobileNavigation() {
             return (
               <motion.button
                 key={item.id}
-                className="relative flex flex-col items-center justify-end pb-1"
+                className="relative flex flex-col items-center justify-end pb-1 w-16"
                 onClick={() => router.push(item.path)}
                 onHoverStart={() => setHoveredItem(item.id)}
                 onHoverEnd={() => setHoveredItem(null)}
                 {...bindLongPress(item.id)}
               >
-                {/* Hendidura bajo el hexágono activo */}
+                {/* Hendidura mejorada bajo el hexágono activo */}
                 {isActive && (
                   <motion.div
-                    className="absolute -top-4 w-16 h-8 bg-primary-950"
+                    className="absolute -top-6 w-full"
                     initial={{ opacity: 0 }}
                     animate={{ opacity: 1 }}
                     exit={{ opacity: 0 }}
                   >
-                    <div className="absolute inset-0 bg-gradient-to-t from-transparent to-primary-900/20" />
-                    <div className="absolute -bottom-px left-0 right-0 h-[1px] bg-gradient-to-r from-transparent via-primary-400/20 to-transparent" />
+                    <div className="relative h-8">
+                      {/* Sombra superior */}
+                      <div className="absolute top-0 inset-x-0 h-4 bg-gradient-to-b from-primary-950 to-transparent" />
+                      {/* Bordes laterales brillantes */}
+                      <div className="absolute inset-y-0 left-0 w-px bg-gradient-to-b from-transparent via-primary-400/20 to-transparent" />
+                      <div className="absolute inset-y-0 right-0 w-px bg-gradient-to-b from-transparent via-primary-400/20 to-transparent" />
+                      {/* Línea inferior brillante */}
+                      <div className="absolute bottom-0 inset-x-0 h-px bg-gradient-to-r from-transparent via-primary-400/30 to-transparent" />
+                    </div>
                   </motion.div>
                 )}
 
-                {/* Hexágono con efectos */}
+                {/* Hexágono con efectos mejorados */}
                 <AnimatePresence>
                   {isActive && (
                     <motion.div
@@ -154,11 +163,11 @@ export default function MobileNavigation() {
                       exit={{ scale: 0.5, rotate: -180 }}
                       transition={{
                         type: "spring",
-                        stiffness: 100,
-                        damping: 15,
+                        stiffness: 80,
+                        damping: 12,
                         y: {
                           repeat: Infinity,
-                          duration: 3,
+                          duration: 4,
                           ease: "easeInOut"
                         }
                       }}
@@ -204,14 +213,23 @@ export default function MobileNavigation() {
                   )}
                 </AnimatePresence>
 
-                {/* Icono y etiqueta base */}
+                {/* Icono y etiqueta base mejorados */}
                 <motion.div
                   className={`flex flex-col items-center ${
                     isActive ? 'opacity-0' : 'opacity-100'
                   }`}
+                  animate={{
+                    scale: isHovered ? 1.1 : 1,
+                    y: isHovered ? -2 : 0
+                  }}
+                  transition={{
+                    type: "spring",
+                    stiffness: 300,
+                    damping: 20
+                  }}
                 >
                   <Icon className={`w-6 h-6 text-primary-200`} />
-                  <span className="text-sm font-medium mt-1 text-primary-200">
+                  <span className="text-sm font-medium mt-1.5 text-primary-200">
                     {item.label}
                   </span>
                 </motion.div>
