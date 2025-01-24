@@ -154,10 +154,10 @@ export default function Home() {
       </section>
 
       {/* Categorías Populares */}
-      <section id="categories" className="py-20 bg-white">
+      <section id="categories" className="py-20 bg-primary-800">
         <div className="container mx-auto px-4">
           <motion.h2 
-            className="text-4xl font-bold text-primary-800 text-center mb-16"
+            className="text-4xl font-bold text-white text-center mb-16"
             ref={featuresRef}
             initial={{ opacity: 0, y: 20 }}
             animate={featuresInView ? { opacity: 1, y: 0 } : {}}
@@ -226,9 +226,9 @@ export default function Home() {
       </section>
 
       {/* Por qué BuscAdis */}
-      <section className="py-16 bg-primary-200">
+      <section className="py-16 bg-primary-900">
         <div className="container mx-auto px-4">
-          <h2 className="text-3xl font-bold text-primary-800 text-center mb-12">
+          <h2 className="text-3xl font-bold text-white text-center mb-12">
             ¿Por qué elegir BuscAdis?
           </h2>
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
@@ -260,10 +260,10 @@ export default function Home() {
       </section>
 
       {/* Cómo funciona */}
-      <section className="py-24 bg-white">
+      <section className="py-24 bg-primary-800">
         <div className="container mx-auto px-4">
           <motion.h2 
-            className="text-4xl font-bold text-primary-800 text-center mb-20"
+            className="text-4xl font-bold text-white text-center mb-20"
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
@@ -308,10 +308,10 @@ export default function Home() {
                   <div className="text-2xl font-bold text-primary-800 mb-4">
                     Paso {step.step}
                   </div>
-                  <h3 className="text-xl font-semibold text-primary-700 mb-3">
+                  <h3 className="text-xl font-semibold text-white mb-3">
                     {step.title}
                   </h3>
-                  <p className="text-primary-600">
+                  <p className="text-primary-200">
                     {step.description}
                   </p>
                 </div>
@@ -329,10 +329,10 @@ export default function Home() {
       </section>
 
       {/* Testimonios */}
-      <section className="py-24 bg-primary-200">
+      <section className="py-24 bg-primary-900">
         <div className="container mx-auto px-4">
           <motion.h2 
-            className="text-4xl font-bold text-primary-800 text-center mb-16"
+            className="text-4xl font-bold text-white text-center mb-16"
             initial={{ opacity: 0, y: 20 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
