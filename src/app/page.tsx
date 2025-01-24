@@ -158,10 +158,9 @@ export default function Home() {
         <div className="container mx-auto px-4">
           <motion.h2 
             className="text-4xl font-bold text-white text-center mb-16"
-            ref={featuresRef}
             initial={{ opacity: 0, y: 20 }}
-            animate={featuresInView ? { opacity: 1, y: 0 } : {}}
-            transition={{ duration: 0.8 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6 }}
           >
             Explora nuestras categorías
           </motion.h2>
@@ -265,9 +264,8 @@ export default function Home() {
           <motion.h2 
             className="text-4xl font-bold text-white text-center mb-20"
             initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.8 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6 }}
           >
             ¿Cómo funciona BuscAdis?
           </motion.h2>
@@ -297,8 +295,7 @@ export default function Home() {
                 key={step.step}
                 className="relative"
                 initial={{ opacity: 0, y: 20 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
+                animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.8, delay: index * 0.2 }}
               >
                 <div className="bg-primary-50 rounded-full w-20 h-20 flex items-center justify-center text-4xl mb-6 mx-auto">
@@ -334,9 +331,8 @@ export default function Home() {
           <motion.h2 
             className="text-4xl font-bold text-white text-center mb-16"
             initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            transition={{ duration: 0.8 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6 }}
           >
             Lo que dicen nuestros usuarios
           </motion.h2>
@@ -452,8 +448,7 @@ export default function Home() {
         <div className="container mx-auto px-4 text-center">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
+            animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8 }}
           >
             <h2 className="text-4xl md:text-5xl font-bold mb-8">

@@ -3,6 +3,7 @@
 import { useState, useRef, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { MicrophoneIcon, CameraIcon, FilterIcon } from '@/components/icons'
+import { AdjustmentsHorizontalIcon } from '@heroicons/react/24/outline'
 import { categories } from '@/data/mockCategories'
 
 interface Suggestion {
@@ -33,6 +34,7 @@ export default function SearchBar({ onSearch }: { onSearch: (query: string) => v
   const [filteredSuggestions, setFilteredSuggestions] = useState(SUGGESTIONS)
   const inputRef = useRef<HTMLInputElement>(null)
   const suggestionsRef = useRef<HTMLDivElement>(null)
+  const [showFilters, setShowFilters] = useState(false)
 
   useEffect(() => {
     if (query) {
@@ -72,6 +74,14 @@ export default function SearchBar({ onSearch }: { onSearch: (query: string) => v
     }
   }, [])
 
+  const handleVoiceSearch = () => {
+    // Implementation of handleVoiceSearch
+  }
+
+  const handleImageSearch = () => {
+    // Implementation of handleImageSearch
+  }
+
   return (
     <div className="relative w-full max-w-3xl mx-auto">
       <div className="relative flex items-center">
@@ -85,26 +95,29 @@ export default function SearchBar({ onSearch }: { onSearch: (query: string) => v
           className="w-full px-4 md:px-6 py-3 md:py-4 text-base md:text-lg rounded-full border-2 border-primary-200 focus:border-primary-500 focus:ring-2 focus:ring-primary-500/20 transition-all duration-200 pr-24 md:pr-32"
         />
         <div className="absolute right-2 flex items-center space-x-1 md:space-x-2">
-          <button 
+          <button
+            onClick={handleVoiceSearch}
             className="p-1.5 md:p-2 text-primary-500 hover:bg-primary-50 rounded-full transition-colors"
             aria-label="Buscar por voz"
             title="Buscar por voz"
           >
-            <MicrophoneIcon className="w-5 h-5 md:w-6 md:h-6" />
+            <MicrophoneIcon className="w-5 h-5" />
           </button>
-          <button 
+          <button
+            onClick={handleImageSearch}
             className="p-1.5 md:p-2 text-primary-500 hover:bg-primary-50 rounded-full transition-colors"
             aria-label="Buscar por imagen"
             title="Buscar por imagen"
           >
-            <CameraIcon className="w-5 h-5 md:w-6 md:h-6" />
+            <CameraIcon className="w-5 h-5" />
           </button>
-          <button 
-            className="p-1.5 md:p-2 text-primary-500 hover:bg-primary-50 rounded-full transition-colors sm:hidden"
+          <button
+            onClick={() => setShowFilters(!showFilters)}
+            className="p-1.5 md:p-2 text-primary-500 hover:bg-primary-50 rounded-full transition-colors"
             aria-label="Abrir filtros"
             title="Abrir filtros"
           >
-            <FilterIcon className="w-5 h-5 md:w-6 md:h-6" />
+            <AdjustmentsHorizontalIcon className="w-5 h-5" />
           </button>
         </div>
       </div>
