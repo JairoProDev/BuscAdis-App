@@ -85,13 +85,25 @@ export default function SearchBar({ onSearch }: { onSearch: (query: string) => v
           className="w-full px-4 md:px-6 py-3 md:py-4 text-base md:text-lg rounded-full border-2 border-primary-200 focus:border-primary-500 focus:ring-2 focus:ring-primary-500/20 transition-all duration-200 pr-24 md:pr-32"
         />
         <div className="absolute right-2 flex items-center space-x-1 md:space-x-2">
-          <button className="p-1.5 md:p-2 text-primary-500 hover:bg-primary-50 rounded-full transition-colors">
+          <button 
+            className="p-1.5 md:p-2 text-primary-500 hover:bg-primary-50 rounded-full transition-colors"
+            aria-label="Buscar por voz"
+            title="Buscar por voz"
+          >
             <MicrophoneIcon className="w-5 h-5 md:w-6 md:h-6" />
           </button>
-          <button className="p-1.5 md:p-2 text-primary-500 hover:bg-primary-50 rounded-full transition-colors">
+          <button 
+            className="p-1.5 md:p-2 text-primary-500 hover:bg-primary-50 rounded-full transition-colors"
+            aria-label="Buscar por imagen"
+            title="Buscar por imagen"
+          >
             <CameraIcon className="w-5 h-5 md:w-6 md:h-6" />
           </button>
-          <button className="p-1.5 md:p-2 text-primary-500 hover:bg-primary-50 rounded-full transition-colors">
+          <button 
+            className="p-1.5 md:p-2 text-primary-500 hover:bg-primary-50 rounded-full transition-colors sm:hidden"
+            aria-label="Abrir filtros"
+            title="Abrir filtros"
+          >
             <FilterIcon className="w-5 h-5 md:w-6 md:h-6" />
           </button>
         </div>

@@ -102,7 +102,7 @@ export default function MobileNavigation() {
   return (
     <>
       <motion.nav 
-        className="fixed bottom-0 left-0 right-0 h-16 bg-primary-950/98 backdrop-blur-xl md:hidden z-50"
+        className="fixed bottom-0 left-0 right-0 h-16 bg-primary-950 md:hidden z-50"
         initial={false}
         animate={{
           y: isVisible ? 0 : 100,

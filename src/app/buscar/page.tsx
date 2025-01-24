@@ -9,10 +9,20 @@ import SearchFilters from '@/components/search/SearchFilters'
 import { CategoryId } from '@/types/marketplace'
 import { categories } from '@/data/mockCategories'
 import { mockData } from '@/data/mockData'
+import AdvancedFilters from '@/components/search/AdvancedFilters'
 
 export default function SearchPage() {
   const [selectedCategory, setSelectedCategory] = useState<CategoryId | null>(null)
   const [selectedType, setSelectedType] = useState<string | null>(null)
+  const [filters, setFilters] = useState({})
+
+  const handleSearch = (query: string) => {
+    console.log('Búsqueda:', { query, filters, category: selectedCategory })
+  }
+
+  const handleFiltersChange = (newFilters: any) => {
+    setFilters(newFilters)
+  }
 
   const filteredData = selectedCategory
     ? { [selectedCategory]: mockData[selectedCategory] }
@@ -25,9 +35,15 @@ export default function SearchPage() {
         <div className="container mx-auto px-4">
           <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4">
             <div className="w-full sm:flex-1">
-              <SearchBar onSearch={() => {}} />
+              <SearchBar onSearch={handleSearch} />
             </div>
-            <SearchFilters />
+            <div className="hidden sm:flex items-center gap-2">
+              <AdvancedFilters
+                category={selectedCategory || 'inmuebles'}
+                onFiltersChange={handleFiltersChange}
+                initialFilters={filters}
+              />
+            </div>
           </div>
         </div>
       </div>
