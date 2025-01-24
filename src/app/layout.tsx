@@ -2,6 +2,7 @@ import './globals.css'
 import { Inter } from 'next/font/google'
 import { ThemeProvider } from '@/components/theme/ThemeProvider'
 import Navigation from '@/components/layout/Navigation'
+import MobileNavigation from '@/components/layout/MobileNavigation'
 import { Loader } from '@/components/ui/Loader'
 import Footer from '@/components/layout/Footer'
 import { Suspense } from 'react'
@@ -29,6 +30,7 @@ export default function RootLayout({
                 {children}
               </main>
               <Footer />
+              <MobileNavigation />
             </Suspense>
           </div>
         </ThemeProvider>
