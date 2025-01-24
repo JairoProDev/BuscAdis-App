@@ -4,7 +4,7 @@ import { useState } from "react"
 import Image from "next/image";
 import Link from "next/link";
 import SearchBar from "@/components/search/SearchBar";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion } from "framer-motion";
 import CountUp from 'react-countup';
 import { useInView } from 'react-intersection-observer';
 import Scene3D from "@/components/3d/Scene";
@@ -12,7 +12,6 @@ import Scene3D from "@/components/3d/Scene";
 export default function Home() {
   const [activeTestimonial, setActiveTestimonial] = useState(0)
   const { ref: statsRef, inView: statsInView } = useInView()
-  const { ref: featuresRef, inView: featuresInView } = useInView()
   const [currentSlide, setCurrentSlide] = useState(0)
 
   const heroSlides = [
@@ -152,76 +151,137 @@ export default function Home() {
           ))}
         </div>
       </section>
-
       {/* Categorías Populares */}
-      <section id="categories" className="py-20 bg-primary-800">
-        <div className="container mx-auto px-4">
+      <section id="categories" className="py-24 bg-white">
           <motion.h2 
-            className="text-4xl font-bold text-white text-center mb-16"
+          className="text-4xl font-bold text-primary-900 text-center mb-6 px-4"
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6 }}
           >
             Explora nuestras categorías
           </motion.h2>
+          <motion.p
+          className="text-lg text-primary-600 text-center mb-16 max-w-2xl mx-auto px-4"
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6, delay: 0.2 }}
+          >
+            Descubre oportunidades únicas en cada una de nuestras categorías especializadas
+          </motion.p>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
-            {[
-              {
-                name: 'Inmuebles',
-                description: 'Encuentra tu próximo hogar, local, terreno u oficina',
-                icon: '🏠',
-                stats: ['10K+ propiedades', '500+ agentes', 'Cobertura nacional']
-              },
-              {
-                name: 'Vehículos',
-                description: 'Las mejores ofertas en vehículos',
-                icon: '🚗',
-                stats: ['5K+ vehículos', 'Todas las marcas', 'Financiación disponible']
-              },
-              {
-                name: 'Empleos',
-                description: 'Oportunidades laborales personalizadas',
-                icon: '💼',
-                stats: ['2K+ empleos', 'Empresas top', 'Salarios competitivos']
-              },
-              {
-                name: 'Servicios',
-                description: 'Servicios profesionales verificados',
-                icon: '🛠️',
-                stats: ['8K+ profesionales', 'Reseñas verificadas', 'Garantía de servicio']
-              }
-            ].map((categoria, index) => (
-              <motion.div
-                key={categoria.name}
-                initial={{ opacity: 0, y: 20 }}
-                animate={featuresInView ? { opacity: 1, y: 0 } : {}}
-                transition={{ duration: 0.8, delay: index * 0.2 }}
-              >
-                <Link 
-                  href={`/categorias/${categoria.name.toLowerCase()}`}
-                  className="block bg-white rounded-2xl p-8 shadow-lg hover:shadow-xl transform hover:-translate-y-1 transition-all duration-300"
+        <div className="relative w-full overflow-hidden">
+          <div 
+            className="flex gap-6 px-4 md:px-8 overflow-x-auto snap-x snap-mandatory hide-scrollbar min-w-full pb-8 scroll-smooth"
+            style={{ 
+              WebkitOverflowScrolling: 'touch',
+              scrollBehavior: 'smooth',
+              cursor: 'grab'
+            }}
+          >
+              {[
+                {
+                  name: 'Empleos',
+                  description: 'Encuentra tu próxima oportunidad laboral',
+                  icon: '💼',
+                  stats: ['2K+ empleos', 'Empresas top', 'Salarios competitivos'],
+                  gradient: 'from-blue-500/10 to-blue-600/5'
+                },
+                {
+                  name: 'Inmuebles',
+                  description: 'Propiedades para comprar o alquilar',
+                  icon: '🏠',
+                  stats: ['10K+ propiedades', '500+ agentes', 'Cobertura nacional'],
+                  gradient: 'from-emerald-500/10 to-emerald-600/5'
+                },
+                {
+                  name: 'Vehículos',
+                  description: 'Compra y venta de vehículos',
+                  icon: '🚗',
+                  stats: ['5K+ vehículos', 'Todas las marcas', 'Financiación disponible'],
+                  gradient: 'from-red-500/10 to-red-600/5'
+                },
+                {
+                  name: 'Servicios',
+                  description: 'Servicios profesionales verificados',
+                  icon: '🛠️',
+                  stats: ['8K+ profesionales', 'Reseñas verificadas', 'Garantía de servicio'],
+                  gradient: 'from-purple-500/10 to-purple-600/5'
+                },
+                {
+                  name: 'Productos',
+                  description: 'Todo tipo de productos nuevos y usados',
+                  icon: '📦',
+                  stats: ['15K+ productos', 'Envíos seguros', 'Garantía de compra'],
+                  gradient: 'from-amber-500/10 to-amber-600/5'
+                },
+                {
+                  name: 'Turismo',
+                  description: 'Experiencias y destinos únicos',
+                  icon: '✈️',
+                  stats: ['1K+ destinos', 'Paquetes completos', 'Mejores precios'],
+                  gradient: 'from-cyan-500/10 to-cyan-600/5'
+                },
+                {
+                  name: 'Eventos',
+                  description: 'Eventos y entretenimiento',
+                  icon: '🎉',
+                  stats: ['500+ eventos', 'Venta de entradas', 'Eventos exclusivos'],
+                  gradient: 'from-pink-500/10 to-pink-600/5'
+                },
+                {
+                  name: 'Educación',
+                  description: 'Cursos y formación profesional',
+                  icon: '📚',
+                  stats: ['3K+ cursos', 'Certificaciones', 'Online y presencial'],
+                  gradient: 'from-indigo-500/10 to-indigo-600/5'
+                },
+                {
+                  name: 'Mascotas',
+                  description: 'Todo para tus compañeros peludos',
+                  icon: '🐾',
+                  stats: ['1K+ anuncios', 'Veterinarios', 'Productos y servicios'],
+                  gradient: 'from-teal-500/10 to-teal-600/5'
+                }
+            ].map((categoria) => (
+              <div
+                  key={categoria.name}
+                  className="w-[280px] flex-shrink-0 snap-start"
                 >
-                  <div className="text-5xl mb-6">{categoria.icon}</div>
-                  <h3 className="text-2xl font-semibold text-primary-800 mb-4">
-                    {categoria.name}
-                  </h3>
-                  <p className="text-primary-600 mb-6">{categoria.description}</p>
-                  <ul className="space-y-2 text-sm text-primary-500">
-                    {categoria.stats.map((stat, i) => (
-                      <li key={i} className="flex items-center">
-                        <svg className="w-4 h-4 mr-2 text-primary-600" fill="currentColor" viewBox="0 0 20 20">
-                          <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
-                        </svg>
-                        {stat}
-                      </li>
-                    ))}
-                  </ul>
-                </Link>
-              </motion.div>
-            ))}
+                  <Link 
+                    href={`/categorias/${categoria.name.toLowerCase()}`}
+                  className={`block h-full bg-gradient-to-br ${categoria.gradient} rounded-2xl p-8 shadow-lg hover:shadow-xl transition-all duration-300 border border-gray-100 hover:scale-[1.02] hover:-translate-y-1`}
+                  >
+                    <div className="text-5xl mb-6">{categoria.icon}</div>
+                    <h3 className="text-2xl font-semibold text-primary-900 mb-4">
+                      {categoria.name}
+                    </h3>
+                    <p className="text-primary-700 mb-6">{categoria.description}</p>
+                    <ul className="space-y-2 text-sm text-primary-600">
+                      {categoria.stats.map((stat, i) => (
+                        <li key={i} className="flex items-center">
+                          <svg className="w-4 h-4 mr-2 text-primary-700" fill="currentColor" viewBox="0 0 20 20">
+                            <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
+                          </svg>
+                          {stat}
+                        </li>
+                      ))}
+                    </ul>
+                  </Link>
+              </div>
+              ))}
           </div>
         </div>
+
+        <style jsx>{`
+          .hide-scrollbar {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+          }
+          .hide-scrollbar::-webkit-scrollbar {
+            display: none;
+          }
+        `}</style>
       </section>
 
       {/* Por qué BuscAdis */}
