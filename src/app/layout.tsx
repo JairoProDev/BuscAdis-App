@@ -21,9 +21,9 @@ export default function RootLayout({
 }) {
   return (
     <html lang="es" suppressHydrationWarning>
-      <body className={`${inter.className} min-h-screen`}>
+      <body className={inter.className}>
         <ThemeProvider>
-          <div className="flex flex-col min-h-screen">
+          <div className="flex min-h-screen flex-col bg-background text-foreground">
             <Suspense fallback={<Loader />}>
               <Navigation />
               <main className="flex-grow">
