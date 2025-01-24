@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import { usePathname, useRouter } from 'next/navigation'
-import { motion, AnimatePresence } from 'framer-motion'
+import { motion, AnimatePresence, useScroll } from 'framer-motion'
 import { HomeIcon, ArticleIcon, SearchNavIcon, MegaphoneIcon, BotIcon } from '@/components/icons'
 import { useLongPress } from '@/hooks/useLongPress'
 
@@ -74,6 +74,22 @@ export default function MobileNavigation() {
   const router = useRouter()
   const [activeSubMenu, setActiveSubMenu] = useState<string | null>(null)
   const [hoveredItem, setHoveredItem] = useState<string | null>(null)
+  const [isVisible, setIsVisible] = useState(true)
+  const { scrollY } = useScroll()
+  const [lastScrollY, setLastScrollY] = useState(0)
+
+  // Control de visibilidad basado en scroll
+  useEffect(() => {
+    return scrollY.onChange((latest) => {
+      const direction = latest > lastScrollY ? 'down' : 'up'
+      if (direction === 'down' && latest > 100) {
+        setIsVisible(false)
+      } else if (direction === 'up') {
+        setIsVisible(true)
+      }
+      setLastScrollY(latest)
+    })
+  }, [scrollY, lastScrollY])
 
   const bindLongPress = useLongPress((id) => {
     setActiveSubMenu(prev => prev === id ? null : id)
@@ -81,11 +97,21 @@ export default function MobileNavigation() {
 
   return (
     <>
-      <nav className="fixed bottom-0 left-0 right-0 h-24 bg-gradient-to-t from-primary-950/95 via-primary-900/90 to-transparent backdrop-blur-lg md:hidden z-50">
-        {/* Efecto de profundidad */}
-        <div className="absolute inset-x-0 top-0 h-24 bg-gradient-to-b from-transparent via-primary-950/20 to-primary-950/40" />
+      <motion.nav 
+        className="fixed bottom-0 left-0 right-0 h-16 bg-primary-950/98 backdrop-blur-xl md:hidden z-50"
+        initial={false}
+        animate={{
+          y: isVisible ? 0 : 100,
+        }}
+        transition={{
+          duration: 0.3,
+          ease: "easeInOut"
+        }}
+      >
+        {/* Efecto de profundidad base */}
+        <div className="absolute inset-x-0 top-0 h-16 bg-gradient-to-b from-primary-900/20 to-primary-950/40" />
         
-        <div className="relative container mx-auto px-4 h-full flex items-center justify-around">
+        <div className="relative container mx-auto px-4 h-full flex items-end justify-around pb-2">
           {navItems.map((item) => {
             const isActive = pathname === item.path
             const isHovered = hoveredItem === item.id
@@ -94,37 +120,50 @@ export default function MobileNavigation() {
             return (
               <motion.button
                 key={item.id}
-                className="relative flex flex-col items-center justify-center w-20 h-24"
+                className="relative flex flex-col items-center justify-end pb-1"
                 onClick={() => router.push(item.path)}
                 onHoverStart={() => setHoveredItem(item.id)}
                 onHoverEnd={() => setHoveredItem(null)}
                 {...bindLongPress(item.id)}
               >
+                {/* Hendidura bajo el hexágono activo */}
+                {isActive && (
+                  <motion.div
+                    className="absolute -top-4 w-16 h-8 bg-primary-950"
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    exit={{ opacity: 0 }}
+                  >
+                    <div className="absolute inset-0 bg-gradient-to-t from-transparent to-primary-900/20" />
+                    <div className="absolute -bottom-px left-0 right-0 h-[1px] bg-gradient-to-r from-transparent via-primary-400/20 to-transparent" />
+                  </motion.div>
+                )}
+
                 {/* Hexágono con efectos */}
                 <AnimatePresence>
                   {isActive && (
                     <motion.div
                       layoutId="activeHex"
-                      className="absolute w-18 h-18 -mt-12"
-                      initial={{ scale: 0, rotate: 180 }}
+                      className="absolute -top-8 w-16 h-16"
+                      initial={{ scale: 0.5, rotate: 180 }}
                       animate={{ 
                         scale: 1,
                         rotate: 0,
-                        y: [-4, 0, -4],
+                        y: [-2, 2, -2],
                       }}
-                      exit={{ scale: 0, rotate: -180 }}
+                      exit={{ scale: 0.5, rotate: -180 }}
                       transition={{
                         type: "spring",
-                        stiffness: 200,
-                        damping: 20,
+                        stiffness: 100,
+                        damping: 15,
                         y: {
                           repeat: Infinity,
-                          duration: 2,
+                          duration: 3,
                           ease: "easeInOut"
                         }
                       }}
                     >
-                      {/* Efecto de brillo */}
+                      {/* Efecto de brillo mejorado */}
                       <div 
                         className="absolute inset-0 blur-2xl opacity-40 -z-10 animate-pulse"
                         style={{
@@ -133,15 +172,15 @@ export default function MobileNavigation() {
                       />
 
                       {/* Hexágono principal */}
-                      <div className={`w-16 h-16 bg-gradient-to-br ${item.gradient} rounded-xl transform rotate-45 shadow-lg`}>
+                      <div className={`w-full h-full bg-gradient-to-br ${item.gradient} rounded-xl transform rotate-45 shadow-lg`}>
                         <div className="absolute inset-0 bg-gradient-to-br from-white/20 to-transparent" />
                       </div>
 
                       {/* Anillo giratorio */}
                       <motion.div
-                        className="absolute inset-0 w-18 h-18 -m-1"
+                        className="absolute inset-0 -m-1"
                         animate={{ rotate: 360 }}
-                        transition={{ duration: 8, repeat: Infinity, ease: "linear" }}
+                        transition={{ duration: 12, repeat: Infinity, ease: "linear" }}
                       >
                         <svg viewBox="0 0 100 100" className="w-full h-full opacity-50">
                           <circle
@@ -156,50 +195,40 @@ export default function MobileNavigation() {
                           />
                         </svg>
                       </motion.div>
+
+                      {/* Icono centrado */}
+                      <div className="absolute inset-0 flex items-center justify-center">
+                        <Icon className="w-7 h-7 text-white transform -rotate-45" />
+                      </div>
                     </motion.div>
                   )}
                 </AnimatePresence>
 
-                {/* Icono y etiqueta */}
+                {/* Icono y etiqueta base */}
                 <motion.div
-                  className={`relative z-10 flex flex-col items-center ${
-                    isActive ? 'text-white' : 'text-primary-400'
+                  className={`flex flex-col items-center ${
+                    isActive ? 'opacity-0' : 'opacity-100'
                   }`}
-                  animate={{
-                    scale: isActive ? 1.2 : isHovered ? 1.1 : 1,
-                    y: isActive ? -20 : 0,
-                  }}
-                  transition={{
-                    type: "spring",
-                    stiffness: 400,
-                    damping: 25
-                  }}
                 >
-                  <Icon className={`w-6 h-6 ${isActive ? 'drop-shadow-lg' : ''}`} />
-                  <motion.span 
-                    className="text-xs mt-1.5 font-medium"
-                    animate={{
-                      opacity: isActive ? 1 : 0.7,
-                      scale: isActive ? 1.1 : 1
-                    }}
-                  >
+                  <Icon className={`w-6 h-6 text-primary-200`} />
+                  <span className="text-sm font-medium mt-1 text-primary-200">
                     {item.label}
-                  </motion.span>
+                  </span>
                 </motion.div>
               </motion.button>
             )
           })}
         </div>
-      </nav>
+      </motion.nav>
 
-      {/* Submenú con efecto de cristal */}
+      {/* Submenú mejorado */}
       <AnimatePresence>
         {activeSubMenu && (
           <motion.div
             initial={{ opacity: 0, y: 100 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: 100 }}
-            className="fixed bottom-24 left-0 right-0 bg-gradient-to-b from-primary-900/95 to-primary-950/95 backdrop-blur-xl md:hidden z-40 border-t border-white/10"
+            className="fixed bottom-16 left-0 right-0 bg-primary-950/98 backdrop-blur-xl md:hidden z-40 border-t border-primary-800/30"
           >
             <div className="container mx-auto p-4">
               <div className="grid grid-cols-2 gap-3">
