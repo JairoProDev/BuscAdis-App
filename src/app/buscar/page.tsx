@@ -20,15 +20,21 @@ export default function SearchPage() {
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-primary-900 to-primary-950">
-      {/* Barra de búsqueda fija */}
-      <div className="sticky top-0 bg-gradient-to-b from-primary-900/95 to-primary-900/80 backdrop-blur-sm pt-20 pb-4 z-30">
+      {/* Header de búsqueda */}
+      <div className="bg-primary-900/80 backdrop-blur-sm pt-20 pb-4">
         <div className="container mx-auto px-4">
-          <div className="flex items-center gap-2">
-            <div className="flex-1">
+          <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4">
+            <div className="w-full sm:flex-1">
               <SearchBar onSearch={() => {}} />
             </div>
             <SearchFilters />
           </div>
+        </div>
+      </div>
+
+      {/* Sección de categorías con scroll horizontal */}
+      <div className="bg-primary-900/60 py-4 overflow-x-auto hide-scrollbar">
+        <div className="container mx-auto px-4">
           <CategoryFilters 
             selectedCategory={selectedCategory}
             selectedType={selectedType}
@@ -42,7 +48,7 @@ export default function SearchPage() {
       <div className="container mx-auto px-4">
         <motion.div 
           layout
-          className="py-6 space-y-12"
+          className="py-6 space-y-8 md:space-y-12"
         >
           {/* Sección Featured siempre visible al inicio */}
           {!selectedCategory && mockData.featured && (
@@ -50,7 +56,6 @@ export default function SearchPage() {
               layout
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
-              className="pt-8"
             >
               <AdisoSection
                 type="featured"

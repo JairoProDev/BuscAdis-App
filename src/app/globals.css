@@ -397,3 +397,18 @@ body {
   @apply bg-primary-600 text-white shadow-lg;
   transform: translateY(-1px);
 }
+
+/* Añadir estos estilos para el scroll horizontal */
+.hide-scrollbar {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+.hide-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+
+/* Asegurar que el contenido horizontal tenga espacio */
+.min-w-max {
+  min-width: max-content;
+}
