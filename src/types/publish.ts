@@ -7,35 +7,37 @@ export type PricingPlan = 'free' | 'basic' | 'premium' | 'professional'
 export type MediaType = 'image' | 'video' | '3d' | 'document'
 
 export interface Location {
-  address: string
-  city: string
-  state: string
-  country: string
-  postalCode: string
-  coordinates: {
-    latitude: number
-    longitude: number
+  address?: string
+  city?: string
+  state?: string
+  country?: string
+  postalCode?: string
+  coordinates?: {
+    lat: number
+    lon: number
   }
 }
 
 export interface MediaFile {
-  id: string
-  type: MediaType
-  url: string
+  id?: string
+  url?: string
+  file: File
+  preview: string
+  type?: MediaType
   thumbnail?: string
   title?: string
   description?: string
-  size: number
-  order: number
-  isPrimary: boolean
+  size?: number
+  order?: number
+  isPrimary?: boolean
 }
 
 export interface PriceInfo {
   amount: number
   currency: string
-  negotiable: boolean
+  negotiable?: boolean
   period?: 'hour' | 'day' | 'week' | 'month' | 'year'
-  type: 'fixed' | 'starting_at' | 'range'
+  type: string
   maxAmount?: number
   pricePerUnit?: boolean
   unit?: string
@@ -196,4 +198,39 @@ export interface CategoryConfig {
       options?: string[]
     }[]
   }[]
+}
+
+export interface CategoryOption {
+  id: string
+  name: string
+  icon?: string
+  description?: string
+  subcategories?: CategoryOption[]
+}
+
+export interface CategorySelectorProps {
+  selectedCategory?: CategoryOption
+  onSelect: (category: CategoryOption) => void
+}
+
+export interface MediaUploaderProps {
+  files: MediaFile[]
+  onFilesChange: (files: MediaFile[]) => void
+  maxFiles?: number
+}
+
+export interface LocationSelectorProps {
+  value?: Location
+  onChange: (location: Location) => void
+}
+
+export interface PriceSelectorProps {
+  value?: PriceInfo
+  onChange: (price: PriceInfo) => void
+}
+
+export interface PublishStepProps {
+  onComplete: () => void
+  onBack?: () => void
+  isLoading?: boolean
 } 
