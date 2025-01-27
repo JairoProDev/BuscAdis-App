@@ -13,7 +13,7 @@ export default function Navigation() {
   return (
     <>
       {/* Header para desktop */}
-      <header className="fixed top-0 left-0 right-0 h-16 bg-transparent z-50">
+      <header className="top-0 left-0 right-0 h-16 bg-primary-900 z-50">
         <div className="container mx-auto px-4 h-full">
           <div className="flex items-center justify-between h-full">
             {/* Logo */}

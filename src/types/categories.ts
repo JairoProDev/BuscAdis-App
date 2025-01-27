@@ -4,7 +4,7 @@ export interface CategoryOption {
   icon?: string;
   description?: string;
   subcategories?: CategoryOption[];
-  subcategory?: CategoryOption;  // Selected subcategory
+  selected?: boolean;
 }
 
 export interface CategorySelectorProps {

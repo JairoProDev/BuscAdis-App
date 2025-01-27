@@ -12,8 +12,8 @@ const priceTypes = [
 ];
 
 const currencies = [
-  { code: 'COP', symbol: '$', name: 'Peso Colombiano' },
-  { code: 'USD', symbol: 'US$', name: 'Dólar Americano' },
+  { code: 'PEN', symbol: 'S/', name: 'Sol Peruano' },
+  { code: 'USD', symbol: '$', name: 'Dólar Americano' },
   { code: 'EUR', symbol: '€', name: 'Euro' },
 ];
 

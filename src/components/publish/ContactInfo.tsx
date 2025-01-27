@@ -99,7 +99,7 @@ export default function ContactInfo({
             value={value.phone || ''}
             onChange={(e) => handleChange('phone', e.target.value)}
             className="w-full pl-10 pr-4 py-3 bg-white rounded-xl border-2 border-primary-100 focus:border-primary-500 focus:ring-2 focus:ring-primary-500/20 transition-all"
-            placeholder="+57 300 123 4567"
+            placeholder="+51 987 654 321"
           />
           <button
             onClick={() => handleChange('showPhone', !value.showPhone)}
@@ -136,7 +136,7 @@ export default function ContactInfo({
             value={value.whatsapp || ''}
             onChange={(e) => handleChange('whatsapp', e.target.value)}
             className="w-full pl-10 pr-4 py-3 bg-white rounded-xl border-2 border-primary-100 focus:border-primary-500 focus:ring-2 focus:ring-primary-500/20 transition-all"
-            placeholder="+57 300 123 4567"
+            placeholder="+51 987 654 321"
           />
           <button
             onClick={() => handleChange('showWhatsapp', !value.showWhatsapp)}

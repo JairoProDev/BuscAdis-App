@@ -5,7 +5,6 @@ import { motion, AnimatePresence } from 'framer-motion'
 import Image from 'next/image'
 import { useRouter } from 'next/navigation'
 import { ListingsService, QuickListingData } from '@/services/listings.service'
-import { CategoryOption } from '@/types/categories'
 import CategorySelector from '@/components/publish/CategorySelector'
 import MediaUploader from '@/components/publish/MediaUploader'
 import LocationSelector from '@/components/publish/LocationSelector'
@@ -15,7 +14,6 @@ import {
   CheckCircleIcon,
   ChevronRightIcon,
   ChevronLeftIcon,
-  CloudArrowUpIcon,
   CurrencyDollarIcon,
   MapPinIcon,
   PhotoIcon,
@@ -58,25 +56,54 @@ export default function PublishPage() {
   };
 
   const validateStep = (step: number): boolean => {
+    const errors: string[] = [];
+    
     switch(step) {
       case 1:
-        return !!ad.category;
+        if (!ad.category) {
+          errors.push('Selecciona una categoría y subcategoría');
+        }
+        break;
       case 2:
-        return !!ad.title && ad.title.length >= 5 && !!ad.description && ad.description.length >= 20;
+        if (!ad.title) {
+          errors.push('Ingresa un título para tu anuncio');
+        } else if (ad.title.length < 5) {
+          errors.push('El título debe tener al menos 5 caracteres');
+        }
+        if (!ad.description) {
+          errors.push('Ingresa una descripción para tu anuncio');
+        } else if (ad.description.length < 20) {
+          errors.push('La descripción debe tener al menos 20 caracteres');
+        }
+        break;
       case 3:
-        return !!ad.contact.whatsapp && ad.contact.whatsapp.length >= 10;
+        if (!ad.contact.whatsapp) {
+          errors.push('Ingresa tu número de WhatsApp');
+        } else if (!/^\d{9,}$/.test(ad.contact.whatsapp)) {
+          errors.push('Ingresa un número de WhatsApp válido (9 dígitos)');
+        }
+        if (!ad.location) {
+          errors.push('Selecciona la ubicación de tu anuncio');
+        }
+        break;
       case 4:
-        return !!ad.location;
-      case 5:
-        return ad.media !== undefined && ad.media.length > 0;
+        if (!ad.media || ad.media.length === 0) {
+          errors.push('Sube al menos una imagen');
+        }
+        break;
       default:
         return true;
     }
+
+    if (errors.length > 0) {
+      setError(errors.join('\n'));
+      return false;
+    }
+    return true;
   };
 
   const handleStepComplete = (nextStep: number) => {
     if (!validateStep(step)) {
-      setError('Por favor completa todos los campos requeridos antes de continuar');
       return;
     }
     setError('');
@@ -126,9 +153,14 @@ export default function PublishPage() {
             initial={{ opacity: 0, y: -20 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -20 }}
-            className="fixed top-4 right-4 bg-red-500 text-white px-6 py-3 rounded-lg shadow-lg z-50"
+            className="fixed top-4 right-4 left-4 md:left-auto bg-red-500 text-white px-6 py-3 rounded-lg shadow-lg z-50 max-w-md"
           >
-            {error}
+            {error.split('\n').map((line, i) => (
+              <div key={i} className="flex items-start gap-2">
+                <span className="text-red-200">•</span>
+                <span>{line}</span>
+              </div>
+            ))}
           </motion.div>
         )}
       </AnimatePresence>
@@ -177,9 +209,9 @@ export default function PublishPage() {
 
       <section className="pb-12">
         <div className="container mx-auto px-4">
-          <div className="max-w-5xl mx-auto flex gap-8">
+          <div className="max-w-5xl mx-auto flex flex-col lg:flex-row gap-8">
             {/* Form Section */}
-            <div className="flex-1">
+            <div className="flex-1 order-2 lg:order-1">
               <div className="bg-white rounded-2xl shadow-xl p-8">
                 <AnimatePresence mode="wait">
                   {step === 1 && (
@@ -192,11 +224,17 @@ export default function PublishPage() {
                     >
                       <CategorySelector
                         selectedCategory={ad.category}
-                        onSelect={(fullCategory) => {
+                        onSelect={(category) => {
+                          const selectedSubcategory = category.subcategories?.find(sub => sub.selected);
                           setAd({
                             ...ad,
-                            category: fullCategory,
-                            type: `${fullCategory.id}/${fullCategory.subcategory?.id}`
+                            category: {
+                              ...category,
+                              subcategories: category.subcategories
+                            },
+                            type: selectedSubcategory ? 
+                              `${category.id}/${selectedSubcategory.id}` : 
+                              `${category.id}`
                           });
                           setTimeout(() => handleStepComplete(2), 500);
                         }}
@@ -283,7 +321,7 @@ export default function PublishPage() {
                             contact: { ...ad.contact, whatsapp: e.target.value }
                                 })}
                                 className="w-full px-4 py-3 bg-white rounded-xl border-2 border-primary-100 focus:border-primary-500 focus:ring-2 focus:ring-primary-500/20 transition-all"
-                          placeholder="Ej: +57 300 123 4567"
+                          placeholder="Ej: +51 987 654 321"
                           required
                               />
                       </div>
@@ -355,8 +393,8 @@ export default function PublishPage() {
             </div>
 
             {/* Live Preview Section */}
-            <div className="w-96 hidden lg:block">
-              <div className="sticky top-24">
+            <div className="w-full lg:w-96 order-1 lg:order-2">
+              <div className="lg:sticky lg:top-24">
                 <motion.div
                   initial={{ opacity: 0, y: 20 }}
                   animate={{ opacity: 1, y: 0 }}
@@ -384,7 +422,8 @@ export default function PublishPage() {
                       <div className="flex items-center gap-2 text-sm text-primary-600">
                         <TagIcon className="w-4 h-4" />
                         {ad.category.name}
-                        {ad.category.subcategory && ` - ${ad.category.subcategory.name}`}
+                        {ad.category.subcategories?.find(sub => sub.selected)?.name && 
+                          ` - ${ad.category.subcategories.find(sub => sub.selected)?.name}`}
                       </div>
                     )}
 

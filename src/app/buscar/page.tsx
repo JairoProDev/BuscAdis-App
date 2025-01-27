@@ -31,7 +31,7 @@ export default function SearchPage() {
   return (
     <div className="min-h-screen bg-gradient-to-b from-primary-900 to-primary-950">
       {/* Header de búsqueda */}
-      <div className="bg-primary-900/80 backdrop-blur-sm pt-20 pb-4">
+      <div className="bg-primary-900/80 backdrop-blur-sm pb-4">
         <div className="container mx-auto px-4">
           <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4">
             <div className="w-full sm:flex-1">

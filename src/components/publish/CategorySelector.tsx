@@ -2,131 +2,133 @@
 
 import { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { CategoryOption, CategorySelectorProps } from '@/types/categories'
-import Image from 'next/image'
 import { ChevronRightIcon } from '@heroicons/react/24/outline'
+import { categories } from '@/data/categories'
 
-const categories: CategoryOption[] = [
-  {
-    id: 'jobs',
-    name: 'Empleos',
-    icon: '/icons/categories/jobs.svg',
-    description: 'Ofertas y búsqueda de empleo',
-    subcategories: [
+interface SubCategory {
+  id: string;
+  name: string;
+  selected?: boolean;
+}
+
+interface CategoryOption {
+  id: string;
+  name: string;
+  description?: string;
+  subcategories?: SubCategory[];
+}
+
+interface CategorySelectorProps {
+  selectedCategory?: CategoryOption | null;
+  onSelect: (category: CategoryOption) => void;
+}
+
+type CategoryName = keyof typeof categories;
+
+const categoryList: CategoryOption[] = Object.entries(categories).map(([name, data]) => ({
+  id: name.toLowerCase(),
+  name: name as CategoryName,
+  description: data.description,
+  subcategories: [
+    // Empleos
+    ...(name === 'Empleos' ? [
       { id: 'full-time', name: 'Tiempo Completo' },
       { id: 'part-time', name: 'Medio Tiempo' },
       { id: 'freelance', name: 'Freelance' },
-      { id: 'internship', name: 'Prácticas' }
-    ]
-  },
-  {
-    id: 'real-estate',
-    name: 'Inmuebles',
-    icon: '/icons/categories/real-estate.svg',
-    description: 'Propiedades en venta y alquiler',
-    subcategories: [
-      { id: 'houses', name: 'Casas' },
-      { id: 'apartments', name: 'Apartamentos' },
-      { id: 'offices', name: 'Oficinas' },
-      { id: 'land', name: 'Terrenos' }
-    ]
-  },
-  {
-    id: 'vehicles',
-    name: 'Vehículos',
-    icon: '/icons/categories/vehicles.svg',
-    description: 'Autos, motos y más',
-    subcategories: [
+      { id: 'internship', name: 'Prácticas' },
+      { id: 'temporary', name: 'Temporal' },
+      { id: 'remote', name: 'Trabajo Remoto' }
+    ] : []),
+    // Inmuebles
+    ...(name === 'Inmuebles' ? [
+      { id: 'houses', name: 'Casas en Venta' },
+      { id: 'apartments', name: 'Departamentos en Venta' },
+      { id: 'rent', name: 'Alquiler' },
+      { id: 'rooms', name: 'Habitaciones' },
+      { id: 'land', name: 'Terrenos' },
+      { id: 'commercial', name: 'Locales Comerciales' }
+    ] : []),
+    // Vehículos
+    ...(name === 'Vehículos' ? [
       { id: 'cars', name: 'Autos' },
       { id: 'motorcycles', name: 'Motos' },
       { id: 'trucks', name: 'Camiones' },
-      { id: 'parts', name: 'Repuestos' }
-    ]
-  },
-  {
-    id: 'services',
-    name: 'Servicios',
-    icon: '/icons/categories/services.svg',
-    description: 'Servicios profesionales',
-    subcategories: [
-      { id: 'home', name: 'Hogar' },
-      { id: 'professional', name: 'Profesionales' },
-      { id: 'tech', name: 'Tecnología' },
-      { id: 'health', name: 'Salud' }
-    ]
-  },
-  {
-    id: 'products',
-    name: 'Productos',
-    icon: '/icons/categories/products.svg',
-    description: 'Artículos nuevos y usados',
-    subcategories: [
+      { id: 'vans', name: 'Camionetas' },
+      { id: 'parts', name: 'Repuestos' },
+      { id: 'accessories', name: 'Accesorios' }
+    ] : []),
+    // Servicios
+    ...(name === 'Servicios' ? [
+      { id: 'home', name: 'Servicios para el Hogar' },
+      { id: 'professional', name: 'Servicios Profesionales' },
+      { id: 'tech', name: 'Servicios Tecnológicos' },
+      { id: 'health', name: 'Servicios de Salud' },
+      { id: 'beauty', name: 'Belleza y Bienestar' },
+      { id: 'events', name: 'Eventos y Fiestas' }
+    ] : []),
+    // Productos
+    ...(name === 'Productos' ? [
       { id: 'electronics', name: 'Electrónicos' },
-      { id: 'furniture', name: 'Muebles' },
-      { id: 'fashion', name: 'Moda' },
-      { id: 'other', name: 'Otros' }
-    ]
-  },
-  {
-    id: 'events',
-    name: 'Eventos',
-    icon: '/icons/categories/events.svg',
-    description: 'Eventos y entretenimiento',
-    subcategories: [
-      { id: 'concerts', name: 'Conciertos' },
-      { id: 'workshops', name: 'Talleres' },
-      { id: 'sports', name: 'Deportes' },
-      { id: 'other-events', name: 'Otros' }
-    ]
-  },
-  {
-    id: 'education',
-    name: 'Educación',
-    icon: '/icons/categories/education.svg',
-    description: 'Cursos y formación',
-    subcategories: [
-      { id: 'courses', name: 'Cursos' },
-      { id: 'tutoring', name: 'Tutorías' },
+      { id: 'furniture', name: 'Muebles y Decoración' },
+      { id: 'fashion', name: 'Ropa y Accesorios' },
+      { id: 'sports', name: 'Deportes y Fitness' },
+      { id: 'books', name: 'Libros y Revistas' },
+      { id: 'collectibles', name: 'Coleccionables' }
+    ] : []),
+    // Turismo
+    ...(name === 'Turismo' ? [
+      { id: 'hotels', name: 'Hoteles y Hospedajes' },
+      { id: 'tours', name: 'Tours y Excursiones' },
+      { id: 'transport', name: 'Transporte Turístico' },
+      { id: 'guides', name: 'Guías Turísticos' },
+      { id: 'packages', name: 'Paquetes Turísticos' },
+      { id: 'activities', name: 'Actividades y Experiencias' }
+    ] : []),
+    // Eventos
+    ...(name === 'Eventos' ? [
+      { id: 'concerts', name: 'Conciertos y Música' },
+      { id: 'theater', name: 'Teatro y Espectáculos' },
+      { id: 'workshops', name: 'Talleres y Seminarios' },
+      { id: 'sports', name: 'Eventos Deportivos' },
+      { id: 'festivals', name: 'Festivales' },
+      { id: 'corporate', name: 'Eventos Corporativos' }
+    ] : []),
+    // Educación
+    ...(name === 'Educación' ? [
+      { id: 'courses', name: 'Cursos y Capacitaciones' },
+      { id: 'tutoring', name: 'Clases Particulares' },
       { id: 'languages', name: 'Idiomas' },
-      { id: 'other-edu', name: 'Otros' }
-    ]
-  },
-  {
-    id: 'tourism',
-    name: 'Turismo',
-    icon: '/icons/categories/tourism.svg',
-    description: 'Alojamiento y experiencias',
-    subcategories: [
-      { id: 'hotels', name: 'Hoteles' },
-      { id: 'tours', name: 'Tours' },
-      { id: 'experiences', name: 'Experiencias' },
-      { id: 'transport', name: 'Transporte' }
-    ]
-  },
-  {
-    id: 'pets',
-    name: 'Mascotas',
-    icon: '/icons/categories/pets.svg',
-    description: 'Animales y accesorios',
-    subcategories: [
+      { id: 'online', name: 'Cursos Online' },
+      { id: 'materials', name: 'Material Educativo' },
+      { id: 'coaching', name: 'Coaching y Mentoría' }
+    ] : []),
+    // Mascotas
+    ...(name === 'Mascotas' ? [
       { id: 'dogs', name: 'Perros' },
       { id: 'cats', name: 'Gatos' },
+      { id: 'other-pets', name: 'Otras Mascotas' },
       { id: 'accessories', name: 'Accesorios' },
-      { id: 'services', name: 'Servicios' }
-    ]
-  }
-];
+      { id: 'food', name: 'Alimentos' },
+      { id: 'services', name: 'Servicios para Mascotas' }
+    ] : [])
+  ].filter(Boolean)
+}));
 
 export default function CategorySelector({ selectedCategory, onSelect }: CategorySelectorProps) {
-  const [activeCategory, setActiveCategory] = useState<CategoryOption | null>(selectedCategory || null);
+  const [activeCategory, setActiveCategory] = useState<CategoryOption | null>(null);
   const [showSubcategories, setShowSubcategories] = useState(false);
+  const [selectedSubcategory, setSelectedSubcategory] = useState<SubCategory | null>(null);
 
   useEffect(() => {
     if (selectedCategory) {
-      const category = categories.find(c => c.id === selectedCategory.id);
+      const category = categoryList.find(c => c.id === selectedCategory.id);
       if (category) {
         setActiveCategory(category);
         setShowSubcategories(true);
+        const selected = category.subcategories?.find(sub => sub.selected);
+        if (selected) {
+          setSelectedSubcategory(selected);
+        }
       }
     }
   }, [selectedCategory]);
@@ -134,20 +136,29 @@ export default function CategorySelector({ selectedCategory, onSelect }: Categor
   const handleCategoryClick = (category: CategoryOption) => {
     setActiveCategory(category);
     setShowSubcategories(true);
+    setSelectedSubcategory(null);
   };
 
-  const handleSubcategoryClick = (subcategory: CategoryOption) => {
+  const handleSubcategoryClick = (subcategory: SubCategory) => {
     if (!activeCategory) return;
     
-    onSelect({
+    setSelectedSubcategory(subcategory);
+    
+    const fullCategory: CategoryOption = {
       ...activeCategory,
-      subcategory
-    });
+      subcategories: activeCategory.subcategories?.map(sub => ({
+        ...sub,
+        selected: sub.id === subcategory.id
+      }))
+    };
+
+    onSelect(fullCategory);
   };
 
   const handleBack = () => {
     setShowSubcategories(false);
     setActiveCategory(null);
+    setSelectedSubcategory(null);
   };
 
   return (
@@ -161,44 +172,39 @@ export default function CategorySelector({ selectedCategory, onSelect }: Categor
             exit={{ opacity: 0, x: 20 }}
             className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4"
           >
-            {categories.map((category) => (
-              <motion.button
-                key={category.id}
-                onClick={() => handleCategoryClick(category)}
-                whileHover={{ scale: 1.02 }}
-                whileTap={{ scale: 0.98 }}
-                className={`p-6 bg-white rounded-xl border-2 transition-all text-left group
-                  ${activeCategory?.id === category.id 
-                    ? 'border-primary-500 shadow-lg shadow-primary-500/20' 
-                    : 'border-primary-100 hover:border-primary-300 hover:shadow-md'
-                  }`}
-              >
-                <div className="flex items-start gap-4">
-                  {category.icon && (
+            {categoryList.map((category) => {
+              const CategoryIcon = categories[category.name as CategoryName].icon;
+              return (
+                <motion.button
+                  key={category.id}
+                  onClick={() => handleCategoryClick(category)}
+                  whileHover={{ scale: 1.02 }}
+                  whileTap={{ scale: 0.98 }}
+                  className={`p-6 bg-white rounded-xl border-2 transition-all text-left group
+                    ${activeCategory?.id === category.id 
+                      ? 'border-primary-500 shadow-lg shadow-primary-500/20' 
+                      : 'border-primary-100 hover:border-primary-300 hover:shadow-md'
+                    }`}
+                >
+                  <div className="flex items-start gap-4">
                     <div className="w-12 h-12 rounded-lg bg-primary-50 p-2 group-hover:bg-primary-100">
-                      <Image
-                        src={category.icon}
-                        alt={category.name}
-                        width={32}
-                        height={32}
-                        className="w-full h-full object-contain"
-                      />
+                      <CategoryIcon className="w-8 h-8 text-primary-600" />
                     </div>
-                  )}
-                  <div className="flex-1">
-                    <h3 className="text-lg font-semibold text-primary-900 group-hover:text-primary-700">
-                      {category.name}
-                    </h3>
-                    {category.description && (
-                      <p className="text-sm text-primary-600">
-                        {category.description}
-                      </p>
-                    )}
+                    <div className="flex-1 min-w-0">
+                      <h3 className="text-lg font-semibold text-primary-900 group-hover:text-primary-700">
+                        {category.name}
+                      </h3>
+                      {category.description && (
+                        <p className="text-sm text-primary-600 truncate">
+                          {category.description}
+                        </p>
+                      )}
+                    </div>
+                    <ChevronRightIcon className="w-5 h-5 text-primary-400 group-hover:text-primary-600" />
                   </div>
-                  <ChevronRightIcon className="w-5 h-5 text-primary-400 group-hover:text-primary-600" />
-                </div>
-              </motion.button>
-            ))}
+                </motion.button>
+              );
+            })}
           </motion.div>
         ) : (
           <motion.div
@@ -222,7 +228,11 @@ export default function CategorySelector({ selectedCategory, onSelect }: Categor
                   onClick={() => handleSubcategoryClick(subcategory)}
                   whileHover={{ scale: 1.02 }}
                   whileTap={{ scale: 0.98 }}
-                  className="p-4 bg-white rounded-xl border-2 border-primary-100 hover:border-primary-300 transition-all text-left flex items-center justify-between group"
+                  className={`p-4 bg-white rounded-xl border-2 transition-all text-left flex items-center justify-between group
+                    ${subcategory.id === selectedSubcategory?.id
+                      ? 'border-primary-500 shadow-lg shadow-primary-500/20'
+                      : 'border-primary-100 hover:border-primary-300'
+                    }`}
                 >
                   <span className="text-primary-900 group-hover:text-primary-700">
                     {subcategory.name}

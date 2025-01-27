@@ -6,9 +6,9 @@ import { categories } from '@/data/categories';
 
 export default function CategorySlider() {
   return (
-    <section id="categories" className="py-16 bg-white">
+    <section id="categories" className="py-16 bg-primary-900">
       <motion.h2 
-        className="text-4xl font-bold text-primary-900 text-center mb-4 px-4"
+        className="text-4xl font-bold text-white text-center mb-4 px-4"
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.6 }}
@@ -16,7 +16,7 @@ export default function CategorySlider() {
         Explora nuestras categorías
       </motion.h2>
       <motion.p
-        className="text-lg text-primary-600 text-center mb-8 max-w-2xl mx-auto px-4"
+        className="text-lg text-primary-200 text-center mb-8 max-w-2xl mx-auto px-4"
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.6, delay: 0.2 }}
@@ -27,11 +27,11 @@ export default function CategorySlider() {
       <div className="space-y-4">
         {[
           {
-            categories: ['Empleos', 'Inmuebles', 'Vehículos', 'Servicios', 'Productos'],
+            categoryNames: ['Empleos', 'Inmuebles', 'Vehículos', 'Servicios', 'Productos', 'Turismo', 'Eventos', 'Educación', 'Mascotas'],
             direction: -1
           },
           {
-            categories: ['Turismo', 'Eventos', 'Educación', 'Mascotas', 'Empleos'],
+            categoryNames: ['Turismo', 'Eventos', 'Educación', 'Mascotas', 'Empleos', 'Inmuebles', 'Vehículos', 'Servicios', 'Productos'],
             direction: 1
           }
         ].map((row, rowIndex) => (
@@ -56,27 +56,28 @@ export default function CategorySlider() {
                 width: '200%',
               }}
             >
-              {Array(2).fill(row.categories).flat().map((categoryName, index) => {
-                const category = categories[categoryName];
+              {Array(2).fill(row.categoryNames).flat().map((categoryName, index) => {
+                const category = categories[categoryName as keyof typeof categories];
+                const Icon = category.icon;
                 return (
                   <Link 
                     key={`${categoryName}-${index}`}
                     href={`/categorias/${categoryName.toLowerCase()}`}
-                    className={`flex-none w-[320px] bg-gradient-to-br ${category.gradient} rounded-xl p-3 shadow hover:shadow-md transition-all duration-300 border border-gray-100 group`}
+                    className={`flex-none w-[320px] bg-gradient-to-br ${category.gradient} rounded-xl p-3 shadow hover:shadow-md transition-all duration-300 border border-white/10 group`}
                   >
                     <div className="relative min-h-[120px]">
                       <div className="flex-1 min-w-0">
-                        <h3 className="text-lg font-semibold text-primary-900 mb-0.5 truncate pr-16">
+                        <h3 className="text-lg font-semibold text-white mb-0.5 truncate pr-16">
                           {categoryName}
                         </h3>
-                        <p className="text-sm text-primary-700 mb-2 truncate pr-16">{category.description}</p>
+                        <p className="text-sm text-primary-200 mb-2 truncate pr-16">{category.description}</p>
                         <div className="flex flex-wrap gap-1.5">
                           {category.stats.map((stat, i) => (
                             <span 
                               key={i} 
-                              className="inline-flex items-center text-xs text-primary-600 bg-white/50 rounded-full px-2 py-0.5"
+                              className="inline-flex items-center text-xs text-white bg-white/10 rounded-full px-2 py-0.5"
                             >
-                              <svg className="w-3 h-3 mr-1 text-primary-700" fill="currentColor" viewBox="0 0 20 20">
+                              <svg className="w-3 h-3 mr-1 text-white/70" fill="currentColor" viewBox="0 0 20 20">
                                 <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
                               </svg>
                               {stat}
@@ -84,8 +85,8 @@ export default function CategorySlider() {
                           ))}
                         </div>
                       </div>
-                      <div className="absolute bottom-0 right-0 text-5xl opacity-90 group-hover:scale-110 transition-transform">
-                        {category.icon}
+                      <div className="absolute bottom-0 right-0 text-white/90 group-hover:scale-110 transition-transform">
+                        <Icon className="w-12 h-12" />
                       </div>
                     </div>
                   </Link>

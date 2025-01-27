@@ -1,125 +1,160 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { motion } from 'framer-motion'
-import { Location, LocationSelectorProps } from '@/types/publish'
-import { MapPinIcon } from '@heroicons/react/24/outline'
+import { MagnifyingGlassIcon, MapPinIcon } from '@heroicons/react/24/outline'
+import { useCombobox } from 'downshift'
 
-const cities = [
-  { name: 'Bogotá', state: 'Cundinamarca' },
-  { name: 'Medellín', state: 'Antioquia' },
-  { name: 'Cali', state: 'Valle del Cauca' },
-  { name: 'Barranquilla', state: 'Atlántico' },
-  { name: 'Cartagena', state: 'Bolívar' },
-  // Añade más ciudades según necesites
-];
+interface District {
+  id: string
+  name: string
+}
+
+interface Region {
+  id: string
+  name: string
+  districts: District[]
+}
+
+interface Location {
+  district: District
+  region: Region
+  coordinates?: {
+    lat: number
+    lon: number
+  }
+}
+
+interface LocationSelectorProps {
+  value?: Location
+  onChange: (location: Location) => void
+}
+
+const regions: Region[] = [
+  {
+    id: 'cusco',
+    name: 'Cusco',
+    districts: [
+      { id: 'cusco', name: 'Cusco' },
+      { id: 'san-sebastian', name: 'San Sebastián' },
+      { id: 'san-jeronimo', name: 'San Jerónimo' },
+      { id: 'santiago', name: 'Santiago' },
+      { id: 'wanchaq', name: 'Wanchaq' },
+      { id: 'poroy', name: 'Poroy' },
+      { id: 'saylla', name: 'Saylla' },
+      { id: 'ccorca', name: 'Ccorca' },
+      
+    ],
+  },
+]
 
 export default function LocationSelector({ value, onChange }: LocationSelectorProps) {
-  const [search, setSearch] = useState('');
-  const [showSuggestions, setShowSuggestions] = useState(false);
-  const [selectedCity, setSelectedCity] = useState<typeof cities[0] | null>(null);
+  const [selectedRegion] = useState<Region>(regions[0])
+  const [inputValue, setInputValue] = useState('')
+  const inputRef = useRef<HTMLInputElement>(null)
 
   useEffect(() => {
-    if (value?.city) {
-      const city = cities.find(c => c.name === value.city);
-      if (city) {
-        setSelectedCity(city);
-        setSearch(city.name);
-      }
+    if (value?.district) {
+      setInputValue(value.district.name)
     }
-  }, [value]);
+  }, [value])
 
-  const filteredCities = cities.filter(city => 
-    city.name.toLowerCase().includes(search.toLowerCase()) ||
-    city.state.toLowerCase().includes(search.toLowerCase())
-  );
+  const filteredDistricts = selectedRegion.districts.filter(district =>
+    district.name.toLowerCase().includes(inputValue.toLowerCase())
+  )
 
-  const handleCitySelect = (city: typeof cities[0]) => {
-    setSelectedCity(city);
-    setSearch(city.name);
-    setShowSuggestions(false);
-    onChange({
-      city: city.name,
-      state: city.state,
-      country: 'Colombia'
-    });
-  };
+  const {
+    isOpen,
+    getMenuProps,
+    getInputProps,
+    getToggleButtonProps,
+    highlightedIndex,
+    getItemProps,
+  } = useCombobox({
+    items: filteredDistricts,
+    inputValue,
+    onInputValueChange: ({ inputValue }) => {
+      setInputValue(inputValue || '')
+    },
+    onSelectedItemChange: ({ selectedItem }) => {
+      if (selectedItem) {
+        onChange({
+          district: selectedItem,
+          region: selectedRegion,
+        })
+      }
+    },
+    itemToString: (item) => item?.name || '',
+  })
+
+  const { ref: downshiftRef, ...inputProps } = getInputProps()
 
   return (
     <div className="space-y-4">
-      <div className="relative">
-        <label htmlFor="location" className="block text-sm font-medium text-primary-700 mb-2">
-          Ubicación
+      <div className="flex flex-col space-y-2">
+        <label className="block text-sm font-medium text-primary-700">
+          Ubicación *
         </label>
-        
         <div className="relative">
+          <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+            <MagnifyingGlassIcon className="h-5 w-5 text-primary-400" />
+          </div>
           <input
-            id="location"
-            type="text"
-            value={search}
-            onChange={(e) => {
-              setSearch(e.target.value);
-              setShowSuggestions(true);
+            ref={(node) => {
+              inputRef.current = node
+              if (typeof downshiftRef === 'function') {
+                downshiftRef(node)
+              }
             }}
-            onFocus={() => setShowSuggestions(true)}
+            {...inputProps}
+            {...getToggleButtonProps()}
+            placeholder="Busca tu distrito..."
             className="w-full pl-10 pr-4 py-3 bg-white rounded-xl border-2 border-primary-100 focus:border-primary-500 focus:ring-2 focus:ring-primary-500/20 transition-all"
-            placeholder="Busca tu ciudad"
           />
-          <MapPinIcon className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-primary-400" />
         </div>
+      </div>
 
-        {showSuggestions && search && (
+      <div {...getMenuProps()}>
+        {isOpen && filteredDistricts.length > 0 && (
           <motion.div
             initial={{ opacity: 0, y: -10 }}
             animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -10 }}
-            className="absolute z-10 w-full mt-1 bg-white rounded-xl shadow-lg border border-primary-100 max-h-60 overflow-auto"
+            className="absolute z-10 mt-1 w-full bg-white rounded-xl shadow-lg border border-primary-100 max-h-60 overflow-auto"
           >
-            {filteredCities.length > 0 ? (
-              <ul className="py-2">
-                {filteredCities.map((city) => (
-                  <li key={`${city.name}-${city.state}`}>
-                    <button
-                      type="button"
-                      onClick={() => handleCitySelect(city)}
-                      className="w-full px-4 py-2 text-left hover:bg-primary-50 transition-colors"
-                    >
-                      <span className="font-medium text-primary-900">{city.name}</span>
-                      <span className="text-sm text-primary-600 ml-2">{city.state}</span>
-                    </button>
-                  </li>
-                ))}
-              </ul>
-            ) : (
-              <div className="p-4 text-center text-primary-600">
-                No se encontraron resultados
+            {filteredDistricts.map((district, index) => (
+              <div
+                key={district.id}
+                {...getItemProps({ item: district, index })}
+                className={`px-4 py-2 cursor-pointer flex items-center gap-2 ${
+                  highlightedIndex === index
+                    ? 'bg-primary-50 text-primary-900'
+                    : 'text-primary-600 hover:bg-primary-50'
+                }`}
+              >
+                <MapPinIcon className="h-4 w-4" />
+                <span>{district.name}</span>
+                <span className="text-sm text-primary-400">
+                  {selectedRegion.name}, Perú
+                </span>
               </div>
-            )}
+            ))}
           </motion.div>
         )}
       </div>
 
-      {selectedCity && (
+      {value?.district && !isOpen && (
         <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          className="p-4 bg-primary-50 rounded-xl"
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="flex items-center gap-2 text-primary-600 bg-primary-50 px-4 py-2 rounded-lg"
         >
-          <div className="flex items-start gap-3">
-            <div className="w-8 h-8 rounded-lg bg-primary-100 p-1.5">
-              <MapPinIcon className="w-full h-full text-primary-600" />
-            </div>
-            <div>
-              <h4 className="font-medium text-primary-900">
-                {selectedCity.name}
-              </h4>
-              <p className="text-sm text-primary-600">
-                {selectedCity.state}, Colombia
-              </p>
-            </div>
+          <MapPinIcon className="h-5 w-5" />
+          <div>
+            <p className="font-medium">{value.district.name}</p>
+            <p className="text-sm">{value.region.name}, Perú</p>
           </div>
         </motion.div>
       )}
     </div>
-  );
+  )
 } 
