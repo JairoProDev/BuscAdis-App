@@ -87,7 +87,7 @@ export default function LocationSelector({ value, onChange }: LocationSelectorPr
     itemToString: (item) => item?.name || '',
   })
 
-  const { ref: downshiftRef, ...inputProps } = getInputProps()
+  const inputProps = getInputProps()
 
   return (
     <div className="space-y-4">
@@ -100,12 +100,7 @@ export default function LocationSelector({ value, onChange }: LocationSelectorPr
             <MagnifyingGlassIcon className="h-5 w-5 text-primary-400" />
           </div>
           <input
-            ref={(node) => {
-              inputRef.current = node
-              if (typeof downshiftRef === 'function') {
-                downshiftRef(node)
-              }
-            }}
+            ref={inputRef}
             {...inputProps}
             {...getToggleButtonProps()}
             placeholder="Busca tu distrito..."
