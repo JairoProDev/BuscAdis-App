@@ -15,7 +15,7 @@ export default function Hero() {
         <div className="absolute -bottom-8 right-20 w-72 h-72 bg-purple-500 rounded-full mix-blend-multiply filter blur-xl opacity-20 animate-blob animation-delay-2000" />
       </div>
 
-      <div className="relative h-full flex flex-col justify-center pt-16 md:pt-24">
+      <div className="relative h-full flex flex-col justify-center pt-16 md:pt-4">
         <Container>
           <div className="grid lg:grid-cols-2 gap-8 lg:gap-12 items-center">
             <motion.div
