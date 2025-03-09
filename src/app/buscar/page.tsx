@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { motion } from 'framer-motion'
 import SearchBar from '@/components/search/SearchBar'
 import AdisoSection from '@/components/home/AdisoSection'
@@ -10,99 +10,129 @@ import { CategoryId } from '@/types/marketplace'
 import { categories } from '@/data/mockCategories'
 import { mockData } from '@/data/mockData'
 import AdvancedFilters from '@/components/search/AdvancedFilters'
+import { ListingsService } from '@/services/listings.service'
+import { useSearchParams } from 'next/navigation'
+import AdisoCard from '@/components/AdisoCard'
+import LoadingState from '@/components/ui/LoadingState'
+import Pagination from '@/components/ui/Pagination'
 
 export default function SearchPage() {
+  const searchParams = useSearchParams()
   const [selectedCategory, setSelectedCategory] = useState<CategoryId | null>(null)
   const [selectedType, setSelectedType] = useState<string | null>(null)
-  const [filters, setFilters] = useState({})
+  const [filters, setFilters] = useState({
+    category: searchParams.get('category') || '',
+    search: searchParams.get('q') || '',
+    page: parseInt(searchParams.get('page') || '1'),
+    limit: 12
+  })
+  const [results, setResults] = useState([])
+  const [loading, setLoading] = useState(true)
+  const [searchTerm, setSearchTerm] = useState('')
+  const [totalPages, setTotalPages] = useState(1)
+  const [error, setError] = useState('')
 
   const handleSearch = (query: string) => {
     console.log('Búsqueda:', { query, filters, category: selectedCategory })
+    setSearchTerm(query)
+    setFilters(prev => ({
+      ...prev,
+      search: query,
+      page: 1
+    }))
   }
 
   const handleFiltersChange = (newFilters: any) => {
-    setFilters(newFilters)
+    setFilters(prev => ({
+      ...prev,
+      ...newFilters,
+      page: 1
+    }))
   }
 
   const filteredData = selectedCategory
     ? { [selectedCategory]: mockData[selectedCategory] }
     : mockData
 
-  return (
-    <div className="min-h-screen bg-gradient-to-b from-primary-900 to-primary-950">
-      {/* Header de búsqueda */}
-      <div className="bg-primary-900/80 backdrop-blur-sm pb-4">
-        <div className="container mx-auto px-4">
-          <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4">
-            <div className="w-full sm:flex-1">
-              <SearchBar onSearch={handleSearch} />
-            </div>
-            <div className="hidden sm:flex items-center gap-2">
-              <AdvancedFilters
-                category={selectedCategory || 'inmuebles'}
-                onFiltersChange={handleFiltersChange}
-                initialFilters={filters}
-              />
-            </div>
-          </div>
-        </div>
-      </div>
+  useEffect(() => {
+    const fetchListings = async () => {
+      setLoading(true)
+      try {
+        const result = await ListingsService.getListings({
+          ...filters,
+          sortBy: 'created_at',
+          sortOrder: 'desc'
+        })
+        
+        setResults(result.listings)
+        setTotalPages(result.totalPages)
+      } catch (err) {
+        setError('Error al cargar los anuncios')
+        console.error(err)
+      } finally {
+        setLoading(false)
+      }
+    }
 
-      {/* Sección de categorías con scroll horizontal */}
-      <div className="bg-primary-900/60 py-4 overflow-x-auto hide-scrollbar">
-        <div className="container mx-auto px-4">
-          <CategoryFilters 
-            selectedCategory={selectedCategory}
-            selectedType={selectedType}
-            onSelectCategory={setSelectedCategory}
-            onSelectType={setSelectedType}
+    fetchListings()
+  }, [filters])
+
+  const handlePageChange = (newPage: number) => {
+    setFilters(prev => ({
+      ...prev,
+      page: newPage
+    }))
+  }
+
+  return (
+    <div className="min-h-screen bg-gray-50">
+      <div className="container mx-auto px-4 py-8">
+        <div className="max-w-2xl mx-auto mb-8">
+          <SearchBar 
+            initialValue={filters.search}
+            onSearch={handleSearch}
           />
         </div>
-      </div>
 
-      {/* Feed de contenido */}
-      <div className="container mx-auto px-4">
-        <motion.div 
-          layout
-          className="py-6 space-y-8 md:space-y-12"
-        >
-          {/* Sección Featured siempre visible al inicio */}
-          {!selectedCategory && mockData.featured && (
-            <motion.div
-              layout
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-            >
-              <AdisoSection
-                type="featured"
-                title="Destacados"
-                categories={[]}
-                adisos={mockData.featured.adisos}
-                featured={true}
-              />
-            </motion.div>
-          )}
+        <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
+          {/* Filtros */}
+          <aside className="lg:col-span-1">
+            <CategoryFilters onFilterChange={handleFiltersChange} />
+          </aside>
 
-          {/* Resto de secciones */}
-          {Object.entries(filteredData)
-            .filter(([type]) => type !== 'featured')
-            .map(([type, data]) => (
-              <motion.div
-                key={type}
-                layout
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-              >
-                <AdisoSection
-                  type={type as CategoryId}
-                  title={data.title}
-                  categories={data.categories}
-                  adisos={data.adisos}
-                  featured={false}
+          {/* Resultados */}
+          <main className="lg:col-span-3">
+            {loading ? (
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {[1, 2, 3, 4, 5, 6].map((i) => (
+                  <div key={i} className="h-64 bg-gray-200 rounded-xl animate-pulse"></div>
+                ))}
+              </div>
+            ) : error ? (
+              <div className="text-center py-8">
+                <p className="text-red-600">{error}</p>
+              </div>
+            ) : results.length === 0 ? (
+              <div className="text-center py-8">
+                <p className="text-gray-600">No se encontraron anuncios</p>
+              </div>
+            ) : (
+              <>
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                  {results.map((listing) => (
+                    <AdisoCard key={listing.id} adiso={listing} />
+                  ))}
+                </div>
+                
+                <Pagination
+                  currentPage={filters.page}
+                  totalPages={totalPages}
+                  onPageChange={handlePageChange}
                 />
-              </motion.div>
-            ))}
-        </motion.div>
+              </>
+            )}
+          </main>
+        </div>
       </div>
     </div>
   )

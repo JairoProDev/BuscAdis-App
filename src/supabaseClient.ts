@@ -1,6 +1,25 @@
 import { createClient } from '@supabase/supabase-js';
 
-const supabaseUrl = 'https://kfamkhpxikqujvqjdrsn.supabase.co';
-const supabaseAnonKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImtmYW1raHB4aWtxdWp2cWpkcnNuIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NDEzNjIzNTEsImV4cCI6MjA1NjkzODM1MX0.g6Z3ThMg-pWtre7ry-4UQIRlfigmC0ZJF1AKvPiEOlo';
+// Obtener las variables de entorno
+const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+const supabaseAnonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
 
+// Verificar que las claves sean válidas
+if (!supabaseUrl || !supabaseAnonKey) {
+  console.error('Faltan las variables de entorno de Supabase. Revisa tu archivo .env.local');
+}
+
+// Crear y exportar el cliente de Supabase
 export const supabase = createClient(supabaseUrl, supabaseAnonKey);
+
+// Función de utilidad para manejar errores de Supabase
+export const handleSupabaseError = (error: any) => {
+  console.error('Error de Supabase:', error);
+  
+  // Determinar mensaje de error para mostrar al usuario
+  if (error.message) {
+    return `Error: ${error.message}`;
+  }
+  
+  return 'Ocurrió un error al comunicarse con la base de datos';
+};

@@ -3,7 +3,7 @@
 import { useState, useRef, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { MicrophoneIcon, CameraIcon, FilterIcon } from '@/components/icons'
-import { AdjustmentsHorizontalIcon } from '@heroicons/react/24/outline'
+import { AdjustmentsHorizontalIcon, MagnifyingGlassIcon } from '@heroicons/react/24/outline'
 import { categories } from '@/data/mockCategories'
 
 interface Suggestion {
@@ -28,8 +28,8 @@ const generateSuggestions = () => {
 
 const SUGGESTIONS = generateSuggestions()
 
-export default function SearchBar({ onSearch }: { onSearch: (query: string) => void }) {
-  const [query, setQuery] = useState('')
+export default function SearchBar({ initialValue = '', onSearch }) {
+  const [searchTerm, setSearchTerm] = useState(initialValue)
   const [isFocused, setIsFocused] = useState(false)
   const [filteredSuggestions, setFilteredSuggestions] = useState(SUGGESTIONS)
   const inputRef = useRef<HTMLInputElement>(null)
@@ -37,17 +37,17 @@ export default function SearchBar({ onSearch }: { onSearch: (query: string) => v
   const [showFilters, setShowFilters] = useState(false)
 
   useEffect(() => {
-    if (query) {
+    if (searchTerm) {
       const filtered = SUGGESTIONS.filter(suggestion =>
-        suggestion.text.toLowerCase().includes(query.toLowerCase()) ||
-        suggestion.categoryId.toLowerCase().includes(query.toLowerCase()) ||
-        suggestion.subTypeId.toLowerCase().includes(query.toLowerCase())
+        suggestion.text.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        suggestion.categoryId.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        suggestion.subTypeId.toLowerCase().includes(searchTerm.toLowerCase())
       )
       setFilteredSuggestions(filtered)
     } else {
       setFilteredSuggestions(SUGGESTIONS)
     }
-  }, [query])
+  }, [searchTerm])
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -82,44 +82,29 @@ export default function SearchBar({ onSearch }: { onSearch: (query: string) => v
     // Implementation of handleImageSearch
   }
 
+  const handleSubmit = (e) => {
+    e.preventDefault()
+    onSearch(searchTerm)
+  }
+
   return (
-    <div className="relative w-full max-w-3xl mx-auto">
-      <div className="relative flex items-center">
+    <form onSubmit={handleSubmit} className="w-full">
+      <div className="relative">
         <input
           ref={inputRef}
           type="text"
-          value={query}
-          onChange={(e) => setQuery(e.target.value)}
+          value={searchTerm}
+          onChange={(e) => setSearchTerm(e.target.value)}
           onFocus={() => setIsFocused(true)}
           placeholder="¿Qué estás buscando?"
-          className="w-full px-4 md:px-6 py-3 md:py-4 text-base md:text-lg rounded-full border-2 border-primary-200 focus:border-primary-500 focus:ring-2 focus:ring-primary-500/20 transition-all duration-200 pr-24 md:pr-32"
+          className="w-full p-4 pr-12 rounded-xl border-2 border-primary-100 focus:border-primary-500 focus:ring-2 focus:ring-primary-500/20 transition-all"
         />
-        <div className="absolute right-2 flex items-center space-x-1 md:space-x-2">
-          <button
-            onClick={handleVoiceSearch}
-            className="p-1.5 md:p-2 text-primary-500 hover:bg-primary-50 rounded-full transition-colors"
-            aria-label="Buscar por voz"
-            title="Buscar por voz"
-          >
-            <MicrophoneIcon className="w-5 h-5" />
-          </button>
-          <button
-            onClick={handleImageSearch}
-            className="p-1.5 md:p-2 text-primary-500 hover:bg-primary-50 rounded-full transition-colors"
-            aria-label="Buscar por imagen"
-            title="Buscar por imagen"
-          >
-            <CameraIcon className="w-5 h-5" />
-          </button>
-          <button
-            onClick={() => setShowFilters(!showFilters)}
-            className="p-1.5 md:p-2 text-primary-500 hover:bg-primary-50 rounded-full transition-colors"
-            aria-label="Abrir filtros"
-            title="Abrir filtros"
-          >
-            <AdjustmentsHorizontalIcon className="w-5 h-5" />
-          </button>
-        </div>
+        <button
+          type="submit"
+          className="absolute right-3 top-1/2 -translate-y-1/2 text-primary-500 hover:text-primary-700"
+        >
+          <MagnifyingGlassIcon className="h-6 w-6" />
+        </button>
       </div>
 
       <AnimatePresence>
@@ -138,8 +123,9 @@ export default function SearchBar({ onSearch }: { onSearch: (query: string) => v
               {filteredSuggestions.map((suggestion, index) => (
                 <button
                   key={index}
-                  onClick={() => {
-                    setQuery(suggestion.text)
+                  onClick={(e) => {
+                    e.preventDefault()
+                    setSearchTerm(suggestion.text)
                     onSearch(suggestion.text)
                     setIsFocused(false)
                   }}
@@ -155,6 +141,6 @@ export default function SearchBar({ onSearch }: { onSearch: (query: string) => v
           </motion.div>
         )}
       </AnimatePresence>
-    </div>
+    </form>
   )
 } 

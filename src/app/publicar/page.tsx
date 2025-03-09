@@ -21,15 +21,28 @@ import {
   UserCircleIcon,
   SparklesIcon
 } from '@heroicons/react/24/outline'
+import LoadingState from '@/components/ui/LoadingState'
+import ErrorMessage from '@/components/ui/ErrorMessage'
+import { CategoriesService } from '@/services/categories.service'
+
+// Pasos de publicación
+const STEPS = {
+  CATEGORY: 1,
+  DETAILS: 2,
+  MEDIA: 3,
+  CONTACT: 4,
+  PREVIEW: 5
+};
 
 export default function PublishPage() {
   const router = useRouter()
-  const [step, setStep] = useState(1);
-  const [progress, setProgress] = useState(0);
+  const [step, setStep] = useState(STEPS.CATEGORY);
+  const [progress, setProgress] = useState(20);
   const [showAdvanced, setShowAdvanced] = useState(false);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState(false);
+  const [loading, setLoading] = useState(false);
 
   const [ad, setAd] = useState<QuickListingData>({
     title: '',
@@ -38,57 +51,60 @@ export default function PublishPage() {
       whatsapp: '',
     },
     media: [],
-    location: undefined,
-    price: undefined,
-    category: undefined,
-    type: undefined,
+    location: {
+      city: '',
+      country: 'Perú'
+    },
+    price: {
+      amount: 0,
+      currency: 'PEN',
+      type: 'fixed'
+    },
+    category: null,
+    type: '',
   });
 
   const updateProgress = () => {
-    let points = 0;
-    if (ad.category) points += 30;
-    if (ad.title) points += 20;
-    if (ad.description) points += 20;
-    if (ad.contact.whatsapp) points += 10;
-    if (ad.location) points += 10;
-    if (ad.media && ad.media.length > 0) points += 10;
-    setProgress(points);
+    const progressMap = {
+      [STEPS.CATEGORY]: 20,
+      [STEPS.DETAILS]: 40,
+      [STEPS.MEDIA]: 60,
+      [STEPS.CONTACT]: 80,
+      [STEPS.PREVIEW]: 100
+    };
+    setProgress(progressMap[step] || 0);
   };
 
   const validateStep = (step: number): boolean => {
     const errors: string[] = [];
     
     switch(step) {
-      case 1:
+      case STEPS.CATEGORY:
         if (!ad.category) {
-          errors.push('Selecciona una categoría y subcategoría');
+          errors.push('Selecciona una categoría');
         }
         break;
-      case 2:
-        if (!ad.title) {
-          errors.push('Ingresa un título para tu anuncio');
-        } else if (ad.title.length < 5) {
-          errors.push('El título debe tener al menos 5 caracteres');
+      case STEPS.DETAILS:
+        if (!ad.title.trim()) {
+          errors.push('El título es obligatorio');
         }
-        if (!ad.description) {
-          errors.push('Ingresa una descripción para tu anuncio');
-        } else if (ad.description.length < 20) {
-          errors.push('La descripción debe tener al menos 20 caracteres');
+        if (!ad.description.trim()) {
+          errors.push('La descripción es obligatoria');
+        }
+        if (!ad.price || !ad.price.amount) {
+          errors.push('El precio es obligatorio');
         }
         break;
-      case 3:
-        if (!ad.contact.whatsapp) {
-          errors.push('Ingresa tu número de WhatsApp');
+      case STEPS.CONTACT:
+        if (!ad.contact.whatsapp.trim()) {
+          errors.push('El número de WhatsApp es obligatorio');
         } else if (!/^\d{9,}$/.test(ad.contact.whatsapp)) {
-          errors.push('Ingresa un número de WhatsApp válido (9 dígitos)');
-        }
-        if (!ad.location) {
-          errors.push('Selecciona la ubicación de tu anuncio');
+          errors.push('Ingresa un número de WhatsApp válido');
         }
         break;
-      case 4:
-        if (!ad.media || ad.media.length === 0) {
-          errors.push('Sube al menos una imagen');
+      case STEPS.LOCATION:
+        if (!ad.location.city.trim()) {
+          errors.push('La ubicación es obligatoria');
         }
         break;
       default:
@@ -111,28 +127,291 @@ export default function PublishPage() {
     setStep(nextStep);
   };
 
-  const handlePublish = async () => {
-    if (!validateStep(step)) {
-      setError('Por favor completa todos los campos requeridos');
-      return;
-    }
-
-    setSaving(true);
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setLoading(true);
     setError('');
-    
+
     try {
-      const response = await ListingsService.createQuick(ad);
-      setSuccess(true);
-      setTimeout(() => {
-        router.push(`/anuncios/${response.id}`);
-      }, 1500);
+      // Validar datos requeridos
+      if (!ad.title || !ad.description) {
+        throw new Error('Por favor completa todos los campos requeridos');
+      }
+
+      // Validar WhatsApp o email
+      if (!ad.contact.whatsapp.trim()) {
+        throw new Error('Por favor proporciona al menos un método de contacto');
+      }
+
+      // Crear el listado
+      const listing = await ListingsService.createListing(ad);
+
+      // Redireccionar a la página del listado
+      router.push(`/anuncios/${listing.id}`);
     } catch (err) {
-      setError('Error al publicar el anuncio. Por favor intenta de nuevo.');
-      console.error('Error publishing:', err);
+      setError(err.message);
     } finally {
-      setSaving(false);
+      setLoading(false);
     }
   };
+
+  const handleInputChange = (e) => {
+    const { name, value } = e.target;
+    setAd((prev) => ({
+      ...prev,
+      [name]: value
+    }));
+  };
+
+  // Renderizar componentes basados en el paso actual
+  const renderStepContent = () => {
+    switch (step) {
+      case STEPS.CATEGORY:
+        return (
+          <CategorySelector
+            selectedCategory={ad.category}
+            onSelect={(category) => {
+              const selectedSubcategory = category.subcategories?.find(sub => sub.selected);
+              setAd({
+                ...ad,
+                category: {
+                  ...category,
+                  subcategories: category.subcategories
+                },
+                type: selectedSubcategory ? 
+                  `${category.id}/${selectedSubcategory.id}` : 
+                  `${category.id}`
+              });
+              setTimeout(() => handleStepComplete(STEPS.DETAILS), 500);
+            }}
+          />
+        );
+      case STEPS.DETAILS:
+        return (
+          <div className="space-y-6">
+            <div>
+              <label htmlFor="title" className="block text-sm font-medium text-primary-700 mb-2">
+                Título del anuncio *
+              </label>
+              <input
+                id="title"
+                type="text"
+                name="title"
+                value={ad.title}
+                onChange={handleInputChange}
+                className="w-full px-4 py-3 bg-white rounded-xl border-2 border-primary-100 focus:border-primary-500 focus:ring-2 focus:ring-primary-500/20 transition-all"
+                placeholder="Ej: Vendo iPhone 12 Pro Max"
+                required
+              />
+            </div>
+
+            <div>
+              <label htmlFor="description" className="block text-sm font-medium text-primary-700 mb-2">
+                Descripción *
+              </label>
+              <textarea
+                id="description"
+                name="description"
+                value={ad.description}
+                onChange={handleInputChange}
+                rows={4}
+                className="w-full px-4 py-3 bg-white rounded-xl border-2 border-primary-100 focus:border-primary-500 focus:ring-2 focus:ring-primary-500/20 transition-all"
+                placeholder="Describe tu producto o servicio"
+                required
+              />
+            </div>
+
+            <div className="flex justify-between pt-4">
+              <button
+                onClick={() => setStep(STEPS.CATEGORY)}
+                className="px-6 py-3 flex items-center gap-2 text-primary-600 hover:text-primary-800"
+              >
+                <ChevronLeftIcon className="w-5 h-5" />
+                Anterior
+              </button>
+              <button
+                onClick={() => handleStepComplete(STEPS.MEDIA)}
+                disabled={!ad.title || !ad.description}
+                className="px-6 py-3 bg-primary-500 text-white rounded-xl hover:bg-primary-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+              >
+                Siguiente
+                <ChevronRightIcon className="w-5 h-5" />
+              </button>
+            </div>
+          </div>
+        );
+      case STEPS.MEDIA:
+        return (
+          <MediaUploader
+            files={ad.media || []}
+            onFilesChange={(files) => setAd({ ...ad, media: files })}
+            maxFiles={5}
+          />
+        );
+      case STEPS.CONTACT:
+        return (
+          <div className="space-y-6">
+            <div>
+              <label htmlFor="whatsapp" className="block text-sm font-medium text-primary-700 mb-2">
+                WhatsApp *
+              </label>
+              <input
+                id="whatsapp"
+                type="tel"
+                name="contact.whatsapp"
+                value={ad.contact.whatsapp}
+                onChange={handleInputChange}
+                className="w-full px-4 py-3 bg-white rounded-xl border-2 border-primary-100 focus:border-primary-500 focus:ring-2 focus:ring-primary-500/20 transition-all"
+                placeholder="Ej: +51 987 654 321"
+                required
+              />
+            </div>
+
+            <LocationSelector
+              value={ad.location}
+              onChange={(location) => setAd({ ...ad, location })}
+            />
+
+            <button
+              type="button"
+              onClick={() => setShowAdvanced(!showAdvanced)}
+              className="w-full px-4 py-2 text-sm text-primary-600 hover:text-primary-800 transition-colors flex items-center justify-center gap-2"
+            >
+              <SparklesIcon className="w-5 h-5" />
+              {showAdvanced ? 'Ocultar opciones avanzadas' : 'Mostrar opciones avanzadas'}
+            </button>
+
+            {showAdvanced && (
+              <motion.div
+                initial={{ opacity: 0, height: 0 }}
+                animate={{ opacity: 1, height: 'auto' }}
+                exit={{ opacity: 0, height: 0 }}
+                className="space-y-6 pt-4"
+              >
+                <PriceSelector
+                  value={ad.price}
+                  onChange={(price) => setAd({ ...ad, price })}
+                />
+              </motion.div>
+            )}
+
+            <div className="flex justify-between pt-4">
+              <button
+                onClick={() => setStep(STEPS.DETAILS)}
+                className="px-6 py-3 flex items-center gap-2 text-primary-600 hover:text-primary-800"
+              >
+                <ChevronLeftIcon className="w-5 h-5" />
+                Anterior
+              </button>
+              <button
+                onClick={() => handleStepComplete(STEPS.PREVIEW)}
+                disabled={saving || !ad.title || !ad.description || !ad.contact.whatsapp}
+                className="px-6 py-3 bg-primary-500 text-white rounded-xl hover:bg-primary-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+              >
+                {saving ? (
+                  <>
+                    <ArrowPathIcon className="w-5 h-5 animate-spin" />
+                    Publicando...
+                  </>
+                ) : (
+                  <>
+                    <CheckCircleIcon className="w-5 h-5" />
+                    Publicar anuncio
+                  </>
+                )}
+              </button>
+            </div>
+          </div>
+        );
+      case STEPS.PREVIEW:
+        return (
+          <div className="bg-white rounded-2xl shadow-xl p-6">
+            <h3 className="text-lg font-semibold text-primary-900 mb-4">Vista previa</h3>
+            
+            <div className="aspect-w-4 aspect-h-3 bg-primary-50 rounded-xl mb-4 overflow-hidden">
+              {ad.media && ad.media.length > 0 ? (
+                <Image
+                  src={URL.createObjectURL(ad.media[0])}
+                  alt="Preview"
+                  fill
+                  className="object-cover"
+                />
+              ) : (
+                <div className="flex items-center justify-center">
+                  <PhotoIcon className="w-12 h-12 text-primary-300" />
+                </div>
+              )}
+            </div>
+
+            <div className="space-y-4">
+              {ad.category && (
+                <div className="flex items-center gap-2 text-sm text-primary-600">
+                  <TagIcon className="w-4 h-4" />
+                  {ad.category.name}
+                  {ad.category.subcategories?.find(sub => sub.selected)?.name && 
+                    ` - ${ad.category.subcategories.find(sub => sub.selected)?.name}`}
+                </div>
+              )}
+
+              <h4 className="text-xl font-semibold text-primary-900">
+                {ad.title || 'Título del anuncio'}
+              </h4>
+
+              <p className="text-sm text-primary-600 line-clamp-3">
+                {ad.description || 'Descripción del anuncio'}
+              </p>
+
+              {ad.location && (
+                <div className="flex items-center gap-2 text-sm text-primary-600">
+                  <MapPinIcon className="w-4 h-4" />
+                  {ad.location.city}, {ad.location.country}
+                </div>
+              )}
+
+              {ad.price && (
+                <div className="flex items-center gap-2 text-lg font-semibold text-primary-900">
+                  <CurrencyDollarIcon className="w-5 h-5" />
+                  {ad.price.amount} {ad.price.currency}
+                </div>
+              )}
+
+              {ad.contact.whatsapp && (
+                <div className="flex items-center gap-2 text-sm text-primary-600">
+                  <UserCircleIcon className="w-4 h-4" />
+                  {ad.contact.whatsapp}
+                </div>
+              )}
+            </div>
+
+            <div className="mt-6 pt-6 border-t border-primary-100">
+              <div className="flex items-center gap-4">
+                <div className="flex-1">
+                  <div className="text-sm font-medium text-primary-900 mb-1">
+                    Progreso
+                  </div>
+                  <div className="h-2 bg-primary-100 rounded-full overflow-hidden">
+                    <motion.div
+                      className="h-full bg-primary-500"
+                      initial={{ width: 0 }}
+                      animate={{ width: `${progress}%` }}
+                    />
+                  </div>
+                </div>
+                <div className="text-2xl font-bold text-primary-900">
+                  {progress}%
+                </div>
+              </div>
+            </div>
+          </div>
+        );
+      default:
+        return null;
+    }
+  };
+
+  if (loading) {
+    return <LoadingState text="Publicando tu anuncio..." />;
+  }
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-primary-900 to-primary-800">
@@ -149,19 +428,10 @@ export default function PublishPage() {
       {/* Error Message */}
       <AnimatePresence>
         {error && (
-          <motion.div
-            initial={{ opacity: 0, y: -20 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -20 }}
-            className="fixed top-4 right-4 left-4 md:left-auto bg-red-500 text-white px-6 py-3 rounded-lg shadow-lg z-50 max-w-md"
-          >
-            {error.split('\n').map((line, i) => (
-              <div key={i} className="flex items-start gap-2">
-                <span className="text-red-200">•</span>
-                <span>{line}</span>
-              </div>
-            ))}
-          </motion.div>
+          <ErrorMessage 
+            message={error}
+            onDismiss={() => setError('')}
+          />
         )}
       </AnimatePresence>
 
@@ -194,14 +464,14 @@ export default function PublishPage() {
             className="max-w-4xl mx-auto text-center"
           >
             <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold text-white mb-6">
-              {step === 1 && "¿Qué deseas publicar?"}
-              {step === 2 && "Cuéntanos más"}
-              {step === 3 && "Últimos detalles"}
+              {step === STEPS.CATEGORY && "¿Qué deseas publicar?"}
+              {step === STEPS.DETAILS && "Cuéntanos más"}
+              {step === STEPS.CONTACT && "Últimos detalles"}
             </h1>
             <p className="text-xl text-primary-200 mb-12">
-              {step === 1 && "Selecciona la categoría que mejor describe tu anuncio"}
-              {step === 2 && "Describe tu producto o servicio para que todos lo encuentren"}
-              {step === 3 && "Añade información de contacto y ubicación"}
+              {step === STEPS.CATEGORY && "Selecciona la categoría que mejor describe tu anuncio"}
+              {step === STEPS.DETAILS && "Describe tu producto o servicio para que todos lo encuentren"}
+              {step === STEPS.CONTACT && "Añade información de contacto y ubicación"}
             </p>
           </motion.div>
         </div>
@@ -214,180 +484,7 @@ export default function PublishPage() {
             <div className="flex-1 order-2 lg:order-1">
               <div className="bg-white rounded-2xl shadow-xl p-8">
                 <AnimatePresence mode="wait">
-                  {step === 1 && (
-                    <motion.div
-                      key="step1"
-                      initial={{ opacity: 0, x: 20 }}
-                      animate={{ opacity: 1, x: 0 }}
-                      exit={{ opacity: 0, x: -20 }}
-                      className="space-y-6"
-                    >
-                      <CategorySelector
-                        selectedCategory={ad.category}
-                        onSelect={(category) => {
-                          const selectedSubcategory = category.subcategories?.find(sub => sub.selected);
-                          setAd({
-                            ...ad,
-                            category: {
-                              ...category,
-                              subcategories: category.subcategories
-                            },
-                            type: selectedSubcategory ? 
-                              `${category.id}/${selectedSubcategory.id}` : 
-                              `${category.id}`
-                          });
-                          setTimeout(() => handleStepComplete(2), 500);
-                        }}
-                      />
-                    </motion.div>
-                  )}
-
-                  {step === 2 && (
-                    <motion.div
-                      key="step2"
-                      initial={{ opacity: 0, x: 20 }}
-                      animate={{ opacity: 1, x: 0 }}
-                      exit={{ opacity: 0, x: -20 }}
-                      className="space-y-6"
-                    >
-                        <div>
-                          <label htmlFor="title" className="block text-sm font-medium text-primary-700 mb-2">
-                          Título del anuncio *
-                          </label>
-                          <input
-                            id="title"
-                            type="text"
-                          value={ad.title}
-                            onChange={(e) => setAd({ ...ad, title: e.target.value })}
-                            className="w-full px-4 py-3 bg-white rounded-xl border-2 border-primary-100 focus:border-primary-500 focus:ring-2 focus:ring-primary-500/20 transition-all"
-                          placeholder="Ej: Vendo iPhone 12 Pro Max"
-                          required
-                          />
-                        </div>
-
-                        <div>
-                          <label htmlFor="description" className="block text-sm font-medium text-primary-700 mb-2">
-                          Descripción *
-                          </label>
-                          <textarea
-                            id="description"
-                          value={ad.description}
-                            onChange={(e) => setAd({ ...ad, description: e.target.value })}
-                          rows={4}
-                            className="w-full px-4 py-3 bg-white rounded-xl border-2 border-primary-100 focus:border-primary-500 focus:ring-2 focus:ring-primary-500/20 transition-all"
-                          placeholder="Describe tu producto o servicio"
-                          required
-                          />
-                        </div>
-
-                      <div className="flex justify-between pt-4">
-                        <button
-                          onClick={() => setStep(1)}
-                          className="px-6 py-3 flex items-center gap-2 text-primary-600 hover:text-primary-800"
-                        >
-                          <ChevronLeftIcon className="w-5 h-5" />
-                          Anterior
-                        </button>
-                        <button
-                          onClick={() => handleStepComplete(3)}
-                          disabled={!ad.title || !ad.description}
-                          className="px-6 py-3 bg-primary-500 text-white rounded-xl hover:bg-primary-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
-                        >
-                          Siguiente
-                          <ChevronRightIcon className="w-5 h-5" />
-                        </button>
-                      </div>
-                    </motion.div>
-                  )}
-
-                  {step === 3 && (
-                    <motion.div
-                      key="step3"
-                      initial={{ opacity: 0, x: 20 }}
-                      animate={{ opacity: 1, x: 0 }}
-                      exit={{ opacity: 0, x: -20 }}
-                      className="space-y-6"
-                    >
-                      <div>
-                        <label htmlFor="whatsapp" className="block text-sm font-medium text-primary-700 mb-2">
-                          WhatsApp *
-                            </label>
-                              <input
-                          id="whatsapp"
-                          type="tel"
-                          value={ad.contact.whatsapp}
-                                onChange={(e) => setAd({
-                                  ...ad,
-                            contact: { ...ad.contact, whatsapp: e.target.value }
-                                })}
-                                className="w-full px-4 py-3 bg-white rounded-xl border-2 border-primary-100 focus:border-primary-500 focus:ring-2 focus:ring-primary-500/20 transition-all"
-                          placeholder="Ej: +51 987 654 321"
-                          required
-                              />
-                      </div>
-
-                      <LocationSelector
-                        value={ad.location}
-                        onChange={(location) => setAd({ ...ad, location })}
-                      />
-
-                      <MediaUploader
-                        files={ad.media || []}
-                        onFilesChange={(files) => setAd({ ...ad, media: files })}
-                        maxFiles={5}
-                      />
-
-                      <button
-                        type="button"
-                        onClick={() => setShowAdvanced(!showAdvanced)}
-                        className="w-full px-4 py-2 text-sm text-primary-600 hover:text-primary-800 transition-colors flex items-center justify-center gap-2"
-                      >
-                        <SparklesIcon className="w-5 h-5" />
-                        {showAdvanced ? 'Ocultar opciones avanzadas' : 'Mostrar opciones avanzadas'}
-                      </button>
-
-                      {showAdvanced && (
-                        <motion.div
-                          initial={{ opacity: 0, height: 0 }}
-                          animate={{ opacity: 1, height: 'auto' }}
-                          exit={{ opacity: 0, height: 0 }}
-                          className="space-y-6 pt-4"
-                        >
-                          <PriceSelector
-                            value={ad.price}
-                            onChange={(price) => setAd({ ...ad, price })}
-                          />
-                        </motion.div>
-                      )}
-
-                      <div className="flex justify-between pt-4">
-                        <button
-                          onClick={() => setStep(2)}
-                          className="px-6 py-3 flex items-center gap-2 text-primary-600 hover:text-primary-800"
-                        >
-                          <ChevronLeftIcon className="w-5 h-5" />
-                          Anterior
-                        </button>
-                        <button
-                          onClick={handlePublish}
-                          disabled={saving || !ad.title || !ad.description || !ad.contact.whatsapp}
-                          className="px-6 py-3 bg-primary-500 text-white rounded-xl hover:bg-primary-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
-                        >
-                          {saving ? (
-                            <>
-                              <ArrowPathIcon className="w-5 h-5 animate-spin" />
-                              Publicando...
-                            </>
-                          ) : (
-                            <>
-                              <CheckCircleIcon className="w-5 h-5" />
-                              Publicar anuncio
-                            </>
-                          )}
-                        </button>
-                      </div>
-                    </motion.div>
-                  )}
+                  {renderStepContent()}
                 </AnimatePresence>
               </div>
             </div>
@@ -438,7 +535,7 @@ export default function PublishPage() {
                     {ad.location && (
                       <div className="flex items-center gap-2 text-sm text-primary-600">
                         <MapPinIcon className="w-4 h-4" />
-                        {ad.location.city}, {ad.location.state}
+                        {ad.location.city}, {ad.location.country}
                       </div>
                     )}
 
@@ -470,13 +567,13 @@ export default function PublishPage() {
                             animate={{ width: `${progress}%` }}
                           />
                         </div>
-            </div>
+                      </div>
                       <div className="text-2xl font-bold text-primary-900">
                         {progress}%
-            </div>
-          </div>
-        </div>
-              </motion.div>
+                      </div>
+                    </div>
+                  </div>
+                </motion.div>
               </div>
             </div>
           </div>
