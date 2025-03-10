@@ -1,8 +1,8 @@
 'use client';
 
 import { useState } from 'react';
-import { useAuth } from '../hooks/useAuth';
-import { useRouter } from 'next/navigation';
+// import { useAuth } from '../hooks/useAuth'; // Eliminar si no se usa
+// import { useRouter } from 'next/navigation'; // Eliminar si no se usa
 import { PhoneInput } from 'react-international-phone';
 import { AuthService } from '../services/auth.service';
 
@@ -18,8 +18,8 @@ export default function LoginForm() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
 
-  const { loginWithEmail, loginWithPhone, sendPhoneOtp, error: authError, loading: authLoading } = useAuth();
-  const router = useRouter();
+  // const { loginWithEmail, loginWithPhone, sendPhoneOtp, error: authError, loading: authLoading } = useAuth(); // Asegúrate de usarlo si es necesario
+  // const router = useRouter(); // Asegúrate de usarlo si es necesario
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -96,10 +96,11 @@ export default function LoginForm() {
             </div>
           ) : (
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
+              <label htmlFor="verificationCode" className="block text-sm font-medium text-gray-700 mb-1">
                 Código de verificación
               </label>
               <input
+                id="verificationCode" // Agrega el atributo id
                 type="text"
                 required
                 maxLength={6}
@@ -112,10 +113,11 @@ export default function LoginForm() {
         ) : (
           <>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
+              <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-1">
                 Correo electrónico
               </label>
               <input
+                id="email" // Agrega el atributo id
                 type="email"
                 required
                 className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500"
@@ -125,10 +127,11 @@ export default function LoginForm() {
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
+              <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-1">
                 Contraseña
               </label>
               <input
+                id="password" // Agrega el atributo id
                 type="password"
                 required
                 className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500"

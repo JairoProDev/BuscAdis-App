@@ -36,7 +36,6 @@ export default function RegisterForm() {
 
       if (error) throw error;
 
-      // Redirigir o mostrar mensaje de éxito
       console.log('Registro exitoso:', data);
     } catch (error) {
       setError('Error al registrarse. Verifica tus datos.');
@@ -60,10 +59,11 @@ export default function RegisterForm() {
 
       <form onSubmit={handleSubmit} className="space-y-6">
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">
+          <label htmlFor="firstName" className="block text-sm font-medium text-gray-700 mb-1">
             Nombre completo
           </label>
           <input
+            id="firstName"
             type="text"
             required
             className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500"
@@ -86,10 +86,11 @@ export default function RegisterForm() {
         </div>
 
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">
+          <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-1">
             Correo electrónico (opcional)
           </label>
           <input
+            id="email"
             type="email"
             className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500"
             value={formData.email}
@@ -98,10 +99,11 @@ export default function RegisterForm() {
         </div>
 
         <div>
-          <label className="block text-sm font-medium text-gray-700 mb-1">
+          <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-1">
             Contraseña
           </label>
           <input
+            id="password"
             type="password"
             required
             className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500"

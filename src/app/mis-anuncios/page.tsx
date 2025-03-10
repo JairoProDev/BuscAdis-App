@@ -11,14 +11,25 @@ import {
   EyeSlashIcon
 } from '@heroicons/react/24/outline';
 
+interface Listing {
+  id: string;
+  title: string;
+  description: string;
+  price: number;
+  price_type: string;
+  created_at: string;
+  is_active: boolean;
+  // Agrega otras propiedades según sea necesario
+}
+
 export default function MyListingsPage() {
-  const [listings, setListings] = useState([]);
+  const [listings, setListings] = useState<Listing[]>([]);
   const [loading, setLoading] = useState(true);
   const { user } = useAuth();
 
   useEffect(() => {
     loadListings();
-  }, []);
+  }, [user]);
 
   const loadListings = async () => {
     if (!user) return;
@@ -35,7 +46,7 @@ export default function MyListingsPage() {
   const handleToggleStatus = async (listingId: string, currentStatus: boolean) => {
     try {
       await UserListingsService.toggleListingStatus(listingId, !currentStatus);
-      setListings(listings.map((listing: any) =>
+      setListings(listings.map((listing) =>
         listing.id === listingId
           ? { ...listing, is_active: !currentStatus }
           : listing
@@ -50,7 +61,7 @@ export default function MyListingsPage() {
 
     try {
       await UserListingsService.deleteListing(listingId);
-      setListings(listings.filter((listing: any) => listing.id !== listingId));
+      setListings(listings.filter((listing) => listing.id !== listingId));
     } catch (error) {
       console.error('Error deleting listing:', error);
     }
@@ -87,7 +98,7 @@ export default function MyListingsPage() {
         ) : (
           <div className="bg-white shadow overflow-hidden sm:rounded-md">
             <ul className="divide-y divide-gray-200">
-              {listings.map((listing: any) => (
+              {listings.map((listing) => (
                 <li key={listing.id}>
                   <div className="px-4 py-4 sm:px-6">
                     <div className="flex items-center justify-between">

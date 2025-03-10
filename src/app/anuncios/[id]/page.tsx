@@ -18,11 +18,30 @@ import ErrorMessage from '@/components/ui/ErrorMessage';
 import { formatDate } from '@/utils/date';
 import { formatPrice } from '@/utils/format';
 
+interface Listing {
+  title: string;
+  description: string;
+  price: number;
+  price_type: string;
+  images: string[];
+  location: {
+    city: string;
+    country?: string;
+  };
+  contact: {
+    whatsapp?: string;
+    email?: string;
+    phone?: string;
+  };
+  created_at: string;
+  views?: number;
+}
+
 export default function ListingDetailPage() {
   const params = useParams();
   const id = params.id;
   
-  const [listing, setListing] = useState(null);
+  const [listing, setListing] = useState<Listing | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [activeImageIndex, setActiveImageIndex] = useState(0);
@@ -50,7 +69,7 @@ export default function ListingDetailPage() {
   const handleWhatsAppClick = () => {
     if (!listing?.contact?.whatsapp) return;
     
-    const message = encodeURIComponent(`Hola, estoy interesado en tu anuncio "${listing.title}" en BuscAdis.`);
+    const message = encodeURIComponent(`Hola, Me interesa su anuncio "${listing.title}" en BuscAdis.`);
     const number = listing.contact.whatsapp.replace(/\D/g, '');
     window.open(`https://wa.me/${number}?text=${message}`, '_blank');
   };
@@ -74,7 +93,7 @@ export default function ListingDetailPage() {
     }
   };
 
-  const handleContactClick = (type) => {
+  const handleContactClick = (type: 'whatsapp' | 'email' | 'phone') => {
     if (!listing?.contact) return;
 
     if (type === 'whatsapp' && listing.contact.whatsapp) {

@@ -1,5 +1,6 @@
 import { supabase } from '@/lib/supabase';
-import { LoginCredentials, RegisterCredentials, AuthUser } from '../types/auth.types';
+// Asegúrate de que estas importaciones sean necesarias
+// import { LoginCredentials, RegisterCredentials, AuthUser } from '../types/auth.types';
 
 export class AuthService {
   static async register({
@@ -17,18 +18,33 @@ export class AuthService {
   }) {
     try {
       const { data, error } = await supabase.auth.signUp({
-        email: email || undefined,
+        email: email ?? '',
         password,
         options: {
           data: {
             first_name: firstName,
             last_name: lastName,
-            phone: phone || undefined
+            phone: phone ?? ''
           }
         }
       });
 
       if (error) throw error;
+
+      // Insertar en la tabla profiles
+      const { error: profileError } = await supabase
+        .from('profiles')
+        .insert([
+          {
+            id: data.user.id, // Usar el ID del usuario creado
+            full_name: `${firstName} ${lastName}`,
+            phone: phone ?? '',
+            email: email ?? ''
+          }
+        ]);
+
+      if (profileError) throw profileError;
+
       return data;
     } catch (error) {
       console.error('Error en registro:', error);

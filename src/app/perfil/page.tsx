@@ -6,7 +6,7 @@ import { supabase } from '@/lib/supabase';
 import ProtectedRoute from '@/features/auth/components/ProtectedRoute';
 
 export default function ProfilePage() {
-  const { user, loading } = useAuth();
+  const { user } = useAuth();
   const [isEditing, setIsEditing] = useState(false);
   const [formData, setFormData] = useState({
     fullName: user?.full_name || '',
@@ -50,10 +50,11 @@ export default function ProfilePage() {
 
           <form onSubmit={handleSubmit} className="space-y-6">
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
+              <label htmlFor="fullName" className="block text-sm font-medium text-gray-700 mb-1">
                 Nombre completo
               </label>
               <input
+                id="fullName"
                 type="text"
                 className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500"
                 value={formData.fullName}
@@ -63,10 +64,11 @@ export default function ProfilePage() {
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
+              <label htmlFor="phone" className="block text-sm font-medium text-gray-700 mb-1">
                 Teléfono
               </label>
               <input
+                id="phone"
                 type="tel"
                 className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500"
                 value={formData.phone}
@@ -76,10 +78,11 @@ export default function ProfilePage() {
             </div>
 
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">
+              <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-1">
                 Correo electrónico
               </label>
               <input
+                id="email"
                 type="email"
                 className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500"
                 value={formData.email}

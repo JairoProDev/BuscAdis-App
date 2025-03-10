@@ -37,16 +37,10 @@ export default function SearchBar({ initialValue = '', onSearch }) {
   const [showFilters, setShowFilters] = useState(false)
 
   useEffect(() => {
-    if (searchTerm) {
-      const filtered = SUGGESTIONS.filter(suggestion =>
-        suggestion.text.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        suggestion.categoryId.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        suggestion.subTypeId.toLowerCase().includes(searchTerm.toLowerCase())
-      )
-      setFilteredSuggestions(filtered)
-    } else {
-      setFilteredSuggestions(SUGGESTIONS)
-    }
+    const filtered = SUGGESTIONS.filter(suggestion =>
+      suggestion.text.toLowerCase().includes(searchTerm.toLowerCase())
+    )
+    setFilteredSuggestions(filtered)
   }, [searchTerm])
 
   useEffect(() => {
@@ -82,7 +76,7 @@ export default function SearchBar({ initialValue = '', onSearch }) {
     // Implementation of handleImageSearch
   }
 
-  const handleSubmit = (e) => {
+  const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
     onSearch(searchTerm)
   }
@@ -97,7 +91,7 @@ export default function SearchBar({ initialValue = '', onSearch }) {
           onChange={(e) => setSearchTerm(e.target.value)}
           onFocus={() => setIsFocused(true)}
           placeholder="¿Qué estás buscando?"
-          className="w-full p-4 pr-12 rounded-xl border-2 border-primary-100 focus:border-primary-500 focus:ring-2 focus:ring-primary-500/20 transition-all"
+          className="w-full p-4 pr-12 rounded-xl border-2 border-primary-100 focus:border-primary-500 focus:ring-2 focus:ring-primary-500/20 transition-all shadow-lg"
         />
         <button
           type="submit"
@@ -108,7 +102,7 @@ export default function SearchBar({ initialValue = '', onSearch }) {
       </div>
 
       <AnimatePresence>
-        {isFocused && (
+        {isFocused && filteredSuggestions.length > 0 && (
           <motion.div
             ref={suggestionsRef}
             initial={{ opacity: 0, y: 10 }}
