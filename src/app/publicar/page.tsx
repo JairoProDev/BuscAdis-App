@@ -24,6 +24,10 @@ import {
 import LoadingState from '@/components/ui/LoadingState'
 import ErrorMessage from '@/components/ui/ErrorMessage'
 import { CategoriesService } from '@/services/categories.service'
+import { useAuth } from '@/features/auth/hooks/useAuth'
+import PublishForm from '@/components/publish/PublishForm'
+import AuthPrompt from '@/features/auth/components/AuthPrompt'
+import Link from 'next/link'
 
 // Pasos de publicación
 const STEPS = {
@@ -36,6 +40,7 @@ const STEPS = {
 
 export default function PublishPage() {
   const router = useRouter()
+  const { user } = useAuth()
   const [step, setStep] = useState(STEPS.CATEGORY);
   const [progress, setProgress] = useState(20);
   const [showAdvanced, setShowAdvanced] = useState(false);
@@ -43,6 +48,8 @@ export default function PublishPage() {
   const [error, setError] = useState('');
   const [success, setSuccess] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [showAuthPrompt, setShowAuthPrompt] = useState(false);
+  const [publishData, setPublishData] = useState(null);
 
   const [ad, setAd] = useState<QuickListingData>({
     title: '',
@@ -127,31 +134,28 @@ export default function PublishPage() {
     setStep(nextStep);
   };
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    setLoading(true);
-    setError('');
+  const handlePublish = async (data) => {
+    if (!user) {
+      setPublishData(data);
+      setShowAuthPrompt(true);
+      return;
+    }
+    
+    // Proceder con la publicación
+    await handlePublishWithAuth(data);
+  };
 
+  const handlePublishWithAuth = async (data) => {
     try {
-      // Validar datos requeridos
-      if (!ad.title || !ad.description) {
-        throw new Error('Por favor completa todos los campos requeridos');
-      }
-
-      // Validar WhatsApp o email
-      if (!ad.contact.whatsapp.trim()) {
-        throw new Error('Por favor proporciona al menos un método de contacto');
-      }
-
-      // Crear el listado
-      const listing = await ListingsService.createListing(ad);
-
-      // Redireccionar a la página del listado
-      router.push(`/anuncios/${listing.id}`);
-    } catch (err) {
-      setError(err.message);
-    } finally {
-      setLoading(false);
+      // Lógica de publicación
+      const result = await ListingsService.createListing({
+        ...data,
+        userId: user.id
+      });
+      
+      router.push(`/anuncios/${result.id}`);
+    } catch (error) {
+      console.error('Error publishing:', error);
     }
   };
 
@@ -579,6 +583,31 @@ export default function PublishPage() {
           </div>
         </div>
       </section>
+
+      {showAuthPrompt && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4">
+          <div className="bg-white rounded-lg max-w-md w-full p-6">
+            <h2 className="text-xl font-semibold mb-4">Último paso</h2>
+            <p className="text-gray-600 mb-6">
+              Para publicar tu anuncio, necesitas una cuenta. Es gratis y solo toma un minuto.
+            </p>
+            <div className="space-y-4">
+              <Link
+                href={`/register?redirect=${encodeURIComponent('/publicar')}&data=${encodeURIComponent(JSON.stringify(publishData))}`}
+                className="w-full block text-center py-2 px-4 bg-primary-600 text-white rounded-lg hover:bg-primary-700"
+              >
+                Crear cuenta
+              </Link>
+              <Link
+                href={`/login?redirect=${encodeURIComponent('/publicar')}&data=${encodeURIComponent(JSON.stringify(publishData))}`}
+                className="w-full block text-center py-2 px-4 border border-gray-300 rounded-lg hover:bg-gray-50"
+              >
+                Iniciar sesión
+              </Link>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 } 
