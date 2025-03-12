@@ -19,7 +19,8 @@ import {
   PhotoIcon,
   TagIcon,
   UserCircleIcon,
-  SparklesIcon
+  SparklesIcon,
+  XMarkIcon
 } from '@heroicons/react/24/outline'
 import LoadingState from '@/components/ui/LoadingState'
 import ErrorMessage from '@/components/ui/ErrorMessage'
@@ -28,6 +29,8 @@ import { useAuth } from '@/features/auth/hooks/useAuth'
 import PublishForm from '@/components/publish/PublishForm'
 import AuthPrompt from '@/features/auth/components/AuthPrompt'
 import Link from 'next/link'
+import { PhoneInput } from 'react-international-phone'
+import LoadingSpinner from '@/components/ui/LoadingSpinner'
 
 // Pasos de publicación
 const STEPS = {
@@ -40,7 +43,7 @@ const STEPS = {
 
 export default function PublishPage() {
   const router = useRouter()
-  const { user } = useAuth()
+  const { user, isAuthenticated } = useAuth()
   const [step, setStep] = useState(STEPS.CATEGORY);
   const [progress, setProgress] = useState(20);
   const [showAdvanced, setShowAdvanced] = useState(false);
@@ -50,6 +53,8 @@ export default function PublishPage() {
   const [loading, setLoading] = useState(false);
   const [showAuthPrompt, setShowAuthPrompt] = useState(false);
   const [publishData, setPublishData] = useState(null);
+  const [uploadingImages, setUploadingImages] = useState(false);
+  const [uploadProgress, setUploadProgress] = useState(0);
 
   const [ad, setAd] = useState<QuickListingData>({
     title: '',
@@ -167,6 +172,110 @@ export default function PublishPage() {
     }));
   };
 
+  const handleNext = () => {
+    if (step === 1 && (!ad.title || !ad.description)) {
+      setError('El título y la descripción son obligatorios');
+      return;
+    }
+    
+    if (step === 2 && !ad.category) {
+      setError('Debes seleccionar una categoría');
+      return;
+    }
+    
+    if (step === 3 && !ad.location.city) {
+      setError('La ciudad es obligatoria');
+      return;
+    }
+    
+    setError('');
+    setStep(prevStep => Math.min(prevStep + 1, 5));
+  };
+
+  const handlePrevious = () => {
+    setStep(prevStep => Math.max(prevStep - 1, 1));
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    
+    if (!isAuthenticated) {
+      setShowAuthPrompt(true);
+      return;
+    }
+    
+    setLoading(true);
+    setError('');
+    
+    try {
+      const response = await ListingsService.createListing(ad);
+      
+      setSuccess(true);
+      
+      // Redirigir al detalle del anuncio después de 2 segundos
+      setTimeout(() => {
+        router.push(`/anuncios/${response.id}`);
+      }, 2000);
+    } catch (err) {
+      console.error('Error publicando anuncio:', err);
+      setError('Ha ocurrido un error al publicar tu anuncio. Por favor, inténtalo de nuevo.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleImageUpload = async (e) => {
+    const files = Array.from(e.target.files);
+    if (files.length === 0) return;
+    
+    setUploadingImages(true);
+    setUploadProgress(0);
+    
+    try {
+      const totalFiles = files.length;
+      let completedFiles = 0;
+      const uploadedUrls = [];
+      
+      for (const file of files) {
+        // Validar tamaño y tipo
+        if (file.size > 5 * 1024 * 1024) { // 5MB max
+          setError(`La imagen ${file.name} es demasiado grande. El tamaño máximo es 5MB.`);
+          continue;
+        }
+        
+        if (!file.type.startsWith('image/')) {
+          setError(`El archivo ${file.name} no es una imagen válida.`);
+          continue;
+        }
+        
+        const { imageUrl } = await ImageService.uploadImage(file);
+        uploadedUrls.push(imageUrl);
+        
+        completedFiles++;
+        setUploadProgress(Math.round((completedFiles / totalFiles) * 100));
+      }
+      
+      setAd(prev => ({
+        ...prev,
+        media: [...prev.media, ...uploadedUrls]
+      }));
+      
+      setError('');
+    } catch (err) {
+      console.error('Error subiendo imágenes:', err);
+      setError('Ha ocurrido un error al subir las imágenes. Por favor, inténtalo de nuevo.');
+    } finally {
+      setUploadingImages(false);
+    }
+  };
+
+  const removeImage = (index) => {
+    setAd(prev => ({
+      ...prev,
+      media: prev.media.filter((_, i) => i !== index)
+    }));
+  };
+
   // Renderizar componentes basados en el paso actual
   const renderStepContent = () => {
     switch (step) {
@@ -259,15 +368,17 @@ export default function PublishPage() {
               <label htmlFor="whatsapp" className="block text-sm font-medium text-primary-700 mb-2">
                 WhatsApp *
               </label>
-              <input
-                id="whatsapp"
-                type="tel"
-                name="contact.whatsapp"
+              <PhoneInput
+                defaultCountry="pe"
                 value={ad.contact.whatsapp}
-                onChange={handleInputChange}
-                className="w-full px-4 py-3 bg-white rounded-xl border-2 border-primary-100 focus:border-primary-500 focus:ring-2 focus:ring-primary-500/20 transition-all"
-                placeholder="Ej: +51 987 654 321"
-                required
+                onChange={(phone) => setAd({
+                  ...ad,
+                  contact: {
+                    ...ad.contact,
+                    whatsapp: phone
+                  }
+                })}
+                className="w-full"
               />
             </div>
 
@@ -488,7 +599,36 @@ export default function PublishPage() {
             <div className="flex-1 order-2 lg:order-1">
               <div className="bg-white rounded-2xl shadow-xl p-8">
                 <AnimatePresence mode="wait">
-                  {renderStepContent()}
+                  <form onSubmit={handleSubmit} className="p-6">
+                    {error && (
+                      <div className="bg-red-50 text-red-600 p-3 rounded-lg mb-6">
+                        {error}
+                      </div>
+                    )}
+                    
+                    {renderStepContent()}
+                    
+                    {/* Navegación entre pasos */}
+                    {step < 5 && (
+                      <div className="flex justify-between mt-8">
+                        <button
+                          type="button"
+                          onClick={handlePrevious}
+                          className={`px-4 py-2 rounded-lg ${step === 1 ? 'invisible' : 'border border-gray-300 text-gray-700 hover:bg-gray-50'}`}
+                        >
+                          Anterior
+                        </button>
+                        
+                        <button
+                          type="button"
+                          onClick={handleNext}
+                          className="bg-primary-600 text-white px-4 py-2 rounded-lg hover:bg-primary-700 transition-colors"
+                        >
+                          Siguiente
+                        </button>
+                      </div>
+                    )}
+                  </form>
                 </AnimatePresence>
               </div>
             </div>

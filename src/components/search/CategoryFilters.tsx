@@ -4,8 +4,7 @@ import { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { CategoryId } from '@/types/marketplace'
 import { CategoriesService } from '@/services/categories.service'
-import { supabase } from '@/lib/supabaseClient'
-import LoadingState from '@/components/ui/LoadingState'
+import LoadingSpinner from '@/components/ui/LoadingSpinner'
 
 interface CategoryFiltersProps {
   selectedCategory: CategoryId | null
@@ -24,21 +23,19 @@ export default function CategoryFilters({
 }: CategoryFiltersProps) {
   const [categories, setCategories] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
   const [categoryTypes, setCategoryTypes] = useState([]);
   const [typesLoading, setTypesLoading] = useState(false);
 
   useEffect(() => {
     const loadCategories = async () => {
       try {
+        setLoading(true);
         const categoriesData = await CategoriesService.getCategories();
-        const categoriesArray = Object.entries(categoriesData).map(([key, value]) => ({
-          id: key.toLowerCase(),
-          name: key,
-          ...value
-        }));
-        setCategories(categoriesArray);
+        setCategories(categoriesData);
       } catch (error) {
         console.error('Error loading categories:', error);
+        setError('Error al cargar las categorías');
       } finally {
         setLoading(false);
       }
@@ -95,13 +92,11 @@ export default function CategoryFilters({
   };
 
   if (loading) {
-    return (
-      <div className="space-y-4">
-        {[1, 2, 3, 4].map((i) => (
-          <div key={i} className="h-10 bg-gray-200 rounded animate-pulse"></div>
-        ))}
-      </div>
-    );
+    return <LoadingSpinner />;
+  }
+
+  if (error) {
+    return <div className="text-red-500">{error}</div>;
   }
 
   return (
@@ -109,7 +104,10 @@ export default function CategoryFilters({
       <h3 className="font-medium text-lg">Categorías</h3>
       <div className="space-y-2">
         <button
-          onClick={() => handleCategoryChange('')}
+          onClick={() => {
+            onSelectCategory(null);
+            onFilterChange({ category: null });
+          }}
           className={`w-full text-left px-4 py-2 rounded-lg transition-colors ${
             selectedCategory === null
               ? 'bg-primary-100 text-primary-700'
@@ -118,17 +116,20 @@ export default function CategoryFilters({
         >
           Todas las categorías
         </button>
-        {categories.map((category) => (
+        {Object.entries(categories).map(([key]) => (
           <button
-            key={category.id}
-            onClick={() => handleCategoryChange(category.id)}
+            key={key}
+            onClick={() => {
+              onSelectCategory(key as CategoryId);
+              onFilterChange({ category: key });
+            }}
             className={`w-full text-left px-4 py-2 rounded-lg transition-colors ${
-              selectedCategory === category.id
+              selectedCategory === key
                 ? 'bg-primary-100 text-primary-700'
                 : 'hover:bg-gray-100'
             }`}
           >
-            {category.name}
+            {key}
           </button>
         ))}
       </div>

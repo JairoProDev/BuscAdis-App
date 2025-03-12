@@ -5,7 +5,7 @@ import Link from 'next/link';
 import { categories as staticCategories } from '@/data/categories';
 import { useEffect, useState } from 'react';
 import { CategoriesService } from '@/services/categories.service';
-import { supabase } from '@/supabaseClient';
+import LoadingSpinner from '@/components/ui/LoadingSpinner';
 
 // Importar todos los iconos necesarios
 import { 
@@ -14,56 +14,64 @@ import {
   AcademicCapIcon, HeartIcon, QuestionMarkCircleIcon
 } from '@heroicons/react/24/outline';
 
+const iconMap = {
+  BriefcaseIcon,
+  HomeIcon,
+  TruckIcon,
+  WrenchIcon,
+  ShoppingBagIcon,
+  GlobeAltIcon,
+  CalendarIcon,
+  AcademicCapIcon,
+  HeartIcon
+};
+
 export default function CategorySlider() {
-  // Usamos el objeto estático inicialmente
-  const [categories] = useState(staticCategories);
+  const [categories, setCategories] = useState(staticCategories);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
 
-  // Definimos un icono predeterminado para fallback
-  const DefaultIcon = QuestionMarkCircleIcon;
+  useEffect(() => {
+    const loadCategories = async () => {
+      try {
+        setLoading(true);
+        const categoriesData = await CategoriesService.getCategories();
+        console.log('Categories Data:', categoriesData); // Verificar datos
+        setCategories(categoriesData);
+      } catch (error) {
+        console.error('Error loading categories:', error);
+        setError('Error al cargar las categorías');
+      } finally {
+        setLoading(false);
+      }
+    };
 
-  // Datos de categorías estructurados
-  const categoryRows = [
-    {
-      categoryNames: ['Empleos', 'Inmuebles', 'Vehículos', 'Servicios'],
-    },
-    {
-      categoryNames: ['Productos', 'Turismo', 'Eventos', 'Educación', 'Mascotas'],
-    },
-  ];
+    loadCategories();
+  }, []);
+
+  if (loading) {
+    return <LoadingSpinner />;
+  }
+
+  if (error) {
+    return <div className="text-red-500">{error}</div>;
+  }
 
   return (
     <div className="py-8">
       <div className="container mx-auto px-4">
         <div className="space-y-6">
-          {categoryRows.map((row, rowIndex) => (
-            <div key={rowIndex} className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
-              {row.categoryNames.map((categoryName, index) => {
-                // Verificar que categoryName sea válido
-                if (!categoryName) {
-                  return null;
-                }
-                
-                // Garantizar que category esté definido, usando un objeto vacío como fallback
-                const category = categories[categoryName as keyof typeof categories] || {};
-                
-                // Usar un icono predeterminado si icon es undefined
-                const Icon = category.icon || DefaultIcon;
-                
-                // Usar valores predeterminados para todas las propiedades
-                const gradient = category.gradient || 'from-gray-500 to-gray-600';
-                
-                return (
-                  <Link
-                    key={`${categoryName}-${index}`}
-                    href={`/buscar?category=${categoryName.toLowerCase()}`}
-                    className={`flex flex-col items-center justify-center h-32 rounded-xl bg-gradient-to-br ${gradient} text-white p-4 transform hover:scale-105 transition-all duration-300 shadow-md`}
-                  >
-                    <Icon className="w-10 h-10 mb-2" />
-                    <span className="font-medium text-center">{categoryName}</span>
-                  </Link>
-                );
-              })}
-            </div>
+          {Object.entries(categories).map(([key, category]) => (
+            <Link
+              key={key}
+              href={`/buscar?category=${key.toLowerCase()}`}
+              className={`flex flex-col items-center justify-center h-32 rounded-xl bg-gradient-to-br ${category.gradient} text-white p-4 transform hover:scale-105 transition-all duration-300 shadow-md`}
+            >
+              {category.icon && (
+                <category.icon className="w-10 h-10 mb-2" />
+              )}
+              <span className="font-medium text-center">{key}</span>
+            </Link>
           ))}
         </div>
       </div>

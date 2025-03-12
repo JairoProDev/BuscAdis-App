@@ -6,9 +6,9 @@ export type CategoryId =
   | 'vehiculos'
   | 'servicios'
   | 'productos'
+  | 'turismo'
   | 'eventos'
   | 'educacion'
-  | 'turismo'
   | 'mascotas'
 
 // Tipos para cada categoría
@@ -33,12 +33,18 @@ export type EmpleoType =
 // ... (definir los tipos para las demás categorías)
 
 export interface Category {
-  id: CategoryId
-  name: string
-  icon: IconType
-  count: number
-  color: string
-  types: SubType[]
+  name: string;
+  icon: string;
+  gradient: string;
+  description: string;
+  stats?: {
+    count?: number;
+    trend?: number;
+  };
+}
+
+export interface Categories {
+  [key: string]: Category;
 }
 
 export interface SubType {

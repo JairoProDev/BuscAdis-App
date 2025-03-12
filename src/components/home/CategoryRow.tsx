@@ -1,5 +1,6 @@
 'use client'
 
+import React from 'react'
 import { motion } from 'framer-motion'
 import { Category } from '@/types/marketplace'
 import { useEffect, useState } from 'react'
@@ -10,7 +11,7 @@ interface CategoryRowProps {
   title: string
 }
 
-export default function CategoryRow({ title }: CategoryRowProps) {
+const CategoryRow = ({ title }: CategoryRowProps) => {
   const [categories, setCategories] = useState<Category[]>([])
   const [loading, setLoading] = useState(true)
 
@@ -18,15 +19,14 @@ export default function CategoryRow({ title }: CategoryRowProps) {
     const loadCategories = async () => {
       try {
         const categoriesData = await CategoriesService.getCategories()
-        // Convertir el objeto de categorías en un array
-        const categoriesArray = Object.entries(categoriesData).map(([key, value]) => ({
-          id: key.toLowerCase(),
-          name: key,
-          ...value
-        }))
-        setCategories(categoriesArray)
+        console.log('Categories Data in CategoryRow:', categoriesData)
+        if (!Array.isArray(categoriesData)) {
+          throw new Error('Categories data is not an array')
+        }
+        setCategories(categoriesData)
       } catch (error) {
         console.error('Error loading categories:', error)
+        setCategories([]) // Asegúrate de que categories sea un array vacío en caso de error
       } finally {
         setLoading(false)
       }
@@ -71,4 +71,6 @@ export default function CategoryRow({ title }: CategoryRowProps) {
       </div>
     </div>
   )
-} 
+}
+
+export default CategoryRow 

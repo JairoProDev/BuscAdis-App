@@ -1,7 +1,7 @@
 'use client'
 
 import { useEffect, useState } from 'react';
-import { CategoriesService } from '@/services/categories.service';
+import { CategoriesService, Categories } from '@/services/categories.service';
 import CategorySlider from '@/components/home/CategorySlider';
 import FeaturedAds from '@/components/home/FeaturedAds';
 import AdisoSection from '@/components/home/AdisoSection';
@@ -15,23 +15,23 @@ import Stats from '@/components/home/Stats';
 import Comparison from '@/components/home/Comparison';
 import CallToAction from '@/components/home/CallToAction';
 import LoadingState from '@/components/ui/LoadingState';
+import { Suspense } from 'react';
+import FeaturedListings from '@/components/home/FeaturedListings';
+import { SkeletonCard } from '@/components/ui/Skeleton';
 
 export default function Home() {
-  const [categories, setCategories] = useState([]);
+  const [categories, setCategories] = useState(Categories);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const fetchCategories = async () => {
       try {
-        const categoriesObj = await CategoriesService.getCategories();
-        // Convertir el objeto de categorías a un array
-        const categoriesArray = Object.keys(categoriesObj).map(key => ({
-          id: key.toLowerCase(),
-          name: key
-        }));
-        setCategories(categoriesArray);
-      } catch (err) {
-        console.error('Error fetching categories:', err);
+        setLoading(true);
+        const data = await CategoriesService.getCategories();
+        setCategories(data);
+      } catch (error) {
+        console.error('Error fetching categories:', error);
+        // Mantén las categorías estáticas en caso de error
       } finally {
         setLoading(false);
       }
@@ -63,6 +63,36 @@ export default function Home() {
           title={category.name}
         />
       ))}
+      
+      <section className="py-16 bg-gray-50">
+        <div className="container">
+          <h2 className="text-3xl font-bold text-center mb-12">
+            Explora por categorías
+          </h2>
+          <Categories />
+        </div>
+      </section>
+      
+      <section className="py-16">
+        <div className="container">
+          <h2 className="text-3xl font-bold text-center mb-12">
+            Anuncios destacados
+          </h2>
+          <Suspense fallback={<FeaturedListingsSkeleton />}>
+            <FeaturedListings />
+          </Suspense>
+        </div>
+      </section>
     </main>
+  );
+}
+
+function FeaturedListingsSkeleton() {
+  return (
+    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+      {Array(8).fill(0).map((_, i) => (
+        <SkeletonCard key={i} />
+      ))}
+    </div>
   );
 }

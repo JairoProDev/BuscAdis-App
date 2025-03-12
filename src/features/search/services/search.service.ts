@@ -1,82 +1,63 @@
-import { supabase } from '@/lib/supabase';
+import { DynamoDBClient } from '@aws-sdk/client-dynamodb';
+import { DynamoDBDocumentClient, ScanCommand } from '@aws-sdk/lib-dynamodb';
+
+const client = new DynamoDBClient({ region: process.env.NEXT_PUBLIC_AWS_REGION || 'us-east-1' });
+const docClient = DynamoDBDocumentClient.from(client);
 
 export class SearchService {
-  static async searchListings({
-    query,
-    category,
-    location,
-    minPrice,
-    maxPrice,
-    sortBy,
-    page = 1,
-    limit = 20
-  }: {
+  static async searchListings(params: {
     query?: string;
     category?: string;
     location?: string;
     minPrice?: number;
     maxPrice?: number;
-    sortBy?: string;
     page?: number;
     limit?: number;
   }) {
     try {
-      let queryBuilder = supabase
-        .from('listings')
-        .select('*, user:profiles(*)', { count: 'exact' })
-        .eq('is_active', true);
+      let filterExpression = 'isActive = :isActive';
+      let expressionAttributeValues: any = {
+        ':isActive': true
+      };
 
-      // Aplicar filtros
-      if (query) {
-        queryBuilder = queryBuilder.or(
-          `title.ilike.%${query}%,description.ilike.%${query}%`
-        );
+      if (params.query) {
+        filterExpression += ' AND (contains(title, :query) OR contains(description, :query))';
+        expressionAttributeValues[':query'] = params.query.toLowerCase();
       }
 
-      if (category) {
-        queryBuilder = queryBuilder.eq('category_id', category);
+      if (params.category) {
+        filterExpression += ' AND category = :category';
+        expressionAttributeValues[':category'] = params.category;
       }
 
-      if (location) {
-        queryBuilder = queryBuilder.eq('location', location);
+      if (params.location) {
+        filterExpression += ' AND contains(location, :location)';
+        expressionAttributeValues[':location'] = params.location;
       }
 
-      if (minPrice) {
-        queryBuilder = queryBuilder.gte('price', minPrice);
+      if (params.minPrice) {
+        filterExpression += ' AND price >= :minPrice';
+        expressionAttributeValues[':minPrice'] = params.minPrice;
       }
 
-      if (maxPrice) {
-        queryBuilder = queryBuilder.lte('price', maxPrice);
+      if (params.maxPrice) {
+        filterExpression += ' AND price <= :maxPrice';
+        expressionAttributeValues[':maxPrice'] = params.maxPrice;
       }
 
-      // Aplicar ordenamiento
-      switch (sortBy) {
-        case 'price_asc':
-          queryBuilder = queryBuilder.order('price', { ascending: true });
-          break;
-        case 'price_desc':
-          queryBuilder = queryBuilder.order('price', { ascending: false });
-          break;
-        case 'date_desc':
-          queryBuilder = queryBuilder.order('created_at', { ascending: false });
-          break;
-        default:
-          queryBuilder = queryBuilder.order('created_at', { ascending: false });
-      }
+      const command = new ScanCommand({
+        TableName: 'Listings',
+        FilterExpression: filterExpression,
+        ExpressionAttributeValues: expressionAttributeValues,
+        Limit: params.limit || 20
+      });
 
-      // Aplicar paginación
-      const from = (page - 1) * limit;
-      const to = from + limit - 1;
-      queryBuilder = queryBuilder.range(from, to);
-
-      const { data, error, count } = await queryBuilder;
-
-      if (error) throw error;
-
+      const { Items: listings, Count: total } = await docClient.send(command);
+      
       return {
-        listings: data,
-        total: count || 0,
-        pages: Math.ceil((count || 0) / limit)
+        listings: listings || [],
+        total: total || 0,
+        pages: Math.ceil((total || 0) / (params.limit || 20))
       };
     } catch (error) {
       console.error('Error searching listings:', error);

@@ -188,3 +188,5 @@ export const BotIcon: IconType = (props) => (
     />
   </svg>
 )
+
+export { default as WhatsAppIcon } from './WhatsAppIcon'

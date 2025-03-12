@@ -17,6 +17,9 @@ import LoadingState from '@/components/ui/LoadingState';
 import ErrorMessage from '@/components/ui/ErrorMessage';
 import { formatDate } from '@/utils/date';
 import { formatPrice } from '@/utils/format';
+import { Carousel } from '@/components/ui/Carousel';
+import { WhatsAppIcon, FlagIcon } from '@/components/icons';
+import LoadingSpinner from '@/components/ui/LoadingSpinner';
 
 interface Listing {
   title: string;
@@ -50,11 +53,12 @@ export default function ListingDetailPage() {
   useEffect(() => {
     const fetchListing = async () => {
       try {
-        const data = await ListingsService.getListing(id);
+        setLoading(true);
+        const data = await ListingsService.getListingById(id);
         setListing(data);
       } catch (err) {
         console.error('Error fetching listing:', err);
-        setError('No se pudo cargar el anuncio');
+        setError('No se pudo cargar el anuncio. Inténtalo de nuevo más tarde.');
       } finally {
         setLoading(false);
       }
@@ -69,7 +73,7 @@ export default function ListingDetailPage() {
   const handleWhatsAppClick = () => {
     if (!listing?.contact?.whatsapp) return;
     
-    const message = encodeURIComponent(`Hola, Me interesa su anuncio "${listing.title}" en BuscAdis.`);
+    const message = encodeURIComponent(`Hola, estoy interesado en tu anuncio "${listing.title}" de Buscadis.`);
     const number = listing.contact.whatsapp.replace(/\D/g, '');
     window.open(`https://wa.me/${number}?text=${message}`, '_blank');
   };
@@ -79,8 +83,8 @@ export default function ListingDetailPage() {
     if (navigator.share) {
       try {
         await navigator.share({
-          title: listing?.title || 'Anuncio en BuscAdis',
-          text: listing?.description || 'Mira este anuncio en BuscAdis',
+          title: listing?.title || 'Anuncio en Buscadis',
+          text: listing?.description || 'Mira este anuncio en Buscadis',
           url: window.location.href
         });
       } catch (err) {
@@ -97,21 +101,28 @@ export default function ListingDetailPage() {
     if (!listing?.contact) return;
 
     if (type === 'whatsapp' && listing.contact.whatsapp) {
-      const message = encodeURIComponent(`Hola, me interesa tu anuncio "${listing.title}" en BuscAdis`);
+      const message = encodeURIComponent(`Hola, estoy interesado en tu anuncio "${listing.title}" de Buscadis`);
       window.open(`https://wa.me/${listing.contact.whatsapp}?text=${message}`, '_blank');
     } else if (type === 'email' && listing.contact.email) {
-      window.location.href = `mailto:${listing.contact.email}?subject=Interés en tu anuncio: ${listing.title}`;
+      window.location.href = `mailto:${listing.contact.email}?subject=Interesado en: ${listing.title}`;
     }
   };
 
   if (loading) {
-    return <LoadingState text="Cargando anuncio..." />;
+    return (
+      <div className="container py-16 min-h-screen flex items-center justify-center">
+        <LoadingSpinner size="lg" />
+      </div>
+    );
   }
 
   if (error || !listing) {
     return (
-      <div className="container mx-auto px-4 py-8">
-        <ErrorMessage message={error || 'No se encontró el anuncio'} />
+      <div className="container py-16 min-h-screen">
+        <div className="bg-red-50 border border-red-100 rounded-xl p-8 text-center">
+          <h1 className="text-2xl font-bold text-red-700 mb-4">Error</h1>
+          <p className="text-red-600">{error || 'Anuncio no encontrado'}</p>
+        </div>
       </div>
     );
   }
@@ -127,130 +138,113 @@ export default function ListingDetailPage() {
   const contact = listing.contact || {};
   const createdAt = new Date(listing.created_at).toLocaleDateString();
 
+  const formatWhatsAppMessage = () => {
+    if (!listing) return '';
+    let message = `Hola, estoy interesado en tu anuncio "${listing.title}" de Buscadis.`;
+    
+    // Personalizar el mensaje según la categoría
+    if (listing.category === 'empleo') {
+      message = `Hola, estoy interesado en la oferta de trabajo "${listing.title}" publicada en Buscadis.`;
+    } else if (listing.category === 'inmuebles') {
+      message = `Hola, estoy interesado en el inmueble "${listing.title}" que tienes en Buscadis.`;
+    }
+    
+    return encodeURIComponent(message);
+  };
+
   return (
-    <div className="min-h-screen bg-gray-50 py-12">
-      <div className="container mx-auto px-4">
-        <div className="max-w-5xl mx-auto bg-white rounded-xl shadow-lg overflow-hidden">
-          {/* Galería de imágenes */}
-          <div className="relative aspect-video">
-            {images.length > 0 ? (
-              <>
-                <Image
-                  src={images[activeImageIndex]}
-                  alt={title}
-                  layout="fill"
-                  objectFit="cover"
-                />
-                {images.length > 1 && (
-                  <div className="absolute bottom-4 left-0 right-0 flex justify-center space-x-2">
-                    {images.map((_, index) => (
-                      <button
-                        key={index}
-                        onClick={() => setActiveImageIndex(index)}
-                        className={`w-3 h-3 rounded-full ${
-                          index === activeImageIndex ? 'bg-primary-500' : 'bg-white bg-opacity-50'
-                        }`}
-                      />
-                    ))}
-                  </div>
-                )}
-              </>
-            ) : (
-              <div className="w-full h-full flex items-center justify-center bg-gray-200">
-                <div className="text-gray-400">
-                  <svg xmlns="http://www.w3.org/2000/svg" className="h-24 w-24" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                  </svg>
-                </div>
-              </div>
-            )}
-          </div>
-
-          <div className="p-8">
-            {/* Título y ubicación */}
-            <div className="flex items-start justify-between mb-6">
-              <div>
-                <h1 className="text-3xl font-bold text-gray-900 mb-2">{title}</h1>
-                <div className="flex items-center text-gray-600">
-                  <MapPinIcon className="w-5 h-5 mr-1" />
-                  {locationText}
-                </div>
-              </div>
-              <div className="text-right">
-                <div className="text-3xl font-bold text-primary-600">
-                  {formatPrice(price, priceType)}
-                </div>
-                <div className="text-sm text-gray-600">
-                  {priceType === 'negotiable' ? 'Precio negociable' : 'Precio fijo'}
-                </div>
-              </div>
+    <div className="container py-8 md:py-12">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        <div className="lg:col-span-2">
+          {/* Imágenes */}
+          {listing.media && listing.media.length > 0 ? (
+            <div className="mb-8 overflow-hidden rounded-xl">
+              <Carousel images={listing.media} />
             </div>
+          ) : (
+            <div className="mb-8 bg-gray-200 h-96 rounded-xl flex items-center justify-center">
+              <span className="text-gray-400 text-lg">Sin imágenes</span>
+            </div>
+          )}
 
-            {/* Características */}
-            <div className="grid grid-cols-2 md:grid-cols-3 gap-6 mb-8">
-              <div className="flex items-center text-gray-600">
-                <ClockIcon className="w-5 h-5 mr-2" />
+          {/* Detalles del anuncio */}
+          <div className="bg-white rounded-xl shadow-md p-6 mb-8">
+            <h1 className="text-2xl md:text-3xl font-bold text-gray-900 mb-4">{title}</h1>
+            
+            <div className="flex items-center justify-between mb-6">
+              <div className="text-xl md:text-2xl font-bold text-primary-600">
+                {formatPrice(price, priceType)}
+              </div>
+              <div className="text-sm text-gray-500">
                 Publicado el {formatDate(createdAt)}
               </div>
-              <div className="flex items-center text-gray-600">
-                <EyeIcon className="w-5 h-5 mr-2" />
-                {listing.views || 0} vistas
-              </div>
-              <div className="flex items-center text-gray-600">
-                <CurrencyDollarIcon className="w-5 h-5 mr-2" />
-                {priceType === 'fixed' ? 'Precio fijo' : 'Precio negociable'}
-              </div>
             </div>
-
-            {/* Descripción */}
+            
             <div className="mb-8">
-              <h2 className="text-xl font-semibold text-gray-900 mb-4">
-                Descripción
-              </h2>
-              <div className="text-gray-700 whitespace-pre-wrap">
-                {description}
+              <h2 className="text-lg font-semibold text-gray-800 mb-3">Descripción</h2>
+              <div className="text-gray-600 whitespace-pre-line">{description}</div>
+            </div>
+            
+            <div className="mb-6">
+              <h2 className="text-lg font-semibold text-gray-800 mb-3">Ubicación</h2>
+              <div className="text-gray-600">
+                {locationText}
               </div>
             </div>
-
-            {/* Botones de acción */}
-            <div className="flex flex-col md:flex-row gap-4">
-              {contact.whatsapp && (
-                <button
-                  onClick={() => handleContactClick('whatsapp')}
-                  className="flex-1 flex items-center justify-center py-3 px-4 bg-green-500 text-white rounded-lg hover:bg-green-600 transition-colors"
-                >
-                  <ChatBubbleLeftIcon className="w-5 h-5 mr-2" />
-                  Contactar por WhatsApp
-                </button>
-              )}
-              
-              {contact.phone && (
-                <button
-                  onClick={() => window.location.href = `tel:${contact.phone}`}
-                  className="flex-1 flex items-center justify-center py-3 px-4 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors"
-                >
-                  <PhoneIcon className="w-5 h-5 mr-2" />
-                  Llamar
-                </button>
-              )}
-              
-              {contact.email && (
-                <button
-                  onClick={() => handleContactClick('email')}
-                  className="flex-1 flex items-center justify-center py-3 px-4 bg-primary-600 text-white rounded-lg hover:bg-primary-700 transition-colors"
-                >
-                  <ChatBubbleLeftIcon className="w-5 h-5 mr-2" />
-                  Contactar por Email
-                </button>
-              )}
-              
-              <button
-                onClick={handleShare}
-                className="flex items-center justify-center py-3 px-4 bg-gray-200 text-gray-800 rounded-lg hover:bg-gray-300 transition-colors"
+            
+            <div className="flex space-x-4">
+              <button 
+                className="text-gray-500 hover:text-gray-700 flex items-center"
+                onClick={() => {
+                  navigator.share({
+                    title: listing.title,
+                    text: `Mira este anuncio en Buscadis: ${listing.title}`,
+                    url: window.location.href
+                  }).catch(err => console.log('Error compartiendo:', err));
+                }}
               >
-                <ShareIcon className="w-5 h-5 mr-2" />
+                <ShareIcon className="w-5 h-5 mr-1" />
                 Compartir
               </button>
+              
+              <button className="text-gray-500 hover:text-red-600 flex items-center">
+                <FlagIcon className="w-5 h-5 mr-1" />
+                Reportar
+              </button>
+            </div>
+          </div>
+        </div>
+        
+        {/* Contacto */}
+        <div className="sticky top-24 h-fit">
+          <div className="bg-white rounded-xl shadow-md p-6">
+            <h2 className="text-xl font-bold text-gray-800 mb-4">Contactar al anunciante</h2>
+            
+            <div className="space-y-4 mb-6">
+              {listing.contact?.whatsapp && (
+                <a
+                  href={`https://wa.me/${listing.contact.whatsapp}?text=${formatWhatsAppMessage()}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="bg-green-500 hover:bg-green-600 text-white py-3 px-4 rounded-lg flex items-center justify-center font-medium transition-colors w-full"
+                >
+                  <WhatsAppIcon className="w-5 h-5 mr-2" />
+                  Contactar por WhatsApp
+                </a>
+              )}
+              
+              {listing.contact?.email && (
+                <a
+                  href={`mailto:${listing.contact.email}?subject=Interesado en: ${listing.title}`}
+                  className="bg-primary-100 hover:bg-primary-200 text-primary-700 py-3 px-4 rounded-lg flex items-center justify-center font-medium transition-colors w-full"
+                >
+                  Contactar por email
+                </a>
+              )}
+            </div>
+            
+            <div className="text-sm text-gray-500">
+              Al contactar al anunciante, menciona que viste su anuncio en Buscadis.
             </div>
           </div>
         </div>

@@ -8,7 +8,6 @@ import { ListingsService } from '@/services/listings.service'
 import AdisoCard from '@/components/AdisoCard'
 import LoadingState from '@/components/ui/LoadingState'
 import ErrorMessage from '@/components/ui/ErrorMessage'
-import { supabase } from '@/lib/supabaseClient'
 
 interface AdisoSectionProps {
   type: CategoryId | 'featured'
@@ -28,28 +27,13 @@ export default function AdisoSection({
   useEffect(() => {
     const fetchAdisos = async () => {
       try {
-        let data;
+        const data = await ListingsService.getListings({
+          category: type === 'featured' ? undefined : type.toLowerCase(),
+          limit: 6,
+          featured: type === 'featured'
+        });
         
-        if (type === 'featured') {
-          // Obtener anuncios destacados
-          const response = await ListingsService.getListings(1, 6);
-          data = response;
-        } else {
-          // Filtrar por tipo/categoría
-          const category = type.toLowerCase();
-          const response = await supabase
-            .from('listings')
-            .select('*')
-            .eq('is_active', true)
-            .eq('type', category)
-            .order('created_at', { ascending: false })
-            .limit(6);
-            
-          if (response.error) throw response.error;
-          data = response.data || [];
-        }
-        
-        setAdisos(data);
+        setAdisos(data.listings);
       } catch (err) {
         console.error(`Error fetching ${type} listings:`, err);
         setError(`No se pudieron cargar los anuncios de ${title}`);

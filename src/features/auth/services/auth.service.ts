@@ -1,115 +1,230 @@
-import { supabase } from '@/lib/supabase';
+import { 
+  CognitoIdentityProviderClient,
+  SignUpCommand,
+  ConfirmSignUpCommand,
+  InitiateAuthCommand,
+  ResendConfirmationCodeCommand,
+  ForgotPasswordCommand,
+  ConfirmForgotPasswordCommand,
+  GlobalSignOutCommand
+} from '@aws-sdk/client-cognito-identity-provider';
+import { awsConfig } from '@/lib/aws-config';
 // Asegúrate de que estas importaciones sean necesarias
 // import { LoginCredentials, RegisterCredentials, AuthUser } from '../types/auth.types';
 
 export class AuthService {
+  private static client = new CognitoIdentityProviderClient(awsConfig);
+  private static CLIENT_ID = process.env.NEXT_PUBLIC_USER_POOL_CLIENT_ID;
+
   static async register({
     email,
     password,
     phone,
     firstName,
     lastName
-  }: {
-    email?: string;
-    password: string;
-    phone?: string;
-    firstName: string;
-    lastName: string;
   }) {
     try {
-      const { data, error } = await supabase.auth.signUp({
-        email: email ?? '',
-        password,
-        options: {
-          data: {
-            first_name: firstName,
-            last_name: lastName,
-            phone: phone ?? ''
-          }
+      const command = new SignUpCommand({
+        ClientId: this.CLIENT_ID,
+        Username: email,
+        Password: password,
+        UserAttributes: [
+          { Name: 'name', Value: `${firstName} ${lastName}` },
+          { Name: 'phone_number', Value: phone },
+          { Name: 'given_name', Value: firstName },
+          { Name: 'family_name', Value: lastName }
+        ]
+      });
+
+      const response = await this.client.send(command);
+      return { 
+        data: response, 
+        error: null 
+      };
+    } catch (error) {
+      console.error('Error en registro:', error);
+      return { 
+        data: null, 
+        error 
+      };
+    }
+  }
+
+  static async confirmSignUp(email, code) {
+    try {
+      const command = new ConfirmSignUpCommand({
+        ClientId: this.CLIENT_ID,
+        Username: email,
+        ConfirmationCode: code
+      });
+
+      const response = await this.client.send(command);
+      return { 
+        data: response, 
+        error: null 
+      };
+    } catch (error) {
+      console.error('Error confirming signup:', error);
+      return { 
+        data: null, 
+        error 
+      };
+    }
+  }
+
+  static async resendConfirmationCode(email) {
+    try {
+      const command = new ResendConfirmationCodeCommand({
+        ClientId: this.CLIENT_ID,
+        Username: email
+      });
+
+      const response = await this.client.send(command);
+      return { 
+        data: response, 
+        error: null 
+      };
+    } catch (error) {
+      console.error('Error resending confirmation code:', error);
+      return { 
+        data: null, 
+        error 
+      };
+    }
+  }
+
+  static async login({ email, password }) {
+    try {
+      const command = new InitiateAuthCommand({
+        AuthFlow: 'USER_PASSWORD_AUTH',
+        ClientId: this.CLIENT_ID,
+        AuthParameters: {
+          USERNAME: email,
+          PASSWORD: password
         }
       });
 
-      if (error) throw error;
-
-      // Insertar en la tabla profiles
-      const { error: profileError } = await supabase
-        .from('profiles')
-        .insert([
-          {
-            id: data.user.id, // Usar el ID del usuario creado
-            full_name: `${firstName} ${lastName}`,
-            phone: phone ?? '',
-            email: email ?? ''
-          }
-        ]);
-
-      if (profileError) throw profileError;
-
-      return data;
-    } catch (error) {
-      console.error('Error en registro:', error);
-      throw error;
-    }
-  }
-
-  static async loginWithEmail({ email, password }: { email: string; password: string }) {
-    try {
-      const { data, error } = await supabase.auth.signInWithPassword({
-        email,
-        password
-      });
-
-      if (error) throw error;
-      return data;
+      const response = await this.client.send(command);
+      
+      // Guardar tokens en cookies seguras
+      if (response.AuthenticationResult) {
+        // Guarda los tokens en cookies HttpOnly
+        document.cookie = `accessToken=${response.AuthenticationResult.AccessToken}; path=/; max-age=3600; SameSite=Strict; Secure`;
+        document.cookie = `idToken=${response.AuthenticationResult.IdToken}; path=/; max-age=86400; SameSite=Strict; Secure`;
+        document.cookie = `refreshToken=${response.AuthenticationResult.RefreshToken}; path=/; max-age=2592000; SameSite=Strict; Secure`;
+      }
+      
+      return { 
+        data: response, 
+        error: null 
+      };
     } catch (error) {
       console.error('Error en login:', error);
-      throw error;
-    }
-  }
-
-  static async loginWithPhone({ phone, code }: { phone: string; code: string }) {
-    try {
-      const { data, error } = await supabase.auth.verifyOtp({
-        phone,
-        token: code,
-        type: 'sms'
-      });
-
-      if (error) throw error;
-      return data;
-    } catch (error) {
-      console.error('Error en login con teléfono:', error);
-      throw error;
-    }
-  }
-
-  static async sendPhoneOtp(phone: string) {
-    try {
-      const { data, error } = await supabase.auth.signInWithOtp({
-        phone
-      });
-
-      if (error) throw error;
-      return data;
-    } catch (error) {
-      console.error('Error enviando OTP:', error);
-      throw error;
+      return { 
+        data: null, 
+        error 
+      };
     }
   }
 
   static async logout() {
     try {
-      const { error } = await supabase.auth.signOut();
-      if (error) throw error;
+      const accessToken = this.getAccessToken();
+      
+      if (accessToken) {
+        const command = new GlobalSignOutCommand({
+          AccessToken: accessToken
+        });
+        
+        await this.client.send(command);
+      }
+      
+      // Eliminar cookies
+      document.cookie = 'accessToken=; path=/; max-age=0; SameSite=Strict; Secure';
+      document.cookie = 'idToken=; path=/; max-age=0; SameSite=Strict; Secure';
+      document.cookie = 'refreshToken=; path=/; max-age=0; SameSite=Strict; Secure';
+      
+      return { success: true };
     } catch (error) {
       console.error('Error en logout:', error);
-      throw error;
+      return { success: false, error };
     }
   }
 
-  static async getCurrentUser(): Promise<AuthUser | null> {
-    const { data: { session }, error } = await supabase.auth.getSession();
-    if (error) throw error;
-    return session?.user ?? null;
+  static async forgotPassword(email) {
+    try {
+      const command = new ForgotPasswordCommand({
+        ClientId: this.CLIENT_ID,
+        Username: email
+      });
+
+      const response = await this.client.send(command);
+      return { 
+        data: response, 
+        error: null 
+      };
+    } catch (error) {
+      console.error('Error in forgot password:', error);
+      return { 
+        data: null, 
+        error 
+      };
+    }
+  }
+
+  static async confirmForgotPassword(email, code, newPassword) {
+    try {
+      const command = new ConfirmForgotPasswordCommand({
+        ClientId: this.CLIENT_ID,
+        Username: email,
+        ConfirmationCode: code,
+        Password: newPassword
+      });
+
+      const response = await this.client.send(command);
+      return { 
+        data: response, 
+        error: null 
+      };
+    } catch (error) {
+      console.error('Error confirming forgot password:', error);
+      return { 
+        data: null, 
+        error 
+      };
+    }
+  }
+
+  static async getCurrentUser() {
+    const idToken = this.getIdToken();
+    if (!idToken) return null;
+    
+    // Decodificar el token JWT para obtener la información del usuario
+    try {
+      const payload = JSON.parse(atob(idToken.split('.')[1]));
+      return {
+        id: payload.sub,
+        email: payload.email,
+        name: payload.name,
+        firstName: payload.given_name,
+        lastName: payload.family_name,
+        phone: payload.phone_number,
+        emailVerified: payload.email_verified === 'true',
+        phoneVerified: payload.phone_number_verified === 'true'
+      };
+    } catch (error) {
+      console.error('Error parsing token:', error);
+      return null;
+    }
+  }
+
+  private static getAccessToken() {
+    const match = document.cookie.match(new RegExp('(^| )accessToken=([^;]+)'));
+    return match ? match[2] : null;
+  }
+
+  private static getIdToken() {
+    const match = document.cookie.match(new RegExp('(^| )idToken=([^;]+)'));
+    return match ? match[2] : null;
   }
 }

@@ -1,4 +1,11 @@
-import { supabase } from '@/lib/supabase';
+import { DynamoDBClient } from '@aws-sdk/client-dynamodb';
+import { DynamoDBDocumentClient, PutCommand, QueryCommand } from '@aws-sdk/lib-dynamodb';
+import { v4 as uuidv4 } from 'uuid';
+
+const client = new DynamoDBClient({ 
+  region: process.env.NEXT_PUBLIC_AWS_REGION || 'us-east-1'
+});
+const docClient = DynamoDBDocumentClient.from(client);
 
 export class AnalyticsService {
   static async trackSearch(data: {
@@ -9,22 +16,25 @@ export class AnalyticsService {
     sessionId: string;
   }) {
     try {
-      const { error } = await supabase
-        .from('search_analytics')
-        .insert({
-          user_id: data.userId,
+      const command = new PutCommand({
+        TableName: 'SearchAnalytics',
+        Item: {
+          id: uuidv4(),
+          userId: data.userId,
           query: data.query,
           filters: data.filters,
-          results_count: data.resultsCount,
-          session_id: data.sessionId,
-          device_info: {
+          resultsCount: data.resultsCount,
+          sessionId: data.sessionId,
+          deviceInfo: {
             userAgent: navigator.userAgent,
             platform: navigator.platform,
             language: navigator.language
-          }
-        });
+          },
+          createdAt: new Date().toISOString()
+        }
+      });
 
-      if (error) throw error;
+      await docClient.send(command);
     } catch (error) {
       console.error('Error tracking search:', error);
     }
@@ -47,16 +57,35 @@ export class AnalyticsService {
 
   static async getPopularSearchTerms(days: number = 7) {
     try {
-      const { data, error } = await supabase
-        .from('search_analytics')
-        .select('query, count(*)')
-        .gte('created_at', new Date(Date.now() - days * 24 * 60 * 60 * 1000).toISOString())
-        .group('query')
-        .order('count', { ascending: false })
-        .limit(10);
+      const startDate = new Date();
+      startDate.setDate(startDate.getDate() - days);
 
-      if (error) throw error;
-      return data;
+      const command = new QueryCommand({
+        TableName: 'SearchAnalytics',
+        IndexName: 'QueryIndex',
+        KeyConditionExpression: 'createdAt >= :startDate',
+        ExpressionAttributeValues: {
+          ':startDate': startDate.toISOString()
+        },
+        Select: 'ALL_PROJECTED_ATTRIBUTES'
+      });
+
+      const { Items: searches } = await docClient.send(command);
+      
+      if (!searches) return [];
+
+      // Agrupar por término de búsqueda y contar
+      const searchCounts = searches.reduce((acc, search) => {
+        const query = search.query.toLowerCase();
+        acc[query] = (acc[query] || 0) + 1;
+        return acc;
+      }, {});
+
+      // Convertir a array y ordenar
+      return Object.entries(searchCounts)
+        .map(([query, count]) => ({ query, count }))
+        .sort((a, b) => b.count - a.count)
+        .slice(0, 10);
     } catch (error) {
       console.error('Error getting popular search terms:', error);
       throw error;

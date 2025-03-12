@@ -1,20 +1,24 @@
-import { supabase } from '@/lib/supabase';
+import { DynamoDBClient } from '@aws-sdk/client-dynamodb';
+import { DynamoDBDocumentClient, QueryCommand, PutCommand } from '@aws-sdk/lib-dynamodb';
+import { v4 as uuidv4 } from 'uuid';
+
+const client = new DynamoDBClient({ region: process.env.NEXT_PUBLIC_AWS_REGION || 'us-east-1' });
+const docClient = DynamoDBDocumentClient.from(client);
 
 export class MessagesService {
   static async getConversations(userId: string) {
     try {
-      const { data, error } = await supabase
-        .from('conversations')
-        .select(`
-          *,
-          listing:listings(*),
-          messages:messages(*)
-        `)
-        .or(`sender_id.eq.${userId},receiver_id.eq.${userId}`)
-        .order('updated_at', { ascending: false });
+      const command = new QueryCommand({
+        TableName: 'Conversations',
+        IndexName: 'UserConversationsIndex',
+        KeyConditionExpression: 'participantId = :userId',
+        ExpressionAttributeValues: {
+          ':userId': userId
+        }
+      });
 
-      if (error) throw error;
-      return data;
+      const { Items: conversations } = await docClient.send(command);
+      return conversations || [];
     } catch (error) {
       console.error('Error getting conversations:', error);
       throw error;
@@ -23,16 +27,19 @@ export class MessagesService {
 
   static async sendMessage(conversationId: string, senderId: string, content: string) {
     try {
-      const { data, error } = await supabase
-        .from('messages')
-        .insert({
-          conversation_id: conversationId,
-          sender_id: senderId,
-          content: content
-        });
+      const command = new PutCommand({
+        TableName: 'Messages',
+        Item: {
+          id: uuidv4(),
+          conversationId,
+          senderId,
+          content,
+          createdAt: new Date().toISOString()
+        }
+      });
 
-      if (error) throw error;
-      return data;
+      await docClient.send(command);
+      return { success: true };
     } catch (error) {
       console.error('Error sending message:', error);
       throw error;

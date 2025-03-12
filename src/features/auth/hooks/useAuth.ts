@@ -1,94 +1,68 @@
-import { create } from 'zustand';
+import { useState, useEffect, useCallback } from 'react';
 import { AuthService } from '../services/auth.service';
-import { AuthState, LoginCredentials, RegisterCredentials } from '../types/auth.types';
-import { supabase } from '@/lib/supabase';
+import { useRouter } from 'next/navigation';
+import { CognitoUser } from '@aws-amplify/auth';
 
-interface AuthState {
-  user: any | null;
-  loading: boolean;
-  error: string | null;
-  isAuthenticated: boolean;
-  register: (data: any) => Promise<void>;
-  loginWithEmail: (data: any) => Promise<void>;
-  loginWithPhone: (data: any) => Promise<void>;
-  sendPhoneOtp: (phone: string) => Promise<void>;
-  logout: () => Promise<void>;
-  clearError: () => void;
-}
+export function useAuth() {
+  const [user, setUser] = useState<CognitoUser | null>(null);
+  const [loading, setLoading] = useState(true);
+  const router = useRouter();
 
-export const useAuth = create<AuthState>((set) => ({
-  user: null,
-  loading: true,
-  error: null,
-  isAuthenticated: false,
-
-  register: async (data) => {
+  const checkSession = useCallback(async () => {
     try {
-      set({ loading: true, error: null });
-      const result = await AuthService.register(data);
-      set({ user: result.user, isAuthenticated: true });
-    } catch (error: any) {
-      set({ error: error.message });
+      setLoading(true);
+      const currentUser = await AuthService.getCurrentUser();
+      setUser(currentUser);
+    } catch (error) {
+      console.error('Error checking session:', error);
+      setUser(null);
     } finally {
-      set({ loading: false });
+      setLoading(false);
     }
-  },
+  }, []);
 
-  loginWithEmail: async (data) => {
+  useEffect(() => {
+    checkSession();
+    
+    // Verificar la sesión cada 15 minutos
+    const intervalId = setInterval(checkSession, 15 * 60 * 1000);
+    
+    return () => clearInterval(intervalId);
+  }, [checkSession]);
+
+  const login = async (credentials: any) => {
+    setLoading(true);
     try {
-      set({ loading: true, error: null });
-      const result = await AuthService.loginWithEmail(data);
-      set({ user: result.user, isAuthenticated: true });
-    } catch (error: any) {
-      set({ error: error.message });
+      const result = await AuthService.login(credentials);
+      await checkSession();
+      return { success: true };
+    } catch (error) {
+      console.error('Error during login:', error);
+      return { 
+        success: false, 
+        message: error.message || 'Error durante el inicio de sesión' 
+      };
     } finally {
-      set({ loading: false });
+      setLoading(false);
     }
-  },
+  };
 
-  loginWithPhone: async (data) => {
+  const logout = async () => {
     try {
-      set({ loading: true, error: null });
-      const result = await AuthService.loginWithPhone(data);
-      set({ user: result.user, isAuthenticated: true });
-    } catch (error: any) {
-      set({ error: error.message });
-    } finally {
-      set({ loading: false });
-    }
-  },
-
-  sendPhoneOtp: async (phone) => {
-    try {
-      set({ loading: true, error: null });
-      await AuthService.sendPhoneOtp(phone);
-    } catch (error: any) {
-      set({ error: error.message });
-    } finally {
-      set({ loading: false });
-    }
-  },
-
-  logout: async () => {
-    try {
-      set({ loading: true, error: null });
       await AuthService.logout();
-      set({ user: null, isAuthenticated: false });
-    } catch (error: any) {
-      set({ error: error.message });
-    } finally {
-      set({ loading: false });
+      setUser(null);
+      router.push('/');
+    } catch (error) {
+      console.error('Error during logout:', error);
     }
-  },
+  };
 
-  clearError: () => set({ error: null })
-}));
-
-// Inicializar el listener de sesión
-supabase.auth.onAuthStateChange((event, session) => {
-  if (session) {
-    useAuth.setState({ user: session.user, isAuthenticated: true });
-  } else {
-    useAuth.setState({ user: null, isAuthenticated: false });
-  }
-});
+  return {
+    user,
+    loading,
+    isAuthenticated: !!user,
+    login,
+    logout,
+    checkSession
+  };
+}

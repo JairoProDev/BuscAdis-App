@@ -1,6 +1,8 @@
-import { supabase } from '@/lib/supabaseClient';
+import { DynamoDBClient } from '@aws-sdk/client-dynamodb';
+import { DynamoDBDocumentClient, QueryCommand, ScanCommand } from '@aws-sdk/lib-dynamodb';
 import { Cache } from '@/utils/cache';
 import { categories as staticCategories } from '@/data/categories';
+import { awsConfig } from '@/lib/aws-config';
 
 // Mapeo de nombres de iconos a componentes reales
 import { 
@@ -15,6 +17,9 @@ import {
   HeartIcon
 } from '@heroicons/react/24/outline';
 
+const client = new DynamoDBClient(awsConfig);
+const docClient = DynamoDBDocumentClient.from(client);
+
 const iconMap = {
   'BriefcaseIcon': BriefcaseIcon,
   'HomeIcon': HomeIcon,
@@ -27,72 +32,55 @@ const iconMap = {
   'HeartIcon': HeartIcon
 };
 
+export const Categories = staticCategories; // Exporta las categorías estáticas
+
 export class CategoriesService {
   static async getCategories() {
     try {
-      const { data, error } = await supabase
-        .from('categories')
-        .select('*');
-        
-      if (error) throw error;
-      
-      // Si no hay datos, usar categorías estáticas
-      if (!data || data.length === 0) {
-        return staticCategories;
-      }
-      
-      // Convertir los datos a un formato compatible
-      const formattedCategories = {};
-      
-      // Usar las categorías estáticas como base para mantener los iconos
-      Object.keys(staticCategories).forEach(key => {
-        formattedCategories[key] = { ...staticCategories[key] };
+      const command = new ScanCommand({
+        TableName: 'Categories'
       });
       
-      // Actualizar con datos reales
-      data.forEach(cat => {
-        if (formattedCategories[cat.name]) {
-          formattedCategories[cat.name] = {
-            ...formattedCategories[cat.name],
-            description: cat.description || formattedCategories[cat.name].description,
-            gradient: cat.gradient || formattedCategories[cat.name].gradient,
-            stats: cat.stats || formattedCategories[cat.name].stats,
-          };
-        }
-      });
-      
-      return formattedCategories;
+      const { Items: data } = await docClient.send(command);
+      return data || [];
     } catch (error) {
       console.error('Error fetching categories:', error);
-      return staticCategories;
+      throw new Error(`Error fetching categories: ${error.message}`);
     }
   }
   
-  static async getCategoryCount(categoryName) {
+  static async getCategoryCount(categoryName: string) {
     try {
-      const { count, error } = await supabase
-        .from('listings')
-        .select('*', { count: 'exact', head: true })
-        .eq('type', categoryName.toLowerCase());
-        
-      if (error) throw error;
-      return count || 0;
+      const command = new QueryCommand({
+        TableName: 'Listings',
+        IndexName: 'CategoryIndex',
+        KeyConditionExpression: 'category = :category',
+        ExpressionAttributeValues: {
+          ':category': categoryName.toLowerCase()
+        },
+        Select: 'COUNT'
+      });
+
+      const { Count } = await docClient.send(command);
+      return Count || 0;
     } catch (error) {
       console.error(`Error fetching count for category ${categoryName}:`, error);
       return 0;
     }
   }
   
-  static async getCategoryWithTypes(categoryId) {
+  static async getCategoryWithTypes(categoryId: string) {
     try {
-      const { data, error } = await supabase
-        .from('categories')
-        .select('*, types(*)')
-        .eq('id', categoryId)
-        .single();
-        
-      if (error) throw new Error(error.message);
-      return data;
+      const command = new QueryCommand({
+        TableName: 'CategoryTypes',
+        KeyConditionExpression: 'categoryId = :categoryId',
+        ExpressionAttributeValues: {
+          ':categoryId': categoryId
+        }
+      });
+
+      const { Items: data } = await docClient.send(command);
+      return data || [];
     } catch (error) {
       console.error(`Error fetching category ${categoryId}:`, error);
       return null;

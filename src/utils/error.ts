@@ -20,12 +20,12 @@ export const handleApiError = (error: any) => {
     };
   }
 
-  // Error de Supabase
-  if (error?.code && error?.message) {
+  // Error de AWS
+  if (error?.name === 'ConditionalCheckFailedException') {
     return {
-      message: error.message,
-      code: error.code,
-      status: error.status || 500
+      message: 'El recurso no existe o no tienes permiso para acceder',
+      code: 'CONDITIONAL_CHECK_FAILED',
+      status: 404
     };
   }
 

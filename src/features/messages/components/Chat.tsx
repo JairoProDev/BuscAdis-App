@@ -4,6 +4,7 @@ import { useState, useEffect, useRef } from 'react';
 import { useAuth } from '@/features/auth/hooks/useAuth';
 import { MessagesService } from '../services/messages.service';
 import { PaperAirplaneIcon } from '@heroicons/react/24/solid';
+import { ApiGatewayManagementApiClient, PostToConnectionCommand } from '@aws-sdk/client-apigatewaymanagementapi';
 
 interface ChatProps {
   conversationId: string;
@@ -16,22 +17,24 @@ export default function Chat({ conversationId, otherUser, listing }: ChatProps) 
   const [newMessage, setNewMessage] = useState('');
   const { user } = useAuth();
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  const wsRef = useRef(null);
 
   useEffect(() => {
-    const subscription = supabase
-      .channel('messages')
-      .on('postgres_changes', {
-        event: 'INSERT',
-        schema: 'public',
-        table: 'messages',
-        filter: `conversation_id=eq.${conversationId}`
-      }, (payload) => {
-        setMessages((prev: any) => [...prev, payload.new]);
-      })
-      .subscribe();
+    // Conectar al WebSocket de API Gateway
+    const ws = new WebSocket(process.env.NEXT_PUBLIC_WS_URL);
+    wsRef.current = ws;
+
+    ws.onmessage = (event) => {
+      const message = JSON.parse(event.data);
+      if (message.conversationId === conversationId) {
+        setMessages((prev) => [...prev, message]);
+      }
+    };
 
     return () => {
-      subscription.unsubscribe();
+      if (wsRef.current) {
+        wsRef.current.close();
+      }
     };
   }, [conversationId]);
 

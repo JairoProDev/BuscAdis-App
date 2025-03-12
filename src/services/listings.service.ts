@@ -1,8 +1,16 @@
-import axios from 'axios';
-import { CategoryOption } from '@/types/categories';
-import { Location, MediaFile, PriceInfo } from '@/types/publish';
-import { API_URL } from '@/config/constants'
-import { supabase } from '@/lib/supabaseClient';
+import { DynamoDBClient } from '@aws-sdk/client-dynamodb';
+import { 
+  DynamoDBDocumentClient, 
+  PutCommand, 
+  GetCommand, 
+  QueryCommand, 
+  ScanCommand,
+  DeleteCommand,
+  UpdateCommand
+} from '@aws-sdk/lib-dynamodb';
+import { v4 as uuidv4 } from 'uuid';
+import { AuthService } from '@/features/auth/services/auth.service';
+import { awsConfig } from '@/lib/aws-config';
 
 export interface QuickListingData {
   title: string;
@@ -46,6 +54,9 @@ export interface QuickListingData {
 }
 
 export class ListingsService {
+  private static client = new DynamoDBClient(awsConfig);
+  private static docClient = DynamoDBDocumentClient.from(this.client);
+
   static async createListing(data) {
     try {
       // Validar datos requeridos
@@ -53,270 +64,297 @@ export class ListingsService {
         throw new Error('El título y la descripción son obligatorios');
       }
 
-      // Crear el listado
-      const { data: listing, error } = await supabase
-        .from('listings')
-        .insert([
-          {
-            title: data.title,
-            description: data.description,
-            price: data.price?.amount || 0,
-            price_type: data.price?.type || 'fixed',
-            category: data.category?.id || 'otros',
-            location: {
-              city: data.location?.city || '',
-              region: data.location?.region?.name || '',
-              coordinates: data.location?.coordinates || null
-            },
-            contact: {
-              whatsapp: data.contact?.whatsapp || '',
-              email: data.contact?.email || ''
-            },
-            media: data.media || [],
-            is_active: true,
-            created_at: new Date().toISOString()
-          }
-        ])
-        .select();
+      const currentUser = await AuthService.getCurrentUser();
+      if (!currentUser) {
+        throw new Error('Usuario no autenticado');
+      }
 
-      if (error) throw error;
-      return listing[0];
+      const listingId = uuidv4();
+      
+      const command = new PutCommand({
+        TableName: 'Listings',
+        Item: {
+          id: listingId,
+          userId: currentUser.id,
+          title: data.title,
+          description: data.description,
+          price: data.price?.amount || 0,
+          priceType: data.price?.type || 'fixed',
+          category: data.category?.id || 'otros',
+          location: {
+            city: data.location?.city || '',
+            region: data.location?.region?.name || '',
+            coordinates: data.location?.coordinates || null
+          },
+          contact: {
+            whatsapp: data.contact?.whatsapp || '',
+            email: data.contact?.email || ''
+          },
+          media: data.media || [],
+          isActive: true,
+          createdAt: new Date().toISOString(),
+          updatedAt: new Date().toISOString()
+        }
+      });
+
+      await this.docClient.send(command);
+      return { id: listingId };
     } catch (error) {
       console.error('Error creating listing:', error);
       throw error;
     }
   }
 
-  static async getListings(options = {}) {
-    const {
-      page = 1,
-      limit = 10,
-      category,
-      search,
-      priceMin,
-      priceMax,
-      sortBy = 'created_at',
-      sortOrder = 'desc'
-    } = options;
-
+  static async getListingById(id) {
     try {
-      let query = supabase
-        .from('listings')
-        .select('*', { count: 'exact' })
-        .eq('is_active', true);
+      const command = new GetCommand({
+        TableName: 'Listings',
+        Key: { id }
+      });
 
-      // Aplicar filtros
-      if (category) {
-        query = query.eq('category', category.toLowerCase());
+      const response = await this.docClient.send(command);
+      return response.Item;
+    } catch (error) {
+      console.error('Error getting listing:', error);
+      throw error;
+    }
+  }
+
+  static async getListingsByUser(userId) {
+    try {
+      const command = new QueryCommand({
+        TableName: 'Listings',
+        IndexName: 'UserIdIndex',
+        KeyConditionExpression: 'userId = :userId',
+        ExpressionAttributeValues: {
+          ':userId': userId
+        }
+      });
+
+      const response = await this.docClient.send(command);
+      return response.Items;
+    } catch (error) {
+      console.error('Error getting user listings:', error);
+      throw error;
+    }
+  }
+
+  static async getListings(params) {
+    try {
+      let filterExpressions = [];
+      let expressionAttributeValues = {};
+      
+      if (params.category) {
+        filterExpressions.push('category = :category');
+        expressionAttributeValues[':category'] = params.category;
+      }
+      
+      if (params.query) {
+        filterExpressions.push('contains(title, :query) OR contains(description, :query)');
+        expressionAttributeValues[':query'] = params.query;
+      }
+      
+      if (params.minPrice) {
+        filterExpressions.push('price >= :minPrice');
+        expressionAttributeValues[':minPrice'] = Number(params.minPrice);
+      }
+      
+      if (params.maxPrice) {
+        filterExpressions.push('price <= :maxPrice');
+        expressionAttributeValues[':maxPrice'] = Number(params.maxPrice);
+      }
+      
+      if (params.location) {
+        filterExpressions.push('contains(location.city, :location) OR contains(location.region, :location)');
+        expressionAttributeValues[':location'] = params.location;
       }
 
-      if (search) {
-        query = query.or(`title.ilike.%${search}%,description.ilike.%${search}%`);
+      const command = new ScanCommand({
+        TableName: 'Listings',
+        FilterExpression: filterExpressions.length > 0 ? filterExpressions.join(' AND ') : undefined,
+        ExpressionAttributeValues: Object.keys(expressionAttributeValues).length > 0 ? expressionAttributeValues : undefined,
+        Limit: params.limit || 20
+      });
+
+      const response = await this.docClient.send(command);
+      
+      // Ordenar resultados según el parámetro sortBy
+      let sortedItems = response.Items || [];
+      
+      if (params.sortBy) {
+        switch (params.sortBy) {
+          case 'price_asc':
+            sortedItems.sort((a, b) => a.price - b.price);
+            break;
+          case 'price_desc':
+            sortedItems.sort((a, b) => b.price - a.price);
+            break;
+          case 'date_desc':
+            sortedItems.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+            break;
+          case 'date_asc':
+            sortedItems.sort((a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime());
+            break;
+          case 'featured':
+            // Aquí podrías implementar una lógica para destacados
+            break;
+          default:
+            sortedItems.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+        }
       }
-
-      if (priceMin !== undefined) {
-        query = query.gte('price', priceMin);
-      }
-
-      if (priceMax !== undefined) {
-        query = query.lte('price', priceMax);
-      }
-
-      // Aplicar ordenamiento
-      query = query.order(sortBy, { ascending: sortOrder === 'asc' });
-
-      // Aplicar paginación
-      const from = (page - 1) * limit;
-      const to = from + limit - 1;
-      query = query.range(from, to);
-
-      const { data, error, count } = await query;
-
-      if (error) throw error;
-
+      
+      // Implementar paginación manual
+      const startIndex = (params.page - 1) * (params.limit || 20);
+      const paginatedItems = sortedItems.slice(startIndex, startIndex + (params.limit || 20));
+      
       return {
-        listings: data || [],
-        total: count || 0,
-        page,
-        limit,
-        totalPages: Math.ceil((count || 0) / limit)
+        listings: paginatedItems,
+        total: sortedItems.length,
+        pages: Math.ceil(sortedItems.length / (params.limit || 20))
       };
     } catch (error) {
-      console.error('Error fetching listings:', error);
+      console.error('Error getting listings:', error);
       throw error;
     }
   }
 
-  static async getListing(id) {
+  static async updateListing(id, data) {
     try {
-      const { data, error } = await supabase
-        .from('listings')
-        .select('*')
-        .eq('id', id)
-        .single();
-
-      if (error) throw error;
-      return data;
+      const currentUser = await AuthService.getCurrentUser();
+      if (!currentUser) {
+        throw new Error('Usuario no autenticado');
+      }
+      
+      // Verificar que el anuncio pertenece al usuario
+      const listing = await this.getListingById(id);
+      if (!listing) {
+        throw new Error('Anuncio no encontrado');
+      }
+      
+      if (listing.userId !== currentUser.id) {
+        throw new Error('No tienes permiso para editar este anuncio');
+      }
+      
+      // Construir expresiones de actualización
+      let updateExpression = 'SET updatedAt = :updatedAt';
+      let expressionAttributeValues = {
+        ':updatedAt': new Date().toISOString()
+      };
+      
+      // Actualizar solo los campos proporcionados
+      if (data.title) {
+        updateExpression += ', title = :title';
+        expressionAttributeValues[':title'] = data.title;
+      }
+      
+      if (data.description) {
+        updateExpression += ', description = :description';
+        expressionAttributeValues[':description'] = data.description;
+      }
+      
+      if (data.price) {
+        updateExpression += ', price = :price';
+        expressionAttributeValues[':price'] = data.price.amount;
+        
+        updateExpression += ', priceType = :priceType';
+        expressionAttributeValues[':priceType'] = data.price.type;
+      }
+      
+      if (data.category) {
+        updateExpression += ', category = :category';
+        expressionAttributeValues[':category'] = data.category;
+      }
+      
+      if (data.location) {
+        updateExpression += ', location = :location';
+        expressionAttributeValues[':location'] = {
+          city: data.location.city || '',
+          region: data.location.region || '',
+          coordinates: data.location.coordinates || null
+        };
+      }
+      
+      if (data.contact) {
+        updateExpression += ', contact = :contact';
+        expressionAttributeValues[':contact'] = {
+          whatsapp: data.contact.whatsapp || '',
+          email: data.contact.email || ''
+        };
+      }
+      
+      if (data.media) {
+        updateExpression += ', media = :media';
+        expressionAttributeValues[':media'] = data.media;
+      }
+      
+      if (data.isActive !== undefined) {
+        updateExpression += ', isActive = :isActive';
+        expressionAttributeValues[':isActive'] = data.isActive;
+      }
+      
+      const command = new UpdateCommand({
+        TableName: 'Listings',
+        Key: { id },
+        UpdateExpression: updateExpression,
+        ExpressionAttributeValues: expressionAttributeValues,
+        ReturnValues: 'ALL_NEW'
+      });
+      
+      const response = await this.docClient.send(command);
+      return response.Attributes;
     } catch (error) {
-      console.error(`Error fetching listing ${id}:`, error);
-      throw error;
-    }
-  }
-
-  static async updateListing(id, updates) {
-    try {
-      const { data, error } = await supabase
-        .from('listings')
-        .update(updates)
-        .eq('id', id)
-        .select();
-
-      if (error) throw error;
-      return data[0];
-    } catch (error) {
-      console.error(`Error updating listing ${id}:`, error);
+      console.error('Error updating listing:', error);
       throw error;
     }
   }
 
   static async deleteListing(id) {
     try {
-      const { error } = await supabase
-        .from('listings')
-        .delete()
-        .eq('id', id);
-
-      if (error) throw error;
-      return true;
+      const currentUser = await AuthService.getCurrentUser();
+      if (!currentUser) {
+        throw new Error('Usuario no autenticado');
+      }
+      
+      // Verificar que el anuncio pertenece al usuario
+      const listing = await this.getListingById(id);
+      if (!listing) {
+        throw new Error('Anuncio no encontrado');
+      }
+      
+      if (listing.userId !== currentUser.id) {
+        throw new Error('No tienes permiso para eliminar este anuncio');
+      }
+      
+      const command = new DeleteCommand({
+        TableName: 'Listings',
+        Key: { id }
+      });
+      
+      await this.docClient.send(command);
+      return { success: true };
     } catch (error) {
-      console.error(`Error deleting listing ${id}:`, error);
+      console.error('Error deleting listing:', error);
       throw error;
     }
   }
 
-  static async getListingsByCategory(categoryId, page = 1, limit = 10) {
+  static async getListings() {
     try {
-      const from = (page - 1) * limit;
-      const to = from + limit - 1;
-      
-      const { data, error, count } = await supabase
-        .from('listings')
-        .select('*', { count: 'exact' })
-        .eq('is_active', true)
-        .eq('type', categoryId.toLowerCase())
-        .order('created_at', { ascending: false })
-        .range(from, to);
-        
-      if (error) throw new Error(error.message);
-      
-      return {
-        listings: data || [],
-        totalCount: count || 0,
-        hasMore: (count || 0) > to + 1
-      };
-    } catch (error) {
-      console.error(`Error fetching listings for category ${categoryId}:`, error);
-      return { listings: [], totalCount: 0, hasMore: false };
-    }
-  }
+      console.log("Fetching listings with config:", awsConfig);
+      const command = new ScanCommand({
+        TableName: 'Listings',
+        FilterExpression: 'isActive = :isActive',
+        ExpressionAttributeValues: {
+          ':isActive': true
+        }
+      });
 
-  static async getFeaturedListings(limit = 6) {
-    try {
-      const { data, error } = await supabase
-        .from('listings')
-        .select('*')
-        .eq('is_active', true)
-        .eq('is_featured', true)
-        .limit(limit);
-        
-      if (error) throw new Error(error.message);
-      return data || [];
+      const { Items: listings } = await this.docClient.send(command);
+      return listings || [];
     } catch (error) {
-      console.error('Error fetching featured listings:', error);
+      console.error('Error getting listings:', error);
+      // Retorna un array vacío en caso de error para no interrumpir la carga de la página
       return [];
-    }
-  }
-
-  static async getRecentListings(limit = 10) {
-    try {
-      const { data, error } = await supabase
-        .from('listings')
-        .select('*')
-        .eq('is_active', true)
-        .order('created_at', { ascending: false })
-        .limit(limit);
-        
-      if (error) throw new Error(error.message);
-      return data || [];
-    } catch (error) {
-      console.error('Error fetching recent listings:', error);
-      return [];
-    }
-  }
-
-  static async searchListings(params = {}) {
-    try {
-      const { 
-        query = '', 
-        category = null,
-        type = null,
-        minPrice = null,
-        maxPrice = null,
-        location = null,
-        page = 1,
-        limit = 10
-      } = params;
-
-      const from = (page - 1) * limit;
-      const to = from + limit - 1;
-      
-      let queryBuilder = supabase
-        .from('listings')
-        .select('*', { count: 'exact' })
-        .eq('is_active', true);
-
-      if (query) {
-        queryBuilder = queryBuilder.or(`title.ilike.%${query}%,description.ilike.%${query}%`);
-      }
-
-      if (category) {
-        queryBuilder = queryBuilder.eq('type', category);
-      }
-
-      if (type) {
-        queryBuilder = queryBuilder.eq('sub_type', type);
-      }
-
-      if (minPrice !== null) {
-        queryBuilder = queryBuilder.gte('price', minPrice);
-      }
-
-      if (maxPrice !== null) {
-        queryBuilder = queryBuilder.lte('price', maxPrice);
-      }
-
-      if (location) {
-        queryBuilder = queryBuilder.or(`location->city.ilike.%${location}%,location->country.ilike.%${location}%`);
-      }
-
-      queryBuilder = queryBuilder
-        .order('created_at', { ascending: false })
-        .range(from, to);
-
-      const { data, error, count } = await queryBuilder;
-      
-      if (error) throw error;
-      
-      return {
-        listings: data || [],
-        totalCount: count || 0,
-        hasMore: (count || 0) > to + 1,
-        currentPage: page,
-        totalPages: Math.ceil((count || 0) / limit)
-      };
-    } catch (error) {
-      console.error('Error searching listings:', error);
-      throw new Error(error instanceof Error ? error.message : 'Error al buscar anuncios');
     }
   }
 } 
