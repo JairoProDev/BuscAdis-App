@@ -54,8 +54,8 @@ export default function ClassifiedadDetailPage() {
     const fetchClassifiedad = async () => {
       try {
         setLoading(true);
-        const data = await ClassifiedadsService.getClassifiedadById(id);
-        setClassifiedad(data);
+        const data = await ClassifiedadsService.getClassifiedadById();
+        setClassifiedad(data || []);
       } catch (err) {
         console.error('Error fetching classifiedad:', err);
         setError('No se pudo cargar el anuncio. Inténtalo de nuevo más tarde.');

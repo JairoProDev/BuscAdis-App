@@ -15,6 +15,7 @@ import { useSearchParams } from 'next/navigation'
 import AdisoCard from '@/components/AdisoCard'
 import LoadingState from '@/components/ui/LoadingState'
 import Pagination from '@/components/ui/Pagination'
+import { SearchService } from '@/services/search.service'
 
 export default function SearchPage() {
   const searchParams = useSearchParams()
@@ -31,6 +32,7 @@ export default function SearchPage() {
   const [searchTerm, setSearchTerm] = useState('')
   const [totalPages, setTotalPages] = useState(1)
   const [error, setError] = useState('')
+  const [classifiedads, setClassifiedads] = useState([])
 
   const handleSearch = (query: string) => {
     console.log('Búsqueda:', { query, filters, category: selectedCategory })
@@ -58,30 +60,36 @@ export default function SearchPage() {
     const fetchClassifiedads = async () => {
       setLoading(true)
       try {
-        const result = await ClassifiedadsService.getClassifiedads({
-          ...filters,
-          sortBy: 'created_at',
-          sortOrder: 'desc'
-        })
-        
-        setResults(result.classifiedads)
-        setTotalPages(result.totalPages)
+        const data = await SearchService.searchClassifiedads()
+        setClassifiedads(data || [])
+        setResults(data || [])
+        setTotalPages(1)
       } catch (err) {
+        console.error('Error al cargar los anuncios:', err)
         setError('Error al cargar los anuncios')
-        console.error(err)
+        setClassifiedads([])
+        setResults([])
+        setTotalPages(1)
       } finally {
         setLoading(false)
       }
     }
 
     fetchClassifiedads()
-  }, [filters])
+  }, [])
 
   const handlePageChange = (newPage: number) => {
     setFilters(prev => ({
       ...prev,
       page: newPage
     }))
+  }
+
+  if (loading) return <div>Cargando...</div>
+  if (error) return <div>{error}</div>
+
+  if (!results || results.length === 0) {
+    return <div>No hay anuncios disponibles.</div>
   }
 
   return (
