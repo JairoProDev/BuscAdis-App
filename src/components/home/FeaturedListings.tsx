@@ -11,23 +11,20 @@ export default function FeaturedListings() {
   const [error, setError] = useState('');
 
   useEffect(() => {
-    const fetchFeaturedListings = async () => {
+    const fetchListings = async () => {
       try {
-        setLoading(true);
-        const response = await ListingsService.getListings({
-          limit: 8,
-          sortBy: 'featured'
-        });
-        setListings(response.listings);
+        const data = await ListingsService.getListings();
+        console.log('Featured Listings:', data);
+        setListings(data);
       } catch (err) {
         console.error('Error fetching featured listings:', err);
-        setError('No se pudieron cargar los anuncios destacados.');
+        setError('No se pudieron cargar los anuncios destacados');
       } finally {
         setLoading(false);
       }
     };
 
-    fetchFeaturedListings();
+    fetchListings();
   }, []);
 
   if (loading) {

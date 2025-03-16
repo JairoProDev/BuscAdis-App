@@ -1,53 +1,37 @@
 'use client'
 
-import { motion } from 'framer-motion';
+import React from 'react';
 import Link from 'next/link';
-import { categories as staticCategories } from '@/data/categories';
-import { useEffect, useState } from 'react';
-import { CategoriesService } from '@/services/categories.service';
+import { useState, useEffect } from 'react';
 import LoadingSpinner from '@/components/ui/LoadingSpinner';
 
-// Importar todos los iconos necesarios
+// Importar iconos específicos
 import { 
-  BriefcaseIcon, HomeIcon, TruckIcon, WrenchIcon, 
-  ShoppingBagIcon, GlobeAltIcon, CalendarIcon, 
-  AcademicCapIcon, HeartIcon, QuestionMarkCircleIcon
+  BriefcaseIcon, HomeIcon, TruckIcon
 } from '@heroicons/react/24/outline';
 
 const iconMap = {
-  BriefcaseIcon,
-  HomeIcon,
-  TruckIcon,
-  WrenchIcon,
-  ShoppingBagIcon,
-  GlobeAltIcon,
-  CalendarIcon,
-  AcademicCapIcon,
-  HeartIcon
+  'Empleos': BriefcaseIcon,
+  'Inmuebles': HomeIcon,
+  'Vehículos': TruckIcon,
 };
 
 export default function CategorySlider() {
-  const [categories, setCategories] = useState(staticCategories);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
 
-  useEffect(() => {
-    const loadCategories = async () => {
-      try {
-        setLoading(true);
-        const categoriesData = await CategoriesService.getCategories();
-        console.log('Categories Data:', categoriesData); // Verificar datos
-        setCategories(categoriesData);
-      } catch (error) {
-        console.error('Error loading categories:', error);
-        setError('Error al cargar las categorías');
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    loadCategories();
-  }, []);
+  // Datos estáticos para pruebas
+  const categories = {
+    'Empleos': {
+      gradient: 'from-blue-500 to-blue-700',
+    },
+    'Inmuebles': {
+      gradient: 'from-green-500 to-green-700',
+    },
+    'Vehículos': {
+      gradient: 'from-red-500 to-red-700',
+    }
+  };
 
   if (loading) {
     return <LoadingSpinner />;
@@ -61,18 +45,23 @@ export default function CategorySlider() {
     <div className="py-8">
       <div className="container mx-auto px-4">
         <div className="space-y-6">
-          {Object.entries(categories).map(([key, category]) => (
-            <Link
-              key={key}
-              href={`/buscar?category=${key.toLowerCase()}`}
-              className={`flex flex-col items-center justify-center h-32 rounded-xl bg-gradient-to-br ${category.gradient} text-white p-4 transform hover:scale-105 transition-all duration-300 shadow-md`}
-            >
-              {category.icon && (
-                <category.icon className="w-10 h-10 mb-2" />
-              )}
-              <span className="font-medium text-center">{key}</span>
-            </Link>
-          ))}
+          {Object.entries(categories).map(([key, category]) => {
+            // Obtener el componente de icono del mapa
+            const IconComponent = iconMap[key] || null;
+            
+            return (
+              <Link
+                key={key}
+                href={`/buscar?category=${key.toLowerCase()}`}
+                className={`flex flex-col items-center justify-center h-32 rounded-xl bg-gradient-to-br ${category.gradient} text-white p-4 transform hover:scale-105 transition-all duration-300 shadow-md`}
+              >
+                {IconComponent && (
+                  <IconComponent className="w-10 h-10 mb-2" />
+                )}
+                <span className="font-medium text-center">{key}</span>
+              </Link>
+            );
+          })}
         </div>
       </div>
     </div>

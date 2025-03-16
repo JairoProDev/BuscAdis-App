@@ -8,7 +8,7 @@ const benefits = [
   {
     id: 'alcance',
     title: 'Mayor Alcance',
-    description: 'Llega a millones de usuarios activos en toda Colombia',
+    description: 'Llega a millones de usuarios activos en todo Perú',
     stats: [
       { value: '5M+', label: 'Visitas mensuales' },
       { value: '200k+', label: 'Búsquedas diarias' }

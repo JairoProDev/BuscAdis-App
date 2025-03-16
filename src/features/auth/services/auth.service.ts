@@ -23,6 +23,10 @@ export class AuthService {
     firstName,
     lastName
   }) {
+    if (!this.CLIENT_ID) {
+      throw new Error('Client ID is not defined');
+    }
+
     try {
       const command = new SignUpCommand({
         ClientId: this.CLIENT_ID,

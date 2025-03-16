@@ -2,11 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { CategoriesService, Categories } from '@/services/categories.service';
-import CategorySlider from '@/components/home/CategorySlider';
-import FeaturedAds from '@/components/home/FeaturedAds';
-import AdisoSection from '@/components/home/AdisoSection';
 import Hero from '@/components/home/Hero';
-import CategoryRow from '@/components/home/CategoryRow';
 import Benefits from '@/components/home/Benefits';
 import Tools from '@/components/home/Tools';
 import HowItWorks from '@/components/home/HowItWorks';
@@ -47,8 +43,9 @@ export default function Home() {
   return (
     <main>
       <Hero />
-      <CategorySlider />
-      <CategoryRow />
+      {/* Comentar los componentes que no se están utilizando */}
+      {/* <CategorySlider /> */}
+      {/* <CategoryRow /> */}
       <Benefits />
       <Tools />
       <HowItWorks />
@@ -56,20 +53,13 @@ export default function Home() {
       <Stats />
       <Comparison />
       <CallToAction />
-      {!loading && categories.map((category) => (
-        <AdisoSection 
-          key={category.id}
-          type={category.id}
-          title={category.name}
-        />
-      ))}
       
       <section className="py-16 bg-gray-50">
         <div className="container">
           <h2 className="text-3xl font-bold text-center mb-12">
             Explora por categorías
           </h2>
-          <Categories />
+          {/* <Categories /> */}
         </div>
       </section>
       

@@ -187,7 +187,7 @@ export default function PublishPage() {
       setError('La ciudad es obligatoria');
       return;
     }
-    
+
     setError('');
     setStep(prevStep => Math.min(prevStep + 1, 5));
   };
@@ -203,7 +203,7 @@ export default function PublishPage() {
       setShowAuthPrompt(true);
       return;
     }
-    
+
     setLoading(true);
     setError('');
     
@@ -711,13 +711,13 @@ export default function PublishPage() {
                             animate={{ width: `${progress}%` }}
                           />
                         </div>
-                      </div>
+            </div>
                       <div className="text-2xl font-bold text-primary-900">
                         {progress}%
-                      </div>
-                    </div>
-                  </div>
-                </motion.div>
+            </div>
+          </div>
+        </div>
+              </motion.div>
               </div>
             </div>
           </div>
