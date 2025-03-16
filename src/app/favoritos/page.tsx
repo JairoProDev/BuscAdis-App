@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react';
 import { useAuth } from '@/features/auth/hooks/useAuth';
 import { FavoritesService } from '@/features/favorites/services/favorites.service';
 import ProtectedRoute from '@/features/auth/components/ProtectedRoute';
-import ListingCard from '@/components/listings/ListingCard';
+import ClassifiedadCard from '@/components/classifiedads/ClassifiedadCard';
 
 export default function FavoritesPage() {
   const { user } = useAuth();
@@ -51,9 +51,9 @@ export default function FavoritesPage() {
         ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
             {favorites.map((favorite: any) => (
-              <ListingCard
-                key={favorite.listing.id}
-                listing={favorite.listing}
+              <ClassifiedadCard
+                key={favorite.classifiedad.id}
+                classifiedad={favorite.classifiedad}
                 isFavorite={true}
               />
             ))}

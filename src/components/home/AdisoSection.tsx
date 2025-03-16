@@ -4,7 +4,7 @@ import { motion } from 'framer-motion'
 import { CategoryId, Adiso } from '@/types/marketplace'
 import FeaturedAds from './FeaturedAds'
 import { useEffect, useState } from 'react'
-import { ListingsService } from '@/services/listings.service'
+import { ClassifiedadsService } from '@/services/classifiedads.service'
 import AdisoCard from '@/components/AdisoCard'
 import LoadingState from '@/components/ui/LoadingState'
 import ErrorMessage from '@/components/ui/ErrorMessage'
@@ -27,15 +27,15 @@ export default function AdisoSection({
   useEffect(() => {
     const fetchAdisos = async () => {
       try {
-        const data = await ListingsService.getListings({
+        const data = await ClassifiedadsService.getClassifiedads({
           category: type === 'featured' ? undefined : type.toLowerCase(),
           limit: 6,
           featured: type === 'featured'
         });
         
-        setAdisos(data.listings);
+        setAdisos(data.classifiedads);
       } catch (err) {
-        console.error(`Error fetching ${type} listings:`, err);
+        console.error(`Error fetching ${type} classifiedads:`, err);
         setError(`No se pudieron cargar los anuncios de ${title}`);
       } finally {
         setLoading(false);

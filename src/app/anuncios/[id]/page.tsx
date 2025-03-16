@@ -12,7 +12,7 @@ import {
   EyeIcon,
   ShareIcon
 } from '@heroicons/react/24/outline';
-import { ListingsService } from '@/services/listings.service';
+import { ClassifiedadsService } from '@/services/classifiedads.service';
 import LoadingState from '@/components/ui/LoadingState';
 import ErrorMessage from '@/components/ui/ErrorMessage';
 import { formatDate } from '@/utils/date';
@@ -21,7 +21,7 @@ import { Carousel } from '@/components/ui/Carousel';
 import { WhatsAppIcon, FlagIcon } from '@/components/icons';
 import LoadingSpinner from '@/components/ui/LoadingSpinner';
 
-interface Listing {
+interface Classifiedad {
   title: string;
   description: string;
   price: number;
@@ -40,24 +40,24 @@ interface Listing {
   views?: number;
 }
 
-export default function ListingDetailPage() {
+export default function ClassifiedadDetailPage() {
   const params = useParams();
   const id = params.id;
   
-  const [listing, setListing] = useState<Listing | null>(null);
+  const [classifiedad, setClassifiedad] = useState<Classifiedad | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [activeImageIndex, setActiveImageIndex] = useState(0);
 
   // Cargar datos del anuncio
   useEffect(() => {
-    const fetchListing = async () => {
+    const fetchClassifiedad = async () => {
       try {
         setLoading(true);
-        const data = await ListingsService.getListingById(id);
-        setListing(data);
+        const data = await ClassifiedadsService.getClassifiedadById(id);
+        setClassifiedad(data);
       } catch (err) {
-        console.error('Error fetching listing:', err);
+        console.error('Error fetching classifiedad:', err);
         setError('No se pudo cargar el anuncio. Inténtalo de nuevo más tarde.');
       } finally {
         setLoading(false);
@@ -65,16 +65,16 @@ export default function ListingDetailPage() {
     };
 
     if (id) {
-      fetchListing();
+      fetchClassifiedad();
     }
   }, [id]);
 
   // Manejar mensajes de WhatsApp
   const handleWhatsAppClick = () => {
-    if (!listing?.contact?.whatsapp) return;
+    if (!classifiedad?.contact?.whatsapp) return;
     
-    const message = encodeURIComponent(`Hola, estoy interesado en tu anuncio "${listing.title}" de Buscadis.`);
-    const number = listing.contact.whatsapp.replace(/\D/g, '');
+    const message = encodeURIComponent(`Hola, estoy interesado en tu anuncio "${classifiedad.title}" de Buscadis.`);
+    const number = classifiedad.contact.whatsapp.replace(/\D/g, '');
     window.open(`https://wa.me/${number}?text=${message}`, '_blank');
   };
 
@@ -83,8 +83,8 @@ export default function ListingDetailPage() {
     if (navigator.share) {
       try {
         await navigator.share({
-          title: listing?.title || 'Anuncio en Buscadis',
-          text: listing?.description || 'Mira este anuncio en Buscadis',
+          title: classifiedad?.title || 'Anuncio en Buscadis',
+          text: classifiedad?.description || 'Mira este anuncio en Buscadis',
           url: window.location.href
         });
       } catch (err) {
@@ -98,13 +98,13 @@ export default function ListingDetailPage() {
   };
 
   const handleContactClick = (type: 'whatsapp' | 'email' | 'phone') => {
-    if (!listing?.contact) return;
+    if (!classifiedad?.contact) return;
 
-    if (type === 'whatsapp' && listing.contact.whatsapp) {
-      const message = encodeURIComponent(`Hola, estoy interesado en tu anuncio "${listing.title}" de Buscadis`);
-      window.open(`https://wa.me/${listing.contact.whatsapp}?text=${message}`, '_blank');
-    } else if (type === 'email' && listing.contact.email) {
-      window.location.href = `mailto:${listing.contact.email}?subject=Interesado en: ${listing.title}`;
+    if (type === 'whatsapp' && classifiedad.contact.whatsapp) {
+      const message = encodeURIComponent(`Hola, estoy interesado en tu anuncio "${classifiedad.title}" de Buscadis`);
+      window.open(`https://wa.me/${classifiedad.contact.whatsapp}?text=${message}`, '_blank');
+    } else if (type === 'email' && classifiedad.contact.email) {
+      window.location.href = `mailto:${classifiedad.contact.email}?subject=Interesado en: ${classifiedad.title}`;
     }
   };
 
@@ -116,7 +116,7 @@ export default function ListingDetailPage() {
     );
   }
 
-  if (error || !listing) {
+  if (error || !classifiedad) {
     return (
       <div className="container py-16 min-h-screen">
         <div className="bg-red-50 border border-red-100 rounded-xl p-8 text-center">
@@ -128,25 +128,25 @@ export default function ListingDetailPage() {
   }
 
   // Extraer datos del anuncio con valores predeterminados
-  const title = listing.title || 'Sin título';
-  const description = listing.description || 'Sin descripción';
-  const price = listing.price || 0;
-  const priceType = listing.price_type || 'fixed';
-  const images = listing.images || [];
-  const location = listing.location || {};
+  const title = classifiedad.title || 'Sin título';
+  const description = classifiedad.description || 'Sin descripción';
+  const price = classifiedad.price || 0;
+  const priceType = classifiedad.price_type || 'fixed';
+  const images = classifiedad.images || [];
+  const location = classifiedad.location || {};
   const locationText = location.city ? `${location.city}, ${location.country || ''}` : 'Ubicación no especificada';
-  const contact = listing.contact || {};
-  const createdAt = new Date(listing.created_at).toLocaleDateString();
+  const contact = classifiedad.contact || {};
+  const createdAt = new Date(classifiedad.created_at).toLocaleDateString();
 
   const formatWhatsAppMessage = () => {
-    if (!listing) return '';
-    let message = `Hola, estoy interesado en tu anuncio "${listing.title}" de Buscadis.`;
+    if (!classifiedad) return '';
+    let message = `Hola, estoy interesado en tu anuncio "${classifiedad.title}" de Buscadis.`;
     
     // Personalizar el mensaje según la categoría
-    if (listing.category === 'empleo') {
-      message = `Hola, estoy interesado en la oferta de trabajo "${listing.title}" publicada en Buscadis.`;
-    } else if (listing.category === 'inmuebles') {
-      message = `Hola, estoy interesado en el inmueble "${listing.title}" que tienes en Buscadis.`;
+    if (classifiedad.category === 'empleo') {
+      message = `Hola, estoy interesado en la oferta de trabajo "${classifiedad.title}" publicada en Buscadis.`;
+    } else if (classifiedad.category === 'inmuebles') {
+      message = `Hola, estoy interesado en el inmueble "${classifiedad.title}" que tienes en Buscadis.`;
     }
     
     return encodeURIComponent(message);
@@ -157,9 +157,9 @@ export default function ListingDetailPage() {
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
         <div className="lg:col-span-2">
           {/* Imágenes */}
-          {listing.media && listing.media.length > 0 ? (
+          {classifiedad.media && classifiedad.media.length > 0 ? (
             <div className="mb-8 overflow-hidden rounded-xl">
-              <Carousel images={listing.media} />
+              <Carousel images={classifiedad.media} />
             </div>
           ) : (
             <div className="mb-8 bg-gray-200 h-96 rounded-xl flex items-center justify-center">
@@ -197,8 +197,8 @@ export default function ListingDetailPage() {
                 className="text-gray-500 hover:text-gray-700 flex items-center"
                 onClick={() => {
                   navigator.share({
-                    title: listing.title,
-                    text: `Mira este anuncio en Buscadis: ${listing.title}`,
+                    title: classifiedad.title,
+                    text: `Mira este anuncio en Buscadis: ${classifiedad.title}`,
                     url: window.location.href
                   }).catch(err => console.log('Error compartiendo:', err));
                 }}
@@ -221,9 +221,9 @@ export default function ListingDetailPage() {
             <h2 className="text-xl font-bold text-gray-800 mb-4">Contactar al anunciante</h2>
             
             <div className="space-y-4 mb-6">
-              {listing.contact?.whatsapp && (
+              {classifiedad.contact?.whatsapp && (
                 <a
-                  href={`https://wa.me/${listing.contact.whatsapp}?text=${formatWhatsAppMessage()}`}
+                  href={`https://wa.me/${classifiedad.contact.whatsapp}?text=${formatWhatsAppMessage()}`}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="bg-green-500 hover:bg-green-600 text-white py-3 px-4 rounded-lg flex items-center justify-center font-medium transition-colors w-full"
@@ -233,9 +233,9 @@ export default function ListingDetailPage() {
                 </a>
               )}
               
-              {listing.contact?.email && (
+              {classifiedad.contact?.email && (
                 <a
-                  href={`mailto:${listing.contact.email}?subject=Interesado en: ${listing.title}`}
+                  href={`mailto:${classifiedad.contact.email}?subject=Interesado en: ${classifiedad.title}`}
                   className="bg-primary-100 hover:bg-primary-200 text-primary-700 py-3 px-4 rounded-lg flex items-center justify-center font-medium transition-colors w-full"
                 >
                   Contactar por email

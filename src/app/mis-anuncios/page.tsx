@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { useAuth } from '@/features/auth/hooks/useAuth';
-import { ListingsService } from '@/services/listings.service';
+import { ClassifiedadsService } from '@/services/classifiedads.service';
 import Link from 'next/link';
 import { PencilIcon, TrashIcon, EyeIcon, ArrowPathIcon, PlusIcon } from '@heroicons/react/24/outline';
 import LoadingSpinner from '@/components/ui/LoadingSpinner';
@@ -10,39 +10,39 @@ import { formatDistance } from 'date-fns';
 import { es } from 'date-fns/locale';
 import { DocumentTextIcon, PhotoIcon } from '@heroicons/react/24/outline';
 
-export default function MyListingsPage() {
+export default function MyClassifiedadsPage() {
   const { user } = useAuth();
-  const [listings, setListings] = useState([]);
+  const [classifiedads, setClassifiedads] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [deleteConfirm, setDeleteConfirm] = useState(null);
 
   useEffect(() => {
-    const fetchListings = async () => {
+    const fetchClassifiedads = async () => {
       try {
         setLoading(true);
         if (user) {
-          const data = await ListingsService.getListingsByUser(user.id);
-          setListings(data);
+          const data = await ClassifiedadsService.getClassifiedadsByUser(user.id);
+          setClassifiedads(data);
         }
       } catch (err) {
-        console.error('Error fetching listings:', err);
+        console.error('Error fetching classifiedads:', err);
         setError('No se pudieron cargar tus anuncios. Inténtalo de nuevo más tarde.');
       } finally {
         setLoading(false);
       }
     };
 
-    fetchListings();
+    fetchClassifiedads();
   }, [user]);
 
-  const handleDeleteListing = async (id) => {
+  const handleDeleteClassifiedad = async (id) => {
     try {
-      await ListingsService.deleteListing(id);
-      setListings(listings.filter(listing => listing.id !== id));
+      await ClassifiedadsService.deleteClassifiedad(id);
+      setClassifiedads(classifiedads.filter(classifiedad => classifiedad.id !== id));
       setDeleteConfirm(null);
     } catch (err) {
-      console.error('Error deleting listing:', err);
+      console.error('Error deleting classifiedad:', err);
       setError('No se pudo eliminar el anuncio. Inténtalo de nuevo más tarde.');
     }
   };
@@ -81,7 +81,7 @@ export default function MyListingsPage() {
         </div>
       )}
       
-      {listings.length === 0 ? (
+      {classifiedads.length === 0 ? (
         <div className="bg-white rounded-xl shadow-md p-8 text-center">
           <div className="w-20 h-20 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
             <DocumentTextIcon className="w-10 h-10 text-gray-400" />
@@ -119,15 +119,15 @@ export default function MyListingsPage() {
                 </tr>
               </thead>
               <tbody className="bg-white divide-y divide-gray-200">
-                {listings.map((listing) => (
-                  <tr key={listing.id} className="hover:bg-gray-50">
+                {classifiedads.map((classifiedad) => (
+                  <tr key={classifiedad.id} className="hover:bg-gray-50">
                     <td className="px-6 py-4 whitespace-nowrap">
                       <div className="flex items-center">
                         <div className="h-10 w-10 flex-shrink-0">
-                          {listing.media && listing.media.length > 0 ? (
+                          {classifiedad.media && classifiedad.media.length > 0 ? (
                             <img 
-                              src={listing.media[0]} 
-                              alt={listing.title}
+                              src={classifiedad.media[0]} 
+                              alt={classifiedad.title}
                               className="h-10 w-10 rounded-md object-cover" 
                             />
                           ) : (
@@ -138,47 +138,47 @@ export default function MyListingsPage() {
                         </div>
                         <div className="ml-4">
                           <div className="text-sm font-medium text-gray-900 truncate max-w-xs">
-                            {listing.title}
+                            {classifiedad.title}
                           </div>
                           <div className="text-sm text-gray-500">
-                            {listing.category}
+                            {classifiedad.category}
                           </div>
                         </div>
                       </div>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
                       <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${
-                        listing.isActive 
+                        classifiedad.isActive 
                           ? 'bg-green-100 text-green-800' 
                           : 'bg-yellow-100 text-yellow-800'
                       }`}>
-                        {listing.isActive ? 'Activo' : 'Inactivo'}
+                        {classifiedad.isActive ? 'Activo' : 'Inactivo'}
                       </span>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                      {formatDate(listing.createdAt)}
+                      {formatDate(classifiedad.createdAt)}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                      {listing.views || 0}
+                      {classifiedad.views || 0}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                       <div className="flex space-x-2 justify-end">
                         <Link
-                          href={`/anuncios/${listing.id}`}
+                          href={`/anuncios/${classifiedad.id}`}
                           className="text-primary-600 hover:text-primary-900"
                           title="Ver anuncio"
                         >
                           <EyeIcon className="h-5 w-5" />
                         </Link>
                         <Link
-                          href={`/mis-anuncios/editar/${listing.id}`}
+                          href={`/mis-anuncios/editar/${classifiedad.id}`}
                           className="text-indigo-600 hover:text-indigo-900"
                           title="Editar anuncio"
                         >
                           <PencilIcon className="h-5 w-5" />
                         </Link>
                         <button
-                          onClick={() => setDeleteConfirm(listing.id)}
+                          onClick={() => setDeleteConfirm(classifiedad.id)}
                           className="text-red-600 hover:text-red-900"
                           title="Eliminar anuncio"
                         >
@@ -210,7 +210,7 @@ export default function MyListingsPage() {
                 Cancelar
               </button>
               <button
-                onClick={() => handleDeleteListing(deleteConfirm)}
+                onClick={() => handleDeleteClassifiedad(deleteConfirm)}
                 className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700"
               >
                 Eliminar

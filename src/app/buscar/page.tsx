@@ -10,7 +10,7 @@ import { CategoryId } from '@/types/marketplace'
 import { categories } from '@/data/mockCategories'
 import { mockData } from '@/data/mockData'
 import AdvancedFilters from '@/components/search/AdvancedFilters'
-import { ListingsService } from '@/services/listings.service'
+import { ClassifiedadsService } from '@/services/classifiedads.service'
 import { useSearchParams } from 'next/navigation'
 import AdisoCard from '@/components/AdisoCard'
 import LoadingState from '@/components/ui/LoadingState'
@@ -55,16 +55,16 @@ export default function SearchPage() {
     : mockData
 
   useEffect(() => {
-    const fetchListings = async () => {
+    const fetchClassifiedads = async () => {
       setLoading(true)
       try {
-        const result = await ListingsService.getListings({
+        const result = await ClassifiedadsService.getClassifiedads({
           ...filters,
           sortBy: 'created_at',
           sortOrder: 'desc'
         })
         
-        setResults(result.listings)
+        setResults(result.classifiedads)
         setTotalPages(result.totalPages)
       } catch (err) {
         setError('Error al cargar los anuncios')
@@ -74,7 +74,7 @@ export default function SearchPage() {
       }
     }
 
-    fetchListings()
+    fetchClassifiedads()
   }, [filters])
 
   const handlePageChange = (newPage: number) => {
@@ -119,8 +119,8 @@ export default function SearchPage() {
             ) : (
               <>
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                  {results.map((listing) => (
-                    <AdisoCard key={listing.id} adiso={listing} />
+                  {results.map((classifiedad) => (
+                    <AdisoCard key={classifiedad.id} adiso={classifiedad} />
                   ))}
                 </div>
                 

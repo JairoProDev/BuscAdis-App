@@ -1,10 +1,10 @@
 import { supabase } from '@/lib/supabase';
 
-export class UserListingsService {
-  static async getUserListings(userId: string) {
+export class UserClassifiedadsService {
+  static async getUserClassifiedads(userId: string) {
     try {
       const { data, error } = await supabase
-        .from('listings')
+        .from('classifiedads')
         .select('*')
         .eq('user_id', userId)
         .order('created_at', { ascending: false });
@@ -12,55 +12,55 @@ export class UserListingsService {
       if (error) throw error;
       return data;
     } catch (error) {
-      console.error('Error getting user listings:', error);
+      console.error('Error getting user classifiedads:', error);
       throw error;
     }
   }
 
-  static async updateListing(listingId: string, updates: any) {
+  static async updateClassifiedad(classifiedadId: string, updates: any) {
     try {
       const { data, error } = await supabase
-        .from('listings')
+        .from('classifiedads')
         .update(updates)
-        .eq('id', listingId)
+        .eq('id', classifiedadId)
         .select()
         .single();
 
       if (error) throw error;
       return data;
     } catch (error) {
-      console.error('Error updating listing:', error);
+      console.error('Error updating classifiedad:', error);
       throw error;
     }
   }
 
-  static async deleteListing(listingId: string) {
+  static async deleteClassifiedad(classifiedadId: string) {
     try {
       const { error } = await supabase
-        .from('listings')
+        .from('classifiedads')
         .delete()
-        .eq('id', listingId);
+        .eq('id', classifiedadId);
 
       if (error) throw error;
     } catch (error) {
-      console.error('Error deleting listing:', error);
+      console.error('Error deleting classifiedad:', error);
       throw error;
     }
   }
 
-  static async toggleListingStatus(listingId: string, isActive: boolean) {
+  static async toggleClassifiedadStatus(classifiedadId: string, isActive: boolean) {
     try {
       const { data, error } = await supabase
-        .from('listings')
+        .from('classifiedads')
         .update({ is_active: isActive })
-        .eq('id', listingId)
+        .eq('id', classifiedadId)
         .select()
         .single();
 
       if (error) throw error;
       return data;
     } catch (error) {
-      console.error('Error toggling listing status:', error);
+      console.error('Error toggling classifiedad status:', error);
       throw error;
     }
   }

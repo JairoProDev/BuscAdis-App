@@ -1,30 +1,30 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { ListingsService } from '@/services/listings.service';
-import ListingCard from '@/components/listings/ListingCard';
+import { ClassifiedadsService } from '@/services/classifiedads.service';
+import ClassifiedadCard from '@/components/classifiedads/ClassifiedadCard';
 import LoadingSpinner from '@/components/ui/LoadingSpinner';
 
-export default function FeaturedListings() {
-  const [listings, setListings] = useState([]);
+export default function FeaturedClassifiedads() {
+  const [classifiedads, setClassifiedads] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
 
   useEffect(() => {
-    const fetchListings = async () => {
+    const fetchClassifiedads = async () => {
       try {
-        const data = await ListingsService.getListings();
-        console.log('Featured Listings:', data);
-        setListings(data);
+        const data = await ClassifiedadsService.getClassifiedads();
+        console.log('Featured Classifiedads:', data);
+        setClassifiedads(data);
       } catch (err) {
-        console.error('Error fetching featured listings:', err);
+        console.error('Error fetching featured classifiedads:', err);
         setError('No se pudieron cargar los anuncios destacados');
       } finally {
         setLoading(false);
       }
     };
 
-    fetchListings();
+    fetchClassifiedads();
   }, []);
 
   if (loading) {
@@ -43,7 +43,7 @@ export default function FeaturedListings() {
     );
   }
 
-  if (listings.length === 0) {
+  if (classifiedads.length === 0) {
     return (
       <div className="bg-gray-50 border border-gray-100 rounded-xl p-8 text-center">
         <p className="text-gray-600">No hay anuncios destacados disponibles en este momento.</p>
@@ -53,8 +53,8 @@ export default function FeaturedListings() {
 
   return (
     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-      {listings.map((listing) => (
-        <ListingCard key={listing.id} listing={listing} />
+      {classifiedads.map((classifiedad) => (
+        <ClassifiedadCard key={classifiedad.id} classifiedad={classifiedad} />
       ))}
     </div>
   );
