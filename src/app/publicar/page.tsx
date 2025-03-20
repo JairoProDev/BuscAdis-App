@@ -182,7 +182,7 @@ export default function PublishPage() {
       setError('Debes seleccionar una categoría');
       return;
     }
-    
+
     if (step === 3 && !ad.location.city) {
       setError('La ciudad es obligatoria');
       return;

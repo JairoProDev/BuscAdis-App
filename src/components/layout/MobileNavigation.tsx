@@ -84,7 +84,7 @@ export default function MobileNavigation() {
 
   // Control de visibilidad basado en scroll
   useEffect(() => {
-    return scrollY.onChange((latest) => {
+    return scrollY.on("change", (latest) => {
       const direction = latest > lastScrollY ? 'down' : 'up'
       if (direction === 'down' && latest > 100) {
         setIsVisible(false)

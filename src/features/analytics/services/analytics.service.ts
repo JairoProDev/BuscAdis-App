@@ -3,7 +3,7 @@ import { DynamoDBDocumentClient, PutCommand, QueryCommand } from '@aws-sdk/lib-d
 import { v4 as uuidv4 } from 'uuid';
 
 const client = new DynamoDBClient({ 
-  region: process.env.NEXT_PUBLIC_AWS_REGION || 'us-east-1'
+  region: process.env.NEXT_PUBLIC_AWS_REGION || 'us-east-2'
 });
 const docClient = DynamoDBDocumentClient.from(client);
 

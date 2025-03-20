@@ -1,7 +1,7 @@
 import { DynamoDBClient } from '@aws-sdk/client-dynamodb';
 import { DynamoDBDocumentClient, ScanCommand } from '@aws-sdk/lib-dynamodb';
 
-const client = new DynamoDBClient({ region: process.env.NEXT_PUBLIC_AWS_REGION || 'us-east-1' });
+const client = new DynamoDBClient({ region: process.env.NEXT_PUBLIC_AWS_REGION || 'us-east-2' });
 const docClient = DynamoDBDocumentClient.from(client);
 
 export class SearchService {
@@ -61,6 +61,7 @@ export class SearchService {
       };
     } catch (error) {
       console.error('Error searching classifiedads:', error);
+      throw new Error(`Error searching classifiedads: ${error.message}`);
       throw error;
     }
   }
