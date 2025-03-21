@@ -1,30 +1,30 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { ClassifiedadsService } from '@/services/classifiedads.service';
-import ClassifiedadCard from '@/components/classifiedads/ClassifiedadCard';
+import { PublicationsService } from '@/services/publications.service';
+import PublicationCard from '@/components/publications/PublicationCard';
 import LoadingSpinner from '@/components/ui/LoadingSpinner';
 
-export default function FeaturedClassifiedads() {
-  const [classifiedads, setClassifiedads] = useState([]);
+export default function FeaturedPublications() {
+  const [publications, setPublications] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
 
   useEffect(() => {
-    const fetchClassifiedads = async () => {
+    const fetchPublications = async () => {
       try {
-        const data = await ClassifiedadsService.getClassifiedads();
-        console.log('Featured Classifiedads:', data);
-        setClassifiedads(data);
+        const data = await PublicationsService.getPublications();
+        console.log('Featured Publications:', data);
+        setPublications(data);
       } catch (err) {
-        console.error('Error fetching featured classifiedads:', err);
+        console.error('Error fetching featured publications:', err);
         setError('No se pudieron cargar los anuncios destacados');
       } finally {
         setLoading(false);
       }
     };
 
-    fetchClassifiedads();
+    fetchPublications();
   }, []);
 
   if (loading) {
@@ -43,7 +43,7 @@ export default function FeaturedClassifiedads() {
     );
   }
 
-  if (classifiedads.length === 0) {
+  if (publications.length === 0) {
     return (
       <div className="bg-gray-50 border border-gray-100 rounded-xl p-8 text-center">
         <p className="text-gray-600">No hay anuncios destacados disponibles en este momento.</p>
@@ -53,8 +53,8 @@ export default function FeaturedClassifiedads() {
 
   return (
     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-      {classifiedads.map((classifiedad) => (
-        <ClassifiedadCard key={classifiedad.id} classifiedad={classifiedad} />
+      {publications.map((publication) => (
+        <PublicationCard key={publication.id} publication={publication} />
       ))}
     </div>
   );

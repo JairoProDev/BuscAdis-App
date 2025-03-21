@@ -1,10 +1,10 @@
 import { supabase } from '@/lib/supabase';
 
-export class UserClassifiedadsService {
-  static async getUserClassifiedads(userId: string) {
+export class UserPublicationsService {
+  static async getUserPublications(userId: string) {
     try {
       const { data, error } = await supabase
-        .from('classifiedads')
+        .from('publications')
         .select('*')
         .eq('user_id', userId)
         .order('created_at', { ascending: false });
@@ -12,55 +12,55 @@ export class UserClassifiedadsService {
       if (error) throw error;
       return data;
     } catch (error) {
-      console.error('Error getting user classifiedads:', error);
+      console.error('Error getting user publications:', error);
       throw error;
     }
   }
 
-  static async updateClassifiedad(classifiedadId: string, updates: any) {
+  static async updatePublication(publicationId: string, updates: any) {
     try {
       const { data, error } = await supabase
-        .from('classifiedads')
+        .from('publications')
         .update(updates)
-        .eq('id', classifiedadId)
+        .eq('id', publicationId)
         .select()
         .single();
 
       if (error) throw error;
       return data;
     } catch (error) {
-      console.error('Error updating classifiedad:', error);
+      console.error('Error updating publication:', error);
       throw error;
     }
   }
 
-  static async deleteClassifiedad(classifiedadId: string) {
+  static async deletePublication(publicationId: string) {
     try {
       const { error } = await supabase
-        .from('classifiedads')
+        .from('publications')
         .delete()
-        .eq('id', classifiedadId);
+        .eq('id', publicationId);
 
       if (error) throw error;
     } catch (error) {
-      console.error('Error deleting classifiedad:', error);
+      console.error('Error deleting publication:', error);
       throw error;
     }
   }
 
-  static async toggleClassifiedadStatus(classifiedadId: string, isActive: boolean) {
+  static async togglePublicationStatus(publicationId: string, isActive: boolean) {
     try {
       const { data, error } = await supabase
-        .from('classifiedads')
+        .from('publications')
         .update({ is_active: isActive })
-        .eq('id', classifiedadId)
+        .eq('id', publicationId)
         .select()
         .single();
 
       if (error) throw error;
       return data;
     } catch (error) {
-      console.error('Error toggling classifiedad status:', error);
+      console.error('Error toggling publication status:', error);
       throw error;
     }
   }

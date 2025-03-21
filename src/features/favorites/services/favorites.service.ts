@@ -7,32 +7,32 @@ const client = new DynamoDBClient({
 const docClient = DynamoDBDocumentClient.from(client);
 
 export class FavoritesService {
-  static async addToFavorites(userId: string, classifiedadId: string) {
+  static async addToFavorites(userId: string, publicationId: string) {
     try {
       const command = new PutCommand({
         TableName: 'Favorites',
         Item: {
           userId,
-          classifiedadId,
+          publicationId,
           createdAt: new Date().toISOString()
         }
       });
 
       await docClient.send(command);
-      return { userId, classifiedadId };
+      return { userId, publicationId };
     } catch (error) {
       console.error('Error adding to favorites:', error);
       throw error;
     }
   }
 
-  static async removeFromFavorites(userId: string, classifiedadId: string) {
+  static async removeFromFavorites(userId: string, publicationId: string) {
     try {
       const command = new DeleteCommand({
         TableName: 'Favorites',
         Key: {
           userId,
-          classifiedadId
+          publicationId
         }
       });
 
@@ -58,30 +58,30 @@ export class FavoritesService {
       
       if (!favorites || favorites.length === 0) return [];
 
-      // Obtener los detalles de los classifiedads
-      const classifiedadIds = favorites.map(f => f.classifiedadId);
+      // Obtener los detalles de los publications
+      const publicationIds = favorites.map(f => f.publicationId);
       
-      // Obtener los classifiedads en lotes de 25 (límite de BatchGet)
-      const classifiedads = [];
-      for (let i = 0; i < classifiedadIds.length; i += 25) {
-        const batch = classifiedadIds.slice(i, i + 25);
+      // Obtener los publications en lotes de 25 (límite de BatchGet)
+      const publications = [];
+      for (let i = 0; i < publicationIds.length; i += 25) {
+        const batch = publicationIds.slice(i, i + 25);
         const batchCommand = new QueryCommand({
-          TableName: 'Classifiedads',
+          TableName: 'Publications',
           FilterExpression: 'id IN (:...ids)',
           ExpressionAttributeValues: {
             ':ids': batch
           }
         });
         
-        const { Items: batchClassifiedads } = await docClient.send(batchCommand);
-        if (batchClassifiedads) {
-          classifiedads.push(...batchClassifiedads);
+        const { Items: batchPublications } = await docClient.send(batchCommand);
+        if (batchPublications) {
+          publications.push(...batchPublications);
         }
       }
 
       return favorites.map(fav => ({
         ...fav,
-        classifiedad: classifiedads.find(l => l.id === fav.classifiedadId)
+        publication: publications.find(l => l.id === fav.publicationId)
       }));
     } catch (error) {
       console.error('Error getting favorites:', error);

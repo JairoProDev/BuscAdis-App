@@ -13,7 +13,7 @@ async function listTables() {
     const response = await client.send(command);
     console.log("Tables:", response.TableNames);
   } catch (error) {
-    console.error("Error classifiedad tables:", error);
+    console.error("Error publication tables:", error);
   }
 }
 

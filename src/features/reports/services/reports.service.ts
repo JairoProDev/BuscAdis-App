@@ -8,7 +8,7 @@ const docClient = DynamoDBDocumentClient.from(client);
 export class ReportsService {
   static async createReport(data: {
     userId: string;
-    classifiedadId: string;
+    publicationId: string;
     reason: string;
     description: string;
   }) {
@@ -18,7 +18,7 @@ export class ReportsService {
         Item: {
           id: uuidv4(),
           userId: data.userId,
-          classifiedadId: data.classifiedadId,
+          publicationId: data.publicationId,
           reason: data.reason,
           description: data.description,
           status: 'pending',

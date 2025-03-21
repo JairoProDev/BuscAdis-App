@@ -9,10 +9,10 @@ import { ApiGatewayManagementApiClient, PostToConnectionCommand } from '@aws-sdk
 interface ChatProps {
   conversationId: string;
   otherUser: any;
-  classifiedad: any;
+  publication: any;
 }
 
-export default function Chat({ conversationId, otherUser, classifiedad }: ChatProps) {
+export default function Chat({ conversationId, otherUser, publication }: ChatProps) {
   const [messages, setMessages] = useState([]);
   const [newMessage, setNewMessage] = useState('');
   const { user } = useAuth();
@@ -65,7 +65,7 @@ export default function Chat({ conversationId, otherUser, classifiedad }: ChatPr
               {otherUser.full_name}
             </h3>
             <p className="text-sm text-gray-500">
-              {classifiedad.title}
+              {publication.title}
             </p>
           </div>
         </div>

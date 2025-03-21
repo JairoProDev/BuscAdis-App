@@ -46,14 +46,14 @@ export class MessagesService {
     }
   }
 
-  static async startConversation(senderId: string, receiverId: string, classifiedadId: string) {
+  static async startConversation(senderId: string, receiverId: string, publicationId: string) {
     try {
       const { data, error } = await supabase
         .from('conversations')
         .insert({
           sender_id: senderId,
           receiver_id: receiverId,
-          classifiedad_id: classifiedadId
+          publication_id: publicationId
         })
         .select()
         .single();

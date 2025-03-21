@@ -12,7 +12,7 @@ import Comparison from '@/components/home/Comparison';
 import CallToAction from '@/components/home/CallToAction';
 import LoadingState from '@/components/ui/LoadingState';
 import { Suspense } from 'react';
-import FeaturedClassifiedads from '@/components/home/FeaturedClassifiedads';
+import FeaturedPublications from '@/components/home/FeaturedPublications';
 import { SkeletonCard } from '@/components/ui/Skeleton';
 
 export default function Home() {
@@ -68,8 +68,8 @@ export default function Home() {
           <h2 className="text-3xl font-bold text-center mb-12">
             Anuncios destacados
           </h2>
-          <Suspense fallback={<FeaturedClassifiedadsSkeleton />}>
-            <FeaturedClassifiedads />
+          <Suspense fallback={<FeaturedPublicationsSkeleton />}>
+            <FeaturedPublications />
           </Suspense>
         </div>
       </section>
@@ -77,7 +77,7 @@ export default function Home() {
   );
 }
 
-function FeaturedClassifiedadsSkeleton() {
+function FeaturedPublicationsSkeleton() {
   return (
     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
       {Array(8).fill(0).map((_, i) => (

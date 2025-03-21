@@ -2,8 +2,8 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { WhatsAppIcon } from '@/components/icons';
 
-interface ClassifiedadCardProps {
-  classifiedad: {
+interface PublicationCardProps {
+  publication: {
     id: string;
     title: string;
     price: number;
@@ -21,7 +21,7 @@ interface ClassifiedadCardProps {
   };
 }
 
-export default function ClassifiedadCard({ classifiedad }: ClassifiedadCardProps) {
+export default function PublicationCard({ publication }: PublicationCardProps) {
   const formatPrice = (price: number, type: string) => {
     if (type === 'negotiable') return 'Negociable';
     if (type === 'free') return 'Gratis';
@@ -37,13 +37,13 @@ export default function ClassifiedadCard({ classifiedad }: ClassifiedadCardProps
   };
 
   const formatWhatsAppMessage = () => {
-    let message = `Hola, estoy interesado en tu anuncio "${classifiedad.title}" de Buscadis.`;
+    let message = `Hola, estoy interesado en tu anuncio "${publication.title}" de Buscadis.`;
     
     // Personalizar el mensaje según la categoría
-    if (classifiedad.category === 'empleo') {
-      message = `Hola, estoy interesado en la oferta de trabajo "${classifiedad.title}" publicada en Buscadis.`;
-    } else if (classifiedad.category === 'inmuebles') {
-      message = `Hola, estoy interesado en el inmueble "${classifiedad.title}" que tienes en Buscadis.`;
+    if (publication.category === 'empleo') {
+      message = `Hola, estoy interesado en la oferta de trabajo "${publication.title}" publicada en Buscadis.`;
+    } else if (publication.category === 'inmuebles') {
+      message = `Hola, estoy interesado en el inmueble "${publication.title}" que tienes en Buscadis.`;
     }
     
     return encodeURIComponent(message);
@@ -51,12 +51,12 @@ export default function ClassifiedadCard({ classifiedad }: ClassifiedadCardProps
 
   return (
     <div className="bg-white rounded-xl shadow-md overflow-hidden transition-all hover:shadow-lg">
-      <Link href={`/anuncios/${classifiedad.id}`}>
+      <Link href={`/anuncios/${publication.id}`}>
         <div className="relative h-48 w-full">
-          {classifiedad.media && classifiedad.media.length > 0 ? (
+          {publication.media && publication.media.length > 0 ? (
             <Image
-              src={classifiedad.media[0]}
-              alt={classifiedad.title}
+              src={publication.media[0]}
+              alt={publication.title}
               fill
               className="object-cover"
             />
@@ -66,25 +66,25 @@ export default function ClassifiedadCard({ classifiedad }: ClassifiedadCardProps
             </div>
           )}
           <div className="absolute top-2 right-2 bg-primary-500 text-white px-2 py-1 rounded-full text-xs">
-            {formatPrice(classifiedad.price, classifiedad.priceType)}
+            {formatPrice(publication.price, publication.priceType)}
           </div>
         </div>
       </Link>
       
       <div className="p-4">
-        <Link href={`/anuncios/${classifiedad.id}`}>
+        <Link href={`/anuncios/${publication.id}`}>
           <h3 className="font-semibold text-gray-800 text-lg mb-1 hover:text-primary-600 transition-colors">
-            {classifiedad.title}
+            {publication.title}
           </h3>
         </Link>
         
         <div className="text-sm text-gray-500 mb-3">
-          {classifiedad.location.city}, {classifiedad.location.region} • {formatDate(classifiedad.createdAt)}
+          {publication.location.city}, {publication.location.region} • {formatDate(publication.createdAt)}
         </div>
         
         <div className="flex justify-between items-center">
           <a
-            href={`https://wa.me/${classifiedad.contact.whatsapp}?text=${formatWhatsAppMessage()}`}
+            href={`https://wa.me/${publication.contact.whatsapp}?text=${formatWhatsAppMessage()}`}
             target="_blank"
             rel="noopener noreferrer"
             className="flex items-center text-green-600 font-medium text-sm hover:text-green-700 transition-colors"

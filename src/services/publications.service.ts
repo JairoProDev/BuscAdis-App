@@ -12,7 +12,7 @@ import { v4 as uuidv4 } from 'uuid';
 import { AuthService } from '@/features/auth/services/auth.service';
 import { awsConfig } from '@/lib/aws-config';
 
-export interface QuickClassifiedadData {
+export interface QuickPublicationData {
   title: string;
   description: string;
   category?: {
@@ -53,11 +53,11 @@ export interface QuickClassifiedadData {
   priceType?: string;
 }
 
-export class ClassifiedadsService {
+export class PublicationsService {
   private static client = new DynamoDBClient(awsConfig);
   private static docClient = DynamoDBDocumentClient.from(this.client);
 
-  static async createClassifiedad(data) {
+  static async createPublication(data) {
     try {
       // Validar datos requeridos
       if (!data.title || !data.description) {
@@ -69,12 +69,12 @@ export class ClassifiedadsService {
         throw new Error('Usuario no autenticado');
       }
 
-      const classifiedadId = uuidv4();
+      const publicationId = uuidv4();
       
       const command = new PutCommand({
-        TableName: 'Classifiedads',
+        TableName: 'Publications',
         Item: {
-          id: classifiedadId,
+          id: publicationId,
           userId: currentUser.id,
           title: data.title,
           description: data.description,
@@ -98,32 +98,32 @@ export class ClassifiedadsService {
       });
 
       await this.docClient.send(command);
-      return { id: classifiedadId };
+      return { id: publicationId };
     } catch (error) {
-      console.error('Error creating classifiedad:', error);
+      console.error('Error creating publication:', error);
       throw error;
     }
   }
 
-  static async getClassifiedadById(id) {
+  static async getPublicationById(id) {
     try {
       const command = new GetCommand({
-        TableName: 'Classifiedads',
+        TableName: 'Publications',
         Key: { id }
       });
 
       const response = await this.docClient.send(command);
       return response.Item;
     } catch (error) {
-      console.error('Error getting classifiedad:', error);
+      console.error('Error getting publication:', error);
       throw error;
     }
   }
 
-  static async getClassifiedadsByUser(userId) {
+  static async getPublicationsByUser(userId) {
     try {
       const command = new QueryCommand({
-        TableName: 'Classifiedads',
+        TableName: 'Publications',
         IndexName: 'UserIdIndex',
         KeyConditionExpression: 'userId = :userId',
         ExpressionAttributeValues: {
@@ -134,12 +134,12 @@ export class ClassifiedadsService {
       const response = await this.docClient.send(command);
       return response.Items;
     } catch (error) {
-      console.error('Error getting user classifiedads:', error);
+      console.error('Error getting user publications:', error);
       throw error;
     }
   }
 
-  static async getClassifiedads(params) {
+  static async getPublications(params) {
     try {
       let filterExpressions = [];
       let expressionAttributeValues = {};
@@ -170,7 +170,7 @@ export class ClassifiedadsService {
       }
 
       const command = new ScanCommand({
-        TableName: 'Classifiedads',
+        TableName: 'Publications',
         FilterExpression: filterExpressions.length > 0 ? filterExpressions.join(' AND ') : undefined,
         ExpressionAttributeValues: Object.keys(expressionAttributeValues).length > 0 ? expressionAttributeValues : undefined,
         Limit: params.limit || 20
@@ -208,17 +208,17 @@ export class ClassifiedadsService {
       const paginatedItems = sortedItems.slice(startIndex, startIndex + (params.limit || 20));
       
       return {
-        classifiedads: paginatedItems,
+        publications: paginatedItems,
         total: sortedItems.length,
         pages: Math.ceil(sortedItems.length / (params.limit || 20))
       };
     } catch (error) {
-      console.error('Error getting classifiedads:', error);
+      console.error('Error getting publications:', error);
       throw error;
     }
   }
 
-  static async updateClassifiedad(id, data) {
+  static async updatePublication(id, data) {
     try {
       const currentUser = await AuthService.getCurrentUser();
       if (!currentUser) {
@@ -226,12 +226,12 @@ export class ClassifiedadsService {
       }
       
       // Verificar que el anuncio pertenece al usuario
-      const classifiedad = await this.getClassifiedadById(id);
-      if (!classifiedad) {
+      const publication = await this.getPublicationById(id);
+      if (!publication) {
         throw new Error('Anuncio no encontrado');
       }
       
-      if (classifiedad.userId !== currentUser.id) {
+      if (publication.userId !== currentUser.id) {
         throw new Error('No tienes permiso para editar este anuncio');
       }
       
@@ -293,7 +293,7 @@ export class ClassifiedadsService {
       }
       
       const command = new UpdateCommand({
-        TableName: 'Classifiedads',
+        TableName: 'Publications',
         Key: { id },
         UpdateExpression: updateExpression,
         ExpressionAttributeValues: expressionAttributeValues,
@@ -303,12 +303,12 @@ export class ClassifiedadsService {
       const response = await this.docClient.send(command);
       return response.Attributes;
     } catch (error) {
-      console.error('Error updating classifiedad:', error);
+      console.error('Error updating publication:', error);
       throw error;
     }
   }
 
-  static async deleteClassifiedad(id) {
+  static async deletePublication(id) {
     try {
       const currentUser = await AuthService.getCurrentUser();
       if (!currentUser) {
@@ -316,43 +316,43 @@ export class ClassifiedadsService {
       }
       
       // Verificar que el anuncio pertenece al usuario
-      const classifiedad = await this.getClassifiedadById(id);
-      if (!classifiedad) {
+      const publication = await this.getPublicationById(id);
+      if (!publication) {
         throw new Error('Anuncio no encontrado');
       }
       
-      if (classifiedad.userId !== currentUser.id) {
+      if (publication.userId !== currentUser.id) {
         throw new Error('No tienes permiso para eliminar este anuncio');
       }
       
       const command = new DeleteCommand({
-        TableName: 'Classifiedads',
+        TableName: 'Publications',
         Key: { id }
       });
       
       await this.docClient.send(command);
       return { success: true };
     } catch (error) {
-      console.error('Error deleting classifiedad:', error);
+      console.error('Error deleting publication:', error);
       throw error;
     }
   }
 
-  static async getClassifiedads() {
+  static async getPublications() {
     try {
-      console.log("Fetching classifiedads with config:", awsConfig);
+      console.log("Fetching publications with config:", awsConfig);
       const command = new ScanCommand({
-        TableName: 'Classifiedads',
+        TableName: 'Publications',
         FilterExpression: 'isActive = :isActive',
         ExpressionAttributeValues: {
           ':isActive': true
         }
       });
 
-      const { Items: classifiedads } = await this.docClient.send(command);
-      return classifiedads || [];
+      const { Items: publications } = await this.docClient.send(command);
+      return publications || [];
     } catch (error) {
-      console.error('Error getting classifiedads:', error);
+      console.error('Error getting publications:', error);
       // Retorna un array vacío en caso de error para no interrumpir la carga de la página
       return [];
     }

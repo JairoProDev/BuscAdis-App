@@ -52,7 +52,7 @@ export class CategoriesService {
   static async getCategoryCount(categoryName: string) {
     try {
       const command = new QueryCommand({
-        TableName: 'Classifiedads',
+        TableName: 'Publications',
         IndexName: 'CategoryIndex',
         KeyConditionExpression: 'category = :category',
         ExpressionAttributeValues: {

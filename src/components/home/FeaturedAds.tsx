@@ -7,7 +7,7 @@ import { VerifiedIcon, PremiumIcon } from '@/components/icons'
 import { Adiso } from '@/types/marketplace'
 import { categories } from '@/data/mockCategories'
 import { useEffect, useState } from 'react'
-import { ClassifiedadsService } from '@/services/classifiedads.service'
+import { PublicationsService } from '@/services/publications.service'
 import AdisoCard from '@/components/AdisoCard'
 
 interface FeaturedAdsProps {
@@ -22,7 +22,7 @@ export default function FeaturedAds({ featured = false }: FeaturedAdsProps) {
   useEffect(() => {
     const fetchAds = async () => {
       try {
-        const data = await ClassifiedadsService.getFeaturedClassifiedads();
+        const data = await PublicationsService.getFeaturedPublications();
         setAds(data);
       } catch (err) {
         console.error('Error fetching featured ads:', err);

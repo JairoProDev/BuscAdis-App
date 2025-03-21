@@ -5,7 +5,7 @@ export class ValidationError extends Error {
   }
 }
 
-export const validateClassifiedad = (data: any) => {
+export const validatePublication = (data: any) => {
   const errors: string[] = [];
 
   if (!data.title?.trim()) {

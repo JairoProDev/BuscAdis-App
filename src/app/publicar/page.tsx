@@ -4,7 +4,7 @@ import { useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import Image from 'next/image'
 import { useRouter } from 'next/navigation'
-import { ClassifiedadsService, QuickClassifiedadData } from '@/services/classifiedads.service'
+import { PublicationsService, QuickPublicationData } from '@/services/publications.service'
 import CategorySelector from '@/components/publish/CategorySelector'
 import MediaUploader from '@/components/publish/MediaUploader'
 import LocationSelector from '@/components/publish/LocationSelector'
@@ -56,7 +56,7 @@ export default function PublishPage() {
   const [uploadingImages, setUploadingImages] = useState(false);
   const [uploadProgress, setUploadProgress] = useState(0);
 
-  const [ad, setAd] = useState<QuickClassifiedadData>({
+  const [ad, setAd] = useState<QuickPublicationData>({
     title: '',
     description: '',
     contact: {
@@ -153,7 +153,7 @@ export default function PublishPage() {
   const handlePublishWithAuth = async (data) => {
     try {
       // Lógica de publicación
-      const result = await ClassifiedadsService.createClassifiedad({
+      const result = await PublicationsService.createPublication({
         ...data,
         userId: user.id
       });
@@ -208,7 +208,7 @@ export default function PublishPage() {
     setError('');
     
     try {
-      const response = await ClassifiedadsService.createClassifiedad(ad);
+      const response = await PublicationsService.createPublication(ad);
       
       setSuccess(true);
       

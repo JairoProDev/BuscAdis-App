@@ -5,7 +5,7 @@ const client = new DynamoDBClient({ region: process.env.NEXT_PUBLIC_AWS_REGION |
 const docClient = DynamoDBDocumentClient.from(client);
 
 export class SearchService {
-  static async searchClassifiedads(params: {
+  static async searchPublications(params: {
     query?: string;
     category?: string;
     location?: string;
@@ -46,22 +46,22 @@ export class SearchService {
       }
 
       const command = new ScanCommand({
-        TableName: 'Classifiedads',
+        TableName: 'Publications',
         FilterExpression: filterExpression,
         ExpressionAttributeValues: expressionAttributeValues,
         Limit: params.limit || 20
       });
 
-      const { Items: classifiedads, Count: total } = await docClient.send(command);
+      const { Items: publications, Count: total } = await docClient.send(command);
       
       return {
-        classifiedads: classifiedads || [],
+        publications: publications || [],
         total: total || 0,
         pages: Math.ceil((total || 0) / (params.limit || 20))
       };
     } catch (error) {
-      console.error('Error searching classifiedads:', error);
-      throw new Error(`Error searching classifiedads: ${error.message}`);
+      console.error('Error searching publications:', error);
+      throw new Error(`Error searching publications: ${error.message}`);
       throw error;
     }
   }

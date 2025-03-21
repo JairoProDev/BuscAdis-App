@@ -7,11 +7,11 @@ import { HeartIcon } from '@heroicons/react/24/outline';
 import { HeartIcon as HeartSolidIcon } from '@heroicons/react/24/solid';
 
 interface FavoriteButtonProps {
-  classifiedadId: string;
+  publicationId: string;
   initialIsFavorite?: boolean;
 }
 
-export default function FavoriteButton({ classifiedadId, initialIsFavorite = false }: FavoriteButtonProps) {
+export default function FavoriteButton({ publicationId, initialIsFavorite = false }: FavoriteButtonProps) {
   const [isFavorite, setIsFavorite] = useState(initialIsFavorite);
   const [isLoading, setIsLoading] = useState(false);
   const { user, isAuthenticated } = useAuth();
@@ -25,9 +25,9 @@ export default function FavoriteButton({ classifiedadId, initialIsFavorite = fal
     setIsLoading(true);
     try {
       if (isFavorite) {
-        await FavoritesService.removeFromFavorites(user.id, classifiedadId);
+        await FavoritesService.removeFromFavorites(user.id, publicationId);
       } else {
-        await FavoritesService.addToFavorites(user.id, classifiedadId);
+        await FavoritesService.addToFavorites(user.id, publicationId);
       }
       setIsFavorite(!isFavorite);
     } catch (error) {
