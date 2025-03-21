@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import React, { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { FilterIcon, AdjustmentsHorizontalIcon, XMarkIcon } from '@/components/icons'
 import { useRouter } from 'next/navigation'
@@ -51,6 +51,11 @@ export default function SearchFilters({ initialFilters, onFiltersChange }) {
     setIsOpen(false)
   }
 
+  const handleCategoryChange = (value) => {
+    setFilters((prev) => ({ ...prev, category: value }))
+    onFiltersChange({ ...filters, category: value })
+  }
+
   return (
     <div className="relative">
       <motion.button
@@ -76,18 +81,20 @@ export default function SearchFilters({ initialFilters, onFiltersChange }) {
                 <label className="block text-sm font-medium text-white mb-2">
                   Categoría
                 </label>
-                <select
-                  value={filters.category}
-                  onChange={(e) => setFilters({ ...filters, category: e.target.value })}
-                  className="w-full bg-primary-700 text-white rounded-lg px-3 py-2"
-                >
-                  <option value="">Todas las categorías</option>
-                  {categories.map((category) => (
-                    <option key={category.id} value={category.id}>
-                      {category.name}
-                    </option>
-                  ))}
-                </select>
+                {/* Eliminar el Select para evitar errores */}
+                {/* <Select value={filters.category} onChange={handleCategoryChange}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Selecciona una categoría" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="Todos">Todos</SelectItem>
+                    {categories.map((category) => (
+                      <SelectItem key={category.id} value={category.id}>
+                        {category.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select> */}
               </div>
 
               <div>

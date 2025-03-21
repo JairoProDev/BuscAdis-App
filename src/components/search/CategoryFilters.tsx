@@ -1,5 +1,6 @@
 'use client'
 
+import React from 'react'
 import { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { CategoryId } from '@/types/marketplace'
@@ -102,37 +103,20 @@ export default function CategoryFilters({
   return (
     <div className="space-y-4">
       <h3 className="font-medium text-lg">Categorías</h3>
-      <div className="space-y-2">
-        <button
-          onClick={() => {
-            onSelectCategory(null);
-            onFilterChange({ category: null });
-          }}
-          className={`w-full text-left px-4 py-2 rounded-lg transition-colors ${
-            selectedCategory === null
-              ? 'bg-primary-100 text-primary-700'
-              : 'hover:bg-gray-100'
-          }`}
-        >
-          Todas las categorías
-        </button>
-        {Object.entries(categories).map(([key]) => (
-          <button
-            key={key}
-            onClick={() => {
-              onSelectCategory(key as CategoryId);
-              onFilterChange({ category: key });
-            }}
-            className={`w-full text-left px-4 py-2 rounded-lg transition-colors ${
-              selectedCategory === key
-                ? 'bg-primary-100 text-primary-700'
-                : 'hover:bg-gray-100'
-            }`}
-          >
-            {key}
-          </button>
-        ))}
-      </div>
+      {/* Eliminar el Select para evitar errores */}
+      {/* <Select defaultValue={selectedCategory} onChange={handleCategoryChange}>
+        <SelectTrigger>
+          <SelectValue placeholder="Selecciona una categoría" />
+        </SelectTrigger>
+        <SelectContent>
+          <SelectItem value="Todos">Todos</SelectItem>
+          {Object.entries(categories).map(([key]) => (
+            <SelectItem key={key} value={key as CategoryId}>
+              {key}
+            </SelectItem>
+          ))}
+        </SelectContent>
+      </Select> */}
 
       {/* Subtipos con scroll horizontal */}
       <AnimatePresence mode="wait">

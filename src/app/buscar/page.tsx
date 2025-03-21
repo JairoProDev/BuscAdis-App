@@ -14,8 +14,18 @@ import AdisoCard from '@/components/AdisoCard';
 import LoadingState from '@/components/ui/LoadingState';
 import Pagination from '@/components/ui/Pagination';
 import { SearchService } from '@/services/search.service';
+import Input from '@/components/ui/Input';
+import Button  from '@/components/ui/Button';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/Select';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/Card';
+import { Badge } from '@/components/ui/Badge';
+import { Search, List, Grid, AlertCircle } from 'lucide-react';
+import AnunciosGrid from '@/components/AnunciosGrid';
 
-export default function SearchPage() {
+const categorias = ['Todos', 'Vehículos', 'Inmuebles', 'Empleo', 'Servicios', 'Productos', 'Eventos', 'Educación', 'Turismo', 'Mascotas', 'Negocios', 'Otros'];
+const ubicaciones = ['Todas', 'Cusco', 'Lima', 'Arequipa', 'Trujillo', 'Chiclayo', 'Piura', 'Iquitos', 'Huancayo', 'Tacna'];
+
+const BuscadorAvisos = () => {
     const searchParams = useSearchParams();
     const [selectedCategory, setSelectedCategory] = useState<CategoryId | null>(null);
     const [filters, setFilters] = useState({
@@ -30,6 +40,11 @@ export default function SearchPage() {
     const [totalPages, setTotalPages] = useState(1);
     const [error, setError] = useState('');
     const [publications, setPublications] = useState<any[]>([]);
+    const [busqueda, setBusqueda] = useState('');
+    const [categoriaSeleccionada, setCategoriaSeleccionada] = useState('Todos');
+    const [ubicacionSeleccionada, setUbicacionSeleccionada] = useState('Todas');
+    const [isListView, setIsListView] = useState(false);
+    const [noResults, setNoResults] = useState(false);
 
     const handleSearch = (query: string) => {
         console.log('Búsqueda:', { query, filters, category: selectedCategory });
@@ -58,29 +73,32 @@ export default function SearchPage() {
         }));
     };
 
+    const handleBuscar = async () => {
+        setLoading(true);
+        console.log("Filters at start of fetchPublications:", filters); // Log inicial de los filtros
+        try {
+            const data = await SearchService.searchPublications(filters);
+            console.log("Data from SearchService:", data);
+            setPublications(data.publications || []);
+            setResults(data.publications || []);
+            setTotalPages(data.pages);
+            setError('');
+            setNoResults(data.publications.length === 0);
+        } catch (err: any) {
+            console.error('Error al cargar los anuncios:', err);
+            setError(`Error al cargar los anuncios: ${err.message}`);
+            setPublications([]);
+            setResults([]);
+            setTotalPages(1);
+            setNoResults(true);
+        } finally {
+            setLoading(false);
+        }
+    };
+
     useEffect(() => {
-        const fetchPublications = async () => {
-            setLoading(true);
-            console.log("Filters at start of fetchPublications:", filters); // Log inicial de los filtros
-            try {
-                const data = await SearchService.searchPublications(filters);
-                console.log("Data from SearchService:", data);
-                setPublications(data.publications || []);
-                setResults(data.publications || []);
-                setTotalPages(data.pages);
-                setError('');
-            } catch (err: any) {
-                console.error('Error al cargar los anuncios:', err);
-                setError(`Error al cargar los anuncios: ${err.message}`);
-                setPublications([]);
-                setResults([]);
-                setTotalPages(1);
-            } finally {
-                setLoading(false);
-            }
-        };
-        fetchPublications();
-    }, [filters]);
+        handleBuscar();
+    }, [busqueda, categoriaSeleccionada, ubicacionSeleccionada]);
 
     const handlePageChange = (newPage: number) => {
         setFilters((prev) => ({
@@ -92,65 +110,42 @@ export default function SearchPage() {
     if (loading) return <LoadingState text="Cargando anuncios..." />;
     if (error) return <div>{error}</div>;
 
-    if (!results || results.length === 0) {
-        return <div>No hay anuncios disponibles.</div>;
-    }
-
     return (
-        <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="min-h-screen bg-gray-50">
-            <div className="container mx-auto px-4 py-8">
-                <div className="max-w-2xl mx-auto mb-8">
-                    <SearchBar initialValue={filters.search} onSearch={handleSearch} />
-                </div>
+        <div className="container mx-auto p-4 md:p-6 lg:p-8">
+            <h1 className="text-3xl font-bold text-gray-900 mb-6 text-center">Encuentra lo que buscas</h1>
 
-                <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
-                    <aside className="lg:col-span-1">
-                        <CategoryFilters onCategoryChange={handleCategoryChange} />
-                        <SearchFilters filters={filters} onFiltersChange={handleFiltersChange} />
-                        <AdvancedFilters />
-                    </aside>
+            <div className="flex flex-col sm:flex-row gap-4 mb-6">
+                <Input
+                    type="text"
+                    placeholder="Buscar anuncios..."
+                    value={busqueda}
+                    onChange={(e) => setBusqueda(e.target.value)}
+                    className="flex-1"
+                />
+                <Button onClick={handleBuscar} className="bg-blue-500 hover:bg-blue-700 text-white">
+                    <Search className="mr-2" /> Buscar
+                </Button>
+            </div>
 
-                    <main className="lg:col-span-3">
-                        {loading ? (
-                            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                                {[1, 2, 3, 4, 5, 6].map((i) => (
-                                    <div key={i} className="h-64 bg-gray-200 rounded-xl animate-pulse"></div>
-                                ))}
-                            </div>
-                        ) : error ? (
-                            <div className="text-center py-8">
-                                <p className="text-red-600">{error}</p>
-                            </div>
-                        ) : results.length === 0 ? (
-                            <div className="text-center py-8">
-                                 <p className="text-gray-600">No se encontraron anuncios</p>
-                            </div>
-                        ) : (
-                            <>
-                                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                                    {results.map((publication: any) => (
-                                        <AdisoCard key={publication.id} adiso={publication} />
-                                    ))}
-                                </div>
-
-                                <Pagination
-                                    currentPage={filters.page}
-                                    totalPages={totalPages}
-                                    onPageChange={handlePageChange}
-                                />
-
-                                {selectedCategory && (
-                                    <AdisoSection
-                                        title={`Anuncios destacados en ${categories.find((cat) => cat.id === selectedCategory)?.name || 'Categoría'}`}
-                                        adisos={(categories as any)[selectedCategory] || []}
-                                    />
-                                )}
-                            </>
-                        )}
-                    </main>
+            <div className="flex flex-col lg:flex-row gap-6">
+                
+                <div className="w-full lg:w-3/4">
+                    {loading ? (
+                        <LoadingState text="Cargando anuncios..." />
+                    ) : noResults ? (
+                        <div className="flex flex-col items-center justify-center py-12">
+                            <AlertCircle className="h-10 w-10 text-gray-400 mb-4" />
+                            <h2 className="text-2xl font-semibold text-gray-900 mb-2">No se encontraron resultados</h2>
+                            <p className="text-gray-500 text-center mb-6">Intenta modificar tu búsqueda o explora todos los anuncios disponibles.</p>
+                        </div>
+                    ) : (
+                        <AnunciosGrid anuncios={results} isListView={isListView} />
+                    )}
                 </div>
             </div>
-        </motion.div>
+        </div>
     );
-}
+};
+
+export default BuscadorAvisos;
 

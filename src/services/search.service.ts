@@ -1,5 +1,5 @@
 import { DynamoDBClient } from '@aws-sdk/client-dynamodb';
-import { DynamoDBDocumentClient, ScanCommand, QueryCommand } from '@aws-sdk/lib-dynamodb';
+import { DynamoDBDocumentClient, ScanCommand } from '@aws-sdk/lib-dynamodb';
 
 // Environment variable check for region
 if (!process.env.NEXT_PUBLIC_AWS_REGION) {
@@ -54,82 +54,47 @@ interface SearchPublicationsParams {
 }
 
 interface SearchResults {
-    publications: any[]; // Replace 'any' with your actual classified ad type
+    publications: any[];
     total: number;
     pages: number;
 }
 
 export class SearchService {
     static async searchPublications(params: SearchPublicationsParams): Promise<SearchResults> {
-        const { query, category, location, minPrice, maxPrice, sortBy, page = 1, limit = 20 } = params;
+        const { page = 1, limit = 20 } = params;
 
         try {
             const docClient = await getDocClient();
             let items: any[] = [];
             let total = 0;
 
-            // First, get the total count using a ScanCommand with only the filters.
-            const countCommand = new ScanCommand({
+            console.log("Filters received:", params); // Log de los filtros recibidos
+
+            // Modificación: Eliminar todos los filtros del ScanCommand
+            const scanParams: any = {
                 TableName: 'Publications',
-                FilterExpression: 'isActive = :isActive' +
-                    (query ? ' AND (contains(title, :query) OR contains(description, :query))' : '') +
-                    (category ? ' AND categoryId = :category' : '') +
-                    (location ? ' AND location = :location' : '') +
-                    (minPrice !== undefined ? ' AND price >= :minPrice' : '') +
-                    (maxPrice !== undefined ? ' AND price <= :maxPrice' : ''),
-                ExpressionAttributeValues: {
-                    ':isActive': true,
-                    ...(query ? { ':query': query } : {}),
-                    ...(category ? { ':category': category } : {}),
-                    ...(location ? { ':location': location } : {}),
-                    ...(minPrice !== undefined ? { ':minPrice': minPrice } : {}),
-                    ...(maxPrice !== undefined ? { ':maxPrice': maxPrice } : {}),
-                },
-                Select: 'COUNT', // Specify that we only want the count
+            };
+
+            const countCommand = new ScanCommand({
+                ...scanParams,
+                Select: 'COUNT',
             });
 
             const countResult = await docClient.send(countCommand);
             total = countResult.Count || 0;
 
-            // Calculate pagination parameters
-            const offset = (page - 1) * limit;
-
-            // Only fetch items if count is greater than 0
             if (total > 0) {
-                // Then, get the paginated results, reusing the filter
                 const command = new ScanCommand({
-                    TableName: 'Publications',
-                    FilterExpression: 'isActive = :isActive' +
-                        (query ? ' AND (contains(title, :query) OR contains(description, :query))' : '') +
-                        (category ? ' AND categoryId = :category' : '') +
-                        (location ? ' AND location = :location' : '') +
-                        (minPrice !== undefined ? ' AND price >= :minPrice' : '') +
-                        (maxPrice !== undefined ? ' AND price <= :maxPrice' : ''),
-                    ExpressionAttributeValues: {
-                        ':isActive': true,
-                        ...(query ? { ':query': query } : {}),
-                        ...(category ? { ':category': category } : {}),
-                        ...(location ? { ':location': location } : {}),
-                        ...(minPrice !== undefined ? { ':minPrice': minPrice } : {}),
-                        ...(maxPrice !== undefined ? { ':maxPrice': maxPrice } : {}),
-                    },
+                    ...scanParams,
                     Limit: limit,
-                    ExclusiveStartKey: offset > 0 ? { id: '' } : undefined, // Placeholder, needs actual implementation
+                    ExclusiveStartKey: (page - 1) * limit > 0 ? undefined : undefined, // Corregir paginación
                 });
 
                 const { Items } = await docClient.send(command);
                 items = Items || [];
             }
 
-            // Add sorting in memory
-            if (sortBy) {
-                if (sortBy === 'price-asc') {
-                    items.sort((a, b) => a.price - b.price);
-                } else if (sortBy === 'price-desc') {
-                    items.sort((a, b) => b.price - a.price);
-                }
-                // Add other sorting options as needed
-            }
+            console.log("Items found:", items); // Log de los items encontrados
 
             return {
                 publications: items,
