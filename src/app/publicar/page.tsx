@@ -24,18 +24,14 @@ import {
 } from '@heroicons/react/24/outline';
 import LoadingState from '@/components/ui/LoadingState';
 import ErrorMessage from '@/components/ui/ErrorMessage';
-import { useAuth } from '@/features/auth/hooks/useAuth';
-import AuthPrompt from '@/features/auth/components/AuthPrompt';
 import Link from 'next/link';
 import { PhoneInput } from 'react-international-phone';
 import LoadingSpinner from '@/components/ui/LoadingSpinner';
 import { ImageService } from '@/services/image.service';
-import AuthHandler from './AuthHandler';
 import ImageUploader from './ImageUploader';
 import AdPreview from './AdPreview';
 import PublicationProgress from './PublicationProgress';
 import StepNavigation from './StepNavigation';
-import LoginForm from '@/features/auth/components/LoginForm';
 
 // Pasos de publicación
 const STEPS = {
@@ -48,16 +44,12 @@ const STEPS = {
 
 export default function PublishPage() {
     const router = useRouter();
-    const { user, isAuthenticated } = useAuth();
     const [step, setStep] = useState(STEPS.CATEGORY);
     const [progress, setProgress] = useState(20);
-    const [showAdvanced, setShowAdvanced] = useState(false);
     const [saving, setSaving] = useState(false);
     const [error, setError] = useState('');
     const [success, setSuccess] = useState(false);
     const [loading, setLoading] = useState(false);
-    const [showLoginModal, setShowLoginModal] = useState(false);
-    const [pendingPublishData, setPendingPublishData] = useState(null);
 
     const [ad, setAd] = useState<QuickPublicationData>({
         title: '',
@@ -144,29 +136,20 @@ export default function PublishPage() {
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
-
-        if (!isAuthenticated) {
-            setPendingPublishData(ad);
-            setShowLoginModal(true);
-            return;
-        }
-
-        await handlePublishWithAuth();
-    };
-
-    const handlePublishWithAuth = async () => {
         setLoading(true);
         setError('');
 
+        // Validar todos los pasos antes de enviar la publicación
+        for (let i = 1; i <= Object.keys(STEPS).length; i++) {
+            if (!validateStep(i)) {
+                setLoading(false);
+                return;
+            }
+        }
+
         try {
-            const response = await PublicationsService.createPublication({
-                ...ad,
-                userId: user?.id
-            });
-
+            const response = await PublicationsService.createPublication(ad);
             setSuccess(true);
-
-            // Redirigir al detalle del anuncio después de 2 segundos
             setTimeout(() => {
                 router.push(`/anuncios/${response.id}`);
             }, 2000);
@@ -175,13 +158,6 @@ export default function PublishPage() {
             setError('Ha ocurrido un error al publicar tu anuncio. Por favor, inténtalo de nuevo.');
         } finally {
             setLoading(false);
-        }
-    };
-
-    const handleLoginSuccess = () => {
-        if (pendingPublishData) {
-            handlePublishWithAuth();
-            setPendingPublishData(null);
         }
     };
 
@@ -247,7 +223,7 @@ export default function PublishPage() {
                                     subcategories: category.subcategories
                                 },
                                 type: selectedSubcategory ? 
-                                    `${category.id}/${selectedSubcategory.id}` : 
+                                    `<span class="math-inline">\{category\.id\}/</span>{selectedSubcategory.id}` : 
                                     `${category.id}`
                             });
                             setTimeout(() => handleStepComplete(STEPS.DETAILS), 500);
@@ -267,7 +243,7 @@ export default function PublishPage() {
                                 name="title"
                                 value={ad.title}
                                 onChange={handleInputChange}
-                                className="w-full px-4 py-3 bg-white rounded-xl border-2 border-primary-100 focus:border-primary-500 focus:ring-2 focus:ring-primary-500/20 transition-all"
+                                className="w-full px-4 py-3 bg-white rounded-xl border-2 border-primary-100 focus:border-primary-500 focus:ring-500/20 transition-all"
                                 placeholder="Ej: Vendo iPhone 12 Pro Max"
                             />
                         </div>
@@ -321,7 +297,14 @@ export default function PublishPage() {
                     </div>
                 );
             case STEPS.PREVIEW:
-                return <AdPreview ad={ad} />;
+                return (
+                    <div>
+                        <AdPreview ad={ad} />
+                        <button type="submit" className="bg-primary-600 text-white px-4 py-2 rounded-lg w-full mt-6">
+                            Publicar anuncio
+                        </button>
+                    </div>
+                );
             default:
                 return null;
         }
@@ -356,26 +339,16 @@ export default function PublishPage() {
                                     Anterior
                                 </button>
                             )}
-                            {step < Object.keys(STEPS).length ? (
+                            {step < Object.keys(STEPS).length && step !== STEPS.PREVIEW && (
                                 <button type="button" onClick={handleNext} className="bg-primary-600 text-white px-4 py-2 rounded-lg">
                                     Siguiente
                                     <ChevronRightIcon className="w-5 h-5 inline-block ml-2" />
-                                </button>
-                            ) : (
-                                <button type="submit" className="bg-primary-600 text-white px-4 py-2 rounded-lg">
-                                    Publicar anuncio
                                 </button>
                             )}
                         </div>
                     </form>
                 )}
             </div>
-
-            <LoginForm 
-                isOpen={showLoginModal}
-                onClose={() => setShowLoginModal(false)}
-                onSuccess={handleLoginSuccess}
-            />
         </div>
     );
 }
