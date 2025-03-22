@@ -1,7 +1,7 @@
 'use client';
 
 import Link from 'next/link';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useAuth } from '@/features/auth/hooks/useAuth'; // Importar useAuth
 import { UserCircleIcon, BellIcon, MessageSquare } from 'lucide-react'; // Importar iconos
 import LoginForm from '@/features/auth/components/LoginForm';
@@ -9,11 +9,27 @@ import LoginForm from '@/features/auth/components/LoginForm';
 export default function Navbar() {
     const [isOpen, setIsOpen] = useState(false);
     const [showLoginModal, setShowLoginModal] = useState(false);
-    const { user, isAuthenticated, logout } = useAuth(); // Usar useAuth
+    const { user, isAuthenticated, logout, checkSession } = useAuth(); // Usar useAuth
+
+    // Verificar la sesión cuando el componente se monta
+    useEffect(() => {
+        checkSession();
+    }, [checkSession]);
 
     const handleLoginClick = (e: React.MouseEvent) => {
         e.preventDefault();
         setShowLoginModal(true);
+        setIsOpen(false); // Cerrar el menú móvil si está abierto
+    };
+
+    const handleLoginSuccess = () => {
+        setShowLoginModal(false);
+        checkSession(); // Actualizar el estado de autenticación
+    };
+
+    const handleLogout = async () => {
+        await logout();
+        setIsOpen(false); // Cerrar el menú móvil si está abierto
     };
 
     return (
@@ -37,12 +53,6 @@ export default function Navbar() {
                                     <Link href="/publicar" className="px-4 py-2 bg-primary-600 text-white rounded-lg hover:bg-primary-700 transition">
                                         Publicar Adiso
                                     </Link>
-                                    <button
-                                        onClick={logout}
-                                        className="px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-700 transition"
-                                    >
-                                        Cerrar Sesión
-                                    </button>
                                     <Link href="/perfil" className="text-primary-700 hover:text-primary-900">
                                         <UserCircleIcon className="w-6 h-6" />
                                     </Link>
@@ -52,6 +62,12 @@ export default function Navbar() {
                                     <Link href="/mensajes" className="text-primary-700 hover:text-primary-900">
                                         <MessageSquare className="w-6 h-6" />
                                     </Link>
+                                    <button
+                                        onClick={handleLogout}
+                                        className="px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-700 transition"
+                                    >
+                                        Cerrar Sesión
+                                    </button>
                                 </>
                             ) : (
                                 <>
@@ -89,12 +105,6 @@ export default function Navbar() {
                                     <Link href="/publicar" className="block py-2 text-primary-700">
                                         Publicar Adiso
                                     </Link>
-                                    <button
-                                        onClick={logout}
-                                        className="block w-full text-left py-2 text-primary-700"
-                                    >
-                                        Cerrar Sesión
-                                    </button>
                                     <Link href="/perfil" className="block py-2 text-primary-700">
                                         Perfil
                                     </Link>
@@ -104,6 +114,12 @@ export default function Navbar() {
                                     <Link href="/mensajes" className="block py-2 text-primary-700">
                                         Mensajes
                                     </Link>
+                                    <button
+                                        onClick={handleLogout}
+                                        className="block w-full text-left py-2 text-primary-700"
+                                    >
+                                        Cerrar Sesión
+                                    </button>
                                 </>
                             ) : (
                                 <>
@@ -123,6 +139,7 @@ export default function Navbar() {
             <LoginForm 
                 isOpen={showLoginModal}
                 onClose={() => setShowLoginModal(false)}
+                onSuccess={handleLoginSuccess}
             />
         </>
     );

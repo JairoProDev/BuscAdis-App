@@ -1,12 +1,23 @@
 import { useState, useEffect, useCallback } from 'react';
-import { AuthService } from '../services/auth.service';
 import { useRouter } from 'next/navigation';
+import { DynamoDBClient } from "@aws-sdk/client-dynamodb";
+import { DynamoDBDocumentClient, QueryCommand } from "@aws-sdk/lib-dynamodb";
+
+const client = new DynamoDBClient({
+    region: 'us-east-1',
+    credentials: {
+        accessKeyId: process.env.NEXT_PUBLIC_AWS_ACCESS_KEY_ID || '',
+        secretAccessKey: process.env.NEXT_PUBLIC_AWS_SECRET_ACCESS_KEY || ''
+    }
+});
+
+const docClient = DynamoDBDocumentClient.from(client);
 
 interface User {
     id: string;
-    name: string;
     phone: string;
     dni: string;
+    createdAt: number;
 }
 
 interface LoginCredentials {
@@ -27,17 +38,12 @@ export function useAuth() {
     const checkSession = useCallback(async () => {
         try {
             setLoading(true);
-            const response = await fetch('http://localhost:3000/api/user', {
-                credentials: 'include'
-            });
-            
-            if (response.ok) {
-                const data = await response.json();
-                setUser(data.user);
-                localStorage.setItem('user', JSON.stringify(data.user));
+            const storedUser = localStorage.getItem('user');
+            if (storedUser) {
+                const userData = JSON.parse(storedUser);
+                setUser(userData);
             } else {
                 setUser(null);
-                localStorage.removeItem('user');
             }
         } catch (error) {
             console.error('Error checking session:', error);
@@ -49,73 +55,47 @@ export function useAuth() {
     }, []);
 
     useEffect(() => {
-        // Intentar recuperar usuario del localStorage al montar
-        const storedUser = localStorage.getItem('user');
-        if (storedUser) {
-            try {
-                setUser(JSON.parse(storedUser));
-            } catch (e) {
-                localStorage.removeItem('user');
-            }
-        }
-        
-        // Verificar la sesión con el servidor
         checkSession();
-        
-        // Verificar la sesión cada 5 minutos
-        const intervalId = setInterval(checkSession, 5 * 60 * 1000);
-        
-        return () => clearInterval(intervalId);
     }, [checkSession]);
 
     const login = async (credentials: LoginCredentials): Promise<AuthResult> => {
-        setLoading(true);
         try {
-            const response = await fetch('http://localhost:3000/api/login', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify(credentials),
-                credentials: 'include',
+            const command = new QueryCommand({
+                TableName: 'Users',
+                IndexName: 'phone-dni-index',
+                KeyConditionExpression: 'phone = :phone and dni = :dni',
+                ExpressionAttributeValues: {
+                    ':phone': credentials.phone,
+                    ':dni': credentials.dni
+                }
             });
 
-            const data = await response.json();
+            const result = await docClient.send(command);
 
-            if (!response.ok) {
-                throw new Error(data.message || 'Error al iniciar sesión');
+            if (result.Items && result.Items.length > 0) {
+                const userData = result.Items[0] as User;
+                setUser(userData);
+                localStorage.setItem('user', JSON.stringify(userData));
+                return { success: true };
+            } else {
+                return { 
+                    success: false, 
+                    message: 'Teléfono o DNI incorrectos' 
+                };
             }
-
-            // Actualizar el estado del usuario
-            await checkSession();
-            
-            return { success: true };
         } catch (error) {
             console.error('Error during login:', error);
-            return { 
-                success: false, 
-                message: error instanceof Error ? error.message : 'Error durante el inicio de sesión'
+            return {
+                success: false,
+                message: 'Error al iniciar sesión. Por favor, inténtalo de nuevo.'
             };
-        } finally {
-            setLoading(false);
         }
     };
 
-    const logout = async () => {
-        try {
-            const response = await fetch('http://localhost:3000/api/logout', {
-                method: 'POST',
-                credentials: 'include',
-            });
-
-            if (response.ok) {
-                setUser(null);
-                localStorage.removeItem('user');
-                router.push('/');
-            }
-        } catch (error) {
-            console.error('Error during logout:', error);
-        }
+    const logout = () => {
+        setUser(null);
+        localStorage.removeItem('user');
+        router.push('/');
     };
 
     return {
