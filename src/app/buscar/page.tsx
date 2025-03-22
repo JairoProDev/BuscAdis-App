@@ -2,28 +2,16 @@
 
 import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import SearchBar from '@/components/search/SearchBar';
-import AdisoSection from '@/components/home/AdisoSection';
-import CategoryFilters from '@/components/search/CategoryFilters';
-import SearchFilters from '@/components/search/SearchFilters';
-import { CategoryId } from '@/types/marketplace';
-import { categories } from '@/data/mockCategories';
-import AdvancedFilters from '@/components/search/AdvancedFilters';
 import { useSearchParams } from 'next/navigation';
-import AdisoCard from '@/components/AdisoCard';
-import LoadingState from '@/components/ui/LoadingState';
-import Pagination from '@/components/ui/Pagination';
+import { CategoryId } from '@/types/marketplace';
 import { SearchService } from '@/services/search.service';
-import Input from '@/components/ui/Input';
-import Button  from '@/components/ui/Button';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/Select';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/Card';
-import { Badge } from '@/components/ui/Badge';
-import { Search, List, Grid, AlertCircle } from 'lucide-react';
+import LoadingState from '@/components/ui/LoadingState';
+import { AlertCircle } from 'lucide-react';
 import AnunciosGrid from '@/components/AnunciosGrid';
-
-const categorias = ['Todos', 'Vehículos', 'Inmuebles', 'Empleo', 'Servicios', 'Productos', 'Eventos', 'Educación', 'Turismo', 'Mascotas', 'Negocios', 'Otros'];
-const ubicaciones = ['Todas', 'Cusco', 'Lima', 'Arequipa', 'Trujillo', 'Chiclayo', 'Piura', 'Iquitos', 'Huancayo', 'Tacna'];
+import AdvancedSearch from '@/components/search/AdvancedSearch'; // Importar AdvancedSearch
+import MapComponent from '@/components/search/MapComponent'; // Importar MapComponent
+import FilterBar from '@/components/search/FilterBar'; // Importar FilterBar
+import Pagination from '@/components/ui/Pagination'; // Importar Pagination
 
 const BuscadorAvisos = () => {
     const searchParams = useSearchParams();
@@ -36,46 +24,22 @@ const BuscadorAvisos = () => {
     });
     const [results, setResults] = useState<any[]>([]);
     const [loading, setLoading] = useState(true);
-    const [searchTerm, setSearchTerm] = useState('');
     const [totalPages, setTotalPages] = useState(1);
     const [error, setError] = useState('');
     const [publications, setPublications] = useState<any[]>([]);
-    const [busqueda, setBusqueda] = useState('');
-    const [categoriaSeleccionada, setCategoriaSeleccionada] = useState('Todos');
-    const [ubicacionSeleccionada, setUbicacionSeleccionada] = useState('Todas');
     const [isListView, setIsListView] = useState(false);
     const [noResults, setNoResults] = useState(false);
 
-    const handleSearch = (query: string) => {
-        console.log('Búsqueda:', { query, filters, category: selectedCategory });
-        setSearchTerm(query);
-        setFilters((prev) => ({
-            ...prev,
-            search: query,
-            page: 1,
-        }));
-    };
-
-    const handleFiltersChange = (newFilters: any) => {
+    const handleSearch = (newFilters: any) => {
         setFilters((prev) => ({
             ...prev,
             ...newFilters,
             page: 1,
         }));
     };
-
-    const handleCategoryChange = (category: string) => {
-        setSelectedCategory(category as CategoryId);
-        setFilters((prev) => ({
-            ...prev,
-            category,
-            page: 1,
-        }));
-    };
-
     const handleBuscar = async () => {
         setLoading(true);
-        console.log("Filters at start of fetchPublications:", filters); // Log inicial de los filtros
+        console.log("Filters at start of fetchPublications:", filters);
         try {
             const data = await SearchService.searchPublications(filters);
             console.log("Data from SearchService:", data);
@@ -95,11 +59,10 @@ const BuscadorAvisos = () => {
             setLoading(false);
         }
     };
-
     useEffect(() => {
-        handleBuscar();
-    }, [busqueda, categoriaSeleccionada, ubicacionSeleccionada]);
-
+      handleBuscar();
+    }, [filters]);
+    
     const handlePageChange = (newPage: number) => {
         setFilters((prev) => ({
             ...prev,
@@ -112,24 +75,15 @@ const BuscadorAvisos = () => {
 
     return (
         <div className="container mx-auto p-4 md:p-6 lg:p-8">
-            <h1 className="text-3xl font-bold text-gray-900 mb-6 text-center">Encuentra lo que buscas</h1>
-
-            <div className="flex flex-col sm:flex-row gap-4 mb-6">
-                <Input
-                    type="text"
-                    placeholder="Buscar anuncios..."
-                    value={busqueda}
-                    onChange={(e) => setBusqueda(e.target.value)}
-                    className="flex-1"
-                />
-                <Button onClick={handleBuscar} className="bg-blue-500 hover:bg-blue-700 text-white">
-                    <Search className="mr-2" /> Buscar
-                </Button>
-            </div>
+            <h1 className="text-3xl font-bold text-gray-900 mb-6 text-center">Encuentra todo lo que buscas</h1>
 
             <div className="flex flex-col lg:flex-row gap-6">
-                
+                <div className="w-full lg:w-1/4">
+                    {/*<AdvancedSearch onSearch={handleSearch} /> {/* Usar AdvancedSearch */}
+                </div>
+
                 <div className="w-full lg:w-3/4">
+                  {/*   <FilterBar onFilterChange={handleSearch} />  Usar FilterBar */}
                     {loading ? (
                         <LoadingState text="Cargando anuncios..." />
                     ) : noResults ? (
@@ -139,13 +93,17 @@ const BuscadorAvisos = () => {
                             <p className="text-gray-500 text-center mb-6">Intenta modificar tu búsqueda o explora todos los anuncios disponibles.</p>
                         </div>
                     ) : (
-                        <AnunciosGrid anuncios={results} isListView={isListView} />
+                        <div>
+                            <AnunciosGrid anuncios={results} isListView={isListView} />
+                            <Pagination currentPage={filters.page} totalPages={totalPages} onPageChange={handlePageChange} /> {/* Usar Pagination */}
+                        </div>
                     )}
                 </div>
             </div>
+
+            {/* <MapComponent publications={publications} /> {/* Usar MapComponent */}
         </div>
     );
 };
 
 export default BuscadorAvisos;
-

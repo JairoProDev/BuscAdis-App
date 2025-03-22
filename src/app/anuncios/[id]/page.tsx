@@ -18,7 +18,7 @@ import ErrorMessage from '@/components/ui/ErrorMessage';
 import { formatDate } from '@/utils/date';
 import { formatPrice } from '@/utils/format';
 import { Carousel } from '@/components/ui/Carousel';
-import { WhatsAppIcon, FlagIcon } from '@/components/icons';
+import { WhatsAppIcon } from '@/components/icons';
 import LoadingSpinner from '@/components/ui/LoadingSpinner';
 
 interface Publication {
