@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { PhoneInput } from 'react-international-phone';
 import 'react-international-phone/style.css';
@@ -12,62 +12,23 @@ export default function RegisterForm() {
         firstName: '',
         lastName: '',
         phone: '',
-        email: '',
-        password: '',
-        confirmPassword: '',
-        address: '',
-        birthdate: '',
-        gender: '',
+        dni: '',
     });
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState('');
-
-    const [passwordRequirements, setPasswordRequirements] = useState({
-        length: false,
-        uppercase: false,
-        lowercase: false,
-        number: false,
-        symbol: false,
-    });
-
-    useEffect(() => {
-        // Password validation checks
-        setPasswordRequirements({
-            length: formData.password.length >= 8,
-            uppercase: /[A-Z]/.test(formData.password),
-            lowercase: /[a-z]/.test(formData.password),
-            number: /[0-9]/.test(formData.password),
-            symbol: /[!@#$%^&*(),.?":{}|<>]/.test(formData.password),
-        });
-    }, [formData.password]);
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         setLoading(true);
         setError('');
 
-        if (formData.password !== formData.confirmPassword) {
-            setError('Las contraseñas no coinciden');
-            setLoading(false);
-            return;
-        }
-
         try {
-            const { email, password, phone, firstName, lastName, address, birthdate, gender } = formData; // Include new attributes
-            const { data, error } = await AuthService.register({
-                email,
-                password,
-                phone,
-                firstName,
-                lastName,
-                address,
-                birthdate,
-                gender
-            });
+            const { phone, firstName, lastName, dni } = formData;
+            const { data, error } = await AuthService.register({ phone, firstName, lastName, dni });
 
             if (error) throw error;
 
-            router.push(`/confirmar?email=${encodeURIComponent(email)}`);
+            router.push('/login'); // Redirigir a la página de inicio de sesión
         } catch (error) {
             setError('Error al registrarse. Verifica tus datos.');
             console.error('Error en registro:', error);
@@ -80,9 +41,7 @@ export default function RegisterForm() {
         <div className="bg-white p-8 rounded-xl shadow-lg max-w-md w-full mx-auto">
             <h2 className="text-2xl font-bold text-gray-900 mb-6 text-center">Crear cuenta</h2>
 
-            {error && (
-                <div className="bg-red-50 text-red-600 p-3 rounded-lg mb-4">{error}</div>
-            )}
+            {error && <div className="bg-red-50 text-red-600 p-3 rounded-lg mb-4">{error}</div>}
 
             <form onSubmit={handleSubmit} className="space-y-6">
                 <div>
@@ -101,48 +60,8 @@ export default function RegisterForm() {
                 </div>
 
                 <div>
-                    <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-1">Correo electrónico</label>
-                    <input id="email" type="email" required className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500" value={formData.email} onChange={(e) => setFormData({ ...formData, email: e.target.value })} />
-                </div>
-
-                <div>
-                    <label htmlFor="password" className="block text-sm font-medium text-gray-700 mb-1">Contraseña</label>
-                    <input id="password" type="password" required className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500" value={formData.password} onChange={(e) => setFormData({ ...formData, password: e.target.value })} />
-                    <ul className="list-disc list-inside text-sm text-gray-500 mt-2">
-                        <li className={passwordRequirements.length ? 'text-green-600' : 'text-red-600'}>Mínimo 8 caracteres</li>
-                        <li className={passwordRequirements.uppercase ? 'text-green-600' : 'text-red-600'}>Al menos una mayúscula</li>
-                        <li className={passwordRequirements.lowercase ? 'text-green-600' : 'text-red-600'}>Al menos una minúscula</li>
-                        <li className={passwordRequirements.number ? 'text-green-600' : 'text-red-600'}>Al menos un número</li>
-                        <li className={passwordRequirements.symbol ? 'text-green-600' : 'text-red-600'}>Al menos un símbolo</li>
-                    </ul>
-                </div>
-
-                <div>
-                    <label htmlFor="confirmPassword" className="block text-sm font-medium text-gray-700 mb-1">Confirmar contraseña</label>
-                    <input id="confirmPassword" type="password" required className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500" value={formData.confirmPassword} onChange={(e) => setFormData({ ...formData, confirmPassword: e.target.value })} />
-                </div>
-
-                {/* Added Address */}
-                <div>
-                    <label htmlFor="address" className="block text-sm font-medium text-gray-700 mb-1">Dirección</label>
-                    <input type="text" id="address" value={formData.address} onChange={(e) => setFormData({ ...formData, address: e.target.value })} className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500" />
-                </div>
-
-                {/* Added Birthdate */}
-                <div>
-                    <label htmlFor="birthdate" className="block text-sm font-medium text-gray-700 mb-1">Fecha de Nacimiento</label>
-                    <input type="date" id="birthdate" value={formData.birthdate} onChange={(e) => setFormData({ ...formData, birthdate: e.target.value })} className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500" />
-                </div>
-
-                {/* Added Gender */}
-                <div>
-                    <label htmlFor="gender" className="block text-sm font-medium text-gray-700 mb-1">Género</label>
-                    <select id="gender" value={formData.gender} onChange={(e) => setFormData({ ...formData, gender: e.target.value })} className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500">
-                        <option value="">Selecciona...</option>
-                        <option value="male">Masculino</option>
-                        <option value="female">Femenino</option>
-                        <option value="other">Otro</option>
-                    </select>
+                    <label htmlFor="dni" className="block text-sm font-medium text-gray-700 mb-1">DNI</label>
+                    <input type="text" id="dni" value={formData.dni} onChange={(e) => setFormData({ ...formData, dni: e.target.value })} className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500" />
                 </div>
 
                 <button type="submit" disabled={loading} className="w-full bg-primary-600 text-white py-2 px-4 rounded-lg hover:bg-primary-700 transition duration-200">
