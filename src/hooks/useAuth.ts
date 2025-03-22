@@ -1,39 +1,70 @@
-import { useState, useEffect } from 'react';
-import { supabase } from '@/supabaseClient';
+import { useState, useEffect, useCallback } from 'react';
+import { AuthService } from '../services/auth.service';
+import { useRouter } from 'next/navigation';
 
 export function useAuth() {
-  const [user, setUser] = useState(null);
-  const [loading, setLoading] = useState(true);
+    const [user, setUser] = useState<any | null>(null); // User type is now 'any'
+    const [loading, setLoading] = useState(true);
+    const router = useRouter();
 
-  useEffect(() => {
-    // Obtener sesión actual
-    const getSession = async () => {
-      try {
-        const { data: { session }, error } = await supabase.auth.getSession();
-        
-        if (error) throw error;
-        setUser(session?.user || null);
-      } catch (error) {
-        console.error('Error getting session:', error);
-      } finally {
-        setLoading(false);
-      }
+    const checkSession = useCallback(async () => {
+        try {
+            setLoading(true);
+            const currentUser = await AuthService.getCurrentUser();
+            setUser(currentUser);
+        } catch (error) {
+            console.error('Error checking session:', error);
+            setUser(null);
+        } finally {
+            setLoading(false);
+        }
+    },);
+
+    useEffect(() => {
+        checkSession();
+
+        // Verificar la sesión cada 15 minutos
+        const intervalId = setInterval(checkSession, 15 * 60 * 1000);
+
+        return () => clearInterval(intervalId);
+    }, [checkSession]);
+
+    const login = async (credentials: any) => {
+        setLoading(true);
+        try {
+            const result = await AuthService.login(credentials);
+            if (result.error) {
+                return { success: false, message: result.error };
+            }
+            await checkSession();
+            return { success: true };
+        } catch (error) {
+            console.error('Error during login:', error);
+            return {
+                success: false,
+                message: error.message || 'Error durante el inicio de sesión'
+            };
+        } finally {
+            setLoading(false);
+        }
     };
 
-    getSession();
-
-    // Escuchar cambios en auth
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      async (_event, session) => {
-        setUser(session?.user || null);
-        setLoading(false);
-      }
-    );
-
-    return () => {
-      subscription.unsubscribe();
+    const logout = async () => {
+        try {
+            await AuthService.logout();
+            setUser(null);
+            router.push('/');
+        } catch (error) {
+            console.error('Error during logout:', error);
+        }
     };
-  }, []);
 
-  return { user, loading };
+    return {
+        user,
+        loading,
+        isAuthenticated: !!user,
+        login,
+        logout,
+        checkSession
+    };
 }

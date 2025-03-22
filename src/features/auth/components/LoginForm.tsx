@@ -1,13 +1,17 @@
 'use client';
 
 import { useState } from 'react';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { PhoneInput } from 'react-international-phone';
 import 'react-international-phone/style.css';
 import { AuthService } from '../services/auth.service';
+import { PublicationsService } from '@/services/publications.service'; // Importa el servicio de publicaciones
 
 export default function LoginForm() {
     const router = useRouter();
+    const searchParams = useSearchParams();
+    const redirectUrl = searchParams.get('redirect');
+    const publishData = searchParams.get('data');
     const [formData, setFormData] = useState({
         phone: '',
         dni: '',
@@ -26,8 +30,15 @@ export default function LoginForm() {
 
             if (error) throw error;
 
-            // Redirigir a la página principal tras el inicio de sesión
-            router.push('/');
+            // Redirigir a la página correcta tras el inicio de sesión
+            if (redirectUrl) {
+                if(publishData){
+                    await PublicationsService.createPublication(JSON.parse(decodeURIComponent(publishData)));
+                }
+                router.push(redirectUrl);
+            } else {
+                router.push('/');
+            }
         } catch (error) {
             setError('Error al iniciar sesión. Verifica tus datos.');
             console.error('Error en login:', error);
@@ -35,7 +46,7 @@ export default function LoginForm() {
             setLoading(false);
         }
     };
-
+    
     return (
         <div className="bg-white p-8 rounded-xl shadow-lg max-w-md w-full mx-auto">
             <h2 className="text-2xl font-bold text-gray-900 mb-6 text-center">
