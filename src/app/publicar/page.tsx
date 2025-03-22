@@ -1,4 +1,4 @@
-'use client'
+'use client';
 
 import React, { useState, useEffect, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -35,6 +35,7 @@ import ImageUploader from './ImageUploader';
 import AdPreview from './AdPreview';
 import PublicationProgress from './PublicationProgress';
 import StepNavigation from './StepNavigation';
+import LoginForm from '@/features/auth/components/LoginForm';
 
 // Pasos de publicación
 const STEPS = {
@@ -55,10 +56,8 @@ export default function PublishPage() {
     const [error, setError] = useState('');
     const [success, setSuccess] = useState(false);
     const [loading, setLoading] = useState(false);
-    const [showAuthPrompt, setShowAuthPrompt] = useState(false);
-    const [publishData, setPublishData] = useState(null);
-    const [uploadingImages, setUploadingImages] = useState(false);
-    const [uploadProgress, setUploadProgress] = useState(0);
+    const [showLoginModal, setShowLoginModal] = useState(false);
+    const [pendingPublishData, setPendingPublishData] = useState(null);
 
     const [ad, setAd] = useState<QuickPublicationData>({
         title: '',
@@ -66,7 +65,7 @@ export default function PublishPage() {
         contact: {
             whatsapp: '',
         },
-        media:,
+        media: [],
         location: {
             city: '',
             country: 'Perú'
@@ -92,8 +91,8 @@ export default function PublishPage() {
     };
 
     const validateStep = (step: number): boolean => {
-        const errors: string=;
-        
+        const errors: string[] = [];
+
         switch(step) {
             case STEPS.CATEGORY:
                 if (!ad.category) {
@@ -143,27 +142,46 @@ export default function PublishPage() {
         setStep(nextStep);
     };
 
-    const handlePublish = async (data) => {
-        if (!user) {
-            setPublishData(data);
+    const handleSubmit = async (e: React.FormEvent) => {
+        e.preventDefault();
+
+        if (!isAuthenticated) {
+            setPendingPublishData(ad);
+            setShowLoginModal(true);
             return;
         }
-        
-        // Proceder con la publicación
-        await handlePublishWithAuth(data);
+
+        await handlePublishWithAuth();
     };
 
-    const handlePublishWithAuth = async (data) => {
+    const handlePublishWithAuth = async () => {
+        setLoading(true);
+        setError('');
+
         try {
-            // Lógica de publicación
-            const result = await PublicationsService.createPublication({
-                ...data,
-                userId: user.id
+            const response = await PublicationsService.createPublication({
+                ...ad,
+                userId: user?.id
             });
-            
-            router.push(`/anuncios/${result.id}`);
-        } catch (error) {
-            console.error('Error publishing:', error);
+
+            setSuccess(true);
+
+            // Redirigir al detalle del anuncio después de 2 segundos
+            setTimeout(() => {
+                router.push(`/anuncios/${response.id}`);
+            }, 2000);
+        } catch (err) {
+            console.error('Error publicando anuncio:', err);
+            setError('Ha ocurrido un error al publicar tu anuncio. Por favor, inténtalo de nuevo.');
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    const handleLoginSuccess = () => {
+        if (pendingPublishData) {
+            handlePublishWithAuth();
+            setPendingPublishData(null);
         }
     };
 
@@ -180,7 +198,7 @@ export default function PublishPage() {
             setError('El título y la descripción son obligatorios');
             return;
         }
-        
+
         if (step === 2 && !ad.category) {
             setError('Debes seleccionar una categoría');
             return;
@@ -197,34 +215,6 @@ export default function PublishPage() {
 
     const handlePrevious = () => {
         setStep(prevStep => Math.max(prevStep - 1, 1));
-    };
-
-    const handleSubmit = async (e) => {
-        e.preventDefault();
-        
-        if (!isAuthenticated) {
-            setShowAuthPrompt(true);
-            return;
-        }
-
-        setLoading(true);
-        setError('');
-        
-        try {
-            const response = await PublicationsService.createPublication(ad);
-            
-            setSuccess(true);
-            
-            // Redirigir al detalle del anuncio después de 2 segundos
-            setTimeout(() => {
-                router.push(`/anuncios/${response.id}`);
-            }, 2000);
-        } catch (err) {
-            console.error('Error publicando anuncio:', err);
-            setError('Ha ocurrido un error al publicar tu anuncio. Por favor, inténtalo de nuevo.');
-        } finally {
-            setLoading(false);
-        }
     };
 
     const handleImageUpload = (images: string) => {
@@ -337,8 +327,6 @@ export default function PublishPage() {
         }
     };
 
-    const showAuthPrompt = !isAuthenticated && publishData;
-
     return (
         <div className="max-w-3xl mx-auto p-4">
             <h1 className="text-3xl font-semibold mb-6">Publicar anuncio</h1>
@@ -383,30 +371,11 @@ export default function PublishPage() {
                 )}
             </div>
 
-            {showAuthPrompt && (
-                <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4">
-                    <div className="bg-white rounded-lg max-w-md w-full p-6">
-                        <h2 className="text-xl font-semibold mb-4">Último paso</h2>
-                        <p className="text-gray-600 mb-6">
-                            Para publicar tu anuncio, necesitas una cuenta. Es gratis y solo toma un minuto.
-                        </p>
-                        <div className="space-y-4">
-                            <Link
-                                href={`/register?redirect=${encodeURIComponent('/publicar')}&data=${encodeURIComponent(JSON.stringify(publishData))}`}
-                                className="w-full block text-center py-2 px-4 bg-primary-600 text-white rounded-lg hover:bg-primary-700"
-                            >
-                                Crear cuenta
-                            </Link>
-                            <Link
-                                href={`/login?redirect=${encodeURIComponent('/publicar')}&data=${encodeURIComponent(JSON.stringify(publishData))}`}
-                                className="w-full block text-center py-2 px-4 border border-gray-300 rounded-lg hover:bg-gray-50"
-                            >
-                                Iniciar sesión
-                            </Link>
-                        </div>
-                    </div>
-                </div>
-            )}
+            <LoginForm 
+                isOpen={showLoginModal}
+                onClose={() => setShowLoginModal(false)}
+                onSuccess={handleLoginSuccess}
+            />
         </div>
     );
 }

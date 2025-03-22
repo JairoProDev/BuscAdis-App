@@ -4,7 +4,7 @@ import type { NextRequest } from 'next/server';
 function parseJwt(token: string) {
   try {
     return JSON.parse(atob(token.split('.')[1]));
-  } catch (e) {
+  } catch {
     return null;
   }
 }
@@ -32,10 +32,9 @@ export async function middleware(req: NextRequest) {
     
     // Verificar si el token existe y no está expirado
     if (!idToken || isTokenExpired(idToken)) {
-      // Redirigir al login con la URL actual como redirectUrl
-      const url = new URL('/login', req.url);
-      url.searchParams.set('redirectUrl', req.nextUrl.pathname + req.nextUrl.search);
-      return NextResponse.redirect(url);
+      // En lugar de redirigir, permitimos que la página se cargue
+      // El componente de la página manejará mostrar el modal de login
+      return NextResponse.next();
     }
   }
   

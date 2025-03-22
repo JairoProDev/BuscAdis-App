@@ -16,6 +16,7 @@ export default function RegisterForm() {
     });
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState('');
+    const [successMessage, setSuccessMessage] = useState(''); // Mensaje de éxito
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -28,7 +29,10 @@ export default function RegisterForm() {
 
             if (error) throw error;
 
-            router.push('/login'); // Redirigir a la página de inicio de sesión
+            setSuccessMessage('Cuenta creada con éxito.'); // Mensaje de éxito
+            setTimeout(() => {
+                router.push('/login'); // Redirigir a la página de inicio de sesión
+            }, 2000); // Redirigir después de 2 segundos
         } catch (error) {
             setError('Error al registrarse. Verifica tus datos.');
             console.error('Error en registro:', error);
@@ -42,6 +46,11 @@ export default function RegisterForm() {
             <h2 className="text-2xl font-bold text-gray-900 mb-6 text-center">Crear cuenta</h2>
 
             {error && <div className="bg-red-50 text-red-600 p-3 rounded-lg mb-4">{error}</div>}
+            {successMessage && (
+                <div className="text-green-500 text-sm mt-2">
+                    {successMessage}
+                </div>
+            )}
 
             <form onSubmit={handleSubmit} className="space-y-6">
                 <div>

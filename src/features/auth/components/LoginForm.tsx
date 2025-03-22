@@ -1,100 +1,129 @@
 'use client';
 
 import { useState } from 'react';
-import { useRouter, useSearchParams } from 'next/navigation';
-import { PhoneInput } from 'react-international-phone';
-import 'react-international-phone/style.css';
-import { AuthService } from '../services/auth.service';
-import { PublicationsService } from '@/services/publications.service'; // Importa el servicio de publicaciones
+import PhoneInput from 'react-phone-input-2';
+import 'react-phone-input-2/lib/style.css';
+import { XMarkIcon, IdentificationIcon } from '@heroicons/react/24/outline';
+import { useAuth } from '../hooks/useAuth';
 
-export default function LoginForm() {
-    const router = useRouter();
-    const searchParams = useSearchParams();
-    const redirectUrl = searchParams.get('redirect');
-    const publishData = searchParams.get('data');
-    const [formData, setFormData] = useState({
-        phone: '',
-        dni: '',
-    });
-    const [loading, setLoading] = useState(false);
-    const [error, setError] = useState('');
+interface LoginFormProps {
+  isOpen: boolean;
+  onClose: () => void;
+  onSuccess?: () => void;
+}
 
-    const handleSubmit = async (e: React.FormEvent) => {
-        e.preventDefault();
-        setLoading(true);
-        setError('');
+export default function LoginForm({ isOpen, onClose, onSuccess }: LoginFormProps) {
+  const [phone, setPhone] = useState('');
+  const [dni, setDni] = useState('');
+  const [error, setError] = useState('');
+  const [successMessage, setSuccessMessage] = useState('');
+  const [isLoading, setIsLoading] = useState(false);
+  const { login } = useAuth();
 
-        try {
-            const { phone, dni } = formData;
-            const { data, error } = await AuthService.login({ phone, dni });
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setError('');
+    setIsLoading(true);
 
-            if (error) throw error;
+    try {
+      const result = await login({
+        phone: phone.startsWith('+') ? phone : `+${phone}`,
+        dni
+      });
 
-            // Redirigir a la página correcta tras el inicio de sesión
-            if (redirectUrl) {
-                if(publishData){
-                    await PublicationsService.createPublication(JSON.parse(decodeURIComponent(publishData)));
-                }
-                router.push(redirectUrl);
-            } else {
-                router.push('/');
-            }
-        } catch (error) {
-            setError('Error al iniciar sesión. Verifica tus datos.');
-            console.error('Error en login:', error);
-        } finally {
-            setLoading(false);
-        }
-    };
-    
-    return (
-        <div className="bg-white p-8 rounded-xl shadow-lg max-w-md w-full mx-auto">
-            <h2 className="text-2xl font-bold text-gray-900 mb-6 text-center">
-                Iniciar sesión
-            </h2>
+      if (result.success) {
+        setSuccessMessage('¡Inicio de sesión exitoso!');
+        setPhone('');
+        setDni('');
+        
+        // Esperar 1.5 segundos para mostrar el mensaje de éxito
+        setTimeout(() => {
+          onSuccess?.();
+          onClose();
+        }, 1500);
+      } else {
+        setError(result.message || 'Error al iniciar sesión');
+      }
+    } catch (err) {
+      setError('Error al iniciar sesión. Por favor, inténtalo de nuevo.');
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
-            {error && (
-                <div className="bg-red-50 text-red-600 p-3 rounded-lg mb-4">
-                    {error}
-                </div>
-            )}
+  if (!isOpen) return null;
 
-            <form onSubmit={handleSubmit} className="space-y-6">
-                <div>
-                    <label className="block text-sm font-medium text-gray-700 mb-1">
-                        Teléfono WhatsApp
-                    </label>
-                    <PhoneInput
-                        defaultCountry="pe"
-                        value={formData.phone}
-                        onChange={(phone) => setFormData({ ...formData, phone })}
-                        className="w-full"
-                        required
-                    />
-                </div>
+  return (
+    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+      <div className="bg-white rounded-lg p-8 max-w-md w-full relative">
+        <button
+          onClick={onClose}
+          className="absolute top-4 right-4 text-gray-500 hover:text-gray-700"
+          aria-label="Cerrar"
+        >
+          <XMarkIcon className="h-6 w-6" />
+        </button>
 
-                <div>
-                    <label htmlFor="dni" className="block text-sm font-medium text-gray-700 mb-1">
-                        DNI
-                    </label>
-                    <input
-                        type="text"
-                        id="dni"
-                        value={formData.dni}
-                        onChange={(e) => setFormData({ ...formData, dni: e.target.value })}
-                        className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500"
-                        required
-                    />
-                </div>
+        <h2 className="text-2xl font-bold mb-6 text-center">Iniciar Sesión</h2>
 
-                <button
-                    type="submit"
-                    disabled={loading}
-                    className="w-full bg-primary-600 text-white py-2 px-4 rounded-lg hover:bg-primary-700 transition duration-200"
-                >
-                    {loading ? 'Cargando...' : 'Iniciar sesión'}
-                </button>
-            </form>
-        </div>
-    );
+        {successMessage && (
+          <div className="bg-green-50 text-green-600 p-3 rounded-lg mb-4 text-center">
+            {successMessage}
+          </div>
+        )}
+
+        <form onSubmit={handleSubmit} className="space-y-4">
+          <div>
+            <label htmlFor="phone" className="block text-sm font-medium text-gray-700 mb-1">
+              Teléfono
+            </label>
+            <PhoneInput
+              country={'pe'}
+              value={phone}
+              onChange={setPhone}
+              inputProps={{
+                id: 'phone',
+                required: true,
+                className: 'w-full p-2 border border-gray-300 rounded-md',
+                placeholder: '+51 937 054 328',
+              }}
+              containerStyle={{ position: 'relative' }}
+              inputStyle={{ paddingLeft: '4rem' }}
+            />
+          </div>
+
+          <div>
+            <label htmlFor="dni" className="block text-sm font-medium text-gray-700 mb-1 flex items-center">
+              DNI
+              <IdentificationIcon className="h-5 w-5 ml-2" />
+            </label>
+            <input
+              type="text"
+              id="dni"
+              value={dni}
+              onChange={(e) => setDni(e.target.value)}
+              required
+              className="w-full p-2 border border-gray-300 rounded-md"
+              placeholder="Introduce tu DNI"
+            />
+          </div>
+
+          {error && (
+            <div className="bg-red-50 text-red-600 p-3 rounded-lg">
+              {error}
+            </div>
+          )}
+
+          <button
+            type="submit"
+            disabled={isLoading}
+            className={`w-full bg-blue-600 text-white py-2 px-4 rounded-md hover:bg-blue-700 transition-colors
+              ${isLoading ? 'opacity-50 cursor-not-allowed' : ''}`}
+          >
+            {isLoading ? 'Iniciando sesión...' : 'Iniciar Sesión'}
+          </button>
+        </form>
+      </div>
+    </div>
+  );
 }
