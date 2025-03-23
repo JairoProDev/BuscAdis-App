@@ -206,7 +206,7 @@ export default function CategorySelector() {
             >
                 <div className="flex items-center justify-between">
                     <div>
-                    <h3 className={`font-medium ${isSelected ? 'text-primary-900' : 'text-gray-900'}`}></h3>
+                    <h3 className={`font-medium ${isSelected ? 'text-primary-900' : 'text-gray-900'}`}>{subcategory.name}</h3>
                         </div>
                         {isSelected && <CheckCircleIcon className="w-5 h-5 text-primary-500" />}
                     </div>
