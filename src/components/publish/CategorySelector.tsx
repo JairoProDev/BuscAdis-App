@@ -1,9 +1,15 @@
 'use client'
 
-import { useState, useEffect } from 'react'
+import React, { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { ChevronRightIcon } from '@heroicons/react/24/outline'
+import {
+  ChevronRightIcon,
+  TagIcon,
+  CheckCircleIcon,
+  ArrowLeftIcon
+} from '@heroicons/react/24/outline'
 import { categories } from '@/data/categories'
+import { Logger } from '@/services/logging.service'
 
 interface SubCategory {
   id: string;
@@ -19,8 +25,12 @@ interface CategoryOption {
 }
 
 interface CategorySelectorProps {
-  selectedCategory?: CategoryOption | null;
-  onSelect: (category: CategoryOption) => void;
+  categories: CategoryOption[];
+  value: {
+    category: CategoryOption | null;
+    subcategory?: SubCategory | null;
+  };
+  onChange: (selection: { category: CategoryOption; subcategory?: SubCategory }) => void;
 }
 
 type CategoryName = keyof typeof categories;
@@ -114,55 +124,141 @@ const categoryList: CategoryOption[] = Object.entries(categories).map(([name, da
   ].filter(Boolean)
 }));
 
-export default function CategorySelector({ selectedCategory, onSelect }: CategorySelectorProps) {
-  const [activeCategory, setActiveCategory] = useState<CategoryOption | null>(null);
+export default function CategorySelector({
+  categories,
+  value,
+  onChange
+}: CategorySelectorProps) {
+  const [selectedCategory, setSelectedCategory] = useState<CategoryOption | null>(value?.category || null);
+  const [selectedSubcategory, setSelectedSubcategory] = useState<SubCategory | null>(
+    value?.subcategory || null
+  );
   const [showSubcategories, setShowSubcategories] = useState(false);
-  const [selectedSubcategory, setSelectedSubcategory] = useState<SubCategory | null>(null);
 
   useEffect(() => {
-    if (selectedCategory) {
-      const category = categoryList.find(c => c.id === selectedCategory.id);
-      if (category) {
-        setActiveCategory(category);
-        setShowSubcategories(true);
-        const selected = category.subcategories?.find(sub => sub.selected);
-        if (selected) {
-          setSelectedSubcategory(selected);
-        }
-      }
+    if (value?.category) {
+      setSelectedCategory(value.category);
+      setShowSubcategories(!!value.subcategory);
     }
-  }, [selectedCategory]);
+    if (value?.subcategory) {
+      setSelectedSubcategory(value.subcategory);
+    }
+  }, [value]);
 
-  const handleCategoryClick = (category: CategoryOption) => {
-    setActiveCategory(category);
-    setShowSubcategories(true);
+  const handleCategorySelect = (category: CategoryOption) => {
+    setSelectedCategory(category);
     setSelectedSubcategory(null);
+    setShowSubcategories(true);
+    Logger.info(`Categoría seleccionada: ${category.name}`);
+    
+    if (!category.subcategories || category.subcategories.length === 0) {
+      onChange({ category });
+    }
   };
 
-  const handleSubcategoryClick = (subcategory: SubCategory) => {
-    if (!activeCategory) return;
-    
+  const handleSubcategorySelect = (subcategory: SubCategory) => {
     setSelectedSubcategory(subcategory);
+    Logger.info(`Subcategoría seleccionada: ${subcategory.name}`);
     
-    const fullCategory: CategoryOption = {
-      ...activeCategory,
-      subcategories: activeCategory.subcategories?.map(sub => ({
-        ...sub,
-        selected: sub.id === subcategory.id
-      }))
-    };
-
-    onSelect(fullCategory);
+    if (selectedCategory) {
+      onChange({
+        category: selectedCategory,
+        subcategory
+      });
+    }
   };
 
   const handleBack = () => {
     setShowSubcategories(false);
-    setActiveCategory(null);
     setSelectedSubcategory(null);
+    Logger.debug('Volviendo a la lista de categorías');
+  };
+
+  const renderCategoryCard = (category: CategoryOption) => {
+    const isSelected = selectedCategory?.id === category.id;
+    
+    return (
+      <motion.button
+        key={category.id}
+        onClick={() => handleCategorySelect(category)}
+        className={`w-full text-left p-4 rounded-xl border-2 transition-all ${
+          isSelected
+            ? 'border-primary-500 bg-primary-50'
+            : 'border-gray-200 hover:border-primary-200'
+        }`}
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        whileHover={{ scale: 1.02 }}
+        whileTap={{ scale: 0.98 }}
+      >
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <div className={`p-2 rounded-lg ${
+              isSelected ? 'bg-primary-100' : 'bg-gray-100'
+            }`}>
+              <TagIcon className={`w-6 h-6 ${
+                isSelected ? 'text-primary-600' : 'text-gray-500'
+              }`} />
+            </div>
+            <div>
+              <h3 className={`font-medium ${
+                isSelected ? 'text-primary-900' : 'text-gray-900'
+              }`}>
+                {category.name}
+              </h3>
+              {category.description && (
+                <p className="text-sm text-gray-500">{category.description}</p>
+              )}
+            </div>
+          </div>
+          {category.subcategories && category.subcategories.length > 0 && (
+            <ChevronRightIcon className={`w-5 h-5 ${
+              isSelected ? 'text-primary-500' : 'text-gray-400'
+            }`} />
+          )}
+        </div>
+      </motion.button>
+    );
+  };
+
+  const renderSubcategoryCard = (subcategory: SubCategory) => {
+    const isSelected = selectedSubcategory?.id === subcategory.id;
+    
+    return (
+      <motion.button
+        key={subcategory.id}
+        onClick={() => handleSubcategorySelect(subcategory)}
+        className={`w-full text-left p-4 rounded-xl border-2 transition-all ${
+          isSelected
+            ? 'border-primary-500 bg-primary-50'
+            : 'border-gray-200 hover:border-primary-200'
+        }`}
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        whileHover={{ scale: 1.02 }}
+        whileTap={{ scale: 0.98 }}
+      >
+        <div className="flex items-center justify-between">
+          <div>
+            <h3 className={`font-medium ${
+              isSelected ? 'text-primary-900' : 'text-gray-900'
+            }`}>
+              {subcategory.name}
+            </h3>
+            {subcategory.description && (
+              <p className="text-sm text-gray-500">{subcategory.description}</p>
+            )}
+          </div>
+          {isSelected && (
+            <CheckCircleIcon className="w-5 h-5 text-primary-500" />
+          )}
+        </div>
+      </motion.button>
+    );
   };
 
   return (
-    <div className="relative">
+    <div className="space-y-6">
       <AnimatePresence mode="wait">
         {!showSubcategories ? (
           <motion.div
@@ -170,41 +266,14 @@ export default function CategorySelector({ selectedCategory, onSelect }: Categor
             initial={{ opacity: 0, x: -20 }}
             animate={{ opacity: 1, x: 0 }}
             exit={{ opacity: 0, x: 20 }}
-            className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4"
+            className="space-y-4"
           >
-            {categoryList.map((category) => {
-              const CategoryIcon = categories[category.name as CategoryName].icon;
-              return (
-                <motion.button
-                  key={category.id}
-                  onClick={() => handleCategoryClick(category)}
-                  whileHover={{ scale: 1.02 }}
-                  whileTap={{ scale: 0.98 }}
-                  className={`p-6 bg-white rounded-xl border-2 transition-all text-left group
-                    ${activeCategory?.id === category.id 
-                      ? 'border-primary-500 shadow-lg shadow-primary-500/20' 
-                      : 'border-primary-100 hover:border-primary-300 hover:shadow-md'
-                    }`}
-                >
-                  <div className="flex items-start gap-4">
-                    <div className="w-12 h-12 rounded-lg bg-primary-50 p-2 group-hover:bg-primary-100">
-                      <CategoryIcon className="w-8 h-8 text-primary-600" />
-                    </div>
-                    <div className="flex-1 min-w-0">
-                      <h3 className="text-lg font-semibold text-primary-900 group-hover:text-primary-700">
-                        {category.name}
-                      </h3>
-                      {category.description && (
-                        <p className="text-sm text-primary-600 truncate">
-                          {category.description}
-                        </p>
-                      )}
-                    </div>
-                    <ChevronRightIcon className="w-5 h-5 text-primary-400 group-hover:text-primary-600" />
-                  </div>
-                </motion.button>
-              );
-            })}
+            <h2 className="text-lg font-medium text-gray-900">
+              Selecciona una categoría
+            </h2>
+            <div className="grid gap-3">
+              {categories.map(renderCategoryCard)}
+            </div>
           </motion.div>
         ) : (
           <motion.div
@@ -214,36 +283,57 @@ export default function CategorySelector({ selectedCategory, onSelect }: Categor
             exit={{ opacity: 0, x: -20 }}
             className="space-y-4"
           >
-            <button
-              onClick={handleBack}
-              className="text-sm text-primary-600 hover:text-primary-800 transition-colors mb-4 flex items-center gap-1"
-            >
-              ← Volver a categorías
-            </button>
-
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
-              {activeCategory?.subcategories?.map((subcategory) => (
-                <motion.button
-                  key={subcategory.id}
-                  onClick={() => handleSubcategoryClick(subcategory)}
-                  whileHover={{ scale: 1.02 }}
-                  whileTap={{ scale: 0.98 }}
-                  className={`p-4 bg-white rounded-xl border-2 transition-all text-left flex items-center justify-between group
-                    ${subcategory.id === selectedSubcategory?.id
-                      ? 'border-primary-500 shadow-lg shadow-primary-500/20'
-                      : 'border-primary-100 hover:border-primary-300'
-                    }`}
-                >
-                  <span className="text-primary-900 group-hover:text-primary-700">
-                    {subcategory.name}
-                  </span>
-                  <ChevronRightIcon className="w-5 h-5 text-primary-400 group-hover:text-primary-600" />
-                </motion.button>
-              ))}
+            <div className="flex items-center justify-between">
+              <button
+                onClick={handleBack}
+                className="flex items-center gap-2 text-gray-600 hover:text-gray-900"
+              >
+                <ArrowLeftIcon className="w-5 h-5" />
+                <span>Volver a categorías</span>
+              </button>
+              <span className="text-sm text-gray-500">
+                {selectedCategory?.name}
+              </span>
             </div>
+
+            <h2 className="text-lg font-medium text-gray-900">
+              Selecciona una subcategoría
+            </h2>
+
+            <div className="grid gap-3">
+              {selectedCategory?.subcategories?.map(renderSubcategoryCard)}
+            </div>
+
+            {selectedCategory?.subcategories?.length === 0 && (
+              <p className="text-center text-gray-500 py-8">
+                Esta categoría no tiene subcategorías disponibles
+              </p>
+            )}
           </motion.div>
         )}
       </AnimatePresence>
+
+      {/* Selección actual */}
+      {(selectedCategory || selectedSubcategory) && (
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="p-4 bg-gray-50 rounded-xl"
+        >
+          <h3 className="text-sm font-medium text-gray-700 mb-2">
+            Tu selección:
+          </h3>
+          <div className="flex items-center gap-2 text-gray-600">
+            <span>{selectedCategory?.name}</span>
+            {selectedSubcategory && (
+              <>
+                <ChevronRightIcon className="w-4 h-4" />
+                <span>{selectedSubcategory.name}</span>
+              </>
+            )}
+          </div>
+        </motion.div>
+      )}
     </div>
   );
 } 

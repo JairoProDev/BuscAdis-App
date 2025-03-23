@@ -1,155 +1,223 @@
 'use client'
 
-import { useState, useEffect, useRef } from 'react'
+import React, { useState, useEffect, useCallback } from 'react'
 import { motion } from 'framer-motion'
-import { MagnifyingGlassIcon, MapPinIcon } from '@heroicons/react/24/outline'
-import { useCombobox } from 'downshift'
+import { MapPinIcon, MapIcon } from '@heroicons/react/24/outline'
+import { Logger } from '@/services/logging.service'
+import DynamicField from './DynamicField'
 
-interface District {
-  id: string
-  name: string
-}
-
-interface Region {
-  id: string
-  name: string
-  districts: District[]
+declare global {
+  interface Window {
+    google: any
+    initMap: () => void
+  }
 }
 
 interface Location {
-  district: District
-  region: Region
+  city: string
+  country: string
   coordinates?: {
     lat: number
-    lon: number
+    lng: number
   }
 }
 
 interface LocationSelectorProps {
-  value?: Location
+  value: Location
   onChange: (location: Location) => void
+  apiKey?: string
 }
 
-const regions: Region[] = [
-  {
-    id: 'cusco',
-    name: 'Cusco',
-    districts: [
-      { id: 'cusco', name: 'Cusco' },
-      { id: 'san-sebastian', name: 'San Sebastián' },
-      { id: 'san-jeronimo', name: 'San Jerónimo' },
-      { id: 'santiago', name: 'Santiago' },
-      { id: 'wanchaq', name: 'Wanchaq' },
-      { id: 'poroy', name: 'Poroy' },
-      { id: 'saylla', name: 'Saylla' },
-      { id: 'ccorca', name: 'Ccorca' },
-      
-    ],
-  },
-]
+export default function LocationSelector({
+  value,
+  onChange,
+  apiKey = process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY
+}: LocationSelectorProps) {
+  const [map, setMap] = useState<any>(null)
+  const [marker, setMarker] = useState<any>(null)
+  const [autocomplete, setAutocomplete] = useState<any>(null)
+  const [isLoading, setIsLoading] = useState(true)
+  const [error, setError] = useState<string>('')
 
-export default function LocationSelector({ value, onChange }: LocationSelectorProps) {
-  const [selectedRegion] = useState<Region>(regions[0])
-  const [inputValue, setInputValue] = useState('')
-  const inputRef = useRef<HTMLInputElement>(null)
+  const loadGoogleMapsScript = useCallback(() => {
+    if (!apiKey) {
+      setError('API key no configurada')
+      Logger.error('Google Maps API key no configurada')
+      return
+    }
+
+    if (window.google) {
+      initializeMap()
+      return
+    }
+
+    const script = document.createElement('script')
+    script.src = `https://maps.googleapis.com/maps/api/js?key=${apiKey}&libraries=places`
+    script.async = true
+    script.defer = true
+    script.onload = () => {
+      Logger.info('Google Maps cargado exitosamente')
+      initializeMap()
+    }
+    script.onerror = () => {
+      setError('Error al cargar el mapa')
+      Logger.error('Error al cargar Google Maps')
+    }
+    document.head.appendChild(script)
+  }, [apiKey])
 
   useEffect(() => {
-    if (value?.district) {
-      setInputValue(value.district.name)
+    loadGoogleMapsScript()
+  }, [loadGoogleMapsScript])
+
+  const initializeMap = () => {
+    try {
+      // Coordenadas por defecto (Perú)
+      const defaultLocation = { lat: -12.0464, lng: -77.0428 }
+      const mapInstance = new window.google.maps.Map(document.getElementById('map'), {
+        center: value.coordinates || defaultLocation,
+        zoom: 12,
+        styles: [
+          {
+            featureType: 'poi',
+            elementType: 'labels',
+            stylers: [{ visibility: 'off' }]
+          }
+        ]
+      })
+
+      const markerInstance = new window.google.maps.Marker({
+        position: value.coordinates || defaultLocation,
+        map: mapInstance,
+        draggable: true,
+        animation: window.google.maps.Animation.DROP
+      })
+
+      const autocompleteInstance = new window.google.maps.places.Autocomplete(
+        document.getElementById('location-input') as HTMLInputElement,
+        {
+          types: ['(cities)']
+        }
+      )
+
+      autocompleteInstance.addListener('place_changed', () => {
+        const place = autocompleteInstance.getPlace()
+        if (!place.geometry) {
+          Logger.warning('No se encontró la ubicación seleccionada')
+          return
+        }
+
+        const location = {
+          city: place.address_components.find((c: any) => c.types.includes('locality'))?.long_name || '',
+          country: place.address_components.find((c: any) => c.types.includes('country'))?.long_name || '',
+          coordinates: {
+            lat: place.geometry.location.lat(),
+            lng: place.geometry.location.lng()
+          }
+        }
+
+        updateLocation(location)
+        mapInstance.setCenter(place.geometry.location)
+        markerInstance.setPosition(place.geometry.location)
+        Logger.success('Ubicación actualizada desde autocompletado')
+      })
+
+      markerInstance.addListener('dragend', () => {
+        const position = markerInstance.getPosition()
+        reverseGeocode(position.lat(), position.lng())
+        Logger.info('Marcador movido manualmente')
+      })
+
+      setMap(mapInstance)
+      setMarker(markerInstance)
+      setAutocomplete(autocompleteInstance)
+      setIsLoading(false)
+      Logger.success('Mapa inicializado correctamente')
+    } catch (error) {
+      setError('Error al inicializar el mapa')
+      Logger.error('Error al inicializar el mapa:', error)
     }
-  }, [value])
+  }
 
-  const filteredDistricts = selectedRegion.districts.filter(district =>
-    district.name.toLowerCase().includes(inputValue.toLowerCase())
-  )
+  const reverseGeocode = async (lat: number, lng: number) => {
+    try {
+      const geocoder = new window.google.maps.Geocoder()
+      const result = await new Promise((resolve, reject) => {
+        geocoder.geocode(
+          { location: { lat, lng } },
+          (results: any[], status: string) => {
+            if (status === 'OK') {
+              resolve(results[0])
+            } else {
+              reject(status)
+            }
+          }
+        )
+      })
 
-  const {
-    isOpen,
-    getMenuProps,
-    getInputProps,
-    getToggleButtonProps,
-    highlightedIndex,
-    getItemProps,
-  } = useCombobox({
-    items: filteredDistricts,
-    inputValue,
-    onInputValueChange: ({ inputValue }) => {
-      setInputValue(inputValue || '')
-    },
-    onSelectedItemChange: ({ selectedItem }) => {
-      if (selectedItem) {
-        onChange({
-          district: selectedItem,
-          region: selectedRegion,
-        })
+      const place: any = result
+      const location = {
+        city: place.address_components.find((c: any) => c.types.includes('locality'))?.long_name || '',
+        country: place.address_components.find((c: any) => c.types.includes('country'))?.long_name || '',
+        coordinates: { lat, lng }
       }
-    },
-    itemToString: (item) => item?.name || '',
-  })
 
-  const inputProps = getInputProps()
+      updateLocation(location)
+      Logger.success('Geocodificación inversa exitosa')
+    } catch (error) {
+      Logger.error('Error en geocodificación inversa:', error)
+    }
+  }
+
+  const updateLocation = (location: Location) => {
+    onChange(location)
+  }
 
   return (
-    <div className="space-y-4">
-      <div className="flex flex-col space-y-2">
-        <label className="block text-sm font-medium text-primary-700">
-          Ubicación *
-        </label>
-        <div className="relative">
-          <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-            <MagnifyingGlassIcon className="h-5 w-5 text-primary-400" />
-          </div>
-          <input
-            ref={inputRef}
-            {...inputProps}
-            {...getToggleButtonProps()}
-            placeholder="Busca tu distrito..."
-            className="w-full pl-10 pr-4 py-3 bg-white rounded-xl border-2 border-primary-100 focus:border-primary-500 focus:ring-2 focus:ring-primary-500/20 transition-all"
-          />
-        </div>
-      </div>
+    <div className="space-y-6">
+      <DynamicField
+        type="text"
+        label="Ubicación"
+        name="location"
+        value={`${value.city}${value.city && value.country ? ', ' : ''}${value.country}`}
+        placeholder="Busca tu ciudad"
+        helperText="Escribe el nombre de tu ciudad o mueve el marcador en el mapa"
+        required
+        id="location-input"
+      />
 
-      <div {...getMenuProps()}>
-        {isOpen && filteredDistricts.length > 0 && (
-          <motion.div
-            initial={{ opacity: 0, y: -10 }}
-            animate={{ opacity: 1, y: 0 }}
-            className="absolute z-10 mt-1 w-full bg-white rounded-xl shadow-lg border border-primary-100 max-h-60 overflow-auto"
-          >
-            {filteredDistricts.map((district, index) => (
-              <div
-                key={district.id}
-                {...getItemProps({ item: district, index })}
-                className={`px-4 py-2 cursor-pointer flex items-center gap-2 ${
-                  highlightedIndex === index
-                    ? 'bg-primary-50 text-primary-900'
-                    : 'text-primary-600 hover:bg-primary-50'
-                }`}
-              >
-                <MapPinIcon className="h-4 w-4" />
-                <span>{district.name}</span>
-                <span className="text-sm text-primary-400">
-                  {selectedRegion.name}, Perú
-                </span>
-              </div>
-            ))}
-          </motion.div>
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        className="relative rounded-xl overflow-hidden"
+        style={{ height: '400px' }}
+      >
+        {isLoading && (
+          <div className="absolute inset-0 bg-gray-100 flex items-center justify-center">
+            <div className="animate-spin rounded-full h-12 w-12 border-4 border-primary-500 border-t-transparent" />
+          </div>
         )}
-      </div>
 
-      {value?.district && !isOpen && (
-        <motion.div
-          initial={{ opacity: 0, y: 10 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="flex items-center gap-2 text-primary-600 bg-primary-50 px-4 py-2 rounded-lg"
-        >
-          <MapPinIcon className="h-5 w-5" />
-          <div>
-            <p className="font-medium">{value.district.name}</p>
-            <p className="text-sm">{value.region.name}, Perú</p>
+        {error && (
+          <div className="absolute inset-0 bg-red-50 flex items-center justify-center p-4">
+            <div className="text-center text-red-600">
+              <MapIcon className="w-12 h-12 mx-auto mb-2" />
+              <p>{error}</p>
+            </div>
           </div>
-        </motion.div>
-      )}
+        )}
+
+        <div id="map" className="w-full h-full" />
+
+        {!isLoading && !error && (
+          <div className="absolute bottom-4 right-4 bg-white rounded-lg shadow-lg p-3">
+            <div className="flex items-center gap-2 text-sm text-gray-600">
+              <MapPinIcon className="w-5 h-5 text-primary-500" />
+              <span>Arrastra el marcador para ajustar la ubicación</span>
+            </div>
+          </div>
+        )}
+      </motion.div>
     </div>
   )
 } 
