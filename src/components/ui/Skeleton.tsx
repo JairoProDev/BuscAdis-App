@@ -1,3 +1,19 @@
+import { cn } from '@/lib/utils';
+
+function Skeleton({
+  className,
+  ...props
+}: React.HTMLAttributes<HTMLDivElement>) {
+  return (
+    <div
+      className={cn('animate-pulse rounded-md bg-muted', className)}
+      {...props}
+    />
+  );
+}
+
+export { Skeleton };
+
 export function SkeletonCard() {
   return (
     <div className="bg-white rounded-xl shadow-md overflow-hidden animate-pulse">

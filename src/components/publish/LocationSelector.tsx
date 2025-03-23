@@ -135,7 +135,7 @@ export default function LocationSelector({
       Logger.success('Mapa inicializado correctamente')
     } catch (error) {
       setError('Error al inicializar el mapa')
-      Logger.error('Error al inicializar el mapa:', error)
+      Logger.error('Error al inicializar el mapa', { details: error })
     }
   }
 
@@ -165,7 +165,7 @@ export default function LocationSelector({
       updateLocation(location)
       Logger.success('Geocodificación inversa exitosa')
     } catch (error) {
-      Logger.error('Error en geocodificación inversa:', error)
+      Logger.error('Error en geocodificación inversa', { details: error })
     }
   }
 
@@ -175,16 +175,18 @@ export default function LocationSelector({
 
   return (
     <div className="space-y-6">
-      <DynamicField
-        type="text"
-        label="Ubicación"
-        name="location"
-        value={`${value.city}${value.city && value.country ? ', ' : ''}${value.country}`}
-        placeholder="Busca tu ciudad"
-        helperText="Escribe el nombre de tu ciudad o mueve el marcador en el mapa"
-        required
-        id="location-input"
-      />
+      <div id="location-input">
+        <DynamicField
+          type="text"
+          label="Ubicación"
+          name="location"
+          value={`${value.city}${value.city && value.country ? ', ' : ''}${value.country}`}
+          onChange={() => {}}
+          placeholder="Busca tu ciudad"
+          helperText="Escribe el nombre de tu ciudad o mueve el marcador en el mapa"
+          required
+        />
+      </div>
 
       <motion.div
         initial={{ opacity: 0, y: 20 }}
