@@ -3,7 +3,6 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
-    ChevronLeftIcon,
     ChevronRightIcon,
     CheckCircleIcon,
     ArrowLeftIcon,
@@ -51,7 +50,7 @@ export default function CategorySelector() {
                     category_id: selectedCategory.id,
                     subcategory_id: selectedSubcategory.id,
                     sub_subcategory_id: selectedSubSubcategory.id,
-                    category_type: selectedCategory.id as any,
+                    category_type: selectedCategory.id,
                 },
             });
             dispatch({ type: 'SET_STEP', payload: 2 });
@@ -61,7 +60,7 @@ export default function CategorySelector() {
                 payload: {
                     category_id: selectedCategory.id,
                     subcategory_id: selectedSubcategory.id,
-                    category_type: selectedCategory.id as any,
+                    category_type: selectedCategory.id,
                 },
             });
             dispatch({ type: 'SET_STEP', payload: 2 });
@@ -70,12 +69,12 @@ export default function CategorySelector() {
                 type: 'UPDATE_FORM',
                 payload: {
                     category_id: selectedCategory.id,
-                    category_type: selectedCategory.id as any,
+                    category_type: selectedCategory.id,
                 },
             });
             dispatch({ type: 'SET_STEP', payload: 2 });
         }
-    }, [selectedCategory, selectedSubcategory, selectedSubSubcategory, dispatch]);
+    }, [selectedCategory, selectedSubcategory, selectedSubSubcategory, dispatch, showSubcategories, showSubSubcategories]);
 
     const handleCategorySelect = (category: CategoryOption) => {
         setSelectedCategory(category);
