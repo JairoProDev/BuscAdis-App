@@ -103,7 +103,7 @@ export default function LocationSelector({
       autocompleteInstance.addListener('place_changed', () => {
         const place = autocompleteInstance.getPlace()
         if (!place.geometry) {
-          Logger.warning('No se encontró la ubicación seleccionada')
+          Logger.warn('No se encontró la ubicación seleccionada')
           return
         }
 

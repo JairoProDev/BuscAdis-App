@@ -19,15 +19,15 @@ export class ValidationService {
     
     if (!title.trim()) {
       errors.push('El título es obligatorio');
-      Logger.warning('Título vacío detectado');
+      Logger.warn('Título vacío detectado');
     } else {
       if (title.length < 10) {
         errors.push('El título debe tener al menos 10 caracteres');
-        Logger.warning('Título demasiado corto');
+        Logger.warn('Título demasiado corto');
       }
       if (title.length > 100) {
         errors.push('El título no puede exceder los 100 caracteres');
-        Logger.warning('Título demasiado largo');
+        Logger.warn('Título demasiado largo');
       }
     }
 
@@ -42,15 +42,15 @@ export class ValidationService {
     
     if (!description.trim()) {
       errors.push('La descripción es obligatoria');
-      Logger.warning('Descripción vacía detectada');
+      Logger.warn('Descripción vacía detectada');
     } else {
       if (description.length < 50) {
         errors.push('La descripción debe tener al menos 50 caracteres para ser más informativa');
-        Logger.warning('Descripción demasiado corta');
+        Logger.warn('Descripción demasiado corta');
       }
       if (description.length > 2000) {
         errors.push('La descripción no puede exceder los 2000 caracteres');
-        Logger.warning('Descripción demasiado larga');
+        Logger.warn('Descripción demasiado larga');
       }
     }
 
@@ -65,11 +65,11 @@ export class ValidationService {
     
     if (isNaN(price) || price < 0) {
       errors.push('El precio debe ser un número positivo');
-      Logger.warning('Precio inválido detectado');
+      Logger.warn('Precio inválido detectado');
     }
     if (price > 999999999) {
       errors.push('El precio es demasiado alto');
-      Logger.warning('Precio excede el límite permitido');
+      Logger.warn('Precio excede el límite permitido');
     }
 
     return {
@@ -84,10 +84,10 @@ export class ValidationService {
     
     if (!whatsapp.trim()) {
       errors.push('El número de WhatsApp es obligatorio');
-      Logger.warning('Número de WhatsApp vacío');
+      Logger.warn('Número de WhatsApp vacío');
     } else if (!whatsappRegex.test(whatsapp)) {
       errors.push('Ingresa un número de WhatsApp válido (mínimo 9 dígitos)');
-      Logger.warning('Formato de WhatsApp inválido');
+      Logger.warn('Formato de WhatsApp inválido');
     }
 
     return {
@@ -101,11 +101,11 @@ export class ValidationService {
     
     if (!city.trim()) {
       errors.push('La ciudad es obligatoria');
-      Logger.warning('Ciudad no especificada');
+      Logger.warn('Ciudad no especificada');
     }
     if (!country.trim()) {
       errors.push('El país es obligatorio');
-      Logger.warning('País no especificado');
+      Logger.warn('País no especificado');
     }
 
     return {
@@ -119,11 +119,11 @@ export class ValidationService {
     
     if (!media || media.length === 0) {
       errors.push('Debes subir al menos una imagen');
-      Logger.warning('No se han subido imágenes');
+      Logger.warn('No se han subido imágenes');
     }
     if (media.length > 10) {
       errors.push('No puedes subir más de 10 imágenes');
-      Logger.warning('Exceso de imágenes detectado');
+      Logger.warn('Exceso de imágenes detectado');
     }
 
     return {
@@ -137,7 +137,7 @@ export class ValidationService {
     
     if (!category || !category.id) {
       errors.push('Debes seleccionar una categoría');
-      Logger.warning('Categoría no seleccionada');
+      Logger.warn('Categoría no seleccionada');
     }
 
     return {

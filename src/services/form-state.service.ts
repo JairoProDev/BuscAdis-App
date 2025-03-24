@@ -170,7 +170,7 @@ export const useFormStore = create<FormState>()(
         }));
 
         if (!isValid) {
-          Logger.warning(`Validación fallida para ${field}: ${errors.join(', ')}`);
+          Logger.warn(`Validación fallida para ${field}: ${errors.join(', ')}`);
         }
 
         return isValid;

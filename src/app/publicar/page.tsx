@@ -51,7 +51,7 @@ export default function PublishPage() {
             currency: 'PEN',
             type: 'fixed'
         },
-        category: null,
+        // category: null,
         type: '',
     });
 

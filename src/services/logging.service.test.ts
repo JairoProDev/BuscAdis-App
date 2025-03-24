@@ -131,7 +131,7 @@ describe('LoggingService', () => {
   describe('warning', () => {
     it('logs warning message with default options', () => {
       const message = 'Test warning message';
-      Logger.warning(message);
+      Logger.warn(message);
 
       expect(consoleWarnSpy).toHaveBeenCalledWith(
         '[WARNING]',
@@ -144,7 +144,7 @@ describe('LoggingService', () => {
     it('logs warning message with details', () => {
       const message = 'Test warning message';
       const details = { warning: true };
-      Logger.warning(message, { details });
+      Logger.warn(message, { details });
 
       expect(consoleWarnSpy).toHaveBeenCalledWith(
         '[WARNING]',

@@ -58,7 +58,7 @@ export default function DynamicField({
     if (required && (!value || (typeof value === 'string' && !value.trim()))) {
       setLocalError('Este campo es obligatorio');
       setIsValid(false);
-      Logger.warning(`Campo obligatorio vacío: ${name}`);
+      Logger.warn(`Campo obligatorio vacío: ${name}`);
       return false;
     }
 
@@ -66,21 +66,21 @@ export default function DynamicField({
       if (validation.minLength && value.length < validation.minLength) {
         setLocalError(`Mínimo ${validation.minLength} caracteres`);
         setIsValid(false);
-        Logger.warning(`Longitud mínima no alcanzada en ${name}`);
+        Logger.warn(`Longitud mínima no alcanzada en ${name}`);
         return false;
       }
 
       if (validation.maxLength && value.length > validation.maxLength) {
         setLocalError(`Máximo ${validation.maxLength} caracteres`);
         setIsValid(false);
-        Logger.warning(`Longitud máxima excedida en ${name}`);
+        Logger.warn(`Longitud máxima excedida en ${name}`);
         return false;
       }
 
       if (validation.pattern && !validation.pattern.test(value)) {
         setLocalError('Formato inválido');
         setIsValid(false);
-        Logger.warning(`Formato inválido en ${name}`);
+        Logger.warn(`Formato inválido en ${name}`);
         return false;
       }
     }
@@ -89,14 +89,14 @@ export default function DynamicField({
       if (validation.min !== undefined && value < validation.min) {
         setLocalError(`El valor mínimo es ${validation.min}`);
         setIsValid(false);
-        Logger.warning(`Valor mínimo no alcanzado en ${name}`);
+        Logger.warn(`Valor mínimo no alcanzado en ${name}`);
         return false;
       }
 
       if (validation.max !== undefined && value > validation.max) {
         setLocalError(`El valor máximo es ${validation.max}`);
         setIsValid(false);
-        Logger.warning(`Valor máximo excedido en ${name}`);
+        Logger.warn(`Valor máximo excedido en ${name}`);
         return false;
       }
     }
@@ -104,7 +104,7 @@ export default function DynamicField({
     if (validation.customValidation && !validation.customValidation(value)) {
       setLocalError('Valor inválido');
       setIsValid(false);
-      Logger.warning(`Validación personalizada fallida en ${name}`);
+      Logger.warn(`Validación personalizada fallida en ${name}`);
       return false;
     }
 

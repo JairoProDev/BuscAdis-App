@@ -1,7 +1,7 @@
 'use client';
 
 import React from 'react';
-import Image from 'next/image'; // Importa el componente Image
+// import Image from 'next/image'; // Importa el componente Image
 import { QuickPublicationData } from '@/services/publications.service';
 
 interface LivePreviewProps {
@@ -18,19 +18,20 @@ const LivePreview: React.FC<LivePreviewProps> = ({ ad }) => {
                 <div className="flex gap-2 mb-2">
                     {ad.media.map((mediaItem, index) => (
                         <div key={index} className="w-20 h-20 relative"> {/* Añadido div para el contenedor de la imagen */}
-                            <Image
+                        {/* <Image
                                 src={mediaItem}
                                 alt={`Imagen ${index + 1}`}
                                 layout="fill" // Asegura que la imagen se ajuste al contenedor
                                 objectFit="cover"
                                 className="rounded-md"
                             />
+                            */}
                         </div>
                     ))}
                 </div>
             )}
             <p>WhatsApp: {ad.contact?.whatsapp}</p>
-            <p>Ubicación: {ad.location?.city}, {ad.location?.region}</p> {/* Usando region en lugar de state */}
+            {/*<p>Ubicación: {ad.location?.city}, {ad.location?.region}</p> {/* Usando region en lugar de state */}
             {ad.price && <p>Precio: {ad.price.amount} {ad.price.currency}</p>}
         </div>
     );

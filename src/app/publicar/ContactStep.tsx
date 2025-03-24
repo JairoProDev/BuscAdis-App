@@ -3,7 +3,7 @@
 
 import React, { useState } from 'react';
 import { QuickPublicationData } from '@/services/publications.service';
-import LocationSelector from '@/components/publish/LocationSelector';
+// import LocationSelector from '@/components/publish/LocationSelector';
 import PriceSelector from '@/components/publish/PriceSelector';
 import { PhoneInput } from 'react-international-phone';
 import { motion } from 'framer-motion';
@@ -38,12 +38,12 @@ const ContactStep: React.FC<ContactStepProps> = ({ ad, setAd, onNext, onPrevious
           className="w-full"
         />
       </div>
-
+{/*
       <LocationSelector
         value={ad.location}
         onChange={(location) => setAd({ ...ad, location })}
       />
-
+*/}
       <button
         type="button"
         onClick={() => setShowAdvanced(!showAdvanced)}

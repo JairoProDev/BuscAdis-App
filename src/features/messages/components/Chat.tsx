@@ -105,12 +105,14 @@ export default function Chat({ conversationId, otherUser, publication }: ChatPro
             placeholder="Escribe un mensaje..."
             className="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500"
           />
+          {/*
           <button
             type="submit"
             className="bg-primary-600 text-white p-2 rounded-lg hover:bg-primary-700"
           >
             <PaperAirplaneIcon className="w-5 h-5" />
           </button>
+          */}
         </div>
       </form>
     </div>

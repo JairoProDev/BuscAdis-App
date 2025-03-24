@@ -55,7 +55,7 @@ export default function PreviewStep({ data, onEdit }: PreviewStepProps) {
 
     const allValid = Object.values(validations).every(v => v.isValid);
     if (!allValid) {
-      Logger.warning('Se encontraron campos inválidos en la vista previa');
+      Logger.warn('Se encontraron campos inválidos en la vista previa');
     }
     return validations;
   };
