@@ -1,3 +1,5 @@
+
+
 'use client';
 
 import React, { useState, useEffect } from 'react';
@@ -8,7 +10,7 @@ import {
     ArrowLeftIcon,
     TagIcon,
 } from '@heroicons/react/24/outline';
-import { usePublication } from '@/contexts/PublicationContext';
+import { usePublication, PublicationCategory } from '@/contexts/PublicationContext'; // Importa PublicationCategory desde tu contexto
 import { Logger } from '@/services/logging.service';
 import { categoriesData, subcategoriesData, subSubcategoriesData } from '@/data/categories-data';
 
@@ -50,7 +52,7 @@ export default function CategorySelector() {
                     category_id: selectedCategory.id,
                     subcategory_id: selectedSubcategory.id,
                     sub_subcategory_id: selectedSubSubcategory.id,
-                    category_type: selectedCategory.id,
+                    category_type: selectedCategory.id as PublicationCategory,
                 },
             });
             dispatch({ type: 'SET_STEP', payload: 2 });
@@ -60,7 +62,7 @@ export default function CategorySelector() {
                 payload: {
                     category_id: selectedCategory.id,
                     subcategory_id: selectedSubcategory.id,
-                    category_type: selectedCategory.id,
+                    category_type: selectedCategory.id as PublicationCategory,
                 },
             });
             dispatch({ type: 'SET_STEP', payload: 2 });
@@ -69,7 +71,7 @@ export default function CategorySelector() {
                 type: 'UPDATE_FORM',
                 payload: {
                     category_id: selectedCategory.id,
-                    category_type: selectedCategory.id,
+                    category_type: selectedCategory.id as PublicationCategory,
                 },
             });
             dispatch({ type: 'SET_STEP', payload: 2 });
@@ -85,12 +87,12 @@ export default function CategorySelector() {
         Logger.info(`Categoría seleccionada: ${category.name}`);
 
         // Busca las subcategorías para la categoría seleccionada
-        const subcategories = subcategoriesData[category.id] || [];
+        const subcategories = (subcategoriesData as { [key: string]: SubCategory[] })[category.id] || [];
 
         // Actualiza el estado de la categoría seleccionada con las subcategorías encontradas
         setSelectedCategory({
             ...category,
-            subcategories: subcategories.reduce((acc, subcategory) => {
+            subcategories: subcategories.reduce((acc: { [key: string]: SubCategory }, subcategory: SubCategory) => {
                 acc[subcategory.id] = subcategory;
                 return acc;
             }, {}),
@@ -101,7 +103,7 @@ export default function CategorySelector() {
                 type: 'UPDATE_FORM',
                 payload: {
                     category_id: category.id,
-                    category_type: category.id as any,
+                    category_type: category.id as PublicationCategory,
                 },
             });
             dispatch({ type: 'SET_STEP', payload: 2 });
@@ -115,7 +117,7 @@ export default function CategorySelector() {
         Logger.info(`Subcategoría seleccionada: ${subcategory.name}`);
 
         // Busca las sub-subcategorías para la subcategoría seleccionada
-        const subSubcategories = subSubcategoriesData[subcategory.id] || [];
+        const subSubcategories = (subSubcategoriesData as { [key: string]: SubSubCategory[] })[subcategory.id] || [];
 
         // Actualiza el estado de la subcategoría seleccionada con las sub-subcategorías encontradas
         setSelectedSubcategory({
@@ -129,7 +131,7 @@ export default function CategorySelector() {
                 payload: {
                     category_id: selectedCategory?.id,
                     subcategory_id: subcategory.id,
-                    category_type: selectedCategory?.id as any,
+                    category_type: selectedCategory?.id as PublicationCategory,
                 },
             });
             dispatch({ type: 'SET_STEP', payload: 2 });
@@ -193,8 +195,8 @@ export default function CategorySelector() {
 
         return (
             <motion.button
-                key={subcategory.id}
-                onClick={() => handleSubcategorySelect(subcategory)}
+                key={category.id}
+                onClick={() => handleCategorySelect(category)}
                 className={`w-full text-left p-4 rounded-xl border-2 transition-all ${
                     isSelected ? 'border-primary-500 bg-primary-50' : 'border-gray-200 hover:border-primary-200'
                 }`}
@@ -204,18 +206,28 @@ export default function CategorySelector() {
                 whileTap={{ scale: 0.98 }}
             >
                 <div className="flex items-center justify-between">
-                    <div>
-                    <h3 className={`font-medium ${isSelected ? 'text-primary-900' : 'text-gray-900'}`}>{subcategory.name}</h3>
+                    <div className="flex items-center gap-3">
+                        <div className={`p-2 rounded-lg ${isSelected ? 'bg-primary-100' : 'bg-gray-100'}`}>
+                            <TagIcon className={`w-6 h-6 ${isSelected ? 'text-primary-600' : 'text-gray-500'}`} />
                         </div>
-                        {isSelected && <CheckCircleIcon className="w-5 h-5 text-primary-500" />}
+                        <div>
+                            <h3 className={`font-medium ${isSelected ? 'text-primary-900' : 'text-gray-900'}`}>
+                                {category.name}
+                            </h3>
+                            {category.description && <p className="text-sm text-gray-500">{category.description}</p>}
+                        </div>
                     </div>
-                </motion.button>
-            );
-        };
+                    {category.subcategories && Object.keys(category.subcategories).length > 0 && (
+                        <ChevronRightIcon className={`w-5 h-5 ${isSelected ? 'text-primary-500' : 'text-gray-400'}`} />
+                    )}
+                </div>
+            </motion.button>
+        );
+    };
 
         const renderSubSubcategoryCard = (subSubcategory: SubSubCategory) => {
             const isSelected = selectedSubSubcategory?.id === subSubcategory.id;
-
+    
             return (
                 <motion.button
                     key={subSubcategory.id}
@@ -240,7 +252,7 @@ export default function CategorySelector() {
                 </motion.button>
             );
         };
-
+    
         return (
             <div className="space-y-6">
                 <AnimatePresence mode="wait">
@@ -273,13 +285,13 @@ export default function CategorySelector() {
                                 </button>
                                 <span className="text-sm text-gray-500">{selectedCategory?.name}</span>
                             </div>
-
+    
                             <h2 className="text-lg font-medium text-gray-900">Selecciona una subcategoría</h2>
-
+    
                             <div className="grid gap-3">
                                 {selectedCategory && Object.values(selectedCategory.subcategories || {}).map(renderSubcategoryCard)}
                             </div>
-
+    
                             {selectedCategory && Object.keys(selectedCategory.subcategories || {}).length === 0 && (
                                 <p className="text-center text-gray-500 py-8">
                                     Esta categoría no tiene subcategorías disponibles
@@ -304,13 +316,13 @@ export default function CategorySelector() {
                                 </button>
                                 <span className="text-sm text-gray-500">{selectedSubcategory?.name}</span>
                             </div>
-
+    
                             <h2 className="text-lg font-medium text-gray-900">Selecciona una sub-subcategoría</h2>
-
+    
                             <div className="grid gap-3">
                                 {selectedSubcategory?.subSubcategories?.map(renderSubSubcategoryCard)}
                             </div>
-
+    
                             {selectedSubcategory?.subSubcategories?.length === 0 && (
                                 <p className="text-center text-gray-500 py-8">
                                     Esta subcategoría no tiene sub-subcategorías disponibles
@@ -319,7 +331,7 @@ export default function CategorySelector() {
                         </motion.div>
                     )}
                 </AnimatePresence>
-
+    
                 {(selectedCategory || selectedSubcategory || selectedSubSubcategory) && (
                     <motion.div
                         initial={{ opacity: 0, y: 20 }}
