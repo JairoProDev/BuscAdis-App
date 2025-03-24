@@ -1,37 +1,22 @@
 'use client';
 
-import React, { useState, useEffect, useCallback } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
-import Image from 'next/image';
+import React, { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { PublicationsService, QuickPublicationData } from '@/services/publications.service';
 import CategorySelector from '@/components/publish/CategorySelector';
-import MediaUploader from '@/components/publish/MediaUploader';
 import LocationSelector from '@/components/publish/LocationSelector';
 import PriceSelector from '@/components/publish/PriceSelector';
 import { 
-    ArrowPathIcon,
     CheckCircleIcon,
     ChevronRightIcon,
     ChevronLeftIcon,
-    CurrencyDollarIcon,
-    MapPinIcon,
-    PhotoIcon,
-    TagIcon,
-    UserCircleIcon,
-    SparklesIcon,
-    XMarkIcon
 } from '@heroicons/react/24/outline';
 import LoadingState from '@/components/ui/LoadingState';
 import ErrorMessage from '@/components/ui/ErrorMessage';
-import Link from 'next/link';
 import { PhoneInput } from 'react-international-phone';
-import LoadingSpinner from '@/components/ui/LoadingSpinner';
-import { ImageService } from '@/services/image.service';
 import ImageUploader from './ImageUploader';
 import AdPreview from './AdPreview';
 import PublicationProgress from './PublicationProgress';
-import StepNavigation from './StepNavigation';
 
 // Pasos de publicación
 const STEPS = {
@@ -46,7 +31,6 @@ export default function PublishPage() {
     const router = useRouter();
     const [step, setStep] = useState(STEPS.CATEGORY);
     const [progress, setProgress] = useState(20);
-    const [saving, setSaving] = useState(false);
     const [error, setError] = useState('');
     const [success, setSuccess] = useState(false);
     const [loading, setLoading] = useState(false);
@@ -109,9 +93,9 @@ export default function PublishPage() {
                     errors.push('Ingresa un número de WhatsApp válido');
                 }
                 break;
-            case STEPS.LOCATION:
-                if (!ad.location.city.trim()) {
-                    errors.push('La ubicación es obligatoria');
+            case STEPS.MEDIA:
+                if (!ad.media || ad.media.length === 0) {
+                    errors.push('Debes subir al menos una imagen');
                 }
                 break;
             default:
@@ -161,7 +145,7 @@ export default function PublishPage() {
         }
     };
 
-    const handleInputChange = (e) => {
+    const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
         const { name, value } = e.target;
         setAd(prev => ({
             ...prev,
@@ -170,18 +154,7 @@ export default function PublishPage() {
     };
 
     const handleNext = () => {
-        if (step === 1 && (!ad.title || !ad.description)) {
-            setError('El título y la descripción son obligatorios');
-            return;
-        }
-
-        if (step === 2 && !ad.category) {
-            setError('Debes seleccionar una categoría');
-            return;
-        }
-
-        if (step === 3 && !ad.location.city) {
-            setError('La ciudad es obligatoria');
+        if (!validateStep(step)) {
             return;
         }
 
@@ -193,14 +166,14 @@ export default function PublishPage() {
         setStep(prevStep => Math.max(prevStep - 1, 1));
     };
 
-    const handleImageUpload = (images: string) => {
+    const handleImageUpload = (images: string[]) => {
         setAd(prev => ({
             ...prev,
             media: images
         }));
     };
 
-    const removeImage = (index) => {
+    const removeImage = (index: number) => {
         setAd(prev => ({
             ...prev,
             media: prev.media.filter((_, i) => i !== index)
@@ -230,7 +203,6 @@ export default function PublishPage() {
                         }}
                     />
                 );
-            case STEPS.DETAILS:
                 return (
                     <div className="space-y-6">
                         <div>
