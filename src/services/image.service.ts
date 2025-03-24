@@ -151,7 +151,7 @@ export class ImageService {
           .map(type => type.split('/')[1].toUpperCase())
           .join(', ')}`
       );
-      Logger.warning(`Tipo de archivo no permitido: ${file.type}`);
+      Logger.warn(`Tipo de archivo no permitido: ${file.type}`);
     }
 
     // Validar tamaño
@@ -159,7 +159,7 @@ export class ImageService {
       const maxSizeInBytes = finalRules.maxSizeInMB * 1024 * 1024;
       if (file.size > maxSizeInBytes) {
         errors.push(`El archivo no debe superar los ${finalRules.maxSizeInMB}MB`);
-        Logger.warning(`Archivo demasiado grande: ${(file.size / (1024 * 1024)).toFixed(2)}MB`);
+        Logger.warn(`Archivo demasiado grande: ${(file.size / (1024 * 1024)).toFixed(2)}MB`);
       }
     }
 
@@ -169,22 +169,22 @@ export class ImageService {
 
       if (finalRules.minWidth && dimensions.width < finalRules.minWidth) {
         errors.push(`El ancho mínimo debe ser ${finalRules.minWidth}px`);
-        Logger.warning(`Ancho insuficiente: ${dimensions.width}px`);
+        Logger.warn(`Ancho insuficiente: ${dimensions.width}px`);
       }
 
       if (finalRules.minHeight && dimensions.height < finalRules.minHeight) {
         errors.push(`El alto mínimo debe ser ${finalRules.minHeight}px`);
-        Logger.warning(`Alto insuficiente: ${dimensions.height}px`);
+        Logger.warn(`Alto insuficiente: ${dimensions.height}px`);
       }
 
       if (finalRules.maxWidth && dimensions.width > finalRules.maxWidth) {
         errors.push(`El ancho máximo debe ser ${finalRules.maxWidth}px`);
-        Logger.warning(`Ancho excesivo: ${dimensions.width}px`);
+        Logger.warn(`Ancho excesivo: ${dimensions.width}px`);
       }
 
       if (finalRules.maxHeight && dimensions.height > finalRules.maxHeight) {
         errors.push(`El alto máximo debe ser ${finalRules.maxHeight}px`);
-        Logger.warning(`Alto excesivo: ${dimensions.height}px`);
+        Logger.warn(`Alto excesivo: ${dimensions.height}px`);
       }
 
       if (finalRules.aspectRatio) {
@@ -194,7 +194,7 @@ export class ImageService {
           Math.abs(currentRatio - finalRules.aspectRatio) > tolerance
         ) {
           errors.push(`La relación de aspecto debe ser cercana a ${finalRules.aspectRatio}`);
-          Logger.warning(`Relación de aspecto incorrecta: ${currentRatio.toFixed(2)}`);
+          Logger.warn(`Relación de aspecto incorrecta: ${currentRatio.toFixed(2)}`);
         }
       }
     } catch (error) {
