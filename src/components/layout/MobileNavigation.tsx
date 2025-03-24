@@ -102,17 +102,16 @@ export default function MobileNavigation() {
   return (
     <>
       <motion.nav 
-        className="fixed bottom-0 left-0 right-0 h-16 bg-[#004d7f] md:hidden z-50"
-        initial={false}
-        animate={{
-          y: isVisible ? 0 : 100,
-        }}
-        transition={{
-          duration: 0.4,
-          ease: [0.4, 0, 0.2, 1]
-        }}
+          className="fixed bottom-0 left-0 right-0 h-16 bg-blue-900 md:hidden z-50" // Assuming blue-900 is similar
+          initial={false}
+          animate={{
+              y: isVisible ? 0 : 100,
+          }}
+          transition={{
+              duration: 0.4,
+              ease: [0.4, 0, 0.2, 1]
+          }}
       >
-        {/* Removemos el efecto de profundidad base ya que queremos un color sólido */}
         
         <div className="relative container mx-auto px-4 h-full flex items-end justify-around pb-2">
           {navItems.map((item) => {

@@ -15,8 +15,8 @@ export class SearchService {
     limit?: number;
   }) {
     try {
-      let filterExpression = 'isActive = :isActive';
-      let expressionAttributeValues: any = {
+      const filterExpression = 'isActive = :isActive';
+      const expressionAttributeValues: any = {
         ':isActive': true
       };
 
