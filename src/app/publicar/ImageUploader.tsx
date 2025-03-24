@@ -24,14 +24,14 @@ export default function ImageUploader({
     // Validar tipo de archivo
     if (!file.type.startsWith('image/')) {
       setError('Solo se permiten archivos de imagen');
-      Logger.warning(`Intento de subir archivo no permitido: ${file.type}`);
+      Logger.warn(`Intento de subir archivo no permitido: ${file.type}`);
       return false;
     }
 
     // Validar tamaño
     if (file.size > maxSizeInMB * 1024 * 1024) {
       setError(`Las imágenes no deben superar los ${maxSizeInMB}MB`);
-      Logger.warning(`Archivo demasiado grande: ${(file.size / (1024 * 1024)).toFixed(2)}MB`);
+      Logger.warn(`Archivo demasiado grande: ${(file.size / (1024 * 1024)).toFixed(2)}MB`);
       return false;
     }
 
@@ -43,7 +43,7 @@ export default function ImageUploader({
 
     if (files.length + acceptedFiles.length > maxImages) {
       setError(`No puedes subir más de ${maxImages} imágenes`);
-      Logger.warning('Intento de subir más imágenes de las permitidas');
+      Logger.warn('Intento de subir más imágenes de las permitidas');
       return;
     }
 
