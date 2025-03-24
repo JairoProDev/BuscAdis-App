@@ -26,6 +26,7 @@
     "axios": "^1.7.9",
     "class-variance-authority": "^0.7.1",
     "crypto-js": "^4.2.0",
+    "date-fns": "^4.1.0",
     "downshift": "^9.0.8",
     "framer-motion": "^12.5.0",
     "lucide-react": "^0.483.0",
