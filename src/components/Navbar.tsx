@@ -9,7 +9,7 @@ import LoginForm from '@/features/auth/components/LoginForm';
 export default function Navbar() {
     const [isOpen, setIsOpen] = useState(false);
     const [showLoginModal, setShowLoginModal] = useState(false);
-    const { user, isAuthenticated, logout, checkSession } = useAuth(); // Usar useAuth
+    const { isAuthenticated, logout, checkSession } = useAuth(); // Usar useAuth
 
     // Verificar la sesión cuando el componente se monta
     useEffect(() => {

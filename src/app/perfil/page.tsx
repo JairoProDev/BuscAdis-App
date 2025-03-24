@@ -6,7 +6,7 @@ import { ProfileService } from '@/services/profile.service';
 import LoadingSpinner from '@/components/ui/LoadingSpinner';
 
 interface User {
-    name?: string; // Propiedades opcionales
+    name?: string;
     email?: string;
     phone?: string;
 }
@@ -23,7 +23,7 @@ export default function ProfilePage() {
     const [profile, setProfile] = useState<Profile | null>(null);
     const [isEditing, setIsEditing] = useState(false);
     const [loading, setLoading] = useState(true);
-    const [saving, setSaving] = useState(false);
+    const [isSaving, setIsSaving] = useState(false);
     const [error, setError] = useState('');
     const [success, setSuccess] = useState('');
 
@@ -76,11 +76,11 @@ export default function ProfilePage() {
         };
 
         fetchProfile();
-    }, [isAuthenticated, user, setProfile]);
+    }, [isAuthenticated, user]); // Eliminar setProfile de las dependencias
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
-        setSaving(true);
+        setIsSaving(true);
         setError('');
         setSuccess('');
 
@@ -98,7 +98,7 @@ export default function ProfilePage() {
             console.error('Error updating profile:', err);
             setError('No se pudo actualizar el perfil. Inténtalo de nuevo más tarde.');
         } finally {
-            setSaving(false);
+            setIsSaving(false);
         }
     };
 
@@ -138,10 +138,11 @@ export default function ProfilePage() {
                                     <input
                                         id="fullName"
                                         type="text"
+                                        name="fullName"
                                         required
                                         className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500"
                                         value={formData.fullName}
-                                        onChange={(e) => setFormData({ ...formData, fullName: e.target.value })}
+                                        onChange={(e: React.ChangeEvent<HTMLInputElement>) => setFormData({ ...formData, fullName: e.target.value })}
                                     />
                                 </div>
 
@@ -152,9 +153,10 @@ export default function ProfilePage() {
                                     <input
                                         id="phone"
                                         type="tel"
+                                        name="phone"
                                         className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500"
                                         value={formData.phone}
-                                        onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
+                                        onChange={(e: React.ChangeEvent<HTMLInputElement>) => setFormData({ ...formData, phone: e.target.value })}
                                     />
                                 </div>
 
@@ -165,9 +167,10 @@ export default function ProfilePage() {
                                     <input
                                         id="email"
                                         type="email"
+                                        name="email"
                                         className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500"
                                         value={formData.email}
-                                        onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                                        onChange={(e: React.ChangeEvent<HTMLInputElement>) => setFormData({ ...formData, email: e.target.value })}
                                     />
                                 </div>
 
