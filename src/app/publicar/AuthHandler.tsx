@@ -7,8 +7,8 @@ import AuthPrompt from '@/features/auth/components/AuthPrompt';
 
 interface AuthHandlerProps {
   children: React.ReactNode;
-  publishData: any;
-  onAuth: (data: any) => void;
+  publishData: unknown;
+  onAuth: (data: unknown) => void;
 }
 
 const AuthHandler: React.FC<AuthHandlerProps> = ({ children, publishData, onAuth }) => {

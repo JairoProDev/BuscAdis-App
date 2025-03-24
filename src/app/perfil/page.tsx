@@ -15,15 +15,12 @@ interface Profile {
     fullName: string;
     phone: string;
     email: string;
-    // Agrega aquí otras propiedades de tu perfil
 }
 
 export default function ProfilePage() {
     const { user, isAuthenticated } = useAuth();
-    const [profile, setProfile] = useState<Profile | null>(null);
     const [isEditing, setIsEditing] = useState(false);
     const [loading, setLoading] = useState(true);
-    const [isSaving, setIsSaving] = useState(false);
     const [error, setError] = useState('');
     const [success, setSuccess] = useState('');
 
@@ -42,24 +39,19 @@ export default function ProfilePage() {
                 const profileData = await ProfileService.getProfile();
 
                 if (profileData) {
-                    // Mapear profileData a Profile
                     const mappedProfile: Profile = {
                         fullName: profileData.fullName || '',
                         phone: profileData.phone || '',
                         email: profileData.email || '',
                     };
-                    setProfile(mappedProfile);
                     setFormData({
                         fullName: mappedProfile.fullName,
                         phone: mappedProfile.phone,
                         email: mappedProfile.email,
                     });
                 } else if (user) {
-                    // Mapear user a User
                     const mappedUser: User = {
-                        name: user.name || '',
                         phone: user.phone || '',
-                        email: user.email || '',
                     };
                     setFormData({
                         fullName: mappedUser.name || '',
@@ -76,18 +68,16 @@ export default function ProfilePage() {
         };
 
         fetchProfile();
-    }, [isAuthenticated, user]); // Eliminar setProfile de las dependencias
+    }, [isAuthenticated, user]);
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
-        setIsSaving(true);
         setError('');
         setSuccess('');
 
         try {
             const updatedProfile = await ProfileService.createOrUpdateProfile(formData);
             if (updatedProfile) {
-                setProfile(updatedProfile as Profile); // Asegúrate de que updatedProfile sea de tipo Profile
                 setIsEditing(false);
                 setSuccess('Perfil actualizado correctamente');
             } else {
@@ -98,7 +88,7 @@ export default function ProfilePage() {
             console.error('Error updating profile:', err);
             setError('No se pudo actualizar el perfil. Inténtalo de nuevo más tarde.');
         } finally {
-            setIsSaving(false);
+            // No se usa isSaving, por lo que no es necesario
         }
     };
 
