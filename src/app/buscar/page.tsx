@@ -1,21 +1,21 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { motion } from 'framer-motion';
+//import { motion } from 'framer-motion';
 import { useSearchParams } from 'next/navigation';
-import { CategoryId } from '@/types/marketplace';
+//import { CategoryId } from '@/types/marketplace';
 import { SearchService } from '@/services/search.service';
 import LoadingState from '@/components/ui/LoadingState';
 import { AlertCircle } from 'lucide-react';
 import AnunciosGrid from '@/components/AnunciosGrid';
-import AdvancedSearch from '@/components/search/AdvancedSearch'; // Importar AdvancedSearch
-import MapComponent from '@/components/search/MapComponent'; // Importar MapComponent
-import FilterBar from '@/components/search/FilterBar'; // Importar FilterBar
+//import AdvancedSearch from '@/components/search/AdvancedSearch'; // Importar AdvancedSearch
+//import MapComponent from '@/components/search/MapComponent'; // Importar MapComponent
+//import FilterBar from '@/components/search/FilterBar'; // Importar FilterBar
 import Pagination from '@/components/ui/Pagination'; // Importar Pagination
 
 const BuscadorAvisos = () => {
     const searchParams = useSearchParams();
-    const [selectedCategory, setSelectedCategory] = useState<CategoryId | null>(null);
+    //const [selectedCategory, setSelectedCategory] = useState<CategoryId | null>(null);
     const [filters, setFilters] = useState({
         category: searchParams.get('category') || '',
         search: searchParams.get('q') || '',
