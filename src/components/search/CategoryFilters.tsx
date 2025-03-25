@@ -55,8 +55,8 @@ export default function CategoryFilters({
       setTypesLoading(true);
 
       try {
-        // Ejemplo de cómo podrías obtener subcategorías de Supabase
-        const { data, error } = await supabase
+        // Ejemplo de cómo podrías obtener subcategorías de 
+        const { data, error } = await aws
           .from('category_types')
           .select('*')
           .eq('category_id', selectedCategory);

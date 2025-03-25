@@ -1,8 +1,19 @@
 import { DynamoDBClient } from '@aws-sdk/client-dynamodb';
 import { DynamoDBDocumentClient, ScanCommand } from '@aws-sdk/lib-dynamodb';
+import { Auth } from 'aws-amplify';
 
-const client = new DynamoDBClient({ region: process.env.NEXT_PUBLIC_AWS_REGION || 'us-east-2' });
-const docClient = DynamoDBDocumentClient.from(client);
+async function createDynamoDBClient() {
+  const credentials = await Auth.currentCredentials();
+  return new DynamoDBClient({
+    region: process.env.NEXT_PUBLIC_AWS_REGION || 'us-east-2',
+    credentials: Auth.essentialCredentials(credentials),
+  });
+}
+
+async function createDocClient() {
+  const client = await createDynamoDBClient();
+  return DynamoDBDocumentClient.from(client);
+}
 
 export class SearchService {
   static async searchPublications(params: {
@@ -15,9 +26,10 @@ export class SearchService {
     limit?: number;
   }) {
     try {
+      const docClient = await createDocClient(); // Obtén el cliente con credenciales de Cognito
       const filterExpression = 'isActive = :isActive';
       const expressionAttributeValues: any = {
-        ':isActive': true
+        ':isActive': true,
       };
 
       if (params.query) {
@@ -49,55 +61,21 @@ export class SearchService {
         TableName: 'Publications',
         FilterExpression: filterExpression,
         ExpressionAttributeValues: expressionAttributeValues,
-        Limit: params.limit || 20
+        Limit: params.limit || 20,
       });
 
       const { Items: publications, Count: total } = await docClient.send(command);
-      
+
       return {
         publications: publications || [],
         total: total || 0,
-        pages: Math.ceil((total || 0) / (params.limit || 20))
+        pages: Math.ceil((total || 0) / (params.limit || 20)),
       };
     } catch (error) {
       console.error('Error searching publications:', error);
       throw new Error(`Error searching publications: ${error.message}`);
-      throw error;
     }
   }
 
-  static async getPopularSearches() {
-    try {
-      const { data, error } = await supabase
-        .from('search_history')
-        .select('query, count')
-        .order('count', { ascending: false })
-        .limit(10);
-
-      if (error) throw error;
-      return data;
-    } catch (error) {
-      console.error('Error getting popular searches:', error);
-      throw error;
-    }
-  }
-
-  static async saveSearchQuery(query: string, userId?: string) {
-    try {
-      const { error } = await supabase
-        .from('search_history')
-        .upsert({
-          query,
-          user_id: userId,
-          count: 1
-        }, {
-          onConflict: 'query',
-          count: 'count + 1'
-        });
-
-      if (error) throw error;
-    } catch (error) {
-      console.error('Error saving search query:', error);
-    }
-  }
+  // Eliminamos los métodos relacionados con Supabase
 }
