@@ -1,6 +1,6 @@
 import { DynamoDBClient } from '@aws-sdk/client-dynamodb';
 import { DynamoDBDocumentClient, ScanCommand } from '@aws-sdk/lib-dynamodb';
-import { Auth } from 'aws-amplify';
+import { Auth } from '@aws-amplify/auth';
 
 async function createDynamoDBClient() {
   const credentials = await Auth.currentCredentials();
