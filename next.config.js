@@ -10,7 +10,13 @@ const nextConfig = {
     ignoreDuringBuilds: true,
   },
   images: {
-    domains: ["buscadis-storage.s3.amazonaws.com"],
+    domains: [
+      "buscadis-storage.s3.amazonaws.com",
+      "images.unsplash.com",
+      "randomuser.me",
+      "res.cloudinary.com",
+      "via.placeholder.com",
+    ],
   },
   webpack: (config, { isServer }) => {
     if (!isServer) {
@@ -24,9 +30,26 @@ const nextConfig = {
         child_process: false,
         "fs/promises": false,
         "timers/promises": false,
+        mongoose: false,
+        mongodb: false,
+        bufferutil: false,
+        "utf-8-validate": false,
       };
     }
+
+    // Optimize bundle size
+    config.optimization = {
+      ...config.optimization,
+      moduleIds: "deterministic",
+    };
+
     return config;
+  },
+  // Provide MongoDB URI via serverRuntimeConfig for server-side only
+  serverRuntimeConfig: {
+    mongodb: {
+      uri: process.env.MONGODB_URI,
+    },
   },
 };
 

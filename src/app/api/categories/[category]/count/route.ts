@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
-import getMongoClient from '@/lib/mongodb';
+import dbConnect from '@/lib/dbConnect';
+import { getPublicationModel } from '@/lib/models/Publication';
 
 export const dynamic = 'force-dynamic'; // Disable caching
 
@@ -17,33 +18,40 @@ export async function GET(
       );
     }
     
-    const client = await getMongoClient();
-    const db = client.db('test');
+    // Connect to database
+    await dbConnect();
     
     // Count across all publication collections
-    const inmuebles = await db.collection('publications_inmuebles').countDocuments({
+    // Get models for each category type
+    const inmueblesModel = getPublicationModel('inmuebles');
+    const empleosModel = getPublicationModel('empleos');
+    const serviciosModel = getPublicationModel('servicios');
+    const vehiculosModel = getPublicationModel('vehiculos');
+    
+    // Count in each collection
+    const inmuebles = await inmueblesModel.countDocuments({
       categorySlug: categorySlug
     });
     
-    const empleos = await db.collection('publications_empleos').countDocuments({
+    const empleos = await empleosModel.countDocuments({
       categorySlug: categorySlug
     });
     
-    const servicios = await db.collection('publications_servicios').countDocuments({
+    const servicios = await serviciosModel.countDocuments({
       categorySlug: categorySlug
     });
     
-    const vehiculos = await db.collection('publications_vehiculos').countDocuments({
+    const vehiculos = await vehiculosModel.countDocuments({
       categorySlug: categorySlug
     });
     
     const total = inmuebles + empleos + servicios + vehiculos;
     
     return NextResponse.json({ count: total });
-  } catch (error) {
+  } catch (error: any) {
     console.error(`Error getting count for category ${params.category}:`, error);
     return NextResponse.json(
-      { error: 'Error retrieving category count' },
+      { error: `Error retrieving category count: ${error.message}` },
       { status: 500 }
     );
   }

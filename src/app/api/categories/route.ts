@@ -1,17 +1,44 @@
 import { NextResponse } from 'next/server';
-import getMongoClient from '@/lib/mongodb';
+import dbConnect from '@/lib/dbConnect';
+import mongoose from 'mongoose';
 import { categories as staticCategories } from '@/lib/constants';
 
 export const dynamic = 'force-dynamic'; // Disable caching to ensure data is always fresh
 
+// Define Category Schema
+const CategorySchema = new mongoose.Schema({
+  id: { type: String, required: true },
+  name: { type: String, required: true },
+  description: { type: String },
+  icon: { type: String },
+  iconName: { type: String },
+  slug: { type: String, required: true },
+  imageUrl: { type: String },
+  count: { type: Number, default: 0 }
+});
+
+// Get Category model (or create if it doesn't exist)
+const getCategoryModel = () => {
+  try {
+    return mongoose.models.categories || 
+      mongoose.model('categories', CategorySchema, 'categories');
+  } catch (error) {
+    console.error('Error creating Category model:', error);
+    // Return existing model if creation fails
+    return mongoose.models.categories;
+  }
+};
+
 export async function GET() {
   try {
-    const client = await getMongoClient();
-    const db = client.db('test');
-    const collection = db.collection('categories');
+    // Connect to MongoDB
+    await dbConnect();
+    
+    // Get model
+    const CategoryModel = getCategoryModel();
     
     // Get categories from MongoDB
-    const categories = await collection.find({}).toArray();
+    let categories = await CategoryModel.find({}).lean();
     
     // If no categories in DB, use static ones
     if (!categories || categories.length === 0) {
@@ -25,6 +52,14 @@ export async function GET() {
         imageUrl: category.imageUrl,
         count: category.count || 0
       }));
+      
+      // Try to seed the database with static categories
+      try {
+        await CategoryModel.insertMany(categoriesArray);
+      } catch (error) {
+        console.error('Error seeding categories:', error);
+        // Continue with the static categories even if seeding fails
+      }
       
       return NextResponse.json(categoriesArray);
     }

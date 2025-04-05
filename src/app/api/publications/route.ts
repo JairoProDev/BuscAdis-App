@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server'
-import getMongoClient from '@/lib/mongodb'
-import { Db } from 'mongodb'
+import dbConnect from '@/lib/dbConnect'
+import { getPublicationModel } from '@/lib/models/Publication'
 
 export const dynamic = 'force-dynamic' // Disable caching to ensure data is always fresh
 
@@ -12,16 +12,11 @@ export async function GET(request: Request) {
     const limit = parseInt(searchParams.get('limit') || '20')
     const page = parseInt(searchParams.get('page') || '1')
     
-    const client = await getMongoClient()
-    const db: Db = client.db('test')
+    // Connect to database
+    await dbConnect()
     
-    // Determine collection based on category
-    let collectionName = 'publications_inmuebles'
-    if (category === 'empleos') collectionName = 'publications_empleos'
-    if (category === 'servicios') collectionName = 'publications_servicios'
-    if (category === 'vehiculos') collectionName = 'publications_vehiculos'
-    
-    const collection = db.collection(collectionName)
+    // Get model for specified category
+    const PublicationModel = getPublicationModel(category)
     
     // Build filter
     const filter: any = { status: 'active' }
@@ -33,16 +28,16 @@ export async function GET(request: Request) {
     }
     
     // Count total for pagination
-    const total = await collection.countDocuments(filter)
+    const total = await PublicationModel.countDocuments(filter)
     
     // Get results with pagination
     const skip = (page - 1) * limit
-    const publications = await collection
+    const publications = await PublicationModel
       .find(filter)
       .sort({ createdAt: -1 })
       .skip(skip)
       .limit(limit)
-      .toArray()
+      .lean()
     
     return NextResponse.json({
       publications,
@@ -51,10 +46,10 @@ export async function GET(request: Request) {
       page,
       limit
     })
-  } catch (error) {
+  } catch (error: any) {
     console.error('Error fetching publications:', error)
     return NextResponse.json(
-      { error: 'Error al obtener las publicaciones' },
+      { error: `Error al obtener las publicaciones: ${error.message}` },
       { status: 500 }
     )
   }
@@ -71,40 +66,33 @@ export async function POST(request: Request) {
       )
     }
     
-    const client = await getMongoClient()
-    const db = client.db('test')
+    // Connect to database
+    await dbConnect()
     
-    // Determine collection based on category
-    let collectionName = 'publications_inmuebles'
-    if (data.categorySlug === 'empleos') collectionName = 'publications_empleos'
-    if (data.categorySlug === 'servicios') collectionName = 'publications_servicios'
-    if (data.categorySlug === 'vehiculos') collectionName = 'publications_vehiculos'
+    // Get model for the specified category
+    const categorySlug = data.categorySlug || 'inmuebles'
+    const PublicationModel = getPublicationModel(categorySlug)
     
-    const collection = db.collection(collectionName)
-    
-    const now = new Date().toISOString()
-    const publication = {
+    const now = new Date()
+    const publication = new PublicationModel({
       ...data,
       id: data.id || `pub_${Date.now()}`, // Generate ID if not provided
       status: 'active',
       createdAt: now,
       updatedAt: now
-    }
+    })
     
-    const result = await collection.insertOne(publication)
-    
-    if (!result.acknowledged) {
-      throw new Error('Error al insertar la publicación')
-    }
+    // Save the publication
+    await publication.save()
     
     return NextResponse.json({ 
       success: true,
       id: publication.id
     })
-  } catch (error) {
+  } catch (error: any) {
     console.error('Error creating publication:', error)
     return NextResponse.json(
-      { error: 'Error al crear la publicación' },
+      { error: `Error al crear la publicación: ${error.message}` },
       { status: 500 }
     )
   }

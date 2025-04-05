@@ -35,17 +35,22 @@ const FeaturedListingsSection = () => {
   return (
     <section
       ref={ref}
-      className="py-16 sm:py-20 bg-gradient-to-r from-blue-50/80 to-purple-50/80 relative overflow-hidden"
+      className="py-16 sm:py-20 relative overflow-hidden"
+      style={{
+        background: "linear-gradient(to bottom, #f8f9ff, #f3f4f8)",
+        backgroundImage: "radial-gradient(circle at 1px 1px, #e2e8f0 1px, transparent 0)",
+        backgroundSize: "30px 30px"
+      }}
     >
-      {/* Decorative elements */}
-      <div className="absolute -top-24 -right-24 w-96 h-96 rounded-full bg-orange-100/40 blur-3xl"></div>
-      <div className="absolute -bottom-20 -left-20 w-72 h-72 rounded-full bg-blue-100/50 blur-2xl"></div>
-      <div className="absolute top-1/4 right-1/3 w-6 h-6 rounded-full bg-pink-200/20"></div>
-      <div className="absolute bottom-1/3 left-1/4 w-3 h-3 rounded-full bg-orange-300/30"></div>
+      {/* Decorative elements - platinum styling */}
+      <div className="absolute -top-24 -right-24 w-96 h-96 rounded-full bg-gradient-to-br from-gray-200/40 via-white/30 to-gray-300/40 blur-3xl"></div>
+      <div className="absolute -bottom-20 -left-20 w-72 h-72 rounded-full bg-gradient-to-tr from-gray-200/50 via-white/40 to-gray-300/50 blur-2xl"></div>
+      <div className="absolute top-1/4 right-1/3 w-6 h-6 rounded-full bg-white/50 shadow-[0_0_10px_rgba(255,255,255,0.8)]"></div>
+      <div className="absolute bottom-1/3 left-1/4 w-3 h-3 rounded-full bg-white/60 shadow-[0_0_5px_rgba(255,255,255,0.6)]"></div>
 
-      {/* Animated patterns */}
+      {/* Animated patterns - more subtle for platinum look */}
       <motion.div
-        className="absolute inset-0 opacity-10 z-0"
+        className="absolute inset-0 opacity-5 z-0"
         style={{
           backgroundImage: "radial-gradient(circle at 1px 1px, #cbd5e1 1px, transparent 0)",
           backgroundSize: "40px 40px"
@@ -69,34 +74,42 @@ const FeaturedListingsSection = () => {
           animate={inView ? { opacity: 1, y: 0 } : {}}
           transition={{ duration: 0.6, ease: "easeOut" }}
         >
-          <div className="mb-4 sm:mb-0">
-            <div className="flex items-center mb-3">
+          <div className="mb-4 sm:mb-0 relative">
+            {/* Light glow effect behind badge */}
+            <div className="absolute top-0 left-0 w-40 h-10 bg-gradient-to-r from-blue-200/20 via-purple-200/20 to-blue-200/20 blur-xl rounded-full"></div>
+            
+            <div className="flex items-center mb-3 relative">
               <motion.span
-                className="px-4 py-1.5 rounded-full bg-amber-100 text-amber-700 text-sm font-medium inline-flex items-center"
+                className="px-4 py-1.5 rounded-full bg-gradient-to-r from-gray-100 to-gray-200 text-gray-700 text-sm font-medium inline-flex items-center shadow-sm border border-gray-300/40 relative overflow-hidden"
                 initial={{ opacity: 0, x: -20 }}
                 animate={inView ? { opacity: 1, x: 0 } : {}}
                 transition={{ delay: 0.2, duration: 0.5 }}
               >
-                <SparklesIcon className="h-4 w-4 mr-1.5 animate-[pulse_1.5s_infinite]" />
-                Recomendados para ti
+                <SparklesIcon className="h-4 w-4 mr-1.5 text-blue-500 animate-[pulse_1.5s_infinite]" />
+                <span className="relative z-10">Recomendados para ti</span>
+                {/* Platinum shimmer effect */}
+                <span className="absolute inset-0 bg-gradient-to-r from-gray-200/0 via-white/80 to-gray-200/0 rounded-full animate-shimmer"></span>
               </motion.span>
             </div>
+            
             <motion.h2
-              className="text-3xl sm:text-4xl font-bold text-neutral-900 mb-2"
+              className="text-3xl sm:text-4xl font-bold text-gray-900 mb-2"
               initial={{ opacity: 0, y: 20 }}
               animate={inView ? { opacity: 1, y: 0 } : {}}
               transition={{ delay: 0.3, duration: 0.5 }}
             >
-              Anuncios Destacados
+              Anuncios <span className="bg-clip-text text-transparent bg-gradient-to-r from-blue-600 to-purple-600">Destacados</span>
             </motion.h2>
+            
             <motion.div
-              className="h-1 w-24 bg-gradient-to-r from-blue-500 via-pink-500 to-amber-500 rounded-full mb-4"
+              className="h-1 w-24 bg-gradient-to-r from-gray-400 via-gray-300 to-gray-500 rounded-full mb-4"
               initial={{ width: 0, opacity: 0 }}
               animate={inView ? { width: 96, opacity: 1 } : {}}
               transition={{ delay: 0.4, duration: 0.6 }}
             ></motion.div>
+            
             <motion.p
-              className="text-lg text-neutral-700 max-w-xl"
+              className="text-lg text-gray-700 max-w-xl"
               initial={{ opacity: 0 }}
               animate={inView ? { opacity: 1 } : {}}
               transition={{ delay: 0.5, duration: 0.5 }}
@@ -105,6 +118,7 @@ const FeaturedListingsSection = () => {
               interesarte.
             </motion.p>
           </div>
+          
           <motion.div
             initial={{ opacity: 0, scale: 0.9 }}
             animate={inView ? { opacity: 1, scale: 1 } : {}}
@@ -113,33 +127,38 @@ const FeaturedListingsSection = () => {
             whileTap={{ scale: 0.95 }}
             className="relative"
           >
-            <span className="absolute inset-0 rounded-lg bg-gradient-to-r from-blue-600 to-pink-600 blur-md opacity-70 group-hover:opacity-100 transition-opacity duration-300"></span>
             <Link
               href="/buscar?destacado=true"
-              className="relative inline-flex items-center px-6 py-3 rounded-lg bg-gradient-to-r from-blue-600 to-pink-600 text-white font-medium transition-all duration-200 shadow-md hover:shadow-lg transform hover:-translate-y-0.5 z-10"
+              className="inline-flex items-center px-6 py-3 rounded-lg bg-gradient-to-r from-blue-600 to-purple-600 text-white font-medium transition-all duration-200 shadow-md hover:shadow-xl relative overflow-hidden group"
             >
-              Ver Todos los Destacados
-              <ArrowRightIcon className="ml-1.5 h-5 w-5 group-hover:translate-x-1 transition-transform duration-200" />
+              {/* Platinum shimmer effect */}
+              <span className="absolute top-0 left-0 w-full h-full bg-gradient-to-r from-white/0 via-white/40 to-white/0 transform -skew-x-30 -translate-x-full transition-transform duration-1000 ease-out group-hover:translate-x-full"></span>
+              
+              <span className="relative z-10">Ver Todos los Destacados</span>
+              <ArrowRightIcon className="ml-1.5 h-5 w-5 relative z-10 group-hover:translate-x-1 transition-transform duration-200" />
             </Link>
           </motion.div>
         </motion.div>
 
-        {/* Navigation controls for mobile scrolling */}
+        {/* Navigation controls for mobile scrolling - platinum styled */}
         <div className="flex justify-end gap-2 mb-4 lg:hidden">
-          <button
+          <motion.button
             onClick={scrollToLeft}
-            className="p-2 rounded-full bg-white shadow-md hover:bg-neutral-100 transition-colors duration-200"
+            className="p-2 rounded-full bg-gradient-to-br from-gray-100 to-gray-300 text-gray-700 shadow-sm hover:shadow-md transition-all duration-200 border border-gray-200"
             aria-label="Desplazar a la izquierda"
+            whileTap={{ scale: 0.95 }}
           >
-            <ArrowRightIcon className="h-5 w-5 text-neutral-700 transform rotate-180" />
-          </button>
-          <button
+            <ArrowRightIcon className="h-5 w-5 transform rotate-180" />
+          </motion.button>
+          
+          <motion.button
             onClick={scrollToRight}
-            className="p-2 rounded-full bg-white shadow-md hover:bg-neutral-100 transition-colors duration-200"
+            className="p-2 rounded-full bg-gradient-to-br from-gray-100 to-gray-300 text-gray-700 shadow-sm hover:shadow-md transition-all duration-200 border border-gray-200"
             aria-label="Desplazar a la derecha"
+            whileTap={{ scale: 0.95 }}
           >
-            <ArrowRightIcon className="h-5 w-5 text-neutral-700" />
-          </button>
+            <ArrowRightIcon className="h-5 w-5" />
+          </motion.button>
         </div>
 
         {/* Grid de Anuncios - Con scroll horizontal en móvil */}
@@ -161,7 +180,7 @@ const FeaturedListingsSection = () => {
           ))}
         </motion.div>
 
-        {/* Scroll indicators */}
+        {/* Scroll indicators - platinum styled */}
         <motion.div
           className="mt-6 flex justify-center gap-1.5 lg:hidden"
           initial={{ opacity: 0 }}
@@ -175,7 +194,11 @@ const FeaturedListingsSection = () => {
           ].map((_, i) => (
             <div
               key={i}
-              className={`w-8 h-1.5 rounded-full ${i === 0 ? "bg-pink-500" : "bg-neutral-300"}`}
+              className={`w-8 h-1.5 rounded-full transition-all duration-300 ${
+                i === 0 
+                  ? "bg-gradient-to-r from-gray-300 to-gray-500" 
+                  : "bg-gray-300"
+              }`}
             ></div>
           ))}
         </motion.div>
