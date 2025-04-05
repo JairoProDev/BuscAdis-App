@@ -1,33 +1,31 @@
-import { DynamoDBClient } from '@aws-sdk/client-dynamodb';
-import { DynamoDBDocumentClient, PutCommand, GetCommand } from '@aws-sdk/lib-dynamodb';
-
-const client = new DynamoDBClient({
-    region: process.env.NEXT_PUBLIC_AWS_REGION,
-    credentials: {
-        accessKeyId: process.env.NEXT_PUBLIC_AWS_ACCESS_KEY_ID,
-        secretAccessKey: process.env.NEXT_PUBLIC_AWS_SECRET_ACCESS_KEY,
-    },
-});
-
-const docClient = DynamoDBDocumentClient.from(client);
-const usersTable = process.env.NEXT_PUBLIC_DYNAMODB_USERS_TABLE;
+import clientPromise from '@/lib/mongodb';
 
 export class AuthService {
+    private static async getCollection() {
+        const client = await clientPromise;
+        const db = client.db('test');
+        return db.collection('users');
+    }
+
     static async register({ firstName, lastName, phone, dni }) {
         try {
-            const params = {
-                TableName: usersTable,
-                Item: {
-                    phone,
-                    dni,
-                    firstName,
-                    lastName,
-                    createdAt: Date.now(),
-                },
-                ConditionExpression: 'attribute_not_exists(phone)', // Evita duplicados
+            const users = await this.getCollection();
+            
+            // Check if user already exists
+            const existingUser = await users.findOne({ phone });
+            if (existingUser) {
+                return { data: null, error: 'El número de teléfono ya está registrado' };
+            }
+            
+            const userData = {
+                phone,
+                dni,
+                firstName,
+                lastName,
+                createdAt: Date.now(),
             };
-
-            await docClient.send(new PutCommand(params));
+            
+            await users.insertOne(userData);
             return { data: { message: 'Usuario registrado correctamente' }, error: null };
         } catch (error) {
             console.error('Error en registro:', error);
@@ -37,18 +35,12 @@ export class AuthService {
 
     static async login({ phone, dni }) {
         try {
-            const params = {
-                TableName: usersTable,
-                Key: {
-                    phone,
-                    dni,
-                },
-            };
+            const users = await this.getCollection();
+            
+            const user = await users.findOne({ phone, dni });
 
-            const result = await docClient.send(new GetCommand(params));
-
-            if (result.Item) {
-                return { data: result.Item, error: null };
+            if (user) {
+                return { data: user, error: null };
             } else {
                 return { data: null, error: 'Credenciales incorrectas' };
             }

@@ -12,6 +12,20 @@ import AnunciosGrid from '@/components/AnunciosGrid';
 //import MapComponent from '@/components/search/MapComponent'; // Importar MapComponent
 //import FilterBar from '@/components/search/FilterBar'; // Importar FilterBar
 import Pagination from '@/components/ui/Pagination'; // Importar Pagination
+import Link from 'next/link';
+
+interface Publication {
+  id: string;
+  title: string;
+  description: string;
+  price: number;
+  currency: string;
+  categorySlug: string;
+  location: string;
+  contactName: string;
+  status: string;
+  createdAt: string;
+}
 
 const BuscadorAvisos = () => {
     const searchParams = useSearchParams();
@@ -26,7 +40,7 @@ const BuscadorAvisos = () => {
     const [loading, setLoading] = useState(true);
     const [totalPages, setTotalPages] = useState(1);
     const [error, setError] = useState('');
-    const [publications, setPublications] = useState<any[]>([]);
+    const [publications, setPublications] = useState<Publication[]>([]);
     const [isListView, setIsListView] = useState(false);
     const [noResults, setNoResults] = useState(false);
 

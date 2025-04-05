@@ -1,46 +1,9 @@
-import { DynamoDBClient } from '@aws-sdk/client-dynamodb';
-import { DynamoDBDocumentClient, ScanCommand } from '@aws-sdk/lib-dynamodb';
+import clientPromise from '@/lib/mongodb';
 
-// Environment variable check for region
-if (!process.env.NEXT_PUBLIC_AWS_REGION) {
-    throw new Error('NEXT_PUBLIC_AWS_REGION environment variable is not defined.');
+// Check for MongoDB URI
+if (!process.env.MONGODB_URI) {
+    throw new Error('MONGODB_URI environment variable is not defined.');
 }
-
-let client: DynamoDBClient;
-
-async function getDynamoDBClient() {
-    if (!client) {
-        try {
-            // Usar credenciales estáticas en desarrollo local
-            if (process.env.NODE_ENV === 'development') {
-                if (!process.env.NEXT_PUBLIC_AWS_ACCESS_KEY_ID || !process.env.NEXT_PUBLIC_AWS_SECRET_ACCESS_KEY) {
-                    throw new Error('AWS credentials are not defined in development.');
-                }
-                client = new DynamoDBClient({
-                    region: process.env.NEXT_PUBLIC_AWS_REGION,
-                    credentials: {
-                        accessKeyId: process.env.NEXT_PUBLIC_AWS_ACCESS_KEY_ID,
-                        secretAccessKey: process.env.NEXT_PUBLIC_AWS_SECRET_ACCESS_KEY,
-                    },
-                });
-            } else {
-                // Preparación para integración con Cognito en producción
-                // Aquí iría la lógica para obtener credenciales de Cognito
-                // Por ahora, lanzamos un error para recordar la implementación
-                throw new Error('Cognito integration is required for production.');
-            }
-        } catch (error) {
-            console.error('Error initializing DynamoDB client:', error);
-            throw new Error(`Error initializing DynamoDB client: ${error.message}`);
-        }
-    }
-    return client;
-}
-
-const getDocClient = async () => {
-    const dynamoDBClient = await getDynamoDBClient();
-    return DynamoDBDocumentClient.from(dynamoDBClient);
-};
 
 interface SearchPublicationsParams {
     query?: string;
@@ -60,42 +23,98 @@ interface SearchResults {
 }
 
 export class SearchService {
+    private static async getCollection(category?: string) {
+        const client = await clientPromise;
+        const db = client.db('test');
+        
+        // Use the right collection based on category, default to inmuebles
+        if (category === 'empleos') {
+            return db.collection('publications_empleos');
+        } else if (category === 'servicios') {
+            return db.collection('publications_servicios');
+        } else if (category === 'vehiculos') {
+            return db.collection('publications_vehiculos');
+        } else {
+            return db.collection('publications_inmuebles');
+        }
+    }
+
     static async searchPublications(params: SearchPublicationsParams): Promise<SearchResults> {
         const { page = 1, limit = 20 } = params;
 
         try {
-            const docClient = await getDocClient();
-            let items: any[] = [];
-            let total = 0;
-
-            console.log("Filters received:", params); // Log de los filtros recibidos
-
-            // Modificación: Eliminar todos los filtros del ScanCommand
-            const scanParams: any = {
-                TableName: 'Publications',
+            const publications = await this.getCollection(params.category);
+            
+            console.log("Filters received:", params); // Log of received filters
+            
+            // Build filter object
+            const filter: Record<string, any> = { 
+                // Default to active listings
+                status: "active"
             };
-
-            const countCommand = new ScanCommand({
-                ...scanParams,
-                Select: 'COUNT',
-            });
-
-            const countResult = await docClient.send(countCommand);
-            total = countResult.Count || 0;
-
-            if (total > 0) {
-                const command = new ScanCommand({
-                    ...scanParams,
-                    Limit: limit,
-                    ExclusiveStartKey: (page - 1) * limit > 0 ? undefined : undefined, // Corregir paginación
-                });
-
-                const { Items } = await docClient.send(command);
-                items = Items || [];
+            
+            if (params.query) {
+                filter.$or = [
+                    { title: { $regex: params.query, $options: 'i' } },
+                    { description: { $regex: params.query, $options: 'i' } }
+                ];
             }
-
-            console.log("Items found:", items); // Log de los items encontrados
-
+            
+            if (params.category) {
+                filter.categorySlug = params.category;
+            }
+            
+            if (params.location) {
+                if (!filter.$or) filter.$or = [];
+                filter.$or.push(
+                    { location: { $regex: params.location, $options: 'i' } }
+                );
+            }
+            
+            if (params.minPrice) {
+                filter.price = filter.price || {};
+                filter.price.$gte = Number(params.minPrice);
+            }
+            
+            if (params.maxPrice) {
+                filter.price = filter.price || {};
+                filter.price.$lte = Number(params.maxPrice);
+            }
+            
+            // Count total matching documents
+            const total = await publications.countDocuments(filter);
+            
+            // Set up sort options
+            let sortOptions: Record<string, number> = { createdAt: -1 }; // Default: newest first
+            
+            if (params.sortBy) {
+                switch (params.sortBy) {
+                    case 'price_asc':
+                        sortOptions = { price: 1 };
+                        break;
+                    case 'price_desc':
+                        sortOptions = { price: -1 };
+                        break;
+                    case 'date_asc':
+                        sortOptions = { createdAt: 1 };
+                        break;
+                    case 'date_desc':
+                        sortOptions = { createdAt: -1 };
+                        break;
+                }
+            }
+            
+            // Get paginated results
+            const skip = (page - 1) * limit;
+            const items = await publications
+                .find(filter)
+                .sort(sortOptions)
+                .skip(skip)
+                .limit(limit)
+                .toArray();
+            
+            console.log("Items found:", items.length); // Log of items found
+            
             return {
                 publications: items,
                 total: total,

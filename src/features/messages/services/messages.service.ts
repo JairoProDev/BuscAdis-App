@@ -1,24 +1,20 @@
-import { DynamoDBClient } from '@aws-sdk/client-dynamodb';
-import { DynamoDBDocumentClient, QueryCommand, PutCommand } from '@aws-sdk/lib-dynamodb';
 import { v4 as uuidv4 } from 'uuid';
-
-const client = new DynamoDBClient({ region: process.env.NEXT_PUBLIC_AWS_REGION || 'us-east-2' });
-const docClient = DynamoDBDocumentClient.from(client);
+import clientPromise from '@/lib/mongodb';
 
 export class MessagesService {
+  private static async getCollection(collectionName: string) {
+    const client = await clientPromise;
+    const db = client.db('test');
+    return db.collection(collectionName);
+  }
+
   static async getConversations(userId: string) {
     try {
-      const command = new QueryCommand({
-        TableName: 'Conversations',
-        IndexName: 'UserConversationsIndex',
-        KeyConditionExpression: 'participantId = :userId',
-        ExpressionAttributeValues: {
-          ':userId': userId
-        }
-      });
-
-      const { Items: conversations } = await docClient.send(command);
-      return conversations || [];
+      const conversations = await this.getCollection('conversations');
+      
+      return await conversations
+        .find({ participantId: userId })
+        .toArray();
     } catch (error) {
       console.error('Error getting conversations:', error);
       throw error;
@@ -27,18 +23,17 @@ export class MessagesService {
 
   static async sendMessage(conversationId: string, senderId: string, content: string) {
     try {
-      const command = new PutCommand({
-        TableName: 'Messages',
-        Item: {
-          id: uuidv4(),
-          conversationId,
-          senderId,
-          content,
-          createdAt: new Date().toISOString()
-        }
-      });
-
-      await docClient.send(command);
+      const messages = await this.getCollection('messages');
+      
+      const messageData = {
+        id: uuidv4(),
+        conversationId,
+        senderId,
+        content,
+        createdAt: new Date().toISOString()
+      };
+      
+      await messages.insertOne(messageData);
       return { success: true };
     } catch (error) {
       console.error('Error sending message:', error);
@@ -48,18 +43,23 @@ export class MessagesService {
 
   static async startConversation(senderId: string, receiverId: string, publicationId: string) {
     try {
-      const { data, error } = await supabase
-        .from('conversations')
-        .insert({
-          sender_id: senderId,
-          receiver_id: receiverId,
-          publication_id: publicationId
-        })
-        .select()
-        .single();
-
-      if (error) throw error;
-      return data;
+      const conversations = await this.getCollection('conversations');
+      
+      const conversationData = {
+        id: uuidv4(),
+        senderId,
+        receiverId,
+        publicationId,
+        createdAt: new Date().toISOString()
+      };
+      
+      const result = await conversations.insertOne(conversationData);
+      
+      if (!result.acknowledged) {
+        throw new Error('Failed to start conversation');
+      }
+      
+      return conversationData;
     } catch (error) {
       console.error('Error starting conversation:', error);
       throw error;

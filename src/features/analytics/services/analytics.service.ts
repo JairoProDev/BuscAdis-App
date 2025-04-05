@@ -1,13 +1,13 @@
-import { DynamoDBClient } from '@aws-sdk/client-dynamodb';
-import { DynamoDBDocumentClient, PutCommand, QueryCommand } from '@aws-sdk/lib-dynamodb';
 import { v4 as uuidv4 } from 'uuid';
-
-const client = new DynamoDBClient({ 
-  region: process.env.NEXT_PUBLIC_AWS_REGION || 'us-east-2'
-});
-const docClient = DynamoDBDocumentClient.from(client);
+import clientPromise from '@/lib/mongodb';
 
 export class AnalyticsService {
+  private static async getCollection(collectionName: string) {
+    const client = await clientPromise;
+    const db = client.db('test');
+    return db.collection(collectionName);
+  }
+
   static async trackSearch(data: {
     userId?: string;
     query: string;
@@ -16,25 +16,22 @@ export class AnalyticsService {
     sessionId: string;
   }) {
     try {
-      const command = new PutCommand({
-        TableName: 'SearchAnalytics',
-        Item: {
-          id: uuidv4(),
-          userId: data.userId,
-          query: data.query,
-          filters: data.filters,
-          resultsCount: data.resultsCount,
-          sessionId: data.sessionId,
-          deviceInfo: {
-            userAgent: navigator.userAgent,
-            platform: navigator.platform,
-            language: navigator.language
-          },
-          createdAt: new Date().toISOString()
-        }
+      const searchAnalytics = await this.getCollection('search_analytics');
+      
+      await searchAnalytics.insertOne({
+        id: uuidv4(),
+        userId: data.userId,
+        query: data.query,
+        filters: data.filters,
+        resultsCount: data.resultsCount,
+        sessionId: data.sessionId,
+        deviceInfo: {
+          userAgent: navigator.userAgent,
+          platform: navigator.platform,
+          language: navigator.language
+        },
+        createdAt: new Date().toISOString()
       });
-
-      await docClient.send(command);
     } catch (error) {
       console.error('Error tracking search:', error);
     }
@@ -42,13 +39,12 @@ export class AnalyticsService {
 
   static async getSearchAnalytics() {
     try {
-      const { data, error } = await supabase
-        .from('search_analytics')
-        .select('*')
-        .order('created_at', { ascending: false });
-
-      if (error) throw error;
-      return data;
+      const searchAnalytics = await this.getCollection('search_analytics');
+      
+      return await searchAnalytics
+        .find({})
+        .sort({ createdAt: -1 })
+        .toArray();
     } catch (error) {
       console.error('Error getting search analytics:', error);
       throw error;
@@ -57,31 +53,25 @@ export class AnalyticsService {
 
   static async getPopularSearchTerms(days: number = 7) {
     try {
+      const searchAnalytics = await this.getCollection('search_analytics');
+      
       const startDate = new Date();
       startDate.setDate(startDate.getDate() - days);
-
-      const command = new QueryCommand({
-        TableName: 'SearchAnalytics',
-        IndexName: 'QueryIndex',
-        KeyConditionExpression: 'createdAt >= :startDate',
-        ExpressionAttributeValues: {
-          ':startDate': startDate.toISOString()
-        },
-        Select: 'ALL_PROJECTED_ATTRIBUTES'
-      });
-
-      const { Items: searches } = await docClient.send(command);
       
-      if (!searches) return [];
+      const searches = await searchAnalytics
+        .find({ createdAt: { $gte: startDate.toISOString() } })
+        .toArray();
+      
+      if (!searches || searches.length === 0) return [];
 
-      // Agrupar por término de búsqueda y contar
+      // Group by search term and count
       const searchCounts = searches.reduce((acc, search) => {
         const query = search.query.toLowerCase();
         acc[query] = (acc[query] || 0) + 1;
         return acc;
       }, {});
 
-      // Convertir a array y ordenar
+      // Convert to array and sort
       return Object.entries(searchCounts)
         .map(([query, count]) => ({ query, count }))
         .sort((a, b) => b.count - a.count)

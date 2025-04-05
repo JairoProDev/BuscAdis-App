@@ -1,11 +1,13 @@
-import { DynamoDBClient } from '@aws-sdk/client-dynamodb';
-import { DynamoDBDocumentClient, PutCommand } from '@aws-sdk/lib-dynamodb';
 import { v4 as uuidv4 } from 'uuid';
-
-const client = new DynamoDBClient({ region: process.env.NEXT_PUBLIC_AWS_REGION });
-const docClient = DynamoDBDocumentClient.from(client);
+import clientPromise from '@/lib/mongodb';
 
 export class ReportsService {
+  private static async getCollection() {
+    const client = await clientPromise;
+    const db = client.db('test');
+    return db.collection('reports');
+  }
+
   static async createReport(data: {
     userId: string;
     publicationId: string;
@@ -13,21 +15,20 @@ export class ReportsService {
     description: string;
   }) {
     try {
-      const command = new PutCommand({
-        TableName: 'Reports',
-        Item: {
-          id: uuidv4(),
-          userId: data.userId,
-          publicationId: data.publicationId,
-          reason: data.reason,
-          description: data.description,
-          status: 'pending',
-          createdAt: new Date().toISOString()
-        }
-      });
+      const reports = await this.getCollection();
+      
+      const report = {
+        id: uuidv4(),
+        userId: data.userId,
+        publicationId: data.publicationId,
+        reason: data.reason,
+        description: data.description,
+        status: 'pending',
+        createdAt: new Date().toISOString()
+      };
 
-      await docClient.send(command);
-      return command.input.Item;
+      await reports.insertOne(report);
+      return report;
     } catch (error) {
       console.error('Error creating report:', error);
       throw error;

@@ -1,16 +1,6 @@
-import { DynamoDBClient } from '@aws-sdk/client-dynamodb';
-import { 
-    DynamoDBDocumentClient, 
-    PutCommand, 
-    GetCommand, 
-    QueryCommand, 
-    ScanCommand,
-    DeleteCommand,
-    UpdateCommand
-} from '@aws-sdk/lib-dynamodb';
 import { v4 as uuidv4 } from 'uuid';
 import { AuthService } from '@/features/auth/services/auth.service';
-import { awsConfig } from '@/lib/aws-config';
+import clientPromise from '@/lib/mongodb';
 
 interface MediaItem {
     url: string;
@@ -55,8 +45,21 @@ interface PublicationParams {
 }
 
 export class PublicationsService {
-    private static client = new DynamoDBClient(awsConfig);
-    private static docClient = DynamoDBDocumentClient.from(this.client);
+    private static async getCollection(category?: string) {
+        const client = await clientPromise;
+        const db = client.db('test');
+        
+        // Use the right collection based on category, default to inmuebles
+        if (category === 'empleos') {
+            return db.collection('publications_empleos');
+        } else if (category === 'servicios') {
+            return db.collection('publications_servicios');
+        } else if (category === 'vehiculos') {
+            return db.collection('publications_vehiculos');
+        } else {
+            return db.collection('publications_inmuebles');
+        }
+    }
 
     static async createPublication(data: QuickPublicationData): Promise<{ id: string }> {
         try {
@@ -70,34 +73,28 @@ export class PublicationsService {
             }
 
             const publicationId = uuidv4();
+            // Get the appropriate collection based on category
+            const category = data.category?.id || 'inmuebles';
+            const publications = await this.getCollection(category);
             
-            const command = new PutCommand({
-                TableName: 'Publications',
-                Item: {
-                    id: publicationId,
-                    userId: currentUser.id,
-                    title: data.title,
-                    description: data.description,
-                    price: data.price?.amount || 0,
-                    priceType: data.price?.type || 'fixed',
-                    category: data.category?.id || 'otros',
-                    location: {
-                        city: data.location?.city || '',
-                        region: data.location?.region?.name || '',
-                        coordinates: data.location?.coordinates || null
-                    },
-                    contact: {
-                        whatsapp: data.contact?.whatsapp || '',
-                        email: data.contact?.email || ''
-                    },
-                    media: data.media || [],
-                    isActive: true,
-                    createdAt: new Date().toISOString(),
-                    updatedAt: new Date().toISOString()
-                }
+            const result = await publications.insertOne({
+                id: publicationId,
+                userId: currentUser.id,
+                title: data.title,
+                description: data.description,
+                price: data.price?.amount || 0,
+                priceType: data.price?.type || 'fixed',
+                categorySlug: data.category?.id || 'inmuebles',
+                categoryName: data.category?.name || 'Inmuebles',
+                location: data.location?.city || '',
+                contactName: 'Propietario',
+                contactPhone: data.contact?.whatsapp || '',
+                currency: data.price?.currency || 'PEN',
+                status: 'active',
+                createdAt: new Date().toISOString(),
+                updatedAt: new Date().toISOString()
             });
 
-            await this.docClient.send(command);
             return { id: publicationId };
         } catch (error) {
             console.error('Error creating publication:', error);
@@ -105,15 +102,10 @@ export class PublicationsService {
         }
     }
 
-    static async getPublicationById(id: string): Promise<any> {
+    static async getPublicationById(id: string, category?: string): Promise<any> {
         try {
-            const command = new GetCommand({
-                TableName: 'Publications',
-                Key: { id }
-            });
-
-            const response = await this.docClient.send(command);
-            return response.Item;
+            const publications = await this.getCollection(category);
+            return await publications.findOne({ id });
         } catch (error) {
             console.error('Error getting publication:', error);
             throw error;
@@ -122,17 +114,18 @@ export class PublicationsService {
 
     static async getPublicationsByUser(userId: string): Promise<any[]> {
         try {
-            const command = new QueryCommand({
-                TableName: 'Publications',
-                IndexName: 'UserIdIndex',
-                KeyConditionExpression: 'userId = :userId',
-                ExpressionAttributeValues: {
-                    ':userId': userId
-                }
-            });
-
-            const response = await this.docClient.send(command);
-            return response.Items || [];
+            // We need to search in all collections
+            const client = await clientPromise;
+            const db = client.db('test');
+            
+            // Get publications from each collection
+            const inmuebles = await db.collection('publications_inmuebles').find({ userId }).toArray();
+            const empleos = await db.collection('publications_empleos').find({ userId }).toArray();
+            const servicios = await db.collection('publications_servicios').find({ userId }).toArray();
+            const vehiculos = await db.collection('publications_vehiculos').find({ userId }).toArray();
+            
+            // Combine and return all results
+            return [...inmuebles, ...empleos, ...servicios, ...vehiculos];
         } catch (error) {
             console.error('Error getting user publications:', error);
             throw error;
@@ -141,71 +134,71 @@ export class PublicationsService {
 
     static async getPublications(params: PublicationParams): Promise<{ publications: any[], total: number, pages: number }> {
         try {
-            const filterExpressions: string[] = [];
-            const expressionAttributeValues: Record<string, any> = {};
-            
-            if (params.category) {
-                filterExpressions.push('category = :category');
-                expressionAttributeValues[':category'] = params.category;
-            }
+            const publications = await this.getCollection(params.category);
+            const filter: Record<string, any> = {
+                // Default to active listings
+                status: "active"
+            };
             
             if (params.query) {
-                filterExpressions.push('contains(title, :query) OR contains(description, :query)');
-                expressionAttributeValues[':query'] = params.query;
+                filter.$or = [
+                    { title: { $regex: params.query, $options: 'i' } },
+                    { description: { $regex: params.query, $options: 'i' } }
+                ];
             }
             
             if (params.minPrice) {
-                filterExpressions.push('price >= :minPrice');
-                expressionAttributeValues[':minPrice'] = Number(params.minPrice);
+                filter.price = filter.price || {};
+                filter.price.$gte = Number(params.minPrice);
             }
             
             if (params.maxPrice) {
-                filterExpressions.push('price <= :maxPrice');
-                expressionAttributeValues[':maxPrice'] = Number(params.maxPrice);
+                filter.price = filter.price || {};
+                filter.price.$lte = Number(params.maxPrice);
             }
             
             if (params.location) {
-                filterExpressions.push('contains(location.city, :location) OR contains(location.region, :location)');
-                expressionAttributeValues[':location'] = params.location;
+                filter.location = { $regex: params.location, $options: 'i' };
             }
 
-            const command = new ScanCommand({
-                TableName: 'Publications',
-                FilterExpression: filterExpressions.length > 0 ? filterExpressions.join(' AND ') : undefined,
-                ExpressionAttributeValues: Object.keys(expressionAttributeValues).length > 0 ? expressionAttributeValues : undefined,
-                Limit: params.limit || 20
-            });
-
-            const response = await this.docClient.send(command);
+            // Count total documents for pagination
+            const totalCount = await publications.countDocuments(filter);
             
-            let sortedItems = response.Items || [];
+            // Set up sort options
+            let sortOptions: Record<string, number> = { createdAt: -1 }; // Default sort by date desc
             
             if (params.sortBy) {
                 switch (params.sortBy) {
                     case 'price_asc':
-                        sortedItems.sort((a, b) => (a.price || 0) - (b.price || 0));
+                        sortOptions = { price: 1 };
                         break;
                     case 'price_desc':
-                        sortedItems.sort((a, b) => (b.price || 0) - (a.price || 0));
+                        sortOptions = { price: -1 };
                         break;
                     case 'date_desc':
-                        sortedItems.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
+                        sortOptions = { createdAt: -1 };
                         break;
                     case 'date_asc':
-                        sortedItems.sort((a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime());
+                        sortOptions = { createdAt: 1 };
                         break;
-                    default:
-                        sortedItems.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
                 }
             }
             
-            const startIndex = (params.page - 1) * (params.limit || 20);
-            const paginatedItems = sortedItems.slice(startIndex, startIndex + (params.limit || 20));
+            // Get paginated results
+            const limit = params.limit || 20;
+            const skip = (params.page - 1) * limit;
+            
+            const items = await publications
+                .find(filter)
+                .sort(sortOptions)
+                .skip(skip)
+                .limit(limit)
+                .toArray();
             
             return {
-                publications: paginatedItems,
-                total: sortedItems.length,
-                pages: Math.ceil(sortedItems.length / (params.limit || 20))
+                publications: items,
+                total: totalCount,
+                pages: Math.ceil(totalCount / limit)
             };
         } catch (error) {
             console.error('Error getting publications:', error);
@@ -220,7 +213,19 @@ export class PublicationsService {
                 throw new Error('Usuario no autenticado');
             }
             
-            const publication = await this.getPublicationById(id);
+            // Find which collection contains this publication
+            const collections = ['inmuebles', 'empleos', 'servicios', 'vehiculos'];
+            let publication = null;
+            let categoryFound = null;
+            
+            for (const category of collections) {
+                publication = await this.getPublicationById(id, category);
+                if (publication) {
+                    categoryFound = category;
+                    break;
+                }
+            }
+            
             if (!publication) {
                 throw new Error('Anuncio no encontrado');
             }
@@ -229,71 +234,54 @@ export class PublicationsService {
                 throw new Error('No tienes permiso para editar este anuncio');
             }
             
-            let updateExpression = 'SET updatedAt = :updatedAt';
-            const expressionAttributeValues: Record<string, any> = {
-                ':updatedAt': new Date().toISOString()
+            const updateData: Record<string, any> = {
+                updatedAt: new Date().toISOString()
             };
             
             if (data.title) {
-                updateExpression += ', title = :title';
-                expressionAttributeValues[':title'] = data.title;
+                updateData.title = data.title;
             }
             
             if (data.description) {
-                updateExpression += ', description = :description';
-                expressionAttributeValues[':description'] = data.description;
+                updateData.description = data.description;
             }
             
             if (data.price) {
-                updateExpression += ', price = :price';
-                expressionAttributeValues[':price'] = data.price.amount;
-                
-                updateExpression += ', priceType = :priceType';
-                expressionAttributeValues[':priceType'] = data.price.type;
+                updateData.price = data.price.amount;
+                updateData.priceType = data.price.type;
+                if (data.price.currency) {
+                    updateData.currency = data.price.currency;
+                }
             }
-            
+
             if (data.category) {
-                updateExpression += ', category = :category';
-                expressionAttributeValues[':category'] = data.category;
-            }
-            
-            if (data.location) {
-                updateExpression += ', location = :location';
-                expressionAttributeValues[':location'] = {
-                    city: data.location.city || '',
-                    region: data.location.region || '',
-                    coordinates: data.location.coordinates || null
-                };
+                updateData.categorySlug = data.category.id;
+                updateData.categoryName = data.category.name;
             }
             
             if (data.contact) {
-                updateExpression += ', contact = :contact';
-                expressionAttributeValues[':contact'] = {
-                    whatsapp: data.contact.whatsapp || '',
-                    email: data.contact.email || ''
-                };
+                updateData.contactPhone = data.contact.whatsapp;
             }
             
             if (data.media) {
-                updateExpression += ', media = :media';
-                expressionAttributeValues[':media'] = data.media;
+                updateData.images = data.media;
             }
             
-            if (data.isActive !== undefined) {
-                updateExpression += ', isActive = :isActive';
-                expressionAttributeValues[':isActive'] = data.isActive;
+            if (data.location) {
+                updateData.location = data.location.city || '';
             }
             
-            const command = new UpdateCommand({
-                TableName: 'Publications',
-                Key: { id },
-                UpdateExpression: updateExpression,
-                ExpressionAttributeValues: expressionAttributeValues,
-                ReturnValues: 'ALL_NEW'
-            });
+            const publications = await this.getCollection(categoryFound);
+            const result = await publications.updateOne(
+                { id },
+                { $set: updateData }
+            );
             
-            const response = await this.docClient.send(command);
-            return response.Attributes;
+            if (result.modifiedCount === 0) {
+                throw new Error('No se pudo actualizar el anuncio');
+            }
+            
+            return await this.getPublicationById(id, categoryFound);
         } catch (error) {
             console.error('Error updating publication:', error);
             throw error;
@@ -307,7 +295,19 @@ export class PublicationsService {
                 throw new Error('Usuario no autenticado');
             }
             
-            const publication = await this.getPublicationById(id);
+            // Find which collection contains this publication
+            const collections = ['inmuebles', 'empleos', 'servicios', 'vehiculos'];
+            let publication = null;
+            let categoryFound = null;
+            
+            for (const category of collections) {
+                publication = await this.getPublicationById(id, category);
+                if (publication) {
+                    categoryFound = category;
+                    break;
+                }
+            }
+            
             if (!publication) {
                 throw new Error('Anuncio no encontrado');
             }
@@ -316,12 +316,13 @@ export class PublicationsService {
                 throw new Error('No tienes permiso para eliminar este anuncio');
             }
             
-            const command = new DeleteCommand({
-                TableName: 'Publications',
-                Key: { id }
-            });
+            const publications = await this.getCollection(categoryFound);
+            const result = await publications.deleteOne({ id });
             
-            await this.docClient.send(command);
+            if (result.deletedCount === 0) {
+                throw new Error('No se pudo eliminar el anuncio');
+            }
+            
             return { success: true };
         } catch (error) {
             console.error('Error deleting publication:', error);
@@ -331,20 +332,20 @@ export class PublicationsService {
 
     static async getAllPublications(): Promise<any[]> {
         try {
-            console.log("Fetching publications with config:", awsConfig);
-            const command = new ScanCommand({
-                TableName: 'Publications',
-                FilterExpression: 'isActive = :isActive',
-                ExpressionAttributeValues: {
-                    ':isActive': true
-                }
-            });
-
-            const { Items: publications } = await this.docClient.send(command);
-            return publications || [];
+            const client = await clientPromise;
+            const db = client.db('test');
+            
+            // Get publications from each collection
+            const inmuebles = await db.collection('publications_inmuebles').find({}).toArray();
+            const empleos = await db.collection('publications_empleos').find({}).toArray();
+            const servicios = await db.collection('publications_servicios').find({}).toArray();
+            const vehiculos = await db.collection('publications_vehiculos').find({}).toArray();
+            
+            // Combine and return all results
+            return [...inmuebles, ...empleos, ...servicios, ...vehiculos];
         } catch (error) {
-            console.error('Error getting publications:', error);
-            return [];
+            console.error('Error getting all publications:', error);
+            throw error;
         }
     }
 }

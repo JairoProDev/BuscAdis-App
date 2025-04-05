@@ -1,18 +1,6 @@
 // src/services/auth.service.ts
 
-import { DynamoDBClient } from "@aws-sdk/client-dynamodb";
-import { DynamoDBDocumentClient, QueryCommand, PutCommand } from "@aws-sdk/lib-dynamodb";
-// import { v4 as uuidv4 } from 'uuid';
-
-const client = new DynamoDBClient({
-    region: 'us-east-1',
-    credentials: {
-        accessKeyId: process.env.NEXT_PUBLIC_AWS_ACCESS_KEY_ID || '',
-        secretAccessKey: process.env.NEXT_PUBLIC_AWS_SECRET_ACCESS_KEY || ''
-    }
-});
-
-const docClient = DynamoDBDocumentClient.from(client);
+import clientPromise from '@/lib/mongodb';
 
 interface User {
     phone: string;
@@ -34,24 +22,25 @@ interface AuthResponse {
 }
 
 export class AuthService {
+    private static async getCollection() {
+        const client = await clientPromise;
+        const db = client.db('test');
+        return db.collection('users');
+    }
+
     static async login(credentials: LoginCredentials): Promise<AuthResponse> {
         try {
-            const command = new QueryCommand({
-                TableName: 'Users',
-                IndexName: 'phone-dni-index',
-                KeyConditionExpression: 'phone = :phone AND dni = :dni',
-                ExpressionAttributeValues: {
-                    ':phone': credentials.phone,
-                    ':dni': credentials.dni
-                }
+            const users = await this.getCollection();
+            
+            const user = await users.findOne({
+                phone: credentials.phone,
+                dni: credentials.dni
             });
 
-            const response = await docClient.send(command);
-
-            if (response.Items && response.Items.length > 0) {
+            if (user) {
                 return {
                     success: true,
-                    user: response.Items[0] as User
+                    user: user as User
                 };
             }
 
@@ -70,20 +59,15 @@ export class AuthService {
 
     static async register(userData: LoginCredentials): Promise<AuthResponse> {
         try {
+            const users = await this.getCollection();
+            
             // Primero verificamos si el usuario ya existe
-            const checkCommand = new QueryCommand({
-                TableName: 'Users',
-                IndexName: 'phone-dni-index',
-                KeyConditionExpression: 'phone = :phone AND dni = :dni',
-                ExpressionAttributeValues: {
-                    ':phone': userData.phone,
-                    ':dni': userData.dni
-                }
+            const existingUser = await users.findOne({
+                phone: userData.phone,
+                dni: userData.dni
             });
 
-            const existingUser = await docClient.send(checkCommand);
-
-            if (existingUser.Items && existingUser.Items.length > 0) {
+            if (existingUser) {
                 return {
                     success: false,
                     message: 'Ya existe un usuario con este teléfono y DNI'
@@ -100,12 +84,7 @@ export class AuthService {
                 updatedAt: now
             };
 
-            const command = new PutCommand({
-                TableName: 'Users',
-                Item: newUser
-            });
-
-            await docClient.send(command);
+            await users.insertOne(newUser);
 
             return {
                 success: true,

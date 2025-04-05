@@ -1,10 +1,12 @@
-import { DynamoDBClient } from '@aws-sdk/client-dynamodb';
-import { DynamoDBDocumentClient, PutCommand, GetCommand, UpdateCommand } from '@aws-sdk/lib-dynamodb';
 import { AuthService } from '@/features/auth/services/auth.service';
+import clientPromise from '@/lib/mongodb';
 
 export class ProfileService {
-  private static client = new DynamoDBClient({ region: process.env.NEXT_PUBLIC_AWS_REGION });
-  private static docClient = DynamoDBDocumentClient.from(this.client);
+  private static async getCollection() {
+    const client = await clientPromise;
+    const db = client.db('test');
+    return db.collection('profiles');
+  }
 
   static async getProfile() {
     try {
@@ -13,13 +15,8 @@ export class ProfileService {
         throw new Error('Usuario no autenticado');
       }
 
-      const command = new GetCommand({
-        TableName: 'Profiles',
-        Key: { id: currentUser.id }
-      });
-
-      const response = await this.docClient.send(command);
-      return response.Item;
+      const profiles = await this.getCollection();
+      return await profiles.findOne({ id: currentUser.id });
     } catch (error) {
       console.error('Error getting profile:', error);
       throw error;
@@ -33,47 +30,39 @@ export class ProfileService {
         throw new Error('Usuario no autenticado');
       }
 
+      const profiles = await this.getCollection();
+      
       // Verificar si el perfil ya existe
       const existingProfile = await this.getProfile();
       
       if (existingProfile) {
         // Actualizar perfil existente
-        const command = new UpdateCommand({
-          TableName: 'Profiles',
-          Key: { id: currentUser.id },
-          UpdateExpression: 'SET fullName = :fullName, phone = :phone, email = :email, updatedAt = :updatedAt',
-          ExpressionAttributeValues: {
-            ':fullName': userData.fullName || currentUser.name,
-            ':phone': userData.phone || currentUser.phone,
-            ':email': userData.email || currentUser.email,
-            ':updatedAt': new Date().toISOString()
-          },
-          ReturnValues: 'ALL_NEW'
-        });
+        const updateData = {
+          fullName: userData.fullName || currentUser.name,
+          phone: userData.phone || currentUser.phone,
+          email: userData.email || currentUser.email,
+          updatedAt: new Date().toISOString()
+        };
         
-        const response = await this.docClient.send(command);
-        return response.Attributes;
+        await profiles.updateOne(
+          { id: currentUser.id },
+          { $set: updateData }
+        );
+        
+        return { ...existingProfile, ...updateData };
       } else {
         // Crear nuevo perfil
-        const command = new PutCommand({
-          TableName: 'Profiles',
-          Item: {
-            id: currentUser.id,
-            fullName: userData.fullName || currentUser.name,
-            phone: userData.phone || currentUser.phone,
-            email: userData.email || currentUser.email,
-            createdAt: new Date().toISOString(),
-            updatedAt: new Date().toISOString()
-          }
-        });
-        
-        await this.docClient.send(command);
-        return {
+        const newProfile = {
           id: currentUser.id,
           fullName: userData.fullName || currentUser.name,
           phone: userData.phone || currentUser.phone,
-          email: userData.email || currentUser.email
+          email: userData.email || currentUser.email,
+          createdAt: new Date().toISOString(),
+          updatedAt: new Date().toISOString()
         };
+        
+        await profiles.insertOne(newProfile);
+        return newProfile;
       }
     } catch (error) {
       console.error('Error updating profile:', error);

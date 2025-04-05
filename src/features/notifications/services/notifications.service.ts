@@ -1,23 +1,19 @@
-import { DynamoDBClient } from '@aws-sdk/client-dynamodb';
-import { DynamoDBDocumentClient, QueryCommand, UpdateCommand, BatchWriteCommand } from '@aws-sdk/lib-dynamodb';
-
-const client = new DynamoDBClient({ region: process.env.NEXT_PUBLIC_AWS_REGION });
-const docClient = DynamoDBDocumentClient.from(client);
+import clientPromise from '@/lib/mongodb';
 
 export class NotificationsService {
+  private static async getCollection() {
+    const client = await clientPromise;
+    const db = client.db('test');
+    return db.collection('notifications');
+  }
+
   static async getNotifications(userId: string) {
     try {
-      const command = new QueryCommand({
-        TableName: 'Notifications',
-        KeyConditionExpression: 'userId = :userId',
-        ExpressionAttributeValues: {
-          ':userId': userId
-        },
-        ScanIndexForward: false
-      });
-
-      const { Items: data } = await docClient.send(command);
-      return data || [];
+      const notifications = await this.getCollection();
+      return await notifications
+        .find({ userId })
+        .sort({ createdAt: -1 })
+        .toArray();
     } catch (error) {
       console.error('Error getting notifications:', error);
       throw error;
@@ -26,21 +22,15 @@ export class NotificationsService {
 
   static async markAsRead(notificationId: string) {
     try {
-      const command = new UpdateCommand({
-        TableName: 'Notifications',
-        Key: { id: notificationId },
-        UpdateExpression: 'SET #read = :read',
-        ExpressionAttributeNames: {
-          '#read': 'read'
-        },
-        ExpressionAttributeValues: {
-          ':read': true
-        },
-        ReturnValues: 'ALL_NEW'
-      });
-
-      const { Attributes } = await docClient.send(command);
-      return Attributes;
+      const notifications = await this.getCollection();
+      
+      const result = await notifications.findOneAndUpdate(
+        { id: notificationId },
+        { $set: { read: true } },
+        { returnDocument: 'after' }
+      );
+      
+      return result.value;
     } catch (error) {
       console.error('Error marking notification as read:', error);
       throw error;
@@ -49,27 +39,21 @@ export class NotificationsService {
 
   static async markAllAsRead(userId: string) {
     try {
-      const notifications = await this.getNotifications(userId);
-      const unreadNotifications = notifications.filter(n => !n.read);
-
+      const notifications = await this.getCollection();
+      
+      // First get all unread notifications
+      const unreadNotifications = await notifications
+        .find({ userId, read: { $ne: true } })
+        .toArray();
+      
       if (unreadNotifications.length === 0) return [];
-
-      const updateRequests = unreadNotifications.map(notification => ({
-        PutRequest: {
-          Item: {
-            ...notification,
-            read: true
-          }
-        }
-      }));
-
-      const command = new BatchWriteCommand({
-        RequestItems: {
-          Notifications: updateRequests
-        }
-      });
-
-      await docClient.send(command);
+      
+      // Update all unread notifications
+      await notifications.updateMany(
+        { userId, read: { $ne: true } },
+        { $set: { read: true } }
+      );
+      
       return unreadNotifications;
     } catch (error) {
       console.error('Error marking all notifications as read:', error);

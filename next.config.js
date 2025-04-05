@@ -12,6 +12,22 @@ const nextConfig = {
   images: {
     domains: ["buscadis-storage.s3.amazonaws.com"],
   },
+  webpack: (config, { isServer }) => {
+    if (!isServer) {
+      // Don't attempt to import these modules in the browser
+      config.resolve.fallback = {
+        ...config.resolve.fallback,
+        fs: false,
+        net: false,
+        tls: false,
+        dns: false,
+        child_process: false,
+        "fs/promises": false,
+        "timers/promises": false,
+      };
+    }
+    return config;
+  },
 };
 
 module.exports = nextConfig;

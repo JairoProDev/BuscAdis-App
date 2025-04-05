@@ -1,21 +1,12 @@
-import { DynamoDBClient } from '@aws-sdk/client-dynamodb';
-import { DynamoDBDocumentClient, ScanCommand } from '@aws-sdk/lib-dynamodb';
-import { Auth } from '@aws-amplify/auth';
-
-async function createDynamoDBClient() {
-  const credentials = await Auth.currentCredentials();
-  return new DynamoDBClient({
-    region: process.env.NEXT_PUBLIC_AWS_REGION || 'us-east-2',
-    credentials: Auth.essentialCredentials(credentials),
-  });
-}
-
-async function createDocClient() {
-  const client = await createDynamoDBClient();
-  return DynamoDBDocumentClient.from(client);
-}
+import clientPromise from '@/lib/mongodb';
 
 export class SearchService {
+  private static async getCollection() {
+    const client = await clientPromise;
+    const db = client.db('test');
+    return db.collection('publications_inmuebles');
+  }
+
   static async searchPublications(params: {
     query?: string;
     category?: string;
@@ -26,56 +17,64 @@ export class SearchService {
     limit?: number;
   }) {
     try {
-      const docClient = await createDocClient(); // Obtén el cliente con credenciales de Cognito
-      const filterExpression = 'isActive = :isActive';
-      const expressionAttributeValues: any = {
-        ':isActive': true,
+      const publications = await this.getCollection();
+      
+      // Build filter object
+      const filter: Record<string, any> = { 
+        // Default filter for active publications
+        status: "active"
       };
-
+      
       if (params.query) {
-        filterExpression += ' AND (contains(title, :query) OR contains(description, :query))';
-        expressionAttributeValues[':query'] = params.query.toLowerCase();
+        filter.$or = [
+          { title: { $regex: params.query, $options: 'i' } },
+          { description: { $regex: params.query, $options: 'i' } }
+        ];
       }
-
+      
       if (params.category) {
-        filterExpression += ' AND category = :category';
-        expressionAttributeValues[':category'] = params.category;
+        filter.categorySlug = params.category;
       }
-
+      
       if (params.location) {
-        filterExpression += ' AND contains(location, :location)';
-        expressionAttributeValues[':location'] = params.location;
+        if (!filter.$or) filter.$or = [];
+        filter.$or.push(
+          { location: { $regex: params.location, $options: 'i' } }
+        );
       }
-
+      
       if (params.minPrice) {
-        filterExpression += ' AND price >= :minPrice';
-        expressionAttributeValues[':minPrice'] = params.minPrice;
+        filter.price = filter.price || {};
+        filter.price.$gte = Number(params.minPrice);
       }
-
+      
       if (params.maxPrice) {
-        filterExpression += ' AND price <= :maxPrice';
-        expressionAttributeValues[':maxPrice'] = params.maxPrice;
+        filter.price = filter.price || {};
+        filter.price.$lte = Number(params.maxPrice);
       }
-
-      const command = new ScanCommand({
-        TableName: 'Publications',
-        FilterExpression: filterExpression,
-        ExpressionAttributeValues: expressionAttributeValues,
-        Limit: params.limit || 20,
-      });
-
-      const { Items: publications, Count: total } = await docClient.send(command);
-
+      
+      // Count total matching documents
+      const total = await publications.countDocuments(filter);
+      
+      // Get paginated results
+      const limit = params.limit || 20;
+      const skip = ((params.page || 1) - 1) * limit;
+      
+      const items = await publications
+        .find(filter)
+        .sort({ createdAt: -1 }) // Default newest first
+        .skip(skip)
+        .limit(limit)
+        .toArray();
+      
       return {
-        publications: publications || [],
+        publications: items || [],
         total: total || 0,
-        pages: Math.ceil((total || 0) / (params.limit || 20)),
+        pages: Math.ceil((total || 0) / limit),
       };
     } catch (error) {
       console.error('Error searching publications:', error);
       throw new Error(`Error searching publications: ${error.message}`);
     }
   }
-
-  // Eliminamos los métodos relacionados con Supabase
 }

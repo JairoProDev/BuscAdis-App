@@ -1,24 +1,22 @@
-import { DynamoDBClient } from '@aws-sdk/client-dynamodb';
-import { DynamoDBDocumentClient, PutCommand, DeleteCommand, QueryCommand } from '@aws-sdk/lib-dynamodb';
-
-const client = new DynamoDBClient({ 
-  region: process.env.NEXT_PUBLIC_AWS_REGION || 'us-east-2'
-});
-const docClient = DynamoDBDocumentClient.from(client);
+import clientPromise from '@/lib/mongodb';
 
 export class FavoritesService {
+  private static async getCollection(collectionName: string) {
+    const client = await clientPromise;
+    const db = client.db('test');
+    return db.collection(collectionName);
+  }
+
   static async addToFavorites(userId: string, publicationId: string) {
     try {
-      const command = new PutCommand({
-        TableName: 'Favorites',
-        Item: {
-          userId,
-          publicationId,
-          createdAt: new Date().toISOString()
-        }
+      const favorites = await this.getCollection('favorites');
+      
+      await favorites.insertOne({
+        userId,
+        publicationId,
+        createdAt: new Date().toISOString()
       });
-
-      await docClient.send(command);
+      
       return { userId, publicationId };
     } catch (error) {
       console.error('Error adding to favorites:', error);
@@ -28,16 +26,14 @@ export class FavoritesService {
 
   static async removeFromFavorites(userId: string, publicationId: string) {
     try {
-      const command = new DeleteCommand({
-        TableName: 'Favorites',
-        Key: {
-          userId,
-          publicationId
-        }
+      const favorites = await this.getCollection('favorites');
+      
+      const result = await favorites.deleteOne({ 
+        userId, 
+        publicationId 
       });
-
-      await docClient.send(command);
-      return true;
+      
+      return result.deletedCount > 0;
     } catch (error) {
       console.error('Error removing from favorites:', error);
       throw error;
@@ -46,42 +42,45 @@ export class FavoritesService {
 
   static async getFavorites(userId: string) {
     try {
-      const command = new QueryCommand({
-        TableName: 'Favorites',
-        KeyConditionExpression: 'userId = :userId',
-        ExpressionAttributeValues: {
-          ':userId': userId
-        }
-      });
-
-      const { Items: favorites } = await docClient.send(command);
+      const favorites = await this.getCollection('favorites');
       
-      if (!favorites || favorites.length === 0) return [];
-
-      // Obtener los detalles de los publications
-      const publicationIds = favorites.map(f => f.publicationId);
+      const userFavorites = await favorites
+        .find({ userId })
+        .toArray();
       
-      // Obtener los publications en lotes de 25 (límite de BatchGet)
+      if (!userFavorites || userFavorites.length === 0) return [];
+
+      // Get the publication details by searching across all publication collections
+      const client = await clientPromise;
+      const db = client.db('test');
+      const publicationIds = userFavorites.map(f => f.publicationId);
+      
+      // Try to find publications across all collection types
       const publications = [];
-      for (let i = 0; i < publicationIds.length; i += 25) {
-        const batch = publicationIds.slice(i, i + 25);
-        const batchCommand = new QueryCommand({
-          TableName: 'Publications',
-          FilterExpression: 'id IN (:...ids)',
-          ExpressionAttributeValues: {
-            ':ids': batch
-          }
-        });
+      
+      // Search in each collection type
+      const collectionNames = [
+        'publications_inmuebles', 
+        'publications_empleos', 
+        'publications_servicios', 
+        'publications_vehiculos'
+      ];
+      
+      for (const collectionName of collectionNames) {
+        const collection = db.collection(collectionName);
+        const found = await collection
+          .find({ id: { $in: publicationIds } })
+          .toArray();
         
-        const { Items: batchPublications } = await docClient.send(batchCommand);
-        if (batchPublications) {
-          publications.push(...batchPublications);
+        if (found.length > 0) {
+          publications.push(...found);
         }
       }
 
-      return favorites.map(fav => ({
+      // Map favorites with their publication details
+      return userFavorites.map(fav => ({
         ...fav,
-        publication: publications.find(l => l.id === fav.publicationId)
+        publication: publications.find(p => p.id === fav.publicationId)
       }));
     } catch (error) {
       console.error('Error getting favorites:', error);

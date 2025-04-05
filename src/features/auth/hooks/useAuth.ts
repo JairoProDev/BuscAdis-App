@@ -1,17 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
-import { DynamoDBClient } from "@aws-sdk/client-dynamodb";
-import { DynamoDBDocumentClient, QueryCommand } from "@aws-sdk/lib-dynamodb";
-
-const client = new DynamoDBClient({
-    region: 'us-east-1',
-    credentials: {
-        accessKeyId: process.env.NEXT_PUBLIC_AWS_ACCESS_KEY_ID || '',
-        secretAccessKey: process.env.NEXT_PUBLIC_AWS_SECRET_ACCESS_KEY || ''
-    }
-});
-
-const docClient = DynamoDBDocumentClient.from(client);
 
 interface User {
     id: string;
@@ -60,27 +48,26 @@ export function useAuth() {
 
     const login = async (credentials: LoginCredentials): Promise<AuthResult> => {
         try {
-            const command = new QueryCommand({
-                TableName: 'Users',
-                IndexName: 'phone-dni-index',
-                KeyConditionExpression: 'phone = :phone and dni = :dni',
-                ExpressionAttributeValues: {
-                    ':phone': credentials.phone,
-                    ':dni': credentials.dni
-                }
+            // Using the API route to authenticate
+            const response = await fetch('/api/auth/login', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(credentials),
             });
 
-            const result = await docClient.send(command);
+            const data = await response.json();
 
-            if (result.Items && result.Items.length > 0) {
-                const userData = result.Items[0] as User;
+            if (data.success) {
+                const userData = data.user as User;
                 setUser(userData);
                 localStorage.setItem('user', JSON.stringify(userData));
                 return { success: true };
             } else {
                 return { 
                     success: false, 
-                    message: 'Teléfono o DNI incorrectos' 
+                    message: data.message || 'Teléfono o DNI incorrectos' 
                 };
             }
         } catch (error) {

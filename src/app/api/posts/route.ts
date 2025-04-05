@@ -1,18 +1,17 @@
 import { NextResponse } from 'next/server'
-import { DynamoDBClient } from '@aws-sdk/client-dynamodb'
-import { DynamoDBDocumentClient, ScanCommand, PutCommand } from '@aws-sdk/lib-dynamodb'
-
-const client = new DynamoDBClient({ region: process.env.AWS_REGION })
-const docClient = DynamoDBDocumentClient.from(client)
+import clientPromise from '@/lib/mongodb'
 
 export async function GET() {
   try {
-    const command = new ScanCommand({
-      TableName: 'Posts',
-      ScanIndexForward: false
-    })
+    const client = await clientPromise
+    const db = client.db('test')
+    const posts = db.collection('posts')
     
-    const { Items: data } = await docClient.send(command)
+    const data = await posts
+      .find({})
+      .sort({ createdAt: -1 })
+      .toArray()
+    
     return NextResponse.json(data || [])
   } catch (error) {
     console.error('Error fetching posts:', error)
@@ -27,15 +26,19 @@ export async function POST(request: Request) {
   try {
     const post = await request.json()
     
-    const command = new PutCommand({
-      TableName: 'Posts',
-      Item: {
-        ...post,
-        createdAt: new Date().toISOString()
-      }
+    const client = await clientPromise
+    const db = client.db('test')
+    const posts = db.collection('posts')
+    
+    const result = await posts.insertOne({
+      ...post,
+      createdAt: new Date().toISOString()
     })
     
-    await docClient.send(command)
+    if (!result.acknowledged) {
+      throw new Error('Failed to insert document')
+    }
+    
     return NextResponse.json(post)
   } catch (error) {
     console.error('Error creating post:', error)
