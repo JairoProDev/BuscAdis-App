@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react';
 // import { CategoriesService, Categories } from '@/services/categories.service';
 import Hero from '@/components/home/Hero';
-import Benefits from '@/components/home/Benefits';
+import Benefits from '@/components/home/Functionalitys';
 import Tools from '@/components/home/Tools';
 import HowItWorks from '@/components/home/HowItWorks';
 import Testimonials from '@/components/home/Testimonials';
