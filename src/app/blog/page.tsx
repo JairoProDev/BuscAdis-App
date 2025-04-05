@@ -3,7 +3,7 @@
 import { useState } from 'react'
 import { motion } from 'framer-motion'
 import PostCard from '@/components/blog/PostCard'
-import NewsletterForm from '@/components/blog/NewsletterForm'
+import MagazineForm from '@/components/blog/MagazineForm'
 import { Post } from '@/types/blog'
 import { 
   AdjustmentsHorizontalIcon,
@@ -112,10 +112,10 @@ export default function BlogPage() {
         </div>
       </section>
 
-      {/* Newsletter Section */}
+      {/* Magazine Section */}
       <section className="py-16">
         <div className="container mx-auto px-4">
-          <NewsletterForm />
+          <MagazineForm />
         </div>
       </section>
 

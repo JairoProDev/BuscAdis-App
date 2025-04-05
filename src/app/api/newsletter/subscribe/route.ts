@@ -1,8 +1,8 @@
 import { NextResponse } from 'next/server'
-import type { Newsletter } from '@/types/blog'
+import type { Magazine } from '@/types/blog'
 
 // Aquí implementaremos la conexión con la base de datos
-const subscribers: Newsletter[] = []
+const subscribers: Magazine[] = []
 
 export async function POST(request: Request) {
   try {
@@ -26,7 +26,7 @@ export async function POST(request: Request) {
     }
 
     // Crear nuevo suscriptor
-    const newSubscriber: Newsletter = {
+    const newSubscriber: Magazine = {
       id: Date.now().toString(),
       email,
       name,

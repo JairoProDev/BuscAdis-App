@@ -90,7 +90,7 @@ export interface BlogStats {
   }[]
 }
 
-export interface Newsletter {
+export interface Magazine {
   id: string
   email: string
   name?: string

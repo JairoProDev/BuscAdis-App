@@ -7,7 +7,7 @@ import { motion } from 'framer-motion'
 import { Post } from '@/types/blog'
 import { formatDate } from '@/utils/dates'
 import PostCard from '@/components/blog/PostCard'
-import NewsletterForm from '@/components/blog/NewsletterForm'
+import MagazineForm from '@/components/blog/MagazineForm'
 import { 
   ClockIcon, 
   EyeIcon, 
@@ -291,10 +291,10 @@ export default function PostPage({ params }: PostPageProps) {
         </section>
       )}
 
-      {/* Newsletter */}
+      {/* Magazine */}
       <section className="py-16">
         <div className="container mx-auto px-4">
-          <NewsletterForm />
+          <MagazineForm />
         </div>
       </section>
     </div>

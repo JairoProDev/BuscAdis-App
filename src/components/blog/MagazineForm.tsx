@@ -4,7 +4,7 @@ import { useState } from 'react'
 import { motion } from 'framer-motion'
 import { EnvelopeIcon } from '@heroicons/react/24/outline'
 
-export default function NewsletterForm() {
+export default function MagazineForm() {
   const [email, setEmail] = useState('')
   const [status, setStatus] = useState<'idle' | 'loading' | 'success' | 'error'>('idle')
   const [message, setMessage] = useState('')
@@ -15,7 +15,7 @@ export default function NewsletterForm() {
 
     try {
       // Aquí implementaremos la lógica de suscripción
-      const response = await fetch('/api/newsletter/subscribe', {
+      const response = await fetch('/api/Magazine/subscribe', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email })
@@ -47,7 +47,7 @@ export default function NewsletterForm() {
             Mantente actualizado
           </h3>
           <p className="text-primary-200 mb-8">
-            Suscríbete a nuestro newsletter y recibe las últimas noticias, artículos y recursos directamente en tu bandeja de entrada.
+            Suscríbete a nuestra revista y recibe las últimas noticias, artículos y recursos directamente en tu bandeja de entrada.
           </p>
 
           <form onSubmit={handleSubmit} className="space-y-4">

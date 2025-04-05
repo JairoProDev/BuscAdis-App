@@ -11,13 +11,15 @@ import { SparklesIcon, MapPinIcon, ClockIcon } from '@heroicons/react/24/outline
 
 const FeaturedAd = () => {
     const [currentIndex, setCurrentIndex] = useState(0);
+    // Establecemos la dirección siempre a 'right'
     const [direction, setDirection] = useState<'left' | 'right'>('right');
 
     useEffect(() => {
         const interval = setInterval(() => {
             setCurrentIndex((prevIndex) => {
                 const nextIndex = (prevIndex + 1) % featuredAds.length;
-                setDirection(prevIndex < nextIndex ? 'right' : 'left');
+                // Mantenemos la dirección siempre a 'right'
+                setDirection('right');
                 return nextIndex;
             });
         }, 5000);
@@ -28,11 +30,9 @@ const FeaturedAd = () => {
     const currentAd = featuredAds[currentIndex];
 
     const variants = {
-        initial: (direction: 'left' | 'right') => {
-            return {
-                opacity: 0,
-                x: direction === 'right' ? 100 : -100,
-            };
+        initial: {
+            opacity: 0,
+            x: 100, // Siempre inicia desde la derecha
         },
         animate: {
             opacity: 1,
@@ -42,15 +42,13 @@ const FeaturedAd = () => {
                 ease: "easeInOut",
             },
         },
-        exit: (direction: 'left' | 'right') => {
-            return {
-                opacity: 0,
-                x: direction === 'right' ? -100 : 100,
-                transition: {
-                    duration: 0.3,
-                    ease: "easeInOut",
-                },
-            };
+        exit: {
+            opacity: 0,
+            x: -100, // Siempre sale hacia la izquierda
+            transition: {
+                duration: 0.3,
+                ease: "easeInOut",
+            },
         },
     };
 
@@ -67,15 +65,14 @@ const FeaturedAd = () => {
                 <div className="absolute top-0 right-0 w-20 h-20 bg-gradient-to-bl from-white/10 via-teal-300/5 to-transparent transform rotate-45 translate-x-5 -translate-y-5 opacity-50"></div>
                 <div className="absolute bottom-0 left-0 w-16 h-16 bg-gradient-to-tr from-white/10 via-cyan-300/5 to-transparent transform rotate-45 -translate-x-5 translate-y-5 opacity-50"></div>
 
-                <AnimatePresence mode="wait" custom={direction}>
+                <AnimatePresence mode="wait">
                     <motion.div
                         key={currentIndex}
                         variants={variants}
                         initial="initial"
                         animate="animate"
                         exit="exit"
-                        custom={direction}
-                        className="rounded-2xl shadow-[0_20px_50px_rgba(0,0,0,0.3)] overflow-hidden border border-teal-500/20 group hover:shadow-[0_30px_60px_rgba(20,184,166,0.3)] transition-all duration-500 hover:-translate-y-2 bg-slate-800" // Añadido bg-slate-800 aquí también
+                        className="rounded-2xl shadow-[0_20px_50px_rgba(0,0,0,0.3)] overflow-hidden border border-teal-500/20 group hover:shadow-[0_30px_60px_rgba(20,184,166,0.3)] transition-all duration-500 hover:-translate-y-2 bg-slate-800"
                     >
                         {/* Badge Premium */}
                         <div className="absolute top-4 right-4 z-20">
@@ -115,7 +112,7 @@ const FeaturedAd = () => {
                             </div>
                         </div>
 
-                        <div className="p-6 space-y-4 bg-slate-800"> {/* Aseguramos el fondo sólido aquí */}
+                        <div className="p-6 space-y-4 bg-slate-800">
                             <div className="flex items-center space-x-2">
                                 <span className="px-3 py-1 text-xs font-medium bg-teal-900/50 text-teal-300 rounded-full border border-teal-700/30">
                                     {currentAd.category}
