@@ -59,18 +59,26 @@ const CategoriesSection = () => {
       ref={ref}
       className="py-16 sm:py-24 relative overflow-hidden"
       style={{
-        background: "linear-gradient(to bottom, #f7f9fc, #f3f4f6)",
-        backgroundImage: "radial-gradient(circle at 1px 1px, #e2e8f0 1px, transparent 0)",
+        background: "linear-gradient(120deg, #0f766e, #0891b2)",
+        backgroundImage: "radial-gradient(circle at 1px 1px, rgba(255, 255, 255, 0.05) 1px, transparent 0)",
         backgroundSize: "30px 30px"
       }}
     >
-      {/* Decorative elements - with platinum/silver effects */}
+      {/* Premium animated background elements */}
+      <div className="absolute inset-0 bg-[url('/patterns/grid.svg')] opacity-10" />
+      
+      {/* Decorative elements - with platinum/silver & teal effects */}
       <div className="absolute -top-20 -right-20 w-80 h-80 rounded-full 
-        bg-gradient-to-br from-gray-200 via-white to-gray-300 animate-[spin_60s_linear_infinite] 
-        shadow-[0_0_40px_rgba(220,220,230,0.6)] opacity-60"></div>
+        bg-gradient-to-br from-cyan-200/20 via-teal-300/10 to-emerald-300/20 
+        animate-[spin_60s_linear_infinite] filter blur-xl opacity-40"></div>
       <div className="absolute -bottom-40 -left-40 w-96 h-96 rounded-full 
-        bg-gradient-to-tl from-gray-200 via-white to-gray-300 animate-[spin_80s_linear_infinite] 
-        shadow-[0_0_60px_rgba(220,220,230,0.4)] opacity-60"></div>
+        bg-gradient-to-tl from-teal-300/20 via-white/10 to-cyan-300/20 
+        animate-[spin_80s_linear_infinite] filter blur-xl opacity-40"></div>
+        
+      {/* Animated floating particles */}
+      <div className="particle absolute w-3 h-3 bg-cyan-300/40 rounded-full blur-sm"></div>
+      <div className="particle-2 absolute w-2 h-2 bg-teal-200/40 rounded-full blur-sm"></div>
+      <div className="particle-3 absolute w-4 h-4 bg-white/30 rounded-full blur-sm"></div>
 
       {/* Premium border effect */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
@@ -82,40 +90,41 @@ const CategoriesSection = () => {
           transition={{ duration: 0.6, ease: "easeOut" }}
         >
           {/* Subtle light effect behind badge for premium look */}
-          <div className="absolute top-0 left-1/2 transform -translate-x-1/2 w-40 h-10 bg-gradient-to-r from-blue-200/30 via-purple-200/30 to-blue-200/30 blur-xl rounded-full"></div>
+          <div className="absolute top-0 left-1/2 transform -translate-x-1/2 w-40 h-10 bg-gradient-to-r from-cyan-400/30 via-teal-300/30 to-cyan-400/30 blur-xl rounded-full"></div>
           
           <motion.span
-            className="px-4 py-1.5 rounded-full bg-gradient-to-r from-gray-100 to-gray-200 text-gray-800 text-sm font-medium mb-3 inline-block shadow-sm relative border border-gray-300/40"
+            className="px-4 py-1.5 rounded-full bg-gradient-to-r from-slate-800 to-slate-700 text-cyan-300 text-sm font-medium mb-3 inline-block shadow-lg relative border border-teal-500/20"
             initial={{ opacity: 0, y: -10 }}
             animate={inView ? { opacity: 1, y: 0 } : {}}
             transition={{ delay: 0.1, duration: 0.4 }}
+            whileHover={{ y: -3, transition: { duration: 0.2 } }}
           >
-            <span className="relative z-10">Encuentra lo que buscas</span>
+            <span className="relative z-10">Explora nuestras categorías</span>
             {/* Subtle platinum shimmer effect */}
-            <span className="absolute inset-0 bg-gradient-to-r from-gray-200/0 via-white/80 to-gray-200/0 rounded-full animate-shimmer"></span>
+            <span className="absolute inset-0 bg-gradient-to-r from-teal-500/0 via-cyan-300/20 to-teal-500/0 rounded-full animate-shimmer"></span>
           </motion.span>
           
           <motion.h2
-            className="text-3xl sm:text-4xl font-bold text-gray-900 mb-4"
+            className="text-3xl sm:text-5xl font-bold text-white mb-4"
             initial={{ opacity: 0, scale: 0.95 }}
             animate={inView ? { opacity: 1, scale: 1 } : {}}
             transition={{ delay: 0.2, duration: 0.5 }}
           >
-            Explora por <span className="bg-clip-text text-transparent bg-gradient-to-r from-blue-600 to-purple-600">Categorías</span>
+            Encuentra lo que <span className="bg-clip-text text-transparent bg-gradient-to-r from-cyan-200 to-teal-200">Necesitas</span>
           </motion.h2>
           
           <motion.p
-            className="text-lg text-gray-700 max-w-3xl mx-auto"
+            className="text-lg text-cyan-50 max-w-3xl mx-auto"
             initial={{ opacity: 0 }}
             animate={inView ? { opacity: 1 } : {}}
             transition={{ delay: 0.3, duration: 0.5 }}
           >
-            Encuentra rápidamente lo que necesitas navegando nuestras secciones
-            principales.
+            Explora las mejores oportunidades clasificadas por categorías y encuentra 
+            rápidamente lo que estás buscando.
           </motion.p>
           
           <motion.div
-            className="w-24 h-1 bg-gradient-to-r from-gray-400 via-gray-300 to-gray-500 rounded-full mx-auto mt-8"
+            className="w-24 h-1 bg-gradient-to-r from-cyan-400 via-teal-300 to-cyan-400 rounded-full mx-auto mt-8 shadow-[0_0_10px_rgba(34,211,238,0.5)]"
             initial={{ width: 0, opacity: 0 }}
             animate={inView ? { width: 96, opacity: 1 } : {}}
             transition={{ delay: 0.4, duration: 0.6 }}
@@ -128,12 +137,13 @@ const CategoriesSection = () => {
             onClick={scrollToLeft}
             className={`p-2 rounded-full ${
               canScrollLeft 
-                ? "bg-gradient-to-br from-gray-100 to-gray-300 text-gray-700 shadow-md" 
-                : "bg-gray-200 text-gray-400"
-            } transition-all duration-200 border border-gray-200`}
+                ? "bg-gradient-to-br from-slate-700 to-slate-800 text-cyan-300 shadow-lg border border-cyan-500/20" 
+                : "bg-slate-700 text-slate-500"
+            } transition-all duration-200`}
             disabled={!canScrollLeft}
             aria-label="Desplazar a la izquierda"
             whileTap={{ scale: 0.95 }}
+            whileHover={canScrollLeft ? { scale: 1.05, boxShadow: "0 0 10px rgba(34, 211, 238, 0.3)" } : {}}
           >
             <ArrowRightIcon className="h-5 w-5 transform rotate-180" />
           </motion.button>
@@ -142,12 +152,13 @@ const CategoriesSection = () => {
             onClick={scrollToRight}
             className={`p-2 rounded-full ${
               canScrollRight 
-                ? "bg-gradient-to-br from-gray-100 to-gray-300 text-gray-700 shadow-md" 
-                : "bg-gray-200 text-gray-400"
-            } transition-all duration-200 border border-gray-200`}
+                ? "bg-gradient-to-br from-slate-700 to-slate-800 text-cyan-300 shadow-lg border border-cyan-500/20" 
+                : "bg-slate-700 text-slate-500"
+            } transition-all duration-200`}
             disabled={!canScrollRight}
             aria-label="Desplazar a la derecha"
             whileTap={{ scale: 0.95 }}
+            whileHover={canScrollRight ? { scale: 1.05, boxShadow: "0 0 10px rgba(34, 211, 238, 0.3)" } : {}}
           >
             <ArrowRightIcon className="h-5 w-5" />
           </motion.button>
@@ -180,13 +191,13 @@ const CategoriesSection = () => {
           animate={inView ? { opacity: 1 } : {}}
           transition={{ delay: 0.8 }}
         >
-          {categories.map((_, i) => (
+          {categories.slice(0, Math.min(5, categories.length)).map((_, i) => (
             <div
               key={i}
               className={`w-8 h-1.5 rounded-full transition-all duration-300 ${
                 i === 0 
-                  ? "bg-gradient-to-r from-gray-300 to-gray-500" 
-                  : "bg-gray-300"
+                  ? "bg-gradient-to-r from-cyan-400 to-teal-400 shadow-[0_0_5px_rgba(34,211,238,0.5)]" 
+                  : "bg-slate-600"
               }`}
             ></div>
           ))}
@@ -201,9 +212,9 @@ const CategoriesSection = () => {
         >
           <motion.a
             href="/buscar"
-            className="inline-flex items-center justify-center px-6 py-3 border border-transparent text-base font-medium rounded-lg text-white bg-gradient-to-r from-blue-600 to-purple-600 transition-all duration-200 transform hover:scale-105 shadow-md hover:shadow-xl relative overflow-hidden group"
+            className="inline-flex items-center justify-center px-6 py-3 border border-transparent text-base font-medium rounded-lg text-slate-900 bg-gradient-to-r from-cyan-300 to-teal-300 transition-all duration-200 transform hover:scale-105 shadow-[0_0_20px_rgba(34,211,238,0.4)] hover:shadow-[0_0_30px_rgba(34,211,238,0.6)] relative overflow-hidden group"
             whileHover={{
-              boxShadow: "0 10px 25px -5px rgba(59, 130, 246, 0.5)",
+              boxShadow: "0 0 30px rgba(34, 211, 238, 0.6)",
             }}
             whileTap={{ scale: 0.95 }}
           >
@@ -221,7 +232,7 @@ const CategoriesSection = () => {
   );
 };
 
-// Add the shimmer animation to tailwind styles
+// Add the shimmer animation and particle animations to tailwind styles
 if (typeof document !== 'undefined') {
   const style = document.createElement('style');
   style.textContent = `
@@ -235,6 +246,41 @@ if (typeof document !== 'undefined') {
     }
     .animate-shimmer {
       animation: shimmer 2.5s infinite;
+    }
+    
+    /* Animated floating particles */
+    .particle {
+      top: 20%;
+      left: 60%;
+      animation: float 8s ease-in-out infinite;
+    }
+    .particle-2 {
+      top: 70%;
+      left: 30%;
+      animation: float 12s ease-in-out infinite;
+    }
+    .particle-3 {
+      top: 40%;
+      left: 80%;
+      animation: float 10s ease-in-out infinite;
+    }
+    
+    @keyframes float {
+      0% {
+        transform: translateY(0) translateX(0);
+      }
+      25% {
+        transform: translateY(-15px) translateX(15px);
+      }
+      50% {
+        transform: translateY(15px) translateX(-15px);
+      }
+      75% {
+        transform: translateY(5px) translateX(5px);
+      }
+      100% {
+        transform: translateY(0) translateX(0);
+      }
     }
   `;
   document.head.appendChild(style);
