@@ -1,6 +1,8 @@
-// When imported, this will return either the real MongoDB client (server-side)
-// or a mock client (client-side) that will prevent browser-specific errors
-import clientPromise, { mongoFetch } from './mongodb-adapter';
+/**
+ * Main MongoDB entry point
+ * This module re-exports the shared MongoDB client
+ */
+import getMongoClient, { mongoFetch } from './mongodb-shared';
 
 export { mongoFetch };
-export default clientPromise; 
+export default getMongoClient; 

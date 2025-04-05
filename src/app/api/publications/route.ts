@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server'
-import clientPromise from '@/lib/mongodb'
+import getMongoClient from '@/lib/mongodb'
 import { Db } from 'mongodb'
 
 export const dynamic = 'force-dynamic' // Disable caching to ensure data is always fresh
@@ -12,7 +12,7 @@ export async function GET(request: Request) {
     const limit = parseInt(searchParams.get('limit') || '20')
     const page = parseInt(searchParams.get('page') || '1')
     
-    const client = await clientPromise
+    const client = await getMongoClient()
     const db: Db = client.db('test')
     
     // Determine collection based on category
@@ -71,7 +71,7 @@ export async function POST(request: Request) {
       )
     }
     
-    const client = await clientPromise
+    const client = await getMongoClient()
     const db = client.db('test')
     
     // Determine collection based on category

@@ -13,6 +13,7 @@ import AnunciosGrid from '@/components/AnunciosGrid';
 //import FilterBar from '@/components/search/FilterBar'; // Importar FilterBar
 import Pagination from '@/components/ui/Pagination'; // Importar Pagination
 import Link from 'next/link';
+import { mongoFetch } from '@/lib/mongodb';
 
 interface Publication {
   id: string;
@@ -36,12 +37,10 @@ const BuscadorAvisos = () => {
         page: parseInt(searchParams.get('page') || '1'),
         limit: 12,
     });
-    const [results, setResults] = useState<any[]>([]);
+    const [results, setResults] = useState<Publication[]>([]);
     const [loading, setLoading] = useState(true);
     const [totalPages, setTotalPages] = useState(1);
     const [error, setError] = useState('');
-    const [publications, setPublications] = useState<Publication[]>([]);
-    const [isListView, setIsListView] = useState(false);
     const [noResults, setNoResults] = useState(false);
 
     const handleSearch = (newFilters: any) => {
@@ -51,21 +50,27 @@ const BuscadorAvisos = () => {
             page: 1,
         }));
     };
-    const handleBuscar = async () => {
+    
+    const fetchPublications = async () => {
         setLoading(true);
-        console.log("Filters at start of fetchPublications:", filters);
         try {
-            const data = await SearchService.searchPublications(filters);
-            console.log("Data from SearchService:", data);
-            setPublications(data.publications || []);
-            setResults(data.publications || []);
-            setTotalPages(data.pages);
+            // Use MongoDB browser adapter
+            const response = await mongoFetch('/api/publications', {
+                queryParams: {
+                    category: filters.category,
+                    query: filters.search,
+                    page: filters.page.toString(),
+                    limit: filters.limit.toString()
+                }
+            });
+            
+            setResults(response.publications || []);
+            setTotalPages(response.pages || 1);
+            setNoResults((response.publications || []).length === 0);
             setError('');
-            setNoResults(data.publications.length === 0);
         } catch (err: any) {
             console.error('Error al cargar los anuncios:', err);
             setError(`Error al cargar los anuncios: ${err.message}`);
-            setPublications([]);
             setResults([]);
             setTotalPages(1);
             setNoResults(true);
@@ -73,8 +78,9 @@ const BuscadorAvisos = () => {
             setLoading(false);
         }
     };
+    
     useEffect(() => {
-      handleBuscar();
+      fetchPublications();
     }, [filters]);
     
     const handlePageChange = (newPage: number) => {
@@ -85,21 +91,66 @@ const BuscadorAvisos = () => {
     };
 
     if (loading) return <LoadingState text="Cargando anuncios..." />;
-    if (error) return <div>{error}</div>;
-
+    
     return (
         <div className="container mx-auto p-4 md:p-6 lg:p-8">
             <h1 className="text-3xl font-bold text-gray-900 mb-6 text-center">Encuentra todo lo que buscas</h1>
 
             <div className="flex flex-col lg:flex-row gap-6">
                 <div className="w-full lg:w-1/4">
-                    {/*<AdvancedSearch onSearch={handleSearch} /> {/* Usar AdvancedSearch */}
+                    {/* Placeholder for AdvancedSearch */}
+                    <div className="bg-white rounded-lg shadow-md p-4">
+                        <h2 className="text-xl font-semibold mb-4">Filtros</h2>
+                        <div className="mb-4">
+                            <label className="block text-sm font-medium text-gray-700 mb-1">Buscar</label>
+                            <input 
+                                type="text" 
+                                className="w-full px-3 py-2 border border-gray-300 rounded-md"
+                                value={filters.search}
+                                onChange={(e) => handleSearch({ search: e.target.value })}
+                                placeholder="¿Qué estás buscando?"
+                            />
+                        </div>
+                        
+                        <div className="mb-4">
+                            <label className="block text-sm font-medium text-gray-700 mb-1">Categoría</label>
+                            <select 
+                                className="w-full px-3 py-2 border border-gray-300 rounded-md"
+                                value={filters.category}
+                                onChange={(e) => handleSearch({ category: e.target.value })}
+                            >
+                                <option value="">Todas las categorías</option>
+                                <option value="inmuebles">Inmuebles</option>
+                                <option value="empleos">Empleos</option>
+                                <option value="servicios">Servicios</option>
+                                <option value="vehiculos">Vehículos</option>
+                            </select>
+                        </div>
+                        
+                        <button
+                            className="w-full bg-blue-600 hover:bg-blue-700 text-white font-medium py-2 px-4 rounded-md transition-colors"
+                            onClick={() => fetchPublications()}
+                        >
+                            Buscar
+                        </button>
+                    </div>
                 </div>
 
                 <div className="w-full lg:w-3/4">
-                  {/*   <FilterBar onFilterChange={handleSearch} />  Usar FilterBar */}
-                    {loading ? (
-                        <LoadingState text="Cargando anuncios..." />
+                    {error ? (
+                        <div className="bg-red-50 text-red-700 p-4 rounded-lg mb-6">
+                            <div className="flex items-center mb-2">
+                                <AlertCircle className="h-5 w-5 mr-2" />
+                                <h3 className="text-lg font-semibold">Error</h3>
+                            </div>
+                            <p>{error}</p>
+                            <button 
+                                className="mt-2 text-sm text-blue-600 hover:text-blue-800"
+                                onClick={() => fetchPublications()}
+                            >
+                                Intentar de nuevo
+                            </button>
+                        </div>
                     ) : noResults ? (
                         <div className="flex flex-col items-center justify-center py-12">
                             <AlertCircle className="h-10 w-10 text-gray-400 mb-4" />
@@ -108,8 +159,8 @@ const BuscadorAvisos = () => {
                         </div>
                     ) : (
                         <div>
-                            <AnunciosGrid anuncios={results} isListView={isListView} />
-                            <Pagination currentPage={filters.page} totalPages={totalPages} onPageChange={handlePageChange} /> {/* Usar Pagination */}
+                            <AnunciosGrid anuncios={results} isListView={false} />
+                            <Pagination currentPage={filters.page} totalPages={totalPages} onPageChange={handlePageChange} />
                         </div>
                     )}
                 </div>

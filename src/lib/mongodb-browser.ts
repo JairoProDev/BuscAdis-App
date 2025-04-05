@@ -1,33 +1,109 @@
-import { MongoClient } from 'mongodb';
+/**
+ * Browser-compatible MongoDB adapter
+ * This is a special version of the MongoDB client that works in browser environments
+ * by providing simple wrappers that call API endpoints instead of direct MongoDB connections.
+ */
 
-if (!process.env.MONGODB_URI) {
-  throw new Error('Please define the MONGODB_URI environment variable');
+interface MongoFetchOptions extends RequestInit {
+  queryParams?: Record<string, string>;
 }
 
-const uri = process.env.MONGODB_URI;
-const options = {};
-
-let client: MongoClient;
-let clientPromise: Promise<MongoClient>;
-
-if (process.env.NODE_ENV === 'development') {
-  // In development mode, use a global variable so that the value
-  // is preserved across module reloads caused by HMR (Hot Module Replacement).
-  let globalWithMongo = global as typeof global & {
-    _mongoClientPromise?: Promise<MongoClient>;
-  };
-
-  if (!globalWithMongo._mongoClientPromise) {
-    client = new MongoClient(uri, options);
-    globalWithMongo._mongoClientPromise = client.connect();
+/**
+ * Safely fetch data from our MongoDB API routes
+ */
+export const mongoFetch = async (endpoint: string, options: MongoFetchOptions = {}) => {
+  try {
+    const { queryParams, ...fetchOptions } = options;
+    
+    // Add query parameters if provided
+    let url = endpoint;
+    if (queryParams && Object.keys(queryParams).length > 0) {
+      const params = new URLSearchParams();
+      Object.entries(queryParams).forEach(([key, value]) => {
+        params.append(key, value);
+      });
+      url = `${url}${url.includes('?') ? '&' : '?'}${params.toString()}`;
+    }
+    
+    // Set default headers if not provided
+    const headers = {
+      'Content-Type': 'application/json',
+      ...fetchOptions.headers,
+    };
+    
+    const response = await fetch(url, {
+      ...fetchOptions,
+      headers,
+    });
+    
+    if (!response.ok) {
+      throw new Error(`API error: ${response.status} ${response.statusText}`);
+    }
+    
+    return await response.json();
+  } catch (error) {
+    console.error('MongoDB API fetch error:', error);
+    throw error;
   }
-  clientPromise = globalWithMongo._mongoClientPromise;
-} else {
-  // In production mode, it's best to not use a global variable.
-  client = new MongoClient(uri, options);
-  clientPromise = client.connect();
-}
+};
 
-// Export a module-scoped MongoClient promise. By doing this in a
-// separate module, the client can be shared across functions.
-export default clientPromise; 
+/**
+ * Browser-compatible MongoDB client
+ * This client provides methods that simulate MongoDB operations but use the fetch API
+ */
+export const browserMongoClient = {
+  // Find documents
+  find: async (collection: string, query: any = {}) => {
+    return mongoFetch(`/api/mongodb/${collection}/find`, {
+      method: 'POST',
+      body: JSON.stringify({ query }),
+    });
+  },
+  
+  // Find a single document
+  findOne: async (collection: string, query: any = {}) => {
+    return mongoFetch(`/api/mongodb/${collection}/findOne`, {
+      method: 'POST',
+      body: JSON.stringify({ query }),
+    });
+  },
+  
+  // Insert a document
+  insertOne: async (collection: string, document: any) => {
+    return mongoFetch(`/api/mongodb/${collection}/insertOne`, {
+      method: 'POST',
+      body: JSON.stringify({ document }),
+    });
+  },
+  
+  // Update a document
+  updateOne: async (collection: string, filter: any, update: any) => {
+    return mongoFetch(`/api/mongodb/${collection}/updateOne`, {
+      method: 'POST',
+      body: JSON.stringify({ filter, update }),
+    });
+  },
+  
+  // Delete a document
+  deleteOne: async (collection: string, filter: any) => {
+    return mongoFetch(`/api/mongodb/${collection}/deleteOne`, {
+      method: 'DELETE',
+      body: JSON.stringify({ filter }),
+    });
+  },
+};
+
+// Export a dummy MongoDB client for browser environments
+export default async function getMongoClient() {
+  return {
+    db: (dbName: string) => ({
+      collection: (collectionName: string) => ({
+        find: (query: any = {}) => browserMongoClient.find(collectionName, query),
+        findOne: (query: any = {}) => browserMongoClient.findOne(collectionName, query),
+        insertOne: (doc: any) => browserMongoClient.insertOne(collectionName, doc),
+        updateOne: (filter: any, update: any) => browserMongoClient.updateOne(collectionName, filter, update),
+        deleteOne: (filter: any) => browserMongoClient.deleteOne(collectionName, filter),
+      }),
+    }),
+  };
+} 
