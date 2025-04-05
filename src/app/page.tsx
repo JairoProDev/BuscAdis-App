@@ -11,6 +11,9 @@ import Stats from '@/components/home/Stats';
 import Comparison from '@/components/home/Comparison';
 import CallToAction from '@/components/home/CallToAction';
 import LoadingState from '@/components/ui/LoadingState';
+import CategoriesSection from '@/components/home/CategoriesSection';
+import FeaturedListingsSection from '@/components/home/FeaturedListingsSection';
+import BenefitsSection from '@/components/home/BenefitsSection';
 // import { Suspense } from 'react';
 // import FeaturedPublications from '@/components/home/FeaturedPublications';
 // import { SkeletonCard } from '@/components/ui/Skeleton';
@@ -43,9 +46,9 @@ export default function Home() {
   return (
     <main>
       <Hero />
-      {/* Comentar los componentes que no se están utilizando */}
-      {/* <CategorySlider /> */}
-      {/* <CategoryRow /> */}
+      <CategoriesSection />
+      <FeaturedListingsSection />
+      <BenefitsSection />
       <Benefits />
       <Tools />
       <HowItWorks />
