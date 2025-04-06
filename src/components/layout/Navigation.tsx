@@ -52,7 +52,7 @@ export default function Navigation() {
 
     return (
         <header className={`${backgroundColor} fixed top-0 left-0 right-0 h-16 z-50 transition-all duration-300`}>
-            <div className="container mx-auto px-4 h-full">
+            <div className="container mx-2 px-0 h-full">
                 <div className="flex items-center justify-between h-full">
                     {/* Logo y Navegación Izquierda (Desktop y Mobile) */}
                     <div className="flex items-center justify-between w-full md:w-auto">
@@ -169,25 +169,25 @@ export default function Navigation() {
                                         >
                                             Cerrar Sesión
                                         </button>
-                                </motion.div>
-                            )}
-                        </div>
-                    ) : (
-                        <div className="flex items-center space-x-2">
-                            <Link
-                                href="/login"
-                                className={`${textColor} hover:${hoverTextColor} mr-4`} {/* Añadiendo margen */}
-                            >
-                                Iniciar sesión
-                            </Link>
-                            <Link
-                                href="/register"
-                                className={`${textColor} hover:${hoverTextColor}`}
-                            >
-                                Regístrate
-                            </Link>
-                        </div>
-                    )}
+                                    </motion.div>
+                                )}
+                            </div>
+                        ) : (
+                            <div className="flex items-center space-x-2">
+                                <Link
+                                    href="/login"
+                                    className={`${textColor} hover:${hoverTextColor} transition-colors`}
+                                >
+                                    Iniciar sesión
+                                </Link>
+                                <Link
+                                    href="/register"
+                                    className={`${primaryButtonBg} ${primaryButtonTextColor} px-3 py-2 rounded-md text-sm hover:${primaryButtonHoverBg} transition-colors`}
+                                >
+                                    Regístrate
+                                </Link>
+                            </div>
+                        )}
 
                     {/* Icono de Notificaciones (Opcional) */}
                     {isAuthenticated && (

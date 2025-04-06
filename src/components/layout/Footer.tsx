@@ -66,18 +66,18 @@ export default function Footer() {
                       <h4 className="text-lg font-bold mb-4">{primaryColor === 'text-teal-400' ? <span className={primaryColor}>Categorías</span> : 'Categorías'}</h4>
                       <div className="grid grid-cols-2 gap-x-4">
                           <ul className="space-y-2">
-                              <li><a href="/categorias/empleos" className={`${textColor}/80 hover:${primaryColor} flex items-center`}>💼 Empleos</a></li>
-                              <li><a href="/categorias/inmuebles" className={`${textColor}/80 hover:${primaryColor} flex items-center`}>🏠 Inmuebles</a></li>
-                              <li><a href="/categorias/vehiculos" className={`${textColor}/80 hover:${primaryColor} flex items-center`}>🚗 Vehículos</a></li>
-                              <li><a href="/categorias/servicios" className={`${textColor}/80 hover:${primaryColor} flex items-center`}>🛠️ Servicios</a></li>
-                              <li><a href="/categorias/productos" className={`${textColor}/80 hover:${primaryColor} flex items-center`}>📦 Productos</a></li>
+                              <li><a href="/empleos" className={`${textColor}/80 hover:${primaryColor} flex items-center`}>💼 Empleos</a></li>
+                              <li><a href="/inmuebles" className={`${textColor}/80 hover:${primaryColor} flex items-center`}>🏠 Inmuebles</a></li>
+                              <li><a href="/vehiculos" className={`${textColor}/80 hover:${primaryColor} flex items-center`}>🚗 Vehículos</a></li>
+                              <li><a href="/servicios" className={`${textColor}/80 hover:${primaryColor} flex items-center`}>🛠️ Servicios</a></li>
+                              <li><a href="/productos" className={`${textColor}/80 hover:${primaryColor} flex items-center`}>📦 Productos</a></li>
                           </ul>
                           <ul className="space-y-2">
-                              <li><a href="/categorias/eventos" className={`${textColor}/80 hover:${primaryColor} flex items-center`}>🎉 Eventos</a></li>
-                              <li><a href="/categorias/educacion" className={`${textColor}/80 hover:${primaryColor} flex items-center`}>📚 Educación</a></li>
-                              <li><a href="/categorias/turismo" className={`${textColor}/80 hover:${primaryColor} flex items-center`}>✈️ Turismo</a></li>
-                              <li><a href="/categorias/mascotas" className={`${textColor}/80 hover:${primaryColor} flex items-center`}>🐾 Mascotas</a></li>
-                              <li><a href="/categorias/negocios" className={`${textColor}/80 hover:${primaryColor} flex items-center`}>💰 Negocios</a></li>
+                              <li><a href="/eventos" className={`${textColor}/80 hover:${primaryColor} flex items-center`}>🎉 Eventos</a></li>
+                              <li><a href="/educacion" className={`${textColor}/80 hover:${primaryColor} flex items-center`}>📚 Educación</a></li>
+                              <li><a href="/turismo" className={`${textColor}/80 hover:${primaryColor} flex items-center`}>✈️ Turismo</a></li>
+                              <li><a href="/mascotas" className={`${textColor}/80 hover:${primaryColor} flex items-center`}>🐾 Mascotas</a></li>
+                              <li><a href="/negocios" className={`${textColor}/80 hover:${primaryColor} flex items-center`}>💰 Negocios</a></li>
                           </ul>
                       </div>
                   </div>
@@ -87,7 +87,7 @@ export default function Footer() {
                       <ul className="space-y-2">
                           <li><a href="/ayuda" className={`${textColor}/80 hover:${primaryColor}`}>Centro de Ayuda</a></li>
                           <li><a href="/contacto" className={`${textColor}/80 hover:${primaryColor}`}>Contacto</a></li>
-                          <li><a href="/faq" className={`${textColor}/80 hover:${primaryColor}`}>Preguntas Frecuentes</a></li>
+                          <li><a href="/funcionamiento" className={`${textColor}/80 hover:${primaryColor}`}>Preguntas Frecuentes</a></li>
                           <li><a href="/blog" className={`${textColor}/80 hover:${primaryColor}`}>Blog</a></li>
                       </ul>
                   </div>

@@ -210,12 +210,12 @@ const CategoriesSection = () => {
                     style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
                 >
                     {categories.map((category, index) => (
-                        <div
+                        <motion.div
                             key={category.id}
                             className="snap-center flex-shrink-0 w-[85%] sm:w-[45%] lg:w-auto"
                         >
                             <CategoryCard category={category} index={index} />
-                        </div>
+                        </motion.div>
                     ))}
                 </motion.div>
 
@@ -242,7 +242,7 @@ const CategoriesSection = () => {
                 <motion.div
                     className="mt-12 text-center"
                     initial={{ opacity: 0, y: 20 }}
-                    animate={inView ? { opacity: 1, y: 0 } : {}}
+                    animate={{ opacity: 1, y: 0 }}
                     transition={{ delay: 0.6, duration: 0.5 }}
                 >
                     <motion.a
@@ -254,7 +254,7 @@ const CategoriesSection = () => {
                         whileTap={{ scale: 0.95 }}
                     >
                         {/* Platinum shimmer effect */}
-                        <span className="absolute top-0 left-0 w-full h-full bg-gradient-to-r from-white/0 via-white/40 to-white/0 transform -skew-x-30 -translate-x-full transition-transform duration-1000 ease-out group-hover:translate-x-full"></span>
+                        <span className="absolute top-0 left-0 w-full h-full bg-gradient-to-r from-white/0 via-white/40 to-white/0 transform -skew-x-30 -translate-x-full group-hover:translate-x-full transition-transform duration-700"></span>
 
                         <span className="relative z-10">Ver todas las categorías</span>
                         <span className="relative z-10 ml-2 inline-block">
