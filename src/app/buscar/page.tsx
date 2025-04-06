@@ -1,248 +1,341 @@
 'use client';
 
-import { useState, useEffect } from 'react';
-//import { motion } from 'framer-motion';
-import { useSearchParams } from 'next/navigation';
-//import { CategoryId } from '@/types/marketplace';
-import { SearchService } from '@/services/search.service';
-import LoadingState from '@/components/ui/LoadingState';
-import { AlertCircle } from 'lucide-react';
-import AnunciosGrid from '@/components/AnunciosGrid';
-//import AdvancedSearch from '@/components/search/AdvancedSearch'; // Importar AdvancedSearch
-//import MapComponent from '@/components/search/MapComponent'; // Importar MapComponent
-//import FilterBar from '@/components/search/FilterBar'; // Importar FilterBar
-import Pagination from '@/components/ui/Pagination'; // Importar Pagination
-import Link from 'next/link';
+import { useState, useEffect, useCallback } from 'react';
+import { motion } from 'framer-motion';
+import { useRouter, useSearchParams, usePathname } from 'next/navigation';
 import { mongoFetch } from '@/lib/dbConnect';
+import { AlertCircle } from 'lucide-react';
+import SearchLayout from '@/components/search/SearchLayout';
+import { Publication } from '@/components/search/SearchResults';
+import { useToast } from '@/hooks/useToast';
+import { 
+  RocketLaunchIcon, 
+  SparklesIcon
+} from '@heroicons/react/24/outline';
 
-interface Publication {
-    id: string;
-    title: string;
-    description: string;
-    price: number;
-    currency: string;
-    categorySlug: string;
-    location: string;
-    contactName: string;
-    status: string;
-    createdAt: string;
-    images?: string[];
+interface SearchParams {
+  category?: string;
+  subcategory?: string;
+  subsubcategory?: string;
+  query?: string;
+  location?: string;
+  minPrice?: string;
+  maxPrice?: string;
+  sortBy?: string;
+  page: number;
+  limit?: number;
 }
 
-interface PublicationCardProps {
-    publication: Publication;
-}
-
-// Simple publication card component
-const PublicationCard: React.FC<PublicationCardProps> = ({ publication }) => {
-    const formatPrice = (price: number, currency: string) => {
-        if (!price) return 'Precio a consultar';
-
-        return new Intl.NumberFormat('es-PE', {
-            style: 'currency',
-            currency: currency || 'PEN',
-            maximumFractionDigits: 0,
-        }).format(price);
-    };
-
-    // Default image if none provided
-    const imageUrl = publication.images && publication.images.length > 0
-        ? publication.images[0]
-        : '/images/placeholder.jpg';
-
-    return (
-        <div className="bg-slate-800 rounded-xl shadow-lg hover:shadow-xl transition-shadow duration-300 overflow-hidden h-full border border-teal-500/20 hover:border-cyan-400/30">
-            <div className="relative h-48 bg-gray-700">
-                <img
-                    src={imageUrl}
-                    alt={publication.title}
-                    className="w-full h-full object-cover"
-                />
-                {publication.id && publication.id.includes('premium') && (
-                    <div className="absolute top-2 right-2 px-2 py-1 rounded-full text-xs font-semibold bg-gradient-to-r from-teal-600 to-cyan-600 text-white shadow-md border border-white/10">
-                        Premium
-                    </div>
-                )}
-            </div>
-            <div className="p-4">
-                <h3 className="text-lg font-semibold text-white line-clamp-2">{publication.title}</h3>
-                <p className="text-cyan-100 text-sm mt-2 line-clamp-2">{publication.description}</p>
-                <div className="mt-3 flex items-center text-sm text-teal-300">
-                    <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
-                    </svg>
-                    <span className="truncate">{publication.location}</span>
-                </div>
-                <div className="mt-4 flex justify-between items-center">
-                    <span className="text-xl font-bold text-teal-400">
-                        {formatPrice(publication.price, publication.currency)}
-                    </span>
-                    <span className="text-xs uppercase tracking-wider text-cyan-300">
-                        {publication.categorySlug}
-                    </span>
-                </div>
-            </div>
-        </div>
-    );
-};
-
-const BuscadorAvisos = () => {
-    const searchParams = useSearchParams();
-    //const [selectedCategory, setSelectedCategory] = useState<CategoryId | null>(null);
-    const [filters, setFilters] = useState({
-        category: searchParams.get('category') || '',
-        search: searchParams.get('q') || '',
-        page: parseInt(searchParams.get('page') || '1'),
-        limit: 12,
+export default function BuscadorPage() {
+  const router = useRouter();
+  const searchParams = useSearchParams();
+  const pathname = usePathname();
+  const { showToast } = useToast();
+  
+  // Estados para búsqueda y navegación
+  const [searchState, setSearchState] = useState<SearchParams>({
+    category: searchParams?.get('category') || '',
+    subcategory: searchParams?.get('subcategory') || '',
+    subsubcategory: searchParams?.get('subsubcategory') || '',
+    query: searchParams?.get('q') || '',
+    location: searchParams?.get('location') || '',
+    minPrice: searchParams?.get('minPrice') || '',
+    maxPrice: searchParams?.get('maxPrice') || '',
+    sortBy: searchParams?.get('sortBy') || 'recent',
+    page: parseInt(searchParams?.get('page') || '1'),
+    limit: 12,
+  });
+  
+  // Estados para resultados y UI
+  const [results, setResults] = useState<Publication[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [totalResults, setTotalResults] = useState(0);
+  const [totalPages, setTotalPages] = useState(1);
+  const [error, setError] = useState('');
+  const [showDailyReward, setShowDailyReward] = useState(false);
+  const [userPoints, setUserPoints] = useState(0);
+  
+  // Función para actualizar URL con nuevos parámetros de búsqueda
+  const updateUrlParams = useCallback((params: SearchParams) => {
+    const newParams = new URLSearchParams();
+    
+    // Solo agregar parámetros con valor
+    Object.entries(params).forEach(([key, value]) => {
+      if (value && key !== 'limit') {
+        newParams.set(key, value.toString());
+      }
     });
-    const [results, setResults] = useState<Publication[]>([]);
-    const [loading, setLoading] = useState(true);
-    const [totalPages, setTotalPages] = useState(1);
-    const [error, setError] = useState('');
-    const [noResults, setNoResults] = useState(false);
-
-    const handleSearch = (newFilters: Record<string, any>) => {
-        setFilters((prev) => ({
-            ...prev,
-            ...newFilters,
-            page: 1,
-        }));
-    };
-
-    const fetchPublications = async () => {
-        setLoading(true);
-        try {
-            // Use MongoDB browser adapter
-            const response = await mongoFetch('/api/publications', {
-                queryParams: {
-                    category: filters.category,
-                    query: filters.search,
-                    page: filters.page.toString(),
-                    limit: filters.limit.toString()
-                }
-            });
-
-            setResults(response.publications || []);
-            setTotalPages(response.pages || 1);
-            setNoResults((response.publications || []).length === 0);
-            setError('');
-        } catch (err: any) {
-            console.error('Error al cargar los anuncios:', err);
-            setError(`Error al cargar los anuncios: ${err.message}`);
-            setResults([]);
-            setTotalPages(1);
-            setNoResults(true);
-        } finally {
-            setLoading(false);
+    
+    // Actualizar la URL sin recargar la página
+    const newPath = `${pathname}?${newParams.toString()}`;
+    router.push(newPath, { scroll: false });
+  }, [pathname, router]);
+  
+  // Función para buscar anuncios
+  const fetchPublications = useCallback(async (params: SearchParams = searchState) => {
+    setLoading(true);
+    setError('');
+    
+    try {
+      // Usar MongoDB browser adapter
+      const response = await mongoFetch('/api/publications', {
+        queryParams: {
+          category: params.category || '',
+          subcategory: params.subcategory || '',
+          query: params.query || '',
+          location: params.location || '',
+          minPrice: params.minPrice || '',
+          maxPrice: params.maxPrice || '',
+          sortBy: params.sortBy || 'recent',
+          page: params.page.toString(),
+          limit: params.limit?.toString() || '12'
         }
+      });
+      
+      // Enriquecer datos con campos adicionales para UI
+      const publications = response.publications || [];
+      const enhancedPublications = publications.map((pub: Publication) => ({
+        ...pub,
+        premium: pub.id?.includes('premium') || Math.random() > 0.8, // Simulación de anuncios premium        verified: Math.random() > 0.7, // Simulación de verificación
+        views: Math.floor(Math.random() * 500) + 50, // Vistas aleatorias
+        likes: Math.floor(Math.random() * 50), // Likes aleatorios
+        bookmarks: Math.floor(Math.random() * 20) // Guardados aleatorios
+      }));
+      
+      setResults(enhancedPublications);
+      setTotalResults(response.total || 0);
+      setTotalPages(response.pages || 1);
+      
+      // Guardar historial de búsqueda si hubo resultados
+      if (params.query && enhancedPublications.length > 0) {
+        saveSearchHistory(params.query);
+      }
+      
+      // Recompensa por búsqueda
+      checkForDailyReward();
+      
+    } catch (err: unknown) {
+      console.error('Error al cargar los anuncios:', err);
+      const errorMessage = err instanceof Error 
+        ? err.message 
+        : 'Error desconocido al cargar los anuncios';
+      setError(`Error al cargar los anuncios: ${errorMessage}`);
+      setResults([]);
+      setTotalPages(1);
+    } finally {
+      setLoading(false);
+    }
+  }, [searchState]);
+  
+  // Cargar datos iniciales
+  useEffect(() => {
+    fetchPublications();
+    
+    // Cargar puntos del usuario
+    const savedPoints = localStorage.getItem('userPoints');
+    if (savedPoints) {
+      setUserPoints(parseInt(savedPoints));
+    }
+  }, [fetchPublications]);
+  
+  // Guardar historial de búsquedas
+  const saveSearchHistory = (query: string) => {
+    try {
+      const savedHistory = localStorage.getItem('searchHistory');
+      let history: string[] = savedHistory ? JSON.parse(savedHistory) : [];
+      
+      // Añadir solo si no existe y limitar a 10 elementos
+      if (!history.includes(query)) {
+        history = [query, ...history].slice(0, 10);
+        localStorage.setItem('searchHistory', JSON.stringify(history));
+      }
+    } catch (e) {
+      console.error('Error guardando historial:', e);
+    }
+  };
+  
+  // Sistema de recompensas diarias para gamificación
+  const checkForDailyReward = () => {
+    try {
+      const lastReward = localStorage.getItem('lastSearchReward');
+      const today = new Date().toDateString();
+      
+      if (lastReward !== today) {
+        // Dar recompensa diaria
+        const pointsToAdd = Math.floor(Math.random() * 15) + 10; // 10-25 puntos
+        const newTotal = userPoints + pointsToAdd;
+        
+        setUserPoints(newTotal);
+        setShowDailyReward(true);
+        
+        // Guardar en localStorage
+        localStorage.setItem('userPoints', newTotal.toString());
+        localStorage.setItem('lastSearchReward', today);
+        
+        // Mostrar notificación
+        setTimeout(() => {
+          showToast({
+            title: "¡Recompensa diaria!",
+            message: `Has ganado ${pointsToAdd} puntos por buscar hoy`,
+            type: "success",
+            icon: <SparklesIcon className="h-5 w-5" />
+          });
+        }, 1000);
+      }
+    } catch (e) {
+      console.error('Error con sistema de recompensas:', e);
+    }
+  };
+  
+  // Manejar cambios en la búsqueda
+  const handleSearch = (query: string, options?: Record<string, string>) => {
+    const newState = {
+      ...searchState,
+      query,
+      page: 1, // Volver a página 1 con nueva búsqueda
+      ...(options || {})
     };
-
-    useEffect(() => {
-        fetchPublications();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [filters]);
-
-    const handlePageChange = (newPage: number) => {
-        setFilters((prev) => ({
-            ...prev,
-            page: newPage,
-        }));
+    
+    setSearchState(newState);
+    updateUrlParams(newState);
+    fetchPublications(newState);
+  };
+  
+  // Manejar cambios en filtros
+  const handleFilterChange = (filters: Partial<SearchParams>) => {
+    const newState = {
+      ...searchState,
+      ...filters,
+      page: 1 // Volver a página 1 con nuevos filtros
     };
-
-    if (loading) return <LoadingState text="Cargando anuncios..." />;
-
+    
+    setSearchState(newState);
+    updateUrlParams(newState);
+    fetchPublications(newState);
+  };
+  
+  // Cargar más resultados (para infinite scroll)
+  const handleLoadMore = () => {
+    if (searchState.page < totalPages) {
+      const newState = {
+        ...searchState,
+        page: searchState.page + 1
+      };
+      
+      setSearchState(newState);
+      
+      // Cargar solo la siguiente página y añadir a resultados existentes
+      fetchPublications(newState).then(() => {
+        // Mostrar una notificación de logro si es la página 3+
+        if (newState.page >= 3) {
+          showToast({
+            title: "¡Explorador incansable!",
+            message: "Has desbloqueado un logro por tu búsqueda profunda",
+            type: "info",
+            icon: <RocketLaunchIcon className="h-5 w-5" />
+          });
+          
+          // Dar puntos extra
+          const extraPoints = 5;
+          const newTotal = userPoints + extraPoints;
+          setUserPoints(newTotal);
+          localStorage.setItem('userPoints', newTotal.toString());
+        }
+      });
+    }
+  };
+  
+  // Manejar cierre del modal de recompensa diaria
+  const handleCloseReward = () => {
+    setShowDailyReward(false);
+  };
+  
+  if (error && !loading) {
     return (
-        <div className="container mx-auto p-4 md:p-6 lg:p-8 bg-slate-900 min-h-screen">
-            <h1 className="text-3xl font-bold text-white mb-6 text-center bg-clip-text text-transparent bg-gradient-to-r from-teal-400 to-cyan-400">
-                Encuentra todo lo que buscas
-            </h1>
-
-            <div className="flex flex-col lg:flex-row gap-6">
-                <div className="w-full lg:w-1/4">
-                    {/* Search filters with premium styling */}
-                    <div className="bg-slate-800 rounded-lg shadow-md p-6 border border-teal-500/20 relative overflow-hidden">
-                        {/* Platinum-like gradient edge effect */}
-                        <div className="absolute inset-0 border border-teal-500/30 rounded-lg bg-gradient-to-r from-teal-700 via-slate-900 to-cyan-700 opacity-50 pointer-events-none"></div>
-
-                        <h2 className="text-xl font-semibold mb-4 relative z-10 text-white">Filtros</h2>
-                        <div className="mb-4 relative z-10">
-                            <label className="block text-sm font-medium text-gray-300 mb-1">Buscar</label>
-                            <input
-                                type="text"
-                                className="w-full px-4 py-2 border border-slate-700 rounded-lg shadow-sm focus:ring-2 focus:ring-teal-500 focus:border-teal-500 bg-slate-900 text-white"
-                                value={filters.search}
-                                onChange={(e) => handleSearch({ search: e.target.value })}
-                                placeholder="¿Qué estás buscando?"
-                            />
-                        </div>
-
-                        <div className="mb-4 relative z-10">
-                            <label htmlFor="category-select" className="block text-sm font-medium text-gray-300 mb-1">Categoría</label>
-                            <select
-                                id="category-select"
-                                className="w-full px-4 py-2 border border-slate-700 rounded-lg shadow-sm focus:ring-2 focus:ring-teal-500 focus:border-teal-500 bg-slate-900 text-white"
-                                value={filters.category}
-                                onChange={(e) => handleSearch({ category: e.target.value })}
-                                aria-label="Seleccionar categoría"
-                            >
-                                <option value="">Todas las categorías</option>
-                                <option value="inmuebles">Inmuebles</option>
-                                <option value="empleos">Empleos</option>
-                                <option value="servicios">Servicios</option>
-                                <option value="vehiculos">Vehículos</option>
-                            </select>
-                        </div>
-
-                        <button
-                            className="w-full bg-gradient-to-r from-teal-500 to-cyan-500 hover:from-teal-600 hover:to-cyan-600 text-slate-900 font-medium py-2 px-4 rounded-lg transition-colors shadow-md hover:shadow-lg relative z-10"
-                            onClick={() => fetchPublications()}
-                        >
-                            Buscar
-                        </button>
-                    </div>
-                </div>
-
-                <div className="w-full lg:w-3/4">
-                    {error ? (
-                        <div className="bg-red-900 text-red-300 p-4 rounded-lg mb-6 border border-red-700">
-                            <div className="flex items-center mb-2">
-                                <AlertCircle className="h-5 w-5 mr-2" />
-                                <h3 className="text-lg font-semibold">Error</h3>
-                            </div>
-                            <p>{error}</p>
-                            <button
-                                className="mt-2 text-sm text-blue-300 hover:text-blue-500 font-medium"
-                                onClick={() => fetchPublications()}
-                            >
-                                Intentar de nuevo
-                            </button>
-                        </div>
-                    ) : noResults ? (
-                        <div className="flex flex-col items-center justify-center py-12 bg-slate-800 rounded-lg shadow-md border border-teal-500/20">
-                            <AlertCircle className="h-10 w-10 text-gray-400 mb-4" />
-                            <h2 className="text-2xl font-semibold text-white mb-2">No se encontraron resultados</h2>
-                            <p className="text-gray-500 text-center mb-6">Intenta modificar tu búsqueda o explora todos los anuncios disponibles.</p>
-                        </div>
-                    ) : (
-                        <div>
-                            {/* Results grid with premium styling */}
-                            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-                                {results.map((publication) => (
-                                    <PublicationCard key={publication.id} publication={publication} />
-                                ))}
-                            </div>
-                            <div className="mt-8">
-                                <Pagination currentPage={filters.page} totalPages={totalPages} onPageChange={handlePageChange} />
-                            </div>
-                        </div>
-                    )}
-                </div>
-            </div>
-
-            {/* <MapComponent publications={publications} /> {/* Usar MapComponent */}
+      <div className="container mx-auto p-4 md:p-6 lg:p-8 bg-slate-900 min-h-screen text-white">
+        <div className="bg-red-900/80 text-red-100 p-6 rounded-lg shadow-lg border border-red-700 mb-6">
+          <div className="flex items-center gap-3 mb-4">
+            <AlertCircle className="h-8 w-8 text-red-300" />
+            <h2 className="text-xl font-semibold">Error al cargar los resultados</h2>
+          </div>
+          <p className="mb-5">{error}</p>
+          <button
+            className="bg-red-700 hover:bg-red-800 text-white py-2 px-4 rounded-lg transition-colors"
+            onClick={() => fetchPublications()}
+          >
+            Intentar nuevamente
+          </button>
         </div>
+      </div>
     );
-};
-
-export default BuscadorAvisos;
+  }
+  
+  return (
+    <main className="container mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8 lg:py-12 bg-slate-900 min-h-screen text-white">
+      {/* Contenedor principal de búsqueda */}
+      <SearchLayout
+        initialResults={results}
+        initialCategory={searchState.category}
+        initialSubcategory={searchState.subcategory}
+        initialQuery={searchState.query}
+        loading={loading}
+        onSearch={handleSearch}
+        onFilterChange={handleFilterChange}
+        onLoadMore={handleLoadMore}
+        hasMore={searchState.page < totalPages}
+        totalResults={totalResults}
+        showMap={true}
+      />
+      
+      {/* Modal de recompensa diaria */}
+      {showDailyReward && (
+        <motion.div
+          initial={{ opacity: 0, scale: 0.8 }}
+          animate={{ opacity: 1, scale: 1 }}
+          className="fixed inset-0 z-50 flex items-center justify-center p-4"
+        >
+          <div className="absolute inset-0 bg-black/70" onClick={handleCloseReward}></div>
+          <div className="relative bg-gradient-to-br from-slate-900 to-slate-800 rounded-xl border border-teal-500/50 p-6 max-w-md w-full shadow-[0_0_40px_rgba(20,184,166,0.3)]">
+            <div className="absolute inset-0 overflow-hidden rounded-xl">
+              <div className="absolute top-0 right-0 -mt-10 -mr-10 w-40 h-40 bg-teal-500/20 blur-3xl rounded-full"></div>
+              <div className="absolute bottom-0 left-0 -mb-10 -ml-10 w-40 h-40 bg-cyan-500/20 blur-3xl rounded-full"></div>
+            </div>
+            
+            <div className="relative z-10">
+              <div className="bg-gradient-to-br from-teal-500 to-cyan-500 w-16 h-16 rounded-full mx-auto mb-4 flex items-center justify-center">
+                <SparklesIcon className="h-8 w-8 text-white" />
+              </div>
+              
+              <h3 className="text-2xl font-bold text-white text-center mb-2">¡Recompensa diaria!</h3>
+              <p className="text-slate-300 text-center mb-6">
+                Gracias por buscar en BuscAdis hoy. ¡Has ganado puntos de recompensa!
+              </p>
+              
+              <div className="bg-slate-800/80 rounded-lg p-4 mb-6 border border-teal-500/30">
+                <div className="flex justify-between items-center">
+                  <span className="text-slate-300">Tus puntos:</span>
+                  <span className="text-xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-teal-300 to-cyan-300">
+                    {userPoints} pts
+                  </span>
+                </div>
+              </div>
+              
+              <div className="text-center">
+                <p className="text-xs text-slate-400 mb-4">
+                  Continúa buscando para conseguir más puntos y desbloquear recompensas exclusivas.
+                </p>
+                
+                <button
+                  onClick={handleCloseReward}
+                  className="bg-gradient-to-r from-teal-500 to-cyan-500 hover:from-teal-600 hover:to-cyan-600 text-white font-medium py-2 px-8 rounded-lg transition-colors shadow-lg hover:shadow-teal-500/30"
+                >
+                  ¡Continuar buscando!
+                </button>
+              </div>
+            </div>
+          </div>
+        </motion.div>
+      )}
+    </main>
+  );
+}

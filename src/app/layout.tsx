@@ -11,10 +11,12 @@ import { Suspense } from 'react';
 import { Toaster } from '@/components/ui/toaster';
 import { PublicationProvider } from '@/contexts/PublicationContext';
 import { ReactNode } from 'react';
+import { ToastProvider } from '@/providers/ToastProvider';
+import type { Metadata } from 'next';
 
 const inter = Inter({ subsets: ['latin'] });
 
-export const metadata = {
+export const metadata: Metadata = {
   title: 'BuscAdis - Encuentra las mejores oportunidades',
   description: 'Plataforma premium de avisos clasificados. Conectamos a quienes buscan con quienes ofrecen oportunidades de calidad.',
 };
@@ -23,19 +25,21 @@ export default function RootLayout({ children }: { children: ReactNode }) {
   return (
     <html lang="es" suppressHydrationWarning>
       <body className={inter.className}>
-        <ThemeProvider>
-          <PublicationProvider>
-            <div className="flex min-h-screen flex-col bg-background text-foreground">
-              <Suspense fallback={<Loader />}>
-                <Navigation />
-                <main className="flex-grow">{children}</main>
-                <Footer />
-                <MobileNavigation />
-              </Suspense>
-            </div>
-            <Toaster />
-          </PublicationProvider>
-        </ThemeProvider>
+        <ToastProvider>
+          <ThemeProvider>
+            <PublicationProvider>
+              <div className="flex min-h-screen flex-col bg-background text-foreground">
+                <Suspense fallback={<Loader />}>
+                  <Navigation />
+                  <main className="flex-grow">{children}</main>
+                  <Footer />
+                  <MobileNavigation />
+                </Suspense>
+              </div>
+              <Toaster />
+            </PublicationProvider>
+          </ThemeProvider>
+        </ToastProvider>
       </body>
     </html>
   );

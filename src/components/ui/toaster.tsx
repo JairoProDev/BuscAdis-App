@@ -2,12 +2,11 @@
 
 import {
   Toast,
-  ToastClose,
   ToastDescription,
   ToastProvider,
   ToastTitle,
   ToastViewport,
-} from '@/components/ui/toast';
+} from '@/components/ui/Toast';
 import { useToast } from '@/components/ui/use-toast';
 
 export function Toaster() {
@@ -25,11 +24,11 @@ export function Toaster() {
               )}
             </div>
             {action}
-            <ToastClose />
+            {/* Si necesitas un botón de cerrar, puedes agregarlo aquí */}
           </Toast>
         );
       })}
       <ToastViewport />
     </ToastProvider>
   );
-} 
+}

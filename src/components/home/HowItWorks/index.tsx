@@ -1,263 +1,288 @@
 'use client'
 
-import { useState } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { useState, useRef, useEffect } from 'react';
+import { motion, useInView } from 'framer-motion';
 import Container from '@/components/shared/Container';
-import { SparklesIcon, CheckCircleIcon } from '@heroicons/react/24/solid';
-import { ArrowRightIcon, MagnifyingGlassIcon, ChatBubbleLeftRightIcon, RocketLaunchIcon } from '@heroicons/react/24/outline';
+import { ArrowRightIcon, ArrowPathIcon, BookmarkIcon, MapIcon, BellIcon, UserIcon } from '@heroicons/react/24/outline';
+import { Orb } from '@/components/ui/animations/Orb';
 
 const steps = [
   {
-    title: 'Busca',
-    description: 'Encuentra exactamente lo que necesitas con nuestro buscador inteligente impulsado por IA.',
-    icon: <MagnifyingGlassIcon className="w-12 h-12 text-teal-300" />,
-    details: [
-      'Búsqueda predictiva y sugerencias personalizadas',
-      'Filtros avanzados y geolocalización',
-      'Resultados ordenados por relevancia'
-    ],
-    color: 'from-teal-500 to-cyan-500'
+    id: 1,
+    title: 'Crea una cuenta',
+    description: 'Regístrate en menos de 1 minuto para comenzar a disfrutar de todos los beneficios.',
+    icon: UserIcon,
+    color: 'from-teal-500 to-emerald-400'
   },
   {
-    title: 'Conecta',
-    description: 'Comunícate de forma segura y directa con vendedores verificados a través de nuestro sistema de mensajería integrado.',
-    icon: <ChatBubbleLeftRightIcon className="w-12 h-12 text-cyan-300" />,
-    details: [
-      'Chat encriptado en tiempo real',
-      'Sistema de reputación y verificación',
-      'Notificaciones instantáneas'
-    ],
+    id: 2,
+    title: 'Navega entre categorías',
+    description: 'Explora todas las categorías disponibles para encontrar exactamente lo que buscas.',
+    icon: MapIcon,
     color: 'from-cyan-500 to-teal-400'
   },
   {
-    title: 'Disfruta',
-    description: 'Realiza transacciones seguras con nuestro sistema de pagos protegidos y ten de una experiencia sin preocupaciones.',
-    icon: <RocketLaunchIcon className="w-12 h-12 text-teal-300" />,
-    details: [
-      'Pagos seguros con garantía',
-      'Proceso de entrega rastreable',
-      'Soporte 24/7 multicanal'
-    ],
-    color: 'from-emerald-500 to-teal-500'
+    id: 3,
+    title: 'Guarda tus favoritos',
+    description: 'Marca tus anuncios favoritos para revisarlos más tarde o compararlos con otras opciones.',
+    icon: BookmarkIcon,
+    color: 'from-blue-500 to-cyan-400'
+  },
+  {
+    id: 4,
+    title: 'Crea alertas personalizadas',
+    description: 'Configura notificaciones para recibir avisos cuando aparezcan nuevos anuncios que te interesen.',
+    icon: BellIcon, 
+    color: 'from-emerald-500 to-green-400'
+  },
+  {
+    id: 5,
+    title: 'Mantente actualizado',
+    description: 'Recibe actualizaciones automáticas sobre el estado de tus búsquedas y nuevas ofertas.',
+    icon: ArrowPathIcon,
+    color: 'from-teal-500 to-cyan-400'
   }
 ];
 
 export default function HowItWorks() {
-  const [activeStep, setActiveStep] = useState<number | null>(null);
-  const [isHovering, setIsHovering] = useState(false);
+  const [activeStep, setActiveStep] = useState(1);
+  const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const containerRef = useRef<HTMLDivElement | null>(null);
+  const isInView = useInView(containerRef, { once: false, amount: 0.3 });
+  
+  // Auto-advance steps
+  useEffect(() => {
+    if (isInView) {
+      intervalRef.current = setInterval(() => {
+        setActiveStep(prev => prev >= steps.length ? 1 : prev + 1);
+      }, 4000);
+    } else if (intervalRef.current) {
+      clearInterval(intervalRef.current);
+    }
+    
+    return () => {
+      if (intervalRef.current) {
+        clearInterval(intervalRef.current);
+      }
+    };
+  }, [isInView]);
+
+  // Manual step selection
+  const handleStepClick = (step: number) => {
+    setActiveStep(step);
+    
+    // Reset interval timer on manual click
+    if (intervalRef.current) {
+      clearInterval(intervalRef.current);
+      intervalRef.current = setInterval(() => {
+        setActiveStep(prev => prev >= steps.length ? 1 : prev + 1);
+      }, 4000);
+    }
+  };
+
+  // Get the current step's data
+  const currentStep = steps.find(step => step.id === activeStep);
+  
+  // Variants for animations
+  const containerVariants = {
+    hidden: { opacity: 0, y: 20 },
+    visible: { 
+      opacity: 1, 
+      y: 0,
+      transition: { 
+        staggerChildren: 0.1,
+        delayChildren: 0.1
+      }
+    }
+  };
+  
+  const itemVariants = {
+    hidden: { opacity: 0, y: 20 },
+    visible: { opacity: 1, y: 0 }
+  };
 
   return (
-    <section className="py-24 bg-gradient-to-br from-slate-900 via-teal-900/40 to-slate-900 relative overflow-hidden">
-      {/* Decorative elements */}
-      <div className="absolute inset-0">
-        <div className="absolute inset-0 bg-[url('/patterns/circuit.svg')] opacity-10" />
+    <section ref={containerRef} className="relative bg-gradient-to-b from-slate-900 via-slate-900/95 to-slate-900/90 py-16 md:py-24 overflow-hidden">
+      {/* Elementos decorativos tecnológicos */}
+      <div className="absolute inset-0 overflow-hidden">
+        <div className="absolute left-0 right-0 top-10 bg-gradient-to-r from-teal-500/5 via-cyan-500/10 to-green-500/5 h-px"></div>
+        <div className="absolute top-0 left-1/4 w-96 h-96 bg-teal-500/10 rounded-full filter blur-3xl opacity-30"></div>
+        <div className="absolute bottom-0 right-1/4 w-96 h-96 bg-cyan-500/20 rounded-full filter blur-3xl opacity-30"></div>
         
-        {/* Animated orbs */}
-        <div className="absolute top-20 left-20 w-72 h-72 bg-gradient-to-br from-teal-400/10 via-teal-300/5 to-emerald-400/10 rounded-full filter blur-xl opacity-30 animate-blob" />
-        <div className="absolute bottom-20 right-20 w-72 h-72 bg-gradient-to-br from-cyan-400/10 via-white/5 to-teal-500/10 rounded-full filter blur-xl opacity-30 animate-blob animation-delay-2000" />
+        {/* Technological circuit patterns */}
+        <svg width="100%" height="100%" className="absolute inset-0 opacity-10">
+          <pattern id="circuit-pattern" x="0" y="0" width="100" height="100" patternUnits="userSpaceOnUse">
+            <path d="M0 50 H100 M50 0 V100 M25 25 L75 75 M75 25 L25 75" stroke="url(#tech-gradient)" strokeWidth="0.5" fill="none" />
+            <circle cx="50" cy="50" r="3" fill="url(#tech-gradient)" />
+            <circle cx="25" cy="25" r="2" fill="url(#tech-gradient)" />
+            <circle cx="75" cy="75" r="2" fill="url(#tech-gradient)" />
+            <circle cx="75" cy="25" r="2" fill="url(#tech-gradient)" />
+            <circle cx="25" cy="75" r="2" fill="url(#tech-gradient)" />
+          </pattern>
+          <defs>
+            <linearGradient id="tech-gradient" x1="0%" y1="0%" x2="100%" y2="100%">
+              <stop offset="0%" stopColor="#14b8a6" />
+              <stop offset="100%" stopColor="#06b6d4" />
+            </linearGradient>
+          </defs>
+          <rect x="0" y="0" width="100%" height="100%" fill="url(#circuit-pattern)" />
+        </svg>
         
-        {/* Laser light effects */}
-        <div className="absolute h-full w-[1px] left-[10%] bg-gradient-to-b from-transparent via-teal-400/10 to-transparent opacity-50"></div>
-        <div className="absolute h-full w-[1px] left-[90%] bg-gradient-to-b from-transparent via-cyan-400/10 to-transparent opacity-50"></div>
-        
-        {/* Floating data points */}
-        <div className="absolute inset-0">
-          {Array.from({ length: 20 }).map((_, i) => (
-            <motion.div
-              key={i}
-              className="absolute w-1 h-1 bg-teal-400/40 rounded-full"
-              initial={{ 
-                x: `${Math.random() * 100}%`, 
-                y: `${Math.random() * 100}%`,
-                opacity: Math.random() * 0.5 + 0.3
-              }}
-              animate={{ 
-                y: ['0%', '100%'],
-                opacity: [0.3, 0.8, 0.3]
-              }}
-              transition={{ 
-                repeat: Infinity, 
-                duration: Math.random() * 10 + 15,
-                ease: 'linear',
-                delay: Math.random() * 5
-              }}
-            />
-          ))}
-        </div>
-        
-        {/* Tech grid on floor */}
-        <div className="absolute bottom-0 left-0 right-0 h-40 perspective-1000">
-          <div className="absolute bottom-0 left-0 w-full h-full bg-gradient-to-t from-teal-500/5 to-transparent"></div>
-          <div className="absolute bottom-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-teal-400/30 to-transparent"></div>
+        {/* Floating orbs */}
+        <div className="absolute opacity-80 pointer-events-none">
+          <Orb size={160} color="#14b8a630" top="10%" left="5%" duration={25} />
+          <Orb size={100} color="#06b6d430" top="30%" left="15%" duration={18} />
+          <Orb size={120} color="#10b98130" top="70%" left="8%" duration={22} />
+          <Orb size={140} color="#14b8a630" top="15%" right="5%" duration={20} />
+          <Orb size={90} color="#06b6d430" top="50%" right="10%" duration={15} />
+          <Orb size={110} color="#10b98130" top="80%" right="15%" duration={24} />
         </div>
       </div>
-
-      <Container className="relative">
-        <motion.div
+      
+      <div className="container mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
+        <motion.div 
+          className="text-center max-w-3xl mx-auto mb-16"
           initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.8 }}
-          className="text-center mb-20"
+          animate={isInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 20 }}
+          transition={{ duration: 0.5 }}
         >
-          {/* Premium badge */}
-          <motion.div
-            className="inline-flex items-center px-4 py-1.5 rounded-full bg-gradient-to-r from-slate-800 to-slate-700 text-teal-300 text-sm font-medium mb-6 shadow-lg relative border border-teal-500/20 overflow-hidden"
-            initial={{ opacity: 0, y: -10 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.2 }}
-            whileHover={{ y: -3, boxShadow: "0 0 20px rgba(20,184,166,0.3)" }}
-          >
-            <SparklesIcon className="h-4 w-4 mr-1.5 text-cyan-300" />
-            <span className="relative z-10">Proceso Optimizado</span>
-            <span className="absolute inset-0 bg-gradient-to-r from-teal-500/0 via-teal-500/20 to-teal-500/0 rounded-full animate-shimmer"></span>
-          </motion.div>
-          
-          <h2 className="text-4xl lg:text-5xl font-bold mb-6 text-transparent bg-clip-text bg-gradient-to-r from-white via-teal-100 to-white">
-            ¿Cómo funciona BuscAdis?
+          <h2 className="text-3xl md:text-4xl font-bold tracking-tight bg-gradient-to-r from-white via-cyan-100 to-white bg-clip-text text-transparent mb-4">
+            Cómo funciona <span className="bg-gradient-to-r from-teal-400 to-cyan-400 bg-clip-text text-transparent">BuscAdis</span>
           </h2>
-          <p className="text-xl text-cyan-100/90 max-w-2xl mx-auto">
-            Descubre lo fácil que es encontrar lo que buscas en solo tres simples pasos
+          <p className="text-slate-300 text-lg md:text-xl">
+            Descubre lo fácil que es usar nuestra plataforma y aprovecha todas sus funcionalidades
           </p>
         </motion.div>
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8 lg:gap-12 relative">
-          {steps.map((step, index) => (
-            <motion.div
-              key={step.title}
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.6, delay: index * 0.2 }}
-              onHoverStart={() => {
-                setActiveStep(index);
-                setIsHovering(true);
-              }}
-              onHoverEnd={() => {
-                setActiveStep(null);
-                setIsHovering(false);
-              }}
-              className="relative group"
-            >
-              {/* Step number indicator */}
-              <div className="absolute -top-5 -left-1 md:-left-2 z-10">
-                <div className="relative">
-                  <div className="flex items-center justify-center w-8 h-8 rounded-full bg-gradient-to-br from-teal-400 to-cyan-400 text-slate-900 font-bold text-sm shadow-teal-500/20 shadow-lg">
-                    {index + 1}
-                  </div>
-                  {/* Pulse effect */}
-                  <div className="absolute inset-0 rounded-full bg-gradient-to-br from-teal-400/80 to-cyan-400/80 blur-sm animate-pulse-slow opacity-40"></div>
-                </div>
-              </div>
-              
-              {/* Card glow effect on hover */}
-              <div className="absolute -inset-1 bg-gradient-to-r from-teal-500/30 to-cyan-500/30 rounded-2xl blur opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
-              
-              <motion.div
-                className={`p-6 rounded-2xl bg-gradient-to-br from-slate-800/70 to-slate-900/70 backdrop-blur-sm border border-teal-500/20 group-hover:border-teal-400/40 shadow-xl relative overflow-hidden
-                  ${activeStep === index ? 'shadow-lg scale-105' : 'group-hover:shadow-teal-500/20 group-hover:shadow-lg'} transition-all duration-300`}
-                animate={{
-                  scale: activeStep === index ? 1.05 : 1,
-                  opacity: activeStep === null || activeStep === index ? 1 : 0.7
-                }}
-              >
-                {/* Holographic effect */}
-                <div className="absolute top-0 left-0 w-full h-px bg-gradient-to-r from-transparent via-teal-500/40 to-transparent"></div>
-                <div className="absolute bottom-0 left-0 w-full h-px bg-gradient-to-r from-transparent via-cyan-500/40 to-transparent"></div>
-                
-                {/* Premium corner for each step */}
-                <div className="absolute top-0 right-0 w-12 h-12 overflow-hidden">
-                  <div className="absolute rotate-45 bg-gradient-to-r ${step.color} text-slate-900 font-bold text-[9px] py-1 right-[-35px] top-[8px] w-[100px] text-center shadow-md opacity-80">PREMIUM</div>
-                </div>
-                
-                <motion.div
-                  className={`w-24 h-24 mx-auto mb-6 rounded-2xl bg-gradient-to-br from-slate-800 to-slate-900 
-                    backdrop-blur-sm flex items-center justify-center shadow-lg border border-teal-500/20 group-hover:border-teal-400/40 relative p-3`}
-                  whileHover={{ rotate: [0, -5, 5, -5, 0], scale: 1.1 }}
-                  transition={{ duration: 0.5 }}
-                >
-                  {/* Icon glow */}
-                  <div className="absolute inset-0 rounded-2xl bg-gradient-to-r ${step.color} opacity-0 group-hover:opacity-20 blur-sm transition-opacity"></div>
-                  {step.icon}
-                </motion.div>
-
-                <h3 className="text-2xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-white to-teal-100 mb-4">{step.title}</h3>
-                <p className="text-cyan-100/80 mb-6 leading-relaxed">{step.description}</p>
-
-                <AnimatePresence>
-                  {activeStep === index && (
-                    <motion.div
-                      initial={{ opacity: 0, height: 0 }}
-                      animate={{ opacity: 1, height: 'auto' }}
-                      exit={{ opacity: 0, height: 0 }}
-                      className="space-y-3"
-                    >
-                      {step.details.map((detail, i) => (
-                        <motion.div
-                          key={detail}
-                          initial={{ opacity: 0, x: -20 }}
-                          animate={{ opacity: 1, x: 0 }}
-                          transition={{ delay: i * 0.1 }}
-                          className="flex items-start gap-2 text-sm text-cyan-100/90 group/item"
-                        >
-                          <CheckCircleIcon className="w-5 h-5 text-teal-400 shrink-0 mt-0.5" />
-                          <span className="group-hover/item:text-white transition-colors">{detail}</span>
-                        </motion.div>
-                      ))}
-                    </motion.div>
-                  )}
-                </AnimatePresence>
-              </motion.div>
-
-              {index < steps.length - 1 && (
-                <div className="hidden md:block absolute top-1/3 left-[calc(100%-1rem)] w-[calc(100%-3rem)] h-0.5 z-0">
-                  <motion.div
-                    className="w-full h-full bg-gradient-to-r from-teal-400/40 via-cyan-400/40 to-teal-400/40"
-                    initial={{ scaleX: 0 }}
-                    animate={{ scaleX: 1 }}
-                    transition={{ duration: 1, delay: index * 0.3 }}
-                  >
-                    <motion.div
-                      className="absolute right-0 -top-2 w-4 h-4 rounded-full bg-gradient-to-r from-teal-400 to-cyan-400 flex items-center justify-center"
-                      animate={{
-                        x: [0, 10, 0],
-                        boxShadow: [
-                          '0 0 0 0 rgba(20,184,166,0)',
-                          '0 0 0 3px rgba(20,184,166,0.3)',
-                          '0 0 0 0 rgba(20,184,166,0)'
-                        ]
-                      }}
-                      transition={{
-                        duration: 2,
-                        repeat: Infinity,
-                        ease: "easeInOut",
-                      }}
-                    >
-                      <ArrowRightIcon className="w-2 h-2 text-slate-900" />
-                    </motion.div>
-                  </motion.div>
-                </div>
-              )}
-            </motion.div>
-          ))}
-        </div>
-        
-        {/* Bottom CTA */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.8, delay: 0.8 }}
-          className="mt-16 text-center"
-        >
-          <motion.button
-            className="inline-flex items-center px-6 py-3 text-base font-medium text-slate-900 bg-gradient-to-r from-teal-300 to-cyan-300 rounded-xl shadow-lg hover:shadow-teal-500/30 transition-all duration-300 group relative overflow-hidden"
-            whileHover={{ y: -3 }}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 lg:gap-12 items-center">
+          {/* Visualizador del paso actual */}
+          <motion.div 
+            className="order-2 lg:order-1"
+            initial={{ opacity: 0, x: -20 }}
+            animate={isInView ? { opacity: 1, x: 0 } : { opacity: 0, x: -20 }}
+            transition={{ duration: 0.6, delay: 0.2 }}
           >
-            <span className="relative z-10 flex items-center">
-              Comenzar ahora <ArrowRightIcon className="w-4 h-4 ml-2 group-hover:translate-x-1 transition-transform" />
-            </span>
-            <span className="absolute top-0 left-0 w-full h-full bg-gradient-to-r from-white/0 via-white/70 to-white/0 -translate-x-full group-hover:translate-x-full transition-transform duration-1000 ease-out"></span>
-          </motion.button>
-        </motion.div>
-      </Container>
+            <div className="bg-slate-800/50 backdrop-blur-sm rounded-2xl border border-slate-700/50 shadow-xl p-8 relative overflow-hidden group">
+              {/* Efectos de iluminación premium */}
+              <div className="absolute -inset-1 bg-gradient-to-r from-teal-500/10 via-transparent to-cyan-500/10 rounded-lg blur opacity-30 group-hover:opacity-50 transition duration-1000"></div>
+              <div className="absolute right-0 bottom-0 w-32 h-32 bg-gradient-to-r from-teal-500/10 to-cyan-500/20 blur-2xl rounded-full transform translate-x-1/2 translate-y-1/2 opacity-70"></div>
+              
+              <div className="relative">
+                {currentStep && (
+                  <motion.div
+                    key={currentStep.id}
+                    initial={{ opacity: 0, scale: 0.9 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    exit={{ opacity: 0, scale: 0.9 }}
+                    transition={{ duration: 0.3 }}
+                    className="flex flex-col items-center p-4"
+                  >
+                    <div className={`flex items-center justify-center w-20 h-20 rounded-full bg-gradient-to-br ${currentStep.color} shadow-lg mb-6`}>
+                      <currentStep.icon className="h-10 w-10 text-white" />
+                    </div>
+                    
+                    <h3 className="text-2xl font-bold text-white mb-3">{currentStep.title}</h3>
+                    <p className="text-slate-300 text-center">{currentStep.description}</p>
+                    
+                    <div className="mt-8 flex items-center justify-center">
+                      <span className="text-teal-400 mr-2">Siguiente paso</span>
+                      <ArrowRightIcon className="h-5 w-5 text-teal-400 animate-pulse" />
+                    </div>
+                  </motion.div>
+                )}
+              </div>
+            </div>
+          </motion.div>
+
+          {/* Navegación de pasos */}
+          <motion.div 
+            className="order-1 lg:order-2"
+            variants={containerVariants}
+            initial="hidden"
+            animate={isInView ? "visible" : "hidden"}
+          >
+            <div className="bg-slate-800/30 backdrop-blur-sm rounded-2xl border border-slate-700/50 shadow-lg p-6">
+              <h3 className="text-xl font-semibold text-white mb-6">Sigue estos pasos para comenzar:</h3>
+              
+              <div className="space-y-6">
+                {steps.map((step) => (
+                  <motion.div 
+                    key={step.id}
+                    variants={itemVariants}
+                    className={`relative flex items-center cursor-pointer transition-all duration-300 ${
+                      activeStep === step.id 
+                        ? 'scale-105 transform' 
+                        : 'opacity-70 hover:opacity-90'
+                    }`}
+                    onClick={() => handleStepClick(step.id)}
+                  >
+                    {/* Línea de conexión entre pasos */}
+                    {step.id !== steps.length && (
+                      <div className="absolute left-6 top-10 w-0.5 h-full bg-gradient-to-b from-teal-500/50 to-transparent z-0"></div>
+                    )}
+                    
+                    {/* Paso numerado */}
+                    <div className={`relative z-10 flex items-center justify-center w-12 h-12 rounded-full shadow-lg mr-4 ${
+                      activeStep === step.id 
+                        ? `bg-gradient-to-br ${step.color} ring-2 ring-white/20` 
+                        : 'bg-slate-700'
+                    }`}>
+                      <span className="text-white font-bold">{step.id}</span>
+                      
+                      {/* Pulse effect for active step */}
+                      {activeStep === step.id && (
+                        <span className="absolute inset-0 rounded-full bg-teal-400 opacity-30 animate-ping-slow"></span>
+                      )}
+                    </div>
+                    
+                    <div className={`transition-colors duration-300 ${
+                      activeStep === step.id 
+                        ? 'bg-slate-700/50 shadow-lg' 
+                        : 'bg-slate-800/30 hover:bg-slate-700/40'
+                    } flex-1 p-3 rounded-xl border ${
+                      activeStep === step.id 
+                        ? 'border-teal-500/30' 
+                        : 'border-slate-700/50'
+                    }`}>
+                      <h4 className={`font-medium ${
+                        activeStep === step.id 
+                          ? 'text-transparent bg-clip-text bg-gradient-to-r from-teal-300 to-cyan-300' 
+                          : 'text-white'
+                      }`}>
+                        {step.title}
+                      </h4>
+                      
+                      {activeStep === step.id && (
+                        <div className="mt-1 text-xs text-slate-400">
+                          <span>Haz click para más detalles</span>
+                        </div>
+                      )}
+                    </div>
+                  </motion.div>
+                ))}
+              </div>
+            </div>
+            
+            {/* Indicador de avance */}
+            <div className="mt-6 flex justify-center">
+              <div className="flex space-x-2">
+                {steps.map((step) => (
+                  <button
+                    key={step.id}
+                    onClick={() => handleStepClick(step.id)}
+                    className={`w-2.5 h-2.5 rounded-full transition-all duration-300 ${
+                      activeStep === step.id
+                        ? 'bg-gradient-to-r from-teal-400 to-cyan-400 w-8'
+                        : 'bg-slate-600 hover:bg-slate-500'
+                    }`}
+                    aria-label={`Go to step ${step.id}`}
+                  />
+                ))}
+              </div>
+            </div>
+          </motion.div>
+        </div>
+      </div>
     </section>
   );
 }
