@@ -51,7 +51,7 @@ export default function Navigation() {
     // const { user, isAuthenticated, logout } = useAuth();
 
     return (
-        <header className={`${backgroundColor} fixed top-0 left-0 right-0 h-16 z-50 transition-all duration-300`}>
+        <header className={`${backgroundColor} inherit top-0 left-0 right-0 h-16 z-50 transition-all duration-300`}>
             <div className="container mx-2 px-0 h-full">
                 <div className="flex items-center justify-between h-full">
                     {/* Logo y Navegación Izquierda (Desktop y Mobile) */}
