@@ -3,9 +3,9 @@
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import { HomeIcon, NewspaperIcon, MagnifyingGlassIcon, PlusCircleIcon } from '@heroicons/react/24/outline'
+import { HomeIcon, NewspaperIcon, MagnifyingGlassIcon, PlusCircleIcon, MegaphoneIcon } from '@heroicons/react/24/outline'
 import { UserCircleIcon, BellIcon } from '@heroicons/react/24/solid'; // Iconos adicionales
-import { motion } from 'framer-motion';
+import { motion, useScroll } from 'framer-motion';
 // import { useAuth } from '@/features/auth/hooks/useAuth'; // Comenta o elimina la importación por ahora
 
 export default function Navigation() {
@@ -58,8 +58,8 @@ export default function Navigation() {
                     <div className="flex items-center justify-between w-full md:w-auto">
                         <Link href="/" className={`text-2xl font-bold ${logoTextColor}`}>
                             BuscAdis
+                            {/* Puedes añadir tu logo aquí */}
                         </Link>
-
                         {/* Botón del menú móvil */}
                         <div className="md:hidden">
                             <button onClick={() => setShowMobileMenu(!showMobileMenu)} className={`${textColor} hover:${hoverTextColor} focus:outline-none focus:ring-2 focus:ring-teal-500`}>
@@ -87,8 +87,8 @@ export default function Navigation() {
                     </div>
 
                     {/* Navegación y Acciones a la Derecha (Desktop) */}
-                    <div className="hidden md:flex items-center space-x-3 lg:space-x-4">
-                        <nav className="flex items-center space-x-2">
+                    <div className="hidden md:flex items-center space-x-4">
+                        <nav className="flex items-center space-x-4">
                             <Link
                                 href="/"
                                 className={`px-3 py-2 rounded-md font-medium transition-colors ${
@@ -100,15 +100,15 @@ export default function Navigation() {
                                 <HomeIcon className="w-5 h-5 mr-1 inline-block" /> Inicio
                             </Link>
                             <Link
-                                href="/blog"
+                                href="/revista"
                                 className={`px-3 py-2 rounded-md font-medium transition-colors ${
-                                    isActive('/blog')
+                                    isActive('/revista')
                                         ? `${activeLinkTextColor} ${activeLinkBg}`
                                         : `${textColor} hover:${hoverTextColor} hover:${linkHoverBg}`
-                                }`}
-                            >
-                                <NewspaperIcon className="w-5 h-5 mr-1 inline-block" /> Blog
-                            </Link>
+                            }`}
+                        >
+                            <NewspaperIcon className="w-5 h-5 mr-1 inline-block" /> Revista Digital {/* Cambiado a Revista Digital */}
+                        </Link>
                             <Link
                                 href="/buscar"
                                 className={`px-3 py-2 rounded-md font-medium transition-colors ${
@@ -121,9 +121,9 @@ export default function Navigation() {
                             </Link>
                             <Link
                                 href="/publicar"
-                                className={`${primaryButtonBg} ${primaryButtonTextColor} px-3 py-2 rounded-md font-semibold hover:${primaryButtonHoverBg} transition-colors`}
+                                className={`${primaryButtonBg} ${primaryButtonTextColor} px-4 py-2 rounded-md font-semibold hover:${primaryButtonHoverBg} transition-colors`}
                             >
-                                <PlusCircleIcon className="w-5 h-5 mr-1 inline-block" /> Publicar
+                                <MegaphoneIcon className="w-5 h-5 mr-1 inline-block" /> Publicar {/* Usando MegaphoneIcon */}
                             </Link>
                         </nav>
 
@@ -147,19 +147,19 @@ export default function Navigation() {
                                     >
                                         <Link
                                             href="/perfil"
-                                            className={`block px-4 py-2 text-sm ${textColor} hover:${hoverTextColor} hover:${mobileMenuHoverBg}`}
+                                            className={`block px-4 py-2 text-sm ${textColor} hover:${hoverTextColor} hover:bg-slate-700`}
                                         >
                                             Mi Perfil
                                         </Link>
                                         <Link
                                             href="/mis-anuncios"
-                                            className={`block px-4 py-2 text-sm ${textColor} hover:${hoverTextColor} hover:${mobileMenuHoverBg}`}
+                                            className={`block px-4 py-2 text-sm ${textColor} hover:${hoverTextColor} hover:bg-slate-700`}
                                         >
                                             Mis Anuncios
                                         </Link>
                                         <Link
                                             href="/favoritos"
-                                            className={`block px-4 py-2 text-sm ${textColor} hover:${hoverTextColor} hover:${mobileMenuHoverBg}`}
+                                            className={`block px-4 py-2 text-sm ${textColor} hover:${hoverTextColor} hover:bg-slate-700`}
                                         >
                                             Favoritos
                                         </Link>
@@ -169,37 +169,37 @@ export default function Navigation() {
                                         >
                                             Cerrar Sesión
                                         </button>
-                                    </motion.div>
-                                )}
-                            </div>
-                        ) : (
-                            <div className="flex items-center space-x-2">
-                                <Link
-                                    href="/login"
-                                    className={`${textColor} hover:${hoverTextColor} transition-colors`}
-                                >
-                                    Iniciar sesión
-                                </Link>
-                                <Link
-                                    href="/register"
-                                    className={`${primaryButtonBg} ${primaryButtonTextColor} px-3 py-2 rounded-md text-sm hover:${primaryButtonHoverBg} transition-colors`}
-                                >
-                                    Regístrate
-                                </Link>
-                            </div>
-                        )}
+                                </motion.div>
+                            )}
+                        </div>
+                    ) : (
+                        <div className="flex items-center space-x-2">
+                            <Link
+                                href="/login"
+                                className={`${textColor} hover:${hoverTextColor} mr-4`} {/* Añadiendo margen */}
+                            >
+                                Iniciar sesión
+                            </Link>
+                            <Link
+                                href="/register"
+                                className={`${textColor} hover:${hoverTextColor}`}
+                            >
+                                Regístrate
+                            </Link>
+                        </div>
+                    )}
 
-                        {/* Icono de Notificaciones (Opcional) */}
-                        {isAuthenticated && (
-                            <button className={`${textColor} hover:${hoverTextColor} relative focus:outline-none focus:ring-2 focus:ring-teal-500`}>
-                                <BellIcon className="w-6 h-6" />
-                                {/* Contador de notificaciones */}
-                                {/* <span className="absolute top-0 right-0 rounded-full bg-red-600 w-2 h-2 transform translate-x-1/2 -translate-y-1/2"></span> */}
-                            </button>
-                        )}
-                    </div>
+                    {/* Icono de Notificaciones (Opcional) */}
+                    {isAuthenticated && (
+                        <button className={`${textColor} hover:${hoverTextColor} relative focus:outline-none focus:ring-2 focus:ring-teal-500`}>
+                            <BellIcon className="w-6 h-6" />
+                            {/* Contador de notificaciones */}
+                            {/* <span className="absolute top-0 right-0 rounded-full bg-red-600 w-2 h-2 transform translate-x-1/2 -translate-y-1/2"></span> */}
+                        </button>
+                    )}
                 </div>
             </div>
+        </div>
 
             {/* Menú Móvil */}
             {showMobileMenu && (
