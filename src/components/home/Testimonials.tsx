@@ -1,10 +1,9 @@
 'use client'
 
-import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import Container from '@/components/shared/Container';
 import { SparklesIcon, StarIcon } from '@heroicons/react/24/solid';
-import { ChevronLeftIcon, ChevronRightIcon, UserCircleIcon } from '@heroicons/react/24/outline';
+import { UserCircleIcon } from '@heroicons/react/24/outline';
 import Image from 'next/image';
 import Slider from 'react-slick';
 import 'slick-carousel/slick/slick.css';
@@ -127,10 +126,10 @@ const testimonialsData = [
 
 export default function Testimonials() {
     // Define tus colores personalizados basados en tu diseño
-    const textColor = 'text-gray-300';
+    const textColor = 'text-gray-100';
     const primaryColor = 'text-teal-400';
     const primaryLightColor = 'text-teal-300';
-    const secondaryColor = 'text-cyan-300';
+    const secondaryColor = 'text-cyan-100';
     const backgroundColor = 'bg-slate-900';
     const cardBg = 'bg-gradient-to-br from-slate-800/90 to-slate-900/90 backdrop-blur-sm';
     const cardBorder = 'border border-teal-500/20';
@@ -230,7 +229,7 @@ export default function Testimonials() {
                                             <p className={`text-sm ${secondaryColor}/70`}>{testimonial.location}, {testimonial.category}</p>
                                         </div>
                                     </div>
-                                    <blockquote className={`text-lg italic ${textColor}/90`}>
+                                    <blockquote className={`text-lg italic text-white`}>
                                         &ldquo;{testimonial.quote}&rdquo;
                                     </blockquote>
                                 </div>

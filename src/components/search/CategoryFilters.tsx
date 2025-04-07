@@ -1,18 +1,28 @@
-'use client'
+'use client';
 
-import React from 'react'
-import { useState, useEffect } from 'react'
-import { motion, AnimatePresence } from 'framer-motion'
-import { CategoryId } from '@/types/marketplace'
-import { CategoriesService } from '@/services/categories.service'
-import LoadingSpinner from '@/components/ui/LoadingSpinner'
+import React, { useState, useEffect } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
+import LoadingSpinner from '@/components/ui/LoadingSpinner';
+import { fetchCategories, fetchCategoryTypes } from '@/services/categories.service';
+
+interface Category {
+  id: string;
+  name: string;
+}
+
+interface CategoryType {
+  id: string;
+  name: string;
+  emoji?: string; // Opcional, si tienes emojis
+  count?: number; // Opcional, para cantidades
+}
 
 interface CategoryFiltersProps {
-  selectedCategory: CategoryId | null
-  selectedType: string | null
-  onSelectCategory: (category: CategoryId | null) => void
-  onSelectType: (type: string | null) => void
-  onFilterChange: (filter: any) => void
+  selectedCategory: Category | null;
+  selectedType: string | null;
+  onSelectCategory: (category: Category | null) => void;
+  onSelectType: (type: string | null) => void;
+  onFilterChange: (filter: any) => void;
 }
 
 export default function CategoryFilters({
@@ -20,19 +30,19 @@ export default function CategoryFilters({
   selectedType,
   onSelectCategory,
   onSelectType,
-  onFilterChange
+  onFilterChange,
 }: CategoryFiltersProps) {
-  const [categories, setCategories] = useState([]);
+  const [categories, setCategories] = useState<Category[]>([]);
+  const [categoryTypes, setCategoryTypes] = useState<CategoryType[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
-  const [categoryTypes, setCategoryTypes] = useState([]);
   const [typesLoading, setTypesLoading] = useState(false);
 
   useEffect(() => {
     const loadCategories = async () => {
       try {
         setLoading(true);
-        const categoriesData = await CategoriesService.getCategories();
+        const categoriesData = await fetchCategories();
         setCategories(categoriesData);
       } catch (error) {
         console.error('Error loading categories:', error);
@@ -46,7 +56,7 @@ export default function CategoryFilters({
   }, []);
 
   useEffect(() => {
-    const fetchCategoryTypes = async () => {
+    const loadCategoryTypes = async () => {
       if (!selectedCategory) {
         setCategoryTypes([]);
         return;
@@ -55,41 +65,23 @@ export default function CategoryFilters({
       setTypesLoading(true);
 
       try {
-        // Ejemplo de cómo podrías obtener subcategorías de 
-        const { data, error } = await aws
-          .from('category_types')
-          .select('*')
-          .eq('category_id', selectedCategory);
-          
-        if (error) throw error;
-        
-        // Si no hay subcategorías en la base de datos, usar datos estáticos
-        if (!data || data.length === 0) {
-          // Usar datos estáticos como fallback
-          const staticTypes = [
-            { id: 'all', name: 'Todos' },
-            { id: 'featured', name: 'Destacados' },
-            { id: 'recent', name: 'Recientes' }
-          ];
-          
-          setCategoryTypes(staticTypes);
-        } else {
-          setCategoryTypes(data);
-        }
+        const categoryTypesData = await fetchCategoryTypes(selectedCategory.id);
+        setCategoryTypes(categoryTypesData);
       } catch (error) {
-        console.error('Error fetching category types:', error);
+        console.error('Error loading category types:', error);
         setCategoryTypes([]);
       } finally {
         setTypesLoading(false);
       }
     };
 
-    fetchCategoryTypes();
+    loadCategoryTypes();
   }, [selectedCategory]);
 
-  const handleCategoryChange = (categoryId) => {
-    onSelectCategory(categoryId);
-    onFilterChange({ category: categoryId });
+  const handleCategoryChange = (categoryId: string | null) => {
+    const selected = categories.find((category) => category.id === categoryId) || null;
+    onSelectCategory(selected);
+    onFilterChange({ category: selected });
   };
 
   if (loading) {
@@ -103,22 +95,6 @@ export default function CategoryFilters({
   return (
     <div className="space-y-4">
       <h3 className="font-medium text-lg">Categorías</h3>
-      {/* Eliminar el Select para evitar errores */}
-      {/* <Select defaultValue={selectedCategory} onChange={handleCategoryChange}>
-        <SelectTrigger>
-          <SelectValue placeholder="Selecciona una categoría" />
-        </SelectTrigger>
-        <SelectContent>
-          <SelectItem value="Todos">Todos</SelectItem>
-          {Object.entries(categories).map(([key]) => (
-            <SelectItem key={key} value={key as CategoryId}>
-              {key}
-            </SelectItem>
-          ))}
-        </SelectContent>
-      </Select> */}
-
-      {/* Subtipos con scroll horizontal */}
       <AnimatePresence mode="wait">
         {selectedCategory && (
           <motion.div
@@ -141,7 +117,6 @@ export default function CategoryFilters({
                 <span>🌟</span>
                 <span>Todos</span>
               </motion.button>
-
               {categoryTypes.map((type) => (
                 <motion.button
                   key={type.id}
@@ -164,5 +139,5 @@ export default function CategoryFilters({
         )}
       </AnimatePresence>
     </div>
-  )
-} 
+  );
+}
