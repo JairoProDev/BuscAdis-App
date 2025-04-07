@@ -1,4 +1,4 @@
-// src\components\ui\toaster.tsx
+// src\components\ui\Toaster.tsx
 'use client';
 
 import {
@@ -7,7 +7,7 @@ import {
   ToastProvider,
   ToastTitle,
   ToastViewport,
-} from '@/components/ui/Toast';
+} from '@/components/ui/toast';
 import { useToast } from '@/components/ui/use-toast';
 
 export function Toaster() {
