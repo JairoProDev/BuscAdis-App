@@ -1,6 +1,6 @@
 import { v4 as uuidv4 } from 'uuid';
 import { AuthService } from '@/features/auth/services/auth.service';
-import clientPromise from '@/lib/mongodb';
+import getMongoClient from '@/lib/mongodb';
 
 interface MediaItem {
     url: string;
@@ -46,7 +46,7 @@ interface PublicationParams {
 
 export class PublicationsService {
     private static async getCollection(category?: string) {
-        const client = await clientPromise;
+        const client = await getMongoClient();
         const db = client.db('test');
         
         // Use the right collection based on category, default to inmuebles
@@ -115,7 +115,7 @@ export class PublicationsService {
     static async getPublicationsByUser(userId: string): Promise<any[]> {
         try {
             // We need to search in all collections
-            const client = await clientPromise;
+            const client = await getMongoClient();
             const db = client.db('test');
             
             // Get publications from each collection
@@ -332,7 +332,7 @@ export class PublicationsService {
 
     static async getAllPublications(): Promise<any[]> {
         try {
-            const client = await clientPromise;
+            const client = await getMongoClient();
             const db = client.db('test');
             
             // Get publications from each collection

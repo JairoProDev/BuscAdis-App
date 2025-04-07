@@ -1,16 +1,14 @@
 'use client'
 
-import { useState, useEffect, useRef } from 'react'
+import React from 'react'
+import { useState, useEffect } from 'react'
 import { motion, AnimatePresence, LayoutGroup } from 'framer-motion'
 import { useInView } from 'react-intersection-observer'
 import { 
   Squares2X2Icon, 
   ListBulletIcon, 
-  ArrowsUpDownIcon,
   FireIcon,
   BookmarkIcon,
-  EyeIcon,
-  ShareIcon,
   HeartIcon,
   MapPinIcon
 } from '@heroicons/react/24/outline'
@@ -22,7 +20,6 @@ import { SparklesIcon } from '@heroicons/react/24/solid'
 import Image from 'next/image'
 import Link from 'next/link'
 import useMediaQuery from '@/hooks/useMediaQuery'
-import React from 'react'
 
 export interface Publication {
   id: string
@@ -45,7 +42,7 @@ export interface Publication {
   slug?: string
   categoryName?: string
   distance?: number
-  attributes?: Record<string, any>
+  attributes?: Record<string, unknown>
 }
 
 interface SearchResultsProps {
@@ -69,7 +66,7 @@ function formatPrice(price: number, currency: string = 'PEN'): string {
       currency: currency,
       maximumFractionDigits: 0
     }).format(price)
-  } catch (e) {
+  } catch {
     return `${price.toLocaleString()} ${currency}`
   }
 }
@@ -99,7 +96,6 @@ export default function SearchResults({
   hasMore = false,
   highlightNew = true,
   showInteractionButtons = true,
-  showMap = false,
   activeCategory
 }: SearchResultsProps) {
   // Estado para alternar entre vista de cuadrícula y lista
@@ -109,8 +105,6 @@ export default function SearchResults({
   const [savedItems, setSavedItems] = useState<Set<string>>(new Set())
   // Referencia para los resultados más nuevos
   const [newItemsCount, setNewItemsCount] = useState(0)
-  // Animaciones para resultados que se van cargando
-  const [visibleItems, setVisibleItems] = useState<Set<string>>(new Set())
   // Referencia para infinite scroll
   const { ref: loadMoreRef, inView } = useInView({
     threshold: 0.1,

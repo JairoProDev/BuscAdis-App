@@ -1,9 +1,9 @@
 import { AuthService } from '@/features/auth/services/auth.service';
-import clientPromise from '@/lib/mongodb';
+import getMongoClient from '@/lib/mongodb';
 
 export class ProfileService {
   private static async getCollection() {
-    const client = await clientPromise;
+    const client = await getMongoClient();
     const db = client.db('test');
     return db.collection('profiles');
   }

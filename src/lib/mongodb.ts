@@ -1,11 +1,44 @@
 /**
  * Main MongoDB entry point
- * This module re-exports the shared MongoDB client
+ * This module re-exports the shared MongoDB client with dynamic imports
+ * to avoid loading server-side code on the client
  */
-import getMongoClient, { mongoFetch } from './mongodb-shared';
 
-export { mongoFetch };
-export default getMongoClient; 
+// Check environment to determine which module to use
+const isBrowser = typeof window !== 'undefined';
+
+// For browser environments, we'll use the browser-compatible version
+// For server environments, we'll use the full MongoDB client
+async function getDynamicMongoClient() {
+  if (isBrowser) {
+    // Dynamic import for browser-only code
+    const { default: getBrowserMongoClient, mongoFetch } = await import('./mongodb-browser');
+    return { 
+      default: getBrowserMongoClient,
+      mongoFetch
+    };
+  } else {
+    // Dynamic import for server-only code
+    const { default: getServerMongoClient } = await import('./mongodb-server');
+    return { 
+      default: getServerMongoClient,
+      // Provide a dummy mongoFetch in server context for API consistency
+      mongoFetch: async () => ({ error: 'mongoFetch is only available in browser environments' })
+    };
+  }
+}
+
+// Export a function that dynamically imports the appropriate client
+export default async function getMongoClient() {
+  const { default: client } = await getDynamicMongoClient();
+  return client();
+}
+
+// Export the mongoFetch function for browser environments
+export async function mongoFetch(endpoint: string, options = {}) {
+  const { mongoFetch: fetchFn } = await getDynamicMongoClient();
+  return fetchFn(endpoint, options);
+}
 
 {/*
 import { MongoClient } from 'mongodb';
