@@ -61,7 +61,7 @@ const defaultAchievements: Achievement[] = [
   }
 ];
 
-export const PublishAchievements: React.FC<PublishAchievementsProps> = ({
+const PublishAchievements: React.FC<PublishAchievementsProps> = ({
   achievements = defaultAchievements,
   totalPoints = 0,
   onAchievementClick,
@@ -169,4 +169,6 @@ export const PublishAchievements: React.FC<PublishAchievementsProps> = ({
       )}
     </div>
   );
-}; 
+};
+
+export default PublishAchievements; 

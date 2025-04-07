@@ -22,6 +22,7 @@ import { SparklesIcon } from '@heroicons/react/24/solid'
 import Image from 'next/image'
 import Link from 'next/link'
 import useMediaQuery from '@/hooks/useMediaQuery'
+import React from 'react'
 
 export interface Publication {
   id: string
@@ -546,9 +547,9 @@ export default function SearchResults({
       
       {/* Resultados */}
       <LayoutGroup>
-        <AnimatePresence mode="popLayout">
+        <AnimatePresence mode="wait">
           {results.length > 0 ? (
-            <>
+            <React.Fragment key="results">
               {viewMode === 'grid' ? (
                 <div className={`grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 gap-4`}>
                   {results.map((publication, index) => renderGridItem(publication, index))}
@@ -576,7 +577,7 @@ export default function SearchResults({
                   )}
                 </div>
               )}
-            </>
+            </React.Fragment>
           ) : (
             <motion.div
               initial={{ opacity: 0 }}

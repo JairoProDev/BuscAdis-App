@@ -11,7 +11,7 @@ interface ImageUploaderProps {
   className?: string;
 }
 
-export const ImageUploader: React.FC<ImageUploaderProps> = ({
+const ImageUploader: React.FC<ImageUploaderProps> = ({
   onImagesChange,
   maxImages = 10,
   className = ''
@@ -55,8 +55,9 @@ export const ImageUploader: React.FC<ImageUploaderProps> = ({
           const processed = await ImageService.processImage(optimizedFile);
           processedImages.push(processed);
           Logger.success(`Imagen ${i + 1} procesada exitosamente`);
-        } catch (error) {
-          Logger.error(`Error al procesar la imagen ${i + 1}:`, error);
+        } catch (error: unknown) {
+          const errorMessage = error instanceof Error ? error.message : String(error);
+          Logger.error(`Error al procesar la imagen ${i + 1}: ${errorMessage}`);
           newErrors.push(`Error al procesar la imagen ${file.name}`);
         }
       }
@@ -66,8 +67,9 @@ export const ImageUploader: React.FC<ImageUploaderProps> = ({
         setImages(updatedImages);
         onImagesChange(updatedImages);
       }
-    } catch (error) {
-      Logger.error('Error al procesar las imágenes:', error);
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : String(error);
+      Logger.error(`Error al procesar las imágenes: ${errorMessage}`);
       newErrors.push('Error al procesar las imágenes');
     } finally {
       setErrors(newErrors);
@@ -214,4 +216,6 @@ export const ImageUploader: React.FC<ImageUploaderProps> = ({
       </AnimatePresence>
     </div>
   );
-}; 
+};
+
+export default ImageUploader; 

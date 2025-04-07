@@ -377,6 +377,7 @@ export default function CategorySelector({
         <AnimatePresence mode="wait">
           {selectedCategory?.subcategories && selectedCategory.subcategories.length > 0 && (
             <motion.div
+              key="subcategories"
               initial={{ opacity: 0, y: -10 }}
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -10 }}
@@ -414,6 +415,7 @@ export default function CategorySelector({
           {/* Sub-sub-navegación si hay una subcategoría seleccionada */}
           {selectedSubcategory?.subsubcategories && selectedSubcategory.subsubcategories.length > 0 && (
             <motion.div
+              key="subsubcategories"
               initial={{ opacity: 0, y: -10 }}
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -10 }}
