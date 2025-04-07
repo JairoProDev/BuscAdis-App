@@ -3,7 +3,7 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import LoadingSpinner from '@/components/ui/LoadingSpinner';
-import { fetchCategories, fetchCategoryTypes } from '@/services/categories.service';
+import { CategoriesService } from '@/services/categories.service'; // Usamos la clase directamente.
 
 interface Category {
   id: string;
@@ -13,8 +13,8 @@ interface Category {
 interface CategoryType {
   id: string;
   name: string;
-  emoji?: string; // Opcional, si tienes emojis
-  count?: number; // Opcional, para cantidades
+  emoji?: string;
+  count?: number;
 }
 
 interface CategoryFiltersProps {
@@ -22,7 +22,7 @@ interface CategoryFiltersProps {
   selectedType: string | null;
   onSelectCategory: (category: Category | null) => void;
   onSelectType: (type: string | null) => void;
-  onFilterChange: (filter: any) => void;
+  onFilterChange: (filter: { category?: Category | null; type?: string | null }) => void;
 }
 
 export default function CategoryFilters({
@@ -36,13 +36,12 @@ export default function CategoryFilters({
   const [categoryTypes, setCategoryTypes] = useState<CategoryType[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
-  const [typesLoading, setTypesLoading] = useState(false);
 
   useEffect(() => {
     const loadCategories = async () => {
       try {
         setLoading(true);
-        const categoriesData = await fetchCategories();
+        const categoriesData = await CategoriesService.getCategories();
         setCategories(categoriesData);
       } catch (error) {
         console.error('Error loading categories:', error);
@@ -62,26 +61,28 @@ export default function CategoryFilters({
         return;
       }
 
-      setTypesLoading(true);
-
       try {
-        const categoryTypesData = await fetchCategoryTypes(selectedCategory.id);
+        const categoryTypesData = await CategoriesService.getCategoryWithTypes(selectedCategory.id);
         setCategoryTypes(categoryTypesData);
       } catch (error) {
         console.error('Error loading category types:', error);
         setCategoryTypes([]);
-      } finally {
-        setTypesLoading(false);
       }
     };
 
     loadCategoryTypes();
   }, [selectedCategory]);
 
-  const handleCategoryChange = (categoryId: string | null) => {
+  const handleCategoryChange = (categoryId: string) => {
+    // Encuentra la categoría seleccionada en la lista de categorías
     const selected = categories.find((category) => category.id === categoryId) || null;
+
+    // Actualiza la categoría seleccionada en la función padre y filtra los resultados
     onSelectCategory(selected);
     onFilterChange({ category: selected });
+
+    // Limpia los tipos asociados para la nueva selección de categoría
+    setCategoryTypes([]);
   };
 
   if (loading) {
@@ -95,46 +96,50 @@ export default function CategoryFilters({
   return (
     <div className="space-y-4">
       <h3 className="font-medium text-lg">Categorías</h3>
-      <AnimatePresence mode="wait">
+
+      {/* Renderizar las categorías */}
+      <div className="flex gap-4 overflow-x-auto hide-scrollbar">
+        {categories.map((category) => (
+          <button
+            key={category.id}
+            onClick={() => handleCategoryChange(category.id)}
+            className={`px-4 py-2 rounded-full ${
+              selectedCategory?.id === category.id
+                ? 'bg-primary-500 text-white'
+                : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+            }`}
+          >
+            {category.name}
+          </button>
+        ))}
+      </div>
+
+      {/* Renderizar los subtipos de la categoría seleccionada */}
+      <AnimatePresence>
         {selectedCategory && (
           <motion.div
-            initial={{ opacity: 0, y: -20 }}
+            initial={{ opacity: 0, y: -10 }}
             animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -20 }}
-            className="flex overflow-x-auto hide-scrollbar -mx-4 px-4"
+            exit={{ opacity: 0, y: -10 }}
+            className="flex gap-2 overflow-x-auto hide-scrollbar"
           >
-            <div className="flex gap-2 min-w-max pb-2">
+            {categoryTypes.map((type) => (
               <motion.button
-                onClick={() => onSelectType(null)}
-                className={`flex items-center space-x-2 px-4 py-2 rounded-full whitespace-nowrap ${
-                  selectedType === null
-                    ? 'bg-white text-primary-900'
-                    : 'bg-white/10 text-white hover:bg-white/20'
+                key={type.id}
+                onClick={() => onSelectType(type.id)}
+                className={`px-4 py-2 rounded-full ${
+                  selectedType === type.id
+                    ? 'bg-primary-500 text-white'
+                    : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
                 }`}
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
               >
-                <span>🌟</span>
-                <span>Todos</span>
+                {type.emoji ? `${type.emoji} ` : ''}
+                {type.name}
+                {type.count ? ` (${type.count})` : ''}
               </motion.button>
-              {categoryTypes.map((type) => (
-                <motion.button
-                  key={type.id}
-                  onClick={() => onSelectType(type.id)}
-                  className={`flex items-center space-x-2 px-4 py-2 rounded-full whitespace-nowrap ${
-                    selectedType === type.id
-                      ? 'bg-white text-primary-900'
-                      : 'bg-white/10 text-white hover:bg-white/20'
-                  }`}
-                  whileHover={{ scale: 1.05 }}
-                  whileTap={{ scale: 0.95 }}
-                >
-                  <span>{type.emoji}</span>
-                  <span>{type.name}</span>
-                  <span className="text-xs opacity-60">({type.count})</span>
-                </motion.button>
-              ))}
-            </div>
+            ))}
           </motion.div>
         )}
       </AnimatePresence>

@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { Toast } from './Toast'; // Cambia la importación aquí
+import { Toast } from './Toast';
 import { useToast as useToastHook } from '@/hooks/useToast';
 
 // Contexto global para acceder al hook desde cualquier parte de la aplicación
