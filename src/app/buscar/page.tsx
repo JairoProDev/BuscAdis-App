@@ -1,3 +1,4 @@
+// src\app\buscar\page.tsx
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
@@ -7,7 +8,7 @@ import { mongoFetch } from '@/lib/dbConnect';
 import { AlertCircle } from 'lucide-react';
 import SearchLayout from '@/components/search/SearchLayout';
 import { Publication } from '@/components/search/SearchResults';
-import { useToast } from '@/hooks/useToast';
+import { useToast } from '@/components/ui/use-toast';
 import { 
   RocketLaunchIcon, 
   SparklesIcon
@@ -174,12 +175,13 @@ export default function BuscadorPage() {
         
         // Mostrar notificación
         setTimeout(() => {
-          showToast({
-            title: "¡Recompensa diaria!",
-            message: `Has ganado ${pointsToAdd} puntos por buscar hoy`,
-            type: "success",
-            icon: <SparklesIcon className="h-5 w-5" />
-          });
+           toast({
+               title: "¡Recompensa diaria!",
+               description: `Has ganado ${pointsToAdd} puntos por buscar hoy.`,
+               // variant: 'success', // Shadcn typically uses variants, check its docs/implementation
+               // You can add an action button if needed, e.g.:
+               // action: <ToastAction altText="Ok">Ok</ToastAction>,
+             });
         }, 1000);
       }
     } catch (e) {

@@ -1,4 +1,4 @@
-// layout.tsx
+// src/app/layout.tsx
 
 import './globals.css';
 import { Inter } from 'next/font/google';
@@ -11,7 +11,6 @@ import { Suspense } from 'react';
 import { Toaster } from '@/components/ui/toaster';
 import { PublicationProvider } from '@/contexts/PublicationContext';
 import { ReactNode } from 'react';
-import { ToastProvider } from '@/providers/ToastProvider';
 import type { Metadata } from 'next';
 
 const inter = Inter({ subsets: ['latin'] });
@@ -25,7 +24,6 @@ export default function RootLayout({ children }: { children: ReactNode }) {
   return (
     <html lang="es" suppressHydrationWarning>
       <body className={inter.className}>
-        <ToastProvider>
           <ThemeProvider>
             <PublicationProvider>
               <div className="flex min-h-screen flex-col bg-background text-foreground">
@@ -39,7 +37,6 @@ export default function RootLayout({ children }: { children: ReactNode }) {
               <Toaster />
             </PublicationProvider>
           </ThemeProvider>
-        </ToastProvider>
       </body>
     </html>
   );

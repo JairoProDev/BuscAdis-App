@@ -1,3 +1,4 @@
+// src\services\logging.service.ts
 import { toast } from 'react-hot-toast';
 
 type LogLevel = 'info' | 'success' | 'warning' | 'error' | 'debug';
