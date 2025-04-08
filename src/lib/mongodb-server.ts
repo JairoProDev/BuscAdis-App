@@ -3,9 +3,11 @@
  * This uses the real MongoDB driver and is only imported on the server
  */
 
-import { MongoClient } from 'mongodb';
+import { MongoClient, ObjectId } from 'mongodb';
 import { MongoClientInterface } from './mongodb';
 import { COLLECTIONS } from './mongodb-shared';
+import { PublicationDocument } from '@/types/interfaces';
+import { Category } from './mongodb';
 
 // MongoDB connection string should be in environment variables
 const MONGODB_URI = process.env.MONGODB_URI || 'mongodb://localhost:27017';
@@ -15,193 +17,355 @@ const MONGODB_DB = process.env.MONGODB_DB || 'test';
 let cachedClient: MongoClient | null = null;
 let cachedDb: any = null;
 
-// Create a new MongoDB client with connection pooling
-export default async function getServerMongoClient(): Promise<MongoClientInterface> {
-  // If we already have a connection, use it
-  if (!cachedClient) {
-    cachedClient = new MongoClient(MONGODB_URI, {
-      // Connection pooling options
-      maxPoolSize: 10,
-      minPoolSize: 5,
-    });
+// Connection options with better timeouts and retries
+const connectionOptions = {
+  connectTimeoutMS: 10000,
+  socketTimeoutMS: 45000,
+  serverSelectionTimeoutMS: 10000,
+  maxPoolSize: 50,
+  minPoolSize: 5,
+  retryWrites: true,
+  retryReads: true
+};
 
-    // Connect to the database
-    await cachedClient.connect();
-    cachedDb = cachedClient.db(MONGODB_DB);
+// Create a new MongoDB client with connection pooling and error handling
+export const getServerMongoClient = async (): Promise<MongoClientInterface> => {
+  if (cachedClient && cachedDb) {
+    console.log('Using cached MongoDB connection');
+    return createServerMongoClient(cachedClient, cachedDb);
   }
 
-  // Return an object that implements MongoClientInterface
+  try {
+    console.log('Establishing new MongoDB connection...');
+    const client = new MongoClient(MONGODB_URI, connectionOptions);
+    await client.connect();
+    const db = client.db(MONGODB_DB);
+
+    cachedClient = client;
+    cachedDb = db;
+
+    console.log('MongoDB connected successfully');
+    return createServerMongoClient(client, db);
+  } catch (error) {
+    console.error('MongoDB connection error:', error);
+    throw new Error('Failed to connect to MongoDB');
+  }
+};
+
+function createServerMongoClient(client: MongoClient, db: any): MongoClientInterface {
   return {
-    fetchPublications: async (options = {}) => {
-      const { 
-        category, 
-        query, 
-        minPrice, 
-        maxPrice, 
-        location, 
-        sortBy = 'recent',
-        page = 1, 
-        limit = 12 
-      } = options;
-      
-      // Build MongoDB query
-      const mongoQuery: any = {};
-      
-      if (category) mongoQuery.category = category;
-      
-      if (query) {
-        mongoQuery.$or = [
-          { title: { $regex: query, $options: 'i' } },
-          { description: { $regex: query, $options: 'i' } }
-        ];
-      }
-      
-      if (location) {
-        mongoQuery['location.city'] = { $regex: location, $options: 'i' };
-      }
-      
-      if (minPrice || maxPrice) {
-        mongoQuery.price = {};
-        if (minPrice) mongoQuery.price.$gte = parseFloat(minPrice);
-        if (maxPrice) mongoQuery.price.$lte = parseFloat(maxPrice);
-      }
-      
-      // Sort options
-      const sortOptions: any = {};
-      switch (sortBy) {
-        case 'price_asc':
-          sortOptions.price = 1;
-          break;
-        case 'price_desc':
-          sortOptions.price = -1;
-          break;
-        case 'recent':
-        default:
-          sortOptions.created_at = -1;
-      }
-      
-      // Calculate pagination
-      const skip = (page - 1) * limit;
-      
-      // Use appropriate collection based on category
-      const collectionName = category === 'empleos' ? COLLECTIONS.PUBLICATIONS_EMPLEOS :
-                            category === 'servicios' ? COLLECTIONS.PUBLICATIONS_SERVICIOS :
-                            category === 'vehiculos' ? COLLECTIONS.PUBLICATIONS_VEHICULOS :
-                            COLLECTIONS.PUBLICATIONS_INMUEBLES;
-                            
-      const data = await cachedDb.collection(collectionName).find(mongoQuery)
-        .sort(sortOptions)
-        .skip(skip)
-        .limit(limit)
-        .toArray();
+    async fetchPublications(
+      category: string,
+      page = 1,
+      limit = 20,
+      filters: Record<string, any> = {},
+    ) {
+      try {
+        // Determine which collection to use based on category
+        let collectionName: string = COLLECTIONS.PUBLICATIONS_INMUEBLES;
         
-      // Get total count for pagination  
-      const totalCount = await cachedDb.collection(collectionName).countDocuments(mongoQuery);
-      
-      return {
-        publications: data,
-        total: totalCount,
-        pages: Math.ceil(totalCount / limit),
-        page
-      };
-    },
-    
-    fetchPublicationById: async (id) => {
-      // Try to find in each collection since we don't know which one it's in
-      const collections = [
-        COLLECTIONS.PUBLICATIONS_INMUEBLES,
-        COLLECTIONS.PUBLICATIONS_EMPLEOS,
-        COLLECTIONS.PUBLICATIONS_SERVICIOS,
-        COLLECTIONS.PUBLICATIONS_VEHICULOS
-      ];
-      
-      for (const collection of collections) {
-        const result = await cachedDb.collection(collection).findOne({ id });
-        if (result) return result;
+        switch (category) {
+          case 'inmuebles':
+            collectionName = COLLECTIONS.PUBLICATIONS_INMUEBLES;
+            break;
+          case 'vehiculos':
+            collectionName = COLLECTIONS.PUBLICATIONS_VEHICULOS;
+            break;
+          case 'empleos':
+            collectionName = COLLECTIONS.PUBLICATIONS_EMPLEOS;
+            break;
+          case 'servicios':
+            collectionName = COLLECTIONS.PUBLICATIONS_SERVICIOS;
+            break;
+          case 'productos':
+            collectionName = COLLECTIONS.PUBLICATIONS_PRODUCTOS;
+            break;
+          case 'eventos':
+            collectionName = COLLECTIONS.PUBLICATIONS_EVENTOS;
+            break;
+          case 'negocios':
+            collectionName = COLLECTIONS.PUBLICATIONS_NEGOCIOS;
+            break;
+          case 'comunidad':
+            collectionName = COLLECTIONS.PUBLICATIONS_COMUNIDAD;
+            break;
+          default:
+            collectionName = COLLECTIONS.PUBLICATIONS_INMUEBLES;
+        }
+
+        // Check if the collection exists
+        const collections = await db.listCollections({ name: collectionName }).toArray();
+        if (collections.length === 0) {
+          console.log(`Collection ${collectionName} does not exist yet`);
+          return { publications: [], totalCount: 0 };
+        }
+        
+        const collection = db.collection(collectionName);
+        
+        // Building the query
+        const query: any = {};
+        
+        // Add filters
+        if (filters.minPrice && filters.maxPrice) {
+          query.price = { $gte: filters.minPrice, $lte: filters.maxPrice };
+        } else if (filters.minPrice) {
+          query.price = { $gte: filters.minPrice };
+        } else if (filters.maxPrice) {
+          query.price = { $lte: filters.maxPrice };
+        }
+        
+        if (filters.location) {
+          query.location = filters.location;
+        }
+        
+        if (filters.subcategory) {
+          query.subcategory = filters.subcategory;
+        }
+        
+        // Calculate pagination
+        const skip = (page - 1) * limit;
+        
+        // Execute query
+        const publications = await collection
+          .find(query)
+          .sort({ createdAt: -1 })
+          .skip(skip)
+          .limit(limit)
+          .toArray();
+        
+        // Get total count for pagination
+        const totalCount = await collection.countDocuments(query);
+        
+        return { publications, totalCount };
+      } catch (error) {
+        console.error('Error fetching publications:', error);
+        return { publications: [], totalCount: 0 };
       }
-      
-      return null;
     },
     
-    fetchPublicationsByUser: async (userId) => {
-      // We need to search in all collections
-      const inmuebles = await cachedDb.collection(COLLECTIONS.PUBLICATIONS_INMUEBLES).find({ userId }).toArray();
-      const empleos = await cachedDb.collection(COLLECTIONS.PUBLICATIONS_EMPLEOS).find({ userId }).toArray();
-      const servicios = await cachedDb.collection(COLLECTIONS.PUBLICATIONS_SERVICIOS).find({ userId }).toArray();
-      const vehiculos = await cachedDb.collection(COLLECTIONS.PUBLICATIONS_VEHICULOS).find({ userId }).toArray();
-      
-      // Combine and return all results
-      return [...inmuebles, ...empleos, ...servicios, ...vehiculos];
+    async fetchPublicationById(id: string, category: string) {
+      try {
+        // Determine which collection to use based on category
+        let collectionName: string;
+        
+        switch (category) {
+          case 'inmuebles':
+            collectionName = COLLECTIONS.PUBLICATIONS_INMUEBLES;
+            break;
+          case 'vehiculos':
+            collectionName = COLLECTIONS.PUBLICATIONS_VEHICULOS;
+            break;
+          case 'empleos':
+            collectionName = COLLECTIONS.PUBLICATIONS_EMPLEOS;
+            break;
+          case 'servicios':
+            collectionName = COLLECTIONS.PUBLICATIONS_SERVICIOS;
+            break;
+          case 'productos':
+            collectionName = COLLECTIONS.PUBLICATIONS_PRODUCTOS;
+            break;
+          case 'eventos':
+            collectionName = COLLECTIONS.PUBLICATIONS_EVENTOS;
+            break;
+          case 'negocios':
+            collectionName = COLLECTIONS.PUBLICATIONS_NEGOCIOS;
+            break;
+          case 'comunidad':
+            collectionName = COLLECTIONS.PUBLICATIONS_COMUNIDAD;
+            break;
+          default:
+            collectionName = COLLECTIONS.PUBLICATIONS_INMUEBLES;
+        }
+        
+        const collection = db.collection(collectionName);
+        return await collection.findOne({ _id: new ObjectId(id) });
+      } catch (error) {
+        console.error('Error fetching publication by ID:', error);
+        return null;
+      }
     },
     
-    createPublication: async (data) => {
-      // Determine collection based on category
-      const categorySlug = data.category || 'inmuebles';
-      const collectionName = `publications_${categorySlug}`;
-      
-      const now = new Date();
-      const publicationData = {
-        ...data,
-        id: data.id || `pub_${Date.now()}`, // Generate ID if not provided
-        status: 'active',
-        created_at: now,
-        updated_at: now
-      };
-      
-      // Insert the document
-      const result = await cachedDb.collection(collectionName).insertOne(publicationData);
-      
-      return { 
-        success: !!result.acknowledged,
-        id: publicationData.id
-      };
+    async fetchPublicationsByUser(userId: string) {
+      try {
+        const collections = [
+          COLLECTIONS.PUBLICATIONS_INMUEBLES,
+          COLLECTIONS.PUBLICATIONS_VEHICULOS,
+          COLLECTIONS.PUBLICATIONS_EMPLEOS,
+          COLLECTIONS.PUBLICATIONS_SERVICIOS,
+          COLLECTIONS.PUBLICATIONS_PRODUCTOS,
+          COLLECTIONS.PUBLICATIONS_EVENTOS,
+          COLLECTIONS.PUBLICATIONS_NEGOCIOS,
+          COLLECTIONS.PUBLICATIONS_COMUNIDAD
+        ];
+        
+        const results = [];
+        
+        for (const collectionName of collections) {
+          try {
+            // Check if collection exists
+            const collExists = await db.listCollections({ name: collectionName }).toArray();
+            if (collExists.length === 0) {
+              continue;
+            }
+            
+            const collection = db.collection(collectionName);
+            const items = await collection
+              .find({ userId })
+              .sort({ createdAt: -1 })
+              .toArray();
+            
+            results.push(...items);
+          } catch (err) {
+            console.error(`Error fetching from ${collectionName}:`, err);
+          }
+        }
+        
+        return results;
+      } catch (error) {
+        console.error('Error fetching publications by user:', error);
+        return [];
+      }
     },
     
-    updatePublication: async (id, data) => {
-      // Try to update in each collection since we don't know which one it's in
-      const collections = [
-        COLLECTIONS.PUBLICATIONS_INMUEBLES,
-        COLLECTIONS.PUBLICATIONS_EMPLEOS,
-        COLLECTIONS.PUBLICATIONS_SERVICIOS,
-        COLLECTIONS.PUBLICATIONS_VEHICULOS
-      ];
-      
-      for (const collection of collections) {
-        const result = await cachedDb.collection(collection).updateOne(
-          { id },
+    async createPublication(data: PublicationDocument) {
+      try {
+        let collectionName: string;
+        
+        switch (data.category) {
+          case 'inmuebles':
+            collectionName = COLLECTIONS.PUBLICATIONS_INMUEBLES;
+            break;
+          case 'vehiculos':
+            collectionName = COLLECTIONS.PUBLICATIONS_VEHICULOS;
+            break;
+          case 'empleos':
+            collectionName = COLLECTIONS.PUBLICATIONS_EMPLEOS;
+            break;
+          case 'servicios':
+            collectionName = COLLECTIONS.PUBLICATIONS_SERVICIOS;
+            break;
+          case 'productos':
+            collectionName = COLLECTIONS.PUBLICATIONS_PRODUCTOS;
+            break;
+          case 'eventos':
+            collectionName = COLLECTIONS.PUBLICATIONS_EVENTOS;
+            break;
+          case 'negocios':
+            collectionName = COLLECTIONS.PUBLICATIONS_NEGOCIOS;
+            break;
+          case 'comunidad':
+            collectionName = COLLECTIONS.PUBLICATIONS_COMUNIDAD;
+            break;
+          default:
+            collectionName = COLLECTIONS.PUBLICATIONS_INMUEBLES;
+        }
+        
+        const collection = db.collection(collectionName);
+        const result = await collection.insertOne({
+          ...data,
+          createdAt: new Date(),
+          updatedAt: new Date(),
+        });
+        
+        return { id: result.insertedId.toString(), ...data };
+      } catch (error) {
+        console.error('Error creating publication:', error);
+        throw error;
+      }
+    },
+    
+    async updatePublication(id: string, category: string, data: Partial<PublicationDocument>) {
+      try {
+        let collectionName: string;
+        
+        switch (category) {
+          case 'inmuebles':
+            collectionName = COLLECTIONS.PUBLICATIONS_INMUEBLES;
+            break;
+          case 'vehiculos':
+            collectionName = COLLECTIONS.PUBLICATIONS_VEHICULOS;
+            break;
+          case 'empleos':
+            collectionName = COLLECTIONS.PUBLICATIONS_EMPLEOS;
+            break;
+          case 'servicios':
+            collectionName = COLLECTIONS.PUBLICATIONS_SERVICIOS;
+            break;
+          case 'productos':
+            collectionName = COLLECTIONS.PUBLICATIONS_PRODUCTOS;
+            break;
+          case 'eventos':
+            collectionName = COLLECTIONS.PUBLICATIONS_EVENTOS;
+            break;
+          case 'negocios':
+            collectionName = COLLECTIONS.PUBLICATIONS_NEGOCIOS;
+            break;
+          case 'comunidad':
+            collectionName = COLLECTIONS.PUBLICATIONS_COMUNIDAD;
+            break;
+          default:
+            collectionName = COLLECTIONS.PUBLICATIONS_INMUEBLES;
+        }
+        
+        const collection = db.collection(collectionName);
+        const result = await collection.updateOne(
+          { _id: new ObjectId(id) },
           { 
-            $set: {
+            $set: { 
               ...data,
-              updated_at: new Date()
+              updatedAt: new Date() 
             } 
           }
         );
         
-        if (result.matchedCount > 0) {
-          return { success: true, modified: result.modifiedCount > 0 };
-        }
+        return result.modifiedCount > 0;
+      } catch (error) {
+        console.error('Error updating publication:', error);
+        return false;
       }
-      
-      return { success: false, error: 'Publication not found' };
     },
     
-    deletePublication: async (id) => {
-      // Try to delete from each collection since we don't know which one it's in
-      const collections = [
-        COLLECTIONS.PUBLICATIONS_INMUEBLES,
-        COLLECTIONS.PUBLICATIONS_EMPLEOS,
-        COLLECTIONS.PUBLICATIONS_SERVICIOS,
-        COLLECTIONS.PUBLICATIONS_VEHICULOS
-      ];
-      
-      for (const collection of collections) {
-        const result = await cachedDb.collection(collection).deleteOne({ id });
-        if (result.deletedCount > 0) {
-          return { success: true };
+    async deletePublication(id: string, category: string) {
+      try {
+        let collectionName: string;
+        
+        switch (category) {
+          case 'inmuebles':
+            collectionName = COLLECTIONS.PUBLICATIONS_INMUEBLES;
+            break;
+          case 'vehiculos':
+            collectionName = COLLECTIONS.PUBLICATIONS_VEHICULOS;
+            break;
+          case 'empleos':
+            collectionName = COLLECTIONS.PUBLICATIONS_EMPLEOS;
+            break;
+          case 'servicios':
+            collectionName = COLLECTIONS.PUBLICATIONS_SERVICIOS;
+            break;
+          case 'productos':
+            collectionName = COLLECTIONS.PUBLICATIONS_PRODUCTOS;
+            break;
+          case 'eventos':
+            collectionName = COLLECTIONS.PUBLICATIONS_EVENTOS;
+            break;
+          case 'negocios':
+            collectionName = COLLECTIONS.PUBLICATIONS_NEGOCIOS;
+            break;
+          case 'comunidad':
+            collectionName = COLLECTIONS.PUBLICATIONS_COMUNIDAD;
+            break;
+          default:
+            collectionName = COLLECTIONS.PUBLICATIONS_INMUEBLES;
         }
+        
+        const collection = db.collection(collectionName);
+        const result = await collection.deleteOne({ _id: new ObjectId(id) });
+        
+        return result.deletedCount > 0;
+      } catch (error) {
+        console.error('Error deleting publication:', error);
+        return false;
       }
-      
-      return { success: false, error: 'Publication not found' };
     }
   };
 } 

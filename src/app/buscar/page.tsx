@@ -4,7 +4,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { motion } from 'framer-motion';
 import { useRouter, useSearchParams, usePathname } from 'next/navigation';
-import { mongoFetch } from '@/lib/dbConnect';
+import { mongoFetch } from '@/lib/mongodb-browser';
 import { AlertCircle } from 'lucide-react';
 import SearchLayout from '@/components/search/SearchLayout';
 import { Publication } from '@/components/search/SearchResults';
@@ -100,56 +100,98 @@ export default function BuscadorPage() {
     setLoading(true);
     setError('');
     
-    try {
-      // Filter empty params
-      const queryParams: Record<string, string> = {};
-      Object.entries(params).forEach(([key, value]) => {
-        if (value && key !== 'limit') {
-          queryParams[key] = value.toString();
+    // Maximum retries
+    const maxRetries = 2;
+    let retries = 0;
+    let succeeded = false;
+    
+    while (retries <= maxRetries && !succeeded) {
+      try {
+        // Filter empty params
+        const queryParams: Record<string, string> = {};
+        Object.entries(params).forEach(([key, value]) => {
+          if (value && key !== 'limit') {
+            queryParams[key] = value.toString();
+          }
+        });
+        
+        // Set default limit
+        queryParams.limit = params.limit?.toString() || '12';
+        
+        // Use MongoDB browser adapter to fetch data
+        const response = await mongoFetch('/api/publications', { queryParams });
+        
+        // Check if we got publications
+        if (!response.publications) {
+          throw new Error('No se encontraron resultados');
         }
-      });
-      
-      // Set default limit
-      queryParams.limit = params.limit?.toString() || '12';
-      
-      // Use MongoDB browser adapter to fetch data
-      const response = await mongoFetch('/api/publications', { queryParams });
-      
-      // Enhance results with UI data
-      const publications = response.publications || [];
-      const enhancedPublications = publications.map((pub: Publication) => ({
-        ...pub,
-        premium: pub.id?.includes('premium') || Math.random() > 0.8,
-        verified: Math.random() > 0.7,
-        views: Math.floor(Math.random() * 500) + 50,
-        likes: Math.floor(Math.random() * 50),
-        bookmarks: Math.floor(Math.random() * 20)
-      }));
-      
-      setResults(enhancedPublications);
-      setTotalResults(response.total || 0);
-      setTotalPages(response.pages || 1);
-      
-      // Save search history if we have results
-      if (params.query && enhancedPublications.length > 0) {
-        saveSearchHistory(params.query);
+        
+        // Enhance results with UI data and normalize location
+        const publications = response.publications || [];
+        const enhancedPublications = publications.map((pub: Publication) => {
+          // Ensure location is properly formatted for React rendering
+          let locationText = '';
+          if (typeof pub.location === 'string') {
+            locationText = pub.location;
+          } else if (pub.location && typeof pub.location === 'object') {
+            locationText = pub.location.city || '';
+            if (pub.location.region && pub.location.region !== pub.location.city) {
+              locationText += pub.location.region ? `, ${pub.location.region}` : '';
+            }
+          }
+
+          return {
+            ...pub,
+            // Ensure location is a string for rendering
+            location: locationText,
+            premium: pub.id?.includes('premium') || Math.random() > 0.8,
+            verified: Math.random() > 0.7,
+            views: Math.floor(Math.random() * 500) + 50,
+            likes: Math.floor(Math.random() * 50),
+            bookmarks: Math.floor(Math.random() * 20)
+          };
+        });
+        
+        setResults(enhancedPublications);
+        setTotalResults(response.total || 0);
+        setTotalPages(response.pages || 1);
+        
+        // Save search history if we have results
+        if (params.query && enhancedPublications.length > 0) {
+          saveSearchHistory(params.query);
+        }
+        
+        // Check for daily reward
+        checkForDailyReward();
+        
+        succeeded = true;
+      } catch (err: unknown) {
+        retries++;
+        console.error(`Error loading publications (attempt ${retries}/${maxRetries}):`, err);
+        
+        if (retries <= maxRetries) {
+          // Wait before retrying (exponential backoff)
+          await new Promise(resolve => setTimeout(resolve, 500 * retries));
+        } else {
+          // We've exhausted all retries
+          const errorMessage = err instanceof Error 
+            ? err.message 
+            : 'No se pudieron cargar los resultados';
+          setError(`API error: ${errorMessage}`);
+          setResults([]);
+          setTotalPages(1);
+          
+          toast({
+            title: "Error de conexión",
+            description: "No se pudo conectar con el servidor. Por favor, intenta más tarde.",
+            variant: "destructive"
+          });
+        }
       }
-      
-      // Check for daily reward
-      checkForDailyReward();
-      
-    } catch (err: unknown) {
-      console.error('Error loading publications:', err);
-      const errorMessage = err instanceof Error 
-        ? err.message 
-        : 'Unknown error loading publications';
-      setError(`Error: ${errorMessage}`);
-      setResults([]);
-      setTotalPages(1);
-    } finally {
-      setLoading(false);
     }
-  }, [searchState]);
+    
+    setLoading(false);
+  }, [searchState, toast]);
   
   // Load initial data
   useEffect(() => {
@@ -273,18 +315,45 @@ export default function BuscadorPage() {
   if (error && !loading) {
     return (
       <div className="container mx-auto p-4 md:p-6 lg:p-8 bg-slate-900 min-h-screen text-white">
-        <div className="bg-red-900/80 text-red-100 p-6 rounded-lg shadow-lg border border-red-700 mb-6">
+        <div className="bg-gradient-to-br from-red-900/80 to-red-950/80 text-red-100 p-6 rounded-lg shadow-lg border border-red-700 mb-6">
           <div className="flex items-center gap-3 mb-4">
             <AlertCircle className="h-8 w-8 text-red-300" />
             <h2 className="text-xl font-semibold">Error al cargar los resultados</h2>
           </div>
-          <p className="mb-5">{error}</p>
-          <button
-            className="bg-red-700 hover:bg-red-800 text-white py-2 px-4 rounded-lg transition-colors"
-            onClick={() => fetchPublications()}
-          >
-            Intentar nuevamente
-          </button>
+          <p className="mb-5">No pudimos conectar con nuestra base de datos de anuncios. Por favor, intenta nuevamente en unos momentos.</p>
+          <div className="text-sm text-red-300/80 mb-5">
+            Información técnica: {error}
+          </div>
+          <div className="flex gap-3">
+            <button
+              className="bg-gradient-to-r from-red-700 to-red-800 hover:from-red-800 hover:to-red-900 text-white py-2 px-4 rounded-lg transition-colors"
+              onClick={() => fetchPublications()}
+            >
+              Intentar nuevamente
+            </button>
+            <button
+              className="bg-slate-800 hover:bg-slate-700 text-slate-200 py-2 px-4 rounded-lg transition-colors"
+              onClick={() => {
+                // Clear filters and try again
+                const resetState = {
+                  ...searchState,
+                  query: '',
+                  category: '',
+                  subcategory: '',
+                  subsubcategory: '',
+                  location: '',
+                  minPrice: '',
+                  maxPrice: '',
+                  page: 1
+                };
+                setSearchState(resetState);
+                updateUrlWithCleanPath(resetState);
+                fetchPublications(resetState);
+              }}
+            >
+              Buscar sin filtros
+            </button>
+          </div>
         </div>
       </div>
     );

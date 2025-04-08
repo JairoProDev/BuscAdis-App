@@ -28,7 +28,7 @@ export interface Publication {
   price: number
   currency: string
   categorySlug: string
-  location: string
+  location: { city: string; region: string } | string  // Allow both object and string format
   contactName: string
   status: string
   createdAt: string
@@ -321,7 +321,11 @@ export default function SearchResults({
               <div className="flex items-center justify-between text-sm">
                 <div className="flex items-center text-cyan-300/90">
                   <MapPinIcon className="w-4 h-4 mr-1 flex-shrink-0" />
-                  <span className="truncate max-w-[180px]">{publication.location}</span>
+                  <span className="truncate max-w-[180px]">
+                    {typeof publication.location === 'string' 
+                      ? publication.location 
+                      : publication.location?.city || 'Ubicación no especificada'}
+                  </span>
                 </div>
                 
                 <span className="text-xs text-teal-300/80">
@@ -449,7 +453,11 @@ export default function SearchResults({
               <div className="flex items-center justify-between">
                 <div className="flex items-center text-cyan-300/90 text-sm">
                   <MapPinIcon className="w-4 h-4 mr-1 flex-shrink-0" />
-                  <span className="truncate max-w-[120px]">{publication.location}</span>
+                  <span className="truncate max-w-[120px]">
+                    {typeof publication.location === 'string'
+                      ? publication.location
+                      : publication.location?.city || 'Ubicación no especificada'}
+                  </span>
                 </div>
                 
                 <span className="bg-slate-900/80 backdrop-blur-sm text-white text-sm font-bold px-3 py-1 rounded-lg shadow-lg border border-slate-700/50">

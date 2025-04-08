@@ -10,6 +10,10 @@ export const COLLECTIONS = {
   PUBLICATIONS_EMPLEOS: 'publications_empleos',
   PUBLICATIONS_SERVICIOS: 'publications_servicios',
   PUBLICATIONS_VEHICULOS: 'publications_vehiculos',
+  PUBLICATIONS_PRODUCTOS: 'publications_productos',
+  PUBLICATIONS_EVENTOS: 'publications_eventos',
+  PUBLICATIONS_NEGOCIOS: 'publications_negocios',
+  PUBLICATIONS_COMUNIDAD: 'publications_comunidad',
   USERS: 'users',
 }
 
