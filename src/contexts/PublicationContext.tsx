@@ -1,222 +1,254 @@
 'use client';
 
 import React, { createContext, useContext, useReducer, ReactNode } from 'react';
-import { Logger } from '../services/logging.service';
-import { Price } from '../components/publish/PriceInput';
-import { Location } from '../components/publish/LocationSelector';
-import { PublicationCategory } from '../types/publications';
+import { ProcessedImage } from '@/services/image.service';
 
-interface FormData {
-  title?: string;
-  description?: string;
-  category_id?: string;
-  subcategory_id?: string;
-  subsubcategory_id?: string;
-  category_type?: PublicationCategory;
-  price?: Price;
-  location?: Location;
-  images?: string[];
-}
-
-interface Achievement {
+// Define types for the publication form data
+export interface Achievement {
   id: string;
   title: string;
   description: string;
   points: number;
   completed: boolean;
-  completedAt?: Date;
+  timestamp?: Date;
 }
 
+export interface PriceData {
+  amount: number;
+  currency: string;
+  type: string;
+}
+
+export interface LocationData {
+  city: string;
+  country: string;
+  district?: string;
+  coordinates?: {
+    lat: number;
+    lon: number;
+  };
+}
+
+export interface FormData {
+  title?: string;
+  description?: string;
+  category?: {
+    id: string;
+    name: string;
+  };
+  subcategory?: {
+    id: string;
+    name: string;
+  };
+  price?: PriceData;
+  location?: LocationData;
+  images?: ProcessedImage[];
+  contactInfo?: {
+    phone?: string;
+    whatsapp?: string;
+    email?: string;
+  };
+}
+
+// State definition
 interface PublicationState {
   currentStep: number;
   formData: FormData;
-  isValid: boolean;
-  errors: Record<string, string>;
-  isSubmitting: boolean;
   achievements: Achievement[];
   totalPoints: number;
+  isSubmitting: boolean;
+  error: string | null;
+  isSuccess: boolean;
 }
 
-type Action =
-  | { type: 'SET_STEP'; payload: number }
-  | { type: 'UPDATE_FORM'; payload: Partial<FormData> }
-  | { type: 'SET_ERRORS'; payload: Record<string, string> }
-  | { type: 'SET_IS_SUBMITTING'; payload: boolean }
-  | { type: 'COMPLETE_ACHIEVEMENT'; payload: string }
-  | { type: 'RESET_STATE' };
-
+// Initial state
 const initialState: PublicationState = {
   currentStep: 1,
   formData: {},
-  isValid: false,
-  errors: {},
-  isSubmitting: false,
   achievements: [
     {
-      id: 'first_image',
-      title: 'Fotógrafo Principiante',
-      description: 'Subiste tu primera imagen',
+      id: 'title_added',
+      title: 'Título Descriptivo',
+      description: 'Añadiste un título claro y descriptivo',
       points: 10,
-      completed: false,
+      completed: false
     },
     {
-      id: 'all_fields',
-      title: 'Detallista',
-      description: 'Completaste todos los campos requeridos',
+      id: 'desc_added',
+      title: 'Descripción Detallada',
+      description: 'Añadiste una descripción completa',
+      points: 15,
+      completed: false
+    },
+    {
+      id: 'images_added',
+      title: 'Imágenes Subidas',
+      description: 'Añadiste imágenes a tu publicación',
       points: 20,
-      completed: false,
+      completed: false
     },
     {
       id: 'location_added',
-      title: 'Ubicación Precisa',
-      description: 'Agregaste la ubicación exacta',
+      title: 'Ubicación Añadida',
+      description: 'Especificaste la ubicación exacta',
       points: 15,
-      completed: false,
-    },
-    {
-      id: 'detailed_description',
-      title: 'Buen Comunicador',
-      description: 'Escribiste una descripción detallada',
-      points: 25,
-      completed: false,
-    },
+      completed: false
+    }
   ],
   totalPoints: 0,
+  isSubmitting: false,
+  error: null,
+  isSuccess: false
 };
 
-function publicationReducer(state: PublicationState, action: Action): PublicationState {
+// Define action types
+type ActionType = 
+  | { type: 'SET_STEP'; payload: number }
+  | { type: 'UPDATE_FORM'; payload: Partial<FormData> }
+  | { type: 'COMPLETE_ACHIEVEMENT'; payload: string }
+  | { type: 'RESET_FORM' }
+  | { type: 'SET_SUBMITTING'; payload: boolean }
+  | { type: 'SET_ERROR'; payload: string | null }
+  | { type: 'SET_SUCCESS'; payload: boolean };
+
+// Reducer function
+function publicationReducer(state: PublicationState, action: ActionType): PublicationState {
   switch (action.type) {
     case 'SET_STEP':
-      Logger.info(`Cambiando al paso ${action.payload}`);
       return {
         ...state,
-        currentStep: action.payload,
+        currentStep: action.payload
       };
-
+    
     case 'UPDATE_FORM':
-      Logger.info('Actualizando formulario', { updates: action.payload });
-      const newFormData = {
+      const updatedFormData = {
         ...state.formData,
-        ...action.payload,
+        ...action.payload
       };
-
-      // Verificar logros
-      const newAchievements = state.achievements.map(achievement => {
-        if (achievement.completed) return achievement;
-
-        let shouldComplete = false;
-        switch (achievement.id) {
-          case 'first_image':
-            shouldComplete = !!newFormData.images?.length;
-            break;
-          case 'all_fields':
-            shouldComplete = !!(
-              newFormData.title &&
-              newFormData.description &&
-              newFormData.category_id &&
-              newFormData.price &&
-              newFormData.location
-            );
-            break;
-          case 'location_added':
-            shouldComplete = !!(
-              newFormData.location?.latitude &&
-              newFormData.location?.longitude
-            );
-            break;
-          case 'detailed_description':
-            shouldComplete = !!(
-              newFormData.description &&
-              newFormData.description.length >= 200
-            );
-            break;
+      
+      // Check for achievements
+      const updatedAchievements = [...state.achievements];
+      let pointsEarned = 0;
+      
+      // Check title achievement
+      if (updatedFormData.title && updatedFormData.title.length >= 10) {
+        const titleAchievement = updatedAchievements.find(a => a.id === 'title_added');
+        if (titleAchievement && !titleAchievement.completed) {
+          titleAchievement.completed = true;
+          titleAchievement.timestamp = new Date();
+          pointsEarned += titleAchievement.points;
         }
-
-        if (shouldComplete && !achievement.completed) {
-          Logger.info(`Logro desbloqueado: ${achievement.title}`);
-          return {
-            ...achievement,
-            completed: true,
-            completedAt: new Date(),
-          };
+      }
+      
+      // Check description achievement
+      if (updatedFormData.description && updatedFormData.description.length >= 30) {
+        const descAchievement = updatedAchievements.find(a => a.id === 'desc_added');
+        if (descAchievement && !descAchievement.completed) {
+          descAchievement.completed = true;
+          descAchievement.timestamp = new Date();
+          pointsEarned += descAchievement.points;
         }
-        return achievement;
-      });
-
-      // Calcular puntos totales
-      const totalPoints = newAchievements.reduce(
-        (total, achievement) => total + (achievement.completed ? achievement.points : 0),
-        0
-      );
-
+      }
+      
+      // Check images achievement
+      if (updatedFormData.images && updatedFormData.images.length > 0) {
+        const imagesAchievement = updatedAchievements.find(a => a.id === 'images_added');
+        if (imagesAchievement && !imagesAchievement.completed) {
+          imagesAchievement.completed = true;
+          imagesAchievement.timestamp = new Date();
+          pointsEarned += imagesAchievement.points;
+        }
+      }
+      
+      // Check location achievement
+      if (updatedFormData.location && updatedFormData.location.city) {
+        const locationAchievement = updatedAchievements.find(a => a.id === 'location_added');
+        if (locationAchievement && !locationAchievement.completed) {
+          locationAchievement.completed = true;
+          locationAchievement.timestamp = new Date();
+          pointsEarned += locationAchievement.points;
+        }
+      }
+      
       return {
         ...state,
-        formData: newFormData,
-        achievements: newAchievements,
-        totalPoints,
-      };
-
-    case 'SET_ERRORS':
-      Logger.warn('Errores de validación encontrados', { errors: action.payload });
-      return {
-        ...state,
-        errors: action.payload,
-        isValid: Object.keys(action.payload).length === 0,
-      };
-
-    case 'SET_IS_SUBMITTING':
-      return {
-        ...state,
-        isSubmitting: action.payload,
-      };
-
-    case 'COMPLETE_ACHIEVEMENT':
-      Logger.info(`Completando logro: ${action.payload}`);
-      const updatedAchievements = state.achievements.map(achievement =>
-        achievement.id === action.payload
-          ? { ...achievement, completed: true, completedAt: new Date() }
-          : achievement
-      );
-
-      return {
-        ...state,
+        formData: updatedFormData,
         achievements: updatedAchievements,
-        totalPoints: updatedAchievements.reduce(
-          (total, achievement) => total + (achievement.completed ? achievement.points : 0),
-          0
-        ),
+        totalPoints: state.totalPoints + pointsEarned
       };
-
-    case 'RESET_STATE':
-      Logger.info('Reiniciando estado de publicación');
+    
+    case 'COMPLETE_ACHIEVEMENT':
+      const achievementId = action.payload;
+      const achievementIndex = state.achievements.findIndex(a => a.id === achievementId);
+      
+      if (achievementIndex === -1 || state.achievements[achievementIndex].completed) {
+        return state;
+      }
+      
+      const newAchievements = [...state.achievements];
+      newAchievements[achievementIndex] = {
+        ...newAchievements[achievementIndex],
+        completed: true,
+        timestamp: new Date()
+      };
+      
+      return {
+        ...state,
+        achievements: newAchievements,
+        totalPoints: state.totalPoints + newAchievements[achievementIndex].points
+      };
+    
+    case 'RESET_FORM':
       return initialState;
-
+    
+    case 'SET_SUBMITTING':
+      return {
+        ...state,
+        isSubmitting: action.payload
+      };
+    
+    case 'SET_ERROR':
+      return {
+        ...state,
+        error: action.payload,
+        isSubmitting: false
+      };
+    
+    case 'SET_SUCCESS':
+      return {
+        ...state,
+        isSuccess: action.payload,
+        isSubmitting: false
+      };
+    
     default:
       return state;
   }
 }
 
-const PublicationContext = createContext<{
-  state: PublicationState;
-  dispatch: React.Dispatch<Action>;
-} | null>(null);
-
+// Create action creators
 export const publicationActions = {
   setStep: (step: number) => ({ type: 'SET_STEP', payload: step } as const),
-  updateForm: (formData: Partial<FormData>) =>
-    ({ type: 'UPDATE_FORM', payload: formData } as const),
-  setErrors: (errors: Record<string, string>) =>
-    ({ type: 'SET_ERRORS', payload: errors } as const),
-  setIsSubmitting: (isSubmitting: boolean) =>
-    ({ type: 'SET_IS_SUBMITTING', payload: isSubmitting } as const),
-  completeAchievement: (achievementId: string) =>
-    ({ type: 'COMPLETE_ACHIEVEMENT', payload: achievementId } as const),
-  resetState: () => ({ type: 'RESET_STATE' } as const),
+  updateForm: (data: Partial<FormData>) => ({ type: 'UPDATE_FORM', payload: data } as const),
+  completeAchievement: (id: string) => ({ type: 'COMPLETE_ACHIEVEMENT', payload: id } as const),
+  resetForm: () => ({ type: 'RESET_FORM' } as const),
+  setSubmitting: (isSubmitting: boolean) => ({ type: 'SET_SUBMITTING', payload: isSubmitting } as const),
+  setError: (error: string | null) => ({ type: 'SET_ERROR', payload: error } as const),
+  setSuccess: (isSuccess: boolean) => ({ type: 'SET_SUCCESS', payload: isSuccess } as const)
 };
 
+// Create context
+type PublicationContextType = {
+  state: PublicationState;
+  dispatch: React.Dispatch<ActionType>;
+};
+
+const PublicationContext = createContext<PublicationContextType | undefined>(undefined);
+
+// Create context provider
 export function PublicationProvider({ children }: { children: ReactNode }) {
   const [state, dispatch] = useReducer(publicationReducer, initialState);
-
+  
   return (
     <PublicationContext.Provider value={{ state, dispatch }}>
       {children}
@@ -224,10 +256,13 @@ export function PublicationProvider({ children }: { children: ReactNode }) {
   );
 }
 
+// Create hook for using the context
 export function usePublication() {
   const context = useContext(PublicationContext);
-  if (!context) {
-    throw new Error('usePublication debe ser usado dentro de un PublicationProvider');
+  
+  if (context === undefined) {
+    throw new Error('usePublication must be used within a PublicationProvider');
   }
+  
   return context;
 } 

@@ -39,11 +39,14 @@ interface Publication {
   };
   created_at: string;
   views?: number;
+  category?: string;
+  subcategory?: string;
+  subSubcategory?: string;
 }
 
 export default function PublicationDetailPage() {
   const params = useParams();
-  const id = params.id;
+  const id = params.id as string;
   
   const [publication, setPublication] = useState<Publication | null>(null);
   const [loading, setLoading] = useState(true);
@@ -55,8 +58,12 @@ export default function PublicationDetailPage() {
     const fetchPublication = async () => {
       try {
         setLoading(true);
-        const data = await PublicationsService.getPublicationById();
-        setPublication(data || []);
+        // Extract category from URL if possible
+        const pathParts = window.location.pathname.split('/');
+        const category = pathParts.length > 2 ? pathParts[1] : undefined;
+        
+        const data = await PublicationsService.getPublicationById(id, category);
+        setPublication(data || null);
       } catch (err) {
         console.error('Error fetching publication:', err);
         setError('No se pudo cargar el anuncio. Inténtalo de nuevo más tarde.');

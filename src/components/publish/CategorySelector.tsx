@@ -1,14 +1,19 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
     ChevronRightIcon,
     CheckCircleIcon,
     ArrowLeftIcon,
     TagIcon,
+    BuildingOfficeIcon,
+    ShoppingBagIcon,
+    TruckIcon,
+    BriefcaseIcon,
+    HomeIcon,
 } from '@heroicons/react/24/outline';
-import { usePublication, PublicationCategory } from '@/contexts/PublicationContext';
+import { usePublication, publicationActions } from '@/contexts/PublicationContext';
 import { Logger } from '@/services/logging.service';
 import { categoriesData, subcategoriesData, subSubcategoriesData } from '@/data/categories-data';
 
@@ -31,8 +36,61 @@ interface CategoryOption {
     subcategories?: { [key: string]: SubCategory };
 }
 
-export default function CategorySelector() {
-    const { dispatch } = usePublication();
+interface Category {
+    id: string;
+    name: string;
+    icon: React.ElementType;
+    description: string;
+}
+
+interface CategorySelectorProps {
+    value?: { id: string; name: string };
+    onChange: (category: { id: string; name: string }) => void;
+    className?: string;
+}
+
+const categories: Category[] = [
+    {
+        id: 'inmuebles',
+        name: 'Inmuebles',
+        icon: HomeIcon,
+        description: 'Propiedades, alquileres, terrenos'
+    },
+    {
+        id: 'vehiculos',
+        name: 'Vehículos',
+        icon: TruckIcon,
+        description: 'Autos, motos, camiones'
+    },
+    {
+        id: 'empleos',
+        name: 'Empleos',
+        icon: BriefcaseIcon,
+        description: 'Ofertas y demandas de trabajo'
+    },
+    {
+        id: 'servicios',
+        name: 'Servicios',
+        icon: BuildingOfficeIcon,
+        description: 'Profesionales, técnicos y más'
+    },
+    {
+        id: 'productos',
+        name: 'Productos',
+        icon: ShoppingBagIcon,
+        description: 'Artículos nuevos y usados'
+    },
+    {
+        id: 'otros',
+        name: 'Otros',
+        icon: TagIcon,
+        description: 'Otras categorías'
+    }
+];
+
+const CategorySelector: React.FC = () => {
+    const { state, dispatch } = usePublication();
+    const selectedCategoryId = state.formData.category?.id;
     const [selectedCategory, setSelectedCategory] = useState<CategoryOption | null>(null);
     const [selectedSubcategory, setSelectedSubcategory] = useState<SubCategory | null>(null);
     const [selectedSubSubcategory, setSelectedSubSubcategory] = useState<SubSubCategory | null>(null);
@@ -43,67 +101,44 @@ export default function CategorySelector() {
 
     useEffect(() => {
         if (selectedCategory && selectedSubcategory && selectedSubSubcategory) {
-            dispatch({
-                type: 'UPDATE_FORM',
-                payload: {
-                    category_id: selectedCategory.id,
-                    subcategory_id: selectedSubcategory.id,
-                    sub_subcategory_id: selectedSubSubcategory.id,
-                    category_type: selectedCategory.id as PublicationCategory,
-                },
-            });
-            dispatch({ type: 'SET_STEP', payload: 2 });
+            dispatch(publicationActions.updateForm({
+                category_id: selectedCategory.id,
+                subcategory_id: selectedSubcategory.id,
+                sub_subcategory_id: selectedSubSubcategory.id,
+                category_type: selectedCategory.id as PublicationCategory,
+            }));
+            dispatch(publicationActions.setStep(2));
         } else if (selectedCategory && selectedSubcategory && !selectedSubSubcategory && !showSubSubcategories) {
-            dispatch({
-                type: 'UPDATE_FORM',
-                payload: {
-                    category_id: selectedCategory.id,
-                    subcategory_id: selectedSubcategory.id,
-                    category_type: selectedCategory.id as PublicationCategory,
-                },
-            });
-            dispatch({ type: 'SET_STEP', payload: 2 });
+            dispatch(publicationActions.updateForm({
+                category_id: selectedCategory.id,
+                subcategory_id: selectedSubcategory.id,
+                category_type: selectedCategory.id as PublicationCategory,
+            }));
+            dispatch(publicationActions.setStep(2));
         } else if (selectedCategory && !selectedSubcategory && !showSubcategories) {
-            dispatch({
-                type: 'UPDATE_FORM',
-                payload: {
-                    category_id: selectedCategory.id,
-                    category_type: selectedCategory.id as PublicationCategory,
-                },
-            });
-            dispatch({ type: 'SET_STEP', payload: 2 });
+            dispatch(publicationActions.updateForm({
+                category_id: selectedCategory.id,
+                category_type: selectedCategory.id as PublicationCategory,
+            }));
+            dispatch(publicationActions.setStep(2));
         }
     }, [selectedCategory, selectedSubcategory, selectedSubSubcategory, dispatch, showSubcategories, showSubSubcategories]);
 
-    const handleCategorySelect = (category: CategoryOption) => {
-        setSelectedCategory(category);
-        setSelectedSubcategory(null);
-        setSelectedSubSubcategory(null);
-        setShowSubcategories(true);
-        setShowSubSubcategories(false);
-        Logger.info(`Categoría seleccionada: ${category.name}`);
+    const handleCategorySelect = useCallback((category: Category) => {
+        dispatch(publicationActions.updateForm({
+            category: { 
+                id: category.id, 
+                name: category.name 
+            }
+        }));
+        Logger.debug('Category selected', { category: category.id });
+    }, [dispatch]);
 
-        const subcategories = (subcategoriesData as { [key: string]: SubCategory[] })[category.id] || [];
-
-        setSelectedCategory({
-            ...category,
-            subcategories: subcategories.reduce((acc: { [key: string]: SubCategory }, subcategory: SubCategory) => {
-                acc[subcategory.id] = subcategory;
-                return acc;
-            }, {}),
-        });
-
-        if (subcategories.length === 0) {
-            dispatch({
-                type: 'UPDATE_FORM',
-                payload: {
-                    category_id: category.id,
-                    category_type: category.id as PublicationCategory,
-                },
-            });
-            dispatch({ type: 'SET_STEP', payload: 2 });
+    const handleNext = useCallback(() => {
+        if (selectedCategoryId) {
+            dispatch(publicationActions.setStep(2));
         }
-    };
+    }, [dispatch, selectedCategoryId]);
 
     const handleSubcategorySelect = (subcategory: SubCategory) => {
         setSelectedSubcategory(subcategory);
@@ -119,15 +154,12 @@ export default function CategorySelector() {
         });
 
         if (subSubcategories.length === 0) {
-            dispatch({
-                type: 'UPDATE_FORM',
-                payload: {
-                    category_id: selectedCategory?.id,
-                    subcategory_id: subcategory.id,
-                    category_type: selectedCategory?.id as PublicationCategory,
-                },
-            });
-            dispatch({ type: 'SET_STEP', payload: 2 });
+            dispatch(publicationActions.updateForm({
+                category_id: selectedCategory?.id,
+                subcategory_id: subcategory.id,
+                category_type: selectedCategory?.id as PublicationCategory,
+            }));
+            dispatch(publicationActions.setStep(2));
         }
     };
 
@@ -154,7 +186,7 @@ export default function CategorySelector() {
         return (
             <motion.button
                 key={category.id}
-                onClick={() => handleCategorySelect(category)}
+                onClick={() => handleCategorySelect(categories.find(c => c.id === category.id) as Category)}
                 className={`w-full text-left p-4 rounded-xl border-2 transition-all ${
                     isSelected ? 'border-primary-500 bg-primary-50' : 'border-gray-200 hover:border-primary-200'
                 }`}
@@ -343,6 +375,47 @@ export default function CategorySelector() {
                     </div>
                 </motion.div>
             )}
+
+            {selectedCategoryId && (
+                <motion.div
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    className="flex flex-col space-y-4"
+                >
+                    <div className="bg-blue-50 p-4 rounded-lg">
+                        <div className="flex items-start">
+                            <div className="flex-shrink-0">
+                                {categories.find(c => c.id === selectedCategoryId)?.icon && 
+                                    React.createElement(
+                                        categories.find(c => c.id === selectedCategoryId)!.icon,
+                                        { className: "h-5 w-5 text-blue-400" }
+                                    )
+                                }
+                            </div>
+                            <div className="ml-3">
+                                <h3 className="text-sm font-medium text-blue-800">
+                                    Categoría seleccionada: {state.formData.category?.name}
+                                </h3>
+                                <div className="mt-2 text-sm text-blue-700">
+                                    <p>
+                                        {categories.find(c => c.id === selectedCategoryId)?.description}
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <button
+                        type="button"
+                        onClick={handleNext}
+                        className="self-center px-4 py-2 bg-blue-600 text-white rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+                    >
+                        Continuar
+                    </button>
+                </motion.div>
+            )}
         </div>
     );
-}
+};
+
+export default CategorySelector;

@@ -8,24 +8,32 @@ import {
   ChatBubbleBottomCenterTextIcon
 } from '@heroicons/react/24/outline';
 import { Logger } from '@/services/logging.service';
+import { Achievement as ContextAchievement } from '@/contexts/PublicationContext';
 
-export interface Achievement {
-  id: string;
-  title: string;
-  description: string;
-  points: number;
+export interface Achievement extends ContextAchievement {
   icon: React.ElementType;
-  completed: boolean;
-  timestamp?: Date;
 }
 
 interface PublishAchievementsProps {
-  achievements: Achievement[];
+  achievements: (Achievement | ContextAchievement)[];
   totalPoints: number;
-  onAchievementClick?: (achievement: Achievement) => void;
+  onAchievementClick?: (achievement: Achievement | ContextAchievement) => void;
   className?: string;
 }
 
+// Map of achievement IDs to icons
+const achievementIcons: Record<string, React.ElementType> = {
+  'title_added': TagIcon,
+  'desc_added': ChatBubbleBottomCenterTextIcon,
+  'images_added': CameraIcon,
+  'location_added': MapPinIcon,
+  'first_image': CameraIcon,
+  'all_fields': TagIcon,
+  'location': MapPinIcon,
+  'description': ChatBubbleBottomCenterTextIcon
+};
+
+// Default achievements with icons
 const defaultAchievements: Achievement[] = [
   {
     id: 'first_image',
@@ -67,6 +75,17 @@ const PublishAchievements: React.FC<PublishAchievementsProps> = ({
   onAchievementClick,
   className = ''
 }) => {
+  // Map all achievements to include icons if they don't have them
+  const processedAchievements = achievements.map(achievement => {
+    if ('icon' in achievement) {
+      return achievement as Achievement;
+    }
+    return {
+      ...achievement,
+      icon: achievementIcons[achievement.id] || TagIcon
+    } as Achievement;
+  });
+
   const handleAchievementClick = (achievement: Achievement) => {
     Logger.debug(`Achievement clicked: ${achievement.title}`);
     onAchievementClick?.(achievement);
@@ -86,7 +105,7 @@ const PublishAchievements: React.FC<PublishAchievementsProps> = ({
 
       <div className="grid gap-4 sm:grid-cols-2">
         <AnimatePresence>
-          {achievements.map((achievement) => (
+          {processedAchievements.map((achievement) => (
             <motion.div
               key={achievement.id}
               initial={{ opacity: 0, y: 20 }}
@@ -156,7 +175,7 @@ const PublishAchievements: React.FC<PublishAchievementsProps> = ({
         </AnimatePresence>
       </div>
 
-      {achievements.some(a => a.completed) && (
+      {processedAchievements.some(a => a.completed) && (
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}

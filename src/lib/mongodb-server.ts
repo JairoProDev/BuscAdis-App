@@ -1,38 +1,37 @@
 /**
- * Server-side MongoDB client module
- * This module provides a MongoDB client for server-side rendering
+ * Server-side MongoDB client implementation
+ * This uses the real MongoDB driver and is only imported on the server
  */
+
 import { MongoClient } from 'mongodb';
 
-if (!process.env.MONGODB_URI) {
-  throw new Error('Please define the MONGODB_URI environment variable');
-}
+// MongoDB connection string should be in environment variables
+const MONGODB_URI = process.env.MONGODB_URI || 'mongodb://localhost:27017';
+const MONGODB_DB = process.env.MONGODB_DB || 'test';
 
-const uri = process.env.MONGODB_URI;
-const options = {};
+// Create cached connection variable
+let cachedClient: MongoClient | null = null;
+let cachedDb: any = null;
 
-let client: MongoClient;
-let clientPromise: Promise<MongoClient>;
-
-if (process.env.NODE_ENV === 'development') {
-  // In development mode, use a global variable so that the value
-  // is preserved across module reloads caused by HMR (Hot Module Replacement).
-  let globalWithMongo = global as typeof global & {
-    _mongoClientPromise?: Promise<MongoClient>;
-  };
-
-  if (!globalWithMongo._mongoClientPromise) {
-    client = new MongoClient(uri, options);
-    globalWithMongo._mongoClientPromise = client.connect();
-  }
-  clientPromise = globalWithMongo._mongoClientPromise;
-} else {
-  // In production mode, it's best to not use a global variable.
-  client = new MongoClient(uri, options);
-  clientPromise = client.connect();
-}
-
-// Export a function that returns the MongoDB client
+// Create a new MongoDB client with connection pooling
 export default async function getServerMongoClient() {
-  return await clientPromise;
+  // If we already have a connection, use it
+  if (cachedClient && cachedDb) {
+    return cachedClient;
+  }
+
+  // If no connection, create a new one
+  if (!cachedClient) {
+    cachedClient = new MongoClient(MONGODB_URI, {
+      // Connection pooling options
+      maxPoolSize: 10,
+      minPoolSize: 5,
+    });
+
+    // Connect to the database
+    await cachedClient.connect();
+    cachedDb = cachedClient.db(MONGODB_DB);
+  }
+
+  return cachedClient;
 } 

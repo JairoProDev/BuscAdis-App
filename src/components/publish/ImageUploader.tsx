@@ -1,4 +1,4 @@
-import React, { useCallback, useState, useRef } from 'react';
+import React, { useCallback, useState, useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { ImageService, ProcessedImage } from '@/services/image.service';
 import { Logger } from '@/services/logging.service';
@@ -6,21 +6,29 @@ import { PhotoIcon, XMarkIcon, ArrowPathIcon } from '@heroicons/react/24/outline
 import { CheckCircleIcon } from '@heroicons/react/24/solid';
 
 interface ImageUploaderProps {
+  images?: ProcessedImage[];
   onImagesChange: (images: ProcessedImage[]) => void;
   maxImages?: number;
   className?: string;
 }
 
 const ImageUploader: React.FC<ImageUploaderProps> = ({
+  images: initialImages = [],
   onImagesChange,
   maxImages = 10,
   className = ''
 }) => {
-  const [images, setImages] = useState<ProcessedImage[]>([]);
+  const [images, setImages] = useState<ProcessedImage[]>(initialImages);
   const [isDragging, setIsDragging] = useState(false);
   const [isProcessing, setIsProcessing] = useState(false);
   const [errors, setErrors] = useState<string[]>([]);
   const fileInputRef = useRef<HTMLInputElement>(null);
+
+  useEffect(() => {
+    if (initialImages.length > 0) {
+      setImages(initialImages);
+    }
+  }, [initialImages]);
 
   const handleFiles = useCallback(async (files: FileList) => {
     setIsProcessing(true);

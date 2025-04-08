@@ -18,7 +18,9 @@ const steps = [
   { id: 5, title: 'Revisar', description: 'Revisa y publica tu anuncio' },
 ];
 
-export default function PublishPage() {
+interface PublishPageProps {}
+
+export default function PublishPage({}: PublishPageProps) {
   const { state, dispatch } = usePublication();
 
   useEffect(() => {
@@ -112,10 +114,10 @@ export default function PublishPage() {
       case 4:
         return (
           <ImageUploader
-            images={state.formData.images || []}
             onImagesChange={(images) =>
               dispatch(publicationActions.updateForm({ images }))
             }
+            images={state.formData.images}
           />
         );
       case 5:
