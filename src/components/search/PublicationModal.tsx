@@ -225,7 +225,7 @@ export default function PublicationModal({
                     {/* View full details link */}
                     <div className="text-center">
                       <a 
-                        href={`/${publication.categorySlug || 'anuncios'}/${publicationId}`}
+                        href={`/anuncios/${publicationId}`}
                         className="text-teal-400 hover:text-teal-300 text-sm font-medium"
                         target="_blank"
                         rel="noopener noreferrer"

@@ -62,7 +62,11 @@ export default function Navigation() {
                         </Link>
                         {/* Botón del menú móvil */}
                         <div className="md:hidden">
-                            <button onClick={() => setShowMobileMenu(!showMobileMenu)} className={`${textColor} hover:${hoverTextColor} focus:outline-none focus:ring-2 focus:ring-teal-500`}>
+                            <button 
+                                onClick={() => setShowMobileMenu(!showMobileMenu)} 
+                                className={`${textColor} hover:${hoverTextColor} focus:outline-none focus:ring-2 focus:ring-teal-500`}
+                                aria-label="Toggle menu"
+                            >
                                 <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                     {showMobileMenu ? (
                                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
@@ -132,6 +136,7 @@ export default function Navigation() {
                                 <button
                                     onClick={() => setShowUserMenu(!showUserMenu)}
                                     className={`flex items-center space-x-2 ${textColor} hover:${hoverTextColor} focus:outline-none`}
+                                    aria-label="User menu"
                                 >
                                     <UserCircleIcon className="w-8 h-8" />
                                     <span className="hidden lg:block">{user?.full_name?.split(' ')[0] || 'Usuario'}</span>
@@ -191,7 +196,10 @@ export default function Navigation() {
 
                     {/* Icono de Notificaciones (Opcional) */}
                     {isAuthenticated && (
-                        <button className={`${textColor} hover:${hoverTextColor} relative focus:outline-none focus:ring-2 focus:ring-teal-500`}>
+                        <button 
+                            className={`${textColor} hover:${hoverTextColor} relative focus:outline-none focus:ring-2 focus:ring-teal-500`}
+                            aria-label="Notifications"
+                        >
                             <BellIcon className="w-6 h-6" />
                             {/* Contador de notificaciones */}
                             {/* <span className="absolute top-0 right-0 rounded-full bg-red-600 w-2 h-2 transform translate-x-1/2 -translate-y-1/2"></span> */}

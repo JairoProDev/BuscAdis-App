@@ -216,13 +216,12 @@ export default function SearchResults({
     // Update URL without navigation using history.pushState
     const publication = results.find(p => p.id === publicationId);
     if (publication) {
-      const categoryPath = publication.categorySlug || 'anuncios';
       const titleSlug = publication.title
         .toLowerCase()
         .replace(/[^\w\s]/gi, '')
         .replace(/\s+/g, '-')
         .substring(0, 50);
-      const newPath = `/${categoryPath}/${publicationId}-${titleSlug}`;
+      const newPath = `/anuncios/${publicationId}-${titleSlug}`;
       window.history.pushState({ id: publicationId }, '', newPath);
     }
   };
@@ -237,14 +236,13 @@ export default function SearchResults({
   
   // Generar URL amigable para SEO
   const generateSeoUrl = (publication: Publication) => {
-    const base = publication.categorySlug || 'anuncios';
     const titleSlug = publication.title
       .toLowerCase()
       .replace(/[^\w\s]/gi, '')
       .replace(/\s+/g, '-')
       .substring(0, 50);
     
-    return `/${base}/${publication.id}-${titleSlug}`;
+    return `/anuncios/${publication.id}-${titleSlug}`;
   };
   
   // Renderizar item en vista de cuadrícula

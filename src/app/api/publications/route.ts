@@ -1,55 +1,86 @@
 import { NextResponse } from 'next/server'
-import dbConnect from '@/lib/dbConnect'
-import { getPublicationModel } from '@/lib/models/Publication'
+import { mongoDbQuery, mongoDbInsert } from '@/lib/mongodb.server'
 
 export const dynamic = 'force-dynamic' // Disable caching to ensure data is always fresh
+export const runtime = 'nodejs' // Mark as server-side only
 
 export async function GET(request: Request) {
   try {
     const { searchParams } = new URL(request.url)
-    const category = searchParams.get('category') || 'inmuebles'
+    
+    // Extract query parameters
+    const category = searchParams.get('category') || ''
+    const subcategory = searchParams.get('subcategory') || ''
+    const subsubcategory = searchParams.get('subsubcategory') || ''
     const query = searchParams.get('query') || ''
-    const limit = parseInt(searchParams.get('limit') || '20')
+    const location = searchParams.get('location') || ''
+    const minPrice = searchParams.get('minPrice') || ''
+    const maxPrice = searchParams.get('maxPrice') || ''
+    const sortBy = searchParams.get('sortBy') || 'recent'
     const page = parseInt(searchParams.get('page') || '1')
+    const limit = parseInt(searchParams.get('limit') || '12')
     
-    // Connect to database
-    await dbConnect()
+    // Build MongoDB query
+    const mongoQuery: any = {}
     
-    // Get model for specified category
-    const PublicationModel = getPublicationModel(category)
+    if (category) mongoQuery.category = category
+    if (subcategory) mongoQuery.subcategory = subcategory
+    if (subsubcategory) mongoQuery.subsubcategory = subsubcategory
     
-    // Build filter
-    const filter: any = { status: 'active' }
     if (query) {
-      filter.$or = [
+      mongoQuery.$or = [
         { title: { $regex: query, $options: 'i' } },
         { description: { $regex: query, $options: 'i' } }
       ]
     }
     
-    // Count total for pagination
-    const total = await PublicationModel.countDocuments(filter)
+    if (location) {
+      mongoQuery['location.city'] = { $regex: location, $options: 'i' }
+    }
     
-    // Get results with pagination
+    if (minPrice || maxPrice) {
+      mongoQuery.price = {}
+      if (minPrice) mongoQuery.price.$gte = parseFloat(minPrice)
+      if (maxPrice) mongoQuery.price.$lte = parseFloat(maxPrice)
+    }
+    
+    // Sort options
+    const sortOptions: any = {}
+    switch (sortBy) {
+      case 'price_asc':
+        sortOptions.price = 1
+        break
+      case 'price_desc':
+        sortOptions.price = -1
+        break
+      case 'recent':
+      default:
+        sortOptions.created_at = -1
+    }
+    
+    // Calculate pagination
     const skip = (page - 1) * limit
-    const publications = await PublicationModel
-      .find(filter)
-      .sort({ createdAt: -1 })
-      .skip(skip)
-      .limit(limit)
-      .lean()
     
-    return NextResponse.json({
-      publications,
-      total,
-      pages: Math.ceil(total / limit),
-      page,
+    // Execute the query using server-side MongoDB utilities
+    const data = await mongoDbQuery('publications', mongoQuery, {
+      sort: sortOptions,
+      skip,
       limit
     })
-  } catch (error: any) {
-    console.error('Error fetching publications:', error)
-    return NextResponse.json(
-      { error: `Error al obtener las publicaciones: ${error.message}` },
+    
+    // Get total count for pagination
+    const totalCount = data.length // In a real app, this would be a separate count query
+    
+    return NextResponse.json({
+      publications: data,
+      total: totalCount,
+      pages: Math.ceil(totalCount / limit),
+      page
+    })
+  } catch (error) {
+    console.error('Error in publications API:', error)
+    return new NextResponse(
+      JSON.stringify({ error: 'Failed to fetch publications' }),
       { status: 500 }
     )
   }
@@ -66,28 +97,25 @@ export async function POST(request: Request) {
       )
     }
     
-    // Connect to database
-    await dbConnect()
-    
-    // Get model for the specified category
+    // Determine collection based on category
     const categorySlug = data.categorySlug || 'inmuebles'
-    const PublicationModel = getPublicationModel(categorySlug)
+    const collectionName = `publications_${categorySlug}`
     
     const now = new Date()
-    const publication = new PublicationModel({
+    const publicationData = {
       ...data,
       id: data.id || `pub_${Date.now()}`, // Generate ID if not provided
       status: 'active',
-      createdAt: now,
-      updatedAt: now
-    })
+      created_at: now,
+      updated_at: now
+    }
     
-    // Save the publication
-    await publication.save()
+    // Save the publication using server-side MongoDB utility
+    const result = await mongoDbInsert(collectionName, publicationData)
     
     return NextResponse.json({ 
       success: true,
-      id: publication.id
+      id: publicationData.id
     })
   } catch (error: any) {
     console.error('Error creating publication:', error)

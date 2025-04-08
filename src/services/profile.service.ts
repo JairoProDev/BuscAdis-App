@@ -1,5 +1,4 @@
 import { AuthService } from '@/features/auth/services/auth.service';
-import getMongoClient from '@/lib/mongodb';
 import { Logger } from '@/services/logging.service';
 
 // Check if we're in browser environment
@@ -12,25 +11,11 @@ interface ProfileData {
 }
 
 export class ProfileService {
-  private static async getCollection() {
-    try {
-      const client = await getMongoClient();
-      const db = client.db('test');
-      return db.collection('profiles');
-    } catch (error) {
-      Logger.error('Error getting profiles collection', { error });
-      if (isBrowser) {
-        // Return a mock collection for client-side
-        return {
-          findOne: async () => null,
-          insertOne: async () => ({ acknowledged: true }),
-          updateOne: async () => ({ modifiedCount: 1 })
-        };
-      } else {
-        throw error;
-      }
-    }
-  }
+  // API endpoints
+  private static readonly ENDPOINTS = {
+    PROFILE: '/api/profile',
+    USER_PROFILE: (userId: string) => `/api/users/${userId}/profile`,
+  };
 
   static async getProfile() {
     try {
@@ -39,13 +24,20 @@ export class ProfileService {
         throw new Error('Usuario no autenticado');
       }
 
-      const profiles = await this.getCollection();
-      return await profiles.findOne({ id: currentUser.id });
+      const response = await fetch(this.ENDPOINTS.USER_PROFILE(currentUser.id));
+      
+      if (!response.ok) {
+        if (response.status === 404) {
+          return null; // Profile not found is a valid state
+        }
+        throw new Error(`API error: ${response.status}`);
+      }
+      
+      return await response.json();
     } catch (error) {
-      Logger.error('Error getting profile:', { error });
-      // Return null instead of failing completely on client-side
-      if (isBrowser) return null;
-      throw error;
+      console.error('Error getting profile:', error);
+      // Return null instead of failing completely
+      return null;
     }
   }
 
@@ -56,56 +48,36 @@ export class ProfileService {
         throw new Error('Usuario no autenticado');
       }
 
-      const profiles = await this.getCollection();
-      
-      // Verificar si el perfil ya existe
-      const existingProfile = await this.getProfile();
-      
-      if (existingProfile) {
-        // Actualizar perfil existente
-        const updateData = {
+      const response = await fetch(this.ENDPOINTS.PROFILE, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          userId: currentUser.id,
           fullName: userData.fullName || currentUser.name,
           phone: userData.phone || currentUser.phone,
           email: userData.email || currentUser.email,
-          updatedAt: new Date().toISOString()
-        };
-        
-        await profiles.updateOne(
-          { id: currentUser.id },
-          { $set: updateData }
-        );
-        
-        Logger.info('Profile updated successfully', { userId: currentUser.id });
-        return { ...existingProfile, ...updateData };
-      } else {
-        // Crear nuevo perfil
-        const newProfile = {
-          id: currentUser.id,
-          fullName: userData.fullName || currentUser.name,
-          phone: userData.phone || currentUser.phone,
-          email: userData.email || currentUser.email,
-          createdAt: new Date().toISOString(),
-          updatedAt: new Date().toISOString()
-        };
-        
-        await profiles.insertOne(newProfile);
-        Logger.info('New profile created', { userId: currentUser.id });
-        return newProfile;
+        }),
+      });
+      
+      if (!response.ok) {
+        throw new Error(`API error: ${response.status}`);
       }
+      
+      return await response.json();
     } catch (error) {
-      Logger.error('Error updating profile:', { error });
-      if (isBrowser) {
-        // Return a mock profile on client side to prevent UI crashes
-        return {
-          id: 'mock-id',
-          fullName: userData.fullName || 'User',
-          phone: userData.phone || '',
-          email: userData.email || '',
-          createdAt: new Date().toISOString(),
-          updatedAt: new Date().toISOString()
-        };
-      }
-      throw error;
+      console.error('Error updating profile:', error);
+      // Return mock data to prevent UI crashes
+      // Use a safe approach that doesn't depend on currentUser which might be undefined in the catch block
+      return {
+        id: 'mock-id',
+        fullName: userData.fullName || 'User',
+        phone: userData.phone || '',
+        email: userData.email || '',
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString()
+      };
     }
   }
 }

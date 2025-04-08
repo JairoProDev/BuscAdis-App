@@ -1,4 +1,33 @@
 /**
+ * Shared MongoDB utilities that work in both browser and server environments
+ * This file provides interfaces and type definitions that can be used safely
+ * in both environments without importing server-only code on the client.
+ */
+
+// MongoDB collection names
+export const COLLECTIONS = {
+  PUBLICATIONS_INMUEBLES: 'publications_inmuebles',
+  PUBLICATIONS_EMPLEOS: 'publications_empleos',
+  PUBLICATIONS_SERVICIOS: 'publications_servicios',
+  PUBLICATIONS_VEHICULOS: 'publications_vehiculos',
+  USERS: 'users',
+}
+
+// API endpoints for browser-side MongoDB access
+export const API_ENDPOINTS = {
+  PUBLICATIONS: '/api/publications',
+  PUBLICATIONS_BY_ID: (id: string) => `/api/publications/${id}`,
+  USER_PUBLICATIONS: (userId: string) => `/api/users/${userId}/publications`,
+}
+
+// Standard error message for common MongoDB errors
+export const MONGODB_ERRORS = {
+  CONNECTION_FAILED: 'Could not connect to database',
+  DOCUMENT_NOT_FOUND: 'Document not found',
+  INVALID_ID: 'Invalid document ID',
+}
+
+/**
  * Shared MongoDB module that handles both server and client environments
  * This module detects the current environment and provides the appropriate MongoDB client
  */
