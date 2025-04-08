@@ -1,109 +1,94 @@
 /**
- * Browser-compatible MongoDB adapter
- * This is a special version of the MongoDB client that works in browser environments
- * by providing simple wrappers that call API endpoints instead of direct MongoDB connections.
- */
-
-interface MongoFetchOptions extends RequestInit {
-  queryParams?: Record<string, string>;
-}
-
-/**
- * Safely fetch data from our MongoDB API routes
- */
-export const mongoFetch = async (endpoint: string, options: MongoFetchOptions = {}) => {
-  try {
-    const { queryParams, ...fetchOptions } = options;
-    
-    // Add query parameters if provided
-    let url = endpoint;
-    if (queryParams && Object.keys(queryParams).length > 0) {
-      const params = new URLSearchParams();
-      Object.entries(queryParams).forEach(([key, value]) => {
-        params.append(key, value);
-      });
-      url = `${url}${url.includes('?') ? '&' : '?'}${params.toString()}`;
-    }
-    
-    // Set default headers if not provided
-    const headers = {
-      'Content-Type': 'application/json',
-      ...fetchOptions.headers,
-    };
-    
-    const response = await fetch(url, {
-      ...fetchOptions,
-      headers,
-    });
-    
-    if (!response.ok) {
-      throw new Error(`API error: ${response.status} ${response.statusText}`);
-    }
-    
-    return await response.json();
-  } catch (error) {
-    console.error('MongoDB API fetch error:', error);
-    throw error;
-  }
-};
-
-/**
  * Browser-compatible MongoDB client
- * This client provides methods that simulate MongoDB operations but use the fetch API
+ * 
+ * This file contains a lightweight browser-compatible version of the MongoDB client
+ * that uses fetch to communicate with the server via API endpoints.
  */
-export const browserMongoClient = {
-  // Find documents
-  find: async (collection: string, query: any = {}) => {
-    return mongoFetch(`/api/mongodb/${collection}/find`, {
-      method: 'POST',
-      body: JSON.stringify({ query }),
-    });
-  },
-  
-  // Find a single document
-  findOne: async (collection: string, query: any = {}) => {
-    return mongoFetch(`/api/mongodb/${collection}/findOne`, {
-      method: 'POST',
-      body: JSON.stringify({ query }),
-    });
-  },
-  
-  // Insert a document
-  insertOne: async (collection: string, document: any) => {
-    return mongoFetch(`/api/mongodb/${collection}/insertOne`, {
-      method: 'POST',
-      body: JSON.stringify({ document }),
-    });
-  },
-  
-  // Update a document
-  updateOne: async (collection: string, filter: any, update: any) => {
-    return mongoFetch(`/api/mongodb/${collection}/updateOne`, {
-      method: 'POST',
-      body: JSON.stringify({ filter, update }),
-    });
-  },
-  
-  // Delete a document
-  deleteOne: async (collection: string, filter: any) => {
-    return mongoFetch(`/api/mongodb/${collection}/deleteOne`, {
-      method: 'DELETE',
-      body: JSON.stringify({ filter }),
-    });
-  },
-};
 
-// Export a dummy MongoDB client for browser environments
-export default async function getMongoClient() {
+// Base API URL for MongoDB data
+const API_BASE = '/api/mongodb';
+
+/**
+ * Browser MongoDB Client Factory
+ * Returns a fake MongoDB client that works in the browser
+ */
+export default function getBrowserMongoClient() {
   return {
     db: (dbName: string) => ({
       collection: (collectionName: string) => ({
-        find: (query: any = {}) => browserMongoClient.find(collectionName, query),
-        findOne: (query: any = {}) => browserMongoClient.findOne(collectionName, query),
-        insertOne: (doc: any) => browserMongoClient.insertOne(collectionName, doc),
-        updateOne: (filter: any, update: any) => browserMongoClient.updateOne(collectionName, filter, update),
-        deleteOne: (filter: any) => browserMongoClient.deleteOne(collectionName, filter),
-      }),
-    }),
+        // Implement only the methods we need for the browser
+        find: async (query = {}) => {
+          const response = await mongoFetch(`${API_BASE}/${dbName}/${collectionName}/find`, {
+            method: 'POST',
+            body: JSON.stringify({ query })
+          });
+          return {
+            toArray: async () => response.data || []
+          };
+        },
+        findOne: async (query = {}) => {
+          const response = await mongoFetch(`${API_BASE}/${dbName}/${collectionName}/findOne`, {
+            method: 'POST',
+            body: JSON.stringify({ query })
+          });
+          return response.data;
+        },
+        insertOne: async (document = {}) => {
+          const response = await mongoFetch(`${API_BASE}/${dbName}/${collectionName}/insertOne`, {
+            method: 'POST',
+            body: JSON.stringify({ document })
+          });
+          return response.data;
+        },
+        updateOne: async (filter = {}, update = {}) => {
+          const response = await mongoFetch(`${API_BASE}/${dbName}/${collectionName}/updateOne`, {
+            method: 'POST',
+            body: JSON.stringify({ filter, update })
+          });
+          return response.data;
+        },
+        deleteOne: async (filter = {}) => {
+          const response = await mongoFetch(`${API_BASE}/${dbName}/${collectionName}/deleteOne`, {
+            method: 'POST',
+            body: JSON.stringify({ filter })
+          });
+          return response.data;
+        },
+        countDocuments: async (filter = {}) => {
+          const response = await mongoFetch(`${API_BASE}/${dbName}/${collectionName}/count`, {
+            method: 'POST',
+            body: JSON.stringify({ filter })
+          });
+          return response.data?.count || 0;
+        }
+      })
+    })
   };
+}
+
+/**
+ * Helper function to make API requests to the MongoDB API endpoints
+ */
+export async function mongoFetch(endpoint: string, options: RequestInit = {}) {
+  try {
+    const headers = {
+      'Content-Type': 'application/json',
+      ...options.headers
+    };
+
+    const response = await fetch(endpoint, {
+      ...options,
+      headers
+    });
+
+    if (!response.ok) {
+      throw new Error(`MongoDB API error: ${response.status} ${response.statusText}`);
+    }
+
+    const data = await response.json();
+    return { data, error: null };
+  } catch (error) {
+    console.error('MongoDB fetch error:', error);
+    return { data: null, error: error instanceof Error ? error.message : String(error) };
+  }
 } 

@@ -1,9 +1,9 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   webpack: (config, { isServer }) => {
-    // MongoDB uses some Node.js modules that are not available in browsers
+    // Only handle server-only modules on client-side
     if (!isServer) {
-      // Mark MongoDB and its dependencies as server-only modules
+      // Properly mark optional MongoDB dependencies as external in client bundles
       config.resolve.fallback = {
         ...config.resolve.fallback,
         "mongodb-client-encryption": false,
@@ -21,16 +21,16 @@ const nextConfig = {
         dns: false,
       };
 
-      // Prevent webpack from trying to bundle server-only modules
-      config.module.rules.push({
-        test: /mongodb\/.*\.js$|mongodb-client-encryption\/.*\.js$|kerberos\/.*\.js$|@mongodb-js\/zstd\/.*\.js$|snappy\/.*\.js$/,
-        use: "null-loader",
-      });
-
-      // Prevent webpack from trying to bundle native node modules
+      // Use null-loader for MongoDB native modules
       config.module.rules.push({
         test: /\.node$/,
-        use: "null-loader",
+        loader: "null-loader",
+      });
+
+      // Use null-loader for MongoDB and related modules
+      config.module.rules.push({
+        test: /mongodb\/.*\.js$|mongodb-client-encryption\/.*\.js$|kerberos\/.*\.js$|@mongodb-js\/zstd\/.*\.js$|snappy\/.*\.js$|aws4\/.*\.js$|socks\/.*\.js$|gcp-metadata\/.*\.js$/,
+        loader: "null-loader",
       });
     }
 
@@ -47,9 +47,26 @@ const nextConfig = {
       "mongodb",
       "mongodb-client-encryption",
       "kerberos",
+      "@mongodb-js/zstd",
+      "snappy",
+      "aws4",
+      "gcp-metadata",
+      "socks",
     ],
+    // Configure Turbopack settings
     turbo: {
-      // Configure Turbopack settings here
+      loaders: {
+        ".node": "empty",
+      },
+      resolveAlias: {
+        "mongodb-client-encryption": "next/dist/compiled/noop",
+        kerberos: "next/dist/compiled/noop",
+        "@mongodb-js/zstd": "next/dist/compiled/noop",
+        snappy: "next/dist/compiled/noop",
+        aws4: "next/dist/compiled/noop",
+        "gcp-metadata": "next/dist/compiled/noop",
+        socks: "next/dist/compiled/noop",
+      },
     },
   },
   // Configure image domains

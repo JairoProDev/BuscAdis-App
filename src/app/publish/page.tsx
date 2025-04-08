@@ -2,13 +2,13 @@
 
 import React, { useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { usePublication, publicationActions } from '../../contexts/PublicationContext';
-import CategorySelector from '../../components/publish/CategorySelector';
-import LocationSelector from '../../components/publish/LocationSelector';
-import PriceInput from '../../components/publish/PriceInput';
-import ImageUploader from '../../components/publish/ImageUploader';
-import PublishAchievements from '../../components/publish/PublishAchievements';
-import { Logger } from '../../services/logging.service';
+import { usePublication, publicationActions } from '@/contexts/PublicationContext';
+import CategorySelector from '@/components/publish/CategorySelector';
+import LocationSelector from '@/components/publish/LocationSelector';
+import PriceInput from '@/components/publish/PriceInput';
+import ImageUploader from '@/components/publish/ImageUploader';
+import PublishAchievements from '@/components/publish/PublishAchievements';
+import { Logger } from '@/services/logging.service';
 
 const steps = [
   { id: 1, title: 'Categoría', description: 'Selecciona la categoría de tu publicación' },

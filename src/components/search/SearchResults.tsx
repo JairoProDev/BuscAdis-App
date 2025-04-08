@@ -192,8 +192,10 @@ export default function SearchResults({
       return newSet
     })
   }
-  
+
+    
   // Marcar elemento como visto al hacer scroll
+ {/* 
   const handleItemVisible = (id: string) => {
     setVisibleItems(prev => {
       const newSet = new Set(prev)
@@ -201,7 +203,7 @@ export default function SearchResults({
       return newSet
     })
   }
-  
+    */}
   // Generar URL amigable para SEO
   const generateSeoUrl = (publication: Publication) => {
     const base = publication.categorySlug || 'anuncio'

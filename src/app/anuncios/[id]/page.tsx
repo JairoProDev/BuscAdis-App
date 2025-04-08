@@ -10,7 +10,8 @@ import {
   ClockIcon,
   CurrencyDollarIcon,
   EyeIcon,
-  ShareIcon
+  ShareIcon,
+  FlagIcon
 } from '@heroicons/react/24/outline';
 import { PublicationsService } from '@/services/publications.service';
 import LoadingState from '@/components/ui/LoadingState';
@@ -157,9 +158,9 @@ export default function PublicationDetailPage() {
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
         <div className="lg:col-span-2">
           {/* Imágenes */}
-          {publication.media && publication.media.length > 0 ? (
+          {publication.images && publication.images.length > 0 ? (
             <div className="mb-8 overflow-hidden rounded-xl">
-              <Carousel images={publication.media} />
+              <Carousel images={publication.images} />
             </div>
           ) : (
             <div className="mb-8 bg-gray-200 h-96 rounded-xl flex items-center justify-center">
