@@ -91,8 +91,18 @@ export class PublicationsService {
      */
     static async getPublicationById(id: string, category?: string) {
         try {
+            // Construir query params
+            const params = new URLSearchParams();
+            if (category) {
+                params.append('category', category);
+            }
+            
             // Fetch from API
-            const response = await fetch(this.ENDPOINTS.PUBLICATION(id));
+            const queryString = params.toString() ? `?${params.toString()}` : '';
+            const endpoint = `${this.ENDPOINTS.PUBLICATION(id)}${queryString}`;
+            
+            console.log(`Fetching publication from: ${endpoint}`);
+            const response = await fetch(endpoint);
             
             if (!response.ok) {
                 throw new Error(`API error: ${response.status}`);

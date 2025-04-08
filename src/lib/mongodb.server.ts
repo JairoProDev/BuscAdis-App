@@ -1,6 +1,6 @@
 'use server';
 
-import { MongoClient, ServerApiVersion } from 'mongodb';
+import { MongoClient, ServerApiVersion, Document, FindOptions, Sort } from 'mongodb';
 
 // Connection URI
 const uri = process.env.MONGODB_URI || "mongodb://localhost:27017";
@@ -15,11 +15,11 @@ let client: MongoClient | null = null;
 let connectionAttempts = 0;
 const MAX_RETRIES = 3;
 
-// Add the QueryOptions interface at the top of the file
-interface QueryOptions {
+// Define QueryOptions interface compatible with MongoDB FindOptions
+interface QueryOptions extends Omit<FindOptions<Document>, 'sort'> {
   limit?: number;
   skip?: number;
-  sort?: Record<string, number>;
+  sort?: Record<string, number> | Sort;
   projection?: Record<string, number>;
   count?: boolean;
 }
@@ -41,8 +41,9 @@ function logError(message: string, error: unknown) {
       console.error('Error message:', error.message);
       console.error('Error stack:', error.stack);
       
-      // @ts-ignore - Handle potential MongoDB specific error properties
+      // @ts-expect-error - MongoDB error might have result property
       if (error.result) {
+        // @ts-expect-error - MongoDB error result
         console.error('Error result:', error.result);
       }
     } else {
@@ -153,7 +154,7 @@ export async function getMongoClient(): Promise<MongoClient> {
 /**
  * Server-side function to connect to MongoDB and perform a query with better error handling
  */
-export async function mongoDbQuery<T>(collection: string, query: Record<string, unknown>, options: QueryOptions = {}): Promise<T[] | number> {
+export async function mongoDbQuery<T extends Document>(collection: string, query: Record<string, unknown>, options: QueryOptions = {}): Promise<T[] | number> {
   let mongoClient: MongoClient | null = null;
   
   try {
@@ -177,8 +178,25 @@ export async function mongoDbQuery<T>(collection: string, query: Record<string, 
       return count;
     }
     
+    // Extract sort and other options separately
+    const { sort, ...otherOptions } = options;
+    const findOptions: FindOptions<Document> = {
+      ...otherOptions
+    };
+    
+    // Add sort if provided
+    if (sort) {
+      // Convert to the MongoDB sort format
+      if (typeof sort === 'object' && !Array.isArray(sort)) {
+        // @ts-expect-error - Cast Record<string, number> to Sort which is compatible with MongoDB
+        findOptions.sort = sort;
+      } else {
+        findOptions.sort = sort;
+      }
+    }
+    
     // Execute query
-    const result = await db.collection(collection).find(query, options).toArray();
+    const result = await db.collection(collection).find(query, findOptions).toArray();
     logDebug(`Query returned ${result.length} documents`);
     
     return JSON.parse(JSON.stringify(result)) as T[];
@@ -218,7 +236,7 @@ export async function mongoDbGetById<T>(collection: string, id: string): Promise
 /**
  * Server-side function to insert a document with better error handling
  */
-export async function mongoDbInsert<T>(collection: string, document: T): Promise<any> {
+export async function mongoDbInsert<T extends Document>(collection: string, document: T): Promise<any> {
   try {
     logDebug(`Inserting document into collection '${collection}'`);
     

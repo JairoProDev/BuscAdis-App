@@ -1,13 +1,13 @@
-import { IconType } from '@/types/icons'
-
 export type CategoryId = 
   | 'empleos'
   | 'inmuebles' 
   | 'vehiculos'
   | 'servicios'
   | 'productos'
-  | 'turismo'
   | 'eventos'
+  | 'negocios'
+  | 'comunidad'
+  | 'turismo'
   | 'educacion'
   | 'mascotas'
 
@@ -33,14 +33,15 @@ export type EmpleoType =
 // ... (definir los tipos para las demás categorías)
 
 export interface Category {
+  id: string;
   name: string;
-  icon: string;
-  gradient: string;
-  description: string;
-  stats?: {
-    count?: number;
-    trend?: number;
-  };
+  slug?: string;
+  description?: string;
+  icon?: string;
+  iconName?: string;
+  gradient?: string;
+  imageUrl?: string;
+  count?: number;
 }
 
 export interface Categories {

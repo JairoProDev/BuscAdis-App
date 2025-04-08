@@ -39,7 +39,36 @@ export default function PublicationModal({
       
       try {
         setLoading(true);
-        const data = await PublicationsService.getPublicationById(publicationId, category);
+        setError('');
+        
+        // Intentar obtener los datos de publicación, pasando la categoría correctamente
+        console.log(`Fetching publication ${publicationId} from category ${category || 'unknown'}`);
+        
+        // Añadir reintento automático
+        let attempts = 0;
+        const maxAttempts = 2;
+        let success = false;
+        let data = null;
+        
+        while (attempts <= maxAttempts && !success) {
+          try {
+            attempts++;
+            data = await PublicationsService.getPublicationById(publicationId, category);
+            success = true;
+          } catch (err) {
+            console.warn(`Attempt ${attempts}/${maxAttempts} failed:`, err);
+            // Esperar un poco antes de reintentar
+            if (attempts <= maxAttempts) {
+              await new Promise(resolve => setTimeout(resolve, 500));
+            }
+          }
+        }
+        
+        if (!success || !data) {
+          throw new Error('No se pudo obtener la información del anuncio después de varios intentos');
+        }
+        
+        console.log('Publication data fetched successfully:', data);
         setPublication(data || null);
         
         // Track view in analytics
@@ -54,7 +83,8 @@ export default function PublicationModal({
         }
       } catch (err) {
         console.error('Error fetching publication:', err);
-        setError('No se pudo cargar el anuncio. Inténtalo de nuevo más tarde.');
+        setError('No se pudo cargar el anuncio. Por favor, intenta nuevamente más tarde.');
+        setPublication(null);
       } finally {
         setLoading(false);
       }

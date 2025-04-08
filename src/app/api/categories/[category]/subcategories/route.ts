@@ -126,8 +126,11 @@ export async function GET(
     // If no static subcategories, try to get from database
     const results = await mongoDbQuery('subcategories', { categoryId }, {});
     
-    if (results && results.length > 0) {
-      return NextResponse.json(results);
+    if (results) {
+      // Handle both array and number return types
+      if (Array.isArray(results) && results.length > 0) {
+        return NextResponse.json(results);
+      }
     }
 
     // Return empty array if no subcategories found

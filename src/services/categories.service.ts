@@ -147,18 +147,21 @@ export class CategoriesService {
       // Server-side code - use mongoDbQuery instead of direct client access
       if (!isBrowser) {
         try {
-          const results = await mongoDbQuery('categories', {}, {});
+          const results = await mongoDbQuery<CategoryItem>('categories', {}, {});
           
-          if (results && results.length > 0) {
-            return results.map((category: any) => ({
-              id: category._id?.toString() || '',
-              name: category.name || '',
-              icon: category.icon || '',
-              description: category.description || '',
-              gradient: category.gradient || '',
-              slug: category.slug || '',
-              count: category.count || 0
-            }));
+          if (results) {
+            // Handle both array and number return types
+            if (Array.isArray(results)) {
+              return results.map((category: any) => ({
+                id: category._id?.toString() || '',
+                name: category.name || '',
+                icon: category.icon || '',
+                description: category.description || '',
+                gradient: category.gradient || '',
+                slug: category.slug || '',
+                count: category.count || 0
+              }));
+            }
           }
         } catch (error) {
           console.error('Error querying MongoDB:', error);
@@ -199,16 +202,19 @@ export class CategoriesService {
       // Server-side code - use mongoDbQuery instead of direct client access
       if (!isBrowser) {
         try {
-          const results = await mongoDbQuery('subcategories', { categoryId }, {});
+          const results = await mongoDbQuery<any>('subcategories', { categoryId }, {});
           
-          if (results && results.length > 0) {
-            return results.map((subcategory: any) => ({
-              id: subcategory._id?.toString() || '',
-              name: subcategory.name || '',
-              icon: subcategory.icon || '',
-              categoryId: subcategory.categoryId,
-              count: subcategory.count || 0
-            }));
+          if (results) {
+            // Handle both array and number return types
+            if (Array.isArray(results) && results.length > 0) {
+              return results.map((subcategory: any) => ({
+                id: subcategory._id?.toString() || '',
+                name: subcategory.name || '',
+                icon: subcategory.icon || '',
+                categoryId: subcategory.categoryId,
+                count: subcategory.count || 0
+              }));
+            }
           }
         } catch (error) {
           console.error(`Error querying MongoDB for subcategories:`, error);
