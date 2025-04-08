@@ -18,47 +18,39 @@ export async function GET() {
       'publications_comunidad'
     ]
     
-    // Static fallback counts in case of database errors
-    const staticCounts = [
-      { id: 'empleos', count: 43 },
-      { id: 'inmuebles', count: 76 },
-      { id: 'vehiculos', count: 62 },
-      { id: 'servicios', count: 51 },
-      { id: 'productos', count: 87 },
-      { id: 'eventos', count: 34 },
-      { id: 'negocios', count: 27 },
-      { id: 'comunidad', count: 19 },
-    ]
-    
-    try {
-      // Get counts for each category
-      const countPromises = categoryCollections.map(async (collection) => {
-        try {
-          const data = await mongoDbQuery(collection, {}, { limit: 0 })
-          return {
-            id: collection.replace('publications_', ''),
-            count: data.length
-          }
-        } catch (err) {
-          console.error(`Error counting for collection ${collection}:`, err)
-          // Return static count for this category as fallback
-          const staticCount = staticCounts.find(
-            c => c.id === collection.replace('publications_', '')
-          )
-          return staticCount || { id: collection.replace('publications_', ''), count: 0 }
+    // Get counts for each category
+    const countPromises = categoryCollections.map(async (collection) => {
+      try {
+        // Use MongoDB's countDocuments() via a raw query
+        const result = await mongoDbQuery(collection, {}, { count: true });
+        return {
+          id: collection.replace('publications_', ''),
+          count: typeof result === 'number' ? result : (Array.isArray(result) ? result.length : 0)
         }
-      })
-      
-      const counts = await Promise.all(countPromises)
-      return NextResponse.json(counts)
-    } catch (error) {
-      console.error('Error in categories count:', error)
-      // Return static counts as fallback
-      return NextResponse.json(staticCounts)
-    }
+      } catch (err) {
+        console.error(`Error counting for collection ${collection}:`, err)
+        // If there's an error, return zero count rather than fake numbers
+        return { 
+          id: collection.replace('publications_', ''), 
+          count: 0 
+        }
+      }
+    })
+    
+    const counts = await Promise.all(countPromises)
+    return NextResponse.json(counts)
   } catch (error) {
     console.error('Error fetching category counts:', error)
-    // If absolutely everything fails, return an empty array rather than 500
-    return NextResponse.json([])
+    // Return empty counts rather than fake counts if there's an error
+    return NextResponse.json([
+      { id: 'empleos', count: 0 },
+      { id: 'inmuebles', count: 0 },
+      { id: 'vehiculos', count: 0 },
+      { id: 'servicios', count: 0 },
+      { id: 'productos', count: 0 },
+      { id: 'eventos', count: 0 },
+      { id: 'negocios', count: 0 },
+      { id: 'comunidad', count: 0 },
+    ])
   }
 } 

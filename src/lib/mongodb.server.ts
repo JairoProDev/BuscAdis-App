@@ -15,25 +15,38 @@ let client: MongoClient | null = null;
 let connectionAttempts = 0;
 const MAX_RETRIES = 3;
 
+// Add the QueryOptions interface at the top of the file
+interface QueryOptions {
+  limit?: number;
+  skip?: number;
+  sort?: Record<string, number>;
+  projection?: Record<string, number>;
+  count?: boolean;
+}
+
 // Enhanced logging
-function logDebug(message: string, data?: any) {
+function logDebug(message: string, data?: unknown) {
   if (DEBUG) {
     console.log(`[MongoDB Debug] ${message}`, data ? data : '');
   }
 }
 
-function logError(message: string, error: any) {
+function logError(message: string, error: unknown) {
   console.error(`[MongoDB Error] ${message}:`, error);
   
   // Log detailed information about the error
   if (error) {
-    console.error('Error name:', error.name);
-    console.error('Error message:', error.message);
-    console.error('Error code:', error.code);
-    console.error('Error stack:', error.stack);
-    
-    if (error.result) {
-      console.error('Error result:', error.result);
+    if (error instanceof Error) {
+      console.error('Error name:', error.name);
+      console.error('Error message:', error.message);
+      console.error('Error stack:', error.stack);
+      
+      // @ts-ignore - Handle potential MongoDB specific error properties
+      if (error.result) {
+        console.error('Error result:', error.result);
+      }
+    } else {
+      console.error('Unknown error type:', typeof error);
     }
   }
 }
@@ -42,9 +55,16 @@ function logError(message: string, error: any) {
  * Get or create MongoDB client connection with retries
  */
 export async function getMongoClient(): Promise<MongoClient> {
-  if (client && client.topology && client.topology.isConnected()) {
-    logDebug('Reusing existing MongoDB connection');
-    return client;
+  // Check if client exists and is connected
+  if (client) {
+    try {
+      await client.db().command({ ping: 1 });
+      logDebug('Reusing existing MongoDB connection');
+      return client;
+    } catch (err) {
+      logDebug('Existing client is disconnected');
+      // Fall through to reconnect
+    }
   }
   
   connectionAttempts++;
@@ -133,7 +153,7 @@ export async function getMongoClient(): Promise<MongoClient> {
 /**
  * Server-side function to connect to MongoDB and perform a query with better error handling
  */
-export async function mongoDbQuery<T>(collection: string, query: any, options: any = {}): Promise<T[]> {
+export async function mongoDbQuery<T>(collection: string, query: Record<string, unknown>, options: QueryOptions = {}): Promise<T[] | number> {
   let mongoClient: MongoClient | null = null;
   
   try {
@@ -147,7 +167,14 @@ export async function mongoDbQuery<T>(collection: string, query: any, options: a
     const collections = await db.listCollections({name: collection}).toArray();
     if (collections.length === 0) {
       logDebug(`Collection '${collection}' does not exist, returning empty result`);
-      return [] as T[];
+      return options.count ? 0 : ([] as T[]);
+    }
+    
+    // If count option is true, use countDocuments instead of find
+    if (options.count) {
+      const count = await db.collection(collection).countDocuments(query);
+      logDebug(`Count query returned ${count} documents`);
+      return count;
     }
     
     // Execute query

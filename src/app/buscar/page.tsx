@@ -237,7 +237,10 @@ export default function BuscadorPage() {
         localStorage.setItem('userPoints', newTotal.toString());
         localStorage.setItem('lastSearchReward', today);
         
-        // Show notification
+        // Show reward modal
+        setShowDailyReward(true);
+        
+        // Show notification after modal is displayed
         setTimeout(() => {
           toast({
             title: "¡Recompensa diaria!",
@@ -311,6 +314,11 @@ export default function BuscadorPage() {
   const handleCloseReward = () => {
     setShowDailyReward(false);
   };
+
+  // Make sure modal click events don't propagate to the backdrop
+  const handleModalClick = (e: React.MouseEvent) => {
+    e.stopPropagation(); // Prevent clicks inside the modal from closing it
+  };
   
   if (error && !loading) {
     return (
@@ -381,10 +389,14 @@ export default function BuscadorPage() {
         <motion.div
           initial={{ opacity: 0, scale: 0.8 }}
           animate={{ opacity: 1, scale: 1 }}
+          exit={{ opacity: 0, scale: 0.8 }}
           className="fixed inset-0 z-50 flex items-center justify-center p-4"
         >
           <div className="absolute inset-0 bg-black/70" onClick={handleCloseReward}></div>
-          <div className="relative bg-gradient-to-br from-slate-900 to-slate-800 rounded-xl border border-teal-500/50 p-6 max-w-md w-full shadow-[0_0_40px_rgba(20,184,166,0.3)]">
+          <div 
+            className="relative bg-gradient-to-br from-slate-900 to-slate-800 rounded-xl border border-teal-500/50 p-6 max-w-md w-full shadow-[0_0_40px_rgba(20,184,166,0.3)]"
+            onClick={handleModalClick}
+          >
             <div className="absolute inset-0 overflow-hidden rounded-xl">
               <div className="absolute top-0 right-0 -mt-10 -mr-10 w-40 h-40 bg-teal-500/20 blur-3xl rounded-full"></div>
               <div className="absolute bottom-0 left-0 -mb-10 -ml-10 w-40 h-40 bg-cyan-500/20 blur-3xl rounded-full"></div>
