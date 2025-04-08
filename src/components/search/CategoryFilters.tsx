@@ -3,11 +3,34 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import LoadingSpinner from '@/components/ui/LoadingSpinner';
-import { CategoriesService } from '@/services/categories.service'; // Usamos la clase directamente.
+import { CategoriesService } from '@/services/categories.service';
+import { 
+  BriefcaseIcon, 
+  HomeIcon, 
+  TruckIcon, 
+  WrenchIcon, 
+  ShoppingBagIcon, 
+  CalendarIcon, 
+  ChartBarIcon, 
+  UserGroupIcon
+} from '@heroicons/react/24/outline';
+
+// Map category IDs to their corresponding icon components
+const CATEGORY_ICONS: Record<string, React.ElementType> = {
+  'empleos': BriefcaseIcon,
+  'inmuebles': HomeIcon,
+  'vehiculos': TruckIcon,
+  'servicios': WrenchIcon,
+  'productos': ShoppingBagIcon,
+  'eventos': CalendarIcon,
+  'negocios': ChartBarIcon,
+  'comunidad': UserGroupIcon
+};
 
 interface Category {
   id: string;
   name: string;
+  count?: number;
 }
 
 interface CategoryType {
@@ -74,72 +97,94 @@ export default function CategoryFilters({
   }, [selectedCategory]);
 
   const handleCategoryChange = (categoryId: string) => {
-    // Encuentra la categoría seleccionada en la lista de categorías
+    // Find the selected category
     const selected = categories.find((category) => category.id === categoryId) || null;
 
-    // Actualiza la categoría seleccionada en la función padre y filtra los resultados
+    // Update the selected category and filter the results
     onSelectCategory(selected);
     onFilterChange({ category: selected });
-
-    // Limpia los tipos asociados para la nueva selección de categoría
-    setCategoryTypes([]);
   };
 
   if (loading) {
-    return <LoadingSpinner />;
+    return (
+      <div className="flex justify-center items-center py-4">
+        <LoadingSpinner size="md" />
+      </div>
+    );
   }
 
   if (error) {
-    return <div className="text-red-500">{error}</div>;
+    return <div className="text-red-500 p-2 rounded bg-red-50">{error}</div>;
   }
 
   return (
-    <div className="space-y-4">
-      <h3 className="font-medium text-lg">Categorías</h3>
+    <div className="space-y-6">
+      <div>
+        <h3 className="font-semibold text-lg mb-3">Categorías</h3>
 
-      {/* Renderizar las categorías */}
-      <div className="flex gap-4 overflow-x-auto hide-scrollbar">
-        {categories.map((category) => (
-          <button
-            key={category.id}
-            onClick={() => handleCategoryChange(category.id)}
-            className={`px-4 py-2 rounded-full ${
-              selectedCategory?.id === category.id
-                ? 'bg-primary-500 text-white'
-                : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
-            }`}
-          >
-            {category.name}
-          </button>
-        ))}
+        {/* Category buttons with icons */}
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+          {categories.map((category) => {
+            const IconComponent = CATEGORY_ICONS[category.id] || BriefcaseIcon;
+            
+            return (
+              <button
+                key={category.id}
+                onClick={() => handleCategoryChange(category.id)}
+                className={`flex items-center p-3 rounded-lg border transition-all ${
+                  selectedCategory?.id === category.id
+                    ? 'bg-primary-50 border-primary-300 text-primary-700'
+                    : 'bg-white border-gray-200 text-gray-700 hover:bg-gray-50'
+                }`}
+              >
+                <IconComponent className="w-5 h-5 mr-2 flex-shrink-0" />
+                <span className="text-sm font-medium">{category.name}</span>
+                {category.count !== undefined && (
+                  <span className="ml-auto text-xs bg-gray-100 text-gray-700 py-1 px-2 rounded-full">
+                    {category.count}
+                  </span>
+                )}
+              </button>
+            );
+          })}
+        </div>
       </div>
 
-      {/* Renderizar los subtipos de la categoría seleccionada */}
+      {/* Subcategories section */}
       <AnimatePresence>
-        {selectedCategory && (
+        {selectedCategory && categoryTypes.length > 0 && (
           <motion.div
-            initial={{ opacity: 0, y: -10 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -10 }}
-            className="flex gap-2 overflow-x-auto hide-scrollbar"
+            initial={{ opacity: 0, height: 0 }}
+            animate={{ opacity: 1, height: 'auto' }}
+            exit={{ opacity: 0, height: 0 }}
+            className="overflow-hidden"
           >
-            {categoryTypes.map((type) => (
-              <motion.button
-                key={type.id}
-                onClick={() => onSelectType(type.id)}
-                className={`px-4 py-2 rounded-full ${
-                  selectedType === type.id
-                    ? 'bg-primary-500 text-white'
-                    : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
-                }`}
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
-              >
-                {type.emoji ? `${type.emoji} ` : ''}
-                {type.name}
-                {type.count ? ` (${type.count})` : ''}
-              </motion.button>
-            ))}
+            <h3 className="font-semibold text-lg mb-3">Subcategorías de {selectedCategory.name}</h3>
+            
+            <div className="grid grid-cols-2 gap-2">
+              {categoryTypes.map((type) => (
+                <motion.button
+                  key={type.id}
+                  onClick={() => onSelectType(type.id)}
+                  className={`text-left p-3 rounded-lg border ${
+                    selectedType === type.id
+                      ? 'bg-primary-50 border-primary-300 text-primary-700'
+                      : 'bg-white border-gray-200 text-gray-700 hover:bg-gray-50'
+                  }`}
+                  whileHover={{ scale: 1.02 }}
+                  whileTap={{ scale: 0.98 }}
+                >
+                  <div className="flex justify-between items-center">
+                    <span className="font-medium">{type.name}</span>
+                    {type.count !== undefined && (
+                      <span className="text-xs bg-gray-100 text-gray-700 py-1 px-2 rounded-full">
+                        {type.count}
+                      </span>
+                    )}
+                  </div>
+                </motion.button>
+              ))}
+            </div>
           </motion.div>
         )}
       </AnimatePresence>

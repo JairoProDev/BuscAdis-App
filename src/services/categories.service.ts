@@ -1,16 +1,86 @@
 // categories.service.ts
 
 import { Collection, Document } from 'mongodb';
-import getMongoClient from '@/lib/mongodb'; // Función para conectar a MongoDB
-import { categories as staticCategories } from '@/data/categories'; // Datos estáticos de categorías
+import { getMongoClient } from '@/lib/mongodb'; // Correct import as named export
 
-// Tipos para las categorías estáticas
-interface StaticCategory {
-  name?: string;
-  icon: string | React.ComponentType;
-  description: string;
-  gradient: string;
-}
+// Check if we're in a browser environment
+const isBrowser = typeof window !== 'undefined';
+
+// Static categories definition
+const staticCategories = [
+  {
+    id: 'empleos',
+    name: 'Empleos',
+    slug: 'empleos',
+    description: 'Encuentra trabajos o publica ofertas laborales en toda la región.',
+    icon: 'BriefcaseIcon',
+    gradient: 'from-blue-500 to-blue-700',
+    imageUrl: '/images/empleo-dev.jpg',
+  },
+  {
+    id: 'inmuebles',
+    name: 'Inmuebles',
+    slug: 'inmuebles',
+    description: 'Casas, departamentos, terrenos y locales comerciales en venta o alquiler.',
+    icon: 'HomeIcon',
+    gradient: 'from-green-500 to-green-700',
+    imageUrl: '/images/departamento-miraflores.jpg',
+  },
+  {
+    id: 'vehiculos',
+    name: 'Vehículos',
+    slug: 'vehiculos',
+    description: 'Autos, motos, camionetas y más vehículos nuevos y usados.',
+    icon: 'TruckIcon',
+    gradient: 'from-red-500 to-red-700',
+    imageUrl: '/images/vehiculo-corolla.jpg',
+  },
+  {
+    id: 'servicios',
+    name: 'Servicios',
+    slug: 'servicios',
+    description: 'Profesionales y técnicos que ofrecen servicios de calidad.',
+    icon: 'WrenchIcon',
+    gradient: 'from-purple-500 to-purple-700',
+    imageUrl: '/images/servicio-clases.jpg',
+  },
+  {
+    id: 'productos',
+    name: 'Productos',
+    slug: 'productos',
+    description: 'Compra y venta de todo tipo de productos nuevos o de segunda mano.',
+    icon: 'ShoppingBagIcon',
+    gradient: 'from-orange-500 to-orange-700',
+    imageUrl: '/images/producto-laptop.jpg',
+  },
+  {
+    id: 'eventos',
+    name: 'Eventos',
+    slug: 'eventos',
+    description: 'Conciertos, talleres, conferencias y todo tipo de eventos.',
+    icon: 'CalendarIcon',
+    gradient: 'from-pink-500 to-pink-700',
+    imageUrl: '/images/evento-concierto.jpg',
+  },
+  {
+    id: 'negocios',
+    name: 'Negocios',
+    slug: 'negocios',
+    description: 'Oportunidades de negocio, franquicias y traspasos.',
+    icon: 'ChartBarIcon',
+    gradient: 'from-yellow-500 to-yellow-700',
+    imageUrl: '/images/negocio-tienda.jpg',
+  },
+  {
+    id: 'comunidad',
+    name: 'Comunidad',
+    slug: 'comunidad',
+    description: 'Anuncios comunitarios, eventos sociales y más.',
+    icon: 'UserGroupIcon',
+    gradient: 'from-teal-500 to-teal-700',
+    imageUrl: '/images/comunidad-evento.jpg',
+  }
+];
 
 // Tipos para las categorías de MongoDB
 interface CategoryItem {
@@ -20,100 +90,128 @@ interface CategoryItem {
   description?: string;
   gradient?: string;
   slug?: string;
+  count?: number;
+}
+
+// Interface for category counts
+interface CategoryCount {
+  id: string;
+  count: number;
 }
 
 export class CategoriesService {
-  /**
-   * Obtiene una colección específica de MongoDB.
-   * @param collectionName Nombre de la colección.
-   * @returns La colección tipada de MongoDB.
-   */
-  private static async getCollection<T extends Document>(collectionName: string): Promise<Collection<T>> {
-    const client = await getMongoClient(); // Usa la conexión configurada
-    const db = client.db(process.env.MONGO_DB_NAME || 'test'); // Usa el nombre de la base de datos
-
-    // Verifica que la colección sea una instancia válida
-    const collection = db.collection<T>(collectionName);
-    if (!collection || !(collection.find instanceof Function)) {
-      throw new Error(`La colección ${collectionName} no es válida.`);
-    }
-
-    return collection; // Devuelve una colección tipada
-  }
-
   /**
    * Obtiene todas las categorías desde la base de datos o un fallback estático.
    * @returns Una lista de categorías.
    */
   static async getCategories(): Promise<CategoryItem[]> {
     try {
-      const collection = await this.getCollection<CategoryItem>('categories'); // Tipado explícito
-      const results = await collection.find({}).toArray(); // Obtiene los resultados como un array
-
-      return results.map((category) => ({
-        id: category._id?.toString() || '', // Usa `_id` de MongoDB
-        name: category.name || '',
-        icon: category.icon || '',
-        description: category.description || '',
-        gradient: category.gradient || '',
-        slug: category.slug || '',
-      }));
+      // If we're in the browser, use API fetch
+      if (isBrowser) {
+        try {
+          // First try to fetch from API
+          const response = await fetch('/api/categories');
+          if (!response.ok) {
+            throw new Error('API error');
+          }
+          
+          // Get category counts
+          const countResponse = await fetch('/api/categories/count');
+          let counts: CategoryCount[] = [];
+          
+          if (countResponse.ok) {
+            counts = await countResponse.json();
+          }
+          
+          const categories = await response.json();
+          
+          // Merge counts with categories
+          return categories.map((category: CategoryItem) => {
+            const countData = counts.find(c => c.id === category.id);
+            return {
+              ...category,
+              count: countData?.count || 0
+            };
+          });
+        } catch (error) {
+          console.error('Error fetching from API:', error);
+          // Return static categories with zero counts as fallback
+          return staticCategories.map((category) => ({
+            ...category,
+            count: 0
+          }));
+        }
+      }
+      
+      // Server-side code
+      if (!isBrowser) {
+        const client = await getMongoClient();
+        const db = client.db(process.env.MONGO_DB_NAME || 'test');
+        const collection = db.collection('categories');
+        const results = await collection.find({}).toArray();
+        
+        if (results.length > 0) {
+          return results.map((category: any) => ({
+            id: category._id?.toString() || '',
+            name: category.name || '',
+            icon: category.icon || '',
+            description: category.description || '',
+            gradient: category.gradient || '',
+            slug: category.slug || '',
+            count: category.count || 0
+          }));
+        }
+      }
+      
+      // Return static categories as fallback
+      return staticCategories;
     } catch (error) {
       console.error('Error fetching categories:', error);
-
-      // Mapear categorías estáticas como fallback
-      return Object.keys(staticCategories).map((key) => {
-        const category: Partial<StaticCategory> = staticCategories[key as keyof typeof staticCategories];
-        return {
-          id: key,
-          name: category.name || key,
-          icon: typeof category.icon === 'string' ? category.icon : '',
-          description: category.description || 'Descripción no disponible',
-          gradient: category.gradient || 'from-gray-500 to-gray-700',
-        };
-      });
+      // Return static categories as ultimate fallback
+      return staticCategories;
     }
   }
 
   /**
-   * Obtiene el conteo de documentos en diferentes colecciones según el slug.
-   * @param categorySlug Slug de la categoría.
-   * @returns El número total de documentos relacionados.
-   */
-  static async getCategoryCount(categorySlug: string): Promise<number> {
-    try {
-      const collections = ['publications_inmuebles', 'publications_empleos', 'publications_servicios'];
-      let totalCount = 0;
-
-      for (const collectionName of collections) {
-        const collection = await this.getCollection<{ categorySlug: string }>(collectionName); // Tipar documentos
-        totalCount += await collection.countDocuments({ categorySlug });
-      }
-
-      return totalCount;
-    } catch (error) {
-      console.error(`Error fetching count for slug ${categorySlug}:`, error);
-      return 0;
-    }
-  }
-
-  /**
-   * Obtiene los tipos de una categoría específica desde la base de datos.
+   * Obtiene los tipos de una categoría específica (subcategorías).
    * @param categoryId ID de la categoría.
-   * @returns Una lista de tipos asociados con la categoría.
+   * @returns Una lista de subcategorías asociadas con la categoría.
    */
   static async getCategoryWithTypes(categoryId: string): Promise<CategoryItem[]> {
     try {
-      const collection = await this.getCollection<CategoryItem>('categoryTypes');
-      const results = await collection.find({ categoryId }).toArray();
-
-      return results.map((type) => ({
-        id: type._id?.toString() || '', // Usa `_id` de MongoDB
-        name: type.name || '',
-        icon: type.icon || '',
-      }));
+      // For browser environments, fetch from API
+      if (isBrowser) {
+        try {
+          const response = await fetch(`/api/categories/${categoryId}/subcategories`);
+          if (!response.ok) {
+            throw new Error('API error');
+          }
+          return await response.json();
+        } catch (error) {
+          console.error(`Error fetching subcategories for category ${categoryId}:`, error);
+          return [];
+        }
+      }
+      
+      // Server-side code
+      if (!isBrowser) {
+        const client = await getMongoClient();
+        const db = client.db(process.env.MONGO_DB_NAME || 'test');
+        const collection = db.collection('subcategories');
+        const results = await collection.find({ categoryId }).toArray();
+        
+        return results.map((subcategory: any) => ({
+          id: subcategory._id?.toString() || '',
+          name: subcategory.name || '',
+          icon: subcategory.icon || '',
+          categoryId: subcategory.categoryId,
+          count: subcategory.count || 0
+        }));
+      }
+      
+      return [];
     } catch (error) {
-      console.error(`Error fetching types for category ${categoryId}:`, error);
+      console.error(`Error fetching subcategories for category ${categoryId}:`, error);
       return [];
     }
   }
