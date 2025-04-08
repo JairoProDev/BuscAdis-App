@@ -2,18 +2,19 @@
 
 import { useState, useEffect } from 'react';
 import { useParams } from 'next/navigation';
-import { 
-  ShareIcon,
-  FlagIcon
-} from '@heroicons/react/24/outline';
 import { PublicationsService } from '@/services/publications.service';
 import { formatDate } from '@/utils/date';
 import { formatPrice } from '@/utils/format';
 import { Carousel } from '@/components/ui/Carousel';
 import { WhatsAppIcon } from '@/components/icons';
 import LoadingSpinner from '@/components/ui/LoadingSpinner';
+import { 
+  ShareIcon,
+  FlagIcon
+} from '@heroicons/react/24/outline';
 
 interface Publication {
+  id: string;
   title: string;
   description: string;
   price: number;
@@ -32,28 +33,51 @@ interface Publication {
   views?: number;
   category?: string;
   subcategory?: string;
-  subSubcategory?: string;
+  subsubcategory?: string;
 }
 
 export default function PublicationDetailPage() {
   const params = useParams();
-  const id = params.id as string;
+  const category = params.category as string;
+  
+  // Extract publication ID from the URL
+  // The ID can be in formats like "123-title-with-hyphens" or just "123"
+  const idParam = params.id as string;
+  const id = idParam.split('-')[0]; // Extract just the ID portion
   
   const [publication, setPublication] = useState<Publication | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+  const [relatedPublications, setRelatedPublications] = useState([]);
 
-  // Cargar datos del anuncio
+  // Fetch publication data
   useEffect(() => {
     const fetchPublication = async () => {
       try {
         setLoading(true);
-        // Extract category from URL if possible
-        const pathParts = window.location.pathname.split('/');
-        const category = pathParts.length > 2 ? pathParts[1] : undefined;
-        
         const data = await PublicationsService.getPublicationById(id, category);
         setPublication(data || null);
+        
+        // Track view in analytics
+        if (data) {
+          try {
+            // Send view event to backend (implement later)
+            console.log('Publication viewed:', id);
+            
+            // Also track localStorage for analysis
+            try {
+              const viewedItems = JSON.parse(localStorage.getItem('viewedItems') || '[]');
+              if (!viewedItems.includes(id)) {
+                viewedItems.push(id);
+                localStorage.setItem('viewedItems', JSON.stringify(viewedItems));
+              }
+            } catch (e) {
+              console.error('Error tracking local view:', e);
+            }
+          } catch (err) {
+            console.error('Error tracking view:', err);
+          }
+        }
       } catch (err) {
         console.error('Error fetching publication:', err);
         setError('No se pudo cargar el anuncio. Inténtalo de nuevo más tarde.');
@@ -62,12 +86,24 @@ export default function PublicationDetailPage() {
       }
     };
 
+    // Fetch related publications
+    const fetchRelatedPublications = async () => {
+      try {
+        // Implement later - get publications from same category and similar attributes
+        // const relatedData = await PublicationsService.getRelatedPublications(id, category);
+        // setRelatedPublications(relatedData || []);
+      } catch (err) {
+        console.error('Error fetching related publications:', err);
+      }
+    };
+
     if (id) {
       fetchPublication();
+      fetchRelatedPublications();
     }
-  }, [id]);
+  }, [id, category]);
 
-  // Manejar compartir
+  // Handle sharing
   const handleShare = async () => {
     if (navigator.share) {
       try {
@@ -77,10 +113,10 @@ export default function PublicationDetailPage() {
           url: window.location.href
         });
       } catch (err) {
-        console.error('Error compartiendo:', err);
+        console.error('Error sharing:', err);
       }
     } else {
-      // Fallback para navegadores que no soportan Web Share API
+      // Fallback for browsers that don't support Web Share API
       navigator.clipboard.writeText(window.location.href);
       alert('Enlace copiado al portapapeles');
     }
@@ -105,20 +141,12 @@ export default function PublicationDetailPage() {
     );
   }
 
-  // Extraer datos del anuncio con valores predeterminados
-  const title = publication.title || 'Sin título';
-  const description = publication.description || 'Sin descripción';
-  const price = publication.price || 0;
-  const priceType = publication.price_type || 'fixed';
-  const location = publication.location || {};
-  const locationText = location.city ? `${location.city}, ${location.country || ''}` : 'Ubicación no especificada';
-  const createdAt = new Date(publication.created_at).toLocaleDateString();
-
+  // Format WhatsApp message based on category
   const formatWhatsAppMessage = () => {
     if (!publication) return '';
     let message = `Hola, estoy interesado en tu anuncio "${publication.title}" de Buscadis.`;
     
-    // Personalizar el mensaje según la categoría
+    // Customize message based on category
     if (publication.category === 'empleo') {
       message = `Hola, estoy interesado en la oferta de trabajo "${publication.title}" publicada en Buscadis.`;
     } else if (publication.category === 'inmuebles') {
@@ -128,11 +156,20 @@ export default function PublicationDetailPage() {
     return encodeURIComponent(message);
   };
 
+  // Extract default values
+  const title = publication.title || 'Sin título';
+  const description = publication.description || 'Sin descripción';
+  const price = publication.price || 0;
+  const priceType = publication.price_type || 'fixed';
+  const location = publication.location || {};
+  const locationText = location.city ? `${location.city}, ${location.country || ''}` : 'Ubicación no especificada';
+  const createdAt = new Date(publication.created_at).toLocaleDateString();
+
   return (
     <div className="container py-8 md:py-12">
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
         <div className="lg:col-span-2">
-          {/* Imágenes */}
+          {/* Images */}
           {publication.images && publication.images.length > 0 ? (
             <div className="mb-8 overflow-hidden rounded-xl">
               <Carousel images={publication.images} />
@@ -143,7 +180,7 @@ export default function PublicationDetailPage() {
             </div>
           )}
 
-          {/* Detalles del anuncio */}
+          {/* Details */}
           <div className="bg-white rounded-xl shadow-md p-6 mb-8">
             <h1 className="text-2xl md:text-3xl font-bold text-gray-900 mb-4">{title}</h1>
             
@@ -185,7 +222,7 @@ export default function PublicationDetailPage() {
           </div>
         </div>
         
-        {/* Contacto */}
+        {/* Contact sidebar */}
         <div className="sticky top-24 h-fit">
           <div className="bg-white rounded-xl shadow-md p-6">
             <h2 className="text-xl font-bold text-gray-800 mb-4">Contactar al anunciante</h2>
@@ -215,6 +252,16 @@ export default function PublicationDetailPage() {
           </div>
         </div>
       </div>
+      
+      {/* Related listings */}
+      {relatedPublications.length > 0 && (
+        <div className="mt-12">
+          <h2 className="text-2xl font-bold mb-6">Anuncios similares</h2>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+            {/* Implement related listings cards here */}
+          </div>
+        </div>
+      )}
     </div>
   );
-}
+} 

@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useEffect, useState } from 'react';
-import { PublicationsService } from '@/services/publications.service';
+import Link from 'next/link';
 import { Publication } from '@/components/search/SearchResults';
 import LoadingSpinner from '@/components/ui/LoadingSpinner';
 import { Logger } from '@/services/logging.service';
@@ -98,9 +98,9 @@ const FavoritesPage = () => {
           <p className="text-gray-600 mb-6">
             Cuando guardes anuncios como favoritos, aparecerán aquí
           </p>
-          <a href="/" className="inline-block px-4 py-2 bg-blue-600 text-white rounded-md">
+          <Link href="/" className="inline-block px-4 py-2 bg-blue-600 text-white rounded-md">
             Explorar anuncios
-          </a>
+          </Link>
         </div>
       </div>
     );

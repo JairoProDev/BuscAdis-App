@@ -188,6 +188,6 @@ const PublishAchievements: React.FC<PublishAchievementsProps> = ({
       )}
     </div>
   );
-};
+}; 
 
 export default PublishAchievements; 

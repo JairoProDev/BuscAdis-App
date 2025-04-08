@@ -18,8 +18,8 @@ import {
 } from '@heroicons/react/24/solid'
 import { SparklesIcon } from '@heroicons/react/24/solid'
 import Image from 'next/image'
-import Link from 'next/link'
 import useMediaQuery from '@/hooks/useMediaQuery'
+import PublicationModal from '@/components/search/PublicationModal'
 
 export interface Publication {
   id: string
@@ -105,6 +105,9 @@ export default function SearchResults({
   const [savedItems, setSavedItems] = useState<Set<string>>(new Set())
   // Referencia para los resultados más nuevos
   const [newItemsCount, setNewItemsCount] = useState(0)
+  // Modal state
+  const [modalOpen, setModalOpen] = useState(false)
+  const [selectedPublicationId, setSelectedPublicationId] = useState<string | null>(null)
   // Referencia para infinite scroll
   const { ref: loadMoreRef, inView } = useInView({
     threshold: 0.1,
@@ -204,29 +207,57 @@ export default function SearchResults({
     })
   }
     */}
+  // Handle opening the publication modal
+  const handleOpenModal = (publicationId: string, event: React.MouseEvent) => {
+    event.preventDefault();
+    setSelectedPublicationId(publicationId);
+    setModalOpen(true);
+    
+    // Update URL without navigation using history.pushState
+    const publication = results.find(p => p.id === publicationId);
+    if (publication) {
+      const categoryPath = publication.categorySlug || 'anuncios';
+      const titleSlug = publication.title
+        .toLowerCase()
+        .replace(/[^\w\s]/gi, '')
+        .replace(/\s+/g, '-')
+        .substring(0, 50);
+      const newPath = `/${categoryPath}/${publicationId}-${titleSlug}`;
+      window.history.pushState({ id: publicationId }, '', newPath);
+    }
+  };
+  
+  // Handle closing the modal
+  const handleCloseModal = () => {
+    setModalOpen(false);
+    
+    // Restore original URL when closing the modal
+    window.history.pushState({}, '', window.location.pathname.split('?')[0] + window.location.search);
+  };
+  
   // Generar URL amigable para SEO
   const generateSeoUrl = (publication: Publication) => {
-    const base = publication.categorySlug || 'anuncio'
+    const base = publication.categorySlug || 'anuncios';
     const titleSlug = publication.title
       .toLowerCase()
       .replace(/[^\w\s]/gi, '')
       .replace(/\s+/g, '-')
-      .substring(0, 50)
+      .substring(0, 50);
     
-    return `/${base}/${publication.id}-${titleSlug}`
-  }
+    return `/${base}/${publication.id}-${titleSlug}`;
+  };
   
   // Renderizar item en vista de cuadrícula
   const renderGridItem = (publication: Publication, index: number) => {
-    const isNew = index < newItemsCount
-    const isPremium = publication.premium
-    const isLiked = likedItems.has(publication.id)
-    const isSaved = savedItems.has(publication.id)
+    const isNew = index < newItemsCount;
+    const isPremium = publication.premium;
+    const isLiked = likedItems.has(publication.id);
+    const isSaved = savedItems.has(publication.id);
     
     // Default image if none provided
     const imageUrl = publication.images && publication.images.length > 0
       ? publication.images[0]
-      : '/images/placeholder.jpg'
+      : '/images/placeholder.jpg';
     
     return (
       <motion.div
@@ -237,7 +268,11 @@ export default function SearchResults({
         transition={{ duration: 0.4, delay: index * 0.05 }}
         className="relative group"
       >
-        <Link href={generateSeoUrl(publication)} className="block">
+        <a 
+          href={generateSeoUrl(publication)} 
+          className="block"
+          onClick={(e) => handleOpenModal(publication.id, e)}
+        >
           <div className="relative bg-slate-800 rounded-xl overflow-hidden shadow-lg hover:shadow-xl transition-shadow duration-300 border border-teal-500/20 hover:border-cyan-400/30">
             {/* Imagen principal */}
             <div className="relative h-52 overflow-hidden">
@@ -297,7 +332,7 @@ export default function SearchResults({
               </div>
             </div>
           </div>
-        </Link>
+        </a>
         
         {/* Botones de interacción */}
         {showInteractionButtons && (
@@ -354,13 +389,17 @@ export default function SearchResults({
     return (
       <motion.div
         key={publication.id}
-        layoutId={`publication-${publication.id}`}
+        layoutId={`publication-list-${publication.id}`}
         initial={{ opacity: 0, x: -20 }}
         animate={{ opacity: 1, x: 0 }}
-        transition={{ duration: 0.4, delay: index * 0.05 }}
-        className="relative group"
+        transition={{ duration: 0.3, delay: index * 0.05 }}
+        className="relative"
       >
-        <Link href={generateSeoUrl(publication)} className="block">
+        <a 
+          href={generateSeoUrl(publication)} 
+          className="block"
+          onClick={(e) => handleOpenModal(publication.id, e)}
+        >
           <div className="relative flex bg-slate-800 rounded-xl overflow-hidden shadow-lg hover:shadow-xl transition-shadow duration-300 border border-teal-500/20 hover:border-cyan-400/30">
             {/* Imagen */}
             <div className="relative w-32 sm:w-48 flex-shrink-0 overflow-hidden">
@@ -458,7 +497,7 @@ export default function SearchResults({
               )}
             </div>
           </div>
-        </Link>
+        </a>
       </motion.div>
     )
   }
@@ -487,117 +526,130 @@ export default function SearchResults({
   }
   
   return (
-    <div className="w-full">
-      {/* Control de vista y resultados */}
-      <div className="flex flex-wrap items-center justify-between mb-4">
-        <div className="flex items-center space-x-1">
-          <span className="text-sm font-medium text-slate-400">
-            {results.length} resultado{results.length !== 1 ? 's' : ''}
-            {activeCategory && <span className="ml-1">en {activeCategory}</span>}
-          </span>
-          
-          {newItemsCount > 0 && (
-            <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-amber-500/20 text-amber-400">
-              <FireIcon className="w-3 h-3 mr-0.5" />
-              {newItemsCount} nuevo{newItemsCount !== 1 ? 's' : ''}
+    <>
+      {/* Results list */}
+      <div className="relative z-10">
+        {/* Control de vista y resultados */}
+        <div className="flex flex-wrap items-center justify-between mb-4">
+          <div className="flex items-center space-x-1">
+            <span className="text-sm font-medium text-slate-400">
+              {results.length} resultado{results.length !== 1 ? 's' : ''}
+              {activeCategory && <span className="ml-1">en {activeCategory}</span>}
             </span>
-          )}
-        </div>
-        
-        {/* Controles de vista */}
-        <div className="flex items-center gap-2">
-          {/* Selector de orden */}
-          <select 
-            className="bg-slate-700 border border-slate-600 text-slate-300 text-sm rounded-lg focus:ring-teal-500 focus:border-teal-500 p-2 pr-8"
-            aria-label="Ordenar resultados"
-          >
-            <option value="recentes">Más recientes</option>
-            <option value="relevancia">Más relevantes</option>
-            <option value="precio_asc">Precio: menor a mayor</option>
-            <option value="precio_desc">Precio: mayor a menor</option>
-          </select>
+            
+            {newItemsCount > 0 && (
+              <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-amber-500/20 text-amber-400">
+                <FireIcon className="w-3 h-3 mr-0.5" />
+                {newItemsCount} nuevo{newItemsCount !== 1 ? 's' : ''}
+              </span>
+            )}
+          </div>
           
-          {/* Toggle de vista cuadrícula/lista */}
-          <div className="flex rounded-lg overflow-hidden shadow-md">
-            <button
-              className={`p-2 ${viewMode === 'grid' 
-                ? 'bg-gradient-to-r from-teal-500 to-cyan-500 text-white' 
-                : 'bg-slate-700 text-slate-300 hover:bg-slate-600'}`}
-              onClick={() => setViewMode('grid')}
-              aria-label="Ver en cuadrícula"
+          {/* Controles de vista */}
+          <div className="flex items-center gap-2">
+            {/* Selector de orden */}
+            <select 
+              className="bg-slate-700 border border-slate-600 text-slate-300 text-sm rounded-lg focus:ring-teal-500 focus:border-teal-500 p-2 pr-8"
+              aria-label="Ordenar resultados"
             >
-              <Squares2X2Icon className="w-5 h-5" />
-            </button>
-            <button
-              className={`p-2 ${viewMode === 'list' 
-                ? 'bg-gradient-to-r from-teal-500 to-cyan-500 text-white' 
-                : 'bg-slate-700 text-slate-300 hover:bg-slate-600'}`}
-              onClick={() => setViewMode('list')}
-              aria-label="Ver en lista"
-            >
-              <ListBulletIcon className="w-5 h-5" />
-            </button>
+              <option value="recentes">Más recientes</option>
+              <option value="relevancia">Más relevantes</option>
+              <option value="precio_asc">Precio: menor a mayor</option>
+              <option value="precio_desc">Precio: mayor a menor</option>
+            </select>
+            
+            {/* Toggle de vista cuadrícula/lista */}
+            <div className="flex rounded-lg overflow-hidden shadow-md">
+              <button
+                className={`p-2 ${viewMode === 'grid' 
+                  ? 'bg-gradient-to-r from-teal-500 to-cyan-500 text-white' 
+                  : 'bg-slate-700 text-slate-300 hover:bg-slate-600'}`}
+                onClick={() => setViewMode('grid')}
+                aria-label="Ver en cuadrícula"
+              >
+                <Squares2X2Icon className="w-5 h-5" />
+              </button>
+              <button
+                className={`p-2 ${viewMode === 'list' 
+                  ? 'bg-gradient-to-r from-teal-500 to-cyan-500 text-white' 
+                  : 'bg-slate-700 text-slate-300 hover:bg-slate-600'}`}
+                onClick={() => setViewMode('list')}
+                aria-label="Ver en lista"
+              >
+                <ListBulletIcon className="w-5 h-5" />
+              </button>
+            </div>
           </div>
         </div>
+        
+        {/* Resultados */}
+        <LayoutGroup>
+          <AnimatePresence mode="wait">
+            {results.length > 0 ? (
+              <React.Fragment key="results">
+                {viewMode === 'grid' ? (
+                  <div className={`grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 gap-4`}>
+                    {results.map((publication, index) => renderGridItem(publication, index))}
+                  </div>
+                ) : (
+                  <div className="space-y-4">
+                    {results.map((publication, index) => renderListItem(publication, index))}
+                  </div>
+                )}
+                
+                {/* Loader de "cargar más" */}
+                {hasMore && (
+                  <div ref={loadMoreRef} className="mt-8 flex justify-center">
+                    {loading ? (
+                      <div className="p-4 flex items-center justify-center">
+                        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-teal-500"></div>
+                      </div>
+                    ) : (
+                      <button
+                        onClick={onLoadMore}
+                        className="bg-gradient-to-r from-teal-500 to-cyan-500 hover:from-teal-600 hover:to-cyan-600 text-white font-medium py-2 px-6 rounded-lg transition-colors shadow-md hover:shadow-lg"
+                      >
+                        Cargar más resultados
+                      </button>
+                    )}
+                  </div>
+                )}
+              </React.Fragment>
+            ) : (
+              <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                className="flex flex-col items-center justify-center py-12 bg-slate-800 rounded-lg shadow-md border border-teal-500/20"
+              >
+                <div className="p-4 bg-slate-700/50 rounded-full mb-4">
+                  <svg xmlns="http://www.w3.org/2000/svg" className="h-12 w-12 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                  </svg>
+                </div>
+                <h2 className="text-2xl font-semibold text-white mb-2">No se encontraron resultados</h2>
+                <p className="text-slate-400 text-center mb-6 max-w-md">
+                  Intenta modificar tu búsqueda o explora todas las categorías disponibles para encontrar lo que necesitas.
+                </p>
+                <button
+                  className="bg-gradient-to-r from-teal-500 to-cyan-500 hover:from-teal-600 hover:to-cyan-600 text-white font-medium py-2 px-6 rounded-lg transition-colors shadow-md hover:shadow-lg"
+                >
+                  Ver todos los anuncios
+                </button>
+              </motion.div>
+            )}
+          </AnimatePresence>
+        </LayoutGroup>
       </div>
       
-      {/* Resultados */}
-      <LayoutGroup>
-        <AnimatePresence mode="wait">
-          {results.length > 0 ? (
-            <React.Fragment key="results">
-              {viewMode === 'grid' ? (
-                <div className={`grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 gap-4`}>
-                  {results.map((publication, index) => renderGridItem(publication, index))}
-                </div>
-              ) : (
-                <div className="space-y-4">
-                  {results.map((publication, index) => renderListItem(publication, index))}
-                </div>
-              )}
-              
-              {/* Loader de "cargar más" */}
-              {hasMore && (
-                <div ref={loadMoreRef} className="mt-8 flex justify-center">
-                  {loading ? (
-                    <div className="p-4 flex items-center justify-center">
-                      <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-teal-500"></div>
-                    </div>
-                  ) : (
-                    <button
-                      onClick={onLoadMore}
-                      className="bg-gradient-to-r from-teal-500 to-cyan-500 hover:from-teal-600 hover:to-cyan-600 text-white font-medium py-2 px-6 rounded-lg transition-colors shadow-md hover:shadow-lg"
-                    >
-                      Cargar más resultados
-                    </button>
-                  )}
-                </div>
-              )}
-            </React.Fragment>
-          ) : (
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              className="flex flex-col items-center justify-center py-12 bg-slate-800 rounded-lg shadow-md border border-teal-500/20"
-            >
-              <div className="p-4 bg-slate-700/50 rounded-full mb-4">
-                <svg xmlns="http://www.w3.org/2000/svg" className="h-12 w-12 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-                </svg>
-              </div>
-              <h2 className="text-2xl font-semibold text-white mb-2">No se encontraron resultados</h2>
-              <p className="text-slate-400 text-center mb-6 max-w-md">
-                Intenta modificar tu búsqueda o explora todas las categorías disponibles para encontrar lo que necesitas.
-              </p>
-              <button
-                className="bg-gradient-to-r from-teal-500 to-cyan-500 hover:from-teal-600 hover:to-cyan-600 text-white font-medium py-2 px-6 rounded-lg transition-colors shadow-md hover:shadow-lg"
-              >
-                Ver todos los anuncios
-              </button>
-            </motion.div>
-          )}
-        </AnimatePresence>
-      </LayoutGroup>
-    </div>
+      {/* Publication Modal */}
+      {selectedPublicationId && (
+        <PublicationModal
+          publicationId={selectedPublicationId}
+          isOpen={modalOpen}
+          onClose={handleCloseModal}
+          category={activeCategory}
+        />
+      )}
+    </>
   )
 } 

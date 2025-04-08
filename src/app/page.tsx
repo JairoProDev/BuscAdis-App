@@ -1,94 +1,20 @@
 'use client'
 
-import { useEffect, useState } from 'react';
-// import { CategoriesService, Categories } from '@/services/categories.service';
-import Hero from '@/components/home/Hero';
-import Benefits from '@/components/home/Functionalitys';
-import Tools from '@/components/home/Tools';
-import HowItWorks from '@/components/home/HowItWorks';
-import Testimonials from '@/components/home/Testimonials';
-import Stats from '@/components/home/Stats';
-import Comparison from '@/components/home/Comparison';
-import CallToAction from '@/components/home/CallToAction';
-import LoadingState from '@/components/ui/LoadingState';
-import CategoriesSection from '@/components/home/CategoriesSection';
-import FeaturedListingsSection from '@/components/home/FeaturedListingsSection';
-import BenefitsSection from '@/components/home/BenefitsSection';
-// import { Suspense } from 'react';
-// import FeaturedPublications from '@/components/home/FeaturedPublications';
-// import { SkeletonCard } from '@/components/ui/Skeleton';
+import { useEffect } from 'react';
+import { useRouter } from 'next/navigation';
 
-export default function Home() {
-  // const [categories, setCategories] = useState(Categories);
-  const [loading, setLoading] = useState(true);
-
+export default function HomePage() {
+  const router = useRouter();
+  
   useEffect(() => {
-    const fetchCategories = async () => {
-      try {
-        setLoading(true);
-        // const data = await CategoriesService.getCategories();
-        // setCategories(data);
-      } catch (error) {
-        console.error('Error fetching categories:', error);
-        // Mantén las categorías estáticas en caso de error
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchCategories();
-  }, []);
-
-  if (loading) {
-    return <LoadingState text="Cargando categorías..." />;
-  }
-
+    // Immediately redirect to the search page - which is our new homepage
+    router.replace('/buscar');
+  }, [router]);
+  
+  // Return empty div while redirecting
   return (
-    <main>
-      <Hero />
-      <CategoriesSection />
-      <FeaturedListingsSection />
-      <BenefitsSection />
-      <Benefits />
-      <Tools />
-      <HowItWorks />
-      <Testimonials />
-      <Stats />
-      <Comparison />
-      <CallToAction />
-      {/*
-      <section className="py-16 bg-gray-50">
-        <div className="container">
-          <h2 className="text-3xl font-bold text-center mb-12">
-            Explora por categorías
-          </h2>
-          <Categories />
-        </div>
-      </section>
-      
-
-      <section className="py-16">
-        <div className="container">
-          <h2 className="text-3xl font-bold text-center mb-12">
-            Anuncios destacados
-          </h2>
-          <Suspense fallback={<FeaturedPublicationsSkeleton />}>
-            <FeaturedPublications />
-          </Suspense>
-        </div>
-      </section>
-          */}
-    </main>
-  );
-}
-{/*
-function FeaturedPublicationsSkeleton() {
-  return (
-    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-      {Array(8).fill(0).map((_, i) => (
-        <SkeletonCard key={i} />
-      ))}
+    <div className="min-h-screen bg-primary-900 flex items-center justify-center">
+      <div className="animate-pulse text-white text-xl">Redirigiendo...</div>
     </div>
   );
 }
-*/}

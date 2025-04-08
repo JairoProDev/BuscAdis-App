@@ -31,9 +31,9 @@ export default function BuscadorPage() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const pathname = usePathname();
-  const { showToast } = useToast();
+  const { toast } = useToast();
   
-  // Estados para búsqueda y navegación
+  // Parse search state from the URL
   const [searchState, setSearchState] = useState<SearchParams>({
     category: searchParams?.get('category') || '',
     subcategory: searchParams?.get('subcategory') || '',
@@ -47,7 +47,7 @@ export default function BuscadorPage() {
     limit: 12,
   });
   
-  // Estados para resultados y UI
+  // Results and UI states
   const [results, setResults] = useState<Publication[]>([]);
   const [loading, setLoading] = useState(true);
   const [totalResults, setTotalResults] = useState(0);
@@ -56,71 +56,94 @@ export default function BuscadorPage() {
   const [showDailyReward, setShowDailyReward] = useState(false);
   const [userPoints, setUserPoints] = useState(0);
   
-  // Función para actualizar URL con nuevos parámetros de búsqueda
-  const updateUrlParams = useCallback((params: SearchParams) => {
-    const newParams = new URLSearchParams();
+  // Update URL with clean path-based structure instead of query params
+  const updateUrlWithCleanPath = useCallback((params: SearchParams) => {
+    let newPath = '';
     
-    // Solo agregar parámetros con valor
-    Object.entries(params).forEach(([key, value]) => {
-      if (value && key !== 'limit') {
-        newParams.set(key, value.toString());
+    // Build path-based URL structure
+    if (params.category) {
+      newPath += `/${params.category}`;
+      
+      if (params.subcategory) {
+        newPath += `/${params.subcategory}`;
+        
+        if (params.subsubcategory) {
+          newPath += `/${params.subsubcategory}`;
+        }
       }
-    });
+    } else {
+      // Base search path
+      newPath = '/';
+    }
     
-    // Actualizar la URL sin recargar la página
-    const newPath = `${pathname}?${newParams.toString()}`;
+    // Add any remaining query params
+    const queryParams = new URLSearchParams();
+    
+    if (params.query) queryParams.set('q', params.query);
+    if (params.location) queryParams.set('lugar', params.location);
+    if (params.minPrice) queryParams.set('precio_min', params.minPrice);
+    if (params.maxPrice) queryParams.set('precio_max', params.maxPrice);
+    if (params.sortBy && params.sortBy !== 'recent') queryParams.set('orden', params.sortBy);
+    if (params.page && params.page > 1) queryParams.set('pagina', params.page.toString());
+    
+    const queryString = queryParams.toString();
+    if (queryString) {
+      newPath += `?${queryString}`;
+    }
+    
+    // Navigate without reload
     router.push(newPath, { scroll: false });
-  }, [pathname, router]);
+  }, [router]);
   
-  // Función para buscar anuncios
+  // Fetch publications based on search params
   const fetchPublications = useCallback(async (params: SearchParams = searchState) => {
     setLoading(true);
     setError('');
     
     try {
-      // Usar MongoDB browser adapter
-      const response = await mongoFetch('/api/publications', {
-        queryParams: {
-          category: params.category || '',
-          subcategory: params.subcategory || '',
-          query: params.query || '',
-          location: params.location || '',
-          minPrice: params.minPrice || '',
-          maxPrice: params.maxPrice || '',
-          sortBy: params.sortBy || 'recent',
-          page: params.page.toString(),
-          limit: params.limit?.toString() || '12'
+      // Filter empty params
+      const queryParams: Record<string, string> = {};
+      Object.entries(params).forEach(([key, value]) => {
+        if (value && key !== 'limit') {
+          queryParams[key] = value.toString();
         }
       });
       
-      // Enriquecer datos con campos adicionales para UI
+      // Set default limit
+      queryParams.limit = params.limit?.toString() || '12';
+      
+      // Use MongoDB browser adapter to fetch data
+      const response = await mongoFetch('/api/publications', { queryParams });
+      
+      // Enhance results with UI data
       const publications = response.publications || [];
       const enhancedPublications = publications.map((pub: Publication) => ({
         ...pub,
-        premium: pub.id?.includes('premium') || Math.random() > 0.8, // Simulación de anuncios premium        verified: Math.random() > 0.7, // Simulación de verificación
-        views: Math.floor(Math.random() * 500) + 50, // Vistas aleatorias
-        likes: Math.floor(Math.random() * 50), // Likes aleatorios
-        bookmarks: Math.floor(Math.random() * 20) // Guardados aleatorios
+        premium: pub.id?.includes('premium') || Math.random() > 0.8,
+        verified: Math.random() > 0.7,
+        views: Math.floor(Math.random() * 500) + 50,
+        likes: Math.floor(Math.random() * 50),
+        bookmarks: Math.floor(Math.random() * 20)
       }));
       
       setResults(enhancedPublications);
       setTotalResults(response.total || 0);
       setTotalPages(response.pages || 1);
       
-      // Guardar historial de búsqueda si hubo resultados
+      // Save search history if we have results
       if (params.query && enhancedPublications.length > 0) {
         saveSearchHistory(params.query);
       }
       
-      // Recompensa por búsqueda
+      // Check for daily reward
       checkForDailyReward();
       
     } catch (err: unknown) {
-      console.error('Error al cargar los anuncios:', err);
+      console.error('Error loading publications:', err);
       const errorMessage = err instanceof Error 
         ? err.message 
-        : 'Error desconocido al cargar los anuncios';
-      setError(`Error al cargar los anuncios: ${errorMessage}`);
+        : 'Unknown error loading publications';
+      setError(`Error: ${errorMessage}`);
       setResults([]);
       setTotalPages(1);
     } finally {
@@ -128,95 +151,91 @@ export default function BuscadorPage() {
     }
   }, [searchState]);
   
-  // Cargar datos iniciales
+  // Load initial data
   useEffect(() => {
     fetchPublications();
     
-    // Cargar puntos del usuario
+    // Load user points from localStorage
     const savedPoints = localStorage.getItem('userPoints');
     if (savedPoints) {
       setUserPoints(parseInt(savedPoints));
     }
   }, [fetchPublications]);
   
-  // Guardar historial de búsquedas
+  // Save search history
   const saveSearchHistory = (query: string) => {
     try {
       const savedHistory = localStorage.getItem('searchHistory');
       let history: string[] = savedHistory ? JSON.parse(savedHistory) : [];
       
-      // Añadir solo si no existe y limitar a 10 elementos
+      // Add only if it doesn't exist and limit to 10 items
       if (!history.includes(query)) {
         history = [query, ...history].slice(0, 10);
         localStorage.setItem('searchHistory', JSON.stringify(history));
       }
     } catch (e) {
-      console.error('Error guardando historial:', e);
+      console.error('Error saving search history:', e);
     }
   };
   
-  // Sistema de recompensas diarias para gamificación
+  // Daily reward system
   const checkForDailyReward = () => {
     try {
       const lastReward = localStorage.getItem('lastSearchReward');
       const today = new Date().toDateString();
       
       if (lastReward !== today) {
-        // Dar recompensa diaria
-        const pointsToAdd = Math.floor(Math.random() * 15) + 10; // 10-25 puntos
+        // Give daily reward
+        const pointsToAdd = Math.floor(Math.random() * 15) + 10; // 10-25 points
         const newTotal = userPoints + pointsToAdd;
         
         setUserPoints(newTotal);
-        setShowDailyReward(true);
         
-        // Guardar en localStorage
+        // Save to localStorage
         localStorage.setItem('userPoints', newTotal.toString());
         localStorage.setItem('lastSearchReward', today);
         
-        // Mostrar notificación
+        // Show notification
         setTimeout(() => {
-           toast({
-               title: "¡Recompensa diaria!",
-               description: `Has ganado ${pointsToAdd} puntos por buscar hoy.`,
-               // variant: 'success', // Shadcn typically uses variants, check its docs/implementation
-               // You can add an action button if needed, e.g.:
-               // action: <ToastAction altText="Ok">Ok</ToastAction>,
-             });
+          toast({
+            title: "¡Recompensa diaria!",
+            description: `Has ganado ${pointsToAdd} puntos por buscar hoy.`,
+          });
         }, 1000);
       }
     } catch (e) {
-      console.error('Error con sistema de recompensas:', e);
+      console.error('Error with reward system:', e);
     }
   };
   
-  // Manejar cambios en la búsqueda
+  // Handle search input
   const handleSearch = (query: string, options?: Record<string, string>) => {
     const newState = {
       ...searchState,
       query,
-      page: 1, // Volver a página 1 con nueva búsqueda
+      page: 1, // Reset to page 1 with new search
       ...(options || {})
     };
     
     setSearchState(newState);
-    updateUrlParams(newState);
+    updateUrlWithCleanPath(newState);
     fetchPublications(newState);
   };
   
-  // Manejar cambios en filtros
+  // Handle filter changes
   const handleFilterChange = (filters: Partial<SearchParams>) => {
     const newState = {
       ...searchState,
       ...filters,
-      page: 1 // Volver a página 1 con nuevos filtros
+      page: 1 // Reset to page 1 with new filters
     };
     
     setSearchState(newState);
-    updateUrlParams(newState);
+    updateUrlWithCleanPath(newState);
     fetchPublications(newState);
   };
   
-  // Cargar más resultados (para infinite scroll)
+  // Handle pagination / load more
   const handleLoadMore = () => {
     if (searchState.page < totalPages) {
       const newState = {
@@ -225,19 +244,18 @@ export default function BuscadorPage() {
       };
       
       setSearchState(newState);
+      updateUrlWithCleanPath(newState);
       
-      // Cargar solo la siguiente página y añadir a resultados existentes
+      // Load next page and add to existing results
       fetchPublications(newState).then(() => {
-        // Mostrar una notificación de logro si es la página 3+
+        // Show achievement notification if page 3+
         if (newState.page >= 3) {
-          showToast({
+          toast({
             title: "¡Explorador incansable!",
-            message: "Has desbloqueado un logro por tu búsqueda profunda",
-            type: "info",
-            icon: <RocketLaunchIcon className="h-5 w-5" />
+            description: "Has desbloqueado un logro por tu búsqueda profunda",
           });
           
-          // Dar puntos extra
+          // Award extra points
           const extraPoints = 5;
           const newTotal = userPoints + extraPoints;
           setUserPoints(newTotal);

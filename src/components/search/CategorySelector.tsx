@@ -278,29 +278,28 @@ export default function CategorySelector({
     }
   }, [activeCategory, activeSubcategory, activeSubSubcategory])
   
-  // Manejar la selección de categoría
-  const handleCategorySelect = (category: Category) => {
-    setSelectedCategory(category)
-    
+  // Event handlers
+  const handleCategoryClick = (categorySlug: string) => {
     if (onCategoryChange) {
-      onCategoryChange(category.id)
-    } else {
-      // Navegar usando el router
-      router.push(`/buscar/${category.slug}`)
+      onCategoryChange(categorySlug);
     }
-  }
-  
-  // Manejar la selección de subcategoría
-  const handleSubcategorySelect = (subcategory: Subcategory) => {
-    setSelectedSubcategory(subcategory)
     
-    if (onSubcategoryChange) {
-      onSubcategoryChange(subcategory.id)
-    } else if (selectedCategory) {
-      // Navegar usando el router
-      router.push(`/buscar/${selectedCategory.slug}/${subcategory.slug}`)
+    // Navigate directly to category page with clean URL
+    if (typeof window !== 'undefined') {
+      window.history.pushState({}, '', `/${categorySlug}`);
     }
-  }
+  };
+
+  const handleSubcategoryClick = (parentCategory: string, subcategorySlug: string) => {
+    if (onSubcategoryChange) {
+      onSubcategoryChange(subcategorySlug);
+    }
+    
+    // Navigate directly to subcategory page with clean URL
+    if (typeof window !== 'undefined') {
+      window.history.pushState({}, '', `/${parentCategory}/${subcategorySlug}`);
+    }
+  };
   
   // Manejar la selección de sub-subcategoría
   const handleSubSubcategorySelect = (subsubcategory: SubSubcategory) => {
@@ -342,7 +341,7 @@ export default function CategorySelector({
               href={`/buscar/${category.slug}`}
               onClick={(e) => {
                 e.preventDefault()
-                handleCategorySelect(category)
+                handleCategoryClick(category.slug)
               }}
               className={`flex flex-col items-center justify-center min-w-[90px] p-2 rounded-lg mr-2 transition-all ${
                 activeCategory === category.id || activeCategory === category.slug
@@ -390,7 +389,7 @@ export default function CategorySelector({
                   href={`/buscar/${selectedCategory.slug}/${subcategory.slug}`}
                   onClick={(e) => {
                     e.preventDefault()
-                    handleSubcategorySelect(subcategory)
+                    handleSubcategoryClick(selectedCategory.slug, subcategory.slug)
                   }}
                   className={`flex items-center px-3 py-1.5 rounded-full mr-2 text-sm whitespace-nowrap transition-all ${
                     activeSubcategory === subcategory.id || activeSubcategory === subcategory.slug
@@ -490,7 +489,7 @@ export default function CategorySelector({
               href={`/buscar/${category.slug}`}
               onClick={(e) => {
                 e.preventDefault()
-                handleCategorySelect(category)
+                handleCategoryClick(category.slug)
               }}
               className={`relative flex flex-col items-center justify-center p-4 rounded-xl transition-all overflow-hidden group ${
                 activeCategory === category.id || activeCategory === category.slug
@@ -556,7 +555,7 @@ export default function CategorySelector({
                     href={`/buscar/${selectedCategory.slug}/${subcategory.slug}`}
                     onClick={(e) => {
                       e.preventDefault()
-                      handleSubcategorySelect(subcategory)
+                      handleSubcategoryClick(selectedCategory.slug, subcategory.slug)
                     }}
                     className={`flex items-center p-3 rounded-lg transition-all ${
                       activeSubcategory === subcategory.id || activeSubcategory === subcategory.slug
