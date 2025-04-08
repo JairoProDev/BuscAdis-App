@@ -4,6 +4,18 @@ import { mongoDbQuery, mongoDbInsert } from '@/lib/mongodb.server'
 export const dynamic = 'force-dynamic' // Disable caching to ensure data is always fresh
 export const runtime = 'nodejs' // Mark as server-side only
 
+// Get all collections to search in
+const CATEGORY_COLLECTIONS = {
+  'empleos': 'publications_empleos',
+  'inmuebles': 'publications_inmuebles',
+  'vehiculos': 'publications_vehiculos',
+  'servicios': 'publications_servicios',
+  'productos': 'publications_productos',
+  'eventos': 'publications_eventos',
+  'negocios': 'publications_negocios',
+  'comunidad': 'publications_comunidad'
+};
+
 export async function GET(request: Request) {
   try {
     const { searchParams } = new URL(request.url)
@@ -11,7 +23,6 @@ export async function GET(request: Request) {
     // Extract query parameters
     const category = searchParams.get('category') || ''
     const subcategory = searchParams.get('subcategory') || ''
-    const subsubcategory = searchParams.get('subsubcategory') || ''
     const query = searchParams.get('query') || ''
     const location = searchParams.get('location') || ''
     const minPrice = searchParams.get('minPrice') || ''
@@ -23,9 +34,7 @@ export async function GET(request: Request) {
     // Build MongoDB query
     const mongoQuery: any = {}
     
-    if (category) mongoQuery.category = category
     if (subcategory) mongoQuery.subcategory = subcategory
-    if (subsubcategory) mongoQuery.subsubcategory = subsubcategory
     
     if (query) {
       mongoQuery.$or = [
@@ -61,15 +70,53 @@ export async function GET(request: Request) {
     // Calculate pagination
     const skip = (page - 1) * limit
     
-    // Execute the query using server-side MongoDB utilities
-    const data = await mongoDbQuery('publications', mongoQuery, {
-      sort: sortOptions,
-      skip,
-      limit
-    })
+    // Determine which collection(s) to search
+    let data: any[] = [];
+    let totalCount = 0;
     
-    // Get total count for pagination
-    const totalCount = data.length // In a real app, this would be a separate count query
+    if (category && CATEGORY_COLLECTIONS[category]) {
+      // Search in specific category collection
+      const collectionName = CATEGORY_COLLECTIONS[category];
+      data = await mongoDbQuery(collectionName, mongoQuery, {
+        sort: sortOptions,
+        skip,
+        limit
+      });
+      
+      // Get total count for pagination from the same collection
+      const countData = await mongoDbQuery(collectionName, mongoQuery, {});
+      totalCount = countData.length;
+    } else {
+      // Search in all collections if no specific category
+      const promises = Object.values(CATEGORY_COLLECTIONS).map(async (collection) => {
+        return await mongoDbQuery(collection, mongoQuery, {
+          sort: sortOptions,
+          skip: 0, // We'll handle pagination after combining
+          limit: 500 // Get more results to allow for pagination after combining
+        });
+      });
+      
+      const allResults = await Promise.all(promises);
+      const combinedResults = allResults.flat(); // Combine all results
+      
+      // Sort the combined results
+      combinedResults.sort((a, b) => {
+        if (sortBy === 'price_asc') {
+          return (a.price || 0) - (b.price || 0);
+        } else if (sortBy === 'price_desc') {
+          return (b.price || 0) - (a.price || 0);
+        } else {
+          // Default sort by date
+          const dateA = new Date(a.created_at || 0).getTime();
+          const dateB = new Date(b.created_at || 0).getTime();
+          return dateB - dateA;
+        }
+      });
+      
+      // Apply pagination to the combined results
+      totalCount = combinedResults.length;
+      data = combinedResults.slice(skip, skip + limit);
+    }
     
     return NextResponse.json({
       publications: data,
@@ -98,8 +145,8 @@ export async function POST(request: Request) {
     }
     
     // Determine collection based on category
-    const categorySlug = data.categorySlug || 'inmuebles'
-    const collectionName = `publications_${categorySlug}`
+    const categorySlug = data.category || 'inmuebles'
+    const collectionName = CATEGORY_COLLECTIONS[categorySlug] || 'publications_inmuebles'
     
     const now = new Date()
     const publicationData = {

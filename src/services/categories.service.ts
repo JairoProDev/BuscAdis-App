@@ -2,6 +2,7 @@
 
 import { Collection, Document } from 'mongodb';
 import { getMongoClient } from '@/lib/mongodb'; // Correct import as named export
+import { mongoDbQuery } from '@/lib/mongodb.server';
 
 // Check if we're in a browser environment
 const isBrowser = typeof window !== 'undefined';
@@ -143,23 +144,25 @@ export class CategoriesService {
         }
       }
       
-      // Server-side code
+      // Server-side code - use mongoDbQuery instead of direct client access
       if (!isBrowser) {
-        const client = await getMongoClient();
-        const db = client.db(process.env.MONGO_DB_NAME || 'test');
-        const collection = db.collection('categories');
-        const results = await collection.find({}).toArray();
-        
-        if (results.length > 0) {
-          return results.map((category: any) => ({
-            id: category._id?.toString() || '',
-            name: category.name || '',
-            icon: category.icon || '',
-            description: category.description || '',
-            gradient: category.gradient || '',
-            slug: category.slug || '',
-            count: category.count || 0
-          }));
+        try {
+          const results = await mongoDbQuery('categories', {}, {});
+          
+          if (results && results.length > 0) {
+            return results.map((category: any) => ({
+              id: category._id?.toString() || '',
+              name: category.name || '',
+              icon: category.icon || '',
+              description: category.description || '',
+              gradient: category.gradient || '',
+              slug: category.slug || '',
+              count: category.count || 0
+            }));
+          }
+        } catch (error) {
+          console.error('Error querying MongoDB:', error);
+          // Continue to the fallback below
         }
       }
       
@@ -193,20 +196,24 @@ export class CategoriesService {
         }
       }
       
-      // Server-side code
+      // Server-side code - use mongoDbQuery instead of direct client access
       if (!isBrowser) {
-        const client = await getMongoClient();
-        const db = client.db(process.env.MONGO_DB_NAME || 'test');
-        const collection = db.collection('subcategories');
-        const results = await collection.find({ categoryId }).toArray();
-        
-        return results.map((subcategory: any) => ({
-          id: subcategory._id?.toString() || '',
-          name: subcategory.name || '',
-          icon: subcategory.icon || '',
-          categoryId: subcategory.categoryId,
-          count: subcategory.count || 0
-        }));
+        try {
+          const results = await mongoDbQuery('subcategories', { categoryId }, {});
+          
+          if (results && results.length > 0) {
+            return results.map((subcategory: any) => ({
+              id: subcategory._id?.toString() || '',
+              name: subcategory.name || '',
+              icon: subcategory.icon || '',
+              categoryId: subcategory.categoryId,
+              count: subcategory.count || 0
+            }));
+          }
+        } catch (error) {
+          console.error(`Error querying MongoDB for subcategories:`, error);
+          // Continue to the fallback below
+        }
       }
       
       return [];

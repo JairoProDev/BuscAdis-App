@@ -6,39 +6,46 @@ import Image from 'next/image'
 import Link from 'next/link'
 import { useRouter, usePathname } from 'next/navigation'
 import { ChevronRightIcon, ChevronDownIcon } from '@heroicons/react/24/outline'
+import { CategoriesService } from '@/services/categories.service'
+import { 
+  BriefcaseIcon, 
+  HomeIcon, 
+  TruckIcon, 
+  WrenchIcon, 
+  ShoppingBagIcon, 
+  CalendarIcon, 
+  ChartBarIcon, 
+  UserGroupIcon,
+  StarIcon,
+} from '@heroicons/react/24/outline'
+import LoadingSpinner from '@/components/ui/LoadingSpinner'
 
 // Definición de tipos
-interface Category {
-  id: string
-  name: string
-  slug: string
-  icon: string
-  color: string
-  description?: string
-  count?: number
-  image?: string
-  subcategories?: Subcategory[]
+interface CategoryItem {
+  _id?: string;
+  id: string;
+  slug: string;
+  name: string;
+  count?: number;
 }
 
-interface Subcategory {
-  id: string
-  name: string
-  slug: string
-  icon?: string
-  color?: string
-  description?: string
-  count?: number
-  parent: string
-  subsubcategories?: SubSubcategory[]
+interface Category extends CategoryItem {
+  color?: string;
+  icon?: string;
+  description?: string;
+  image?: string;
+  subcategories?: Subcategory[];
 }
 
-interface SubSubcategory {
-  id: string
-  name: string
-  slug: string
-  icon?: string
-  count?: number
-  parent: string
+interface Subcategory extends CategoryItem {
+  parent?: string;
+  icon?: string;
+  subsubcategories?: SubSubcategory[];
+}
+
+interface SubSubcategory extends CategoryItem {
+  parent?: string;
+  icon?: string;
 }
 
 interface CategorySelectorProps {
@@ -53,6 +60,19 @@ interface CategorySelectorProps {
   showAllOption?: boolean
   maxVisible?: number
   className?: string
+  showSubcategories?: boolean
+}
+
+const CATEGORY_ICONS: Record<string, React.ElementType> = {
+  'empleos': BriefcaseIcon,
+  'inmuebles': HomeIcon,
+  'vehiculos': TruckIcon,
+  'servicios': WrenchIcon,
+  'productos': ShoppingBagIcon,
+  'eventos': CalendarIcon,
+  'negocios': ChartBarIcon,
+  'comunidad': UserGroupIcon,
+  'default': StarIcon,
 }
 
 // Datos de ejemplo - Reemplazar con API real
@@ -226,7 +246,8 @@ export default function CategorySelector({
   variant = 'horizontal',
   showAllOption = true,
   maxVisible = 8,
-  className = ''
+  className = '',
+  showSubcategories = true
 }: CategorySelectorProps) {
   const router = useRouter()
   const pathname = usePathname()
@@ -235,6 +256,11 @@ export default function CategorySelector({
   const [selectedCategory, setSelectedCategory] = useState<Category | null>(null)
   const [selectedSubcategory, setSelectedSubcategory] = useState<Subcategory | null>(null)
   const [breadcrumbs, setBreadcrumbs] = useState<{type: string, id: string, name: string}[]>([])
+  const [categories, setCategories] = useState<Category[]>([])
+  const [subcategories, setSubcategories] = useState<Subcategory[]>([])
+  const [loading, setLoading] = useState(true)
+  const [loadingSubcategories, setLoadingSubcategories] = useState(false)
+  const [error, setError] = useState('')
   
   // Encontrar la categoría seleccionada
   useEffect(() => {
@@ -278,28 +304,71 @@ export default function CategorySelector({
     }
   }, [activeCategory, activeSubcategory, activeSubSubcategory])
   
+  // Fetch categories on load
+  useEffect(() => {
+    const fetchCategories = async () => {
+      try {
+        setLoading(true)
+        const data = await CategoriesService.getCategories()
+        setCategories(data as Category[])
+      } catch (error) {
+        console.error('Error fetching categories:', error)
+        setError('Failed to load categories')
+      } finally {
+        setLoading(false)
+      }
+    }
+
+    fetchCategories()
+  }, [])
+
+  // Fetch subcategories when activeCategory changes
+  useEffect(() => {
+    const fetchSubcategories = async () => {
+      if (!activeCategory) {
+        setSubcategories([])
+        return
+      }
+
+      try {
+        setLoadingSubcategories(true)
+        const data = await CategoriesService.getCategoryWithTypes(activeCategory)
+        setSubcategories(data as Subcategory[])
+      } catch (error) {
+        console.error('Error fetching subcategories:', error)
+        setSubcategories([])
+      } finally {
+        setLoadingSubcategories(false)
+      }
+    }
+
+    if (showSubcategories) {
+      fetchSubcategories()
+    }
+  }, [activeCategory, showSubcategories])
+  
   // Event handlers
   const handleCategoryClick = (categorySlug: string) => {
     if (onCategoryChange) {
-      onCategoryChange(categorySlug);
+      onCategoryChange(categorySlug)
     }
     
     // Navigate directly to category page with clean URL
     if (typeof window !== 'undefined') {
-      window.history.pushState({}, '', `/${categorySlug}`);
+      window.history.pushState({}, '', `/${categorySlug}`)
     }
-  };
+  }
 
   const handleSubcategoryClick = (parentCategory: string, subcategorySlug: string) => {
     if (onSubcategoryChange) {
-      onSubcategoryChange(subcategorySlug);
+      onSubcategoryChange(subcategorySlug)
     }
     
     // Navigate directly to subcategory page with clean URL
     if (typeof window !== 'undefined') {
-      window.history.pushState({}, '', `/${parentCategory}/${subcategorySlug}`);
+      window.history.pushState({}, '', `/${parentCategory}/${subcategorySlug}`)
     }
-  };
+  }
   
   // Manejar la selección de sub-subcategoría
   const handleSubSubcategorySelect = (subsubcategory: SubSubcategory) => {
@@ -308,6 +377,16 @@ export default function CategorySelector({
     } else if (selectedCategory && selectedSubcategory) {
       // Navegar usando el router
       router.push(`/buscar/${selectedCategory.slug}/${selectedSubcategory.slug}/${subsubcategory.slug}`)
+    }
+  }
+  
+  // Handle the "All" category option
+  const handleAllCategories = () => {
+    if (onCategoryChange) {
+      onCategoryChange('')
+    }
+    if (onSubcategoryChange) {
+      onSubcategoryChange('')
     }
   }
   
@@ -636,6 +715,18 @@ export default function CategorySelector({
       default:
         return renderHorizontalSelector()
     }
+  }
+  
+  if (loading) {
+    return (
+      <div className="flex justify-center py-4">
+        <LoadingSpinner size="md" />
+      </div>
+    )
+  }
+
+  if (error) {
+    return <div className="text-red-500 py-2">{error}</div>
   }
   
   return (
