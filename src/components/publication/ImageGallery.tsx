@@ -1,0 +1,145 @@
+import React, { useState } from 'react';
+import { Dialog, DialogContent } from '@/components/ui/dialog';
+import { ChevronLeftIcon, ChevronRightIcon, XMarkIcon } from '@heroicons/react/24/outline';
+import { PublicationImage } from '@/types/publication';
+import { getOptimizedImageUrl } from '@/utils/image-helpers';
+
+interface ImageGalleryProps {
+  images: PublicationImage[];
+  className?: string;
+}
+
+export function ImageGallery({ images, className = '' }: ImageGalleryProps) {
+  const [currentIndex, setCurrentIndex] = useState(0);
+  const [isLightboxOpen, setIsLightboxOpen] = useState(false);
+  
+  // Si no hay imágenes, mostrar placeholder
+  if (!images || images.length === 0) {
+    return (
+      <div className={`bg-gray-200 flex items-center justify-center rounded-md ${className}`}>
+        <p className="text-gray-500 text-sm">No hay imágenes disponibles</p>
+      </div>
+    );
+  }
+  
+  const handlePrevImage = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    setCurrentIndex((prev) => (prev === 0 ? images.length - 1 : prev - 1));
+  };
+  
+  const handleNextImage = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    setCurrentIndex((prev) => (prev === images.length - 1 ? 0 : prev + 1));
+  };
+  
+  const openLightbox = (index: number) => {
+    setCurrentIndex(index);
+    setIsLightboxOpen(true);
+  };
+  
+  // Obtener la imagen principal
+  const mainImage = images[0];
+  const mainImageUrl = mainImage?.secureUrl || mainImage?.url || '';
+  
+  return (
+    <>
+      <div className={`relative ${className}`}>
+        {/* Imagen principal */}
+        <div 
+          className="w-full aspect-video bg-gray-100 rounded-lg overflow-hidden cursor-pointer relative"
+          onClick={() => openLightbox(0)}
+        >
+          <img
+            src={getOptimizedImageUrl(mainImageUrl)}
+            alt="Imagen principal"
+            className="w-full h-full object-cover"
+            loading="lazy"
+          />
+          
+          {/* Indicador de cantidad de imágenes */}
+          {images.length > 1 && (
+            <div className="absolute bottom-2 right-2 bg-black/50 text-white px-2 py-1 rounded-md text-xs">
+              {images.length} fotos
+            </div>
+          )}
+        </div>
+        
+        {/* Miniaturas (si hay más de 1 imagen) */}
+        {images.length > 1 && (
+          <div className="grid grid-cols-4 gap-2 mt-2">
+            {images.slice(0, 4).map((image, idx) => (
+              <div
+                key={idx}
+                onClick={() => openLightbox(idx)}
+                className={`
+                  aspect-square rounded-md overflow-hidden cursor-pointer
+                  ${currentIndex === idx ? 'ring-2 ring-primary-500' : ''}
+                  ${idx >= 3 && images.length > 4 ? 'relative' : ''}
+                `}
+              >
+                <img
+                  src={image.secureUrl || image.url}
+                  alt={`Miniatura ${idx + 1}`}
+                  className="w-full h-full object-cover"
+                  loading="lazy"
+                />
+                
+                {/* Mostrar "Ver más" en la última miniatura */}
+                {idx === 3 && images.length > 4 && (
+                  <div className="absolute inset-0 bg-black/50 flex items-center justify-center text-white">
+                    +{images.length - 4}
+                  </div>
+                )}
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+      
+      {/* Lightbox de imágenes */}
+      <Dialog open={isLightboxOpen} onOpenChange={setIsLightboxOpen}>
+        <DialogContent className="max-w-4xl p-0 bg-black/95 border-none">
+          <div className="relative h-[80vh] flex items-center justify-center">
+            {/* Imagen actual */}
+            <img
+              src={images[currentIndex]?.secureUrl || images[currentIndex]?.url}
+              alt={`Imagen ${currentIndex + 1}`}
+              className="max-h-full max-w-full object-contain"
+            />
+            
+            {/* Botones de navegación */}
+            <button
+              onClick={handlePrevImage}
+              className="absolute left-2 bg-black/30 p-2 rounded-full text-white hover:bg-black/50"
+              aria-label="Imagen anterior"
+            >
+              <ChevronLeftIcon className="w-6 h-6" />
+            </button>
+            
+            <button
+              onClick={handleNextImage}
+              className="absolute right-2 bg-black/30 p-2 rounded-full text-white hover:bg-black/50"
+              aria-label="Imagen siguiente"
+            >
+              <ChevronRightIcon className="w-6 h-6" />
+            </button>
+            
+            {/* Botón para cerrar */}
+            <button
+              onClick={() => setIsLightboxOpen(false)}
+              className="absolute top-2 right-2 bg-black/30 p-2 rounded-full text-white hover:bg-black/50"
+              aria-label="Cerrar galería"
+            >
+              <XMarkIcon className="w-6 h-6" />
+            </button>
+            
+            {/* Contador de imágenes */}
+            <div className="absolute bottom-4 left-1/2 transform -translate-x-1/2 bg-black/50 text-white px-3 py-1 rounded-full text-sm">
+              {currentIndex + 1} / {images.length}
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+    </>
+  );
+} 

@@ -8,14 +8,22 @@ Antes de ejecutar cualquier script, asegúrate de tener configurado correctament
 
 1. Instala las dependencias necesarias:
    ```
-   npm install mongodb dotenv
+   npm install mongodb dotenv cloudinary
    ```
 
 2. Verifica que el archivo `.env.local` contenga las variables de entorno correctas:
    ```
    MONGODB_URI=tu_uri_de_mongodb
    MONGODB_DB=nombre_de_tu_base_de_datos
+   CLOUDINARY_CLOUD_NAME=tu_cloud_name
+   CLOUDINARY_API_KEY=tu_api_key
+   CLOUDINARY_API_SECRET=tu_api_secret
    ```
+
+3. Para obtener las credenciales de Cloudinary:
+   - Crea una cuenta en [Cloudinary](https://cloudinary.com/)
+   - En el Dashboard de Cloudinary, encontrarás tu Cloud Name, API Key y API Secret
+   - Copia estos valores a tu archivo `.env.local`
 
 ## Scripts Disponibles
 
@@ -71,9 +79,41 @@ node src/scripts/import-publications.js datos/inmuebles.json --dry-run
 node src/scripts/import-publications.js datos/productos.json --force
 ```
 
+### 3. Carga de Publicaciones con Imágenes (`upload-publication-with-images.js`)
+
+Este script permite subir publicaciones completas incluyendo imágenes a Cloudinary y guardarlas en la base de datos MongoDB.
+
+#### Uso Básico:
+```
+node src/scripts/upload-publication-with-images.js ruta/al/datos.json ruta/directorio/imagenes
+```
+
+#### Estructura del Directorio de Imágenes:
+El script busca imágenes cuyo nombre de archivo comience con el ID de la publicación. Por ejemplo:
+- Para una publicación con ID `inmueble_001`, las imágenes deben nombrarse:
+  - `inmueble_001_1.jpg`
+  - `inmueble_001_2.jpg`
+  - `inmueble_001_principal.jpg`
+  - etc.
+
+#### Funcionamiento:
+1. Lee los datos de las publicaciones desde el archivo JSON
+2. Para cada publicación, busca imágenes relacionadas en el directorio especificado
+3. Sube las imágenes a Cloudinary, organizadas en carpetas según la categoría
+4. Guarda la publicación en MongoDB con las URL de las imágenes
+
+#### Ejemplos:
+```
+# Subir publicaciones de ejemplo con sus imágenes
+node src/scripts/upload-publication-with-images.js src/scripts/sample-publication-data.json data/images/
+
+# Subir publicaciones de una categoría específica
+node src/scripts/upload-publication-with-images.js datos/inmuebles.json imagenes/inmuebles/
+```
+
 ## Plantilla para Datos JSON
 
-El archivo `publication-template.json` incluye ejemplos de cada tipo de publicación para que puedas crear tus propios archivos de datos siguiendo la misma estructura.
+El archivo `publication-template.json` incluye ejemplos de cada tipo de publicación para que puedas crear tus propios archivos de datos siguiendo la misma estructura. Adicionalmente, `sample-publication-data.json` proporciona ejemplos más específicos para probar con el script de carga de imágenes.
 
 ### Estructura básica de una publicación:
 
@@ -105,29 +145,31 @@ El archivo `publication-template.json` incluye ejemplos de cada tipo de publicac
 }
 ```
 
-### Recomendaciones para Crear Archivos JSON:
+## Integración con Cloudinary
 
-1. Crea archivos separados por categoría para facilitar la gestión.
-2. Incluye entre 20-100 publicaciones por archivo para un manejo eficiente.
-3. Asegúrate de que cada publicación tenga un ID único.
-4. Verifica que las categorías y subcategorías sean válidas.
-5. Utiliza imágenes reales y datos precisos para mejorar la calidad de los datos.
+Los scripts utilizan Cloudinary para gestionar imágenes con las siguientes características:
+
+1. **Organización en Carpetas**: Las imágenes se organizan automáticamente en carpetas según la categoría de la publicación (`buscadis/inmuebles`, `buscadis/vehiculos`, etc.).
+
+2. **Transformaciones de Imágenes**: Puedes obtener versiones optimizadas de las imágenes usando los helpers de `src/utils/image-helpers.ts`.
+
+3. **URLs Seguras**: Todas las URLs generadas son HTTPS para mayor seguridad.
+
+4. **Optimización Automática**: Cloudinary optimiza automáticamente las imágenes para mejorar el rendimiento.
 
 ## Flujo de Trabajo Recomendado
 
-Para migrar de datos de prueba a datos reales:
+Para migrar de datos de prueba a datos reales con imágenes:
 
 1. Haz una copia de seguridad de la base de datos actual (opcional).
-2. Ejecuta el script de limpieza con `--dry-run` para verificar qué se eliminaría.
-3. Ejecuta el script de limpieza sin `--dry-run` para eliminar los datos de prueba.
-4. Prepara tus archivos JSON con datos reales usando la plantilla.
-5. Valida tus archivos JSON con `--validate-only`.
-6. Importa cada archivo con `--dry-run` para verificar la importación.
-7. Importa definitivamente tus datos reales sin `--dry-run`.
+2. Ejecuta el script de limpieza para eliminar los datos de prueba.
+3. Prepara tus archivos JSON con datos reales usando la plantilla.
+4. Organiza las imágenes en un directorio, nombrándolas con el ID de la publicación.
+5. Ejecuta el script de carga de publicaciones con imágenes.
 
 ## Notas Importantes
 
 - **Seguridad**: Los scripts realizan operaciones destructivas. Utiliza siempre primero `--dry-run` para verificar los cambios.
 - **Respaldos**: Considera hacer una copia de seguridad antes de ejecutar operaciones de limpieza.
-- **Rendimiento**: Para importaciones muy grandes, considera dividir los datos en varios archivos más pequeños.
-- **Ambiente**: Estos scripts están pensados para entornos de desarrollo y staging. Ten precaución al usarlos en producción. 
+- **Límites de Cloudinary**: El plan gratuito de Cloudinary tiene límites (25GB de almacenamiento y 25K transformaciones/mes).
+- **Rendimiento**: Para importaciones muy grandes, considera dividir los datos en varios archivos más pequeños. 
