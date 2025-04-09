@@ -78,7 +78,7 @@ export default function PublicationCard({ publication }: PublicationCardProps) {
   const seoUrl = useMemo(() => generateSeoUrl(), [publication.id, publication.title, publication.category]);
 
   return (
-    <div className={`bg-white rounded-xl shadow-md overflow-hidden transition-all hover:shadow-lg ${!hasImage ? 'publication-compact' : ''}`}>
+    <div className={`rounded-xl shadow-md overflow-hidden transition-all hover:shadow-lg ${!hasImage ? 'publication-card-no-image' : 'bg-white'}`}>
       <Link href={seoUrl}>
         {hasImage ? (
           <div className="relative h-48 w-full">
@@ -93,39 +93,64 @@ export default function PublicationCard({ publication }: PublicationCardProps) {
             </div>
           </div>
         ) : (
-          <div className="relative px-4 pt-4">
-            <div className="mb-2 text-right">
+          <div className="publication-info flex flex-col justify-between h-40 p-4">
+            <div className="flex justify-between">
+              <span className="category-badge bg-white/20 text-white px-2 py-1 rounded-full text-xs">
+                {publication.category}
+              </span>
               <span className="bg-primary-500 text-white px-2 py-1 rounded-full text-xs">
                 {formatPrice(publication.price, publication.priceType)}
               </span>
+            </div>
+            <h3 className="font-semibold text-white text-lg mb-1 mt-2 line-clamp-2">
+              {publication.title}
+            </h3>
+            <div className="text-sm text-white/80 mb-2">
+              {publication.location.city}, {publication.location.region} • {formatDate(publication.createdAt)}
             </div>
           </div>
         )}
       </Link>
       
-      <div className="p-4">
-        <Link href={seoUrl}>
-          <h3 className={`font-semibold text-gray-800 hover:text-primary-600 transition-colors ${hasImage ? 'text-lg mb-1' : 'text-base mb-1'}`}>
-            {publication.title}
-          </h3>
-        </Link>
-        
-        <div className="text-sm text-gray-500 mb-3">
-          {publication.location.city}, {publication.location.region} • {formatDate(publication.createdAt)}
+      {hasImage && (
+        <div className="p-4">
+          <Link href={seoUrl}>
+            <h3 className="font-semibold text-gray-800 hover:text-primary-600 transition-colors text-lg mb-1">
+              {publication.title}
+            </h3>
+          </Link>
+          
+          <div className="text-sm text-gray-500 mb-3">
+            {publication.location.city}, {publication.location.region} • {formatDate(publication.createdAt)}
+          </div>
+          
+          <div className="flex justify-between items-center">
+            <a
+              href={`https://wa.me/${publication.contact.whatsapp}?text=${formatWhatsAppMessage()}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex items-center text-green-600 font-medium text-sm hover:text-green-700 transition-colors"
+            >
+              <WhatsAppIcon className="w-5 h-5 mr-1" />
+              Contactar
+            </a>
+          </div>
         </div>
-        
-        <div className="flex justify-between items-center">
+      )}
+      
+      {!hasImage && (
+        <div className="p-3 bg-white rounded-b-xl">
           <a
             href={`https://wa.me/${publication.contact.whatsapp}?text=${formatWhatsAppMessage()}`}
             target="_blank"
             rel="noopener noreferrer"
-            className="flex items-center text-green-600 font-medium text-sm hover:text-green-700 transition-colors"
+            className="flex items-center justify-center w-full text-green-600 font-medium text-sm hover:text-green-700 transition-colors py-2"
           >
             <WhatsAppIcon className="w-5 h-5 mr-1" />
             Contactar
           </a>
         </div>
-      </div>
+      )}
     </div>
   );
 }
