@@ -147,7 +147,12 @@ export default function PublishPage() {
             const response = await PublicationsService.createPublication(ad);
             setSuccess(true);
             setTimeout(() => {
-                router.push(`/anuncios/${response.id}`);
+                if (response.category) {
+                    router.push(`/${response.category}/${response.id}`);
+                } else {
+                    // Fallback por si no hay categoría
+                    router.push(`/inmuebles/${response.id}`);
+                }
             }, 2000);
         } catch (err) {
             console.error('Error publicando anuncio:', err);

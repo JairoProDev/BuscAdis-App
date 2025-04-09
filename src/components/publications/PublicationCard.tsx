@@ -19,6 +19,8 @@ interface PublicationCardProps {
       whatsapp: string;
     };
     category: string;
+    subcategory?: string;
+    subsubcategory?: string;
   };
 }
 
@@ -46,7 +48,7 @@ export default function PublicationCard({ publication }: PublicationCardProps) {
   };
 
   const formatWhatsAppMessage = () => {
-    let message = `Hola, estoy interesado en tu anuncio "${publication.title}" de Buscadis.`;
+    let message = `Hola, estoy interesado en tu publicación "${publication.title}" de Buscadis.`;
     
     // Personalizar el mensaje según la categoría
     if (publication.category === 'empleo') {
@@ -63,7 +65,7 @@ export default function PublicationCard({ publication }: PublicationCardProps) {
     return publication.media && publication.media.length > 0;
   }, [publication.media]);
 
-  // Generar slug para la URL amigable
+  // Generar URL amigable sin la palabra "anuncios"
   const generateSeoUrl = () => {
     const titleSlug = publication.title
       .toLowerCase()
@@ -71,11 +73,30 @@ export default function PublicationCard({ publication }: PublicationCardProps) {
       .replace(/\s+/g, '-')
       .substring(0, 50);
     
-    return `/anuncios/${publication.category}/${titleSlug}/${publication.id}`;
+    // Construir la URL con el formato /{categoria}/{subcategoria}/{id}-{slug}
+    let url = `/${publication.category}`;
+    
+    if (publication.subcategory) {
+      url += `/${publication.subcategory}`;
+      
+      if (publication.subsubcategory) {
+        url += `/${publication.subsubcategory}`;
+      }
+    }
+    
+    url += `/${publication.id}-${titleSlug}`;
+    
+    return url;
   };
 
   // URL amigable para SEO
-  const seoUrl = useMemo(() => generateSeoUrl(), [publication.id, publication.title, publication.category]);
+  const seoUrl = useMemo(() => generateSeoUrl(), [
+    publication.id, 
+    publication.title, 
+    publication.category,
+    publication.subcategory,
+    publication.subsubcategory
+  ]);
 
   return (
     <div className={`rounded-xl shadow-md overflow-hidden transition-all hover:shadow-lg ${!hasImage ? 'publication-card-no-image' : 'bg-white'}`}>
@@ -93,19 +114,19 @@ export default function PublicationCard({ publication }: PublicationCardProps) {
             </div>
           </div>
         ) : (
-          <div className="publication-info flex flex-col justify-between h-40 p-4">
+          <div className="publication-info flex flex-col justify-between h-full p-4">
             <div className="flex justify-between">
-              <span className="category-badge bg-white/20 text-white px-2 py-1 rounded-full text-xs">
+              <span className="category-badge">
                 {publication.category}
               </span>
-              <span className="bg-primary-500 text-white px-2 py-1 rounded-full text-xs">
+              <span className="price">
                 {formatPrice(publication.price, publication.priceType)}
               </span>
             </div>
-            <h3 className="font-semibold text-white text-lg mb-1 mt-2 line-clamp-2">
+            <h3 className="title mt-2 line-clamp-2">
               {publication.title}
             </h3>
-            <div className="text-sm text-white/80 mb-2">
+            <div className="location">
               {publication.location.city}, {publication.location.region} • {formatDate(publication.createdAt)}
             </div>
           </div>

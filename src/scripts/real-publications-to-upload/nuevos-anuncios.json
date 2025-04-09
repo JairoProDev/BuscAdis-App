@@ -1,0 +1,380 @@
+[
+  {
+    "title": "Alquilo ambientes para oficinas en Av. Pachacuteq y Av. Manco Inca",
+    "description": "Alquilo ambientes para oficinas, excelente ubicación en esquina de Av. Pachacuteq y Av. Manco Inca - distrito de Wánchaq. Informes a los Cels. 945322613, 944261878.",
+    "category": "inmuebles",
+    "subcategory": "oficinas",
+    "subsubcategory": "alquiler",
+    "price": 0,
+    "price_type": "negotiable",
+    "currency": "PEN",
+    "location": {
+      "city": "Cusco",
+      "region": "Cusco",
+      "district": "Wanchaq",
+      "address": "Av. Pachacuteq y Av. Manco Inca"
+    },
+    "contact": {
+      "whatsapp": "51945322613",
+      "phone": "51944261878"
+    },
+    "features": {
+      "property_type": "oficina",
+      "operation_type": "alquiler"
+    },
+    "status": "active"
+  },
+  {
+    "title": "Alquilo patio pequeño techado para negocio frente al mercadillo las Joyas",
+    "description": "Alquilo un patio pequeño techado con calamina, piso de tierra, interior, más su pasadizo para la calle, el pasadizo es pintado y mayólica hacia la calle, con baño independiente, ideal para vender pollo, depósito, comida al paso o cualquier otro negocio, en pleno lugar de negocios, frente al mercadillo de las Joyas - paradero las Joyas, San Sebastián. Informes al Cel. 982040409.",
+    "category": "inmuebles",
+    "subcategory": "locales",
+    "subsubcategory": "alquiler",
+    "price": 0,
+    "price_type": "negotiable",
+    "currency": "PEN",
+    "location": {
+      "city": "Cusco",
+      "region": "Cusco",
+      "district": "San Sebastián",
+      "address": "Paradero las Joyas, frente al mercadillo"
+    },
+    "contact": {
+      "whatsapp": "51982040409"
+    },
+    "features": {
+      "property_type": "local",
+      "operation_type": "alquiler",
+      "amenities": ["Baño independiente", "Techado", "Pasadizo a calle"]
+    },
+    "status": "active"
+  },
+  {
+    "title": "¡Atención! Espacio para taller de soldadura en Av. Prolongación Grau",
+    "description": "¡Atención! Soldador independiente, se da espacio de 5x6m para taller de soldadura. Local equipado con guillotina, plegadora, roladora y dobladora, etc., Medidor de luz independiente; en Av. Prolongación Grau N°27 – Santiago. Te respaldamos con garantía para tus trabajos. Razón WhatsApp 925251004 (no llamar, solo mensajes).",
+    "category": "inmuebles",
+    "subcategory": "locales",
+    "subsubcategory": "alquiler",
+    "price": 0,
+    "price_type": "negotiable",
+    "currency": "PEN",
+    "location": {
+      "city": "Cusco",
+      "region": "Cusco",
+      "district": "Santiago",
+      "address": "Av. Prolongación Grau N°27"
+    },
+    "contact": {
+      "whatsapp": "51925251004"
+    },
+    "features": {
+      "property_type": "local",
+      "operation_type": "alquiler",
+      "area": 30,
+      "amenities": ["Equipado", "Medidor independiente", "Guillotina", "Plegadora", "Roladora", "Dobladora"]
+    },
+    "status": "active"
+  },
+  {
+    "title": "Se alquila espacio para barbería en Centro Histórico",
+    "description": "Se alquila espacio para barbería o mano alzada para complementar el servicio del salón, ubicado en el centro histórico. Razón Cel. 902010348.",
+    "category": "inmuebles",
+    "subcategory": "locales",
+    "subsubcategory": "alquiler",
+    "price": 0,
+    "price_type": "negotiable",
+    "currency": "PEN",
+    "location": {
+      "city": "Cusco",
+      "region": "Cusco",
+      "district": "Centro Histórico",
+      "address": "Centro Histórico"
+    },
+    "contact": {
+      "whatsapp": "51902010348"
+    },
+    "features": {
+      "property_type": "local",
+      "operation_type": "alquiler"
+    },
+    "status": "active"
+  },
+  {
+    "title": "Se alquila oficinas para agencia de viajes en primera cuadra de Av. Sol",
+    "description": "Se alquila oficinas para agencia de viajes o similares y un espacio en 1er. piso puerta a la calle, para cambio de monedas, agente de bancos o similares ubicación primera cuadra de Av. Sol cerca a Plaza de Armas. Para ver llamar previa cita al Cel. 984852121, 957778400.",
+    "category": "inmuebles",
+    "subcategory": "oficinas",
+    "subsubcategory": "alquiler",
+    "price": 0,
+    "price_type": "negotiable",
+    "currency": "PEN",
+    "location": {
+      "city": "Cusco",
+      "region": "Cusco",
+      "district": "Centro Histórico",
+      "address": "Primera cuadra de Av. Sol, cerca a Plaza de Armas"
+    },
+    "contact": {
+      "whatsapp": "51984852121",
+      "phone": "51957778400"
+    },
+    "features": {
+      "property_type": "oficina",
+      "operation_type": "alquiler",
+      "amenities": ["Primer piso", "Puerta a la calle"]
+    },
+    "status": "active"
+  },
+  {
+    "title": "Se alquila restaurante en el Centro Histórico de Cusco",
+    "description": "Se alquila restaurante en el Centro Histórico de Cusco. Interesados Comunicarse al Cel. 958148088.",
+    "category": "inmuebles",
+    "subcategory": "locales",
+    "subsubcategory": "alquiler",
+    "price": 0,
+    "price_type": "negotiable",
+    "currency": "PEN",
+    "location": {
+      "city": "Cusco",
+      "region": "Cusco",
+      "district": "Centro Histórico",
+      "address": "Centro Histórico"
+    },
+    "contact": {
+      "whatsapp": "51958148088"
+    },
+    "features": {
+      "property_type": "local",
+      "operation_type": "alquiler"
+    },
+    "status": "active"
+  },
+  {
+    "title": "Alquilo local comercial amplio en Pampa de Huasao",
+    "description": "Alquilo local comercial amplio ideal para deposito, taller u otros, cuenta con todos los servicios (medidor trifásico), en la Pampa de Huasao paradero Real Naciente – Hacienda F-1. Razón a los Cels. 974315994, 991592579.",
+    "category": "inmuebles",
+    "subcategory": "locales",
+    "subsubcategory": "alquiler",
+    "price": 0,
+    "price_type": "negotiable",
+    "currency": "PEN",
+    "location": {
+      "city": "Cusco",
+      "region": "Cusco",
+      "district": "San Jerónimo",
+      "address": "Pampa de Huasao paradero Real Naciente – Hacienda F-1"
+    },
+    "contact": {
+      "whatsapp": "51974315994",
+      "phone": "51991592579"
+    },
+    "features": {
+      "property_type": "local",
+      "operation_type": "alquiler",
+      "amenities": ["Medidor trifásico", "Amplio"]
+    },
+    "status": "active"
+  },
+  {
+    "title": "Alquilo local comercial en Av. Tomasa Tito Condemayta",
+    "description": "Alquilo local comercial con trastienda independiente hacia la calle; ubicado en Av. Tomasa Tito Condemayta 1423-F (altura de EsSalud, carril de bajada, edificio marrón con blanco rejas plomas), comunicarse a los Cels. 984692488, 984636305.",
+    "category": "inmuebles",
+    "subcategory": "locales",
+    "subsubcategory": "alquiler",
+    "price": 0,
+    "price_type": "negotiable",
+    "currency": "PEN",
+    "location": {
+      "city": "Cusco",
+      "region": "Cusco",
+      "district": "Wanchaq",
+      "address": "Av. Tomasa Tito Condemayta 1423-F, altura de EsSalud"
+    },
+    "contact": {
+      "whatsapp": "51984692488",
+      "phone": "51984636305"
+    },
+    "features": {
+      "property_type": "local",
+      "operation_type": "alquiler",
+      "amenities": ["Trastienda independiente"]
+    },
+    "status": "active"
+  },
+  {
+    "title": "Alquilo local comercial en Av. de la Cultura, ideal para broasteria",
+    "description": "Alquilo local comercial en fachada, con baño privado y lavador independiente, ideal para todo tipo de negocio especialmente para broasteria; ubicado en la Av. de la Cultura, paradero Andina - carril de bajada (referencia frente a la Andina - Larapa). Informes Cels. 949779857, 921132139.",
+    "category": "inmuebles",
+    "subcategory": "locales",
+    "subsubcategory": "alquiler",
+    "price": 0,
+    "price_type": "negotiable",
+    "currency": "PEN",
+    "location": {
+      "city": "Cusco",
+      "region": "Cusco",
+      "district": "San Jerónimo",
+      "address": "Av. de la Cultura, paradero Andina - Larapa"
+    },
+    "contact": {
+      "whatsapp": "51949779857",
+      "phone": "51921132139"
+    },
+    "features": {
+      "property_type": "local",
+      "operation_type": "alquiler",
+      "amenities": ["Baño privado", "Lavador independiente", "En fachada"]
+    },
+    "status": "active"
+  },
+  {
+    "title": "Alquilo local de 100m2 con sótano en Jr. Iquitos - San Borja Alta",
+    "description": "Alquilo local de 100m2 con sótano total 200m2, en Jr. Iquitos - San Borja Alta, Wanchaq, con baño privado, servicio de agua, luz independiente, no para restaurantes o a afines. Razón Cel. 923497373.",
+    "category": "inmuebles",
+    "subcategory": "locales",
+    "subsubcategory": "alquiler",
+    "price": 0,
+    "price_type": "negotiable",
+    "currency": "PEN",
+    "location": {
+      "city": "Cusco",
+      "region": "Cusco",
+      "district": "Wanchaq",
+      "address": "Jr. Iquitos - San Borja Alta"
+    },
+    "contact": {
+      "whatsapp": "51923497373"
+    },
+    "features": {
+      "property_type": "local",
+      "operation_type": "alquiler",
+      "area": 200,
+      "amenities": ["Sótano", "Baño privado", "Servicios independientes"]
+    },
+    "status": "active"
+  },
+  {
+    "title": "Agencia de viajes necesita guías para actividades de aventura",
+    "description": "Agencia de viajes necesita guías para actividades de aventura con inglés intermedio y necesitamos practicantes con inglés nivel intermedio. Contacto 984228172",
+    "category": "empleos",
+    "subcategory": "turismo",
+    "subsubcategory": "guia",
+    "price": 0,
+    "price_type": "negotiable",
+    "currency": "PEN",
+    "location": {
+      "city": "Cusco",
+      "region": "Cusco"
+    },
+    "contact": {
+      "whatsapp": "51984228172"
+    },
+    "features": {
+      "job_type": "turismo",
+      "experience_level": "No especificado",
+      "requirements": ["Inglés intermedio", "Actividades de aventura"],
+      "job_type": "Tiempo completo"
+    },
+    "status": "active"
+  },
+  {
+    "title": "Agencia de viajes y turismo necesita personal para ventas y operaciones",
+    "description": "Agencia de viajes y turismo, necesita personal para ventas y operaciones logística. Informes al Cel. 984672979.",
+    "category": "empleos",
+    "subcategory": "ventas",
+    "subsubcategory": "turismo",
+    "price": 0,
+    "price_type": "negotiable",
+    "currency": "PEN",
+    "location": {
+      "city": "Cusco",
+      "region": "Cusco"
+    },
+    "contact": {
+      "whatsapp": "51984672979"
+    },
+    "features": {
+      "job_type": "ventas",
+      "experience_level": "No especificado",
+      "job_type": "Tiempo completo"
+    },
+    "status": "active"
+  },
+  {
+    "title": "Agencia Operadora de turismo requiere personal para reservas y operaciones",
+    "description": "Agencia Operadora de turismo requiere personal para el área de reservas y operaciones, así mismo se requiere practicantes con remuneración. Comunicarse al Cel. 982348043. Adjuntar C.V.",
+    "category": "empleos",
+    "subcategory": "turismo",
+    "subsubcategory": "administrativo",
+    "price": 0,
+    "price_type": "negotiable",
+    "currency": "PEN",
+    "location": {
+      "city": "Cusco",
+      "region": "Cusco"
+    },
+    "contact": {
+      "whatsapp": "51982348043"
+    },
+    "features": {
+      "job_type": "Administrativo",
+      "experience_level": "No especificado",
+      "job_type": "Tiempo completo",
+      "benefits": ["Remuneración para practicantes"]
+    },
+    "status": "active"
+  },
+  {
+    "title": "Se necesita joven o señorita para atención en tienda de accesorios de celulares",
+    "description": "Atención se necesita joven o señorita para atención en tienda de accesorios de celulares a tiempo completo, en Av. de la Cultura, frente a la UNSAAC. Se paga buen sueldo. Escribir al WhatsApp 935098013, 940831175.",
+    "category": "empleos",
+    "subcategory": "ventas",
+    "subsubcategory": "comercio",
+    "price": 0,
+    "price_type": "negotiable",
+    "currency": "PEN",
+    "location": {
+      "city": "Cusco",
+      "region": "Cusco",
+      "district": "Wanchaq",
+      "address": "Av. de la Cultura, frente a la UNSAAC"
+    },
+    "contact": {
+      "whatsapp": "51935098013",
+      "phone": "51940831175"
+    },
+    "features": {
+      "job_type": "Ventas",
+      "experience_level": "No especificado",
+      "job_type": "Tiempo completo",
+      "benefits": ["Buen sueldo"]
+    },
+    "status": "active"
+  },
+  {
+    "title": "Chifa Samurai - Fusión Oriental necesita cocinero y meseras",
+    "description": "\"Chifa Samurai\" - Fusión Oriental, Necesita: 1 Cocinero o 2 practicantes de cocina y 2 Meseras, tiempo completo o medio tiempo, con experiencia. Se paga buen sueldo por su trabajo. Presentarse con C.V. en Av. de la Cultura - Wanchaq (altura del paradero Amauta, costado Alianza Francesa), Cel. 993658442.",
+    "category": "empleos",
+    "subcategory": "gastronomia",
+    "subsubcategory": "cocinero",
+    "price": 0,
+    "price_type": "negotiable",
+    "currency": "PEN",
+    "location": {
+      "city": "Cusco",
+      "region": "Cusco",
+      "district": "Wanchaq",
+      "address": "Av. de la Cultura, altura paradero Amauta, costado Alianza Francesa"
+    },
+    "contact": {
+      "whatsapp": "51993658442"
+    },
+    "features": {
+      "job_type": "Gastronomía",
+      "experience_level": "Con experiencia",
+      "job_type": "Tiempo completo o medio tiempo",
+      "benefits": ["Buen sueldo"]
+    },
+    "status": "active"
+  }
+] 
