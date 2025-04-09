@@ -87,7 +87,7 @@ const SAMPLE_PUBLICATIONS: Record<string, PublicationData[]> = {
       contactName: 'Carlos Mendoza',
       contactPhone: '+51 987 654 321',
       status: 'active',
-      images: ['/images/sample/toyota-corolla.jpg'],
+      images: ['/images/vehiculo-corolla.jpg'],
       created_at: new Date().toISOString()
     },
     {
@@ -102,7 +102,7 @@ const SAMPLE_PUBLICATIONS: Record<string, PublicationData[]> = {
       contactName: 'Laura Torres',
       contactPhone: '+51 923 456 789',
       status: 'active',
-      images: ['/images/sample/honda-cbr.jpg'],
+      images: ['/images/vehiculo-corolla.jpg'],
       created_at: new Date().toISOString()
     }
   ],
@@ -119,7 +119,7 @@ const SAMPLE_PUBLICATIONS: Record<string, PublicationData[]> = {
       contactName: 'María Sánchez',
       contactPhone: '+51 912 345 678',
       status: 'active',
-      images: ['/images/sample/departamento-miraflores.jpg'],
+      images: ['/images/departamento-miraflores.jpg'],
       created_at: new Date().toISOString()
     }
   ],

@@ -1,0 +1,284 @@
+[
+  {
+    "id": "inmueble_001",
+    "title": "Departamento 3 dormitorios en Miraflores",
+    "description": "Amplio departamento con 3 dormitorios, 2 baños, sala comedor y cocina. Excelente ubicación en zona tranquila de Miraflores, cerca de parques, centros comerciales y transporte público.",
+    "category": "inmuebles",
+    "subcategory": "departamentos",
+    "price": 250000,
+    "currency": "USD",
+    "location": {
+      "city": "Lima",
+      "region": "Lima",
+      "district": "Miraflores",
+      "address": "Calle Las Flores 123",
+      "latitude": -12.123456,
+      "longitude": -77.123456
+    },
+    "contactName": "Juan Pérez",
+    "contactEmail": "juan.perez@ejemplo.com",
+    "contactPhone": "+51987654321",
+    "images": [
+      "https://ejemplo.com/imagen1.jpg",
+      "https://ejemplo.com/imagen2.jpg"
+    ],
+    "features": {
+      "bathrooms": 2,
+      "bedrooms": 3,
+      "area": 120,
+      "parking": 1,
+      "amenities": ["Gimnasio", "Piscina", "Seguridad 24/7"]
+    },
+    "status": "active",
+    "operation_type": "sale"
+  },
+  {
+    "id": "vehiculo_001",
+    "title": "Toyota Corolla 2020, excelente estado",
+    "description": "Vendo Toyota Corolla 2020 en excelente estado, único dueño, mantenimiento al día en la casa, 30,000 km. Motor 1.8L, transmisión automática, full equipo.",
+    "category": "vehiculos",
+    "subcategory": "autos",
+    "price": 18000,
+    "currency": "USD",
+    "location": {
+      "city": "Arequipa",
+      "region": "Arequipa",
+      "district": "Cayma",
+      "address": "Av. Ejército 500",
+      "latitude": -16.123456,
+      "longitude": -71.123456
+    },
+    "contactName": "Ana Gómez",
+    "contactEmail": "ana.gomez@ejemplo.com",
+    "contactPhone": "+51999888777",
+    "images": [
+      "https://ejemplo.com/carro1.jpg",
+      "https://ejemplo.com/carro2.jpg",
+      "https://ejemplo.com/carro3.jpg"
+    ],
+    "features": {
+      "year": 2020,
+      "brand": "Toyota",
+      "model": "Corolla",
+      "mileage": 30000,
+      "fuel_type": "Gasolina",
+      "transmission": "Automática",
+      "color": "Plateado",
+      "condition": "Usado - Como nuevo"
+    },
+    "status": "active"
+  },
+  {
+    "id": "empleo_001",
+    "title": "Desarrollador Full Stack - Empresa Tecnológica",
+    "description": "Empresa líder en desarrollo de software busca Desarrollador Full Stack con experiencia en React, Node.js y MongoDB. Ofrecemos excelentes condiciones laborales, horario flexible y posibilidad de trabajo remoto. Beneficios corporativos y línea de carrera.",
+    "category": "empleos",
+    "subcategory": "tecnologia",
+    "price": 0,
+    "currency": "PEN",
+    "location": {
+      "city": "Lima",
+      "region": "Lima",
+      "district": "San Isidro",
+      "address": "Av. Javier Prado 2000",
+      "latitude": -12.987654,
+      "longitude": -77.987654
+    },
+    "contactName": "Departamento de RRHH",
+    "contactEmail": "rrhh@empresa.com",
+    "contactPhone": "+51944555666",
+    "features": {
+      "job_type": "Tiempo completo",
+      "employment_type": "full-time",
+      "experience_level": "Semi Senior",
+      "education_level": "Bachiller",
+      "salary_range": "S/ 5,000 - S/ 8,000",
+      "benefits": ["Seguro médico", "Horario flexible", "Vacaciones adicionales"],
+      "requirements": [
+        "3+ años de experiencia en desarrollo web",
+        "Conocimientos en React, Node.js, MongoDB",
+        "Inglés intermedio"
+      ]
+    },
+    "status": "active"
+  },
+  {
+    "id": "producto_001",
+    "title": "MacBook Pro 16\" 2021 M1 Pro 16GB 512GB",
+    "description": "Vendo MacBook Pro 16 pulgadas modelo 2021 con chip M1 Pro, 16GB de RAM y 512GB de almacenamiento SSD. En perfecto estado, con caja original y todos los accesorios. Batería al 98% de capacidad.",
+    "category": "productos",
+    "subcategory": "computadoras",
+    "price": 6500,
+    "currency": "PEN",
+    "location": {
+      "city": "Lima",
+      "region": "Lima",
+      "district": "La Molina",
+      "address": "Av. La Molina 1234",
+      "latitude": -12.111111,
+      "longitude": -77.222222
+    },
+    "contactName": "Carlos Mendoza",
+    "contactEmail": "carlos.m@ejemplo.com",
+    "contactPhone": "+51922333444",
+    "images": [
+      "https://ejemplo.com/laptop1.jpg",
+      "https://ejemplo.com/laptop2.jpg"
+    ],
+    "features": {
+      "brand": "Apple",
+      "model": "MacBook Pro",
+      "specifications": [
+        "Pantalla 16 pulgadas",
+        "Chip M1 Pro",
+        "16GB RAM",
+        "512GB SSD"
+      ],
+      "condition": "Usado - Excelente estado",
+      "warranty": "Garantía Apple hasta noviembre 2023"
+    },
+    "status": "active"
+  },
+  {
+    "id": "servicio_001",
+    "title": "Servicio de Diseño Web y Desarrollo de Tiendas Online",
+    "description": "Ofrezco servicios profesionales de diseño web y desarrollo de tiendas online. Experto en WordPress, WooCommerce, Shopify y desarrollo personalizado. Más de 8 años de experiencia en el sector. Precios competitivos y entrega rápida.",
+    "category": "servicios",
+    "subcategory": "informatica",
+    "price": 1500,
+    "currency": "PEN",
+    "location": {
+      "city": "Trujillo",
+      "region": "La Libertad",
+      "district": "Trujillo",
+      "latitude": -8.123456,
+      "longitude": -79.123456
+    },
+    "contactName": "Roberto Sánchez",
+    "contactEmail": "roberto@ejemplo.com",
+    "contactPhone": "+51966777888",
+    "images": [
+      "https://ejemplo.com/diseno1.jpg",
+      "https://ejemplo.com/diseno2.jpg"
+    ],
+    "features": {
+      "service_type": "Informática y tecnología",
+      "experience": "8 años",
+      "delivery_time": "15-30 días según proyecto",
+      "service_includes": [
+        "Diseño a medida",
+        "Responsive design",
+        "Optimización SEO",
+        "Capacitación básica"
+      ],
+      "payment_methods": ["Transferencia bancaria", "Yape", "Plin"]
+    },
+    "status": "active"
+  },
+  {
+    "id": "evento_001",
+    "title": "Concierto Rock Peruano - Bandas Locales",
+    "description": "Gran concierto de rock peruano con las mejores bandas locales. 5 horas de música en vivo, zona de comidas y bebidas. No te pierdas la oportunidad de disfrutar del mejor rock nacional en un ambiente increíble.",
+    "category": "eventos",
+    "subcategory": "conciertos",
+    "price": 50,
+    "currency": "PEN",
+    "location": {
+      "city": "Lima",
+      "region": "Lima",
+      "district": "Barranco",
+      "address": "Calle Bulevar 123",
+      "latitude": -12.345678,
+      "longitude": -77.345678
+    },
+    "contactName": "Producciones Rock Perú",
+    "contactEmail": "contacto@rockperu.com",
+    "contactPhone": "+51911222333",
+    "images": [
+      "https://ejemplo.com/concierto1.jpg",
+      "https://ejemplo.com/concierto2.jpg"
+    ],
+    "features": {
+      "event_date": "2023-12-15T20:00:00Z",
+      "duration": "5 horas",
+      "capacity": 500,
+      "min_age": 18,
+      "lineup": ["Banda 1", "Banda 2", "Banda 3", "Banda 4"],
+      "additional_info": "Puertas abren a las 19:00. Documento de identidad obligatorio."
+    },
+    "status": "active"
+  },
+  {
+    "id": "negocio_001",
+    "title": "Traspaso Cafetería Completamente Equipada en Centro Histórico",
+    "description": "Traspaso cafetería en pleno funcionamiento ubicada en el Centro Histórico. Local de 80m² completamente equipado con maquinaria, mobiliario y decoración. Cartera de clientes fidelizada y excelente ubicación con alto tránsito peatonal. Motivo de venta: traslado a otra ciudad.",
+    "category": "negocios",
+    "subcategory": "traspasos",
+    "price": 35000,
+    "currency": "USD",
+    "location": {
+      "city": "Cusco",
+      "region": "Cusco",
+      "district": "Centro Histórico",
+      "address": "Calle Plateros 456",
+      "latitude": -13.123456,
+      "longitude": -72.123456
+    },
+    "contactName": "Miguel Torres",
+    "contactEmail": "miguel.t@ejemplo.com",
+    "contactPhone": "+51988999000",
+    "images": [
+      "https://ejemplo.com/cafe1.jpg",
+      "https://ejemplo.com/cafe2.jpg",
+      "https://ejemplo.com/cafe3.jpg"
+    ],
+    "features": {
+      "business_type": "Cafetería",
+      "area": 80,
+      "monthly_revenue": "USD 5,000 - USD 7,000",
+      "monthly_expenses": "USD 2,500 aprox.",
+      "employees": 3,
+      "years_operating": 4,
+      "reason_for_selling": "Traslado del propietario a otra ciudad",
+      "included": [
+        "Maquinaria profesional",
+        "Mobiliario completo",
+        "Marca y redes sociales",
+        "Capacitación inicial"
+      ],
+      "lease_terms": "Contrato de alquiler transferible por 3 años más"
+    },
+    "status": "active"
+  },
+  {
+    "id": "comunidad_001",
+    "title": "Clases de Yoga para Principiantes - Sábados en Parque Kennedy",
+    "description": "Organizo clases gratuitas de yoga para principiantes todos los sábados en el Parque Kennedy. Actividad comunitaria dirigida a personas de todas las edades que quieran iniciarse en la práctica del yoga. Trae tu mat y ropa cómoda. ¡Te esperamos!",
+    "category": "comunidad",
+    "subcategory": "actividades",
+    "price": 0,
+    "currency": "PEN",
+    "location": {
+      "city": "Lima",
+      "region": "Lima",
+      "district": "Miraflores",
+      "address": "Parque Kennedy",
+      "latitude": -12.111111,
+      "longitude": -77.111111
+    },
+    "contactName": "Laura Benites",
+    "contactEmail": "laura.b@ejemplo.com",
+    "contactPhone": "+51944777888",
+    "images": [
+      "https://ejemplo.com/yoga1.jpg"
+    ],
+    "features": {
+      "community_type": "Actividad recreativa",
+      "target_audience": "Principiantes en yoga",
+      "schedule": "Todos los sábados de 9:00 a 10:30 am",
+      "requirements": "Traer mat de yoga y ropa cómoda",
+      "participation_type": "Gratuita"
+    },
+    "status": "active"
+  }
+] 
