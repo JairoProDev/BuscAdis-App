@@ -1,0 +1,174 @@
+[
+  {
+    "title": "Casa en venta 3 dormitorios - La Molina",
+    "description": "Amplia casa de 3 dormitorios con vista panorámica. Incluye cochera para 2 vehículos, jardín amplio y área de servicio. Ubicada en zona residencial tranquila con vigilancia 24 horas. Cerca a centros comerciales, colegios y parques.",
+    "category": "inmuebles",
+    "subcategory": "casas",
+    "subsubcategory": "venta",
+    "price": 250000,
+    "currency": "PEN",
+    "location": {
+      "city": "Lima",
+      "region": "Lima",
+      "district": "La Molina",
+      "address": "Calle Las Acacias 123",
+      "latitude": -12.073562,
+      "longitude": -76.926832
+    },
+    "contactName": "Juan Pérez",
+    "contactEmail": "correo@ejemplo.com",
+    "contactPhone": "+51987654321",
+    "images": [
+      "https://res.cloudinary.com/dhgegbf9a/image/upload/v1712644123/anuncios-revista/inmueble1.jpg",
+      "https://res.cloudinary.com/dhgegbf9a/image/upload/v1712644123/anuncios-revista/inmueble2.jpg"
+    ],
+    "features": {
+      "property_type": "casa",
+      "operation_type": "sale",
+      "area": 150,
+      "bedrooms": 3,
+      "bathrooms": 2,
+      "parking": 2,
+      "amenities": ["Jardín", "Patio trasero", "Seguridad privada", "Terraza"]
+    },
+    "status": "active"
+  },
+  {
+    "title": "Toyota Corolla 2019 Full Equipo - Único dueño",
+    "description": "Vendo Toyota Corolla del 2019 en excelente estado, único dueño, con 45,000 km. Mantenimientos al día en Toyota, llantas nuevas, lunas eléctricas, aire acondicionado, sistema de sonido premium. Uso particular. No chocado.",
+    "category": "vehiculos",
+    "subcategory": "autos",
+    "subsubcategory": "sedan",
+    "price": 15500,
+    "currency": "USD",
+    "location": {
+      "city": "Lima",
+      "region": "Lima",
+      "district": "San Borja",
+      "address": "Av. San Luis 500",
+      "latitude": -12.092143,
+      "longitude": -76.987452
+    },
+    "contactName": "María García",
+    "contactEmail": "correo@ejemplo.com",
+    "contactPhone": "+51999888777",
+    "images": [
+      "https://res.cloudinary.com/dhgegbf9a/image/upload/v1712644123/anuncios-revista/auto1.jpg",
+      "https://res.cloudinary.com/dhgegbf9a/image/upload/v1712644123/anuncios-revista/auto2.jpg"
+    ],
+    "features": {
+      "vehicle_type": "Sedan",
+      "year_model": "2019",
+      "brand": "Toyota",
+      "model": "Corolla",
+      "mileage": 45000,
+      "fuel_type": "Gasolina",
+      "transmission": "Automática",
+      "condition": "used"
+    },
+    "status": "active"
+  },
+  {
+    "title": "Refrigeradora Samsung No Frost 400L - Nueva con garantía",
+    "description": "Vendo refrigeradora Samsung No Frost de 400 litros. Nueva en caja sellada con garantía de 12 meses. Eficiencia energética A+. Dispensador de agua, panel digital y sistema de enfriamiento rápido. Entrega a domicilio en Lima.",
+    "category": "productos",
+    "subcategory": "electrodomesticos",
+    "subsubcategory": "refrigeracion",
+    "price": 2200,
+    "currency": "PEN",
+    "location": {
+      "city": "Lima",
+      "region": "Lima",
+      "district": "San Miguel",
+      "address": "Av. La Marina 890",
+      "latitude": -12.078236,
+      "longitude": -77.092658
+    },
+    "contactName": "Pedro López",
+    "contactEmail": "correo@ejemplo.com",
+    "contactPhone": "+51966555444",
+    "images": [
+      "https://res.cloudinary.com/dhgegbf9a/image/upload/v1712644123/anuncios-revista/producto1.jpg",
+      "https://res.cloudinary.com/dhgegbf9a/image/upload/v1712644123/anuncios-revista/producto2.jpg"
+    ],
+    "features": {
+      "product_type": "Electrodomésticos",
+      "brand": "Samsung",
+      "model": "RT38K5530S8",
+      "condition": "new",
+      "specifications": {
+        "capacidad": "400 litros",
+        "eficiencia": "A+",
+        "tipo": "No Frost"
+      },
+      "warranty": "12 meses oficial"
+    },
+    "status": "active"
+  },
+  {
+    "title": "Servicio técnico profesional de laptops y computadoras a domicilio",
+    "description": "Ofrezco servicio técnico especializado para laptops y computadoras. Reparación, mantenimiento, limpieza, actualización de software, instalación de programas y optimización. Servicio a domicilio en toda Lima Metropolitana. Trabajo garantizado. 8 años de experiencia.",
+    "category": "servicios",
+    "subcategory": "informatica",
+    "subsubcategory": "reparacion",
+    "price_type": "quote",
+    "location": {
+      "city": "Lima",
+      "region": "Lima",
+      "district": "Varios distritos",
+      "latitude": -12.046374,
+      "longitude": -77.042793
+    },
+    "contactName": "Carlos Mendoza",
+    "contactEmail": "correo@ejemplo.com",
+    "contactPhone": "+51955444333",
+    "images": [
+      "https://res.cloudinary.com/dhgegbf9a/image/upload/v1712644123/anuncios-revista/servicio1.jpg"
+    ],
+    "features": {
+      "service_type": "Informática",
+      "price_type": "quote",
+      "availability": ["Lunes a Sábados", "9:00 am - 7:00 pm"],
+      "service_area": ["Lima Metropolitana"],
+      "experience_years": 8
+    },
+    "status": "active"
+  },
+  {
+    "title": "Se busca asistente administrativo con experiencia - Tiempo completo",
+    "description": "Empresa importante en crecimiento busca asistente administrativo con experiencia en atención al cliente, manejo de Excel y capacidad de organización. Ofrecemos sueldo competitivo, beneficios de ley, capacitaciones y buen ambiente laboral. Zona San Isidro.",
+    "category": "empleos",
+    "subcategory": "administracion",
+    "subsubcategory": "asistente",
+    "price": 0,
+    "location": {
+      "city": "Lima",
+      "region": "Lima",
+      "district": "San Isidro",
+      "address": "Av. República de Panamá 3055",
+      "latitude": -12.111111,
+      "longitude": -77.022222
+    },
+    "contactName": "Recursos Humanos",
+    "contactEmail": "correo@ejemplo.com",
+    "contactPhone": "+51944333222",
+    "features": {
+      "job_type": "Administrativo",
+      "salary_range": "S/ 1,500 - S/ 2,000",
+      "employment_type": "full-time",
+      "experience_level": "Junior",
+      "education_level": "Técnico",
+      "requirements": [
+        "Experiencia mínima 1 año",
+        "Conocimientos de Office",
+        "Buena redacción"
+      ],
+      "benefits": [
+        "Planilla completa",
+        "Seguro EPS",
+        "Horario de oficina"
+      ]
+    },
+    "status": "active"
+  }
+] 
