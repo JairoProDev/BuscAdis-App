@@ -1,6 +1,7 @@
 import Image from 'next/image';
 import Link from 'next/link';
 import { WhatsAppIcon } from '@/components/icons';
+import { useMemo } from 'react';
 
 interface PublicationCardProps {
   publication: {
@@ -29,11 +30,19 @@ export default function PublicationCard({ publication }: PublicationCardProps) {
   };
 
   const formatDate = (dateString: string) => {
-    const date = new Date(dateString);
-    return date.toLocaleDateString('es-PE', {
-      day: 'numeric',
-      month: 'short'
-    });
+    try {
+      const date = new Date(dateString);
+      if (isNaN(date.getTime())) {
+        return 'Fecha no disponible';
+      }
+      return date.toLocaleDateString('es-PE', {
+        day: 'numeric',
+        month: 'short'
+      });
+    } catch (error) {
+      console.error('Error formateando fecha:', error);
+      return 'Fecha no disponible';
+    }
   };
 
   const formatWhatsAppMessage = () => {
@@ -49,31 +58,54 @@ export default function PublicationCard({ publication }: PublicationCardProps) {
     return encodeURIComponent(message);
   };
 
+  // Determinar si la publicación tiene imagen
+  const hasImage = useMemo(() => {
+    return publication.media && publication.media.length > 0;
+  }, [publication.media]);
+
+  // Generar slug para la URL amigable
+  const generateSeoUrl = () => {
+    const titleSlug = publication.title
+      .toLowerCase()
+      .replace(/[^\w\sáéíóúñ]/gi, '')
+      .replace(/\s+/g, '-')
+      .substring(0, 50);
+    
+    return `/anuncios/${publication.category}/${titleSlug}/${publication.id}`;
+  };
+
+  // URL amigable para SEO
+  const seoUrl = useMemo(() => generateSeoUrl(), [publication.id, publication.title, publication.category]);
+
   return (
-    <div className="bg-white rounded-xl shadow-md overflow-hidden transition-all hover:shadow-lg">
-      <Link href={`/anuncios/${publication.id}`}>
-        <div className="relative h-48 w-full">
-          {publication.media && publication.media.length > 0 ? (
+    <div className={`bg-white rounded-xl shadow-md overflow-hidden transition-all hover:shadow-lg ${!hasImage ? 'publication-compact' : ''}`}>
+      <Link href={seoUrl}>
+        {hasImage ? (
+          <div className="relative h-48 w-full">
             <Image
               src={publication.media[0]}
               alt={publication.title}
               fill
               className="object-cover"
             />
-          ) : (
-            <div className="w-full h-full flex items-center justify-center bg-gray-200">
-              <span className="text-gray-400 text-lg">Sin imagen</span>
+            <div className="absolute top-2 right-2 bg-primary-500 text-white px-2 py-1 rounded-full text-xs">
+              {formatPrice(publication.price, publication.priceType)}
             </div>
-          )}
-          <div className="absolute top-2 right-2 bg-primary-500 text-white px-2 py-1 rounded-full text-xs">
-            {formatPrice(publication.price, publication.priceType)}
           </div>
-        </div>
+        ) : (
+          <div className="relative px-4 pt-4">
+            <div className="mb-2 text-right">
+              <span className="bg-primary-500 text-white px-2 py-1 rounded-full text-xs">
+                {formatPrice(publication.price, publication.priceType)}
+              </span>
+            </div>
+          </div>
+        )}
       </Link>
       
       <div className="p-4">
-        <Link href={`/anuncios/${publication.id}`}>
-          <h3 className="font-semibold text-gray-800 text-lg mb-1 hover:text-primary-600 transition-colors">
+        <Link href={seoUrl}>
+          <h3 className={`font-semibold text-gray-800 hover:text-primary-600 transition-colors ${hasImage ? 'text-lg mb-1' : 'text-base mb-1'}`}>
             {publication.title}
           </h3>
         </Link>

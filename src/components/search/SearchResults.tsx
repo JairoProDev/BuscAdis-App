@@ -207,6 +207,23 @@ export default function SearchResults({
     })
   }
     */}
+  // Generar URL amigable para SEO
+  const generateSeoUrl = (publication: Publication) => {
+    const titleSlug = publication.title
+      .toLowerCase()
+      .replace(/[^\w\sáéíóúñ]/gi, '')
+      .replace(/\s+/g, '-')
+      .substring(0, 50);
+    
+    // Extraer subcategoría si está disponible
+    let subcategory = '';
+    if (publication.attributes && publication.attributes.subcategory) {
+      subcategory = `/${String(publication.attributes.subcategory).toLowerCase().replace(/\s+/g, '-')}`;
+    }
+    
+    return `/anuncios/${publication.categorySlug}${subcategory}/${titleSlug}/${publication.id}`;
+  };
+  
   // Handle opening the publication modal
   const handleOpenModal = (publicationId: string, event: React.MouseEvent) => {
     event.preventDefault();
@@ -216,13 +233,8 @@ export default function SearchResults({
     // Update URL without navigation using history.pushState
     const publication = results.find(p => p.id === publicationId);
     if (publication) {
-      const titleSlug = publication.title
-        .toLowerCase()
-        .replace(/[^\w\s]/gi, '')
-        .replace(/\s+/g, '-')
-        .substring(0, 50);
-      const newPath = `/anuncios/${publicationId}-${titleSlug}`;
-      window.history.pushState({ id: publicationId }, '', newPath);
+      const seoUrl = generateSeoUrl(publication);
+      window.history.pushState({ id: publicationId }, '', seoUrl);
     }
   };
   
@@ -234,17 +246,6 @@ export default function SearchResults({
     window.history.pushState({}, '', window.location.pathname.split('?')[0] + window.location.search);
   };
   
-  // Generar URL amigable para SEO
-  const generateSeoUrl = (publication: Publication) => {
-    const titleSlug = publication.title
-      .toLowerCase()
-      .replace(/[^\w\s]/gi, '')
-      .replace(/\s+/g, '-')
-      .substring(0, 50);
-    
-    return `/anuncios/${publication.id}-${titleSlug}`;
-  };
-  
   // Renderizar item en vista de cuadrícula
   const renderGridItem = (publication: Publication, index: number) => {
     const isNew = index < newItemsCount;
@@ -252,10 +253,14 @@ export default function SearchResults({
     const isLiked = likedItems.has(publication.id);
     const isSaved = savedItems.has(publication.id);
     
+    // Verificar si tiene imágenes
+    const hasImages = publication.images && publication.images.length > 0;
+    
     // Default image if none provided
-    const imageUrl = publication.images && publication.images.length > 0
-      ? publication.images[0]
-      : '/images/placeholder.jpg';
+    const imageUrl = hasImages ? publication.images[0] : '/images/placeholder.jpg';
+    
+    // Clase CSS para tarjetas sin imagen
+    const noImageClass = !hasImages ? 'publication-no-image' : '';
     
     return (
       <motion.div
@@ -264,7 +269,7 @@ export default function SearchResults({
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.4, delay: index * 0.05 }}
-        className="relative group"
+        className={`relative group ${noImageClass}`}
       >
         <a 
           href={generateSeoUrl(publication)} 
@@ -272,51 +277,81 @@ export default function SearchResults({
           onClick={(e) => handleOpenModal(publication.id, e)}
         >
           <div className="relative bg-slate-800 rounded-xl overflow-hidden shadow-lg hover:shadow-xl transition-shadow duration-300 border border-teal-500/20 hover:border-cyan-400/30">
-            {/* Imagen principal */}
-            <div className="relative h-52 overflow-hidden">
-              <div className="absolute inset-0 bg-gradient-to-br from-slate-900/20 to-slate-900/60 z-10" />
-              <Image
-                src={imageUrl}
-                alt={publication.title}
-                fill
-                sizes="(max-width: 640px) 100vw, (max-width: 768px) 50vw, (max-width: 1024px) 33vw, 25vw"
-                className="object-cover transition-transform duration-500 group-hover:scale-110"
-              />
+            {/* Imagen principal (solo si hay imagen) */}
+            {hasImages ? (
+              <div className="relative h-52 overflow-hidden">
+                <div className="absolute inset-0 bg-gradient-to-br from-slate-900/20 to-slate-900/60 z-10" />
+                <Image
+                  src={imageUrl}
+                  alt={publication.title}
+                  fill
+                  sizes="(max-width: 640px) 100vw, (max-width: 768px) 50vw, (max-width: 1024px) 33vw, 25vw"
+                  className="object-cover transition-transform duration-500 group-hover:scale-110"
+                />
 
-              {/* Badges */}
-              <div className="absolute top-2 left-2 flex gap-2 z-20">
-                {isPremium && (
-                  <span className="bg-gradient-to-r from-teal-500 to-cyan-500 text-white text-xs font-medium px-2.5 py-0.5 rounded-full shadow-lg flex items-center">
-                    <SparklesIcon className="w-3 h-3 mr-1" />
-                    Premium
-                  </span>
-                )}
+                {/* Badges */}
+                <div className="absolute top-2 left-2 flex gap-2 z-20">
+                  {isPremium && (
+                    <span className="bg-gradient-to-r from-teal-500 to-cyan-500 text-white text-xs font-medium px-2.5 py-0.5 rounded-full shadow-lg flex items-center">
+                      <SparklesIcon className="w-3 h-3 mr-1" />
+                      Premium
+                    </span>
+                  )}
+                  
+                  {isNew && (
+                    <span className="bg-gradient-to-r from-amber-500 to-orange-500 text-white text-xs font-medium px-2.5 py-0.5 rounded-full shadow-lg flex items-center">
+                      <FireIcon className="w-3 h-3 mr-1" />
+                      Nuevo
+                    </span>
+                  )}
+                </div>
                 
-                {isNew && (
-                  <span className="bg-gradient-to-r from-amber-500 to-orange-500 text-white text-xs font-medium px-2.5 py-0.5 rounded-full shadow-lg flex items-center">
-                    <FireIcon className="w-3 h-3 mr-1" />
-                    Nuevo
+                {/* Precio */}
+                <div className="absolute bottom-2 right-2 z-20">
+                  <span className="bg-slate-900/80 backdrop-blur-sm text-white text-sm font-bold px-3 py-1 rounded-lg shadow-lg border border-slate-700/50">
+                    {formatPrice(publication.price, publication.currency)}
                   </span>
-                )}
+                </div>
               </div>
-              
-              {/* Precio */}
-              <div className="absolute bottom-2 right-2 z-20">
-                <span className="bg-slate-900/80 backdrop-blur-sm text-white text-sm font-bold px-3 py-1 rounded-lg shadow-lg border border-slate-700/50">
-                  {formatPrice(publication.price, publication.currency)}
-                </span>
+            ) : (
+              <div className="p-4">
+                {/* Badges para tarjetas sin imagen */}
+                <div className="flex justify-between gap-2 mb-2">
+                  <div className="flex gap-1">
+                    {isPremium && (
+                      <span className="bg-gradient-to-r from-teal-500 to-cyan-500 text-white text-xs font-medium px-2 py-0.5 rounded-full shadow-sm flex items-center">
+                        <SparklesIcon className="w-3 h-3 mr-1" />
+                        Premium
+                      </span>
+                    )}
+                    
+                    {isNew && (
+                      <span className="bg-gradient-to-r from-amber-500 to-orange-500 text-white text-xs font-medium px-2 py-0.5 rounded-full shadow-sm flex items-center">
+                        <FireIcon className="w-3 h-3 mr-1" />
+                        Nuevo
+                      </span>
+                    )}
+                  </div>
+                  
+                  {/* Precio para tarjetas sin imagen */}
+                  <span className="bg-slate-900/80 backdrop-blur-sm text-white text-xs font-medium px-2 py-0.5 rounded-lg shadow-sm border border-slate-700/50">
+                    {formatPrice(publication.price, publication.currency)}
+                  </span>
+                </div>
               </div>
-            </div>
+            )}
 
             {/* Contenido */}
-            <div className="p-4">
-              <h3 className="text-lg font-semibold text-white line-clamp-2 mb-1 group-hover:text-teal-300 transition-colors">
+            <div className={`p-${hasImages ? '4' : '2'}`}>
+              <h3 className={`${hasImages ? 'text-lg' : 'text-base'} font-semibold text-white line-clamp-2 mb-1 group-hover:text-teal-300 transition-colors`}>
                 {publication.title}
               </h3>
               
-              <p className="text-cyan-100/80 text-sm line-clamp-2 mb-3">
-                {publication.description}
-              </p>
+              {hasImages && (
+                <p className="text-cyan-100/80 text-sm line-clamp-2 mb-3">
+                  {publication.description}
+                </p>
+              )}
               
               <div className="flex items-center justify-between text-sm">
                 <div className="flex items-center text-cyan-300/90">
@@ -594,7 +629,7 @@ export default function SearchResults({
           {results.length > 0 ? (
               <React.Fragment key="results">
               {viewMode === 'grid' ? (
-                <div className={`grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 gap-4`}>
+                <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 gap-4 auto-rows-auto">
                   {results.map((publication, index) => renderGridItem(publication, index))}
                 </div>
               ) : (

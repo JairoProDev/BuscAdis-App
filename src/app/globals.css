@@ -124,6 +124,16 @@
   .cursor-follower.active {
     @apply w-[60px] h-[60px] bg-primary-500/20;
   }
+
+  /* Estilos para publicaciones sin imagen */
+  .publication-no-image {
+    grid-row: span 1;
+  }
+
+  /* Publicaciones normales (con imagen) ocupan más espacio vertical */
+  .grid > div:not(.publication-no-image) {
+    grid-row: span 2;
+  }
 }
 
 @layer utilities {
