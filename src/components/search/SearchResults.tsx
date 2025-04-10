@@ -20,6 +20,7 @@ import { SparklesIcon } from '@heroicons/react/24/solid'
 import Image from 'next/image'
 import useMediaQuery from '@/hooks/useMediaQuery'
 import PublicationModal from '@/components/search/PublicationModal'
+import { generateSeoUrl } from '@/utils/url'
 
 export interface Publication {
   id: string
@@ -207,23 +208,6 @@ export default function SearchResults({
     })
   }
     */}
-  // Generar URL amigable para SEO
-  const generateSeoUrl = (publication: Publication) => {
-    const titleSlug = publication.title
-      .toLowerCase()
-      .replace(/[^\w\sáéíóúñ]/gi, '')
-      .replace(/\s+/g, '-')
-      .substring(0, 50);
-    
-    // Extraer subcategoría si está disponible
-    let subcategory = '';
-    if (publication.attributes && publication.attributes.subcategory) {
-      subcategory = `/${String(publication.attributes.subcategory).toLowerCase().replace(/\s+/g, '-')}`;
-    }
-    
-    return `/anuncios/${publication.categorySlug}${subcategory}/${titleSlug}/${publication.id}`;
-  };
-  
   // Handle opening the publication modal
   const handleOpenModal = (publicationId: string, event: React.MouseEvent) => {
     event.preventDefault();
@@ -233,7 +217,12 @@ export default function SearchResults({
     // Update URL without navigation using history.pushState
     const publication = results.find(p => p.id === publicationId);
     if (publication) {
-      const seoUrl = generateSeoUrl(publication);
+      const seoUrl = generateSeoUrl(
+        publication.id,
+        publication.title,
+        publication.categorySlug,
+        publication.attributes?.subcategory as string | undefined
+      );
       window.history.pushState({ id: publicationId }, '', seoUrl);
     }
   };
@@ -257,10 +246,10 @@ export default function SearchResults({
     const hasImages = publication.images && publication.images.length > 0;
     
     // Default image if none provided
-    const imageUrl = hasImages ? publication.images[0] : '/images/placeholder.jpg';
+    const imageUrl = hasImages && publication.images ? publication.images[0] : '/images/placeholder.jpg';
     
     // Clase CSS para tarjetas sin imagen
-    const noImageClass = !hasImages ? 'publication-no-image' : '';
+    const noImageClass = !hasImages ? 'publication-card-no-image' : '';
     
     return (
       <motion.div
@@ -272,7 +261,12 @@ export default function SearchResults({
         className={`relative group ${noImageClass}`}
       >
         <a 
-          href={generateSeoUrl(publication)} 
+          href={generateSeoUrl(
+            publication.id,
+            publication.title,
+            publication.categorySlug,
+            publication.attributes?.subcategory as string | undefined
+          )} 
           className="block"
           onClick={(e) => handleOpenModal(publication.id, e)}
         >
@@ -342,7 +336,7 @@ export default function SearchResults({
             )}
 
             {/* Contenido */}
-            <div className={`p-${hasImages ? '4' : '2'}`}>
+            <div className={hasImages ? 'p-4' : 'p-2'}>
               <h3 className={`${hasImages ? 'text-lg' : 'text-base'} font-semibold text-white line-clamp-2 mb-1 group-hover:text-teal-300 transition-colors`}>
                 {publication.title}
               </h3>
@@ -418,10 +412,11 @@ export default function SearchResults({
     const isLiked = likedItems.has(publication.id)
     const isSaved = savedItems.has(publication.id)
     
+    // Verificar si tiene imágenes
+    const hasImages = publication.images && publication.images.length > 0;
+    
     // Default image if none provided
-    const imageUrl = publication.images && publication.images.length > 0
-      ? publication.images[0]
-      : '/images/placeholder.jpg'
+    const imageUrl = hasImages && publication.images ? publication.images[0] : '/images/placeholder.jpg';
     
     return (
       <motion.div
@@ -433,7 +428,12 @@ export default function SearchResults({
         className="relative"
       >
         <a 
-          href={generateSeoUrl(publication)} 
+          href={generateSeoUrl(
+            publication.id,
+            publication.title,
+            publication.categorySlug,
+            publication.attributes?.subcategory as string | undefined
+          )} 
           className="block"
           onClick={(e) => handleOpenModal(publication.id, e)}
         >

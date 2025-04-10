@@ -67,6 +67,10 @@ export default function PublicationCard({ publication }: PublicationCardProps) {
 
   // Generar URL amigable sin la palabra "anuncios"
   const generateSeoUrl = () => {
+    if (!publication || !publication.title) {
+      return `/${publication?.category || 'anuncios'}/${publication?.id || ''}`;
+    }
+    
     const titleSlug = publication.title
       .toLowerCase()
       .replace(/[^\w\sáéíóúñ]/gi, '')

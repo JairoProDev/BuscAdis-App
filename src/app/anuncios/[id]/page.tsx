@@ -118,24 +118,28 @@ export default function PublicationDetailPage() {
             }
             
             // Update URL with slug if URL doesn't already have one
-            if (data.title && !window.location.pathname.includes('-') && window.history) {
-              const slug = data.title
-                .toLowerCase()
-                .replace(/[^\w\sáéíóúñ]/g, '')
-                .replace(/\s+/g, '-')
-                .replace(/[áàäâ]/g, 'a')
-                .replace(/[éèëê]/g, 'e')
-                .replace(/[íìïî]/g, 'i')
-                .replace(/[óòöô]/g, 'o')
-                .replace(/[úùüû]/g, 'u')
-                .replace(/ñ/g, 'n')
-                .replace(/-+/g, '-')
-                .trim()
-                .substring(0, 80);
-                
-              const category = data.category || data.categorySlug || '';
-              const newPath = `/${category}/${id}-${slug}`;
-              window.history.replaceState(null, '', newPath);
+            if (data && data.title && !window.location.pathname.includes('-') && window.history) {
+              try {
+                const slug = data.title
+                  .toLowerCase()
+                  .replace(/[^\w\sáéíóúñ]/g, '')
+                  .replace(/\s+/g, '-')
+                  .replace(/[áàäâ]/g, 'a')
+                  .replace(/[éèëê]/g, 'e')
+                  .replace(/[íìïî]/g, 'i')
+                  .replace(/[óòöô]/g, 'o')
+                  .replace(/[úùüû]/g, 'u')
+                  .replace(/ñ/g, 'n')
+                  .replace(/-+/g, '-')
+                  .trim()
+                  .substring(0, 80);
+                  
+                const category = data.category || data.categorySlug || '';
+                const newPath = `/${category}/${id}-${slug}`;
+                window.history.replaceState(null, '', newPath);
+              } catch (err) {
+                console.error('Error al generar slug para URL:', err);
+              }
             }
           } catch (err) {
             console.error('Error tracking view:', err);
