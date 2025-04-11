@@ -213,14 +213,15 @@ export default function SearchResults({
     setSelectedPublicationId(publicationId);
     setModalOpen(true);
     
+    // Añadir clase modal-open al body para evitar scrolling
+    document.body.classList.add('modal-open');
+    
     // Update URL without navigation using history.pushState
     const publication = results.find(p => p.id === publicationId);
     if (publication) {
       const url = generateSeoUrl(
         publication.id, 
-        publication.title, 
-        publication.categorySlug,
-        publication.attributes?.subcategory as string | undefined
+        publication.title
       );
       
       // Update URL without navigation
@@ -231,6 +232,9 @@ export default function SearchResults({
   // Handle closing the modal
   const handleCloseModal = () => {
     setModalOpen(false);
+    
+    // Remover clase modal-open del body al cerrar
+    document.body.classList.remove('modal-open');
     
     // Restore original URL when closing the modal
     window.history.pushState({}, '', window.location.pathname.split('?')[0] + window.location.search);
@@ -287,9 +291,7 @@ export default function SearchResults({
         <a 
           href={generateSeoUrl(
             publication.id,
-            publication.title,
-            publication.categorySlug,
-            publication.attributes?.subcategory as string | undefined
+            publication.title
           )} 
           className="block h-full"
           onClick={(e) => handleOpenModal(publication.id, e)}
@@ -480,9 +482,7 @@ export default function SearchResults({
         <a 
           href={generateSeoUrl(
             publication.id,
-            publication.title,
-            publication.categorySlug,
-            publication.attributes?.subcategory as string | undefined
+            publication.title
           )} 
           className="block w-full"
           onClick={(e) => handleOpenModal(publication.id, e)}

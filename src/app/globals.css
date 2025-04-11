@@ -850,3 +850,56 @@ div[aria-modal="true"],
 .z-\[9999\] {
   z-index: 9999 !important;
 }
+
+/* Gestión de modal y overflow */
+.modal-open {
+  overflow: hidden;
+}
+
+/* Mejoras en la visualización y responsive design */
+.publication-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 1.5rem;
+}
+
+/* Asegurar que todas las tarjetas de publicación tienen la misma altura */
+.publication-card {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+.publication-card-content {
+  flex-grow: 1;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Mejorar la visualización del modal */
+.publication-modal {
+  max-height: 90vh;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+}
+
+/* Ajustar tamaño de las tarjetas para que sean consistentes */
+.publication-grid-item {
+  min-height: 350px;
+  height: 100%;
+}
+
+/* Solucionar problema de espaciado en grid */
+.publications-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+  gap: 1.5rem;
+  width: 100%;
+}
+
+@media (max-width: 640px) {
+  .publications-grid {
+    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+    gap: 1rem;
+  }
+}

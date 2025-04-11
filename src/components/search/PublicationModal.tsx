@@ -14,6 +14,7 @@ import { WhatsAppIcon } from '@/components/icons';
 import LoadingSpinner from '@/components/ui/LoadingSpinner';
 import { Publication } from '@/components/search/SearchResults';
 import { motion, AnimatePresence } from 'framer-motion';
+import { generateSeoUrl, slugify } from '@/utils/url';
 
 interface PublicationModalProps {
   publicationId: string;
@@ -87,22 +88,13 @@ export default function PublicationModal({
             
             // También actualizar la URL para reflejar el slug si está disponible
             if (data.title && !window.location.pathname.includes('-') && window.history) {
-              const slug = data.title
-                .toLowerCase()
-                .replace(/[^\w\sáéíóúüñ]/g, '')
-                .replace(/\s+/g, '-')
-                .replace(/[áàäâ]/g, 'a')
-                .replace(/[éèëê]/g, 'e')
-                .replace(/[íìïî]/g, 'i')
-                .replace(/[óòöô]/g, 'o')
-                .replace(/[úùüû]/g, 'u')
-                .replace(/ñ/g, 'n')
-                .replace(/-+/g, '-')
-                .trim()
-                .substring(0, 80);
-                
-              const newPath = window.location.pathname.replace(cleanId, `${cleanId}-${slug}`);
-              window.history.replaceState(null, '', newPath);
+              try {
+                const slug = slugify(data.title);                
+                const newPath = `/anuncios/${cleanId}-${slug}`;
+                window.history.replaceState(null, '', newPath);
+              } catch (err) {
+                console.error('Error al generar slug para URL:', err);
+              }
             }
           } catch (err) {
             console.error('Error tracking view:', err);

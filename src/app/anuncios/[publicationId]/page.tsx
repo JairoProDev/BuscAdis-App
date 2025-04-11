@@ -13,6 +13,7 @@ import {
   FlagIcon,
   ArrowLeftIcon
 } from '@heroicons/react/24/outline';
+import { slugify } from '@/utils/url';
 
 interface Publication {
   id: string;
@@ -119,22 +120,13 @@ export default function PublicationDetailPage() {
             
             // Update URL with slug if URL doesn't already have one
             if (data.title && !window.location.pathname.includes('-') && window.history) {
-              const slug = data.title
-                .toLowerCase()
-                .replace(/[^\w\sáéíóúüñ]/g, '')
-                .replace(/\s+/g, '-')
-                .replace(/[áàäâ]/g, 'a')
-                .replace(/[éèëê]/g, 'e')
-                .replace(/[íìïî]/g, 'i')
-                .replace(/[óòöô]/g, 'o')
-                .replace(/[úùüû]/g, 'u')
-                .replace(/ñ/g, 'n')
-                .replace(/-+/g, '-')
-                .trim()
-                .substring(0, 80);
-                
-              const newPath = window.location.pathname.replace(id, `${id}-${slug}`);
-              window.history.replaceState(null, '', newPath);
+              try {
+                const slug = slugify(data.title);
+                const newPath = `/anuncios/${id}-${slug}`;
+                window.history.replaceState(null, '', newPath);
+              } catch (err) {
+                console.error('Error al generar slug para URL:', err);
+              }
             }
           } catch (err) {
             console.error('Error tracking view:', err);
@@ -269,12 +261,12 @@ export default function PublicationDetailPage() {
   // Format WhatsApp message based on category
   const formatWhatsAppMessage = () => {
     if (!publication) return '';
-    let message = `Hola, estoy interesado en tu anuncio "${publication.title}" de Buscadis.`;
+    let message = `Hola, estoy interesado en tu publicación "${publication.title}" de Buscadis.`;
     
     // Customize message based on category
-    if (publication.category === 'empleo') {
+    if (publication.category === 'empleo' || publication.categorySlug === 'empleo') {
       message = `Hola, estoy interesado en la oferta de trabajo "${publication.title}" publicada en Buscadis.`;
-    } else if (publication.category === 'inmuebles') {
+    } else if (publication.category === 'inmuebles' || publication.categorySlug === 'inmuebles') {
       message = `Hola, estoy interesado en el inmueble "${publication.title}" que tienes en Buscadis.`;
     }
     

@@ -69,16 +69,10 @@ export default function PublicationCard({ publication }: PublicationCardProps) {
   // URL amigable para SEO
   const seoUrl = useMemo(() => generateSeoUrl(
     publication.id, 
-    publication.title, 
-    publication.category,
-    publication.subcategory,
-    publication.subsubcategory
+    publication.title
   ), [
     publication.id, 
-    publication.title, 
-    publication.category,
-    publication.subcategory,
-    publication.subsubcategory
+    publication.title
   ]);
 
   return (
