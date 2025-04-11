@@ -1,9 +1,10 @@
 interface LoadingSpinnerProps {
   size?: 'sm' | 'md' | 'lg';
   color?: 'primary' | 'white' | 'gray';
+  className?: string;
 }
 
-export default function LoadingSpinner({ size = 'md', color = 'primary' }: LoadingSpinnerProps) {
+export default function LoadingSpinner({ size = 'md', color = 'primary', className = '' }: LoadingSpinnerProps) {
   const sizeClasses = {
     sm: 'w-4 h-4',
     md: 'w-8 h-8',
@@ -18,7 +19,7 @@ export default function LoadingSpinner({ size = 'md', color = 'primary' }: Loadi
 
   return (
     <svg 
-      className={`animate-spin ${sizeClasses[size]} ${colorClasses[color]}`} 
+      className={`animate-spin ${sizeClasses[size]} ${colorClasses[color]} ${className}`} 
       xmlns="http://www.w3.org/2000/svg" 
       fill="none" 
       viewBox="0 0 24 24"
