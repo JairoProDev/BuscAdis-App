@@ -1,6 +1,7 @@
 import Link from 'next/link';
 import Image from 'next/image';
 import { MapPinIcon, StarIcon } from '@heroicons/react/24/solid';
+import { generateSeoUrl } from '@/utils/url';
 
 export default function AdisoCard({ adiso, featured = false }) {
   // Si adiso es undefined o null, mostrar un placeholder
@@ -42,7 +43,11 @@ export default function AdisoCard({ adiso, featured = false }) {
   const rating = adiso.rating || 0;
 
   return (
-    <Link href={`/anuncios/${id}`} className="block">
+    <Link href={generateSeoUrl(
+      id, 
+      title, 
+      adiso.category || adiso.categorySlug || 'general'
+    )} className="block">
       <div className="rounded-xl overflow-hidden bg-white shadow-md hover:shadow-lg transition-shadow duration-300">
         <div className="relative aspect-video">
           <div className="w-full h-full bg-gray-200">

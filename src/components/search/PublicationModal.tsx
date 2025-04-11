@@ -21,6 +21,18 @@ import { generateSeoUrl, slugify } from '@/utils/url';
 import { useRouter } from 'next/navigation';
 import Image from 'next/image';
 
+// Extender la interfaz Publication para incluir las propiedades de contacto
+interface PublicationWithContact extends Publication {
+  contactPhone?: string;
+  contact?: {
+    phone?: string;
+    email?: string;
+    name?: string;
+  };
+  subcategory?: string;
+  subsubcategory?: string;
+}
+
 interface PublicationModalProps {
   publicationId: string;
   isOpen: boolean;
@@ -35,7 +47,7 @@ export default function PublicationModal({
   category 
 }: PublicationModalProps) {
   const router = useRouter();
-  const [publication, setPublication] = useState<Publication | null>(null);
+  const [publication, setPublication] = useState<PublicationWithContact | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [isExpanded, setIsExpanded] = useState(false);
@@ -161,8 +173,9 @@ export default function PublicationModal({
       publication.id,
       publication.title,
       publication.categorySlug,
-      undefined,
-      undefined
+      publication.subcategory,
+      publication.subsubcategory,
+      true // Incluir el título en la URL para la página completa
     );
     
     router.push(url);
@@ -218,21 +231,21 @@ export default function PublicationModal({
     <AnimatePresence>
       {isOpen && (
         <div className="fixed inset-0 z-[9999] overflow-hidden">
-          {/* Overlay */}
+          {/* Overlay - Transparente para permitir interactividad pero capturar clics para cerrar */}
           <div 
-            className="fixed inset-0 bg-black/75 backdrop-blur-sm" 
+            className="fixed inset-0 pointer-events-auto" 
             onClick={handleClose}
           ></div>
           
-          {/* Modal */}
+          {/* Modal - Añadir pointer-events-auto para asegurar interactividad */}
           <motion.div 
-            className="relative w-full max-w-5xl mx-auto my-4 sm:my-8 px-2 sm:px-4 h-[calc(100vh-2rem)] sm:h-auto"
+            className="relative w-full max-w-5xl mx-auto my-4 sm:my-8 px-2 sm:px-4 h-[calc(100vh-2rem)] sm:h-auto pointer-events-auto"
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -20 }}
             transition={{ duration: 0.3 }}
           >
-            <div className="bg-white rounded-xl overflow-hidden shadow-xl max-h-full flex flex-col">
+            <div className="bg-white rounded-xl overflow-hidden shadow-xl max-h-full flex flex-col pointer-events-auto">
               {/* Botón de cerrar */}
               <button 
                 onClick={handleClose}

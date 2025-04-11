@@ -22,7 +22,7 @@ export function generateSeoUrl(title: string, category: string, subcategory?: st
     .replace(/^-|-$/g, "");
 
   // Construir la URL con categoría y título
-  let url = `/anuncios/${category}`;
+  let url = `/${category}`;
   
   // Añadir subcategoría si existe
   if (subcategory) {

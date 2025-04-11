@@ -43,6 +43,8 @@ export interface Publication {
   categoryName?: string
   distance?: number
   attributes?: Record<string, unknown>
+  subcategory?: string
+  subsubcategory?: string
 }
 
 interface SearchResultsProps {
@@ -108,6 +110,7 @@ export default function SearchResults({
   // Modal state
   const [modalOpen, setModalOpen] = useState(false)
   const [selectedPublicationId, setSelectedPublicationId] = useState<string | null>(null)
+  const [originalUrl, setOriginalUrl] = useState<string>('')
   // Referencia para infinite scroll
   const { ref: loadMoreRef, inView } = useInView({
     threshold: 0.1,
@@ -210,6 +213,12 @@ export default function SearchResults({
   // Handle opening the publication modal
   const handleOpenModal = useCallback((publicationId: string, event: React.MouseEvent) => {
     event.preventDefault();
+    const publication = results.find(p => p.id === publicationId);
+    if (!publication) return;
+
+    // Save the current URL before changing it
+    setOriginalUrl(window.location.href);
+
     setSelectedPublicationId(publicationId);
     setModalOpen(true);
     
@@ -217,33 +226,44 @@ export default function SearchResults({
     document.body.classList.add('modal-open');
     document.documentElement.style.setProperty('--scrollbar-width', `${window.innerWidth - document.documentElement.clientWidth}px`);
     
-    // Update URL without navigation using history.pushState
-    const publication = results.find(p => p.id === publicationId);
-    if (publication) {
-      const url = generateSeoUrl(
-        publication.id, 
-        publication.title,
-        publication.categorySlug
-      );
+    // Generate URL *without* title for the modal state
+    const modalUrl = generateSeoUrl(
+      publication.id, 
+      publication.title,
+      publication.categorySlug,
+      publication.subcategory,
+      publication.subsubcategory,
+      false
+    );
       
-      // Actualizar URL sin navegación
-      window.history.pushState({modalOpen: true, publicationId}, '', url);
-    }
+    // Update URL without navigation using history.pushState
+    window.history.pushState({ modalOpen: true, publicationId }, '', modalUrl);
+
   }, [results]);
   
   // Handle closing the modal
-  const handleCloseModal = () => {
+  const handleCloseModal = useCallback(() => {
     setModalOpen(false);
+    setSelectedPublicationId(null);
     
     // Remover clase modal-open del body al cerrar
     document.body.classList.remove('modal-open');
     document.documentElement.style.removeProperty('--scrollbar-width');
     
-    // Restaurar URL original al cerrar el modal, asegurando mantener los parámetros de búsqueda
-    const searchParams = window.location.search;
-    const baseUrl = window.location.pathname.split('/').slice(0, -2).join('/') || '/';
-    window.history.pushState({modalOpen: false}, '', baseUrl + searchParams);
-  };
+    // Restore the original URL using replaceState
+    if (originalUrl) {
+      window.history.replaceState({ modalOpen: false }, '', originalUrl);
+      setOriginalUrl('');
+    } else {
+      // Fallback if originalUrl wasn't set (should not happen ideally)
+      // Go back might be an option, but replaceState to a sensible default is safer
+      const searchParams = window.location.search;
+      // Attempt to reconstruct a base path (e.g., search results path)
+      // This might need refinement based on your app's routing structure
+      const basePath = window.location.pathname.substring(0, window.location.pathname.lastIndexOf('/')) || '/'; 
+      window.history.replaceState({modalOpen: false}, '', basePath + searchParams);
+    }
+  }, [originalUrl]);
   
   // Función para cambiar el modo de vista
   const handleChangeViewMode = (mode: 'grid' | 'list') => {
@@ -294,7 +314,10 @@ export default function SearchResults({
           href={generateSeoUrl(
             publication.id,
             publication.title,
-            publication.categorySlug
+            publication.categorySlug,
+            publication.subcategory,
+            publication.subsubcategory,
+            false
           )} 
           className="block h-full"
           onClick={(e) => handleOpenModal(publication.id, e)}
@@ -435,7 +458,11 @@ export default function SearchResults({
         <a 
           href={generateSeoUrl(
             publication.id,
-            publication.title
+            publication.title,
+            publication.categorySlug,
+            publication.subcategory,
+            publication.subsubcategory,
+            false // No incluir título en la URL cuando abrimos el modal
           )} 
           className="block w-full"
           onClick={(e) => handleOpenModal(publication.id, e)}

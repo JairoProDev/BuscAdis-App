@@ -9,6 +9,7 @@
  * @param category - Categoría de la publicación (opcional)
  * @param subcategory - Subcategoría de la publicación (opcional)
  * @param subsubcategory - Sub-subcategoría de la publicación (opcional)
+ * @param includeTitle - Incluir el slug del título en la URL (opcional, por defecto true)
  * @returns URL SEO-friendly
  */
 export function generateSeoUrl(
@@ -16,7 +17,8 @@ export function generateSeoUrl(
   title: string,
   category?: string,
   subcategory?: string,
-  subsubcategory?: string
+  subsubcategory?: string,
+  includeTitle: boolean = true
 ): string {
   // Genera un slug del título
   const titleSlug = title
@@ -47,13 +49,16 @@ export function generateSeoUrl(
     // ID (requerido)
     url += `/${id}`;
     
-    // Título (opcional como parte de la URL)
-    if (title) {
+    // Título (opcional como parte de la URL, controlado por includeTitle)
+    if (title && includeTitle) {
       url += `/${titleSlug}`;
     }
   } else {
     // Fallback si no hay categoría
-    url = `/${id}/${titleSlug}`;
+    url = `/${id}`;
+    if (title && includeTitle) {
+      url += `/${titleSlug}`;
+    }
   }
   
   return url;
