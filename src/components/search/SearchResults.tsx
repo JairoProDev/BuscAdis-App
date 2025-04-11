@@ -1,7 +1,6 @@
 'use client'
 
-import React from 'react'
-import { useState, useEffect } from 'react'
+import React, { useCallback, useEffect, useState } from 'react'
 import { motion, AnimatePresence, LayoutGroup } from 'framer-motion'
 import { useInView } from 'react-intersection-observer'
 import { 
@@ -209,7 +208,7 @@ export default function SearchResults({
   }
     */}
   // Handle opening the publication modal
-  const handleOpenModal = (publicationId: string, event: React.MouseEvent) => {
+  const handleOpenModal = useCallback((publicationId: string, event: React.MouseEvent) => {
     event.preventDefault();
     setSelectedPublicationId(publicationId);
     setModalOpen(true);
@@ -217,15 +216,17 @@ export default function SearchResults({
     // Update URL without navigation using history.pushState
     const publication = results.find(p => p.id === publicationId);
     if (publication) {
-      const seoUrl = generateSeoUrl(
-        publication.id,
-        publication.title,
+      const url = generateSeoUrl(
+        publication.id, 
+        publication.title, 
         publication.categorySlug,
         publication.attributes?.subcategory as string | undefined
       );
-      window.history.pushState({ id: publicationId }, '', seoUrl);
+      
+      // Update URL without navigation
+      window.history.pushState({}, '', url);
     }
-  };
+  }, [results]);
   
   // Handle closing the modal
   const handleCloseModal = () => {
@@ -234,6 +235,29 @@ export default function SearchResults({
     // Restore original URL when closing the modal
     window.history.pushState({}, '', window.location.pathname.split('?')[0] + window.location.search);
   };
+  
+  // Función para cambiar el modo de vista
+  const handleChangeViewMode = (mode: 'grid' | 'list') => {
+    // Si ya estamos en este modo, no hacemos nada
+    if (viewMode === mode) return;
+    
+    // Si vamos a cambiar a cuadrícula desde lista, forzamos un rerender
+    if (mode === 'grid' && viewMode === 'list') {
+      setViewMode('grid');
+      // Force re-render de la cuadrícula
+      setTimeout(() => {
+        const gridContainer = document.querySelector('.grid');
+        if (gridContainer) {
+          gridContainer.classList.add('refresh-grid');
+          setTimeout(() => {
+            gridContainer.classList.remove('refresh-grid');
+          }, 50);
+        }
+      }, 50);
+    } else {
+      setViewMode(mode);
+    }
+  }
   
   // Renderizar item en vista de cuadrícula
   const renderGridItem = (publication: Publication, index: number) => {
@@ -258,7 +282,7 @@ export default function SearchResults({
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.4, delay: index * 0.05 }}
-        className={`relative group ${noImageClass}`}
+        className="relative h-full"
       >
         <a 
           href={generateSeoUrl(
@@ -267,13 +291,13 @@ export default function SearchResults({
             publication.categorySlug,
             publication.attributes?.subcategory as string | undefined
           )} 
-          className="block"
+          className="block h-full"
           onClick={(e) => handleOpenModal(publication.id, e)}
         >
-          <div className="relative bg-slate-800 rounded-xl overflow-hidden shadow-lg hover:shadow-xl transition-shadow duration-300 border border-teal-500/20 hover:border-cyan-400/30">
+          <div className={`relative bg-slate-800 rounded-xl overflow-hidden shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1 h-full ${noImageClass}`}>
             {/* Imagen principal (solo si hay imagen) */}
             {hasImages ? (
-              <div className="relative h-52 overflow-hidden">
+              <div className="relative h-64 overflow-hidden">
                 <div className="absolute inset-0 bg-gradient-to-br from-slate-900/20 to-slate-900/60 z-10" />
                 <Image
                   src={imageUrl}
@@ -302,9 +326,22 @@ export default function SearchResults({
                 
                 {/* Precio */}
                 <div className="absolute bottom-2 right-2 z-20">
-                  <span className="bg-slate-900/80 backdrop-blur-sm text-white text-sm font-bold px-3 py-1 rounded-lg shadow-lg border border-slate-700/50">
+                  <span className="bg-slate-900/80 backdrop-blur-sm text-white text-sm font-bold px-3 py-1 rounded-lg shadow-lg">
                     {formatPrice(publication.price, publication.currency)}
                   </span>
+                </div>
+
+                {/* Logo de Buscadis */}
+                <div className="absolute top-2 right-2 z-20">
+                  <div className="bg-white/90 backdrop-blur-sm rounded-full p-1 shadow-md">
+                    <Image
+                      src="/logo.png"
+                      alt="Buscadis"
+                      width={30}
+                      height={30}
+                      className="rounded-full"
+                    />
+                  </div>
                 </div>
               </div>
             ) : (
@@ -328,9 +365,22 @@ export default function SearchResults({
                   </div>
                   
                   {/* Precio para tarjetas sin imagen */}
-                  <span className="bg-slate-900/80 backdrop-blur-sm text-white text-xs font-medium px-2 py-0.5 rounded-lg shadow-sm border border-slate-700/50">
+                  <span className="bg-slate-900/80 backdrop-blur-sm text-white text-xs font-medium px-2 py-0.5 rounded-lg shadow-sm">
                     {formatPrice(publication.price, publication.currency)}
                   </span>
+                </div>
+
+                {/* Logo de Buscadis */}
+                <div className="absolute top-2 right-2 z-20">
+                  <div className="bg-white/90 backdrop-blur-sm rounded-full p-1 shadow-md">
+                    <Image
+                      src="/logo.png"
+                      alt="Buscadis"
+                      width={24}
+                      height={24}
+                      className="rounded-full"
+                    />
+                  </div>
                 </div>
               </div>
             )}
@@ -374,7 +424,7 @@ export default function SearchResults({
                 e.stopPropagation()
                 toggleLike(publication.id)
               }}
-              className={`p-1 rounded-full ${isLiked ? 'bg-red-500' : 'bg-slate-800/90 hover:bg-slate-700/90'} shadow-lg backdrop-blur-sm border border-slate-700/50`}
+              className={`p-1 rounded-full ${isLiked ? 'bg-red-500' : 'bg-slate-800/90 hover:bg-slate-700/90'} shadow-lg backdrop-blur-sm`}
               aria-label={isLiked ? "Quitar me gusta" : "Me gusta"}
             >
               {isLiked ? (
@@ -390,7 +440,7 @@ export default function SearchResults({
                 e.stopPropagation()
                 toggleSave(publication.id)
               }}
-              className={`p-1 rounded-full ${isSaved ? 'bg-teal-500' : 'bg-slate-800/90 hover:bg-slate-700/90'} shadow-lg backdrop-blur-sm border border-slate-700/50`}
+              className={`p-1 rounded-full ${isSaved ? 'bg-teal-500' : 'bg-slate-800/90 hover:bg-slate-700/90'} shadow-lg backdrop-blur-sm`}
               aria-label={isSaved ? "Guardado" : "Guardar"}
             >
               {isSaved ? (
@@ -425,7 +475,7 @@ export default function SearchResults({
         initial={{ opacity: 0, x: -20 }}
         animate={{ opacity: 1, x: 0 }}
         transition={{ duration: 0.3, delay: index * 0.05 }}
-        className="relative"
+        className="relative w-full list-view-item"
       >
         <a 
           href={generateSeoUrl(
@@ -434,20 +484,22 @@ export default function SearchResults({
             publication.categorySlug,
             publication.attributes?.subcategory as string | undefined
           )} 
-          className="block"
+          className="block w-full"
           onClick={(e) => handleOpenModal(publication.id, e)}
         >
-          <div className="relative flex bg-slate-800 rounded-xl overflow-hidden shadow-lg hover:shadow-xl transition-shadow duration-300 border border-teal-500/20 hover:border-cyan-400/30">
+          <div className="relative flex flex-row bg-slate-800 rounded-xl overflow-hidden shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1 h-full">
             {/* Imagen */}
-            <div className="relative w-32 sm:w-48 flex-shrink-0 overflow-hidden">
+            <div className="relative w-40 sm:w-48 flex-shrink-0 overflow-hidden h-auto">
               <div className="absolute inset-0 bg-gradient-to-br from-slate-900/20 to-slate-900/60 z-10" />
-              <Image
-                src={imageUrl}
-                alt={publication.title}
-                fill
-                sizes="(max-width: 640px) 30vw, 120px"
-                className="object-cover h-full transition-transform duration-500 group-hover:scale-110"
-              />
+              <div className="relative w-full h-full min-h-[160px]">
+                <Image
+                  src={imageUrl}
+                  alt={publication.title}
+                  fill
+                  sizes="(max-width: 640px) 30vw, 120px"
+                  className="object-cover transition-transform duration-500 group-hover:scale-110"
+                />
+              </div>
               
               {/* Badges */}
               <div className="absolute top-2 left-2 flex flex-col gap-1 z-20">
@@ -468,7 +520,7 @@ export default function SearchResults({
             </div>
 
             {/* Contenido */}
-            <div className="flex-1 p-4 flex flex-col justify-between">
+            <div className="flex-1 p-4 flex flex-col justify-between min-h-[160px]">
               <div>
                 <div className="flex justify-between items-start mb-1">
                   <h3 className="text-lg font-semibold text-white line-clamp-1 group-hover:text-teal-300 transition-colors">
@@ -495,9 +547,22 @@ export default function SearchResults({
                   </span>
                 </div>
                 
-                <span className="bg-slate-900/80 backdrop-blur-sm text-white text-sm font-bold px-3 py-1 rounded-lg shadow-lg border border-slate-700/50">
+                <span className="bg-slate-900/80 backdrop-blur-sm text-white text-sm font-bold px-3 py-1 rounded-lg shadow-lg">
                   {formatPrice(publication.price, publication.currency)}
                 </span>
+              </div>
+              
+              {/* Logo de Buscadis */}
+              <div className="absolute top-2 right-2 z-20">
+                <div className="bg-white/90 backdrop-blur-sm rounded-full p-1 shadow-md">
+                  <Image
+                    src="/logo.png"
+                    alt="Buscadis"
+                    width={24}
+                    height={24}
+                    className="rounded-full"
+                  />
+                </div>
               </div>
               
               {/* Botones de interacción en vista de lista */}
@@ -509,7 +574,7 @@ export default function SearchResults({
                       e.stopPropagation()
                       toggleLike(publication.id)
                     }}
-                    className={`p-1 rounded-full ${isLiked ? 'bg-red-500' : 'bg-slate-700/90 hover:bg-slate-600/90'} shadow-lg backdrop-blur-sm border border-slate-600/50`}
+                    className={`p-1 rounded-full ${isLiked ? 'bg-red-500' : 'bg-slate-700/90 hover:bg-slate-600/90'} shadow-lg backdrop-blur-sm`}
                     aria-label={isLiked ? "Quitar me gusta" : "Me gusta"}
                   >
                     {isLiked ? (
@@ -525,7 +590,7 @@ export default function SearchResults({
                       e.stopPropagation()
                       toggleSave(publication.id)
                     }}
-                    className={`p-1 rounded-full ${isSaved ? 'bg-teal-500' : 'bg-slate-700/90 hover:bg-slate-600/90'} shadow-lg backdrop-blur-sm border border-slate-600/50`}
+                    className={`p-1 rounded-full ${isSaved ? 'bg-teal-500' : 'bg-slate-700/90 hover:bg-slate-600/90'} shadow-lg backdrop-blur-sm`}
                     aria-label={isSaved ? "Guardado" : "Guardar"}
                   >
                     {isSaved ? (
@@ -605,7 +670,7 @@ export default function SearchResults({
               className={`p-2 ${viewMode === 'grid' 
                 ? 'bg-gradient-to-r from-teal-500 to-cyan-500 text-white' 
                 : 'bg-slate-700 text-slate-300 hover:bg-slate-600'}`}
-              onClick={() => setViewMode('grid')}
+              onClick={() => handleChangeViewMode('grid')}
               aria-label="Ver en cuadrícula"
             >
               <Squares2X2Icon className="w-5 h-5" />
@@ -614,7 +679,7 @@ export default function SearchResults({
               className={`p-2 ${viewMode === 'list' 
                 ? 'bg-gradient-to-r from-teal-500 to-cyan-500 text-white' 
                 : 'bg-slate-700 text-slate-300 hover:bg-slate-600'}`}
-              onClick={() => setViewMode('list')}
+              onClick={() => handleChangeViewMode('list')}
               aria-label="Ver en lista"
             >
               <ListBulletIcon className="w-5 h-5" />
@@ -625,11 +690,11 @@ export default function SearchResults({
       
       {/* Resultados */}
       <LayoutGroup>
-          <AnimatePresence mode="wait">
+        <AnimatePresence mode="wait">
           {results.length > 0 ? (
-              <React.Fragment key="results">
+            <React.Fragment key="results">
               {viewMode === 'grid' ? (
-                <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 gap-4 auto-rows-auto">
+                <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 gap-4 grid-auto-rows">
                   {results.map((publication, index) => renderGridItem(publication, index))}
                 </div>
               ) : (
@@ -655,7 +720,7 @@ export default function SearchResults({
                   )}
                 </div>
               )}
-              </React.Fragment>
+            </React.Fragment>
           ) : (
             <motion.div
               initial={{ opacity: 0 }}
@@ -681,16 +746,16 @@ export default function SearchResults({
         </AnimatePresence>
       </LayoutGroup>
     </div>
-      
-      {/* Publication Modal */}
-      {selectedPublicationId && (
-        <PublicationModal
-          publicationId={selectedPublicationId}
-          isOpen={modalOpen}
-          onClose={handleCloseModal}
-          category={activeCategory}
-        />
-      )}
-    </>
-  )
-} 
+    
+    {/* Publication Modal */}
+    {selectedPublicationId && (
+      <PublicationModal
+        publicationId={selectedPublicationId}
+        isOpen={modalOpen}
+        onClose={handleCloseModal}
+        category={activeCategory}
+      />
+    )}
+  </>
+)
+}

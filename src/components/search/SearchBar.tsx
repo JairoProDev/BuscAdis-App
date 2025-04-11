@@ -45,8 +45,8 @@ const generateSuggestions = () => {
         text: `${type.name} en ${category.name}`,
         categoryId: category.id,
         subTypeId: type.id,
-        score: Math.floor(Math.random() * 100) + 1,
-        trending: Math.random() > 0.7
+        score: 100,
+        trending: false
       })
     })
   })
@@ -87,10 +87,11 @@ export default function SearchBar({
     }
 
     // Simulamos cargar búsquedas tendencia
-    const trending = SUGGESTIONS.filter(s => s.trending).map(s => ({
+    const trending = SUGGESTIONS.filter(s => s.categoryId).map(s => ({
       ...s,
-      score: Math.floor(Math.random() * 50) + 50 // Tendencia siempre alta
-    }))
+      score: 90,
+      trending: true
+    })).slice(0, 3);
     setTrendingSearches(trending)
 
     // Simular sugerencias de IA

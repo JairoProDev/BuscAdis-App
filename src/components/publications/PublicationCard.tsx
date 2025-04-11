@@ -2,6 +2,7 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { WhatsAppIcon } from '@/components/icons';
 import { useMemo } from 'react';
+import { generateSeoUrl } from '@/utils/url';
 
 interface PublicationCardProps {
   publication: {
@@ -65,36 +66,14 @@ export default function PublicationCard({ publication }: PublicationCardProps) {
     return publication.media && publication.media.length > 0;
   }, [publication.media]);
 
-  // Generar URL amigable sin la palabra "anuncios"
-  const generateSeoUrl = () => {
-    if (!publication || !publication.title) {
-      return `/${publication?.category || 'anuncios'}/${publication?.id || ''}`;
-    }
-    
-    const titleSlug = publication.title
-      .toLowerCase()
-      .replace(/[^\w\sáéíóúñ]/gi, '')
-      .replace(/\s+/g, '-')
-      .substring(0, 50);
-    
-    // Construir la URL con el formato /{categoria}/{subcategoria}/{id}-{slug}
-    let url = `/${publication.category}`;
-    
-    if (publication.subcategory) {
-      url += `/${publication.subcategory}`;
-      
-      if (publication.subsubcategory) {
-        url += `/${publication.subsubcategory}`;
-      }
-    }
-    
-    url += `/${publication.id}-${titleSlug}`;
-    
-    return url;
-  };
-
   // URL amigable para SEO
-  const seoUrl = useMemo(() => generateSeoUrl(), [
+  const seoUrl = useMemo(() => generateSeoUrl(
+    publication.id, 
+    publication.title, 
+    publication.category,
+    publication.subcategory,
+    publication.subsubcategory
+  ), [
     publication.id, 
     publication.title, 
     publication.category,
@@ -103,22 +82,35 @@ export default function PublicationCard({ publication }: PublicationCardProps) {
   ]);
 
   return (
-    <div className={`rounded-xl shadow-md overflow-hidden transition-all hover:shadow-lg ${!hasImage ? 'publication-card-no-image' : 'bg-white'}`}>
+    <div className={`rounded-xl shadow-md overflow-hidden transition-all duration-300 transform hover:-translate-y-1 hover:shadow-lg ${!hasImage ? 'publication-card-no-image' : 'bg-white'}`}>
       <Link href={seoUrl}>
         {hasImage ? (
-          <div className="relative h-48 w-full">
+          <div className="relative h-56 w-full">
             <Image
               src={publication.media[0]}
               alt={publication.title}
               fill
               className="object-cover"
             />
-            <div className="absolute top-2 right-2 bg-primary-500 text-white px-2 py-1 rounded-full text-xs">
+            <div className="absolute top-2 right-2 bg-gradient-to-r from-cyan-500 to-teal-500 text-white font-bold px-3 py-1.5 rounded-full text-xs shadow-lg backdrop-blur-sm">
               {formatPrice(publication.price, publication.priceType)}
+            </div>
+            
+            {/* Logo de Buscadis */}
+            <div className="absolute top-2 left-2 z-20">
+              <div className="bg-white/90 backdrop-blur-sm rounded-full p-1 shadow-md">
+                <Image
+                  src="/logo.png"
+                  alt="Buscadis"
+                  width={28}
+                  height={28}
+                  className="rounded-full"
+                />
+              </div>
             </div>
           </div>
         ) : (
-          <div className="publication-info flex flex-col justify-between h-full p-4">
+          <div className="publication-info flex flex-col justify-between h-full p-4 relative">
             <div className="flex justify-between">
               <span className="category-badge">
                 {publication.category}
@@ -127,6 +119,20 @@ export default function PublicationCard({ publication }: PublicationCardProps) {
                 {formatPrice(publication.price, publication.priceType)}
               </span>
             </div>
+            
+            {/* Logo de Buscadis */}
+            <div className="absolute top-2 right-2 z-20">
+              <div className="bg-white/90 backdrop-blur-sm rounded-full p-1 shadow-md">
+                <Image
+                  src="/logo.png"
+                  alt="Buscadis"
+                  width={24}
+                  height={24}
+                  className="rounded-full"
+                />
+              </div>
+            </div>
+            
             <h3 className="title mt-2 line-clamp-2">
               {publication.title}
             </h3>

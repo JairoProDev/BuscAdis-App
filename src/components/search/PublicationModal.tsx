@@ -45,6 +45,9 @@ export default function PublicationModal({
         setLoading(true);
         setError('');
         
+        // Asegurar que el body tiene la clase modal-open
+        document.body.classList.add('modal-open');
+        
         // Intentar obtener los datos de publicación, pasando la categoría correctamente
         console.log(`Fetching publication ${cleanId} from category ${category || 'unknown'}`);
         
@@ -115,6 +118,12 @@ export default function PublicationModal({
     };
 
     fetchPublication();
+    
+    // Cleanup function
+    return () => {
+      // Restaurar overflow del body cuando el componente se desmonta
+      document.body.classList.remove('modal-open');
+    };
   }, [publicationId, cleanId, isOpen, category]);
 
   // Handle ESC key to close modal
@@ -135,15 +144,21 @@ export default function PublicationModal({
   // Prevent body scroll when modal is open
   useEffect(() => {
     if (isOpen) {
-      document.body.style.overflow = 'hidden';
+      document.body.classList.add('modal-open');
     } else {
-      document.body.style.overflow = 'auto';
+      document.body.classList.remove('modal-open');
     }
     
     return () => {
-      document.body.style.overflow = 'auto';
+      document.body.classList.remove('modal-open');
     };
   }, [isOpen]);
+
+  // Handle modal close
+  const handleClose = () => {
+    document.body.classList.remove('modal-open');
+    onClose();
+  };
 
   // Handle sharing
   const handleShare = async () => {
@@ -238,7 +253,7 @@ export default function PublicationModal({
                 <div className="mb-4">
                   <h2 className="text-lg font-semibold text-gray-800 mb-2">Ubicación</h2>
                   <div className="text-gray-600">
-                    {publication.location}
+                    {publication && formatLocation(publication.location)}
                   </div>
                 </div>
                 
@@ -342,57 +357,52 @@ export default function PublicationModal({
   return (
     <AnimatePresence>
       {isOpen && (
-        <div className="fixed inset-0 z-50 overflow-y-auto">
-          <div className="fixed inset-0 bg-black/70" onClick={onClose}></div>
+        <div className="fixed inset-0 z-[9999] overflow-y-auto">
+          <div className="fixed inset-0 bg-black/80" onClick={handleClose}></div>
           
           <motion.div 
-            className="relative min-h-screen flex items-center justify-center p-4"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
+            className="relative w-full max-w-4xl mx-auto my-8 px-4"
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -20 }}
             transition={{ duration: 0.3 }}
           >
-            <motion.div 
-              className="relative bg-white rounded-xl max-w-5xl w-full max-h-[90vh] overflow-y-auto"
-              initial={{ scale: 0.9, y: 20 }}
-              animate={{ scale: 1, y: 0 }}
-              exit={{ scale: 0.9, y: 20 }}
-              transition={{ type: 'spring', damping: 25, stiffness: 300 }}
-            >
+            <div className="bg-white rounded-xl overflow-hidden shadow-xl">
               {/* Close button */}
               <button 
-                onClick={onClose}
-                className="absolute top-4 right-4 z-20 bg-gray-100 hover:bg-gray-200 text-gray-800 p-2 rounded-full"
+                onClick={handleClose}
+                className="absolute top-4 right-4 z-[9999] bg-gray-100 hover:bg-gray-200 text-gray-800 p-2 rounded-full"
                 aria-label="Cerrar"
               >
-                <XMarkIcon className="w-6 h-6" />
+                <XMarkIcon className="w-5 h-5" />
               </button>
-
+              
               {loading ? (
                 <div className="flex items-center justify-center p-16">
                   <LoadingSpinner size="lg" />
                 </div>
-              ) : error || !publication ? (
+              ) : error ? (
                 <div className="p-8 text-center">
                   <h2 className="text-xl font-bold text-red-500 mb-2">Error</h2>
-                  <p className="text-gray-700">{error || 'Anuncio no encontrado'}</p>
+                  <p className="text-slate-600">{error}</p>
                 </div>
-              ) : (
-                <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 p-6">
-                  <div className="lg:col-span-2">
+              ) : publication ? (
+                <div className="grid grid-cols-1 lg:grid-cols-3 gap-0 lg:gap-6">
+                  <div className="lg:col-span-2 overflow-hidden">
                     {/* Images */}
                     {publication.images && publication.images.length > 0 ? (
-                      <div className="mb-6 overflow-hidden rounded-xl">
+                      <div className="relative h-64 sm:h-80 lg:h-96 overflow-hidden">
                         <Carousel images={publication.images} />
                       </div>
                     ) : (
-                      <div className="mb-6 bg-gray-100 h-64 rounded-xl flex items-center justify-center">
+                      <div className="bg-gray-100 h-64 sm:h-80 lg:h-96 flex items-center justify-center">
                         <span className="text-gray-500 text-lg">Sin imágenes</span>
                       </div>
                     )}
-
-                    {/* Details */}
-                    <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
+                  </div>
+                  
+                  <div className="lg:col-span-1 p-6">
+                    <div className="mb-4">
                       <h1 className="text-2xl font-bold text-gray-900 mb-3">{publication.title}</h1>
                       
                       <div className="flex items-center justify-between mb-4">
@@ -407,21 +417,15 @@ export default function PublicationModal({
                       <div className="mb-6">
                         <h2 className="text-lg font-semibold text-gray-800 mb-2">Descripción</h2>
                         <div 
-                          className={`text-gray-600 whitespace-pre-line relative ${
-                            isExpanded ? '' : 'max-h-32 overflow-hidden'
-                          }`}
+                          className={`text-gray-600 whitespace-pre-line ${isExpanded ? '' : 'line-clamp-4'}`}
+                          onClick={toggleExpanded}
                         >
                           {publication.description}
-                          
-                          {!isExpanded && publication.description.length > 150 && (
-                            <div className="absolute bottom-0 left-0 right-0 h-16 bg-gradient-to-t from-white to-transparent pointer-events-none"></div>
-                          )}
                         </div>
-                        
-                        {publication.description.length > 150 && (
+                        {publication.description && publication.description.length > 200 && (
                           <button 
+                            className="text-primary-600 hover:text-primary-700 text-sm mt-2"
                             onClick={toggleExpanded}
-                            className="mt-2 text-primary-600 hover:text-primary-700 text-sm font-medium"
                           >
                             {isExpanded ? 'Ver menos' : 'Ver más'}
                           </button>
@@ -431,87 +435,67 @@ export default function PublicationModal({
                       <div className="mb-4">
                         <h2 className="text-lg font-semibold text-gray-800 mb-2">Ubicación</h2>
                         <div className="text-gray-600">
-                          {publication.location}
+                          {publication && formatLocation(publication.location)}
                         </div>
                       </div>
                       
-                      <div className="flex space-x-4 border-t border-gray-100 pt-4 mt-4">
-                        <button 
-                          className="text-gray-500 hover:text-gray-700 flex items-center"
-                          onClick={handleShare}
-                        >
-                          <ShareIcon className="w-5 h-5 mr-1" />
-                          Compartir
-                        </button>
-                        
-                        <button className="text-gray-500 hover:text-red-600 flex items-center">
-                          <FlagIcon className="w-5 h-5 mr-1" />
-                          Reportar
-                        </button>
-                        
-                        <a 
-                          href={`/anuncios/${cleanId}-${publication.title?.toLowerCase().replace(/\s+/g, '-').substring(0, 80)}`} 
-                          className="text-primary-600 hover:text-primary-700 flex items-center ml-auto"
-                          target="_blank"
-                          rel="noopener noreferrer"
-                        >
-                          Ver página completa
-                        </a>
-                      </div>
-                    </div>
-                  </div>
-                  
-                  {/* Contact sidebar */}
-                  <div>
-                    <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
-                      <h2 className="text-xl font-bold text-gray-800 mb-4">Contactar al anunciante</h2>
-                      
-                      <div className="space-y-4 mb-6">
-                        {publication.contact?.whatsapp && (
-                          <a
-                            href={`https://wa.me/${publication.contact.whatsapp}?text=${formatWhatsAppMessage()}`}
-                            className="flex items-center justify-center w-full bg-green-500 hover:bg-green-600 text-white py-3 px-4 rounded-xl transition-all"
-                            target="_blank"
+                      <div className="mt-8 space-y-3">
+                        {/* WhatsApp contact button */}
+                        {publication.contactPhone && (
+                          <a 
+                            href={`https://wa.me/${publication.contactPhone.replace(/\D/g, '')}?text=${formatWhatsAppMessage()}`} 
+                            target="_blank" 
                             rel="noopener noreferrer"
+                            className="bg-green-500 hover:bg-green-600 text-white font-medium py-2 px-4 rounded-lg flex items-center justify-center w-full transition-colors"
                           >
                             <WhatsAppIcon className="w-5 h-5 mr-2" />
                             Contactar por WhatsApp
                           </a>
                         )}
                         
-                        {publication.contact?.email && (
-                          <a
-                            href={`mailto:${publication.contact.email}?subject=Interesado en tu anuncio: ${publication.title}`}
-                            className="flex items-center justify-center w-full bg-gray-100 hover:bg-gray-200 text-gray-800 py-3 px-4 rounded-xl transition-all"
+                        {/* Share and report buttons */}
+                        <div className="flex space-x-3">
+                          <button 
+                            onClick={handleShare}
+                            className="bg-blue-50 hover:bg-blue-100 text-blue-700 font-medium py-2 px-4 rounded-lg flex items-center justify-center flex-1 transition-colors"
                           >
-                            <svg className="w-5 h-5 mr-2" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                              <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path>
-                              <polyline points="22,6 12,13 2,6"></polyline>
-                            </svg>
-                            Contactar por Email
-                          </a>
-                        )}
-                        
-                        {publication.contact?.phone && (
-                          <a
-                            href={`tel:${publication.contact.phone}`}
-                            className="flex items-center justify-center w-full bg-blue-500 hover:bg-blue-600 text-white py-3 px-4 rounded-xl transition-all"
-                          >
-                            <svg className="w-5 h-5 mr-2" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                              <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"></path>
-                            </svg>
-                            Llamar
-                          </a>
-                        )}
+                            <ShareIcon className="w-5 h-5 mr-2" />
+                            Compartir
+                          </button>
+                          
+                          <button className="bg-red-50 hover:bg-red-100 text-red-700 font-medium py-2 px-4 rounded-lg flex items-center justify-center flex-1 transition-colors">
+                            <FlagIcon className="w-5 h-5 mr-2" />
+                            Reportar
+                          </button>
+                        </div>
                       </div>
                     </div>
                   </div>
                 </div>
-              )}
-            </motion.div>
+              ) : null}
+            </div>
           </motion.div>
         </div>
       )}
     </AnimatePresence>
   );
+}
+
+// Método para formatear la ubicación correctamente
+const formatLocation = (location: any): string => {
+  if (typeof location === 'string') {
+    return location;
+  }
+  
+  if (location && typeof location === 'object') {
+    if (location.city && location.region) {
+      return `${location.city}, ${location.region}`;
+    } else if (location.city) {
+      return location.city;
+    } else if (location.region) {
+      return location.region;
+    }
+  }
+  
+  return 'Ubicación no especificada';
 } 

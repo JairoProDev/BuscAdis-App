@@ -144,11 +144,8 @@ export default function BuscadorPage() {
             ...pub,
             // Ensure location is a string for rendering
             location: locationText,
-            premium: pub.id?.includes('premium') || Math.random() > 0.8,
-            verified: Math.random() > 0.7,
-            views: Math.floor(Math.random() * 500) + 50,
-            likes: Math.floor(Math.random() * 50),
-            bookmarks: Math.floor(Math.random() * 20)
+            premium: pub.premium || false,
+            verified: pub.verified || false
           };
         });
         
@@ -228,7 +225,7 @@ export default function BuscadorPage() {
       
       if (lastReward !== today) {
         // Give daily reward
-        const pointsToAdd = Math.floor(Math.random() * 15) + 10; // 10-25 points
+        const pointsToAdd = 15; // Puntos fijos en lugar de aleatorios
         const newTotal = userPoints + pointsToAdd;
         
         setUserPoints(newTotal);
@@ -368,21 +365,23 @@ export default function BuscadorPage() {
   }
   
   return (
-    <main className="container mx-0 px-4 sm:px-6 lg:px-8 py-6 sm:py-8 lg:py-12 bg-slate-900 min-h-screen text-white">
-      {/* Contenedor principal de búsqueda */}
-      <SearchLayout
-        initialResults={results}
-        initialCategory={searchState.category}
-        initialSubcategory={searchState.subcategory}
-        initialQuery={searchState.query}
-        loading={loading}
-        onSearch={handleSearch}
-        onFilterChange={handleFilterChange}
-        onLoadMore={handleLoadMore}
-        hasMore={searchState.page < totalPages}
-        totalResults={totalResults}
-        showMap={true}
-      />
+    <main className="w-full bg-slate-900 min-h-screen text-white">
+      <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8 lg:py-12">
+        {/* Contenedor principal de búsqueda */}
+        <SearchLayout
+          initialResults={results}
+          initialCategory={searchState.category}
+          initialSubcategory={searchState.subcategory}
+          initialQuery={searchState.query}
+          loading={loading}
+          onSearch={handleSearch}
+          onFilterChange={handleFilterChange}
+          onLoadMore={handleLoadMore}
+          hasMore={searchState.page < totalPages}
+          totalResults={totalResults}
+          showMap={true}
+        />
+      </div>
       
       {/* Modal de recompensa diaria */}
       {showDailyReward && (
