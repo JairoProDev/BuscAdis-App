@@ -1,10 +1,13 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { 
   ShareIcon,
   FlagIcon,
   XMarkIcon,
+  ArrowTopRightOnSquareIcon,
+  MapPinIcon,
+  CalendarIcon
 } from '@heroicons/react/24/outline';
 import { PublicationsService } from '@/services/publications.service';
 import { formatDate } from '@/utils/date';
@@ -15,6 +18,8 @@ import LoadingSpinner from '@/components/ui/LoadingSpinner';
 import { Publication } from '@/components/search/SearchResults';
 import { motion, AnimatePresence } from 'framer-motion';
 import { generateSeoUrl, slugify } from '@/utils/url';
+import { useRouter } from 'next/navigation';
+import Image from 'next/image';
 
 interface PublicationModalProps {
   publicationId: string;
@@ -29,18 +34,26 @@ export default function PublicationModal({
   onClose,
   category 
 }: PublicationModalProps) {
+  const router = useRouter();
   const [publication, setPublication] = useState<Publication | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [isExpanded, setIsExpanded] = useState(false);
 
-  // Extract just the ID portion if it contains a slug
-  const cleanId = publicationId ? publicationId.split('-')[0] : '';
+  // Extraer solo la parte del ID si contiene un slug
+  const cleanId = useMemo(() => 
+    publicationId ? publicationId.split('-')[0] : '', 
+    [publicationId]
+  );
 
-  // Fetch publication data
+  // Obtener datos de la publicación con pre-carga rápida
   useEffect(() => {
+    if (!isOpen || !publicationId) return;
+    
+    let isMounted = true;
+    
     const fetchPublication = async () => {
-      if (!publicationId || !isOpen) return;
+      if (!cleanId) return;
       
       try {
         setLoading(true);
@@ -49,63 +62,51 @@ export default function PublicationModal({
         // Asegurar que el body tiene la clase modal-open
         document.body.classList.add('modal-open');
         
-        // Intentar obtener los datos de publicación, pasando la categoría correctamente
-        console.log(`Fetching publication ${cleanId} from category ${category || 'unknown'}`);
+        console.log(`Obteniendo publicación ${cleanId} de categoría ${category || 'desconocida'}`);
         
-        // Añadir reintento automático
+        // Implementar reintento automático
         let attempts = 0;
-        const maxAttempts = 2;
+        const maxAttempts = 1; // Reducir a 1 para acelerar
         let success = false;
         let data = null;
         
-        while (attempts <= maxAttempts && !success) {
+        while (attempts <= maxAttempts && !success && isMounted) {
           try {
             attempts++;
-            data = await PublicationsService.getPublicationById(cleanId, category);
+            // Usar Promise.race para limitar el tiempo de espera
+            data = await Promise.race([
+              PublicationsService.getPublicationById(cleanId, category),
+              new Promise<any>((_, reject) => 
+                setTimeout(() => reject(new Error('Tiempo de espera agotado')), 3000)
+              )
+            ]);
             success = true;
           } catch (err) {
-            console.warn(`Attempt ${attempts}/${maxAttempts} failed:`, err);
-            // Esperar un poco antes de reintentar
-            if (attempts <= maxAttempts) {
-              await new Promise(resolve => setTimeout(resolve, 500));
+            console.warn(`Intento ${attempts}/${maxAttempts} fallido:`, err);
+            if (attempts <= maxAttempts && isMounted) {
+              await new Promise(resolve => setTimeout(resolve, 100)); // Reducir tiempo de espera
             }
           }
         }
         
         if (!success || !data) {
-          throw new Error('No se pudo obtener la información del anuncio después de varios intentos');
+          throw new Error('No se pudo obtener la información después de varios intentos');
         }
         
-        console.log('Publication data fetched successfully:', data);
-        setPublication(data || null);
-        
-        // Track view in analytics
-        if (data) {
-          try {
-            // Send view event to backend
-            console.log('Publication viewed:', cleanId);
-            // We'll implement the real tracking in another step
-            
-            // También actualizar la URL para reflejar el slug si está disponible
-            if (data.title && !window.location.pathname.includes('-') && window.history) {
-              try {
-                const slug = slugify(data.title);                
-                const newPath = `/anuncios/${cleanId}-${slug}`;
-                window.history.replaceState(null, '', newPath);
-              } catch (err) {
-                console.error('Error al generar slug para URL:', err);
-              }
-            }
-          } catch (err) {
-            console.error('Error tracking view:', err);
-          }
+        if (isMounted) {
+          console.log('Datos obtenidos correctamente:', data);
+          setPublication(data);
         }
       } catch (err) {
-        console.error('Error fetching publication:', err);
-        setError('No se pudo cargar el anuncio. Por favor, intenta nuevamente más tarde.');
-        setPublication(null);
+        console.error('Error al obtener publicación:', err);
+        if (isMounted) {
+          setError('No se pudo cargar la publicación. Intenta de nuevo.');
+          setPublication(null);
+        }
       } finally {
-        setLoading(false);
+        if (isMounted) {
+          setLoading(false);
+        }
       }
     };
 
@@ -113,12 +114,12 @@ export default function PublicationModal({
     
     // Cleanup function
     return () => {
-      // Restaurar overflow del body cuando el componente se desmonta
+      isMounted = false;
       document.body.classList.remove('modal-open');
     };
   }, [publicationId, cleanId, isOpen, category]);
 
-  // Handle ESC key to close modal
+  // Manejar tecla ESC para cerrar modal
   useEffect(() => {
     const handleEsc = (event: KeyboardEvent) => {
       if (event.key === 'Escape') {
@@ -133,7 +134,7 @@ export default function PublicationModal({
     };
   }, [onClose]);
 
-  // Prevent body scroll when modal is open
+  // Prevenir scroll del body cuando el modal está abierto
   useEffect(() => {
     if (isOpen) {
       document.body.classList.add('modal-open');
@@ -146,227 +147,99 @@ export default function PublicationModal({
     };
   }, [isOpen]);
 
-  // Handle modal close
+  // Cerrar modal
   const handleClose = () => {
     document.body.classList.remove('modal-open');
     onClose();
   };
 
-  // Handle sharing
+  // Ver publicación completa
+  const handleViewFullPublication = () => {
+    if (!publication) return;
+    
+    const url = generateSeoUrl(
+      publication.id,
+      publication.title,
+      publication.categorySlug,
+      undefined,
+      undefined
+    );
+    
+    router.push(url);
+  };
+
+  // Compartir
   const handleShare = async () => {
+    if (!publication) return;
+    
     if (navigator.share) {
       try {
         await navigator.share({
-          title: publication?.title || 'Anuncio en Buscadis',
-          text: publication?.description || 'Mira este anuncio en Buscadis',
+          title: publication.title,
+          text: publication.description,
           url: window.location.href
         });
       } catch (err) {
-        console.error('Error sharing:', err);
+        console.error('Error al compartir:', err);
       }
     } else {
-      // Fallback for browsers that don't support Web Share API
+      // Fallback para navegadores que no soportan Web Share API
       navigator.clipboard.writeText(window.location.href);
       alert('Enlace copiado al portapapeles');
     }
   };
 
-  // Format WhatsApp message based on category
+  // Formatear mensaje de WhatsApp según la categoría
   const formatWhatsAppMessage = () => {
     if (!publication) return '';
-    let message = `Hola, estoy interesado en tu anuncio "${publication.title}" de Buscadis.`;
     
-    // Customize message based on category
-    if (publication.categorySlug === 'empleo' || publication.category === 'empleos') {
-      message = `Hola, estoy interesado en la oferta de trabajo "${publication.title}" publicada en Buscadis.`;
-    } else if (publication.categorySlug === 'inmuebles' || publication.category === 'inmuebles') {
-      message = `Hola, estoy interesado en el inmueble "${publication.title}" que tienes en Buscadis.`;
+    let message = `Hola, estoy interesado en tu publicación "${publication.title}" de BuscaDis.`;
+    
+    // Personalizar mensaje según categoría
+    if (publication.categorySlug === 'empleos') {
+      message = `Hola, estoy interesado en la oferta de trabajo "${publication.title}" publicada en BuscaDis.`;
+    } else if (publication.categorySlug === 'inmuebles') {
+      message = `Hola, estoy interesado en el inmueble "${publication.title}" que tienes en BuscaDis.`;
+    } else if (publication.categorySlug === 'vehiculos') {
+      message = `Hola, estoy interesado en el vehículo "${publication.title}" que tienes en BuscaDis.`;
     }
     
     return encodeURIComponent(message);
   };
 
-  // Toggle expanded state (more text)
+  // Alternar estado expandido (más texto)
   const toggleExpanded = () => {
     setIsExpanded(!isExpanded);
   };
-
-  // Check if in standalone mode (direct URL access)
-  const isStandalone = !isOpen;
-
-  // If it's in standalone mode (being accessed directly via URL), render a page instead of a modal
-  if (isStandalone) {
-    return (
-      <div className="container py-8">
-        {/* You can place the same content here, but styled for a full page */}
-        {loading ? (
-          <div className="flex items-center justify-center p-16">
-            <LoadingSpinner size="lg" />
-          </div>
-        ) : error || !publication ? (
-          <div className="p-8 text-center">
-            <h2 className="text-xl font-bold text-red-500 mb-2">Error</h2>
-            <p className="text-slate-300">{error || 'Anuncio no encontrado'}</p>
-          </div>
-        ) : (
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-            <div className="lg:col-span-2">
-              {/* Images */}
-              {publication.images && publication.images.length > 0 ? (
-                <div className="mb-6 overflow-hidden rounded-xl">
-                  <Carousel images={publication.images} />
-                </div>
-              ) : (
-                <div className="mb-6 bg-gray-100 h-64 rounded-xl flex items-center justify-center">
-                  <span className="text-gray-500 text-lg">Sin imágenes</span>
-                </div>
-              )}
-
-              {/* Details */}
-              <div className="bg-white rounded-xl shadow-md p-6 mb-6">
-                <h1 className="text-2xl font-bold text-gray-900 mb-3">{publication.title}</h1>
-                
-                <div className="flex items-center justify-between mb-4">
-                  <div className="text-xl font-bold text-primary-600">
-                    {formatPrice(publication.price, publication.currency)}
-                  </div>
-                  <div className="text-sm text-gray-500">
-                    Publicado el {formatDate(publication.createdAt)}
-                  </div>
-                </div>
-                
-                <div className="mb-6">
-                  <h2 className="text-lg font-semibold text-gray-800 mb-2">Descripción</h2>
-                  <div className="text-gray-600 whitespace-pre-line">
-                    {publication.description}
-                  </div>
-                </div>
-                
-                <div className="mb-4">
-                  <h2 className="text-lg font-semibold text-gray-800 mb-2">Ubicación</h2>
-                  <div className="text-gray-600">
-                    {publication && formatLocation(publication.location)}
-                  </div>
-                </div>
-                
-                <div className="flex space-x-4">
-                  <button 
-                    className="text-gray-500 hover:text-gray-700 flex items-center"
-                    onClick={handleShare}
-                  >
-                    <ShareIcon className="w-5 h-5 mr-1" />
-                    Compartir
-                  </button>
-                  
-                  <button className="text-gray-500 hover:text-red-600 flex items-center">
-                    <FlagIcon className="w-5 h-5 mr-1" />
-                    Reportar
-                  </button>
-                </div>
-              </div>
-            </div>
-            
-            {/* Contact sidebar */}
-            <div className="lg:sticky lg:top-24 h-fit">
-              <div className="bg-white rounded-xl shadow-md p-6">
-                <h2 className="text-xl font-bold text-gray-800 mb-4">Contactar al anunciante</h2>
-                
-                <div className="space-y-4 mb-6">
-                  {publication.contact?.whatsapp && (
-                    <a
-                      href={`https://wa.me/${publication.contact.whatsapp}?text=${formatWhatsAppMessage()}`}
-                      className="flex items-center justify-center w-full bg-green-500 hover:bg-green-600 text-white py-3 px-4 rounded-xl transition-all"
-                      target="_blank"
-                      rel="noopener noreferrer"
-                    >
-                      <WhatsAppIcon className="w-5 h-5 mr-2" />
-                      Contactar por WhatsApp
-                    </a>
-                  )}
-                  
-                  {publication.contact?.email && (
-                    <a
-                      href={`mailto:${publication.contact.email}?subject=Interesado en tu anuncio: ${publication.title}`}
-                      className="flex items-center justify-center w-full bg-gray-100 hover:bg-gray-200 text-gray-800 py-3 px-4 rounded-xl transition-all"
-                    >
-                      <svg className="w-5 h-5 mr-2" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                        <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"></path>
-                        <polyline points="22,6 12,13 2,6"></polyline>
-                      </svg>
-                      Contactar por Email
-                    </a>
-                  )}
-                  
-                  {publication.contact?.phone && (
-                    <a
-                      href={`tel:${publication.contact.phone}`}
-                      className="flex items-center justify-center w-full bg-blue-500 hover:bg-blue-600 text-white py-3 px-4 rounded-xl transition-all"
-                    >
-                      <svg className="w-5 h-5 mr-2" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                        <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"></path>
-                      </svg>
-                      Llamar
-                    </a>
-                  )}
-                </div>
-                
-                <div className="text-sm text-gray-500">
-                  <p>ID de anuncio: {publication.id}</p>
-                  <p>Categoría: {publication.category || publication.categorySlug || 'General'}</p>
-                  {publication.subcategory && (
-                    <p>Subcategoría: {publication.subcategory}</p>
-                  )}
-                </div>
-              </div>
-
-              {/* Stats card */}
-              <div className="bg-white rounded-xl shadow-md p-6 mt-4">
-                <h3 className="font-semibold text-gray-800 mb-4">Estadísticas</h3>
-                <div className="space-y-2">
-                  <div className="flex justify-between">
-                    <span className="text-gray-600">Vistas</span>
-                    <span className="font-medium">{publication.views || 0}</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-gray-600">Contactos</span>
-                    <span className="font-medium">-</span>
-                  </div>
-                  <div className="flex justify-between">
-                    <span className="text-gray-600">Publicado</span>
-                    <span className="font-medium">{formatDate(publication.createdAt)}</span>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        )}
-      </div>
-    );
-  }
 
   if (!isOpen) return null;
 
   return (
     <AnimatePresence>
       {isOpen && (
-        <div className="fixed inset-0 z-[9999] overflow-y-auto">
-          <div className="fixed inset-0 bg-black/80" onClick={handleClose}></div>
+        <div className="fixed inset-0 z-[9999] overflow-hidden">
+          {/* Overlay */}
+          <div 
+            className="fixed inset-0 bg-black/75 backdrop-blur-sm" 
+            onClick={handleClose}
+          ></div>
           
+          {/* Modal */}
           <motion.div 
-            className="relative w-full max-w-4xl mx-auto my-8 px-4"
+            className="relative w-full max-w-5xl mx-auto my-4 sm:my-8 px-2 sm:px-4 h-[calc(100vh-2rem)] sm:h-auto"
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -20 }}
             transition={{ duration: 0.3 }}
           >
-            <div className="bg-white rounded-xl overflow-hidden shadow-xl">
-              {/* Close button */}
+            <div className="bg-white rounded-xl overflow-hidden shadow-xl max-h-full flex flex-col">
+              {/* Botón de cerrar */}
               <button 
                 onClick={handleClose}
-                className="absolute top-4 right-4 z-[9999] bg-gray-100 hover:bg-gray-200 text-gray-800 p-2 rounded-full"
+                className="absolute top-3 right-3 z-[9999] bg-white hover:bg-gray-100 text-gray-800 p-2 rounded-full shadow-md"
                 aria-label="Cerrar"
               >
-                <XMarkIcon className="w-5 h-5" />
+                <XMarkIcon className="w-6 h-6" />
               </button>
               
               {loading ? (
@@ -376,89 +249,125 @@ export default function PublicationModal({
               ) : error ? (
                 <div className="p-8 text-center">
                   <h2 className="text-xl font-bold text-red-500 mb-2">Error</h2>
-                  <p className="text-slate-600">{error}</p>
+                  <p className="text-gray-600 mb-4">{error}</p>
+                  <button 
+                    onClick={handleClose} 
+                    className="bg-blue-600 text-white px-4 py-2 rounded-lg"
+                  >
+                    Cerrar
+                  </button>
                 </div>
               ) : publication ? (
-                <div className="grid grid-cols-1 lg:grid-cols-3 gap-0 lg:gap-6">
-                  <div className="lg:col-span-2 overflow-hidden">
-                    {/* Images */}
-                    {publication.images && publication.images.length > 0 ? (
-                      <div className="relative h-64 sm:h-80 lg:h-96 overflow-hidden">
-                        <Carousel images={publication.images} />
-                      </div>
-                    ) : (
-                      <div className="bg-gray-100 h-64 sm:h-80 lg:h-96 flex items-center justify-center">
-                        <span className="text-gray-500 text-lg">Sin imágenes</span>
-                      </div>
-                    )}
-                  </div>
-                  
-                  <div className="lg:col-span-1 p-6">
-                    <div className="mb-4">
-                      <h1 className="text-2xl font-bold text-gray-900 mb-3">{publication.title}</h1>
-                      
-                      <div className="flex items-center justify-between mb-4">
-                        <div className="text-xl font-bold text-primary-600">
-                          {formatPrice(publication.price, publication.currency)}
+                <div className="overflow-auto h-full publication-modal">
+                  <div className="grid grid-cols-1 lg:grid-cols-2">
+                    {/* Columna izquierda - Imágenes */}
+                    <div className="bg-gray-50">
+                      {publication.images && publication.images.length > 0 ? (
+                        <div className="relative h-64 sm:h-80 md:h-96">
+                          <Image
+                            src={publication.images[0]}
+                            alt={publication.title}
+                            layout="fill"
+                            objectFit="contain"
+                            priority={true}
+                            className="p-2"
+                          />
                         </div>
-                        <div className="text-sm text-gray-500">
-                          Publicado el {formatDate(publication.createdAt)}
+                      ) : (
+                        <div className="flex flex-col items-center justify-center h-64 sm:h-80 md:h-96 bg-gray-100">
+                          <div className="p-8 text-center">
+                            <svg xmlns="http://www.w3.org/2000/svg" className="h-16 w-16 mx-auto text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                            </svg>
+                            <p className="text-gray-500 mt-2">Sin imágenes</p>
+                          </div>
                         </div>
-                      </div>
-                      
-                      <div className="mb-6">
-                        <h2 className="text-lg font-semibold text-gray-800 mb-2">Descripción</h2>
-                        <div 
-                          className={`text-gray-600 whitespace-pre-line ${isExpanded ? '' : 'line-clamp-4'}`}
-                          onClick={toggleExpanded}
-                        >
-                          {publication.description}
-                        </div>
-                        {publication.description && publication.description.length > 200 && (
-                          <button 
-                            className="text-primary-600 hover:text-primary-700 text-sm mt-2"
-                            onClick={toggleExpanded}
-                          >
-                            {isExpanded ? 'Ver menos' : 'Ver más'}
-                          </button>
-                        )}
-                      </div>
-                      
+                      )}
+                    </div>
+                    
+                    {/* Columna derecha - Información */}
+                    <div className="p-6">
                       <div className="mb-4">
-                        <h2 className="text-lg font-semibold text-gray-800 mb-2">Ubicación</h2>
-                        <div className="text-gray-600">
-                          {publication && formatLocation(publication.location)}
+                        <h1 className="text-2xl font-bold text-gray-900 mb-2">{publication.title}</h1>
+                        
+                        <div className="flex flex-wrap justify-between items-center gap-2 mb-4">
+                          <div className="text-xl font-bold text-blue-600">
+                            {formatPrice(publication.price, publication.currency)}
+                          </div>
+                          
+                          <div className="flex items-center text-gray-500 text-sm">
+                            <CalendarIcon className="w-4 h-4 mr-1" />
+                            <span>{formatDate(publication.createdAt)}</span>
+                          </div>
                         </div>
-                      </div>
-                      
-                      <div className="mt-8 space-y-3">
-                        {/* WhatsApp contact button */}
-                        {publication.contactPhone && (
+                        
+                        <div className="flex items-center text-gray-500 text-sm mb-4">
+                          <MapPinIcon className="w-4 h-4 mr-1" />
+                          <span>
+                            {typeof publication.location === 'string' 
+                              ? publication.location 
+                              : publication.location?.city || 'Ubicación no especificada'}
+                          </span>
+                        </div>
+                        
+                        <div className="mb-6">
+                          <h2 className="text-lg font-semibold text-gray-800 mb-2">Descripción</h2>
+                          <div 
+                            className={`text-gray-600 whitespace-pre-line ${isExpanded ? '' : 'line-clamp-4'}`}
+                          >
+                            {publication.description}
+                          </div>
+                          {publication.description && publication.description.length > 200 && (
+                            <button 
+                              className="text-blue-600 hover:text-blue-700 text-sm mt-2"
+                              onClick={toggleExpanded}
+                            >
+                              {isExpanded ? 'Ver menos' : 'Ver más'}
+                            </button>
+                          )}
+                        </div>
+                        
+                        <div className="mt-6 space-y-3">
+                          {/* Contacto */}
                           <a 
-                            href={`https://wa.me/${publication.contactPhone.replace(/\D/g, '')}?text=${formatWhatsAppMessage()}`} 
+                            href={`tel:${publication.contactPhone || publication.contact?.phone || ''}`}
+                            className="flex items-center justify-center w-full bg-blue-600 hover:bg-blue-700 text-white py-2 px-4 rounded-lg transition-colors"
+                          >
+                            <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
+                            </svg>
+                            <span>Contactar</span>
+                          </a>
+                          
+                          {/* WhatsApp */}
+                          <a 
+                            href={`https://wa.me/${(publication.contactPhone || publication.contact?.phone || '').replace(/[^0-9]/g, '')}?text=${formatWhatsAppMessage()}`}
                             target="_blank" 
                             rel="noopener noreferrer"
-                            className="bg-green-500 hover:bg-green-600 text-white font-medium py-2 px-4 rounded-lg flex items-center justify-center w-full transition-colors"
+                            className="flex items-center justify-center w-full bg-green-500 hover:bg-green-600 text-white py-2 px-4 rounded-lg transition-colors"
                           >
                             <WhatsAppIcon className="w-5 h-5 mr-2" />
-                            Contactar por WhatsApp
+                            <span>WhatsApp</span>
                           </a>
-                        )}
-                        
-                        {/* Share and report buttons */}
-                        <div className="flex space-x-3">
-                          <button 
-                            onClick={handleShare}
-                            className="bg-blue-50 hover:bg-blue-100 text-blue-700 font-medium py-2 px-4 rounded-lg flex items-center justify-center flex-1 transition-colors"
-                          >
-                            <ShareIcon className="w-5 h-5 mr-2" />
-                            Compartir
-                          </button>
                           
-                          <button className="bg-red-50 hover:bg-red-100 text-red-700 font-medium py-2 px-4 rounded-lg flex items-center justify-center flex-1 transition-colors">
-                            <FlagIcon className="w-5 h-5 mr-2" />
-                            Reportar
-                          </button>
+                          {/* Botones adicionales */}
+                          <div className="flex gap-2">
+                            <button
+                              onClick={handleViewFullPublication}
+                              className="flex items-center justify-center flex-1 bg-gray-100 hover:bg-gray-200 text-gray-800 py-2 px-4 rounded-lg transition-colors"
+                            >
+                              <ArrowTopRightOnSquareIcon className="w-5 h-5 mr-2" />
+                              <span>Ver completo</span>
+                            </button>
+                            
+                            <button
+                              onClick={handleShare}
+                              className="flex items-center justify-center flex-1 bg-gray-100 hover:bg-gray-200 text-gray-800 py-2 px-4 rounded-lg transition-colors"
+                            >
+                              <ShareIcon className="w-5 h-5 mr-2" />
+                              <span>Compartir</span>
+                            </button>
+                          </div>
                         </div>
                       </div>
                     </div>
@@ -471,23 +380,4 @@ export default function PublicationModal({
       )}
     </AnimatePresence>
   );
-}
-
-// Método para formatear la ubicación correctamente
-const formatLocation = (location: any): string => {
-  if (typeof location === 'string') {
-    return location;
-  }
-  
-  if (location && typeof location === 'object') {
-    if (location.city && location.region) {
-      return `${location.city}, ${location.region}`;
-    } else if (location.city) {
-      return location.city;
-    } else if (location.region) {
-      return location.region;
-    }
-  }
-  
-  return 'Ubicación no especificada';
 } 

@@ -2,6 +2,90 @@
  * Tipos para el manejo de publicaciones en la aplicación
  */
 
+// Categorías principales
+export type MainCategory = 
+  | 'empleos' 
+  | 'inmuebles' 
+  | 'vehiculos' 
+  | 'servicios'
+  | 'productos'
+  | 'mascotas';
+
+// Subcategorías por cada categoría principal
+export type EmploymentSubcategory = 
+  | 'administrativo'
+  | 'ventas'
+  | 'atencion-cliente'
+  | 'educacion'
+  | 'salud'
+  | 'tecnologia'
+  | 'marketing'
+  | 'gastronomia'
+  | 'construccion'
+  | 'turismo'
+  | 'otros';
+
+export type RealEstateSubcategory = 
+  | 'casas'
+  | 'departamentos'
+  | 'terrenos'
+  | 'locales'
+  | 'oficinas'
+  | 'habitaciones'
+  | 'otros';
+
+export type VehicleSubcategory = 
+  | 'autos'
+  | 'camionetas'
+  | 'motos'
+  | 'camiones'
+  | 'maquinaria'
+  | 'otros';
+
+export type ServiceSubcategory = 
+  | 'profesionales'
+  | 'hogar'
+  | 'transporte'
+  | 'educacion'
+  | 'eventos'
+  | 'belleza'
+  | 'otros';
+
+// Subsubcategorías
+export type EmploymentType = 
+  | 'tiempo-completo'
+  | 'medio-tiempo'
+  | 'temporal'
+  | 'freelance'
+  | 'practicas'
+  | 'por-horas';
+
+export type RealEstateType = 
+  | 'venta'
+  | 'alquiler'
+  | 'anticresis'
+  | 'traspaso';
+
+export type VehicleType = 
+  | 'nuevo'
+  | 'usado'
+  | 'alquiler';
+
+export type ServiceType = 
+  | 'puntual'
+  | 'recurrente'
+  | 'por-proyecto';
+
+// Enumeración para estados de publicación
+export enum PublicationStatus {
+  DRAFT = 'draft',
+  ACTIVE = 'active',
+  PAUSED = 'paused',
+  SOLD = 'sold',
+  EXPIRED = 'expired',
+  DELETED = 'deleted'
+}
+
 export interface PublicationImage {
   url: string;
   publicId?: string;
@@ -193,4 +277,91 @@ export interface PublicationInput {
   productDetails?: Partial<ProductPublication>;
   realEstateDetails?: Partial<RealEstatePublication>;
   communityDetails?: Partial<CommunityPublication>;
+}
+
+/**
+ * Función para clasificar anuncios basados en su contenido
+ * @param title Título del anuncio
+ * @param description Descripción del anuncio
+ * @returns Categorización sugerida
+ */
+export function classifyPublication(title: string, description: string): {
+  category: MainCategory;
+  subcategory: string;
+  subsubcategory?: string;
+} {
+  const text = `${title} ${description}`.toLowerCase();
+  
+  // Palabras clave para categorías
+  const employmentKeywords = ['empleo', 'trabajo', 'se busca', 'oferta laboral', 'contrato', 'sueldo', 'salario', 'requisitos', 'curriculum', 'cv', 'rrhh', 'postular'];
+  const realEstateKeywords = ['casa', 'departamento', 'alquiler', 'alquilo', 'vendo', 'terreno', 'habitación', 'inmueble', 'propiedad', 'ambiente', 'dormitorio', 'baño'];
+  const vehicleKeywords = ['auto', 'carro', 'vehículo', 'moto', 'camioneta', 'camión', 'modelo', 'año', 'kilometraje', 'motor'];
+  const serviceKeywords = ['servicio', 'ofrezco', 'técnico', 'reparación', 'instalación', 'mantenimiento', 'profesor', 'clases'];
+  
+  // Detectar categoría principal
+  let category: MainCategory = 'productos'; // Categoría por defecto
+  
+  if (employmentKeywords.some(keyword => text.includes(keyword))) {
+    category = 'empleos';
+  } else if (realEstateKeywords.some(keyword => text.includes(keyword))) {
+    category = 'inmuebles';
+  } else if (vehicleKeywords.some(keyword => text.includes(keyword))) {
+    category = 'vehiculos';
+  } else if (serviceKeywords.some(keyword => text.includes(keyword))) {
+    category = 'servicios';
+  }
+  
+  // Detectar subcategoría (simplificado)
+  let subcategory = 'otros';
+  let subsubcategory: string | undefined;
+  
+  // Empleos: detectar tipo de trabajo
+  if (category === 'empleos') {
+    if (text.includes('ventas') || text.includes('vendedor')) {
+      subcategory = 'ventas';
+    } else if (text.includes('administrativo') || text.includes('secretaria')) {
+      subcategory = 'administrativo';
+    } else if (text.includes('profesor') || text.includes('colegio') || text.includes('enseñanza')) {
+      subcategory = 'educacion';
+    }
+    
+    // Detectar jornada
+    if (text.includes('tiempo completo')) {
+      subsubcategory = 'tiempo-completo';
+    } else if (text.includes('medio tiempo') || text.includes('part time')) {
+      subsubcategory = 'medio-tiempo';
+    } else if (text.includes('temporal') || text.includes('campaña')) {
+      subsubcategory = 'temporal';
+    }
+  }
+  
+  // Inmuebles: detectar tipo propiedad
+  if (category === 'inmuebles') {
+    if (text.includes('casa')) {
+      subcategory = 'casas';
+    } else if (text.includes('departamento') || text.includes('depa')) {
+      subcategory = 'departamentos';
+    } else if (text.includes('terreno')) {
+      subcategory = 'terrenos';
+    } else if (text.includes('oficina')) {
+      subcategory = 'oficinas';
+    } else if (text.includes('habitación') || text.includes('cuarto')) {
+      subcategory = 'habitaciones';
+    }
+    
+    // Detectar tipo de operación
+    if (text.includes('venta') || text.includes('vendo')) {
+      subsubcategory = 'venta';
+    } else if (text.includes('alquiler') || text.includes('alquilo')) {
+      subsubcategory = 'alquiler';
+    } else if (text.includes('anticresis')) {
+      subsubcategory = 'anticresis';
+    }
+  }
+  
+  return {
+    category,
+    subcategory,
+    subsubcategory
+  };
 } 

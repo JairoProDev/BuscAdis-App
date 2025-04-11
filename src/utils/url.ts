@@ -27,12 +27,33 @@ export function generateSeoUrl(
     .replace(/\s+/g, '-')
     .substring(0, 50);
   
-  // URL base siempre apunta a la ruta de anuncios con el ID
-  let url = `/anuncios/${id}`;
+  // Construir la URL con el formato /category/subcategory/subsubcategory/id/title
+  let url = '';
   
-  // Si hay título, añadir como slug
-  if (title) {
-    url += `-${titleSlug}`;
+  // Categoría (requerida)
+  if (category) {
+    url += `/${category}`;
+    
+    // Subcategoría (opcional)
+    if (subcategory) {
+      url += `/${subcategory}`;
+      
+      // Subsubcategoría (opcional)
+      if (subsubcategory) {
+        url += `/${subsubcategory}`;
+      }
+    }
+    
+    // ID (requerido)
+    url += `/${id}`;
+    
+    // Título (opcional como parte de la URL)
+    if (title) {
+      url += `/${titleSlug}`;
+    }
+  } else {
+    // Fallback si no hay categoría
+    url = `/${id}/${titleSlug}`;
   }
   
   return url;

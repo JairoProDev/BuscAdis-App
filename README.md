@@ -141,3 +141,85 @@ For build errors:
 ## License
 
 MIT
+
+## Modelo de Datos para Publicaciones
+
+A continuación se detalla la estructura estándar para el modelo de datos de publicaciones:
+
+```javascript
+{
+  // Identificación básica
+  "id": "string", // ID único de la publicación (generado por el sistema)
+  "title": "string", // Título descriptivo de la publicación
+  "description": "string", // Descripción detallada de la publicación
+  
+  // Detalles de precio
+  "price": "number", // Monto del precio (0 si no aplica)
+  "currency": "string", // Moneda (PEN, USD, etc.)
+  "price_type": "string", // Tipo de precio: "fixed", "negotiable", "free", "exchange"
+  
+  // Categorización
+  "category": "string", // Categoría principal (empleos, inmuebles, vehiculos, servicios, etc.)
+  "categorySlug": "string", // Slug de la categoría para URLs
+  "subcategory": "string", // Subcategoría (opcional)
+  "subsubcategory": "string", // Sub-subcategoría (opcional)
+  
+  // Ubicación
+  "location": {
+    "city": "string", // Ciudad
+    "region": "string", // Región/Departamento
+    "district": "string", // Distrito (opcional)
+    "address": "string", // Dirección (opcional)
+    "latitude": "number", // Coordenada latitud (opcional)
+    "longitude": "number", // Coordenada longitud (opcional)
+    "reference": "string" // Referencia de ubicación (opcional)
+  },
+  
+  // Información de contacto
+  "contact": {
+    "name": "string", // Nombre del contacto
+    "phone": "string", // Teléfono (opcional)
+    "whatsapp": "string", // WhatsApp (opcional)
+    "email": "string", // Email (opcional)
+    "preferredMethod": "string" // Método preferido de contacto: "phone", "whatsapp", "email"
+  },
+  
+  // Multimedia
+  "images": [
+    {
+      "url": "string", // URL de la imagen
+      "thumbnailUrl": "string", // URL de la miniatura (opcional)
+      "description": "string", // Descripción de la imagen (opcional)
+      "order": "number" // Orden de visualización
+    }
+  ],
+  
+  // Atributos específicos según categoría
+  "attributes": {
+    // Para empleos
+    "tipo_trabajo": "string", // Tiempo completo, medio tiempo, etc.
+    "salario": "string", // Descripción del salario
+    "requisitos": ["string"], // Lista de requisitos
+    "beneficios": ["string"], // Lista de beneficios
+    
+    // Para inmuebles
+    "area": "number", // Área en metros cuadrados
+    "dormitorios": "number", // Número de dormitorios
+    "baños": "number", // Número de baños
+    "antigüedad": "number", // Antigüedad en años
+    "estacionamientos": "number", // Número de estacionamientos
+    
+    // Para vehículos
+    "marca": "string", // Marca del vehículo
+    "modelo": "string", // Modelo del vehículo
+    "año": "number", // Año del vehículo
+    "kilometraje": "number", // Kilometraje
+    "combustible": "string", // Tipo de combustible
+    "transmision": "string", // Tipo de transmisión
+    
+    // Otros atributos específicos según sea necesario
+  },
+  
+  // Estado y fechas
+  "status": "string", // Estado: "active", "paused", "sold", "expired", "deleted"
+  "created_at": "string", // Fecha de creación (ISO format)

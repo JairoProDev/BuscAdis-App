@@ -215,17 +215,19 @@ export default function SearchResults({
     
     // Añadir clase modal-open al body para evitar scrolling
     document.body.classList.add('modal-open');
+    document.documentElement.style.setProperty('--scrollbar-width', `${window.innerWidth - document.documentElement.clientWidth}px`);
     
     // Update URL without navigation using history.pushState
     const publication = results.find(p => p.id === publicationId);
     if (publication) {
       const url = generateSeoUrl(
         publication.id, 
-        publication.title
+        publication.title,
+        publication.categorySlug
       );
       
-      // Update URL without navigation
-      window.history.pushState({}, '', url);
+      // Actualizar URL sin navegación
+      window.history.pushState({modalOpen: true, publicationId}, '', url);
     }
   }, [results]);
   
@@ -235,9 +237,12 @@ export default function SearchResults({
     
     // Remover clase modal-open del body al cerrar
     document.body.classList.remove('modal-open');
+    document.documentElement.style.removeProperty('--scrollbar-width');
     
-    // Restore original URL when closing the modal
-    window.history.pushState({}, '', window.location.pathname.split('?')[0] + window.location.search);
+    // Restaurar URL original al cerrar el modal, asegurando mantener los parámetros de búsqueda
+    const searchParams = window.location.search;
+    const baseUrl = window.location.pathname.split('/').slice(0, -2).join('/') || '/';
+    window.history.pushState({modalOpen: false}, '', baseUrl + searchParams);
   };
   
   // Función para cambiar el modo de vista
@@ -273,11 +278,8 @@ export default function SearchResults({
     // Verificar si tiene imágenes
     const hasImages = publication.images && publication.images.length > 0;
     
-    // Default image if none provided
+    // URL de imagen por defecto
     const imageUrl = hasImages && publication.images ? publication.images[0] : '/images/placeholder.jpg';
-    
-    // Clase CSS para tarjetas sin imagen
-    const noImageClass = !hasImages ? 'publication-card-no-image' : '';
     
     return (
       <motion.div
@@ -286,130 +288,81 @@ export default function SearchResults({
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.4, delay: index * 0.05 }}
-        className="relative h-full"
+        className="publication-grid-item"
       >
         <a 
           href={generateSeoUrl(
             publication.id,
-            publication.title
+            publication.title,
+            publication.categorySlug
           )} 
           className="block h-full"
           onClick={(e) => handleOpenModal(publication.id, e)}
         >
-          <div className={`relative bg-slate-800 rounded-xl overflow-hidden shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1 h-full ${noImageClass}`}>
-            {/* Imagen principal (solo si hay imagen) */}
-            {hasImages ? (
-              <div className="relative h-64 overflow-hidden">
-                <div className="absolute inset-0 bg-gradient-to-br from-slate-900/20 to-slate-900/60 z-10" />
+          <div className="publication-card">
+            {/* Imagen de la publicación */}
+            <div className="publication-image">
+              {hasImages ? (
                 <Image
                   src={imageUrl}
                   alt={publication.title}
                   fill
                   sizes="(max-width: 640px) 100vw, (max-width: 768px) 50vw, (max-width: 1024px) 33vw, 25vw"
-                  className="object-cover transition-transform duration-500 group-hover:scale-110"
+                  className="object-cover transition-all duration-500"
                 />
-
-                {/* Badges */}
-                <div className="absolute top-2 left-2 flex gap-2 z-20">
-                  {isPremium && (
-                    <span className="bg-gradient-to-r from-teal-500 to-cyan-500 text-white text-xs font-medium px-2.5 py-0.5 rounded-full shadow-lg flex items-center">
-                      <SparklesIcon className="w-3 h-3 mr-1" />
-                      Premium
-                    </span>
-                  )}
-                  
-                  {isNew && (
-                    <span className="bg-gradient-to-r from-amber-500 to-orange-500 text-white text-xs font-medium px-2.5 py-0.5 rounded-full shadow-lg flex items-center">
-                      <FireIcon className="w-3 h-3 mr-1" />
-                      Nuevo
-                    </span>
-                  )}
+              ) : (
+                <div className="flex flex-col items-center justify-center w-full h-full bg-gray-100">
+                  <svg xmlns="http://www.w3.org/2000/svg" className="h-12 w-12 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                  </svg>
+                  <p className="text-gray-500 text-sm mt-2">Sin imagen</p>
                 </div>
-                
-                {/* Precio */}
-                <div className="absolute bottom-2 right-2 z-20">
-                  <span className="bg-slate-900/80 backdrop-blur-sm text-white text-sm font-bold px-3 py-1 rounded-lg shadow-lg">
-                    {formatPrice(publication.price, publication.currency)}
-                  </span>
-                </div>
-
-                {/* Logo de Buscadis */}
-                <div className="absolute top-2 right-2 z-20">
-                  <div className="bg-white/90 backdrop-blur-sm rounded-full p-1 shadow-md">
-                    <Image
-                      src="/logo.png"
-                      alt="Buscadis"
-                      width={30}
-                      height={30}
-                      className="rounded-full"
-                    />
-                  </div>
-                </div>
-              </div>
-            ) : (
-              <div className="p-4">
-                {/* Badges para tarjetas sin imagen */}
-                <div className="flex justify-between gap-2 mb-2">
-                  <div className="flex gap-1">
-                    {isPremium && (
-                      <span className="bg-gradient-to-r from-teal-500 to-cyan-500 text-white text-xs font-medium px-2 py-0.5 rounded-full shadow-sm flex items-center">
-                        <SparklesIcon className="w-3 h-3 mr-1" />
-                        Premium
-                      </span>
-                    )}
-                    
-                    {isNew && (
-                      <span className="bg-gradient-to-r from-amber-500 to-orange-500 text-white text-xs font-medium px-2 py-0.5 rounded-full shadow-sm flex items-center">
-                        <FireIcon className="w-3 h-3 mr-1" />
-                        Nuevo
-                      </span>
-                    )}
-                  </div>
-                  
-                  {/* Precio para tarjetas sin imagen */}
-                  <span className="bg-slate-900/80 backdrop-blur-sm text-white text-xs font-medium px-2 py-0.5 rounded-lg shadow-sm">
-                    {formatPrice(publication.price, publication.currency)}
-                  </span>
-                </div>
-
-                {/* Logo de Buscadis */}
-                <div className="absolute top-2 right-2 z-20">
-                  <div className="bg-white/90 backdrop-blur-sm rounded-full p-1 shadow-md">
-                    <Image
-                      src="/logo.png"
-                      alt="Buscadis"
-                      width={24}
-                      height={24}
-                      className="rounded-full"
-                    />
-                  </div>
-                </div>
-              </div>
-            )}
-
-            {/* Contenido */}
-            <div className={hasImages ? 'p-4' : 'p-2'}>
-              <h3 className={`${hasImages ? 'text-lg' : 'text-base'} font-semibold text-white line-clamp-2 mb-1 group-hover:text-teal-300 transition-colors`}>
-                {publication.title}
-              </h3>
-              
-              {hasImages && (
-                <p className="text-cyan-100/80 text-sm line-clamp-2 mb-3">
-                  {publication.description}
-                </p>
               )}
               
-              <div className="flex items-center justify-between text-sm">
-                <div className="flex items-center text-cyan-300/90">
-                  <MapPinIcon className="w-4 h-4 mr-1 flex-shrink-0" />
-                  <span className="truncate max-w-[180px]">
+              {/* Etiquetas destacadas */}
+              <div className="absolute top-2 left-2 flex gap-1 z-10">
+                {isPremium && (
+                  <span className="bg-gradient-to-r from-teal-500 to-cyan-500 text-white text-xs font-medium px-2 py-1 rounded-full shadow-sm flex items-center">
+                    <SparklesIcon className="w-3 h-3 mr-1" />
+                    <span>Premium</span>
+                  </span>
+                )}
+                
+                {isNew && (
+                  <span className="bg-gradient-to-r from-amber-500 to-orange-500 text-white text-xs font-medium px-2 py-1 rounded-full shadow-sm flex items-center">
+                    <FireIcon className="w-3 h-3 mr-1" />
+                    <span>Nuevo</span>
+                  </span>
+                )}
+              </div>
+              
+              {/* Precio */}
+              <div className="absolute bottom-2 right-2 z-10">
+                <span className="bg-blue-600 text-white text-xs font-bold px-2 py-1 rounded-full shadow-sm">
+                  {formatPrice(publication.price, publication.currency)}
+                </span>
+              </div>
+            </div>
+            
+            {/* Contenido */}
+            <div className="content">
+              <h3 className="title">{publication.title}</h3>
+              
+              <p className="description text-gray-600 text-sm line-clamp-2 mb-2">
+                {publication.description}
+              </p>
+              
+              <div className="meta">
+                <div className="flex items-center">
+                  <MapPinIcon className="w-4 h-4 mr-1 text-gray-400" />
+                  <span className="truncate max-w-[120px]">
                     {typeof publication.location === 'string' 
                       ? publication.location 
                       : publication.location?.city || 'Ubicación no especificada'}
                   </span>
                 </div>
                 
-                <span className="text-xs text-teal-300/80">
+                <span className="text-xs">
                   {formatRelativeTime(publication.createdAt)}
                 </span>
               </div>
@@ -419,36 +372,36 @@ export default function SearchResults({
         
         {/* Botones de interacción */}
         {showInteractionButtons && (
-          <div className="absolute bottom-0 left-0 right-0 p-2 flex justify-between opacity-0 group-hover:opacity-100 transition-opacity z-20">
+          <div className="absolute top-2 right-2 flex gap-1 z-20">
             <button
               onClick={(e) => {
-                e.preventDefault()
-                e.stopPropagation()
-                toggleLike(publication.id)
+                e.preventDefault();
+                e.stopPropagation();
+                toggleLike(publication.id);
               }}
-              className={`p-1 rounded-full ${isLiked ? 'bg-red-500' : 'bg-slate-800/90 hover:bg-slate-700/90'} shadow-lg backdrop-blur-sm`}
+              className={`p-1.5 rounded-full ${isLiked ? 'bg-red-500' : 'bg-white/80 hover:bg-white'} shadow-sm backdrop-blur-sm transition-colors`}
               aria-label={isLiked ? "Quitar me gusta" : "Me gusta"}
             >
               {isLiked ? (
                 <HeartSolid className="w-4 h-4 text-white" />
               ) : (
-                <HeartIcon className="w-4 h-4 text-white" />
+                <HeartIcon className="w-4 h-4 text-gray-700" />
               )}
             </button>
             
             <button
               onClick={(e) => {
-                e.preventDefault()
-                e.stopPropagation()
-                toggleSave(publication.id)
+                e.preventDefault();
+                e.stopPropagation();
+                toggleSave(publication.id);
               }}
-              className={`p-1 rounded-full ${isSaved ? 'bg-teal-500' : 'bg-slate-800/90 hover:bg-slate-700/90'} shadow-lg backdrop-blur-sm`}
+              className={`p-1.5 rounded-full ${isSaved ? 'bg-blue-500' : 'bg-white/80 hover:bg-white'} shadow-sm backdrop-blur-sm transition-colors`}
               aria-label={isSaved ? "Guardado" : "Guardar"}
             >
               {isSaved ? (
                 <BookmarkSolid className="w-4 h-4 text-white" />
               ) : (
-                <BookmarkIcon className="w-4 h-4 text-white" />
+                <BookmarkIcon className="w-4 h-4 text-gray-700" />
               )}
             </button>
           </div>

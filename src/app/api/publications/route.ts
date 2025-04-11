@@ -74,71 +74,14 @@ const CATEGORY_COLLECTIONS: {[key: string]: string} = {
 
 // Sample data for empty collections
 const SAMPLE_PUBLICATIONS: Record<string, PublicationData[]> = {
-  'vehiculos': [
-    {
-      id: 'sample_vehiculo_1',
-      title: 'Toyota Corolla 2022 - Excelente estado',
-      description: 'Vendo Toyota Corolla 2022 con apenas 15,000 km. Único dueño, mantenimiento al día, todos los servicios en concesionario.',
-      price: 18500,
-      currency: 'USD',
-      category: 'vehiculos',
-      subcategory: 'autos',
-      location: { city: 'Lima', region: 'Lima' },
-      contactName: 'Carlos Mendoza',
-      contactPhone: '+51 987 654 321',
-      status: 'active',
-      images: ['/images/vehiculo-corolla.jpg'],
-      created_at: new Date().toISOString()
-    },
-    {
-      id: 'sample_vehiculo_2',
-      title: 'Honda CBR 250R - Impecable',
-      description: 'Vendo Honda CBR 250R con 8,000 km. Documentos en regla, mantenimiento recién hecho.',
-      price: 3800,
-      currency: 'USD',
-      category: 'vehiculos',
-      subcategory: 'motos',
-      location: { city: 'Arequipa', region: 'Arequipa' },
-      contactName: 'Laura Torres',
-      contactPhone: '+51 923 456 789',
-      status: 'active',
-      images: ['/images/vehiculo-corolla.jpg'],
-      created_at: new Date().toISOString()
-    }
-  ],
-  'inmuebles': [
-    {
-      id: 'sample_inmueble_1',
-      title: 'Departamento en Miraflores - 3 dormitorios',
-      description: 'Hermoso departamento en el corazón de Miraflores. 3 dormitorios, 2 baños, cocina equipada, sala-comedor amplia. Edificio con ascensor y seguridad 24/7.',
-      price: 850,
-      currency: 'USD',
-      category: 'inmuebles',
-      subcategory: 'departamentos',
-      location: { city: 'Lima', region: 'Miraflores' },
-      contactName: 'María Sánchez',
-      contactPhone: '+51 912 345 678',
-      status: 'active',
-      images: ['/images/departamento-miraflores.jpg'],
-      created_at: new Date().toISOString()
-    }
-  ],
-  'empleos': [
-    {
-      id: 'sample_empleo_1',
-      title: 'Desarrollador Full Stack React/Node.js',
-      description: 'Importante empresa de tecnología busca desarrollador Full Stack con experiencia en React, Node.js y bases de datos NoSQL. Modalidad remota, excelente remuneración y beneficios.',
-      price: 0,
-      currency: 'PEN',
-      category: 'empleos',
-      subcategory: 'tecnologia',
-      location: { city: 'Lima', region: 'Remoto' },
-      contactName: 'Recursos Humanos',
-      contactEmail: 'rrhh@empresa.com',
-      status: 'active',
-      created_at: new Date().toISOString()
-    }
-  ]
+  'vehiculos': [],
+  'inmuebles': [],
+  'empleos': [],
+  'servicios': [],
+  'productos': [],
+  'eventos': [],
+  'negocios': [],
+  'comunidad': []
 };
 
 // Fallback data for when DB queries fail
