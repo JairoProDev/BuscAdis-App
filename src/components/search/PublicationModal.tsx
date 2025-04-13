@@ -308,7 +308,7 @@ export default function PublicationModal({ publicationId, isOpen, onClose, initi
             <div className="flex-grow flex items-center justify-center">
               <div className="relative h-64 sm:h-80 md:h-[400px] w-full overflow-hidden">
                 <Image
-                  src={pub.images[0]}
+                  src={pub.images && pub.images.length > 0 ? pub.images[0] : '/images/placeholder-buscadis.jpg'}
                   alt={pub.title}
                   fill
                   sizes="(max-width: 768px) 100vw, 50vw"
@@ -318,7 +318,7 @@ export default function PublicationModal({ publicationId, isOpen, onClose, initi
                 />
                 
                 {/* Botones de navegación para más imágenes */}
-                {pub.images.length > 1 && (
+                {pub.images && pub.images.length > 1 && (
                   <div className="absolute bottom-4 left-0 right-0 flex justify-center space-x-2">
                     {pub.images.slice(0, 5).map((_, idx) => (
                       <button 
@@ -596,11 +596,10 @@ export default function PublicationModal({ publicationId, isOpen, onClose, initi
           transition={{ duration: 0.2 }}
           className="fixed inset-0 z-50 flex items-center justify-center overflow-hidden"
           onClick={handleCloseModal}
-          style={{ pointerEvents: 'auto' }}
         >
           {/* Backdrop with minimal opacity */}
           <div 
-            className="fixed inset-0 bg-black/20" 
+            className="fixed inset-0 bg-black/50" 
             onClick={handleCloseModal}
           />
           
@@ -611,12 +610,9 @@ export default function PublicationModal({ publicationId, isOpen, onClose, initi
             animate={{ scale: 1, opacity: 1, y: 0 }}
             exit={{ scale: 0.98, opacity: 0, y: 10 }}
             transition={{ type: "spring", damping: 30, stiffness: 350 }}
-            className="publication-modal bg-white dark:bg-slate-900 rounded-2xl overflow-hidden relative z-10 w-full max-w-4xl mx-4 shadow-xl"
+            className="publication-modal bg-white dark:bg-slate-900 rounded-2xl overflow-hidden relative z-10 w-full max-w-4xl mx-4 shadow-xl max-h-[90vh]"
             id="publication-modal"
-            onClick={(e) => {
-              e.stopPropagation();
-            }}
-            style={{ pointerEvents: 'auto' }}
+            onClick={(e) => e.stopPropagation()}
           >
             {/* Close button with improved positioning and appearance */}
             <button
@@ -662,10 +658,6 @@ const SkeletonLoader = () => (
         <div className="h-4 bg-gray-200 rounded-md w-full"></div>
         <div className="h-4 bg-gray-200 rounded-md w-2/3"></div>
       </div>
-      <div className="flex space-x-3 pt-4">
-        <div className="h-10 bg-gray-200 rounded-md w-1/3"></div>
-        <div className="h-10 bg-gray-200 rounded-md w-1/3"></div>
-      </div>
     </div>
   </div>
 );
@@ -692,7 +684,6 @@ const modalStyles = `
     overflow: hidden;
     position: fixed;
     width: 100%;
-    height: 100%;
   }
 
   /* Mejorar la apariencia de las imágenes en el modal */
@@ -713,9 +704,8 @@ const modalStyles = `
   /* Mejorar la sombra del modal */
   .publication-modal {
     filter: drop-shadow(0 8px 16px rgba(0, 0, 0, 0.1));
-    max-height: 80vh;
     overflow: auto;
-    pointer-events: auto;
+    pointer-events: auto !important;
   }
 
   /* Animación para el skeleton */
@@ -730,11 +720,33 @@ const modalStyles = `
 
   /* Fix para asegurar que los botones y enlaces del modal sean clickeables */
   .publication-modal a,
-  .publication-modal button {
+  .publication-modal button,
+  .publication-modal .modal-content {
     pointer-events: auto !important;
     cursor: pointer !important;
     position: relative !important;
     z-index: 10 !important;
+  }
+  
+  /* Grid layout for desktop and mobile */
+  @media (min-width: 768px) {
+    .publication-modal .grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      max-height: 85vh;
+    }
+    
+    .publication-modal .overflow-y-auto {
+      max-height: 85vh;
+    }
+  }
+  
+  @media (max-width: 767px) {
+    .publication-modal .grid {
+      display: grid;
+      grid-template-columns: 1fr;
+      grid-template-rows: auto 1fr;
+    }
   }
 `;
 

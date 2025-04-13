@@ -398,6 +398,10 @@ export default function CategorySelector({
           {showAllOption && (
             <Link 
               href="/buscar"
+              onClick={(e) => {
+                e.preventDefault();
+                if (onCategoryChange) onCategoryChange('');
+              }}
               className={`flex flex-col items-center justify-center min-w-[90px] p-2 rounded-lg mr-2 transition-all ${
                 !activeCategory 
                   ? 'bg-gradient-to-br from-teal-500 to-cyan-500 text-white shadow-md shadow-teal-500/30' 
@@ -540,6 +544,10 @@ export default function CategorySelector({
           {showAllOption && (
             <Link 
               href="/buscar"
+              onClick={(e) => {
+                e.preventDefault();
+                if (onCategoryChange) onCategoryChange('');
+              }}
               className={`relative flex flex-col items-center justify-center p-4 rounded-xl transition-all overflow-hidden group ${
                 !activeCategory 
                   ? 'bg-gradient-to-br from-teal-500 to-cyan-500 text-white shadow-lg' 

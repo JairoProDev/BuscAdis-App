@@ -33,6 +33,7 @@ export interface Publication {
   status: string
   createdAt: string
   images?: string[]
+  contactPhone?: string
   premium?: boolean
   verified?: boolean
   rating?: number
@@ -299,7 +300,7 @@ export default function SearchResults({
     const hasImages = publication.images && publication.images.length > 0;
     
     // Default image if none provided
-    const imageUrl = hasImages ? publication.images[0] : '/images/placeholder-buscadis.jpg';
+    const imageUrl = hasImages && publication.images ? publication.images[0] : '/images/placeholder-buscadis.jpg';
     
     // Generar seoUrl para el enlace
     const seoUrl = generateSeoUrl(
@@ -310,6 +311,32 @@ export default function SearchResults({
       publication.subsubcategory,
       false // No incluir título en la URL cuando abrimos el modal
     );
+
+    // Formatear mensaje de WhatsApp
+    const formatWhatsAppMessage = () => {
+      let message = `Hola, estoy interesado en tu publicación "${publication.title}" de BuscaDis.`;
+      
+      // Personalizar mensaje según categoría
+      if (publication.categorySlug === 'empleos') {
+        message = `Hola, estoy interesado en la oferta de trabajo "${publication.title}" publicada en BuscaDis.`;
+      } else if (publication.categorySlug === 'inmuebles') {
+        message = `Hola, estoy interesado en el inmueble "${publication.title}" que tienes en BuscaDis.`;
+      } else if (publication.categorySlug === 'vehiculos') {
+        message = `Hola, estoy interesado en el vehículo "${publication.title}" que tienes en BuscaDis.`;
+      }
+      
+      return encodeURIComponent(message);
+    };
+
+    // Función para abrir WhatsApp
+    const handleWhatsAppClick = (e: React.MouseEvent) => {
+      e.preventDefault();
+      e.stopPropagation();
+      const contactPhone = publication.contactPhone || '';
+      const cleanPhone = contactPhone.replace(/[^0-9]/g, '');
+      const whatsappUrl = `https://wa.me/${cleanPhone}?text=${formatWhatsAppMessage()}`;
+      window.open(whatsappUrl, '_blank');
+    };
     
     return (
       <motion.div
@@ -318,84 +345,72 @@ export default function SearchResults({
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.3, delay: index * 0.05 }}
-        className={`relative w-full ${hasImages ? 'h-[350px]' : 'h-[175px]'} rounded-xl overflow-hidden shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1 publication-card ${hasImages ? '' : 'publication-no-image'}`}
+        className="relative w-full h-auto rounded-xl overflow-hidden shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1 publication-card"
       >
         <a 
           href={seoUrl} 
           className="block w-full h-full"
           onClick={(e) => handleOpenModal(publication.id, e)}
         >
-          <div className={`relative flex flex-col bg-white dark:bg-slate-800 rounded-xl overflow-hidden shadow-md hover:shadow-lg transition-all duration-300 h-full`}>
-            {/* Imagen (solo si hay imágenes) */}
-            {hasImages ? (
-              <div className="relative w-full h-48 overflow-hidden bg-gray-100 dark:bg-slate-700">
-                <div className="absolute inset-0 bg-gradient-to-br from-black/10 to-black/30 z-10" />
-                <Image
-                  src={imageUrl}
-                  alt={publication.title}
-                  fill
-                  sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
-                  className="object-cover transition-transform duration-500 hover:scale-110"
-                />
-                
-                {/* Badges */}
-                <div className="absolute top-2 left-2 flex flex-col gap-1 z-20">
-                  {isPremium && (
-                    <span className="bg-gradient-to-r from-teal-500 to-cyan-500 text-white text-xs font-medium px-2 py-1 rounded-full shadow-sm flex items-center">
-                      <SparklesIcon className="w-3 h-3 mr-1" />
-                      <span>Premium</span>
-                    </span>
-                  )}
-                  
-                  {isNew && (
-                    <span className="bg-gradient-to-r from-amber-500 to-orange-500 text-white text-xs font-medium px-2 py-1 rounded-full shadow-sm flex items-center">
-                      <FireIcon className="w-3 h-3 mr-1" />
-                      <span>Nuevo</span>
-                    </span>
-                  )}
-                </div>
-                
-                {/* Precio */}
-                <div className="absolute bottom-2 right-2 z-10">
-                  <span className="bg-blue-600 text-white text-xs font-bold px-2 py-1 rounded-full shadow-sm">
-                    {formatPrice(publication.price, publication.currency)}
+          <div className="relative flex flex-col bg-white dark:bg-slate-800 rounded-xl overflow-hidden shadow-md hover:shadow-lg transition-all duration-300 h-full">
+            {/* Imagen siempre se muestra, usando placeholder si no hay imágenes */}
+            <div className="relative w-full h-48 overflow-hidden bg-gray-100 dark:bg-slate-700">
+              <div className="absolute inset-0 bg-gradient-to-br from-black/10 to-black/30 z-10" />
+              <Image
+                src={imageUrl}
+                alt={publication.title}
+                fill
+                sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
+                className="object-cover transition-transform duration-500 hover:scale-110"
+              />
+              
+              {/* Badges */}
+              <div className="absolute top-2 left-2 flex flex-col gap-1 z-20">
+                {isPremium && (
+                  <span className="bg-gradient-to-r from-teal-500 to-cyan-500 text-white text-xs font-medium px-2 py-1 rounded-full shadow-sm flex items-center">
+                    <SparklesIcon className="w-3 h-3 mr-1" />
+                    <span>Premium</span>
                   </span>
-                </div>
+                )}
+                
+                {isNew && (
+                  <span className="bg-gradient-to-r from-amber-500 to-orange-500 text-white text-xs font-medium px-2 py-1 rounded-full shadow-sm flex items-center">
+                    <FireIcon className="w-3 h-3 mr-1" />
+                    <span>Nuevo</span>
+                  </span>
+                )}
               </div>
-            ) : (
-              <div className="p-3 flex items-center justify-between border-b border-gray-100 dark:border-slate-700 bg-gradient-to-r from-slate-50 to-blue-50 dark:from-slate-800 dark:to-slate-700">
-                <span className="text-sm font-medium text-gray-900 dark:text-white">
+              
+              {/* Precio */}
+              <div className="absolute bottom-2 right-2 z-10">
+                <span className="bg-blue-600 text-white text-xs font-bold px-2 py-1 rounded-full shadow-sm">
                   {formatPrice(publication.price, publication.currency)}
                 </span>
-                
-                <div className="flex gap-1">
-                  {isPremium && (
-                    <span className="bg-gradient-to-r from-teal-500 to-cyan-500 text-white text-xs font-medium px-2 py-0.5 rounded-full shadow-sm flex items-center">
-                      <SparklesIcon className="w-3 h-3 mr-1" />
-                      <span>Premium</span>
-                    </span>
-                  )}
-                  
-                  {isNew && (
-                    <span className="bg-gradient-to-r from-amber-500 to-orange-500 text-white text-xs font-medium px-2 py-0.5 rounded-full shadow-sm flex items-center">
-                      <FireIcon className="w-3 h-3 mr-1" />
-                      <span>Nuevo</span>
-                    </span>
-                  )}
-                </div>
               </div>
-            )}
+              
+              {/* WhatsApp Button */}
+              {publication.contactPhone && (
+                <button
+                  onClick={handleWhatsAppClick}
+                  className="absolute bottom-2 left-2 z-20 bg-green-500 hover:bg-green-600 text-white text-xs font-medium px-2 py-1 rounded-full shadow-sm flex items-center"
+                  aria-label="Contactar por WhatsApp"
+                >
+                  <svg className="w-3 h-3 mr-1" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                    <path d="M17.415 14.382c-.298-.149-1.759-.867-2.031-.967-.272-.099-.47-.148-.669.15-.198.296-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.019-.458.13-.606.134-.133.297-.347.446-.52.149-.174.198-.298.297-.497.1-.198.05-.371-.025-.52-.074-.149-.669-1.612-.916-2.207-.242-.579-.486-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.064 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.57-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z" />
+                  </svg>
+                  <span>WhatsApp</span>
+                </button>
+              )}
+            </div>
             
             {/* Contenido */}
             <div className="flex-1 p-3 flex flex-col justify-between">
               <div>
                 <h3 className="text-sm sm:text-base font-semibold text-gray-900 dark:text-white line-clamp-2 mb-1">{publication.title}</h3>
                 
-                {!hasImages && (
-                  <p className="text-xs text-gray-600 dark:text-gray-300 line-clamp-2 mb-2">
-                    {publication.description}
-                  </p>
-                )}
+                <p className="text-xs text-gray-600 dark:text-gray-300 line-clamp-2 mb-2">
+                  {publication.description}
+                </p>
               </div>
               
               <div className="flex justify-between items-center text-xs text-gray-500 dark:text-gray-400">
@@ -468,6 +483,32 @@ export default function SearchResults({
     
     // Default image if none provided
     const imageUrl = hasImages && publication.images ? publication.images[0] : '/images/placeholder-buscadis.jpg';
+
+    // Formatear mensaje de WhatsApp
+    const formatWhatsAppMessage = () => {
+      let message = `Hola, estoy interesado en tu publicación "${publication.title}" de BuscaDis.`;
+      
+      // Personalizar mensaje según categoría
+      if (publication.categorySlug === 'empleos') {
+        message = `Hola, estoy interesado en la oferta de trabajo "${publication.title}" publicada en BuscaDis.`;
+      } else if (publication.categorySlug === 'inmuebles') {
+        message = `Hola, estoy interesado en el inmueble "${publication.title}" que tienes en BuscaDis.`;
+      } else if (publication.categorySlug === 'vehiculos') {
+        message = `Hola, estoy interesado en el vehículo "${publication.title}" que tienes en BuscaDis.`;
+      }
+      
+      return encodeURIComponent(message);
+    };
+
+    // Función para abrir WhatsApp
+    const handleWhatsAppClick = (e: React.MouseEvent) => {
+      e.preventDefault();
+      e.stopPropagation();
+      const contactPhone = publication.contactPhone || '';
+      const cleanPhone = contactPhone.replace(/[^0-9]/g, '');
+      const whatsappUrl = `https://wa.me/${cleanPhone}?text=${formatWhatsAppMessage()}`;
+      window.open(whatsappUrl, '_blank');
+    };
     
     return (
       <motion.div
@@ -520,6 +561,20 @@ export default function SearchResults({
                   </span>
                 )}
               </div>
+
+              {/* WhatsApp Button for List View */}
+              {publication.contactPhone && (
+                <button
+                  onClick={handleWhatsAppClick}
+                  className="absolute bottom-2 left-2 z-20 bg-green-500 hover:bg-green-600 text-white text-xs font-medium px-2 py-0.5 rounded-full shadow-sm flex items-center"
+                  aria-label="Contactar por WhatsApp"
+                >
+                  <svg className="w-3 h-3 mr-1" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                    <path d="M17.415 14.382c-.298-.149-1.759-.867-2.031-.967-.272-.099-.47-.148-.669.15-.198.296-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.019-.458.13-.606.134-.133.297-.347.446-.52.149-.174.198-.298.297-.497.1-.198.05-.371-.025-.52-.074-.149-.669-1.612-.916-2.207-.242-.579-.486-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.064 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.57-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z" />
+                  </svg>
+                  <span className="hidden sm:inline">WhatsApp</span>
+                </button>
+              )}
             </div>
 
             {/* Contenido */}
@@ -756,7 +811,7 @@ export default function SearchResults({
         publicationId={selectedPublicationId}
         isOpen={modalOpen}
         onClose={handleCloseModal}
-        category={activeCategory}
+        initialData={undefined}
       />
     )}
   </>
