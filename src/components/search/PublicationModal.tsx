@@ -11,7 +11,10 @@ import {
   PhoneIcon,
   PhotoIcon,
   ArrowDownTrayIcon,
-  CheckCircleIcon
+  CheckCircleIcon,
+  ArrowLeftCircleIcon,
+  ArrowRightCircleIcon,
+  CameraIcon
 } from '@heroicons/react/24/outline';
 import { PublicationsService } from '@/services/publications.service';
 import { formatDate } from '@/utils/date';
@@ -27,6 +30,16 @@ import Image from 'next/image';
 import html2canvas from 'html2canvas';
 import Skeleton from 'react-loading-skeleton';
 import 'react-loading-skeleton/dist/skeleton.css';
+import { SpinnerCircle } from "../icons/Spinners";
+import { toast } from 'react-hot-toast';
+import { toPng } from 'html-to-image';
+
+// Declarar tipo global para la caché de publicaciones
+declare global {
+  interface Window {
+    preloadedPublications?: Record<string, PublicationWithContact>;
+  }
+}
 
 // Extender la interfaz Publication para incluir las propiedades de contacto
 interface PublicationWithContact extends Publication {
@@ -44,23 +57,22 @@ interface PublicationModalProps {
   publicationId: string;
   isOpen: boolean;
   onClose: () => void;
-  category?: string;
+  initialData?: PublicationWithContact;
 }
 
-export default function PublicationModal({ 
-  publicationId, 
-  isOpen, 
-  onClose,
-  category 
-}: PublicationModalProps) {
+export default function PublicationModal({ publicationId, isOpen, onClose, initialData }: PublicationModalProps) {
   const router = useRouter();
-  const [publication, setPublication] = useState<PublicationWithContact | null>(null);
-  const [loading, setLoading] = useState(true);
+  const [publication, setPublication] = useState<PublicationWithContact | null>(initialData || null);
+  const [loading, setLoading] = useState(!initialData);
   const [error, setError] = useState('');
   const [isExpanded, setIsExpanded] = useState(false);
+  const [showShareOptions, setShowShareOptions] = useState(false);
   const [isExporting, setIsExporting] = useState(false);
   const [exportSuccess, setExportSuccess] = useState(false);
-  const modalContentRef = useRef<HTMLDivElement>(null);
+  const modalRef = useRef<HTMLDivElement>(null);
+  const exportRef = useRef<HTMLDivElement>(null);
+  const [activeImage, setActiveImage] = useState(0);
+  const [userScrollPosition, setUserScrollPosition] = useState(0);
 
   // Extraer solo la parte del ID si contiene un slug
   const cleanId = useMemo(() => 
@@ -68,78 +80,75 @@ export default function PublicationModal({
     [publicationId]
   );
 
+  // Fetch publication data
+  const fetchPublicationData = async () => {
+    if (!publicationId) return;
+    
+    try {
+      setLoading(true);
+      setError('');
+      const data = await PublicationsService.getPublicationById(cleanId);
+      setPublication(data);
+      
+      // Cache the publication data for future use
+      if (typeof window !== 'undefined') {
+        window.preloadedPublications = window.preloadedPublications || {};
+        window.preloadedPublications[cleanId] = data;
+      }
+    } catch (err) {
+      console.error('Error fetching publication:', err);
+      setError('Error al cargar la publicación');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // When the modal is opened, store the current scroll position
+  useEffect(() => {
+    if (isOpen) {
+      setUserScrollPosition(window.scrollY);
+      document.body.classList.add('modal-open');
+      document.body.style.overflow = 'hidden';
+      document.body.style.paddingRight = '15px'; // Compensate for scrollbar disappearing
+    } else {
+      document.body.classList.remove('modal-open');
+      document.body.style.overflow = '';
+      document.body.style.paddingRight = '';
+      
+      // Restore scroll position when modal closes
+      if (userScrollPosition) {
+        window.scrollTo(0, userScrollPosition);
+      }
+    }
+    
+    return () => {
+      document.body.classList.remove('modal-open');
+      document.body.style.overflow = '';
+      document.body.style.paddingRight = '';
+    };
+  }, [isOpen, userScrollPosition]);
+
   // Obtener datos de la publicación con pre-carga rápida
   useEffect(() => {
-    if (!isOpen || !publicationId) return;
+    // Skip fetching if we already have initialData
+    if (initialData && publicationId === initialData.id) {
+      setPublication(initialData);
+      setLoading(false);
+      return;
+    }
     
-    let isMounted = true;
+    // If we have preloaded data, use it immediately
+    if (window.preloadedPublications && window.preloadedPublications[cleanId]) {
+      setPublication(window.preloadedPublications[cleanId]);
+      setLoading(false);
+      return;
+    }
     
-    const fetchPublication = async () => {
-      if (!cleanId) return;
-      
-      try {
-        setLoading(true);
-        setError('');
-        
-        // Asegurar que el body tiene la clase modal-open
-        document.body.classList.add('modal-open');
-        
-        console.log(`Obteniendo publicación ${cleanId} de categoría ${category || 'desconocida'}`);
-        
-        // Implementar reintento automático
-        let attempts = 0;
-        const maxAttempts = 1; // Reducir a 1 para acelerar
-        let success = false;
-        let data = null;
-        
-        while (attempts <= maxAttempts && !success && isMounted) {
-          try {
-            attempts++;
-            // Usar Promise.race para limitar el tiempo de espera
-            data = await Promise.race([
-              PublicationsService.getPublicationById(cleanId, category),
-              new Promise<any>((_, reject) => 
-                setTimeout(() => reject(new Error('Tiempo de espera agotado')), 3000)
-              )
-            ]);
-            success = true;
-          } catch (err) {
-            console.warn(`Intento ${attempts}/${maxAttempts} fallido:`, err);
-            if (attempts <= maxAttempts && isMounted) {
-              await new Promise(resolve => setTimeout(resolve, 100)); // Reducir tiempo de espera
-            }
-          }
-        }
-        
-        if (!success || !data) {
-          throw new Error('No se pudo obtener la información después de varios intentos');
-        }
-        
-        if (isMounted) {
-          console.log('Datos obtenidos correctamente:', data);
-          setPublication(data);
-        }
-      } catch (err) {
-        console.error('Error al obtener publicación:', err);
-        if (isMounted) {
-          setError('No se pudo cargar la publicación. Intenta de nuevo.');
-          setPublication(null);
-        }
-      } finally {
-        if (isMounted) {
-          setLoading(false);
-        }
-      }
-    };
-
-    fetchPublication();
-    
-    // Cleanup function
-    return () => {
-      isMounted = false;
-      document.body.classList.remove('modal-open');
-    };
-  }, [publicationId, cleanId, isOpen, category]);
+    // If no initialData or different publication, fetch data
+    if (isOpen && publicationId) {
+      fetchPublicationData();
+    }
+  }, [isOpen, publicationId, cleanId, initialData]);
 
   // Manejar tecla ESC para cerrar modal
   useEffect(() => {
@@ -156,22 +165,9 @@ export default function PublicationModal({
     };
   }, [onClose]);
 
-  // Prevenir scroll del body cuando el modal está abierto
-  useEffect(() => {
-    if (isOpen) {
-      document.body.classList.add('modal-open');
-    } else {
-      document.body.classList.remove('modal-open');
-    }
-    
-    return () => {
-      document.body.classList.remove('modal-open');
-    };
-  }, [isOpen]);
-
   // Cerrar modal
-  const handleClose = () => {
-    document.body.classList.remove('modal-open');
+  const handleCloseModal = () => {
+    // No manipular classList aquí para evitar doble manejo con el useEffect
     onClose();
   };
 
@@ -193,25 +189,26 @@ export default function PublicationModal({
 
   // Exportar modal como imagen
   const handleExportAsImage = async () => {
-    if (!modalContentRef.current) return;
+    if (!exportRef.current) return;
     
     try {
       setIsExporting(true);
       
       // Añadir clase para mejorar renderizado durante la captura
-      modalContentRef.current.classList.add('exporting');
+      exportRef.current.classList.add('exporting');
       
-      const canvas = await html2canvas(modalContentRef.current, {
-        scale: 2, // Mayor resolución
-        useCORS: true, // Permitir carga de imágenes de otros dominios
+      // Use html-to-image instead of html2canvas
+      const dataUrl = await toPng(exportRef.current, {
+        quality: 0.95,
         backgroundColor: '#ffffff',
-        logging: false
+        canvasWidth: exportRef.current.clientWidth * 2,
+        canvasHeight: exportRef.current.clientHeight * 2,
+        pixelRatio: 2, // For higher resolution
       });
       
       // Crear enlace para descargar
-      const image = canvas.toDataURL('image/png');
       const link = document.createElement('a');
-      link.href = image;
+      link.href = dataUrl;
       link.download = `buscadis-${publication?.id || 'anuncio'}.png`;
       link.click();
       
@@ -220,9 +217,10 @@ export default function PublicationModal({
       setTimeout(() => setExportSuccess(false), 3000);
       
       // Eliminar clase de exportación
-      modalContentRef.current.classList.remove('exporting');
+      exportRef.current.classList.remove('exporting');
     } catch (err) {
       console.error('Error al exportar como imagen:', err);
+      toast.error('Hubo un problema al generar la imagen');
     } finally {
       setIsExporting(false);
     }
@@ -294,336 +292,358 @@ export default function PublicationModal({
     e.stopPropagation();
   };
 
+  // Renderizar contenido de la publicación
+  const renderPublicationContent = (pub: PublicationWithContact | null) => {
+    if (!pub) return null;
+    
+    return (
+      <>
+        {/* Columna izquierda - Imágenes */}
+        <div className="bg-gray-50 dark:bg-slate-900 relative group">
+          {/* Badge premium */}
+          {pub.premium && (
+            <div className="absolute top-3 left-3 z-10 bg-gradient-to-r from-amber-500 to-yellow-500 text-white text-xs font-bold px-3 py-1 rounded-full shadow-lg flex items-center">
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z" />
+              </svg>
+              <span>Premium</span>
+            </div>
+          )}
+          
+          {/* Indicador de carga para la imagen */}
+          {loading && (
+            <div className="absolute top-2 right-2 z-10">
+              <LoadingSpinner size="sm" color="primary" />
+            </div>
+          )}
+          
+          {pub.images && pub.images.length > 0 ? (
+            <div className="relative h-64 sm:h-80 md:h-[500px] overflow-hidden">
+              <Image
+                src={pub.images[0]}
+                alt={pub.title}
+                fill
+                sizes="(max-width: 768px) 100vw, 50vw"
+                priority={true}
+                className="object-contain transition-all duration-500 hover:scale-105 transform-gpu"
+                style={{ objectFit: 'contain' }}
+              />
+              
+              {/* Botones de navegación para más imágenes */}
+              {pub.images.length > 1 && (
+                <div className="absolute bottom-4 left-0 right-0 flex justify-center space-x-2">
+                  {pub.images.slice(0, 5).map((_, idx) => (
+                    <button 
+                      key={idx} 
+                      className={`w-2 h-2 rounded-full ${idx === 0 ? 'bg-blue-500' : 'bg-gray-300 dark:bg-gray-600'}`}
+                      aria-label={`Ir a imagen ${idx + 1}`}
+                    />
+                  ))}
+                </div>
+              )}
+            </div>
+          ) : (
+            <div className="flex flex-col items-center justify-center h-64 sm:h-80 md:h-[500px] bg-gray-100 dark:bg-slate-800">
+              <div className="p-8 text-center">
+                <PhotoIcon className="h-16 w-16 mx-auto text-gray-400 dark:text-slate-500" />
+                <p className="text-gray-500 dark:text-slate-400 mt-2">Sin imágenes</p>
+              </div>
+            </div>
+          )}
+        </div>
+        
+        {/* Columna derecha - Información */}
+        <div className="p-6 dark:bg-slate-800 dark:text-white">
+          <div className="mb-5">
+            <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-white mb-3 leading-tight">{pub.title}</h1>
+            
+            <div className="flex flex-wrap justify-between items-center gap-2 mb-4">
+              <div className="text-xl font-bold text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-900/30 px-3 py-1 rounded-lg">
+                {formatPrice(pub.price, pub.currency)}
+              </div>
+              
+              <div className="flex items-center text-gray-500 dark:text-slate-400 text-sm bg-gray-100 dark:bg-slate-700 px-2 py-1 rounded-lg">
+                <CalendarIcon className="w-4 h-4 mr-1" />
+                <span>{formatDate(pub.createdAt)}</span>
+              </div>
+            </div>
+            
+            <div className="flex items-center text-gray-600 dark:text-slate-300 text-sm mb-4 bg-gray-100 dark:bg-slate-700 px-2 py-1 rounded-lg inline-block">
+              <MapPinIcon className="w-4 h-4 mr-1 flex-shrink-0" />
+              <span>
+                {typeof pub.location === 'string' 
+                  ? pub.location 
+                  : pub.location?.city || 'Ubicación no especificada'}
+              </span>
+            </div>
+            
+            <div className="mb-6 bg-gray-50 dark:bg-slate-700/50 p-4 rounded-lg">
+              <h2 className="text-lg font-semibold text-gray-800 dark:text-white mb-2 flex items-center">
+                Descripción
+                {loading && <LoadingSpinner size="sm" className="ml-2 opacity-70" />}
+              </h2>
+              <div 
+                className={`text-gray-600 dark:text-slate-300 whitespace-pre-line ${isExpanded ? '' : 'line-clamp-4'}`}
+              >
+                {pub.description}
+              </div>
+              {pub.description && pub.description.length > 200 && (
+                <button 
+                  className="text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 text-sm mt-2 font-medium flex items-center"
+                  onClick={toggleExpanded}
+                >
+                  {isExpanded ? 'Ver menos' : 'Ver más'}
+                  <svg xmlns="http://www.w3.org/2000/svg" className={`h-4 w-4 ml-1 transition-transform ${isExpanded ? 'rotate-180' : ''}`} fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                  </svg>
+                </button>
+              )}
+            </div>
+            
+            <div className="mt-6 space-y-3">
+              {/* Contacto */}
+              <motion.a 
+                href={`tel:${pub.contactPhone || pub.contact?.phone || ''}`}
+                className="flex items-center justify-center w-full bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white py-3 px-4 rounded-lg transition-all shadow-md"
+                whileHover={{ scale: 1.03, boxShadow: "0px 4px 12px rgba(0, 0, 0, 0.15)" }}
+                whileTap={{ scale: 0.97 }}
+              >
+                <PhoneIcon className="w-5 h-5 mr-2" />
+                <span className="font-medium">Llamar ahora</span>
+              </motion.a>
+              
+              {/* WhatsApp */}
+              <motion.a 
+                href={`https://wa.me/${(pub.contactPhone || pub.contact?.phone || '').replace(/[^0-9]/g, '')}?text=${formatWhatsAppMessage()}`}
+                target="_blank" 
+                rel="noopener noreferrer"
+                className="flex items-center justify-center w-full bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white py-3 px-4 rounded-lg transition-all shadow-md"
+                whileHover={{ scale: 1.03, boxShadow: "0px 4px 12px rgba(0, 0, 0, 0.15)" }}
+                whileTap={{ scale: 0.97 }}
+              >
+                <WhatsAppIcon className="w-5 h-5 mr-2" />
+                <span className="font-medium">WhatsApp</span>
+              </motion.a>
+              
+              {/* Botones adicionales */}
+              <div className="grid grid-cols-2 gap-3 mt-2">
+                <motion.button
+                  whileHover={{ scale: 1.03, boxShadow: "0px 4px 8px rgba(0, 0, 0, 0.1)" }}
+                  whileTap={{ scale: 0.97 }}
+                  onClick={handleViewFullPublication}
+                  className="flex items-center justify-center bg-gray-100 hover:bg-gray-200 dark:bg-slate-700 dark:hover:bg-slate-600 text-gray-800 dark:text-white py-3 px-4 rounded-lg transition-all shadow-md"
+                >
+                  <ArrowTopRightOnSquareIcon className="w-5 h-5 mr-2" />
+                  <span className="font-medium">Ver completo</span>
+                </motion.button>
+                
+                <motion.button
+                  whileHover={{ scale: 1.03, boxShadow: "0px 4px 8px rgba(0, 0, 0, 0.1)" }}
+                  whileTap={{ scale: 0.97 }}
+                  onClick={handleShare}
+                  className="flex items-center justify-center bg-gray-100 hover:bg-gray-200 dark:bg-slate-700 dark:hover:bg-slate-600 text-gray-800 dark:text-white py-3 px-4 rounded-lg transition-all shadow-md"
+                >
+                  <ShareIcon className="w-5 h-5 mr-2" />
+                  <span className="font-medium">Compartir</span>
+                </motion.button>
+              </div>
+              
+              {/* Botón de exportar como imagen */}
+              <motion.button
+                whileHover={{ scale: 1.03, boxShadow: "0px 4px 12px rgba(0, 0, 0, 0.15)" }}
+                whileTap={{ scale: 0.97 }}
+                onClick={handleExportAsImage}
+                disabled={isExporting}
+                className={`flex items-center justify-center w-full bg-gradient-to-r from-indigo-600 to-indigo-700 hover:from-indigo-700 hover:to-indigo-800 text-white py-3 px-4 rounded-lg transition-all shadow-md ${isExporting ? 'opacity-70 cursor-not-allowed' : ''}`}
+              >
+                {isExporting ? (
+                  <>
+                    <LoadingSpinner size="sm" className="mr-2" />
+                    <span>Generando imagen...</span>
+                  </>
+                ) : exportSuccess ? (
+                  <>
+                    <CheckCircleIcon className="w-5 h-5 mr-2" />
+                    <span>¡Imagen descargada!</span>
+                  </>
+                ) : (
+                  <>
+                    <ArrowDownTrayIcon className="w-5 h-5 mr-2" />
+                    <span>Descargar como imagen</span>
+                  </>
+                )}
+              </motion.button>
+              
+              {/* Compartir en redes sociales */}
+              <div className="flex justify-center space-x-4 mt-4">
+                <motion.button
+                  onClick={shareOnFacebook}
+                  className="p-3 bg-gradient-to-r from-blue-600 to-blue-700 text-white rounded-full shadow-md"
+                  aria-label="Compartir en Facebook"
+                  whileHover={{ 
+                    scale: 1.1, 
+                    boxShadow: "0px 4px 10px rgba(0, 0, 0, 0.2)",
+                    background: "linear-gradient(to right, #1e40af, #1e3a8a)"
+                  }}
+                  whileTap={{ scale: 0.9 }}
+                >
+                  <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                    <path fillRule="evenodd" d="M22 12c0-5.523-4.477-10-10-10S2 6.477 2 12c0 4.991 3.657 9.128 8.438 9.878v-6.987h-2.54V12h2.54V9.797c0-2.506 1.492-3.89 3.777-3.89 1.094 0 2.238.195 2.238.195v2.46h-1.26c-1.243 0-1.63.771-1.63 1.562V12h2.773l-.443 2.89h-2.33v6.988C18.343 21.128 22 16.991 22 12z" clipRule="evenodd" />
+                  </svg>
+                </motion.button>
+                <motion.button
+                  onClick={shareOnTwitter}
+                  className="p-3 bg-gradient-to-r from-sky-500 to-sky-600 text-white rounded-full shadow-md"
+                  aria-label="Compartir en Twitter"
+                  whileHover={{ 
+                    scale: 1.1, 
+                    boxShadow: "0px 4px 10px rgba(0, 0, 0, 0.2)",
+                    background: "linear-gradient(to right, #0284c7, #0369a1)"
+                  }}
+                  whileTap={{ scale: 0.9 }}
+                >
+                  <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                    <path d="M8.29 20.251c7.547 0 11.675-6.253 11.675-11.675 0-.178 0-.355-.012-.53A8.348 8.348 0 0022 5.92a8.19 8.19 0 01-2.357.646 4.118 4.118 0 001.804-2.27 8.224 8.224 0 01-2.605.996 4.107 4.107 0 00-6.993 3.743 11.65 11.65 0 01-8.457-4.287 4.106 4.106 0 001.27 5.477A4.072 4.072 0 012.8 9.713v.052a4.105 4.105 0 003.292 4.022 4.095 4.095 0 01-1.853.07 4.108 4.108 0 003.834 2.85A8.233 8.233 0 012 18.407a11.616 11.616 0 006.29 1.84" />
+                  </svg>
+                </motion.button>
+                <motion.button
+                  onClick={shareOnWhatsApp}
+                  className="p-3 bg-gradient-to-r from-green-500 to-green-600 text-white rounded-full shadow-md"
+                  aria-label="Compartir en WhatsApp"
+                  whileHover={{ 
+                    scale: 1.1, 
+                    boxShadow: "0px 4px 10px rgba(0, 0, 0, 0.2)",
+                    background: "linear-gradient(to right, #16a34a, #15803d)"
+                  }}
+                  whileTap={{ scale: 0.9 }}
+                >
+                  <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                    <path fillRule="evenodd" d="M17.415 14.382c-.298-.149-1.759-.867-2.031-.967-.272-.099-.47-.148-.669.15-.198.296-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.019-.458.13-.606.134-.133.297-.347.446-.52.149-.174.198-.298.297-.497.1-.198.05-.371-.025-.52-.074-.149-.669-1.612-.916-2.207-.242-.579-.486-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.064 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.57-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z" clipRule="evenodd" />
+                    <path fillRule="evenodd" d="M12 2C6.477 2 2 6.477 2 12c0 1.593.371 3.097 1.031 4.438l-1.002 3.666 3.736-.982A9.962 9.962 0 0012 22c5.523 0 10-4.477 10-10S17.523 2 12 2zm0 18c-1.49 0-2.946-.38-4.222-1.089l-.3-.18-3.126.815.834-3.05-.2-.32A7.957 7.957 0 014 12c0-4.411 3.589-8 8-8s8 3.589 8 8-3.589 8-8 8z" clipRule="evenodd" />
+                  </svg>
+                </motion.button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Footer con marca de agua */}
+        <div className="bg-gradient-to-r from-gray-50 to-gray-100 dark:from-slate-900/50 dark:to-slate-800/50 col-span-1 lg:col-span-2 py-3 px-4 text-center text-sm text-gray-500 dark:text-slate-400 border-t border-gray-100 dark:border-slate-700/50">
+          <div className="flex items-center justify-center">
+            <Image 
+              src="/logo.png" 
+              alt="BuscaDis" 
+              width={60} 
+              height={15} 
+              className="mr-2"
+            />
+            <span className="flex items-center">
+              <span className="mr-2">ID: {pub.id}</span>
+              <span className="bg-blue-100 dark:bg-blue-900/30 px-2 py-0.5 rounded text-xs text-blue-700 dark:text-blue-400">
+                {new Date().toLocaleDateString()}
+              </span>
+            </span>
+          </div>
+        </div>
+      </>
+    );
+  };
+
   if (!isOpen) return null;
 
   return (
     <AnimatePresence>
       {isOpen && (
-        <div className="fixed inset-0 z-[9999] overflow-hidden flex items-center justify-center">
-          {/* Overlay - Solo el fondo oscuro es clickeable para cerrar */}
-          <motion.div 
-            className="fixed inset-0 bg-black/60 backdrop-blur-sm transition-opacity"
-            onClick={handleClose}
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            transition={{ duration: 0.2 }}
-          ></motion.div>
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          transition={{ duration: 0.2 }}
+          className="fixed inset-0 z-50 flex items-center justify-center overflow-y-auto"
+        >
+          {/* Backdrop with reduced blur and improved opacity */}
+          <div 
+            className="fixed inset-0 bg-black/40 backdrop-blur-[1px]" 
+            onClick={handleCloseModal}
+          />
           
-          {/* Modal container - Centrado vertical y horizontal */}
-          <motion.div 
-            className="relative w-full max-w-5xl mx-auto my-4 px-2 sm:px-4 max-h-[90vh] flex items-center justify-center pointer-events-none z-10"
-            initial={{ opacity: 0, scale: 0.95, y: 20 }}
-            animate={{ opacity: 1, scale: 1, y: 0 }}
-            exit={{ opacity: 0, scale: 0.95, y: -10 }}
-            transition={{ 
-              type: "spring", 
-              damping: 25, 
-              stiffness: 350,
-              mass: 0.5
-            }}
+          {/* Modal container with improved animation and styles */}
+          <motion.div
+            ref={modalRef}
+            initial={{ scale: 0.95, opacity: 0, y: 20 }}
+            animate={{ scale: 1, opacity: 1, y: 0 }}
+            exit={{ scale: 0.98, opacity: 0, y: 10 }}
+            transition={{ type: "spring", damping: 30, stiffness: 350 }}
+            className="publication-modal bg-white dark:bg-slate-900 rounded-2xl overflow-hidden relative z-10 w-full max-w-5xl mx-4 my-8 shadow-xl"
+            id="publication-modal"
+            onClick={handleModalClick}
           >
-            {/* Modal content */}
-            <div 
-              ref={modalContentRef}
-              className="bg-white dark:bg-slate-800 rounded-xl overflow-hidden shadow-2xl max-h-full flex flex-col pointer-events-auto w-full relative"
-              onClick={handleModalClick}
+            {/* Close button with improved positioning and appearance */}
+            <button
+              onClick={handleCloseModal}
+              className="absolute top-4 right-4 z-30 bg-white/90 dark:bg-slate-800/90 rounded-full p-2 shadow-lg hover:bg-white dark:hover:bg-slate-700 transition-all duration-200"
+              aria-label="Cerrar"
             >
-              {/* Imagen de marca de agua para exportación */}
-              <div className="absolute bottom-3 right-3 opacity-70 z-10 exporting-only hidden">
-                <Image 
-                  src="/logo.png" 
-                  alt="BuscaDis" 
-                  width={80} 
-                  height={20}
-                />
+              <XMarkIcon className="h-5 w-5 text-gray-700 dark:text-gray-200" />
+            </button>
+            
+            {/* Content remains the same */}
+            
+            {loading ? (
+              <SkeletonLoader />
+            ) : error ? (
+              <div className="p-8 text-center text-red-500">
+                <p>Error al cargar la publicación. Por favor, inténtalo de nuevo.</p>
               </div>
-              
-              {/* Botón de cerrar */}
-              <button 
-                onClick={handleClose}
-                className="absolute top-3 right-3 z-20 bg-white/80 dark:bg-slate-700/80 hover:bg-gray-100 dark:hover:bg-slate-600 text-gray-800 dark:text-white p-2 rounded-full shadow-lg backdrop-blur-sm transition-all hover:scale-110 border border-gray-200 dark:border-slate-600"
-                aria-label="Cerrar"
-              >
-                <XMarkIcon className="w-5 h-5" />
-              </button>
-
-              {loading ? (
-                // Skeleton loader durante la carga
-                <div className="p-6 max-h-[90vh] overflow-auto">
-                  <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                    {/* Skeleton para imagen */}
-                    <div className="bg-gray-50 dark:bg-slate-900 relative rounded-lg overflow-hidden">
-                      <div className="absolute inset-0 flex items-center justify-center">
-                        <LoadingSpinner size="lg" color="primary" className="opacity-20" />
-                      </div>
-                      <Skeleton 
-                        height={400} 
-                        width="100%" 
-                        baseColor={typeof window !== 'undefined' && document.documentElement.classList.contains('dark') ? '#1e293b' : '#f9fafb'}
-                        highlightColor={typeof window !== 'undefined' && document.documentElement.classList.contains('dark') ? '#334155' : '#f3f4f6'} 
-                      />
-                    </div>
-                    
-                    {/* Skeleton para contenido */}
-                    <div className="space-y-5">
-                      <Skeleton height={40} width="80%" />
-                      <Skeleton height={28} width="40%" />
-                      <div className="flex items-center gap-2">
-                        <Skeleton height={24} width={100} />
-                        <Skeleton height={24} width={120} />
-                      </div>
-                      <Skeleton count={3} height={16} />
-                      
-                      <div className="pt-5 space-y-3">
-                        <Skeleton height={50} width="100%" />
-                        <Skeleton height={50} width="100%" />
-                        <div className="grid grid-cols-2 gap-3">
-                          <Skeleton height={40} width="100%" />
-                          <Skeleton height={40} width="100%" />
-                        </div>
-                        <Skeleton height={40} width="100%" />
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              ) : error ? (
-                <div className="p-8 text-center">
-                  <div className="bg-red-100 dark:bg-red-900/30 p-6 rounded-lg mb-4">
-                    <svg xmlns="http://www.w3.org/2000/svg" className="h-12 w-12 text-red-500 mx-auto mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                    </svg>
-                    <h2 className="text-xl font-bold text-red-600 dark:text-red-400 mb-2">Error al cargar</h2>
-                    <p className="text-gray-600 dark:text-slate-300 mb-4">{error}</p>
-                  </div>
-                  <button 
-                    onClick={handleClose} 
-                    className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 transition-colors shadow-md"
-                  >
-                    Volver
-                  </button>
-                </div>
-              ) : publication ? (
-                <div className="overflow-auto max-h-[90vh] publication-modal">
-                  <div className="grid grid-cols-1 lg:grid-cols-2">
-                    {/* Columna izquierda - Imágenes */}
-                    <div className="bg-gray-50 dark:bg-slate-900 relative">
-                      {publication.premium && (
-                        <div className="absolute top-3 left-3 z-10 bg-gradient-to-r from-amber-500 to-yellow-500 text-white text-xs font-bold px-3 py-1 rounded-full shadow-lg flex items-center">
-                          <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z" />
-                          </svg>
-                          <span>Premium</span>
-                        </div>
-                      )}
-                      
-                      {publication.images && publication.images.length > 0 ? (
-                        <div className="relative h-64 sm:h-80 md:h-[500px]">
-                          <Image
-                            src={publication.images[0]}
-                            alt={publication.title}
-                            fill
-                            sizes="(max-width: 768px) 100vw, 50vw"
-                            priority={true}
-                            className="object-contain transition-all duration-500"
-                            style={{ objectFit: 'contain' }}
-                          />
-                        </div>
-                      ) : (
-                        <div className="flex flex-col items-center justify-center h-64 sm:h-80 md:h-[500px] bg-gray-100 dark:bg-slate-800">
-                          <div className="p-8 text-center">
-                            <PhotoIcon className="h-16 w-16 mx-auto text-gray-400 dark:text-slate-500" />
-                            <p className="text-gray-500 dark:text-slate-400 mt-2">Sin imágenes</p>
-                          </div>
-                        </div>
-                      )}
-                    </div>
-                    
-                    {/* Columna derecha - Información */}
-                    <div className="p-6 dark:bg-slate-800 dark:text-white">
-                      <div className="mb-5">
-                        <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-white mb-3">{publication.title}</h1>
-                        
-                        <div className="flex flex-wrap justify-between items-center gap-2 mb-4">
-                          <div className="text-xl font-bold text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-900/30 px-3 py-1 rounded-lg">
-                            {formatPrice(publication.price, publication.currency)}
-                          </div>
-                          
-                          <div className="flex items-center text-gray-500 dark:text-slate-400 text-sm bg-gray-100 dark:bg-slate-700 px-2 py-1 rounded-lg">
-                            <CalendarIcon className="w-4 h-4 mr-1" />
-                            <span>{formatDate(publication.createdAt)}</span>
-                          </div>
-                        </div>
-                        
-                        <div className="flex items-center text-gray-600 dark:text-slate-300 text-sm mb-4 bg-gray-100 dark:bg-slate-700 px-2 py-1 rounded-lg inline-block">
-                          <MapPinIcon className="w-4 h-4 mr-1 flex-shrink-0" />
-                          <span>
-                            {typeof publication.location === 'string' 
-                              ? publication.location 
-                              : publication.location?.city || 'Ubicación no especificada'}
-                          </span>
-                        </div>
-                        
-                        <div className="mb-6 bg-gray-50 dark:bg-slate-700/50 p-4 rounded-lg">
-                          <h2 className="text-lg font-semibold text-gray-800 dark:text-white mb-2">Descripción</h2>
-                          <div 
-                            className={`text-gray-600 dark:text-slate-300 whitespace-pre-line ${isExpanded ? '' : 'line-clamp-4'}`}
-                          >
-                            {publication.description}
-                          </div>
-                          {publication.description && publication.description.length > 200 && (
-                            <button 
-                              className="text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 text-sm mt-2 font-medium flex items-center"
-                              onClick={toggleExpanded}
-                            >
-                              {isExpanded ? 'Ver menos' : 'Ver más'}
-                              <svg xmlns="http://www.w3.org/2000/svg" className={`h-4 w-4 ml-1 transition-transform ${isExpanded ? 'rotate-180' : ''}`} fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                              </svg>
-                            </button>
-                          )}
-                        </div>
-                        
-                        <div className="mt-6 space-y-3">
-                          {/* Contacto */}
-                          <motion.a 
-                            href={`tel:${publication.contactPhone || publication.contact?.phone || ''}`}
-                            className="flex items-center justify-center w-full bg-blue-600 hover:bg-blue-700 text-white py-3 px-4 rounded-lg transition-colors shadow-md"
-                            whileHover={{ scale: 1.03 }}
-                            whileTap={{ scale: 0.97 }}
-                          >
-                            <PhoneIcon className="w-5 h-5 mr-2" />
-                            <span className="font-medium">Llamar ahora</span>
-                          </motion.a>
-                          
-                          {/* WhatsApp */}
-                          <motion.a 
-                            href={`https://wa.me/${(publication.contactPhone || publication.contact?.phone || '').replace(/[^0-9]/g, '')}?text=${formatWhatsAppMessage()}`}
-                            target="_blank" 
-                            rel="noopener noreferrer"
-                            className="flex items-center justify-center w-full bg-green-500 hover:bg-green-600 text-white py-3 px-4 rounded-lg transition-colors shadow-md"
-                            whileHover={{ scale: 1.03 }}
-                            whileTap={{ scale: 0.97 }}
-                          >
-                            <WhatsAppIcon className="w-5 h-5 mr-2" />
-                            <span className="font-medium">WhatsApp</span>
-                          </motion.a>
-                          
-                          {/* Botones adicionales */}
-                          <div className="grid grid-cols-2 gap-3 mt-2">
-                            <motion.button
-                              whileHover={{ scale: 1.03 }}
-                              whileTap={{ scale: 0.97 }}
-                              onClick={handleViewFullPublication}
-                              className="flex items-center justify-center bg-gray-100 hover:bg-gray-200 dark:bg-slate-700 dark:hover:bg-slate-600 text-gray-800 dark:text-white py-3 px-4 rounded-lg transition-colors shadow-md"
-                            >
-                              <ArrowTopRightOnSquareIcon className="w-5 h-5 mr-2" />
-                              <span className="font-medium">Ver completo</span>
-                            </motion.button>
-                            
-                            <motion.button
-                              whileHover={{ scale: 1.03 }}
-                              whileTap={{ scale: 0.97 }}
-                              onClick={handleShare}
-                              className="flex items-center justify-center bg-gray-100 hover:bg-gray-200 dark:bg-slate-700 dark:hover:bg-slate-600 text-gray-800 dark:text-white py-3 px-4 rounded-lg transition-colors shadow-md"
-                            >
-                              <ShareIcon className="w-5 h-5 mr-2" />
-                              <span className="font-medium">Compartir</span>
-                            </motion.button>
-                          </div>
-                          
-                          {/* Botón de exportar como imagen */}
-                          <motion.button
-                            whileHover={{ scale: 1.03 }}
-                            whileTap={{ scale: 0.97 }}
-                            onClick={handleExportAsImage}
-                            disabled={isExporting}
-                            className={`flex items-center justify-center w-full bg-indigo-600 hover:bg-indigo-700 text-white py-3 px-4 rounded-lg transition-colors shadow-md ${isExporting ? 'opacity-70 cursor-not-allowed' : ''}`}
-                          >
-                            {isExporting ? (
-                              <>
-                                <LoadingSpinner size="sm" className="mr-2" />
-                                <span>Generando imagen...</span>
-                              </>
-                            ) : exportSuccess ? (
-                              <>
-                                <CheckCircleIcon className="w-5 h-5 mr-2" />
-                                <span>¡Imagen descargada!</span>
-                              </>
-                            ) : (
-                              <>
-                                <ArrowDownTrayIcon className="w-5 h-5 mr-2" />
-                                <span>Descargar como imagen</span>
-                              </>
-                            )}
-                          </motion.button>
-                          
-                          {/* Compartir en redes sociales */}
-                          <div className="flex justify-center space-x-4 mt-4">
-                            <motion.button
-                              onClick={shareOnFacebook}
-                              className="p-3 bg-blue-600 text-white rounded-full hover:bg-blue-700 transition-colors shadow-md"
-                              aria-label="Compartir en Facebook"
-                              whileHover={{ scale: 1.1, boxShadow: "0px 4px 10px rgba(0, 0, 0, 0.2)" }}
-                              whileTap={{ scale: 0.9 }}
-                            >
-                              <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-                                <path fillRule="evenodd" d="M22 12c0-5.523-4.477-10-10-10S2 6.477 2 12c0 4.991 3.657 9.128 8.438 9.878v-6.987h-2.54V12h2.54V9.797c0-2.506 1.492-3.89 3.777-3.89 1.094 0 2.238.195 2.238.195v2.46h-1.26c-1.243 0-1.63.771-1.63 1.562V12h2.773l-.443 2.89h-2.33v6.988C18.343 21.128 22 16.991 22 12z" clipRule="evenodd" />
-                              </svg>
-                            </motion.button>
-                            <motion.button
-                              onClick={shareOnTwitter}
-                              className="p-3 bg-sky-500 text-white rounded-full hover:bg-sky-600 transition-colors shadow-md"
-                              aria-label="Compartir en Twitter"
-                              whileHover={{ scale: 1.1, boxShadow: "0px 4px 10px rgba(0, 0, 0, 0.2)" }}
-                              whileTap={{ scale: 0.9 }}
-                            >
-                              <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-                                <path d="M8.29 20.251c7.547 0 11.675-6.253 11.675-11.675 0-.178 0-.355-.012-.53A8.348 8.348 0 0022 5.92a8.19 8.19 0 01-2.357.646 4.118 4.118 0 001.804-2.27 8.224 8.224 0 01-2.605.996 4.107 4.107 0 00-6.993 3.743 11.65 11.65 0 01-8.457-4.287 4.106 4.106 0 001.27 5.477A4.072 4.072 0 012.8 9.713v.052a4.105 4.105 0 003.292 4.022 4.095 4.095 0 01-1.853.07 4.108 4.108 0 003.834 2.85A8.233 8.233 0 012 18.407a11.616 11.616 0 006.29 1.84" />
-                              </svg>
-                            </motion.button>
-                            <motion.button
-                              onClick={shareOnWhatsApp}
-                              className="p-3 bg-green-500 text-white rounded-full hover:bg-green-600 transition-colors shadow-md"
-                              aria-label="Compartir en WhatsApp"
-                              whileHover={{ scale: 1.1, boxShadow: "0px 4px 10px rgba(0, 0, 0, 0.2)" }}
-                              whileTap={{ scale: 0.9 }}
-                            >
-                              <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-                                <path fillRule="evenodd" d="M17.415 14.382c-.298-.149-1.759-.867-2.031-.967-.272-.099-.47-.148-.669.15-.198.296-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.019-.458.13-.606.134-.133.297-.347.446-.52.149-.174.198-.298.297-.497.1-.198.05-.371-.025-.52-.074-.149-.669-1.612-.916-2.207-.242-.579-.486-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.064 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.57-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z" clipRule="evenodd" />
-                                <path fillRule="evenodd" d="M12 2C6.477 2 2 6.477 2 12c0 1.593.371 3.097 1.031 4.438l-1.002 3.666 3.736-.982A9.962 9.962 0 0012 22c5.523 0 10-4.477 10-10S17.523 2 12 2zm0 18c-1.49 0-2.946-.38-4.222-1.089l-.3-.18-3.126.815.834-3.05-.2-.32A7.957 7.957 0 014 12c0-4.411 3.589-8 8-8s8 3.589 8 8-3.589 8-8 8z" clipRule="evenodd" />
-                              </svg>
-                            </motion.button>
-                          </div>
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                  
-                  {/* Footer con marca de agua */}
-                  <div className="bg-gray-50 dark:bg-slate-900/50 py-2 px-4 text-center text-sm text-gray-500 dark:text-slate-400">
-                    <div className="flex items-center justify-center">
-                      <Image 
-                        src="/logo.png" 
-                        alt="BuscaDis" 
-                        width={60} 
-                        height={15} 
-                        className="mr-2"
-                      />
-                      <span>ID: {publication.id} • {new Date().toLocaleDateString()}</span>
-                    </div>
-                  </div>
-                </div>
-              ) : null}
-            </div>
+            ) : (
+              renderPublicationContent(publication)
+            )}
           </motion.div>
-        </div>
+        </motion.div>
       )}
     </AnimatePresence>
   );
 }
 
-// Necesitamos añadir un poco de CSS para mejorar la experiencia de exportación
+// Función para el componente de esqueleto de carga mejorado
+const SkeletonLoader = () => (
+  <div className="animate-pulse flex flex-col md:flex-row h-full w-full">
+    <div className="w-full md:w-1/2 bg-gray-200 h-96 md:h-auto flex items-center justify-center">
+      <CameraIcon className="h-20 w-20 text-gray-300" />
+    </div>
+    <div className="w-full md:w-1/2 p-6 space-y-4">
+      <div className="h-8 bg-gray-200 rounded-md w-3/4"></div>
+      <div className="h-6 bg-gray-200 rounded-md w-1/3"></div>
+      <div className="h-6 bg-gray-200 rounded-md w-1/2"></div>
+      <div className="space-y-2">
+        <div className="h-4 bg-gray-200 rounded-md w-full"></div>
+        <div className="h-4 bg-gray-200 rounded-md w-full"></div>
+        <div className="h-4 bg-gray-200 rounded-md w-2/3"></div>
+      </div>
+      <div className="flex space-x-3 pt-4">
+        <div className="h-10 bg-gray-200 rounded-md w-1/3"></div>
+        <div className="h-10 bg-gray-200 rounded-md w-1/3"></div>
+      </div>
+    </div>
+  </div>
+);
+
+// Función para renderizar la imagen de una publicación con efectos mejorados
+const PublicationImage = ({ image, alt }) => (
+  <div className="group relative w-full h-full overflow-hidden">
+    <Image
+      src={image || "/placeholder.png"}
+      alt={alt || "Imagen de publicación"}
+      fill
+      className="object-contain hover:scale-105 transition-transform duration-300"
+      sizes="(max-width: 768px) 100vw, 50vw"
+      priority
+    />
+    <div className="absolute inset-0 bg-gradient-to-t from-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+  </div>
+);
+
+// Necesitamos añadir un poco de CSS para mejorar la experiencia
 const modalStyles = `
   /* Estilos para mostrar durante la exportación */
   .exporting-only {
@@ -638,6 +658,41 @@ const modalStyles = `
   .exporting {
     overflow: hidden !important;
     max-height: none !important;
+  }
+
+  /* Prevenir scroll cuando el modal está abierto */
+  body.modal-open {
+    overflow: hidden;
+  }
+
+  /* Mejorar la apariencia de las imágenes en el modal */
+  .publication-modal img {
+    transition: transform 0.3s ease;
+  }
+
+  /* Añadir efecto de iluminación al hacer hover en las imágenes */
+  .publication-modal .group:hover::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(circle at center, rgba(255,255,255,0.1) 0%, transparent 70%);
+    pointer-events: none;
+    z-index: 5;
+  }
+
+  /* Mejorar la sombra del modal */
+  .publication-modal {
+    filter: drop-shadow(0 8px 16px rgba(0, 0, 0, 0.1));
+  }
+
+  /* Animación para el skeleton */
+  @keyframes shimmer {
+    0% {
+      background-position: -1000px 0;
+    }
+    100% {
+      background-position: 1000px 0;
+    }
   }
 `;
 
