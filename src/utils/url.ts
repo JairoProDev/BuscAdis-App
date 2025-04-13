@@ -20,6 +20,10 @@ export function generateSeoUrl(
   subsubcategory?: string,
   includeTitle: boolean = true
 ): string {
+  // Asegurarse de que el ID esté en formato numérico simple
+  // Si el ID no es secuencial y tiene letras/caracteres, conservar su valor original
+  const numericId = /^\d+$/.test(id) ? id : id;
+  
   // Genera un slug del título
   const titleSlug = title
     .toLowerCase()
@@ -32,7 +36,7 @@ export function generateSeoUrl(
   // Construir la URL con el formato /category/subcategory/subsubcategory/id/title
   let url = '';
   
-  // Categoría (requerida)
+  // Categoría (requerida si está disponible)
   if (category) {
     url += `/${category}`;
     
@@ -47,7 +51,7 @@ export function generateSeoUrl(
     }
     
     // ID (requerido)
-    url += `/${id}`;
+    url += `/${numericId}`;
     
     // Título (opcional como parte de la URL, controlado por includeTitle)
     if (title && includeTitle) {
@@ -55,7 +59,7 @@ export function generateSeoUrl(
     }
   } else {
     // Fallback si no hay categoría
-    url = `/${id}`;
+    url = `/${numericId}`;
     if (title && includeTitle) {
       url += `/${titleSlug}`;
     }

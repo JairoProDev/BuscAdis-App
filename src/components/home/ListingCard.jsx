@@ -37,7 +37,7 @@ const ListingCard = ({ listing, index }) => {
   };
 
   // Determinar si hay una imagen o usar fallback
-  const imageSrc = listing.image || "/images/placeholder.jpg";
+  const imageSrc = listing.image || "/images/placeholder-buscadis.jpg";
   
   // Formatear precio
   const formattedPrice = new Intl.NumberFormat("es-PE", {

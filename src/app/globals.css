@@ -128,11 +128,17 @@
   /* Estilos para publicaciones sin imagen */
   .publication-no-image {
     grid-row: span 1;
+    height: 175px !important;
+    min-height: 175px !important;
+    max-height: 175px !important;
   }
 
   /* Publicaciones normales (con imagen) ocupan más espacio vertical */
-  .grid > div:not(.publication-no-image) {
+  .publication-card:not(.publication-no-image) {
     grid-row: span 2;
+    height: 350px !important;
+    min-height: 350px !important;
+    max-height: 350px !important;
   }
 }
 
@@ -763,8 +769,9 @@ html {
 /* Forzar altura de ítems en grid para consistencia */
 .grid.grid-cols-2 > div,
 .grid.grid-cols-3 > div {
-  min-height: 320px;
-  max-height: 420px;
+  min-height: auto !important;
+  max-height: none !important;
+  height: auto !important;
 }
 
 /* Estilos para vista de lista */
@@ -880,8 +887,10 @@ div[aria-modal="true"],
 /* Mejorar la visualización del modal */
 .publication-modal {
   max-height: 90vh;
+  height: auto !important;
   overflow-y: auto;
   overscroll-behavior: contain;
+  pointer-events: auto !important;
 }
 
 /* Ajustar tamaño de las tarjetas para que sean consistentes */
@@ -894,8 +903,8 @@ div[aria-modal="true"],
 .publications-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+  grid-auto-rows: min-content;
   gap: 1.5rem;
-  width: 100%;
 }
 
 @media (max-width: 640px) {

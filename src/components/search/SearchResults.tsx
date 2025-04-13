@@ -226,14 +226,14 @@ export default function SearchResults({
     document.body.classList.add('modal-open');
     document.documentElement.style.setProperty('--scrollbar-width', `${window.innerWidth - document.documentElement.clientWidth}px`);
     
-    // Generate URL *without* title for the modal state
+    // Generate URL with category, subcategory, and subsubcategory when available
     const modalUrl = generateSeoUrl(
       publication.id, 
       publication.title,
       publication.categorySlug,
       publication.subcategory,
       publication.subsubcategory,
-      false
+      false // Don't include title in the URL for the modal state
     );
       
     // Update URL without navigation using history.pushState
@@ -298,8 +298,18 @@ export default function SearchResults({
     // Verificar si tiene imágenes
     const hasImages = publication.images && publication.images.length > 0;
     
-    // URL de imagen por defecto
-    const imageUrl = hasImages && publication.images ? publication.images[0] : '/images/placeholder.jpg';
+    // Default image if none provided
+    const imageUrl = hasImages ? publication.images[0] : '/images/placeholder-buscadis.jpg';
+    
+    // Generar seoUrl para el enlace
+    const seoUrl = generateSeoUrl(
+      publication.id,
+      publication.title,
+      publication.categorySlug,
+      publication.subcategory,
+      publication.subsubcategory,
+      false // No incluir título en la URL cuando abrimos el modal
+    );
     
     return (
       <motion.div
@@ -307,78 +317,91 @@ export default function SearchResults({
         layoutId={`publication-${publication.id}`}
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.4, delay: index * 0.05 }}
-        className="publication-grid-item"
+        transition={{ duration: 0.3, delay: index * 0.05 }}
+        className={`relative w-full ${hasImages ? 'h-[350px]' : 'h-[175px]'} rounded-xl overflow-hidden shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1 publication-card ${hasImages ? '' : 'publication-no-image'}`}
       >
         <a 
-          href={generateSeoUrl(
-            publication.id,
-            publication.title,
-            publication.categorySlug,
-            publication.subcategory,
-            publication.subsubcategory,
-            false
-          )} 
-          className="block h-full"
+          href={seoUrl} 
+          className="block w-full h-full"
           onClick={(e) => handleOpenModal(publication.id, e)}
         >
-          <div className="publication-card">
-            {/* Imagen de la publicación */}
-            <div className="publication-image">
-              {hasImages ? (
+          <div className={`relative flex flex-col bg-white dark:bg-slate-800 rounded-xl overflow-hidden shadow-md hover:shadow-lg transition-all duration-300 h-full`}>
+            {/* Imagen (solo si hay imágenes) */}
+            {hasImages ? (
+              <div className="relative w-full h-48 overflow-hidden bg-gray-100 dark:bg-slate-700">
+                <div className="absolute inset-0 bg-gradient-to-br from-black/10 to-black/30 z-10" />
                 <Image
                   src={imageUrl}
                   alt={publication.title}
                   fill
-                  sizes="(max-width: 640px) 100vw, (max-width: 768px) 50vw, (max-width: 1024px) 33vw, 25vw"
-                  className="object-cover transition-all duration-500"
+                  sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
+                  className="object-cover transition-transform duration-500 hover:scale-110"
                 />
-              ) : (
-                <div className="flex flex-col items-center justify-center w-full h-full bg-gray-100">
-                  <svg xmlns="http://www.w3.org/2000/svg" className="h-12 w-12 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                  </svg>
-                  <p className="text-gray-500 text-sm mt-2">Sin imagen</p>
-                </div>
-              )}
-              
-              {/* Etiquetas destacadas */}
-              <div className="absolute top-2 left-2 flex gap-1 z-10">
-                {isPremium && (
-                  <span className="bg-gradient-to-r from-teal-500 to-cyan-500 text-white text-xs font-medium px-2 py-1 rounded-full shadow-sm flex items-center">
-                    <SparklesIcon className="w-3 h-3 mr-1" />
-                    <span>Premium</span>
-                  </span>
-                )}
                 
-                {isNew && (
-                  <span className="bg-gradient-to-r from-amber-500 to-orange-500 text-white text-xs font-medium px-2 py-1 rounded-full shadow-sm flex items-center">
-                    <FireIcon className="w-3 h-3 mr-1" />
-                    <span>Nuevo</span>
+                {/* Badges */}
+                <div className="absolute top-2 left-2 flex flex-col gap-1 z-20">
+                  {isPremium && (
+                    <span className="bg-gradient-to-r from-teal-500 to-cyan-500 text-white text-xs font-medium px-2 py-1 rounded-full shadow-sm flex items-center">
+                      <SparklesIcon className="w-3 h-3 mr-1" />
+                      <span>Premium</span>
+                    </span>
+                  )}
+                  
+                  {isNew && (
+                    <span className="bg-gradient-to-r from-amber-500 to-orange-500 text-white text-xs font-medium px-2 py-1 rounded-full shadow-sm flex items-center">
+                      <FireIcon className="w-3 h-3 mr-1" />
+                      <span>Nuevo</span>
+                    </span>
+                  )}
+                </div>
+                
+                {/* Precio */}
+                <div className="absolute bottom-2 right-2 z-10">
+                  <span className="bg-blue-600 text-white text-xs font-bold px-2 py-1 rounded-full shadow-sm">
+                    {formatPrice(publication.price, publication.currency)}
                   </span>
-                )}
+                </div>
               </div>
-              
-              {/* Precio */}
-              <div className="absolute bottom-2 right-2 z-10">
-                <span className="bg-blue-600 text-white text-xs font-bold px-2 py-1 rounded-full shadow-sm">
+            ) : (
+              <div className="p-3 flex items-center justify-between border-b border-gray-100 dark:border-slate-700 bg-gradient-to-r from-slate-50 to-blue-50 dark:from-slate-800 dark:to-slate-700">
+                <span className="text-sm font-medium text-gray-900 dark:text-white">
                   {formatPrice(publication.price, publication.currency)}
                 </span>
+                
+                <div className="flex gap-1">
+                  {isPremium && (
+                    <span className="bg-gradient-to-r from-teal-500 to-cyan-500 text-white text-xs font-medium px-2 py-0.5 rounded-full shadow-sm flex items-center">
+                      <SparklesIcon className="w-3 h-3 mr-1" />
+                      <span>Premium</span>
+                    </span>
+                  )}
+                  
+                  {isNew && (
+                    <span className="bg-gradient-to-r from-amber-500 to-orange-500 text-white text-xs font-medium px-2 py-0.5 rounded-full shadow-sm flex items-center">
+                      <FireIcon className="w-3 h-3 mr-1" />
+                      <span>Nuevo</span>
+                    </span>
+                  )}
+                </div>
               </div>
-            </div>
+            )}
             
             {/* Contenido */}
-            <div className="content">
-              <h3 className="title">{publication.title}</h3>
+            <div className="flex-1 p-3 flex flex-col justify-between">
+              <div>
+                <h3 className="text-sm sm:text-base font-semibold text-gray-900 dark:text-white line-clamp-2 mb-1">{publication.title}</h3>
+                
+                {!hasImages && (
+                  <p className="text-xs text-gray-600 dark:text-gray-300 line-clamp-2 mb-2">
+                    {publication.description}
+                  </p>
+                )}
+              </div>
               
-              <p className="description text-gray-600 text-sm line-clamp-2 mb-2">
-                {publication.description}
-              </p>
-              
-              <div className="meta">
+              <div className="flex justify-between items-center text-xs text-gray-500 dark:text-gray-400">
                 <div className="flex items-center">
-                  <MapPinIcon className="w-4 h-4 mr-1 text-gray-400" />
-                  <span className="truncate max-w-[120px]">
+                  <MapPinIcon className="w-3 h-3 mr-1" />
+                  <span className="truncate max-w-[80px]">
                     {typeof publication.location === 'string' 
                       ? publication.location 
                       : publication.location?.city || 'Ubicación no especificada'}
@@ -444,7 +467,7 @@ export default function SearchResults({
     const hasImages = publication.images && publication.images.length > 0;
     
     // Default image if none provided
-    const imageUrl = hasImages && publication.images ? publication.images[0] : '/images/placeholder.jpg';
+    const imageUrl = hasImages && publication.images ? publication.images[0] : '/images/placeholder-buscadis.jpg';
     
     return (
       <motion.div

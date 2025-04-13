@@ -37,7 +37,7 @@ export default function AdisoCard({ adiso, featured = false }) {
   }
 
   // Demás propiedades con valores predeterminados
-  const image = adiso.image || '/images/placeholder.jpg';
+  const image = adiso.image || '/images/placeholder-buscadis.jpg';
   const isPremium = !!adiso.is_premium || featured;
   const isVerified = !!adiso.is_verified;
   const rating = adiso.rating || 0;
@@ -61,7 +61,7 @@ export default function AdisoCard({ adiso, featured = false }) {
               onError={(e) => {
                 // Fallback a una imagen predeterminada en caso de error
                 const target = e.target as HTMLImageElement;
-                target.src = '/images/placeholder.jpg';
+                target.src = '/images/placeholder-buscadis.jpg';
               }}
             />
           </div>

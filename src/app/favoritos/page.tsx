@@ -44,7 +44,7 @@ const FavoritesPage = () => {
           contactName: 'Contact',
           status: 'active',
           createdAt: new Date().toISOString(),
-          images: ['/images/placeholder.jpg']
+          images: ['/images/placeholder-buscadis.jpg']
         }));
         
         setFavoriteItems(mockFavorites);
@@ -115,7 +115,7 @@ const FavoritesPage = () => {
           <div key={item.id} className="bg-white rounded-lg shadow overflow-hidden">
             <div className="relative h-48">
               <img
-                src={item.images?.[0] || '/images/placeholder.jpg'}
+                src={item.images?.[0] || '/images/placeholder-buscadis.jpg'}
                 alt={item.title}
                 className="w-full h-full object-cover"
               />
