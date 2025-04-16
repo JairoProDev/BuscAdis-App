@@ -167,7 +167,7 @@ export default function CallToAction() {
                   <div className="absolute -inset-2 rounded-lg bg-gradient-to-r from-teal-500/20 to-cyan-500/20 blur-sm opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
                   
                   {/* Stats card */}
-                  <div className="relative rounded-lg bg-gradient-to-br from-slate-800/90 to-slate-900/90 backdrop-blur-sm border border-teal-500/20 p-4 shadow-xl group-hover:border-teal-500/40 transition-all duration-300">
+                  <div className="relative rounded-lg bg-gradient-to-br from-slate-800/90 to-slate-900/90 backdrop-blur-sm border border-teal-500/20 p-4 shadow-xl group-hover:border-teal-500/40 transition-all duration-300 h-[90px] flex flex-col justify-center">
                     <div className="flex items-center mb-1 justify-center md:justify-start">
                       {stat.icon}
                       <span className="ml-1.5 text-xs text-teal-200/70">{stat.label}</span>

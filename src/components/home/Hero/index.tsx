@@ -127,50 +127,50 @@ export default function Hero() {
 
                             <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 sm:gap-6 md:gap-8 py-4">
                                 <motion.div
-                                    className="bg-gradient-to-br from-white/10 to-white/5 backdrop-blur-sm rounded-xl p-2 sm:p-3 md:p-4 text-center border border-teal-500/10 shadow-[0_4px_20px_rgba(0,0,0,0.2)] transition-all duration-300 transform hover:-translate-y-1 hover:shadow-[0_10px_25px_rgba(20,184,166,0.2)]"
+                                    className="bg-gradient-to-br from-white/10 to-white/5 backdrop-blur-sm rounded-xl p-2 sm:p-3 md:p-4 text-center border border-teal-500/10 shadow-[0_4px_20px_rgba(0,0,0,0.2)] transition-all duration-300 transform hover:-translate-y-1 hover:shadow-[0_10px_25px_rgba(20,184,166,0.2)] h-[80px] sm:h-[100px] flex flex-col justify-center items-center"
                                     whileHover={{
                                         boxShadow: "0 10px 25px rgba(20, 184, 166, 0.3)",
                                         borderColor: "rgba(20, 184, 166, 0.3)",
                                         y: -5
                                     }}
                                 >
-                                    <span className="block text-xl sm:text-2xl md:text-3xl font-bold mb-1 bg-clip-text text-transparent bg-gradient-to-r from-white to-teal-200">10K+</span>
+                                    <span className="block text-xl sm:text-2xl md:text-3xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-white to-teal-200">10K+</span>
                                     <span className="text-xs sm:text-sm text-teal-200">Visitas</span>
                                 </motion.div>
 
                                 <motion.div
-                                    className="bg-gradient-to-br from-white/10 to-white/5 backdrop-blur-sm rounded-xl p-2 sm:p-3 md:p-4 text-center border border-cyan-500/10 shadow-[0_4px_20px_rgba(0,0,0,0.2)] transition-all duration-300 transform hover:-translate-y-1 hover:shadow-[0_10px_25px_rgba(6,182,212,0.2)]"
+                                    className="bg-gradient-to-br from-white/10 to-white/5 backdrop-blur-sm rounded-xl p-2 sm:p-3 md:p-4 text-center border border-cyan-500/10 shadow-[0_4px_20px_rgba(0,0,0,0.2)] transition-all duration-300 transform hover:-translate-y-1 hover:shadow-[0_10px_25px_rgba(6,182,212,0.2)] h-[80px] sm:h-[100px] flex flex-col justify-center items-center"
                                     whileHover={{
                                         boxShadow: "0 10px 25px rgba(6, 182, 212, 0.3)",
                                         borderColor: "rgba(6, 182, 212, 0.3)",
                                         y: -5
                                     }}
                                 >
-                                    <span className="block text-xl sm:text-2xl md:text-3xl font-bold mb-1 bg-clip-text text-transparent bg-gradient-to-r from-white to-cyan-200">5K+</span>
+                                    <span className="block text-xl sm:text-2xl md:text-3xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-white to-cyan-200">5K+</span>
                                     <span className="text-xs sm:text-sm text-cyan-200">Publicaciones</span>
                                 </motion.div>
 
                                 <motion.div
-                                    className="bg-gradient-to-br from-white/10 to-white/5 backdrop-blur-sm rounded-xl p-2 sm:p-3 md:p-4 text-center border border-teal-500/10 shadow-[0_4px_20px_rgba(0,0,0,0.2)] transition-all duration-300 transform hover:-translate-y-1 hover:shadow-[0_10px_25px_rgba(20,184,166,0.2)]"
+                                    className="bg-gradient-to-br from-white/10 to-white/5 backdrop-blur-sm rounded-xl p-2 sm:p-3 md:p-4 text-center border border-teal-500/10 shadow-[0_4px_20px_rgba(0,0,0,0.2)] transition-all duration-300 transform hover:-translate-y-1 hover:shadow-[0_10px_25px_rgba(20,184,166,0.2)] h-[80px] sm:h-[100px] flex flex-col justify-center items-center"
                                     whileHover={{
                                         boxShadow: "0 10px 25px rgba(20, 184, 166, 0.3)",
                                         borderColor: "rgba(20, 184, 166, 0.3)",
                                         y: -5
                                     }}
                                 >
-                                    <span className="block text-xl sm:text-2xl md:text-3xl font-bold mb-1 bg-clip-text text-transparent bg-gradient-to-r from-white to-teal-200">150+</span>
+                                    <span className="block text-xl sm:text-2xl md:text-3xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-white to-teal-200">150+</span>
                                     <span className="text-xs sm:text-sm text-teal-200">Conexiones</span>
                                 </motion.div>
 
                                 <motion.div
-                                    className="bg-gradient-to-br from-white/10 to-white/5 backdrop-blur-sm rounded-xl p-2 sm:p-3 md:p-4 text-center border border-cyan-500/10 shadow-[0_4px_20px_rgba(0,0,0,0.2)] transition-all duration-300 transform hover:-translate-y-1 hover:shadow-[0_10px_25px_rgba(6,182,212,0.2)]"
+                                    className="bg-gradient-to-br from-white/10 to-white/5 backdrop-blur-sm rounded-xl p-2 sm:p-3 md:p-4 text-center border border-cyan-500/10 shadow-[0_4px_20px_rgba(0,0,0,0.2)] transition-all duration-300 transform hover:-translate-y-1 hover:shadow-[0_10px_25px_rgba(6,182,212,0.2)] h-[80px] sm:h-[100px] flex flex-col justify-center items-center"
                                     whileHover={{
                                         boxShadow: "0 10px 25px rgba(6, 182, 212, 0.3)",
                                         borderColor: "rgba(6, 182, 212, 0.3)",
                                         y: -5
                                     }}
                                 >
-                                    <span className="block text-xl sm:text-2xl md:text-3xl font-bold mb-1 bg-clip-text text-transparent bg-gradient-to-r from-white to-cyan-200">98%</span>
+                                    <span className="block text-xl sm:text-2xl md:text-3xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-white to-cyan-200">98%</span>
                                     <span className="text-xs sm:text-sm text-cyan-200">Satisfacción</span>
                                 </motion.div>
                             </div>

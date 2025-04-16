@@ -9,7 +9,7 @@
  * @param category - Categoría de la publicación (opcional)
  * @param subcategory - Subcategoría de la publicación (opcional)
  * @param subsubcategory - Sub-subcategoría de la publicación (opcional)
- * @param includeTitle - Incluir el slug del título en la URL (opcional, por defecto true)
+ * @param includeTitle - Incluir el slug del título en la URL (opcional, por defecto false)
  * @returns URL SEO-friendly
  */
 export function generateSeoUrl(
@@ -18,35 +18,48 @@ export function generateSeoUrl(
   category?: string,
   subcategory?: string,
   subsubcategory?: string,
-  includeTitle: boolean = true
+  includeTitle: boolean = false
 ): string {
+  // Si el ID es null o undefined, usar un valor por defecto
+  if (!id) {
+    console.warn('generateSeoUrl: ID is null or undefined');
+    id = 'unknown';
+  }
+
   // Asegurarse de que el ID esté en formato numérico simple
   // Si el ID no es secuencial y tiene letras/caracteres, conservar su valor original
   const numericId = /^\d+$/.test(id) ? id : id;
   
   // Genera un slug del título
   const titleSlug = title
-    .toLowerCase()
-    .normalize("NFD")
-    .replace(/[\u0300-\u036f]/g, "")
-    .replace(/[^\w\sáéíóúñ]/gi, '')
-    .replace(/\s+/g, '-')
-    .substring(0, 50);
+    ? title
+        .toLowerCase()
+        .normalize("NFD")
+        .replace(/[\u0300-\u036f]/g, "")
+        .replace(/[^\w\sáéíóúñ]/gi, '')
+        .replace(/\s+/g, '-')
+        .substring(0, 50)
+    : 'detalle';
+  
+  // Verificar que todas las categorías estén normalizadas
+  const normalizedCategory = category ? slugify(category) : '';
+  const normalizedSubcategory = subcategory ? slugify(subcategory) : '';
+  const normalizedSubsubcategory = subsubcategory ? slugify(subsubcategory) : '';
   
   // Construir la URL con el formato /category/subcategory/subsubcategory/id/title
   let url = '';
   
   // Categoría (requerida si está disponible)
-  if (category) {
-    url += `/${category}`;
+  if (normalizedCategory) {
+    url += `/${normalizedCategory}`;
     
     // Subcategoría (opcional)
-    if (subcategory) {
-      url += `/${subcategory}`;
+    if (normalizedSubcategory) {
+      url += `/${normalizedSubcategory}`;
       
       // Subsubcategoría (opcional)
-      if (subsubcategory) {
-        url += `/${subsubcategory}`;
+      if (normalizedSubsubcategory) {
+        url += `/${normalizedSubsubcategory}`;
       }
     }
     
@@ -54,12 +67,12 @@ export function generateSeoUrl(
     url += `/${numericId}`;
     
     // Título (opcional como parte de la URL, controlado por includeTitle)
-    if (title && includeTitle) {
+    if (includeTitle && title) {
       url += `/${titleSlug}`;
     }
   } else {
     // Fallback si no hay categoría
-    url = `/${numericId}`;
+    url = `/publicaciones/${numericId}`;
     if (title && includeTitle) {
       url += `/${titleSlug}`;
     }
@@ -74,6 +87,8 @@ export function generateSeoUrl(
  * @returns Texto limpio para URL
  */
 export function slugify(text: string): string {
+  if (!text) return '';
+  
   return text
     .toLowerCase()
     .normalize("NFD")

@@ -1,0 +1,80 @@
+[
+  {
+    "title": "Oportunidad Única en el Mundo Notarial",
+    "description": "Prestigiosa notaría busca bachiller en Derecho o estudiante responsable con ganas de crecimiento profesional. Se ofrece excelente remuneración y oportunidad de aprendizaje. Envía tu CV resumido (no documentado) por WhatsApp.",
+    "categorySlug": "empleos",
+    "subcategorySlug": "legal-notarial",
+    "subSubcategorySlug": "bachiller-derecho",
+    "value": 0,
+    "currency": "PEN",
+    "valueType": "consultar",
+    "size": 2,
+    "location": {
+      "country": "Peru",
+      "province": "Cusco",
+      "city": "Cusco",
+      "district": null,
+      "address": null
+    },
+    "contact": {
+      "phones": ["984407991"],
+      "email": null,
+      "name": null
+    },
+    "images": [],
+    "status": "active",
+    "premium": false
+  },
+  {
+    "title": "Se necesita joven o señorita para atención en tienda de accesorios de celulares",
+    "description": "Atención se necesita joven o señorita para atención en tienda de accesorios de celulares a tiempo completo, en Av. de la Cultura, frente a la UNSAAC. Se paga buen sueldo. Escribir al WhatsApp 935098013, 940831175.",
+    "categorySlug": "empleos",
+    "subcategorySlug": "ventas",
+    "subSubcategorySlug": "comercio",
+    "value": 1200,
+    "currency": "PEN",
+    "valueType": "negociable",
+    "size": 1,
+    "location": {
+      "country": "Peru",
+      "province": "Cusco",
+      "city": "Cusco",
+      "district": "Wanchaq",
+      "address": "Av. de la Cultura, frente a la UNSAAC"
+    },
+    "contact": {
+      "phones": ["935098013", "940831175"],
+      "email": null,
+      "name": null
+    },
+    "images": [],
+    "status": "active",
+    "premium": false
+  },
+  {
+    "title": "Alquilo Local Comercial en Calle Plateros",
+    "description": "Alquilo local comercial en calle Plateros 350 c/esquina de Plaza Regocijo. Áreas de 75 m². Excelente ubicación, razón Cel. 910629557.",
+    "categorySlug": "inmuebles",
+    "subcategorySlug": "locales",
+    "subSubcategorySlug": "alquiler",
+    "value": 2500,
+    "currency": "PEN",
+    "valueType": "mensual",
+    "size": 3,
+    "location": {
+      "country": "Peru",
+      "province": "Cusco",
+      "city": "Cusco",
+      "district": "Centro Histórico",
+      "address": "Calle Plateros 350, esquina Plaza Regocijo"
+    },
+    "contact": {
+      "phones": ["910629557"],
+      "email": null,
+      "name": null
+    },
+    "images": [],
+    "status": "active",
+    "premium": true
+  }
+] 

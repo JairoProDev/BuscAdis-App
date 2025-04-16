@@ -70,10 +70,17 @@ export default function PublicationCard({ publication }: PublicationCardProps) {
   // URL amigable para SEO
   const seoUrl = useMemo(() => generateSeoUrl(
     publication.id, 
-    publication.title
+    publication.title,
+    publication.category,
+    publication.subcategory,
+    publication.subsubcategory,
+    false // No incluir el título en la URL (solo se muestra al entrar en la página completa)
   ), [
     publication.id, 
-    publication.title
+    publication.title,
+    publication.category,
+    publication.subcategory,
+    publication.subsubcategory
   ]);
 
   // Obtener la imagen predeterminada según la categoría
