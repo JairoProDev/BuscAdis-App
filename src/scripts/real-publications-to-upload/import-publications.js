@@ -20,8 +20,16 @@ const readline = require("readline");
 dotenv.config({ path: path.resolve(process.cwd(), ".env.local") });
 
 // Parámetros de conexión
-const uri = process.env.MONGODB_URI || "mongodb://localhost:27017";
+const uri = process.env.MONGODB_URI; // Solo usar la URI de Atlas
 const dbName = process.env.MONGODB_DB || "buscadis";
+
+// Verificar que la URI esté definida
+if (!uri) {
+  console.error(
+    "Error: La URI de conexión a MongoDB no está definida en .env.local"
+  );
+  process.exit(1);
+}
 
 // Crear cliente MongoDB con mejor manejo de errores
 const client = new MongoClient(uri, {
@@ -99,7 +107,7 @@ if (!inputFile) {
  */
 function validarPublicacion(publication) {
   // Verificar campos requeridos
-  const camposRequeridos = ["title", "description", "category", "id"];
+  const camposRequeridos = ["title", "description", "category"];
   const camposFaltantes = camposRequeridos.filter(
     (campo) => !publication[campo]
   );
@@ -225,9 +233,7 @@ async function importarPublicaciones() {
           if (!publicacionesPorCategoria[categoria]) {
             publicacionesPorCategoria[categoria] = [];
           }
-          publicacionesPorCategoria[categoria].push(
-            prepararPublicacionParaInsercion(publicacion)
-          );
+          publicacionesPorCategoria[categoria].push(publicacion);
         } else {
           publicacionesInvalidas.push({
             indice: i,
@@ -311,6 +317,17 @@ async function importarPublicaciones() {
 
       const db = client.db(dbName);
 
+      // Obtener el siguiente ID disponible
+      const totalPublicaciones =
+        (await db.collection("publications_empleos").countDocuments()) +
+        (await db.collection("publications_inmuebles").countDocuments()) +
+        (await db.collection("publications_vehiculos").countDocuments()) +
+        (await db.collection("publications_servicios").countDocuments()) +
+        (await db.collection("publications_productos").countDocuments()) +
+        (await db.collection("publications_eventos").countDocuments()) +
+        (await db.collection("publications_negocios").countDocuments()) +
+        (await db.collection("publications_comunidad").countDocuments());
+
       // Importar las publicaciones por categoría
       for (const [categoria, publicaciones] of Object.entries(
         publicacionesPorCategoria
@@ -329,10 +346,16 @@ async function importarPublicaciones() {
           await db.createCollection(coleccion);
         }
 
+        // Asignar ID a cada publicación
+        const publicacionesConId = publicaciones.map((pub, index) => ({
+          ...pub,
+          id: totalPublicaciones + index, // Asignar ID basado en el total actual
+        }));
+
         // Importar las publicaciones en lotes de 100
         const tamanoLote = 100;
-        for (let i = 0; i < publicaciones.length; i += tamanoLote) {
-          const lote = publicaciones.slice(i, i + tamanoLote);
+        for (let i = 0; i < publicacionesConId.length; i += tamanoLote) {
+          const lote = publicacionesConId.slice(i, i + tamanoLote);
           const resultado = await db.collection(coleccion).insertMany(lote);
           console.log(
             `- Lote ${Math.ceil((i + 1) / tamanoLote)}: ${

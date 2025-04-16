@@ -311,15 +311,12 @@ export default function InmuebleDetailPage() {
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
         <div className="lg:col-span-2">
           {/* Images */}
-          {publication.images && publication.images.length > 0 ? (
-            <div className="mb-8 overflow-hidden rounded-xl">
-              <Carousel images={publication.images} />
-            </div>
-          ) : (
-            <div className="mb-8 bg-gray-200 h-96 rounded-xl flex items-center justify-center">
-              <span className="text-gray-400 text-lg">Sin imágenes</span>
-            </div>
-          )}
+          <div className="mb-8 overflow-hidden rounded-xl">
+            <Carousel 
+              images={publication.images || []} 
+              category="inmuebles" 
+            />
+          </div>
 
           {/* Details */}
           <div className="bg-white rounded-xl shadow-md p-6 mb-8">

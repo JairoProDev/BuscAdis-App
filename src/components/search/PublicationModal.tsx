@@ -25,6 +25,7 @@ import Image from 'next/image';
 import 'react-loading-skeleton/dist/skeleton.css';
 import { toast } from 'react-hot-toast';
 import { toPng } from 'html-to-image';
+import { getDefaultImageByCategory } from '@/utils/image-helpers';
 
 // Declarar tipo global para la caché de publicaciones
 declare global {
@@ -43,6 +44,7 @@ interface PublicationWithContact extends Publication {
   };
   subcategory?: string;
   subsubcategory?: string;
+  category?: string;
 }
 
 interface PublicationModalProps {
@@ -283,100 +285,76 @@ export default function PublicationModal({ publicationId, isOpen, onClose, initi
     // Check if publication has images
     const hasImages = pub.images && pub.images.length > 0;
     
+    // Obtener imagen predeterminada según la categoría
+    const defaultImage = getDefaultImageByCategory(pub.categorySlug || pub.category);
+    
     return (
       <div ref={exportRef} className="grid grid-cols-1 md:grid-cols-2 h-full">
-        {/* Columna izquierda - Imágenes (mostrar solo si hay imágenes) */}
-        {hasImages ? (
-          <div className="bg-gray-50 dark:bg-slate-900 relative group flex flex-col justify-between">
-            {/* Badge premium */}
-            {pub.premium && (
-              <div className="absolute top-3 left-3 z-10 bg-gradient-to-r from-amber-500 to-yellow-500 text-white text-xs font-bold px-3 py-1 rounded-full shadow-lg flex items-center">
-                <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z" />
-                </svg>
-                <span>Premium</span>
-              </div>
-            )}
-            
-            {/* Indicador de carga para la imagen */}
-            {loading && (
-              <div className="absolute top-2 right-2 z-10">
-                <LoadingSpinner size="sm" color="primary" />
-              </div>
-            )}
-            
-            <div className="flex-grow flex items-center justify-center">
-              <div className="relative h-64 sm:h-80 md:h-[400px] w-full overflow-hidden">
-                <Image
-                  src={pub.images && pub.images.length > 0 ? pub.images[0] : '/images/placeholder-buscadis.jpg'}
-                  alt={pub.title}
-                  fill
-                  sizes="(max-width: 768px) 100vw, 50vw"
-                  priority={true}
-                  className="object-contain transition-all duration-500 hover:scale-105 transform-gpu"
-                  style={{ objectFit: 'contain' }}
-                />
-                
-                {/* Botones de navegación para más imágenes */}
-                {pub.images && pub.images.length > 1 && (
-                  <div className="absolute bottom-4 left-0 right-0 flex justify-center space-x-2">
-                    {pub.images.slice(0, 5).map((_, idx) => (
-                      <button 
-                        key={idx} 
-                        className={`w-2 h-2 rounded-full ${idx === 0 ? 'bg-blue-500' : 'bg-gray-300 dark:bg-gray-600'}`}
-                        aria-label={`Ir a imagen ${idx + 1}`}
-                      />
-                    ))}
-                  </div>
-                )}
-              </div>
+        {/* Columna izquierda - Imágenes */}
+        <div className="bg-gray-50 dark:bg-slate-900 relative group flex flex-col justify-between">
+          {/* Badge premium */}
+          {pub.premium && (
+            <div className="absolute top-3 left-3 z-10 bg-gradient-to-r from-amber-500 to-yellow-500 text-white text-xs font-bold px-3 py-1 rounded-full shadow-lg flex items-center">
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z" />
+              </svg>
+              <span>Premium</span>
             </div>
-            
-            {/* BuscaDis branding in the left column bottom */}
-            <div className="bg-gradient-to-r from-gray-50 to-gray-100 dark:from-slate-900/50 dark:to-slate-800/50 py-4 px-4 text-center border-t border-gray-100 dark:border-slate-700/50">
-              <div className="flex items-center justify-center">
-                <Image 
-                  src="/logo.png" 
-                  alt="BuscaDis" 
-                  width={80} 
-                  height={20} 
-                  className="mr-2"
-                />
-                <span className="text-sm text-gray-500 dark:text-slate-400 font-medium">
-                  Tu marketplace de confianza
-                </span>
-              </div>
+          )}
+          
+          {/* Indicador de carga para la imagen */}
+          {loading && (
+            <div className="absolute top-2 right-2 z-10">
+              <LoadingSpinner size="sm" color="primary" />
+            </div>
+          )}
+          
+          <div className="flex-grow flex items-center justify-center">
+            <div className="relative h-64 sm:h-80 md:h-[400px] w-full overflow-hidden">
+              <Image
+                src={hasImages ? pub.images[0] : defaultImage}
+                alt={pub.title}
+                fill
+                sizes="(max-width: 768px) 100vw, 50vw"
+                priority={true}
+                className="object-contain transition-all duration-500 hover:scale-105 transform-gpu"
+                style={{ objectFit: 'contain' }}
+              />
+              
+              {/* Botones de navegación para más imágenes */}
+              {pub.images && pub.images.length > 1 && (
+                <div className="absolute bottom-4 left-0 right-0 flex justify-center space-x-2">
+                  {pub.images.slice(0, 5).map((_, idx) => (
+                    <button 
+                      key={idx} 
+                      className={`w-2 h-2 rounded-full ${idx === 0 ? 'bg-blue-500' : 'bg-gray-300 dark:bg-gray-600'}`}
+                      aria-label={`Ir a imagen ${idx + 1}`}
+                    />
+                  ))}
+                </div>
+              )}
             </div>
           </div>
-        ) : (
-          // Placeholder when no images are available
-          <div className="bg-gray-50 dark:bg-slate-800 flex flex-col items-center justify-center p-6 border-r border-gray-100 dark:border-slate-700/50 h-auto">
-            <div className="p-8 text-center">
-              <PhotoIcon className="h-16 w-16 mx-auto text-gray-400 dark:text-slate-500 mb-4" />
-              <p className="text-gray-500 dark:text-slate-400 mb-2">Sin imágenes disponibles</p>
-              <p className="text-sm text-gray-400 dark:text-slate-500">Este anuncio no contiene imágenes</p>
-            </div>
-            
-            {/* BuscaDis branding when no images */}
-            <div className="mt-auto bg-gradient-to-r from-gray-50 to-gray-100 dark:from-slate-900/50 dark:to-slate-800/50 py-4 px-4 text-center border-t border-gray-100 dark:border-slate-700/50 w-full">
-              <div className="flex items-center justify-center">
-                <Image 
-                  src="/logo.png" 
-                  alt="BuscaDis" 
-                  width={80} 
-                  height={20} 
-                  className="mr-2"
-                />
-                <span className="text-sm text-gray-500 dark:text-slate-400 font-medium">
-                  Tu marketplace de confianza
-                </span>
-              </div>
+          
+          {/* BuscaDis branding in the left column bottom */}
+          <div className="bg-gradient-to-r from-gray-50 to-gray-100 dark:from-slate-900/50 dark:to-slate-800/50 py-4 px-4 text-center border-t border-gray-100 dark:border-slate-700/50">
+            <div className="flex items-center justify-center">
+              <Image 
+                src="/logo.png" 
+                alt="BuscaDis" 
+                width={80} 
+                height={20} 
+                className="mr-2"
+              />
+              <span className="text-sm text-gray-500 dark:text-slate-400 font-medium">
+                Tu marketplace de confianza
+              </span>
             </div>
           </div>
-        )}
+        </div>
         
         {/* Columna derecha - Información */}
-        <div className={`p-6 dark:bg-slate-800 dark:text-white overflow-y-auto max-h-[80vh] md:max-h-[600px] flex flex-col ${!hasImages ? 'md:col-span-2' : ''}`}>
+        <div className="p-6 dark:bg-slate-800 dark:text-white overflow-y-auto max-h-[80vh] md:max-h-[600px] flex flex-col">
           <div className="flex-grow">
             <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-white mb-3 leading-tight">{pub.title}</h1>
             
@@ -597,9 +575,9 @@ export default function PublicationModal({ publicationId, isOpen, onClose, initi
           className="fixed inset-0 z-50 flex items-center justify-center overflow-hidden"
           onClick={handleCloseModal}
         >
-          {/* Backdrop with minimal opacity */}
+          {/* Backdrop with darker opacity */}
           <div 
-            className="fixed inset-0 bg-black/50" 
+            className="fixed inset-0 bg-black/70" 
             onClick={handleCloseModal}
           />
           
@@ -612,7 +590,9 @@ export default function PublicationModal({ publicationId, isOpen, onClose, initi
             transition={{ type: "spring", damping: 30, stiffness: 350 }}
             className="publication-modal bg-white dark:bg-slate-900 rounded-2xl overflow-hidden relative z-10 w-full max-w-4xl mx-4 shadow-xl max-h-[90vh]"
             id="publication-modal"
-            onClick={(e) => e.stopPropagation()}
+            onClick={(e) => {
+              e.stopPropagation(); // Prevent the click from reaching the backdrop
+            }}
           >
             {/* Close button with improved positioning and appearance */}
             <button
@@ -724,8 +704,12 @@ const modalStyles = `
   .publication-modal .modal-content {
     pointer-events: auto !important;
     cursor: pointer !important;
-    position: relative !important;
     z-index: 10 !important;
+  }
+
+  /* Asegurarnos que el modal no se cierre al hacer click en él */
+  .publication-modal {
+    cursor: default !important;
   }
   
   /* Grid layout for desktop and mobile */

@@ -162,4 +162,34 @@ export const getOptimizedImageUrl = (url: string): string => {
   
   // Si no es Cloudinary, devolver la URL original
   return url;
+};
+
+/**
+ * Obtiene la ruta de la imagen predeterminada según la categoría
+ * @param category Categoría de la publicación
+ * @returns Ruta de la imagen predeterminada para esa categoría
+ */
+export const getDefaultImageByCategory = (category?: string): string => {
+  if (!category) return '/images/placeholder/productos.jpg';
+  
+  const normalizedCategory = category.toLowerCase().trim();
+  
+  switch (normalizedCategory) {
+    case 'empleos':
+      return '/images/placeholder/empleos.jpg';
+    case 'inmuebles':
+      return '/images/placeholder/inmuebles.jpg';
+    case 'vehiculos':
+      return '/images/placeholder/vehiculos.jpg';
+    case 'servicios':
+      return '/images/placeholder/servicios.jpg';
+    case 'eventos':
+      return '/images/placeholder/eventos.jpg';
+    case 'negocios':
+      return '/images/placeholder/negocios.jpg';
+    case 'comunidad':
+      return '/images/placeholder/comunidad.jpg';
+    default:
+      return '/images/placeholder/productos.jpg';
+  }
 }; 

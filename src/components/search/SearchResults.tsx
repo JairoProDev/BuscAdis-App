@@ -20,6 +20,7 @@ import Image from 'next/image'
 import useMediaQuery from '@/hooks/useMediaQuery'
 import PublicationModal from '@/components/search/PublicationModal'
 import { generateSeoUrl } from '@/utils/url'
+import { toast } from 'react-hot-toast'
 
 export interface Publication {
   id: string
@@ -266,28 +267,34 @@ export default function SearchResults({
     }
   }, [originalUrl]);
   
-  // Función para cambiar el modo de vista
+  // Modify the handleChangeViewMode function to fix layout issues
   const handleChangeViewMode = (mode: 'grid' | 'list') => {
-    // Si ya estamos en este modo, no hacemos nada
+    // Don't do anything if we're already in this mode
     if (viewMode === mode) return;
     
-    // Si vamos a cambiar a cuadrícula desde lista, forzamos un rerender
-    if (mode === 'grid' && viewMode === 'list') {
-      setViewMode('grid');
-      // Force re-render de la cuadrícula
+    // Apply transition class to smooth the change
+    const resultsContainer = document.querySelector('.grid') || document.querySelector('.space-y-4');
+    if (resultsContainer) {
+      resultsContainer.classList.add('opacity-80', 'scale-95');
       setTimeout(() => {
-        const gridContainer = document.querySelector('.grid');
-        if (gridContainer) {
-          gridContainer.classList.add('refresh-grid');
-          setTimeout(() => {
-            gridContainer.classList.remove('refresh-grid');
-          }, 50);
-        }
-      }, 50);
+        setViewMode(mode);
+        // Force layout recalculation after setting the view mode
+        setTimeout(() => {
+          const newContainer = document.querySelector('.grid') || document.querySelector('.space-y-4');
+          if (newContainer) {
+            newContainer.classList.remove('opacity-80', 'scale-95');
+          }
+        }, 50);
+      }, 100);
     } else {
       setViewMode(mode);
     }
-  }
+    
+    // Save preference to localStorage
+    if (typeof window !== 'undefined') {
+      localStorage.setItem('viewMode', mode);
+    }
+  };
   
   // Renderizar item en vista de cuadrícula
   const renderGridItem = (publication: Publication, index: number) => {
@@ -333,6 +340,10 @@ export default function SearchResults({
       e.preventDefault();
       e.stopPropagation();
       const contactPhone = publication.contactPhone || '';
+      if (!contactPhone) {
+        toast.error('No hay número de contacto disponible');
+        return;
+      }
       const cleanPhone = contactPhone.replace(/[^0-9]/g, '');
       const whatsappUrl = `https://wa.me/${cleanPhone}?text=${formatWhatsAppMessage()}`;
       window.open(whatsappUrl, '_blank');
@@ -354,7 +365,7 @@ export default function SearchResults({
         >
           <div className="relative flex flex-col bg-white dark:bg-slate-800 rounded-xl overflow-hidden shadow-md hover:shadow-lg transition-all duration-300 h-full">
             {/* Imagen siempre se muestra, usando placeholder si no hay imágenes */}
-            <div className="relative w-full h-48 overflow-hidden bg-gray-100 dark:bg-slate-700">
+            <div className="relative w-full h-40 overflow-hidden bg-gray-100 dark:bg-slate-700">
               <div className="absolute inset-0 bg-gradient-to-br from-black/10 to-black/30 z-10" />
               <Image
                 src={imageUrl}
@@ -387,20 +398,6 @@ export default function SearchResults({
                   {formatPrice(publication.price, publication.currency)}
                 </span>
               </div>
-              
-              {/* WhatsApp Button */}
-              {publication.contactPhone && (
-                <button
-                  onClick={handleWhatsAppClick}
-                  className="absolute bottom-2 left-2 z-20 bg-green-500 hover:bg-green-600 text-white text-xs font-medium px-2 py-1 rounded-full shadow-sm flex items-center"
-                  aria-label="Contactar por WhatsApp"
-                >
-                  <svg className="w-3 h-3 mr-1" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-                    <path d="M17.415 14.382c-.298-.149-1.759-.867-2.031-.967-.272-.099-.47-.148-.669.15-.198.296-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.019-.458.13-.606.134-.133.297-.347.446-.52.149-.174.198-.298.297-.497.1-.198.05-.371-.025-.52-.074-.149-.669-1.612-.916-2.207-.242-.579-.486-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.064 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.57-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z" />
-                  </svg>
-                  <span>WhatsApp</span>
-                </button>
-              )}
             </div>
             
             {/* Contenido */}
@@ -408,12 +405,12 @@ export default function SearchResults({
               <div>
                 <h3 className="text-sm sm:text-base font-semibold text-gray-900 dark:text-white line-clamp-2 mb-1">{publication.title}</h3>
                 
-                <p className="text-xs text-gray-600 dark:text-gray-300 line-clamp-2 mb-2">
+                <p className="text-xs text-gray-600 dark:text-gray-300 line-clamp-2 mb-1">
                   {publication.description}
                 </p>
               </div>
               
-              <div className="flex justify-between items-center text-xs text-gray-500 dark:text-gray-400">
+              <div className="flex justify-between items-center text-xs text-gray-500 dark:text-gray-400 mt-1">
                 <div className="flex items-center">
                   <MapPinIcon className="w-3 h-3 mr-1" />
                   <span className="truncate max-w-[80px]">
@@ -430,6 +427,20 @@ export default function SearchResults({
             </div>
           </div>
         </a>
+        
+        {/* WhatsApp Button */}
+        {publication.contactPhone && (
+          <button
+            onClick={handleWhatsAppClick}
+            className="absolute bottom-3 right-3 z-20 bg-green-500 hover:bg-green-600 text-white text-xs font-medium px-2 py-1 rounded-full shadow-sm flex items-center"
+            aria-label="Contactar por WhatsApp"
+          >
+            <svg className="w-3 h-3 mr-1" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+              <path d="M17.415 14.382c-.298-.149-1.759-.867-2.031-.967-.272-.099-.47-.148-.669.15-.198.296-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.019-.458.13-.606.134-.133.297-.347.446-.52.149-.174.198-.298.297-.497.1-.198.05-.371-.025-.52-.074-.149-.669-1.612-.916-2.207-.242-.579-.486-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.064 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.57-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z" />
+            </svg>
+            <span>WhatsApp</span>
+          </button>
+        )}
         
         {/* Botones de interacción */}
         {showInteractionButtons && (
@@ -505,6 +516,10 @@ export default function SearchResults({
       e.preventDefault();
       e.stopPropagation();
       const contactPhone = publication.contactPhone || '';
+      if (!contactPhone) {
+        toast.error('No hay número de contacto disponible');
+        return;
+      }
       const cleanPhone = contactPhone.replace(/[^0-9]/g, '');
       const whatsappUrl = `https://wa.me/${cleanPhone}?text=${formatWhatsAppMessage()}`;
       window.open(whatsappUrl, '_blank');
@@ -752,11 +767,11 @@ export default function SearchResults({
           {results.length > 0 ? (
             <React.Fragment key="results">
               {viewMode === 'grid' ? (
-                <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 gap-4 grid-auto-rows">
+                <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 gap-4 grid-auto-rows transition-all duration-300">
                   {results.map((publication, index) => renderGridItem(publication, index))}
                 </div>
               ) : (
-                <div className="space-y-4">
+                <div className="space-y-4 transition-all duration-300">
                   {results.map((publication, index) => renderListItem(publication, index))}
                 </div>
               )}
