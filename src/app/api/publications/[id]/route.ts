@@ -39,15 +39,20 @@ const FALLBACK_PUBLICATION = {
 
 export async function GET(
   request: Request,
-  { params: { id } }: { params: { id: string } }
+  context: { params: { id: string } }
 ) {
-  // Log the ID early for debugging, now that it's directly available
-  console.log(`API Route: Received request for publication ID: ${id}`); 
+  // Explicitly await the params object before accessing its properties
+  const params = await context.params; 
+  const id = params.id;
+
+  // Log the ID early for debugging
+  console.log(`API Route: Received request for publication ID: ${id}`);
   
   // Keep a reference to the original ID for error logging if needed
   const originalIdForErrorLogging = id; 
   
   try {
+    // 'id' is now available from the awaited params
     console.log(`Buscando publicación con ID: ${id}`);
     
     let publication = null;

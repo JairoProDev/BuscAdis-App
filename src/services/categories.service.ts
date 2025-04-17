@@ -1,22 +1,24 @@
 // categories.service.ts
 
-import { Collection, Document } from 'mongodb';
-import { getMongoClient } from '@/lib/mongodb'; // Correct import as named export
-import { mongoDbQuery } from '@/lib/mongodb.server';
+// Removed imports related to MongoDB as they are not needed for static data
+// import { Collection, Document } from 'mongodb';
+// import { getMongoClient } from '@/lib/mongodb'; // Correct import as named export
+// import { mongoDbQuery } from '@/lib/mongodb.server';
 
 // Check if we're in a browser environment
-const isBrowser = typeof window !== 'undefined';
+// const isBrowser = typeof window !== 'undefined'; // Not strictly needed anymore
 
 // Static categories definition - ONLY the 8 main categories
+// (Keep this definition as it's the source of truth now)
 const staticCategories = [
   {
     id: 'empleos',
     name: 'Empleos',
     slug: 'empleos',
     description: 'Encuentra trabajos o publica ofertas laborales en toda la región.',
-    icon: 'BriefcaseIcon',
+    icon: 'BriefcaseIcon', // Keeping icon name as string
     gradient: 'from-blue-500 to-blue-700',
-    imageUrl: '/images/empleo-dev.jpg',
+    imageUrl: '/images/empleo-dev.jpg', // These imageURLs might still cause 404s if files don't exist
   },
   {
     id: 'inmuebles',
@@ -79,118 +81,58 @@ const staticCategories = [
     description: 'Anuncios comunitarios, eventos sociales y más.',
     icon: 'UserGroupIcon',
     gradient: 'from-teal-500 to-teal-700',
-    imageUrl: '/images/comunidad-evento.jpg',
+    imageUrl: '/images/comunidad-evento.jpg', // These imageURLs might still cause 404s if files don't exist
   }
 ];
 
-// Tipos para las categorías de MongoDB
-interface CategoryItem {
+// Type for static categories (simplified)
+interface StaticCategoryItem {
   id: string;
   name: string;
-  icon: string;
-  description?: string;
-  gradient?: string;
-  slug?: string;
-  count?: number;
+  slug: string;
+  description: string;
+  icon: string; // Icon name as string
+  gradient: string;
+  imageUrl: string;
+  count?: number; // Keep optional count for type compatibility if needed elsewhere
 }
 
-// Interface for category counts
-interface CategoryCount {
-  id: string;
-  count: number;
-}
+// Interface for category counts (no longer used here)
+// interface CategoryCount {
+//   id: string;
+//   count: number;
+// }
 
 export class CategoriesService {
   /**
-   * Obtiene todas las categorías desde la base de datos o un fallback estático.
+   * Obtiene todas las categorías principales ESTATICAMENTE.
    * @returns Una lista de categorías.
    */
-  static async getCategories(): Promise<CategoryItem[]> {
-    try {
-      // If we're in the browser, use API fetch
-      if (isBrowser) {
-        try {
-          // First try to fetch from API
-          const response = await fetch('/api/categories');
-          if (!response.ok) {
-            throw new Error('API error');
-          }
-          
-          // Get category counts
-          const countResponse = await fetch('/api/categories/count');
-          let counts: CategoryCount[] = [];
-          
-          if (countResponse.ok) {
-            counts = await countResponse.json();
-          }
-          
-          const categories = await response.json();
-          
-          // Merge counts with categories
-          return categories.map((category: CategoryItem) => {
-            const countData = counts.find(c => c.id === category.id);
-            return {
-              ...category,
-              count: countData?.count || 0
-            };
-          });
-        } catch (error) {
-          console.error('Error fetching from API:', error);
-          // Return static categories with zero counts as fallback
-          return staticCategories.map((category) => ({
-            ...category,
-            count: 0
-          }));
-        }
-      }
-      
-      // Server-side code - use mongoDbQuery instead of direct client access
-      if (!isBrowser) {
-        try {
-          const results = await mongoDbQuery<CategoryItem>('categories', {}, {});
-          
-          if (results) {
-            // Handle both array and number return types
-            if (Array.isArray(results)) {
-              return results.map((category: any) => ({
-                id: category._id?.toString() || '',
-                name: category.name || '',
-                icon: category.icon || '',
-                description: category.description || '',
-                gradient: category.gradient || '',
-                slug: category.slug || '',
-                count: category.count || 0
-              }));
-            }
-          }
-        } catch (error) {
-          console.error('Error querying MongoDB:', error);
-          // Continue to the fallback below
-        }
-      }
-      
-      // Return static categories as fallback
-      return staticCategories;
-    } catch (error) {
-      console.error('Error fetching categories:', error);
-      // Return static categories as ultimate fallback
-      return staticCategories;
-    }
+  static async getCategories(): Promise<StaticCategoryItem[]> {
+    // Always return the static definition directly
+    // Add count: 0 for compatibility if needed by consumers, otherwise remove it
+    return Promise.resolve(staticCategories.map(cat => ({ ...cat, count: 0 }))); 
   }
 
   /**
    * Obtiene los tipos de una categoría específica (subcategorías).
+   * NOTE: This function still attempts to fetch from /api/categories/:id/subcategories.
+   * This API route likely needs to be implemented or this function needs modification
+   * if subcategories should also be static.
+   * For now, we leave it, but calls to it might fail if the API doesn't exist.
    * @param categoryId ID de la categoría.
    * @returns Una lista de subcategorías asociadas con la categoría.
    */
-  static async getCategoryWithTypes(categoryId: string): Promise<CategoryItem[]> {
-    try {
-      // For browser environments, fetch from API
-      if (isBrowser) {
+  static async getCategoryWithTypes(categoryId: string): Promise<any[]> { // Return type might need adjustment
+    // If subcategories should also be static, this needs to be rewritten.
+    // For now, keep the browser fetch attempt, but expect it might fail.
+    const isBrowser = typeof window !== 'undefined';
+    if (isBrowser) {
         try {
           const response = await fetch(`/api/categories/${categoryId}/subcategories`);
           if (!response.ok) {
-            throw new Error('API error');
+            console.error(`API error fetching subcategories for ${categoryId}: ${response.statusText}`);
+            return []; // Return empty on error
           }
           return await response.json();
         } catch (error) {
@@ -199,33 +141,13 @@ export class CategoriesService {
         }
       }
       
-      // Server-side code - use mongoDbQuery instead of direct client access
-      if (!isBrowser) {
-        try {
-          const results = await mongoDbQuery<any>('subcategories', { categoryId }, {});
-          
-          if (results) {
-            // Handle both array and number return types
-            if (Array.isArray(results) && results.length > 0) {
-              return results.map((subcategory: any) => ({
-                id: subcategory._id?.toString() || '',
-                name: subcategory.name || '',
-                icon: subcategory.icon || '',
-                categoryId: subcategory.categoryId,
-                count: subcategory.count || 0
-              }));
-            }
-          }
-        } catch (error) {
-          console.error(`Error querying MongoDB for subcategories:`, error);
-          // Continue to the fallback below
-        }
-      }
-      
-      return [];
-    } catch (error) {
-      console.error(`Error fetching subcategories for category ${categoryId}:`, error);
-      return [];
-    }
+      // Server-side fetch attempt (remove if API doesn't exist)
+      // This part will fail if the API route is gone. 
+      // Consider removing or replacing with static logic if needed.
+      console.warn('Server-side fetching of subcategories in CategoriesService is not implemented with static data.')
+      return []; 
   }
+  
+  // Removed the old getCategories implementation that used fetch/mongoDbQuery
+  // Removed getCategoryCounts function if it existed.
 }

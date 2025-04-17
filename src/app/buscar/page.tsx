@@ -355,23 +355,24 @@ export default function BuscadorPage() {
     // Store the current full URL before changing it
     setCurrentFullUrl(window.location.href);
 
-    // Generate the correct SEO URL
-    // **Numeric ID Handling:**
-    // If you have a separate numeric field (e.g., publication.numericId),
-    // use that here instead of publication.id.
-    // For now, we continue using the existing ID (likely MongoDB _id string).
+    // Generate the correct SEO URL using the publication slug
     const seoUrl = generateSeoUrl(
-      publication.id, // Use the ID from the publication object
-      publication.title,
+      publication.id, // Still needed for modal param lookup
+      publication.title, // Still needed for potential fallback slug generation
+      publication.slug, // *** Pass the publication slug here ***
       publication.categorySlug,
       publication.subcategory,
       publication.subsubcategory,
-      true // Include title slug in URL
+      // Assuming the publication.slug already contains the essence of the title
+      // If not, set this to true to append a title slug
+      false // *** Set to false if slug is self-contained, true otherwise ***
     );
     console.log("Generated SEO URL:", seoUrl);
 
     // Update browser URL to the SEO path with the modal query param
-    const urlWithModalParam = new URL(seoUrl, window.location.origin); // Use origin as base
+    const urlWithModalParam = new URL(seoUrl, window.location.origin); 
+    // Use the original ID for the modal parameter for lookup consistency 
+    // (Alternatively, use publication.slug if the modal can fetch by slug)
     urlWithModalParam.searchParams.set('modal', id);
     const newUrl = urlWithModalParam.toString();
     console.log("Pushing new URL with modal param:", newUrl);

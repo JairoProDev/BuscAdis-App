@@ -4,80 +4,72 @@
 
 /**
  * Genera una URL SEO-friendly para una publicación
- * @param id - ID de la publicación
+ * @param id - ID de la publicación (MongoDB _id, puede seguir siendo necesario para lookup)
  * @param title - Título de la publicación
+ * @param publicationSlug - Slug único y SEO-friendly de la publicación (preferido sobre el ID en la URL visible)
  * @param category - Categoría de la publicación (opcional)
  * @param subcategory - Subcategoría de la publicación (opcional)
  * @param subsubcategory - Sub-subcategoría de la publicación (opcional)
- * @param includeTitle - Incluir el slug del título en la URL (opcional, por defecto false)
+ * @param includeTitleInSlug - Si el slug ya contiene el título o si se debe añadir aparte (opcional, por defecto true asumiendo slug no tiene título)
  * @returns URL SEO-friendly
  */
 export function generateSeoUrl(
-  id: string,
+  id: string, // Keep ID for potential lookup / modal param
   title: string,
+  publicationSlug?: string, // Add dedicated slug parameter
   category?: string,
   subcategory?: string,
   subsubcategory?: string,
-  includeTitle: boolean = false
+  includeTitleInSlug: boolean = true // Renamed parameter for clarity
 ): string {
-  // Si el ID es null o undefined, usar un valor por defecto
-  if (!id) {
-    console.warn('generateSeoUrl: ID is null or undefined');
-    id = 'unknown';
+  if (!id && !publicationSlug) {
+    console.warn('generateSeoUrl: ID and publicationSlug are both missing');
+    return '/'; // Return root or a default path
   }
 
-  // Asegurarse de que el ID esté en formato numérico simple
-  // Si el ID no es secuencial y tiene letras/caracteres, conservar su valor original
-  const numericId = /^\d+$/.test(id) ? id : id;
+  // Use the provided publication slug if available, otherwise generate from title
+  const effectiveSlug = publicationSlug ? slugify(publicationSlug) : slugify(title);
   
-  // Genera un slug del título
-  const titleSlug = title
-    ? title
-        .toLowerCase()
-        .normalize("NFD")
-        .replace(/[\u0300-\u036f]/g, "")
-        .replace(/[^\w\sáéíóúñ]/gi, '')
-        .replace(/\s+/g, '-')
-        .substring(0, 50)
-    : 'detalle';
-  
-  // Verificar que todas las categorías estén normalizadas
+  // Generate a fallback title slug only if needed and not included in publicationSlug
+  const titleSlugForPath = includeTitleInSlug && !publicationSlug ? slugify(title) : '' ;
+
+  // Normalize category parts
   const normalizedCategory = category ? slugify(category) : '';
   const normalizedSubcategory = subcategory ? slugify(subcategory) : '';
   const normalizedSubsubcategory = subsubcategory ? slugify(subsubcategory) : '';
   
-  // Construir la URL con el formato /category/subcategory/subsubcategory/id/title
+  // Construir la URL: /category/subcategory/subsubcategory/effective-slug
   let url = '';
   
-  // Categoría (requerida si está disponible)
   if (normalizedCategory) {
     url += `/${normalizedCategory}`;
     
-    // Subcategoría (opcional)
     if (normalizedSubcategory) {
       url += `/${normalizedSubcategory}`;
       
-      // Subsubcategoría (opcional)
       if (normalizedSubsubcategory) {
         url += `/${normalizedSubsubcategory}`;
       }
     }
     
-    // ID (requerido)
-    url += `/${numericId}`;
-    
-    // Título (opcional como parte de la URL, controlado por includeTitle)
-    if (includeTitle && title) {
-      url += `/${titleSlug}`;
+    // Use the effective slug (publicationSlug or title slug) 
+    // Optionally add title slug if needed
+    url += `/${effectiveSlug}`;
+    if (titleSlugForPath) {
+        url += `-${titleSlugForPath}`; // Append title if slug didn't contain it
     }
+
   } else {
-    // Fallback si no hay categoría
-    url = `/publicaciones/${numericId}`;
-    if (title && includeTitle) {
-      url += `/${titleSlug}`;
+    // Fallback if no category: /publicaciones/effective-slug
+    url = `/publicaciones/${effectiveSlug}`;
+    if (titleSlugForPath) {
+        url += `-${titleSlugForPath}`;
     }
   }
   
+  // Remove trailing hyphens that might occur if titleSlugForPath is empty
+  url = url.replace(/-+$/, ''); 
+
   return url;
 }
 
@@ -93,7 +85,11 @@ export function slugify(text: string): string {
     .toLowerCase()
     .normalize("NFD")
     .replace(/[\u0300-\u036f]/g, "")
-    .replace(/[^\w\sáéíóúñ]/gi, '')
-    .replace(/\s+/g, '-')
-    .trim();
+    // Allow alphanumeric, spaces, and specific accented characters
+    // Remove characters that are not word characters, spaces, or hyphens
+    .replace(/[^\w\s\-áéíóúñüÁÉÍÓÚÑÜ]/g, '') 
+    .replace(/\s+/g, '-') // Replace spaces with hyphens
+    .replace(/--+/g, '-') // Replace multiple hyphens with single
+    .replace(/^-+|-+$/g, '') // Trim hyphens from start/end
+    .substring(0, 75); // Limit slug length
 } 

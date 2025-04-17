@@ -93,14 +93,14 @@ function formatRelativeTime(dateString: string): string {
 // Helper function to get category-specific default image
 const getDefaultImageForCategory = (categorySlug?: string): string => {
   switch (categorySlug) {
-    case 'vehiculos': return '/images/defaults/vehiculos.jpg';
-    case 'inmuebles': return '/images/defaults/inmuebles.jpg';
-    case 'empleos': return '/images/defaults/empleos.jpg';
-    case 'servicios': return '/images/defaults/servicios.jpg';
-    case 'productos': return '/images/defaults/productos.jpg';
-    case 'eventos': return '/images/defaults/eventos.jpg';
-    case 'negocios': return '/images/defaults/negocios.jpg';
-    case 'comunidad': return '/images/defaults/comunidad.jpg';
+    case 'vehiculos': return '/images/placeholder/vehiculos.jpg';
+    case 'inmuebles': return '/images/placeholder/inmuebles.jpg';
+    case 'empleos': return '/images/placeholder/empleos.jpg';
+    case 'servicios': return '/images/placeholder/servicios.jpg';
+    case 'productos': return '/images/placeholder/productos.jpg';
+    case 'eventos': return '/images/placeholder/eventos.jpg';
+    case 'negocios': return '/images/placeholder/negocios.jpg';
+    case 'comunidad': return '/images/placeholder/comunidad.jpg';
     // Add more cases as needed
     default: return '/images/placeholder-buscadis.jpg'; // Generic fallback
   }
