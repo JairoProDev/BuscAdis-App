@@ -350,6 +350,7 @@ export default function SearchResults({
         return;
       }
       const cleanPhone = contactPhone.replace(/[^0-9]/g, '');
+      console.log('Opening WhatsApp with phone:', cleanPhone);
       const whatsappUrl = `https://wa.me/${cleanPhone}?text=${formatWhatsAppMessage()}`;
       window.open(whatsappUrl, '_blank');
     };
@@ -375,83 +376,77 @@ export default function SearchResults({
             }
           }}
         >
-          <div className="relative flex flex-col bg-white dark:bg-slate-800 rounded-xl overflow-hidden shadow-md hover:shadow-lg transition-all duration-300 h-full">
-            {/* Imagen siempre se muestra, usando placeholder si no hay imágenes */}
-            <div className="relative w-full overflow-hidden bg-gray-100 dark:bg-slate-700 image-container">
-              <div className="absolute inset-0 bg-gradient-to-br from-black/10 to-black/30 z-10" />
-              <Image
-                src={imageUrl}
-                alt={publication.title}
-                fill
-                sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
-                className="object-cover transition-transform duration-500 hover:scale-110"
-                onError={(e) => { e.currentTarget.src = '/images/placeholder-buscadis.jpg'; }}
-              />
-              
-              {/* Badges */}
-              <div className="absolute top-2 left-2 flex flex-col gap-1 z-20">
-                {isPremium && (
-                  <span className="bg-gradient-to-r from-teal-500 to-cyan-500 text-white text-xs font-medium px-2 py-1 rounded-full shadow-sm flex items-center">
-                    <SparklesIcon className="w-3 h-3 mr-1" />
-                    <span>Premium</span>
-                  </span>
-                )}
-                
-                {isNew && (
-                  <span className="bg-gradient-to-r from-amber-500 to-orange-500 text-white text-xs font-medium px-2 py-1 rounded-full shadow-sm flex items-center">
-                    <FireIcon className="w-3 h-3 mr-1" />
-                    <span>Nuevo</span>
-                  </span>
-                )}
-              </div>
-              
-              {/* Precio */}
-              <div className="absolute bottom-2 right-2 z-10">
-                <span className="bg-blue-600 text-white text-xs font-bold px-2 py-1 rounded-full shadow-sm">
-                  {formatPrice(publication.price, publication.currency)}
+          {/* Image Container */}
+          <div className="image-container">
+            <div className="absolute inset-0 bg-gradient-to-br from-black/10 to-black/30 z-10" />
+            <Image
+              src={imageUrl}
+              alt={publication.title}
+              fill
+              sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw"
+              className="object-cover"
+              onError={(e) => { e.currentTarget.src = '/images/placeholder-buscadis.jpg'; }}
+            />
+            
+            {/* Badges */}
+            <div className="absolute top-2 left-2 flex flex-col gap-1 z-20">
+              {isPremium && (
+                <span className="bg-gradient-to-r from-teal-500 to-cyan-500 text-white text-xs font-medium px-2 py-1 rounded-full shadow-sm flex items-center">
+                  <SparklesIcon className="w-3 h-3 mr-1" />
+                  <span>Premium</span>
                 </span>
-              </div>
+              )}
+              
+              {isNew && (
+                <span className="bg-gradient-to-r from-amber-500 to-orange-500 text-white text-xs font-medium px-2 py-1 rounded-full shadow-sm flex items-center">
+                  <FireIcon className="w-3 h-3 mr-1" />
+                  <span>Nuevo</span>
+                </span>
+              )}
             </div>
             
-            {/* Contenido */}
-            <div className="flex-1 p-3 flex flex-col justify-between">
-              <div>
-                <h3 className="text-sm sm:text-base font-semibold text-gray-900 dark:text-white line-clamp-2 mb-1">{publication.title}</h3>
-                
-                <p className="text-xs text-gray-600 dark:text-gray-300 line-clamp-2 mb-1">
-                  {publication.description}
-                </p>
-              </div>
-              
-              <div className="flex justify-between items-center text-xs text-gray-500 dark:text-gray-400 mt-1">
-                <div className="flex items-center">
-                  <MapPinIcon className="w-3 h-3 mr-1" />
-                  <span className="truncate max-w-[100px]" title={formatLocation(publication.location)}>
-                    {formatLocation(publication.location)}
-                  </span>
-                </div>
-                
-                <span className="text-xs">
-                  {formatRelativeTime(publication.createdAt)}
+            {/* Precio */}
+            <div className="absolute bottom-2 right-2 z-10">
+              <span className="bg-blue-600 text-white text-xs font-bold px-2 py-1 rounded-full shadow-sm">
+                {formatPrice(publication.price, publication.currency)}
+              </span>
+            </div>
+          </div>
+          
+          {/* Content */}
+          <div className="content">
+            <div>
+              <h3>{publication.title}</h3>
+              <p className="description">{publication.description}</p>
+            </div>
+            
+            <div className="footer">
+              <div className="location">
+                <MapPinIcon className="w-3 h-3 mr-1 flex-shrink-0" />
+                <span title={formatLocation(publication.location)}>
+                  {formatLocation(publication.location)}
                 </span>
               </div>
+              
+              <span className="date">
+                {formatRelativeTime(publication.createdAt)}
+              </span>
             </div>
           </div>
         </a>
         
-        {/* --- WhatsApp Button Moved Outside Link --- */}
-        {publication.contactPhone && (
-          <button
-            onClick={handleWhatsAppClick}
-            className="absolute bottom-3 right-3 z-20 bg-green-500 hover:bg-green-600 text-white text-xs font-medium px-2 py-1 rounded-full shadow-sm flex items-center whatsapp-button"
-            aria-label="Contactar por WhatsApp"
-          >
-            <svg className="w-3 h-3 mr-1" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-              <path d="M17.415 14.382c-.298-.149-1.759-.867-2.031-.967-.272-.099-.47-.148-.669.15-.198.296-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.019-.458.13-.606.134-.133.297-.347.446-.52.149-.174.198-.298.297-.497.1-.198.05-.371-.025-.52-.074-.149-.669-1.612-.916-2.207-.242-.579-.486-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.064 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.57-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z" />
-            </svg>
-            <span>WhatsApp</span>
-          </button>
-        )}
+        {/* WhatsApp Button - Always render the container but conditionally show/hide based on contactPhone */}
+        <div 
+          className={`whatsapp-button ${!publication.contactPhone ? 'hidden' : ''}`}
+          onClick={handleWhatsAppClick}
+          role="button"
+          aria-label="Contactar por WhatsApp"
+        >
+          <svg className="w-3 h-3 mr-1" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+            <path d="M17.415 14.382c-.298-.149-1.759-.867-2.031-.967-.272-.099-.47-.148-.669.15-.198.296-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.019-.458.13-.606.134-.133.297-.347.446-.52.149-.174.198-.298.297-.497.1-.198.05-.371-.025-.52-.074-.149-.669-1.612-.916-2.207-.242-.579-.486-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.064 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.57-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z" />
+          </svg>
+          <span>WhatsApp</span>
+        </div>
         
         {/* Botones de interacción */}
         {showInteractionButtons && (
@@ -798,7 +793,7 @@ export default function SearchResults({
             {allResults.length > 0 ? (
               <React.Fragment key="results">
                 {viewMode === 'grid' ? (
-                  <div className="publications-grid grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 md:gap-4 grid-auto-rows">
+                  <div className="publications-grid">
                     {allResults.filter(publication => publication && publication.id).map((publication, index) => (
                       <React.Fragment key={`grid-item-${publication.id}-${index}`}>
                         {renderGridItem(publication, index)}
@@ -806,7 +801,7 @@ export default function SearchResults({
                     ))}
                   </div>
                 ) : (
-                  <div className="publications-list space-y-3">
+                  <div className="publications-list">
                     {allResults.filter(publication => publication && publication.id).map((publication, index) => (
                       <React.Fragment key={`list-item-${publication.id}-${index}`}>
                         {renderListItem(publication, index)}

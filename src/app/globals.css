@@ -143,64 +143,115 @@
 
   /* === Publication Card Redesign === */
   .publication-card {
-    @apply flex flex-col bg-white dark:bg-slate-800 rounded-lg shadow-md hover:shadow-lg 
-           transition-shadow duration-300 overflow-hidden relative w-full;
-    /* Let height be determined by content */
-    height: auto;
-    min-height: 0;
-    max-height: none;
+    height: auto !important;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
   }
 
   .publication-card > a {
-    @apply flex flex-col flex-grow h-full text-gray-900 dark:text-white no-underline;
+    display: flex;
+    flex-direction: column;
+    height: 100%;
   }
 
   .publication-card .image-container {
-    @apply relative w-full block flex-shrink-0 bg-gray-200 dark:bg-slate-700;
-    /* Aspect ratio 4:3 */
-    padding-bottom: 75%;
-  }
-
-  .publication-card .image-container img {
-    @apply absolute top-0 left-0 w-full h-full object-cover;
+    position: relative;
+    height: 180px !important;
+    width: 100%;
+    overflow: hidden;
   }
 
   .publication-card .content {
-    @apply flex flex-col flex-grow p-3; /* Content takes remaining space */
-    min-height: 0; /* Allow shrinking */
+    flex: 1;
+    padding: 0.75rem;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
   }
 
-  .publication-card .title {
-    @apply text-sm font-semibold line-clamp-2 mb-1 text-gray-900 dark:text-white;
+  .publication-card h3 {
+    font-size: 0.875rem;
+    line-height: 1.25rem;
+    font-weight: 600;
+    margin-bottom: 0.25rem;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
   }
 
   .publication-card .description {
-    @apply text-xs text-gray-600 dark:text-gray-400 line-clamp-2 mb-2 overflow-hidden text-ellipsis;
-    min-height: 2.25em; /* Roughly reserve space for 2 lines */
+    font-size: 0.75rem;
+    margin-bottom: 0.25rem;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
   }
 
-  .publication-card .meta {
-    @apply flex justify-between items-center text-xs text-gray-500 dark:text-gray-300 mt-auto pt-1;
-    /* Sticks to bottom because .content is flex-col and flex-grow */
+  .publication-card .footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 0.7rem;
+    margin-top: 0.5rem;
   }
 
-  /* WhatsApp Button Styling (includes temporary visibility) */
+  .publication-card .location {
+    display: flex;
+    align-items: center;
+    max-width: 60%;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .publication-card .date {
+    font-size: 0.7rem;
+  }
+
+  .publications-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 12px;
+    width: 100%;
+  }
+
+  @media (min-width: 768px) {
+    .publications-grid {
+      grid-template-columns: repeat(3, 1fr);
+      gap: 16px;
+    }
+  }
+
+  @media (min-width: 1024px) {
+    .publications-grid {
+      grid-template-columns: repeat(4, 1fr);
+    }
+  }
+
+  .publications-list {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    width: 100%;
+  }
+
   .whatsapp-button {
-    @apply absolute bottom-2 right-2 z-20 
-           bg-green-500 hover:bg-green-600 text-white 
-           text-xs font-medium px-2 py-1 rounded-full 
-           shadow-md flex items-center transition-opacity duration-200;
-    /* Temporary - make it super obvious */
-    border: 2px solid red !important;
-    background-color: yellow !important;
-    color: black !important;
+    position: absolute !important;
+    bottom: 0.75rem !important;
+    right: 0.75rem !important;
+    z-index: 20 !important;
+    display: flex !important;
+    align-items: center !important;
+    background-color: #25d366 !important;
+    color: white !important;
+    font-size: 0.75rem !important;
+    padding: 0.25rem 0.5rem !important;
+    border-radius: 9999px !important;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.12), 0 1px 2px rgba(0, 0, 0, 0.24) !important;
   }
-
-  /* Interaction buttons (like/save) */
-  .interaction-buttons {
-    @apply absolute top-2 right-2 flex gap-1 z-20;
-  }
-  /* ... styles for buttons inside .interaction-buttons ... */
 
   /* === End Publication Card Redesign === */
 }
@@ -805,751 +856,241 @@ button[aria-label="Contactar por WhatsApp"] {
 
 @media (max-width: 640px) {
   .publications-grid {
-    grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
-    gap: 1rem;
+    display: grid;
+    grid-template-columns: repeat(2, 1fr) !important;
+    gap: 0.75rem !important;
+    width: 100%;
+    margin: 0 auto;
+    padding: 0 0.25rem;
   }
-}
 
-/* List view item styles */
-.list-view-item {
-  margin-bottom: 1rem;
-  height: auto !important;
-  min-height: 120px !important;
-}
+  .publication-card {
+    height: auto !important;
+    min-height: unset !important;
+    margin-bottom: 0.75rem !important;
+  }
 
-.list-view-item > a {
-  height: 100%;
-}
+  .publication-card .image-container {
+    height: 120px !important;
+    min-height: 120px !important;
+  }
 
-/* Ensure consistent spacing in grids */
-.grid-auto-rows {
-  display: grid;
-  grid-auto-rows: auto;
-}
+  .publication-card .content {
+    padding: 0.5rem !important;
+    min-height: unset !important;
+    max-height: unset !important;
+    height: auto !important;
+    display: flex;
+    flex-direction: column;
+  }
 
-/* Reset for publications container */
-#root,
-body,
-html {
-  width: 100%;
-  max-width: 100vw;
-  overflow-x: hidden;
-}
+  .publication-card h3 {
+    font-size: 0.85rem !important;
+    line-height: 1.2 !important;
+    margin-bottom: 0.25rem !important;
+    height: auto !important;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
 
-@media (max-width: 640px) {
-  .container {
+  .publication-card .description {
+    font-size: 0.7rem !important;
+    line-height: 1.1 !important;
+    margin-bottom: 0.25rem !important;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+
+  .publication-card .footer {
+    margin-top: 0.25rem !important;
+    font-size: 0.65rem !important;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+  }
+
+  .publication-card .location,
+  .publication-card .date {
+    font-size: 0.65rem !important;
+    margin: 0 !important;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
     max-width: 100%;
-    overflow-x: hidden;
-    padding-left: 0.5rem;
-    padding-right: 0.5rem;
+    display: inline-block;
   }
 
-  /* Ensure grid items stay full width */
-  .grid.grid-cols-2 > div {
-    min-width: 0;
+  /* Fix WhatsApp button visibility */
+  .whatsapp-button {
+    position: absolute !important;
+    right: 0.25rem !important;
+    bottom: 0.25rem !important;
+    padding: 0.25rem 0.5rem !important;
+    font-size: 0.65rem !important;
+    z-index: 30 !important;
+    opacity: 1 !important;
+    visibility: visible !important;
+    display: flex !important;
+    align-items: center !important;
   }
 
-  /* Prevent content from being cut off */
-  body {
-    overflow-x: hidden;
+  /* Fix list view on mobile */
+  .list-view-item {
+    margin-bottom: 0.75rem !important;
+    min-height: 100px !important;
   }
-}
 
-.publication-card-no-image::before {
-  content: "";
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background-image: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23334155' fill-opacity='0.1'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
-  opacity: 0.3;
-}
-
-.publication-card-no-image p {
-  font-size: 0.875rem;
-  color: rgba(255, 255, 255, 0.7);
-  text-align: center;
-  padding: 0 1rem;
-  position: relative;
-  z-index: 1;
-}
-
-.publication-card-no-image svg {
-  opacity: 0.7;
-  margin-bottom: 0.75rem;
-  z-index: 1;
-}
-
-/* Estilos para la página de anuncios individuales */
-.publication-details-container {
-  max-width: 1200px;
-  margin: 0 auto;
-  padding: 1rem;
-}
-
-.publication-image-gallery {
-  border-radius: 12px;
-  overflow: hidden;
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
-}
-
-.publication-info-box {
-  background-color: white;
-  border-radius: 12px;
-  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.05);
-  padding: 1.5rem;
-  margin-bottom: 1.5rem;
-}
-
-.publication-category-badge {
-  display: inline-flex;
-  padding: 0.25rem 0.75rem;
-  background-color: #f1f5f9;
-  color: #475569;
-  border-radius: 9999px;
-  font-size: 0.75rem;
-  font-weight: 500;
-}
-
-/* Animaciones para mejorar UX */
-@keyframes fadeIn {
-  from {
-    opacity: 0;
-  }
-  to {
-    opacity: 1;
+  /* Fix spacing between items */
+  .space-y-4 > :not([hidden]) ~ :not([hidden]) {
+    --tw-space-y-reverse: 0;
+    margin-top: calc(0.75rem * calc(1 - var(--tw-space-y-reverse))) !important;
+    margin-bottom: calc(0.75rem * var(--tw-space-y-reverse)) !important;
   }
 }
 
-.fade-in {
-  animation: fadeIn 0.5s ease-in-out;
-}
-
-.hover-scale {
-  transition: transform 0.2s ease-in-out;
-}
-
-.hover-scale:hover {
-  transform: scale(1.03);
-}
-
-/* Ajustes para responsive */
-@media (max-width: 768px) {
-  .publication-details-container {
-    padding: 0.5rem;
-  }
-
-  .publication-info-box {
-    padding: 1rem;
-    margin-bottom: 1rem;
-  }
-}
-
-/* Efecto de refrescar cuadrícula */
-.refresh-grid {
-  opacity: 0.95;
-  transform: scale(0.99);
-  transition: all 0.1s ease-out;
-}
-
-.refresh-grid > div {
-  transition: all 0.1s ease-out;
-}
-
-/* Estilos para ajustar animaciones framer-motion */
-.grid.grid-cols-2,
-.grid.grid-cols-3 {
-  position: relative;
-  z-index: 1;
-  padding-bottom: 1rem;
-}
-
-/* Forzar altura de ítems en grid para consistencia */
-.grid.grid-cols-2 > div,
-.grid.grid-cols-3 > div {
-  min-height: auto !important;
-  max-height: none !important;
-  height: auto !important;
-}
-
-/* Estilos para vista de lista */
-.list-view-item {
-  margin-bottom: 1rem;
-  height: auto !important;
-  min-height: 160px !important;
-}
-
-.list-view-item > a {
-  height: 100%;
-}
-
-/* Z-index para modales */
-[role="dialog"],
-.fixed.inset-0 {
-  z-index: 9999 !important;
-}
-
-/* Fondo del modal más oscuro */
-.fixed.inset-0 > .absolute.inset-0 {
-  background-color: rgba(0, 0, 0, 0.8) !important;
-}
-
-/* Asegurarse que las imágenes de los productos se muestren correctamente */
-.relative img.object-cover {
-  object-fit: cover !important;
-  height: 100% !important;
-  width: 100% !important;
-}
-
-/* Evitar problemas con el modal */
-.modal-open {
-  overflow: hidden !important;
-  height: 100vh;
-}
-
-/* Reset para el body cuando se cierra el modal */
-body:not(.modal-open) {
-  overflow: auto !important;
-}
-
-/* Ajuste para altura consistente en publicaciones */
-.publication-card-no-image,
-.grid.grid-cols-2 > div a > div,
-.grid.grid-cols-3 > div a > div {
-  height: 100%;
-  min-height: 320px;
-  display: flex;
-  flex-direction: column;
-}
-
-/* Asegurar que las imágenes mantengan proporciones y tamaño */
-.publication-card-no-image img,
-.grid.grid-cols-2 > div img,
-.grid.grid-cols-3 > div img {
-  object-fit: cover;
-  aspect-ratio: 4/3;
-}
-
-/* Ajustes para el contenedor principal */
-.grid.grid-cols-2 > div,
-.grid.grid-cols-3 > div {
-  position: relative;
-  aspect-ratio: 0.75;
-}
-
-/* Ajustes para modal */
-div[role="dialog"],
-div[aria-modal="true"],
-.fixed.inset-0 {
-  z-index: 9999 !important;
-}
-
-.modal-open {
-  overflow: hidden !important;
-  position: fixed;
-  width: 100%;
-  height: 100%;
-}
-
-/* Asegurar que el contenido del modal es visible */
-.z-\[9999\] {
-  z-index: 9999 !important;
-}
-
-/* Gestión de modal y overflow */
-.modal-open {
-  overflow: hidden !important;
-  padding-right: var(--scrollbar-width, 0);
-}
-
-/* Mejoras en la visualización y responsive design */
-.publication-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-  gap: 1.5rem;
-}
-
-/* Asegurar que todas las tarjetas de publicación tienen la misma altura */
+/* Additional fixes to ensure consistent height and better transitions */
 .publication-card {
-  height: 100%;
   display: flex;
   flex-direction: column;
-}
-
-.publication-card-content {
-  flex-grow: 1;
-  display: flex;
-  flex-direction: column;
-}
-
-/* Mejorar la visualización del modal */
-.publication-modal {
-  max-height: 90vh;
-  height: auto !important;
-  overflow-y: auto;
-  overscroll-behavior: contain;
-  pointer-events: auto !important;
-}
-
-/* Ajustar tamaño de las tarjetas para que sean consistentes */
-.publication-grid-item {
-  min-height: 350px;
   height: 100%;
-}
-
-/* Solucionar problema de espaciado en grid */
-.publications-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
-  grid-auto-rows: auto;
-  gap: 1.5rem;
-}
-
-@media (max-width: 640px) {
-  .publications-grid {
-    grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
-    gap: 1rem;
-  }
-}
-
-/* Asegurar alturas consistentes en las tarjetas */
-.publications-grid > div {
-  height: 100%;
-}
-
-/* Imágenes centrales en publicaciones */
-.publication-image {
-  position: relative;
-  height: 0;
-  padding-bottom: 75%; /* Relación de aspecto 4:3 */
-  background-color: #f5f5f5;
-  overflow: hidden;
-}
-
-.publication-image img {
-  position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  transition: transform 0.3s ease-in-out;
-}
-
-.publication-card:hover .publication-image img {
-  transform: scale(1.05);
-}
-
-/* Tarjetas de publicación */
-.publication-card {
-  height: 350px !important;
-  display: flex;
-  flex-direction: column;
-  transition: transform 0.3s, box-shadow 0.3s;
-  background-color: white;
-  border-radius: 0.75rem;
-  overflow: hidden;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-}
-
-.publication-card:hover {
-  transform: translateY(-4px);
-  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.1);
+  transition: all 0.3s ease;
 }
 
 .publication-card .image-container {
   position: relative;
-  height: 200px !important;
-  background-color: #f5f5f5;
+  height: 180px;
+  overflow: hidden;
 }
 
 .publication-card .content {
-  padding: 1rem;
-  flex-grow: 1;
   display: flex;
   flex-direction: column;
-  height: 150px !important;
-  overflow: hidden;
+  justify-content: space-between;
+  flex-grow: 1;
+  padding: 0.75rem;
+  background-color: white;
 }
 
-.publication-card .title {
+.publication-card h3 {
   font-weight: 600;
   font-size: 1rem;
-  line-height: 1.5rem;
-  color: #111827;
-  margin-bottom: 0.25rem;
-  overflow: hidden;
+  line-height: 1.25;
+  color: #1f2937;
+  margin-bottom: 0.5rem;
   display: -webkit-box;
   -webkit-line-clamp: 2;
   -webkit-box-orient: vertical;
-}
-
-.publication-card .price {
-  font-weight: 700;
-  font-size: 1.125rem;
-  color: #2563eb;
-  margin-bottom: 0.5rem;
-}
-
-.publication-card .meta {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  font-size: 0.875rem;
-  color: #6b7280;
-  margin-top: auto;
-}
-
-/* Modal de publicación */
-.publication-modal {
-  scrollbar-width: thin;
-  scrollbar-color: rgba(156, 163, 175, 0.5) transparent;
-}
-
-.publication-modal::-webkit-scrollbar {
-  width: 6px;
-}
-
-.publication-modal::-webkit-scrollbar-track {
-  background: transparent;
-}
-
-.publication-modal::-webkit-scrollbar-thumb {
-  background-color: rgba(156, 163, 175, 0.5);
-  border-radius: 3px;
-}
-
-/* Contenedor de cuadrícula con tamaño consistente */
-.publications-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
-  gap: 1.5rem;
-}
-
-@media (max-width: 640px) {
-  .publications-grid {
-    grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
-    gap: 1rem;
-  }
-}
-
-/* Asegurar alturas consistentes en las tarjetas */
-.publications-grid > div {
-  height: 100%;
-}
-
-/* Imágenes centrales en publicaciones */
-.publication-image {
-  position: relative;
-  height: 0;
-  padding-bottom: 75%; /* Relación de aspecto 4:3 */
-  background-color: #f5f5f5;
   overflow: hidden;
 }
 
-.publication-image img {
+.publication-card .description {
+  font-size: 0.875rem;
+  color: #4b5563;
+  margin-bottom: 0.75rem;
+  flex-grow: 1;
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.publication-card .footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: auto;
+  font-size: 0.75rem;
+  color: #6b7280;
+}
+
+.publication-card .location {
+  display: flex;
+  align-items: center;
+  max-width: 60%;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.publication-card .date {
+  font-size: 0.75rem;
+  color: #6b7280;
+}
+
+.whatsapp-button {
   position: absolute;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  transition: transform 0.3s ease-in-out;
-}
-
-.publication-card:hover .publication-image img {
-  transform: scale(1.05);
-}
-
-/* Add transitions for smooth view changes */
-.transition-all {
-  transition-property: all;
-  transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
-  transition-duration: 150ms;
-}
-
-/* Grid layout fixes */
-.grid-auto-rows {
-  grid-auto-rows: auto !important;
-}
-
-/* Fix relative positioning for WhatsApp button */
-.publication-card {
-  position: relative;
-}
-
-/* Consistent card heights */
-.publication-card,
-.publication-card > a,
-.publication-card > a > div {
-  height: 100% !important;
-}
-
-/* Improved grid layout when switching between views */
-.grid {
-  transition: opacity 0.3s ease, transform 0.3s ease;
-}
-
-.opacity-80 {
-  opacity: 0.8;
-}
-
-.scale-95 {
-  transform: scale(0.95);
-}
-
-/* Fix spacing issues in grid cells */
-.grid.grid-cols-2 > div,
-.grid.grid-cols-3 > div {
-  margin-bottom: 0 !important;
-}
-
-/* Ensure cards maintain proper height */
-.publication-card .content {
-  min-height: auto;
-  max-height: none;
-  padding: 0.75rem;
-}
-
-/* Ensure proper height for cards in different views */
-@media (min-width: 640px) {
-  .grid-cols-2 > div,
-  .grid-cols-3 > div {
-    height: 350px !important;
-  }
-
-  .publication-card {
-    height: 350px !important;
-  }
-}
-
-@media (max-width: 639px) {
-  .publication-card {
-    height: 300px !important;
-  }
-
-  .publication-card .image-container {
-    height: 150px !important;
-  }
-}
-
-/* Fix for the WhatsApp button positioning */
-.publication-card .whatsapp-button {
-  position: absolute;
-  bottom: 0.75rem;
-  right: 0.75rem;
+  right: 0.5rem;
+  bottom: 0.5rem;
+  background-color: #25d366;
+  color: white;
+  font-size: 0.75rem;
+  font-weight: 600;
+  padding: 0.35rem 0.6rem;
+  border-radius: 9999px;
+  display: flex;
+  align-items: center;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
   z-index: 20;
+  transition: all 0.2s ease;
 }
 
-/* Add a clearfix for float-related issues */
-.clearfix::after {
-  content: "";
-  display: table;
-  clear: both;
+.whatsapp-button:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
 }
 
-/* Fix view transitions */
-.transition-view {
-  transition: all 0.3s ease-in-out;
+.whatsapp-button.hidden {
+  display: none !important;
 }
 
-/* Fix grid layout issues */
-.grid-auto-rows {
-  grid-auto-rows: auto !important;
+/* Publication List Item Styles */
+.publications-list .publication-card {
+  flex-direction: row;
+  height: auto;
+  min-height: 120px;
 }
 
-/* Fix publication card positioning and height */
-.publication-card {
-  position: relative !important;
-  height: 100% !important;
-  min-height: 280px !important;
-  max-height: 400px !important;
-  display: flex;
-  flex-direction: column;
+.publications-list .publication-card a {
+  flex-direction: row;
 }
 
-.publication-card > a {
-  height: 100% !important;
-  display: flex;
-  flex-direction: column;
+.publications-list .publication-card .image-container {
+  width: 120px;
+  height: 120px;
+  flex-shrink: 0;
 }
 
-.publication-card > a > div {
-  height: 100% !important;
-  display: flex;
-  flex-direction: column;
+.publications-list .publication-card .content {
+  padding: 10px 12px;
+  flex: 1;
 }
 
-/* Fix WhatsApp button position */
-.publication-card .whatsapp-button,
-button[aria-label="Contactar por WhatsApp"] {
-  position: absolute !important;
-  bottom: 12px !important;
-  right: 12px !important;
-  z-index: 20 !important;
+.publications-list .publication-card .whatsapp-button {
+  bottom: 10px;
+  right: 10px;
 }
 
-/* Fix grid cell spacing */
-.grid.grid-cols-2,
-.grid.grid-cols-2.sm\:grid-cols-2,
-.grid.grid-cols-2.sm\:grid-cols-2.lg\:grid-cols-3 {
-  grid-gap: 16px !important;
-  gap: 16px !important;
-}
+@media (max-width: 640px) {
+  .publications-list .publication-card .image-container {
+    width: 100px;
+    height: 100px;
+  }
 
-.grid.grid-cols-2 > div,
-.grid.grid-cols-2.sm\:grid-cols-2 > div,
-.grid.grid-cols-2.sm\:grid-cols-2.lg\:grid-cols-3 > div {
-  margin: 0 !important;
-  height: 100% !important;
-}
-
-/* Fix content height */
-.publication-card .content,
-.flex-1.p-3.flex.flex-col.justify-between {
-  flex: 1 !important;
-  min-height: 120px !important;
-  display: flex !important;
-  flex-direction: column !important;
-  justify-content: space-between !important;
-}
-
-/* Media queries for better responsive layout */
-@media (min-width: 640px) {
-  .grid-cols-2 > div,
-  .sm\:grid-cols-2 > div,
-  .lg\:grid-cols-3 > div {
-    height: auto !important;
-    min-height: 280px !important;
+  .publications-list .publication-card {
+    min-height: 100px;
   }
 }
 
-@media (max-width: 639px) {
-  .publication-card {
-    min-height: 250px !important;
-  }
-
-  .publication-card .image-container {
-    height: 140px !important;
-  }
-}
-
-/* Fix for WhatsApp button */
-button[aria-label="Contactar por WhatsApp"] {
-  position: absolute !important;
-  bottom: 12px !important;
-  right: 12px !important;
-  z-index: 30 !important;
-}
-
-/* Fix clearfix to handle floats properly */
-.clearfix::after {
-  content: "";
-  display: table;
-  clear: both;
-}
-
-/* Fix grid transition animations */
-.opacity-80 {
-  opacity: 0.8 !important;
-  transition: opacity 0.3s ease !important;
-}
-
-.scale-95 {
-  transform: scale(0.95) !important;
-  transition: transform 0.3s ease !important;
-}
-
-/* Fix for inconsistent rendering in view mode change */
-.transition-all.duration-300 {
-  transition: all 0.3s ease-in-out !important;
-}
-
-/* Publication grid and list specific styles */
-.publications-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
-  gap: 16px;
+/* Transition classes */
+.view-transition {
   transition: all 0.3s ease-in-out;
 }
 
-.publications-grid .publication-card {
-  height: 100%;
-  display: flex;
-  flex-direction: column;
-  position: relative;
-}
-
-.publications-list {
-  display: flex;
-  flex-direction: column;
-  gap: 16px;
-  transition: all 0.3s ease-in-out;
-}
-
-.publications-list .list-view-item {
-  width: 100%;
-  margin-bottom: 16px;
-}
-
-/* Fix for transitions between views */
-.transition-view {
-  transition: all 0.3s ease-in-out;
-  opacity: 1;
-  transform: scale(1);
-}
-
-.transition-view.opacity-80 {
-  opacity: 0.8;
-}
-
-.transition-view.scale-95 {
-  transform: scale(0.95);
-}
-
-/* Fix view transitions - simplified to reduce reflows */
-.publications-grid,
-.publications-list {
-  transition: opacity 0.3s ease;
-}
-
-/* Publication grid and list specific styles - simplified */
-.publications-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
-  gap: 16px;
-}
-
-.publications-grid .publication-card {
-  height: 100%;
-}
-
-.publications-list {
-  display: flex;
-  flex-direction: column;
-  gap: 16px;
-}
-
-/* Fix publication card positioning and height - simplified */
-.publication-card {
-  position: relative;
-  height: 100%;
-  min-height: 280px;
-  display: flex;
-  flex-direction: column;
-}
-
-.publication-card > a {
-  height: 100%;
-  display: flex;
-  flex-direction: column;
-}
-
-/* Fix WhatsApp button position - simplified */
-button[aria-label="Contactar por WhatsApp"] {
-  position: absolute;
-  bottom: 12px;
-  right: 12px;
-  z-index: 20;
+/* Fix the cut-off issues */
+.search-results-container {
+  min-height: 300px;
 }
