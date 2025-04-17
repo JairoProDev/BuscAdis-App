@@ -8,8 +8,8 @@
       "transactionType": "oferta_empleo",
       "value": 0,
       "currency": "PEN",
-      "valueType": "consultar",
-      "size": 2,
+      "valueType": "consultar", // "excelente remuneración"
+      "size": 2, // Estimado: Texto de longitud media.
       "location": {
         "country": "Peru",
         "province": "Cusco",
@@ -33,10 +33,10 @@
       "subcategorySlug": "departamentos",
       "subSubcategorySlug": null,
       "transactionType": "venta",
-      "value": 60000,
+      "value": 60000, // Tomando el primer precio como referencia
       "currency": "USD",
-      "valueType": "fijo",
-      "size": 1,
+      "valueType": "fijo", // Precios específicos dados
+      "size": 1, // Estimado: Texto corto-medio.
       "location": {
         "country": "Peru",
         "province": "Cusco",
@@ -58,17 +58,17 @@
       "description": "Ofrece: Ambientes amplios, Atención Médica y Psicológica, Cuidados de Enfermería día/noche, Podología, Masajes relajantes y más. Profesionales especializados en cuidado del Adulto Mayor.",
       "categorySlug": "servicios",
       "subcategorySlug": "salud-bienestar",
-      "subSubcategorySlug": "cuidado-personas",
+      "subSubcategorySlug": "cuidado-personas", // Más específico: Cuidado Geriátrico
       "transactionType": "ofrezco_servicio",
       "value": 0,
       "currency": "PEN",
       "valueType": "consultar",
-      "size": 1,
+      "size": 1, // Estimado: Texto corto-medio.
       "location": {
         "country": "Peru",
         "province": "Cusco",
         "city": "Cusco",
-        "district": "Cusco",
+        "district": "Cusco", // Asumiendo distrito Cusco por Huancaro
         "address": "Av. Los Rosales F9-B (Residencial Huancaro)"
       },
       "contact": {
@@ -85,12 +85,12 @@
       "description": "Servicios veterinarios a domicilio a precios económicos: Peluquería+baño (Gato S/35, Perro S/25), Vacuna S/30, Anticonceptivos S/26, Esterilización (Gata/Perrita S/50-70, Perro/Gato S/35-50), Limpieza dental S/30, Extracción Dental, Eutanasia S/35-45 (costo social). Reservar cupo por WhatsApp.",
       "categorySlug": "servicios",
       "subcategorySlug": "servicios-mascotas",
-      "subSubcategorySlug": "veterinaria-consultas",
+      "subSubcategorySlug": "veterinaria-consultas", // Cubre varios servicios vet
       "transactionType": "ofrezco_servicio",
-      "value": 25,
+      "value": 25, // Precio mínimo como referencia
       "currency": "PEN",
-      "valueType": "desde",
-      "size": 1,
+      "valueType": "desde", // Hay varios precios
+      "size": 1, // Estimado: Texto corto-medio.
       "location": {
         "country": "Peru",
         "province": "Cusco",
@@ -114,15 +114,15 @@
       "subcategorySlug": "ventas-comercial-marketing",
       "subSubcategorySlug": "vendedor-ejecutivo-ventas",
       "transactionType": "oferta_empleo",
-      "value": 0,
+      "value": 0, // Sueldo básico no especificado
       "currency": "PEN",
       "valueType": "sueldo_mas_comisiones",
-      "size": 2,
+      "size": 2, // Estimado: Texto de longitud media.
       "location": {
         "country": "Peru",
         "province": "Cusco",
         "city": "Cusco",
-        "district": "Wanchaq",
+        "district": "Wanchaq", // Av. Micaela Bastidas está en Wanchaq
         "address": "Av. Micaela Bastidas 101-102 (esquina con Diagonal Zavaleta)"
       },
       "contact": {
@@ -142,9 +142,9 @@
       "subSubcategorySlug": "duplex",
       "transactionType": "alquiler",
       "value": 0,
-      "currency": "PEN",
-      "valueType": "consultar",
-      "size": 3,
+      "currency": "PEN", // Asumido, podría ser USD
+      "valueType": "consultar", // No indica precio
+      "size": 3, // Estimado: Texto medio-largo.
       "location": {
         "country": "Peru",
         "province": "Cusco",
@@ -166,12 +166,12 @@
       "description": "Se alquila local comercial de 125m² en estreno, primer piso, material noble. Ideal para financieras, empresas de telefonía, ONGs, farmacias, etc. Ubicado a media cuadra de la Plaza de Santiago.",
       "categorySlug": "inmuebles",
       "subcategorySlug": "locales-comerciales",
-      "subSubcategorySlug": "tienda",
+      "subSubcategorySlug": "tienda", // O genérico
       "transactionType": "alquiler",
       "value": 0,
       "currency": "PEN",
       "valueType": "consultar",
-      "size": 1,
+      "size": 1, // Estimado: Texto corto.
       "location": {
         "country": "Peru",
         "province": "Cusco",
@@ -192,18 +192,18 @@
       "title": "Pre Venta Tiendas/Oficinas en Centro Comercial - Av. De La Cultura",
       "description": "¡Oportunidad Única! Pre-venta de tiendas y oficinas en centro comercial con excelente ubicación en Av. de la Cultura, alta rentabilidad. Cuenta con escaleras eléctricas, ascensores, patio de comida, zona de juegos y cines. Trato directo.",
       "categorySlug": "inmuebles",
-      "subcategorySlug": "proyectos-inmobiliarios",
-      "subSubcategorySlug": "en-planos-preventa",
-      "transactionType": "venta",
+      "subcategorySlug": "proyectos-inmobiliarios", // Se ajusta mejor a preventa
+      "subSubcategorySlug": "en-planos-preventa", // Específico para preventa
+      "transactionType": "venta", // La preventa es una modalidad de venta
       "value": 0,
-      "currency": "PEN",
+      "currency": "PEN", // Asumido, podría ser USD
       "valueType": "consultar",
-      "size": 1,
+      "size": 1, // Estimado: Texto corto-medio.
       "location": {
         "country": "Peru",
         "province": "Cusco",
         "city": "Cusco",
-        "district": null,
+        "district": null, // Av. de la Cultura cruza varios distritos
         "address": "Av. De La Cultura (Centro Comercial)"
       },
       "contact": {
@@ -220,17 +220,17 @@
       "description": "Se da en anticresis local amplio (280 m²) por estrenar, ideal para eventos, quinta, tienda u otros. Cuenta con sala amplia, barra, baños para varón y mujer. Ubicado en la pista principal de Pumamarca, zona comercial y turística. Solo personas serias.",
       "categorySlug": "inmuebles",
       "subcategorySlug": "locales-comerciales",
-      "subSubcategorySlug": "eventos-quinta-tienda",
+      "subSubcategorySlug": "eventos-quinta-tienda", // Describe los usos
       "transactionType": "anticresis",
       "value": 0,
-      "currency": "PEN",
+      "currency": "PEN", // Asumido, podría ser USD
       "valueType": "consultar",
-      "size": 1,
+      "size": 1, // Estimado: Texto corto-medio.
       "location": {
         "country": "Peru",
         "province": "Cusco",
         "city": "Cusco",
-        "district": "San Sebastián",
+        "district": "San Sebastián", // Pumamarca pertenece a S.S.
         "address": "Pista Principal de Pumamarca"
       },
       "contact": {
@@ -242,7 +242,7 @@
       "status": "active",
       "premium": false
     },
-    {
+     {
       "title": "Alquilo Bonita Casa de 2 Pisos",
       "description": "Casa de 2 pisos en alquiler. 1er piso: Sala, comedor, cocina, baño, lavandería, patio techado. 2do piso: 2 dormitorios, baño. Ubicada en Calle Los Pinos B-5, San Sebastián (entre 3er y 4to paradero, cerca Av. de la Cultura).",
       "categorySlug": "inmuebles",
@@ -252,7 +252,7 @@
       "value": 0,
       "currency": "PEN",
       "valueType": "consultar",
-      "size": 1,
+      "size": 1, // Estimado: Texto corto-medio.
       "location": {
         "country": "Peru",
         "province": "Cusco",
@@ -274,17 +274,17 @@
       "description": "Venta de 8 terrenos independizados (178m² y 285m²) inscritos en RR.PP., dentro del condominio privado 'Portales del Sol'. Ubicado en Ayuda Mutua, a 15 min de Plaza de Armas y 10 min del Real Plaza. Precio $380/m² (negociable). Trato directo.",
       "categorySlug": "inmuebles",
       "subcategorySlug": "terrenos-lotes",
-      "subSubcategorySlug": "urbano",
+      "subSubcategorySlug": "urbano", // Condominio implica urbano
       "transactionType": "venta",
       "value": 380,
       "currency": "USD",
       "valueType": "por_metro_cuadrado_negociable",
-      "size": 1,
+      "size": 1, // Estimado: Texto corto-medio.
       "location": {
         "country": "Peru",
         "province": "Cusco",
         "city": "Cusco",
-        "district": "Cusco",
+        "district": "Cusco", // Ayuda Mutua está en distrito Cusco
         "address": "Condominio Portales del Sol, Ayuda Mutua"
       },
       "contact": {
@@ -301,12 +301,12 @@
       "description": "Venta de terrenos (100m², 120m², 240m²) en Alto Qosqo, San Sebastián (a una cuadra del mercado Virgen del Carmen). Cuentan con servicios básicos y documentos en regla. Precio conversable, trato directo.",
       "categorySlug": "inmuebles",
       "subcategorySlug": "terrenos-lotes",
-      "subSubcategorySlug": "urbano",
+      "subSubcategorySlug": "urbano", // Zona consolidada cerca a mercado
       "transactionType": "venta",
       "value": 0,
-      "currency": "PEN",
+      "currency": "PEN", // Asumido, podría ser USD
       "valueType": "negociable",
-      "size": 1,
+      "size": 1, // Estimado: Texto corto.
       "location": {
         "country": "Peru",
         "province": "Cusco",

@@ -16,8 +16,8 @@ export function generateSeoUrl(
   id: string,
   title: string,
   category?: string,
-  subcategory?: string | null,
-  subsubcategory?: string | null,
+  subcategory?: string,
+  subsubcategory?: string,
   includeTitle: boolean = false
 ): string {
   // Si el ID es null o undefined, usar un valor por defecto
@@ -43,8 +43,8 @@ export function generateSeoUrl(
   
   // Verificar que todas las categorías estén normalizadas
   const normalizedCategory = category ? slugify(category) : '';
-  const normalizedSubcategory = subcategory ? slugify(subcategory) : null;
-  const normalizedSubsubcategory = subsubcategory ? slugify(subsubcategory) : null;
+  const normalizedSubcategory = subcategory ? slugify(subcategory) : '';
+  const normalizedSubsubcategory = subsubcategory ? slugify(subsubcategory) : '';
   
   // Construir la URL con el formato /category/subcategory/subsubcategory/id/title
   let url = '';
@@ -53,17 +53,17 @@ export function generateSeoUrl(
   if (normalizedCategory) {
     url += `/${normalizedCategory}`;
     
-    // Subcategoría (opcional) - solo incluir si tiene valor válido
-    if (normalizedSubcategory && normalizedSubcategory !== 'unknown' && normalizedSubcategory !== 'null') {
+    // Subcategoría (opcional)
+    if (normalizedSubcategory) {
       url += `/${normalizedSubcategory}`;
       
-      // Subsubcategoría (opcional) - solo incluir si tiene valor válido
-      if (normalizedSubsubcategory && normalizedSubsubcategory !== 'unknown' && normalizedSubsubcategory !== 'null') {
+      // Subsubcategoría (opcional)
+      if (normalizedSubsubcategory) {
         url += `/${normalizedSubsubcategory}`;
       }
     }
     
-    // Siempre incluir el ID después de la categoría (y subcategorías si existen)
+    // ID (requerido)
     url += `/${numericId}`;
     
     // Título (opcional como parte de la URL, controlado por includeTitle)
@@ -77,9 +77,6 @@ export function generateSeoUrl(
       url += `/${titleSlug}`;
     }
   }
-  
-  // Agregar logging para depuración
-  console.log(`URL generada: ${url} para ID: ${id}, categoría: ${category}, subcategoría: ${subcategory}, subsubcategoría: ${subsubcategory}`);
   
   return url;
 }

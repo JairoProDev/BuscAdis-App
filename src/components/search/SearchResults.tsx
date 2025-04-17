@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useCallback, useEffect, useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import { motion, AnimatePresence, LayoutGroup } from 'framer-motion'
 import { useInView } from 'react-intersection-observer'
 import { 
@@ -93,9 +93,25 @@ function formatRelativeTime(dateString: string): string {
   return date.toLocaleDateString('es-PE', { day: 'numeric', month: 'short' })
 }
 
+// Helper function to get category-specific default image
+const getDefaultImageForCategory = (categorySlug?: string): string => {
+  switch (categorySlug) {
+    case 'vehiculos': return '/images/defaults/vehiculos.jpg';
+    case 'inmuebles': return '/images/defaults/inmuebles.jpg';
+    case 'empleos': return '/images/defaults/empleos.jpg';
+    case 'servicios': return '/images/defaults/servicios.jpg';
+    case 'productos': return '/images/defaults/productos.jpg';
+    case 'eventos': return '/images/defaults/eventos.jpg';
+    case 'negocios': return '/images/defaults/negocios.jpg';
+    case 'comunidad': return '/images/defaults/comunidad.jpg';
+    // Add more cases as needed
+    default: return '/images/placeholder-buscadis.jpg'; // Generic fallback
+  }
+};
+
 export default function SearchResults({
-  results,
-  loading,
+  results: initialResults,
+  loading: initialLoading,
   onLoadMore,
   hasMore = false,
   highlightNew = true,
@@ -113,11 +129,17 @@ export default function SearchResults({
   const [modalOpen, setModalOpen] = useState(false)
   const [selectedPublicationId, setSelectedPublicationId] = useState<string | null>(null)
   const [originalUrl, setOriginalUrl] = useState<string>('')
+  
+  // Nuevos estados para el scroll infinito - Managed by parent now mostly
+  const [allResults, setAllResults] = useState<Publication[]>(initialResults || [])
+  const [loading, setLoading] = useState(initialLoading)
+  
   // Referencia para infinite scroll
-  const { ref: loadMoreRef, inView } = useInView({
+  const { ref: loadMoreRef, inView, entry } = useInView({
     threshold: 0.1,
     triggerOnce: false
-  })
+  });
+  
   // Media queries
   const isMd = useMediaQuery('(min-width: 768px)')
   const isLg = useMediaQuery('(min-width: 1024px)')
@@ -129,12 +151,42 @@ export default function SearchResults({
     return 2            // mobile: grid-cols-2
   }
   
+  // Actualizar resultados cuando cambian los resultados iniciales
+  useEffect(() => {
+    if (!initialResults) {
+      // Handle case where initialResults might be undefined
+      setAllResults([]); // Clear local state if initial is undefined
+      return;
+    }
+    if (initialResults.length === 0) {
+      // If parent sends an empty array (e.g., after filters yield nothing)
+      setAllResults([]); // Update local state to be empty
+      return;
+    }
+
+    console.log('SearchResults: Updating results from props, count:', initialResults.length);
+    setAllResults(initialResults);
+    setLoading(initialLoading);
+  }, [initialResults, initialLoading]);
+  
   // Cargar más resultados cuando el elemento de carga está en vista
   useEffect(() => {
-    if (inView && !loading && hasMore && onLoadMore) {
-      onLoadMore()
+    // Log the state whenever inView changes or related states change
+    console.log('SearchResults: InView Effect Check', { 
+      inView, 
+      isIntersecting: entry?.isIntersecting, // More specific check
+      loading,
+      hasMore,
+      canLoadMore: !loading && hasMore && onLoadMore 
+    });
+
+    // Use entry.isIntersecting for potentially more reliable detection
+    if (entry?.isIntersecting && !loading && hasMore && onLoadMore) {
+      console.log('SearchResults: ---> Loading more results TRIGGERED');
+      onLoadMore();
     }
-  }, [inView, loading, hasMore, onLoadMore])
+    // Dependency array includes entry to react to intersection changes
+  }, [inView, entry, loading, hasMore, onLoadMore]); // Removed currentPage dependency
   
   // Cargar likes y guardados del localStorage al iniciar
   useEffect(() => {
@@ -161,14 +213,14 @@ export default function SearchResults({
   // Detectar nuevos resultados
   useEffect(() => {
     // Simular algunos elementos como "nuevos"
-    if (highlightNew && results.length > 0) {
+    if (highlightNew && allResults.length > 0) {
       // Considera "nuevos" el 20% de los resultados más recientes
-      const newCount = Math.max(1, Math.floor(results.length * 0.2))
+      const newCount = Math.max(1, Math.floor(allResults.length * 0.2))
       setNewItemsCount(newCount)
     } else {
       setNewItemsCount(0)
     }
-  }, [results, highlightNew])
+  }, [allResults, highlightNew])
   
   // Gestionar interacciones (like, guardar)
   const toggleLike = (id: string) => {
@@ -238,29 +290,18 @@ export default function SearchResults({
 
   // Función para cerrar el modal de publicación
   const handleCloseModal = () => {
-    // Log para depuración
-    console.log(`Cerrando modal para publicación ID: ${selectedPublicationId}`);
-    
-    // Actualizar estados
+    // Update states
     setModalOpen(false);
     setSelectedPublicationId(null);
-    
-    // Remover clase modal-open del body al cerrar
-    document.body.classList.remove('modal-open');
-    document.documentElement.style.removeProperty('--scrollbar-width');
     
     // Restore the original URL using replaceState
     if (originalUrl) {
       window.history.replaceState({ modalOpen: false }, '', originalUrl);
       setOriginalUrl('');
     } else {
-      // Fallback if originalUrl wasn't set (should not happen ideally)
-      // Go back might be an option, but replaceState to a sensible default is safer
-      const searchParams = window.location.search;
-      // Attempt to reconstruct a base path (e.g., search results path)
-      // This might need refinement based on your app's routing structure
-      const basePath = window.location.pathname.substring(0, window.location.pathname.lastIndexOf('/')) || '/'; 
-      window.history.replaceState({modalOpen: false}, '', basePath + searchParams);
+      // Fallback if originalUrl wasn't set
+      const basePath = window.location.pathname.substring(0, window.location.pathname.lastIndexOf('/')) || '/';
+      window.history.replaceState({modalOpen: false}, '', basePath + window.location.search);
     }
   };
   
@@ -294,20 +335,19 @@ export default function SearchResults({
     const isLiked = likedItems.has(publication.id);
     const isSaved = savedItems.has(publication.id);
     
-    // Verificar si tiene imágenes
-    const hasImages = publication.images && publication.images.length > 0;
-    
-    // Default image if none provided
-    const imageUrl = hasImages && publication.images ? publication.images[0] : '/images/placeholder-buscadis.jpg';
+    // Robust image check
+    const images = publication.images;
+    const hasImages = Array.isArray(images) && images.length > 0 && images[0] !== '/images/placeholder-image.jpg' && images[0] !== '/images/defaults/default.jpg';
+    const imageUrl = hasImages ? images[0] : getDefaultImageForCategory(publication.categorySlug);
     
     // Generar seoUrl para el enlace
     const seoUrl = generateSeoUrl(
       publication.id,
       publication.title || '',
       publication.categorySlug || '',
-      publication.subcategory || null,
-      publication.subsubcategory || null,
-      false // No incluir título en la URL cuando abrimos el modal
+      publication.subcategory || undefined,
+      publication.subsubcategory || undefined,
+      false
     );
 
     // Formatear mensaje de WhatsApp
@@ -364,6 +404,7 @@ export default function SearchResults({
                 fill
                 sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
                 className="object-cover transition-transform duration-500 hover:scale-110"
+                onError={(e) => { e.currentTarget.src = '/images/placeholder-buscadis.jpg'; }}
               />
               
               {/* Badges */}
@@ -486,11 +527,10 @@ export default function SearchResults({
     const isLiked = likedItems.has(publication.id)
     const isSaved = savedItems.has(publication.id)
     
-    // Verificar si tiene imágenes
-    const hasImages = publication.images && publication.images.length > 0;
-    
-    // Default image if none provided
-    const imageUrl = hasImages && publication.images ? publication.images[0] : '/images/placeholder-buscadis.jpg';
+    // Robust image check
+    const images = publication.images;
+    const hasImages = Array.isArray(images) && images.length > 0 && images[0] !== '/images/placeholder-image.jpg' && images[0] !== '/images/defaults/default.jpg';
+    const imageUrl = hasImages ? images[0] : getDefaultImageForCategory(publication.categorySlug);
 
     // Formatear mensaje de WhatsApp
     const formatWhatsAppMessage = () => {
@@ -536,9 +576,9 @@ export default function SearchResults({
             publication.id,
             publication.title || '',
             publication.categorySlug || '',
-            publication.subcategory || null,
-            publication.subsubcategory || null,
-            false // No incluir título en la URL cuando abrimos el modal
+            publication.subcategory || undefined,
+            publication.subsubcategory || undefined,
+            false
           )} 
           className="block w-full"
           onClick={(e) => handleOpenModal(publication.id, e)}
@@ -554,6 +594,7 @@ export default function SearchResults({
                   fill
                   sizes="(max-width: 640px) 30vw, 120px"
                   className="object-cover transition-transform duration-500 group-hover:scale-110"
+                  onError={(e) => { e.currentTarget.src = '/images/placeholder-buscadis.jpg'; }}
                 />
               </div>
               
@@ -678,7 +719,7 @@ export default function SearchResults({
     )
   }
   
-  if (loading && results.length === 0) {
+  if (loading && allResults.length === 0) {
     return (
       <div className="w-full">
         <div className="flex items-center justify-between mb-4">
@@ -705,135 +746,128 @@ export default function SearchResults({
     <>
       {/* Results list */}
       <div className="relative z-10">
-      {/* Control de vista y resultados */}
-      <div className="flex flex-wrap items-center justify-between mb-4">
-        <div className="flex items-center space-x-1">
-          <span className="text-sm font-medium text-slate-400">
-            {results.length} resultado{results.length !== 1 ? 's' : ''}
-            {activeCategory && <span className="ml-1">en {activeCategory}</span>}
-          </span>
-          
-          {newItemsCount > 0 && (
-            <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-amber-500/20 text-amber-400">
-              <FireIcon className="w-3 h-3 mr-0.5" />
-              {newItemsCount} nuevo{newItemsCount !== 1 ? 's' : ''}
+        {/* Control de vista y resultados */}
+        <div className="flex flex-wrap items-center justify-between mb-4">
+          <div className="flex items-center space-x-1">
+            <span className="text-sm font-medium text-slate-400">
+              {allResults.length} resultado{allResults.length !== 1 ? 's' : ''}
+              {activeCategory && <span className="ml-1">en {activeCategory}</span>}
             </span>
-          )}
-        </div>
-        
-        {/* Controles de vista */}
-        <div className="flex items-center gap-2">
-          {/* Selector de orden */}
-          <select 
-            className="bg-slate-700 border border-slate-600 text-slate-300 text-sm rounded-lg focus:ring-teal-500 focus:border-teal-500 p-2 pr-8"
-            aria-label="Ordenar resultados"
-          >
-            <option value="recentes">Más recientes</option>
-            <option value="relevancia">Más relevantes</option>
-            <option value="precio_asc">Precio: menor a mayor</option>
-            <option value="precio_desc">Precio: mayor a menor</option>
-          </select>
+            
+            {newItemsCount > 0 && (
+              <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-amber-500/20 text-amber-400">
+                <FireIcon className="w-3 h-3 mr-0.5" />
+                {newItemsCount} nuevo{newItemsCount !== 1 ? 's' : ''}
+              </span>
+            )}
+          </div>
           
-          {/* Toggle de vista cuadrícula/lista */}
-          <div className="flex rounded-lg overflow-hidden shadow-md">
-            <button
-              className={`p-2 ${viewMode === 'grid' 
-                ? 'bg-gradient-to-r from-teal-500 to-cyan-500 text-white' 
-                : 'bg-slate-700 text-slate-300 hover:bg-slate-600'}`}
-              onClick={() => handleChangeViewMode('grid')}
-              aria-label="Ver en cuadrícula"
+          {/* Controles de vista */}
+          <div className="flex items-center gap-2">
+            {/* Selector de orden */}
+            <select 
+              className="bg-slate-700 border border-slate-600 text-slate-300 text-sm rounded-lg focus:ring-teal-500 focus:border-teal-500 p-2 pr-8"
+              aria-label="Ordenar resultados"
             >
-              <Squares2X2Icon className="w-5 h-5" />
-            </button>
-            <button
-              className={`p-2 ${viewMode === 'list' 
-                ? 'bg-gradient-to-r from-teal-500 to-cyan-500 text-white' 
-                : 'bg-slate-700 text-slate-300 hover:bg-slate-600'}`}
-              onClick={() => handleChangeViewMode('list')}
-              aria-label="Ver en lista"
-            >
-              <ListBulletIcon className="w-5 h-5" />
-            </button>
+              <option value="recentes">Más recientes</option>
+              <option value="relevancia">Más relevantes</option>
+              <option value="precio_asc">Precio: menor a mayor</option>
+              <option value="precio_desc">Precio: mayor a menor</option>
+            </select>
+            
+            {/* Toggle de vista cuadrícula/lista */}
+            <div className="flex rounded-lg overflow-hidden shadow-md">
+              <button
+                className={`p-2 ${viewMode === 'grid' 
+                  ? 'bg-gradient-to-r from-teal-500 to-cyan-500 text-white' 
+                  : 'bg-slate-700 text-slate-300 hover:bg-slate-600'}`}
+                onClick={() => handleChangeViewMode('grid')}
+                aria-label="Ver en cuadrícula"
+              >
+                <Squares2X2Icon className="w-5 h-5" />
+              </button>
+              <button
+                className={`p-2 ${viewMode === 'list' 
+                  ? 'bg-gradient-to-r from-teal-500 to-cyan-500 text-white' 
+                  : 'bg-slate-700 text-slate-300 hover:bg-slate-600'}`}
+                onClick={() => handleChangeViewMode('list')}
+                aria-label="Ver en lista"
+              >
+                <ListBulletIcon className="w-5 h-5" />
+              </button>
+            </div>
           </div>
         </div>
+        
+        {/* Resultados */}
+        <LayoutGroup>
+          <AnimatePresence mode="wait">
+            {allResults.length > 0 ? (
+              <React.Fragment key="results">
+                {viewMode === 'grid' ? (
+                  <div className="publications-grid grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 gap-4 grid-auto-rows transition-all duration-300">
+                    {allResults.filter(publication => publication && publication.id).map((publication, index) => (
+                      <React.Fragment key={`grid-item-${publication.id}-${index}`}>
+                        {renderGridItem(publication, index)}
+                      </React.Fragment>
+                    ))}
+                  </div>
+                ) : (
+                  <div className="publications-list space-y-4 transition-all duration-300">
+                    {allResults.filter(publication => publication && publication.id).map((publication, index) => (
+                      <React.Fragment key={`list-item-${publication.id}-${index}`}>
+                        {renderListItem(publication, index)}
+                      </React.Fragment>
+                    ))}
+                  </div>
+                )}
+                
+                {/* Loader de "cargar más" */}
+                {hasMore && (
+                  <div ref={loadMoreRef} className="mt-8 flex justify-center">
+                    {loading ? (
+                      <div className="p-4 flex items-center justify-center">
+                        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-teal-500"></div>
+                      </div>
+                    ) : null}
+                  </div>
+                )}
+              </React.Fragment>
+            ) : (
+              <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                className="flex flex-col items-center justify-center py-12 bg-slate-800 rounded-lg shadow-md border border-teal-500/20"
+              >
+                <div className="p-4 bg-slate-700/50 rounded-full mb-4">
+                  <svg xmlns="http://www.w3.org/2000/svg" className="h-12 w-12 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                  </svg>
+                </div>
+                <h2 className="text-2xl font-semibold text-white mb-2">No se encontraron resultados</h2>
+                <p className="text-slate-400 text-center mb-6 max-w-md">
+                  Intenta modificar tu búsqueda o explora todas las categorías disponibles para encontrar lo que necesitas.
+                </p>
+                <button
+                  className="bg-gradient-to-r from-teal-500 to-cyan-500 hover:from-teal-600 hover:to-cyan-600 text-white font-medium py-2 px-6 rounded-lg transition-colors shadow-md hover:shadow-lg"
+                >
+                  Ver todos los anuncios
+                </button>
+              </motion.div>
+            )}
+          </AnimatePresence>
+        </LayoutGroup>
       </div>
       
-      {/* Resultados */}
-      <LayoutGroup>
-        <AnimatePresence mode="wait">
-          {results.length > 0 ? (
-            <React.Fragment key="results">
-              {viewMode === 'grid' ? (
-                <div className="publications-grid grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 gap-4 grid-auto-rows transition-all duration-300">
-                  {results.filter(publication => publication && publication.id).map((publication, index) => (
-                    <React.Fragment key={`grid-item-${publication.id}-${index}`}>
-                      {renderGridItem(publication, index)}
-                    </React.Fragment>
-                  ))}
-                </div>
-              ) : (
-                <div className="publications-list space-y-4 transition-all duration-300">
-                  {results.filter(publication => publication && publication.id).map((publication, index) => (
-                    <React.Fragment key={`list-item-${publication.id}-${index}`}>
-                      {renderListItem(publication, index)}
-                    </React.Fragment>
-                  ))}
-                </div>
-              )}
-              
-              {/* Loader de "cargar más" */}
-              {hasMore && (
-                <div ref={loadMoreRef} className="mt-8 flex justify-center">
-                  {loading ? (
-                    <div className="p-4 flex items-center justify-center">
-                      <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-teal-500"></div>
-                    </div>
-                  ) : (
-                    <button
-                      onClick={onLoadMore}
-                      className="bg-gradient-to-r from-teal-500 to-cyan-500 hover:from-teal-600 hover:to-cyan-600 text-white font-medium py-2 px-6 rounded-lg transition-colors shadow-md hover:shadow-lg"
-                    >
-                      Cargar más resultados
-                    </button>
-                  )}
-                </div>
-              )}
-            </React.Fragment>
-          ) : (
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              className="flex flex-col items-center justify-center py-12 bg-slate-800 rounded-lg shadow-md border border-teal-500/20"
-            >
-              <div className="p-4 bg-slate-700/50 rounded-full mb-4">
-                <svg xmlns="http://www.w3.org/2000/svg" className="h-12 w-12 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-                </svg>
-              </div>
-              <h2 className="text-2xl font-semibold text-white mb-2">No se encontraron resultados</h2>
-              <p className="text-slate-400 text-center mb-6 max-w-md">
-                Intenta modificar tu búsqueda o explora todas las categorías disponibles para encontrar lo que necesitas.
-              </p>
-              <button
-                className="bg-gradient-to-r from-teal-500 to-cyan-500 hover:from-teal-600 hover:to-cyan-600 text-white font-medium py-2 px-6 rounded-lg transition-colors shadow-md hover:shadow-lg"
-              >
-                Ver todos los anuncios
-              </button>
-            </motion.div>
-          )}
-        </AnimatePresence>
-      </LayoutGroup>
-    </div>
-    
-    {/* Publication Modal */}
-    {selectedPublicationId && (
-      <PublicationModal
-        publicationId={selectedPublicationId}
-        isOpen={modalOpen}
-        onClose={handleCloseModal}
-        initialData={undefined}
-      />
-    )}
-  </>
-)
+      {/* Publication Modal */}
+      {selectedPublicationId && (
+        <PublicationModal
+          publicationId={selectedPublicationId}
+          isOpen={modalOpen}
+          onClose={handleCloseModal}
+          initialData={undefined}
+        />
+      )}
+    </>
+  )
 }

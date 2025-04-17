@@ -45,14 +45,37 @@ interface PublicationData {
   [key: string]: unknown; // Allow additional properties
 }
 
+// Interface for raw data structure from API (might include _id, etc.)
+interface ApiPublicationData {
+  _id?: string;
+  id?: string;
+  title?: string;
+  description?: string;
+  price?: number | string;
+  currency?: string;
+  category?: string;
+  categorySlug?: string; // Ensure this is potentially received
+  subcategory?: string;
+  location?: { city?: string; region?: string } | string;
+  contactName?: string;
+  contactEmail?: string;
+  contactPhone?: string;
+  status?: string;
+  created_at?: string | Date;
+  createdAt?: string | Date; // API might return this instead
+  images?: string[];
+  premium?: boolean;
+  verified?: boolean;
+  [key: string]: unknown; // Allow other fields
+}
+
 interface MongoQuery {
   subcategory?: string;
-  $or?: Array<{[key: string]: unknown}>;
-  'location.city'?: {$regex: string, $options: string};
-  price?: {
-    $gte?: number;
-    $lte?: number;
-  };
+  $or?: Array<{ [key: string]: unknown }>;
+  'location.city'?: { $regex: string; $options: string };
+  price?: { $gte?: number; $lte?: number };
+  // Add index signature to allow compatibility with Record<string, unknown>
+  [key: string]: unknown;
 }
 
 interface SortOptions {
@@ -119,34 +142,48 @@ const FALLBACK_PUBLICATIONS: PublicationData[] = [
 // Function to seed collections with sample data if they're empty
 async function seedCollectionIfEmpty(collectionName: string): Promise<void> {
   try {
+    // Check only if it hasn't been checked recently
+    if (checkedCollections.has(collectionName)) {
+      logDebug(`Skipping seed check for ${collectionName}, already checked.`);
+      return;
+    }
+
     logDebug(`Checking if ${collectionName} needs to be seeded`);
-    const data = await mongoDbQuery<PublicationData>(collectionName, {}, { limit: 1 });
-    
-    if (data.length === 0) {
-      logDebug(`Collection ${collectionName} is empty, seeding with sample data`);
+    const data = await mongoDbQuery<ApiPublicationData>(collectionName, {}, { limit: 1 });
+    checkedCollections.add(collectionName); // Mark as checked
+
+    const isEmpty = !data || (Array.isArray(data) && data.length === 0);
+
+    if (isEmpty) {
+      logDebug(`Collection ${collectionName} is empty, attempting to seed...`);
       const category = collectionName.replace('publications_', '');
-      
-      if (SAMPLE_PUBLICATIONS[category]) {
-        const samples = SAMPLE_PUBLICATIONS[category];
-        
+      const samples = SAMPLE_PUBLICATIONS[category];
+
+      if (samples && samples.length > 0) {
+        logDebug(`Found ${samples.length} samples for ${category}. Seeding...`);
         for (const sample of samples) {
-          await mongoDbInsert<PublicationData>(collectionName, sample);
+          const preparedSample = { ...sample, id: sample.id || `sample_${category}_${Math.random().toString(36).substring(2, 9)}`, created_at: sample.created_at || new Date() };
+          // Explicitly cast query object for compatibility
+          await mongoDbInsert<ApiPublicationData>(collectionName, preparedSample as Record<string, unknown>);
         }
-        
         logDebug(`Seeded ${samples.length} documents into ${collectionName}`);
       } else {
-        logDebug(`No sample data available for ${category}`);
+        logDebug(`No sample data defined for category: ${category}`);
       }
     } else {
       logDebug(`Collection ${collectionName} already has data, no seeding needed`);
     }
   } catch (error) {
     logError(`Error seeding collection ${collectionName}`, error);
-    // Don't throw, just log the error
   }
 }
 
+// Keep track of collections checked during this server instance lifetime
+const checkedCollections = new Set<string>();
+
 export async function GET(request: Request) {
+  let dbErrorOccurred = false;
+  let noResultsFound = false;
   try {
     logDebug('GET /api/publications received');
     const { searchParams } = new URL(request.url);
@@ -215,24 +252,23 @@ export async function GET(request: Request) {
         logDebug(`Searching in specific collection: ${collectionName}`);
         
         try {
-          // Try to seed the collection if empty - only on first page request
+          // Try to seed ONLY when querying a specific category for the first time (page 1)
           if (page === 1) {
             await seedCollectionIfEmpty(collectionName);
           }
           
-          // Query the collection
-          data = await mongoDbQuery<PublicationData>(collectionName, mongoQuery, {
+          const results = await mongoDbQuery<ApiPublicationData>(collectionName, mongoQuery as Record<string, unknown>, {
             sort: sortOptions,
             skip,
             limit
           });
+          data = Array.isArray(results) ? results : [];
           
-          logDebug(`Retrieved ${data.length} results from ${collectionName}`);
+          const countResults = await mongoDbQuery<ApiPublicationData>(collectionName, mongoQuery as Record<string, unknown>, {});
+          totalCount = Array.isArray(countResults) ? countResults.length : 0;
           
-          // Get total count for pagination from the same collection
-          const countData = await mongoDbQuery<PublicationData>(collectionName, mongoQuery, {});
-          totalCount = countData.length;
-          logDebug(`Total count: ${totalCount}`);
+          if (data.length === 0) noResultsFound = true;
+          logDebug(`Retrieved ${data.length} results from ${collectionName}. Total count: ${totalCount}. Found results: ${!noResultsFound}`);
           
           // If we still have no results, use sample data
           if (data.length === 0 && page === 1) {
@@ -249,6 +285,7 @@ export async function GET(request: Request) {
             }
           }
         } catch (error) {
+          dbErrorOccurred = true;
           logError(`Error querying ${collectionName}`, error);
           
           // Use sample or fallback data
@@ -264,85 +301,72 @@ export async function GET(request: Request) {
         }
       } else {
         // Search in all collections if no specific category
-        logDebug('Searching across all collections');
+        logDebug('Searching across all collections (no seeding on multi-search)');
         
         const promises = Object.entries(CATEGORY_COLLECTIONS).map(async ([categoryKey, collection]) => {
           try {
-            // Try to seed the collection if empty - only on first page request
-            if (page === 1) {
-              await seedCollectionIfEmpty(collection);
-            }
-            
-            const results = await mongoDbQuery<PublicationData>(collection, mongoQuery, {
+            // Don't seed here - seeding happens on specific category requests
+            const results = await mongoDbQuery<ApiPublicationData>(collection, mongoQuery as Record<string, unknown>, {
               sort: sortOptions,
-              skip: 0,
-              limit: 500
+              skip: 0, // Get all matching results, paginate later
+              limit: 0 // No limit when fetching all for combined sort/pagination
             });
             
-            logDebug(`Retrieved ${results.length} results from ${collection}`);
-            return results;
+            const validResults = Array.isArray(results) ? results : [];
+            const processedResults = validResults.map(pub => ({
+              ...pub,
+              category: categoryKey // Add category key
+            }));
+            logDebug(`Retrieved ${processedResults.length} results from ${collection}`);
+            return processedResults;
           } catch (error) {
-            logError(`Error querying collection ${collection}`, error);
-            return []; // Return empty for this collection
+             dbErrorOccurred = true; // Mark that at least one query failed
+             logError(`Error querying collection ${collection} during multi-search`, error);
+             return []; // Return empty for this collection on error
           }
         });
         
         const allResults = await Promise.all(promises);
-        const combinedResults = allResults.flat(); // Combine all results
+        const combinedResults = allResults.flat();
         
-        // If we have no results at all, use mixed sample data
-        if (combinedResults.length === 0) {
-          logDebug('No results found across collections, using mixed sample data');
-          
-          // Combine sample data from all categories
-          const mixedSamples: PublicationData[] = [];
-          for (const categorySamples of Object.values(SAMPLE_PUBLICATIONS)) {
-            mixedSamples.push(...categorySamples);
-          }
-          
-          if (mixedSamples.length > 0) {
-            data = mixedSamples;
-            totalCount = mixedSamples.length;
-            logDebug(`Using ${data.length} mixed sample publications`);
-          } else {
-            data = FALLBACK_PUBLICATIONS;
-            totalCount = FALLBACK_PUBLICATIONS.length;
-            logDebug(`Using fallback publications`);
-          }
+        if (combinedResults.length === 0) noResultsFound = true;
+        
+        logDebug(`Combined ${combinedResults.length} results from all collections. Found results: ${!noResultsFound}`);
+        
+        // Sort the combined results IF we found any
+        if (!noResultsFound) {
+            combinedResults.sort((a, b) => {
+              // Type assertion for safety, assuming structure after filtering
+              const pubA = a as ApiPublicationData;
+              const pubB = b as ApiPublicationData;
+              if (sortBy === 'price_asc') {
+                return (Number(pubA.price || 0)) - (Number(pubB.price || 0));
+              } else if (sortBy === 'price_desc') {
+                return (Number(pubB.price || 0)) - (Number(pubA.price || 0));
+              } else {
+                // Ensure valid date inputs before creating Date objects
+                const dateAValue = pubA.created_at || pubA.createdAt;
+                const dateBValue = pubB.created_at || pubB.createdAt;
+                const dateA = dateAValue ? new Date(dateAValue).getTime() : 0;
+                const dateB = dateBValue ? new Date(dateBValue).getTime() : 0;
+                return dateB - dateA; // Sort descending
+              }
+            });
+            
+            totalCount = combinedResults.length;
+            data = combinedResults.slice(skip, skip + limit);
+            logDebug(`Paginated results: ${data.length} out of ${totalCount}`);
         } else {
-          // Sort the combined results
-          combinedResults.sort((a, b) => {
-            if (sortBy === 'price_asc') {
-              return (a.price || 0) - (b.price || 0);
-            } else if (sortBy === 'price_desc') {
-              return (b.price || 0) - (a.price || 0);
-            } else {
-              // Default sort by date
-              const dateA = new Date(a.created_at || 0).getTime();
-              const dateB = new Date(b.created_at || 0).getTime();
-              return dateB - dateA;
-            }
-          });
-          
-          // Apply pagination to the combined results
-          totalCount = combinedResults.length;
-          data = combinedResults.slice(skip, skip + limit);
-          logDebug(`Retrieved ${data.length} total results after combining and pagination`);
+            // Still set totalCount to 0 if no results were found across DBs
+            totalCount = 0;
+            data = [];
         }
       }
     } catch (error) {
-      logError('Error in MongoDB operations', error);
-      
-      // Use appropriate fallback data
-      if (category && SAMPLE_PUBLICATIONS[category]) {
-        data = SAMPLE_PUBLICATIONS[category];
-        totalCount = data.length;
-        logDebug(`Using ${data.length} sample publications for ${category} after global error`);
-      } else {
-        data = FALLBACK_PUBLICATIONS;
-        totalCount = FALLBACK_PUBLICATIONS.length;
-        logDebug(`Using fallback publications after global error`);
-      }
+      dbErrorOccurred = true;
+      logError('Generic error during MongoDB operations', error);
+      data = [];
+      totalCount = 0;
     }
     
     // Ensure all publications have valid location format
@@ -361,13 +385,96 @@ export async function GET(request: Request) {
       return pub;
     });
     
-    logDebug(`Returning ${data.length} publications to client`);
-    
+    // --- Decide final response --- (AFTER all DB attempts)
+    let finalData: PublicationData[] = data;
+    let finalTotalCount = totalCount;
+    let usingSampleData = false;
+
+    // USE SAMPLE/FALLBACK ONLY IF:
+    // 1. A DB error occurred OR
+    // 2. No results were genuinely found in the DB (noResultsFound is true)
+    // AND we are on the first page (don't show samples on page 2+)
+    if ((dbErrorOccurred || noResultsFound) && page === 1) {
+        logDebug(`Condition met for using sample/fallback data: dbErrorOccurred=${dbErrorOccurred}, noResultsFound=${noResultsFound}, page=${page}`);
+        usingSampleData = true;
+        if (category && SAMPLE_PUBLICATIONS[category] && SAMPLE_PUBLICATIONS[category].length > 0) {
+          finalData = SAMPLE_PUBLICATIONS[category];
+          finalTotalCount = finalData.length;
+          logDebug(`Using ${finalData.length} SAMPLE publications for category: ${category}`);
+        } else if (!category) { // Use mixed samples only if searching ALL categories
+            const mixedSamples: PublicationData[] = [];
+             for (const [catKey, samples] of Object.entries(SAMPLE_PUBLICATIONS)) {
+               if (samples.length > 0) {
+                 const categorizedSamples = samples.map(sample => ({ ...sample, category: catKey }));
+                 mixedSamples.push(...categorizedSamples);
+               }
+             }
+             if (mixedSamples.length > 0) {
+                 finalData = mixedSamples;
+                 // Sort mixed samples by date before pagination
+                 finalData.sort((a, b) => new Date(b.created_at || b.createdAt || 0).getTime() - new Date(a.created_at || a.createdAt || 0).getTime());
+                 finalTotalCount = finalData.length;
+                 // Apply pagination to mixed samples too
+                 finalData = finalData.slice(skip, skip + limit);
+                 logDebug(`Using ${finalData.length} MIXED SAMPLE publications (paginated from ${finalTotalCount})`);
+             } else {
+                 finalData = FALLBACK_PUBLICATIONS;
+                 finalTotalCount = finalData.length;
+                 logDebug('Using FALLBACK publications (no mixed samples defined)');
+             }
+        } else {
+          // Specific category requested, but no samples defined for it
+          finalData = FALLBACK_PUBLICATIONS;
+          finalTotalCount = finalData.length;
+          logDebug(`Using FALLBACK publications for category: ${category} (no specific samples)`);
+        }
+    }
+
+    // Final mapping and validation (using finalData)
+    const validatedData = finalData.map(pub => {
+      if (!pub || typeof pub !== 'object') return null;
+      const id = pub._id?.toString() || pub.id;
+      const title = pub.title;
+      if (!id || !title) return null;
+
+      let locationText = '';
+      if (typeof pub.location === 'string') locationText = pub.location;
+      else if (pub.location && typeof pub.location === 'object') {
+         const loc = pub.location as { city?: string; region?: string };
+         locationText = loc.city || '';
+         if (loc.region && loc.region !== loc.city) {
+           locationText += loc.region ? `, ${loc.region}` : '';
+         }
+       }
+
+      const createdAt = pub.createdAt || pub.created_at || new Date().toISOString();
+
+      return {
+        ...pub, // Keep original fields but override below
+        id: String(id),
+        title: String(title),
+        description: String(pub.description || ''),
+        price: Number(pub.price || 0),
+        currency: String(pub.currency || 'PEN'),
+        categorySlug: String(pub.categorySlug || pub.category || 'unknown'),
+        location: locationText || 'Ubicación no especificada',
+        contactName: String(pub.contactName || ''),
+        status: String(pub.status || 'active'),
+        createdAt: typeof createdAt === 'string' ? createdAt : createdAt.toISOString(),
+        images: Array.isArray(pub.images) && pub.images.length > 0 ? pub.images.map(String) : ['/images/placeholder-image.jpg'],
+        premium: Boolean(pub.premium || false),
+        verified: Boolean(pub.verified || false),
+      } as PublicationData; // Still map to intermediate type first
+    }).filter(Boolean) as PublicationData[]; // Remove nulls
+
+    logDebug(`Returning ${validatedData.length} publications to client (usingSampleData: ${usingSampleData})`);
+
     return NextResponse.json({
-      publications: data,
-      total: totalCount,
-      pages: Math.ceil(totalCount / limit),
-      page
+      publications: validatedData, // Send the finally processed data
+      total: finalTotalCount,
+      pages: Math.ceil(finalTotalCount / limit),
+      page,
+      usingSampleData // Let the client know if sample data is used
     });
   } catch (error) {
     logError('Fatal error in publications API', error);
@@ -378,6 +485,7 @@ export async function GET(request: Request) {
       total: FALLBACK_PUBLICATIONS.length,
       pages: 1,
       page: 1,
+      usingSampleData: true,
       error: error instanceof Error ? error.message : 'Unknown error',
       errorFriendly: 'No pudimos conectar con la base de datos. Mostrando datos de ejemplo.'
     });
@@ -435,7 +543,8 @@ export async function POST(request: Request) {
     
     try {
       // Save the publication using server-side MongoDB utility
-      const result = await mongoDbInsert<PublicationData>(collectionName, publicationData);
+      // Explicitly cast data for compatibility
+      await mongoDbInsert<ApiPublicationData>(collectionName, publicationData as Record<string, unknown>);
       logDebug(`Publication created successfully in ${collectionName}`, { id: publicationData.id });
       
       return NextResponse.json({ 

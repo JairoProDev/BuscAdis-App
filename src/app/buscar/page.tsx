@@ -3,16 +3,37 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import { motion } from 'framer-motion';
-import { useRouter, useSearchParams, usePathname } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { mongoFetch } from '@/lib/mongodb-browser';
 import { AlertCircle } from 'lucide-react';
 import SearchLayout from '@/components/search/SearchLayout';
 import { Publication } from '@/components/search/SearchResults';
 import { useToast } from '@/components/ui/use-toast';
-import { 
-  RocketLaunchIcon, 
-  SparklesIcon
-} from '@heroicons/react/24/outline';
+import { SparklesIcon } from '@heroicons/react/24/outline';
+
+// Interface for raw data structure from API (might include _id, etc.)
+interface ApiPublicationData {
+  _id?: string;
+  id?: string;
+  title?: string;
+  description?: string;
+  price?: number | string;
+  currency?: string;
+  category?: string;
+  categorySlug?: string; // Ensure this is potentially received
+  subcategory?: string;
+  location?: { city?: string; region?: string } | string;
+  contactName?: string;
+  contactEmail?: string;
+  contactPhone?: string;
+  status?: string;
+  created_at?: string | Date;
+  createdAt?: string | Date; // API might return this instead
+  images?: string[];
+  premium?: boolean;
+  verified?: boolean;
+  [key: string]: unknown; // Allow other fields
+}
 
 interface SearchParams {
   category?: string;
@@ -30,21 +51,23 @@ interface SearchParams {
 export default function BuscadorPage() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const pathname = usePathname();
   const { toast } = useToast();
   
-  // Parse search state from the URL
-  const [searchState, setSearchState] = useState<SearchParams>({
-    category: searchParams?.get('category') || '',
-    subcategory: searchParams?.get('subcategory') || '',
-    subsubcategory: searchParams?.get('subsubcategory') || '',
-    query: searchParams?.get('q') || '',
-    location: searchParams?.get('location') || '',
-    minPrice: searchParams?.get('minPrice') || '',
-    maxPrice: searchParams?.get('maxPrice') || '',
-    sortBy: searchParams?.get('sortBy') || 'recent',
-    page: parseInt(searchParams?.get('page') || '1'),
-    limit: 12,
+  // Parse search state from the URL only once on initial load
+  const [searchState, setSearchState] = useState<SearchParams>(() => {
+    const params = searchParams; // Get it once
+    return {
+      category: params?.get('category') || '',
+      subcategory: params?.get('subcategory') || '',
+      subsubcategory: params?.get('subsubcategory') || '',
+      query: params?.get('q') || '',
+      location: params?.get('location') || '',
+      minPrice: params?.get('minPrice') || '',
+      maxPrice: params?.get('maxPrice') || '',
+      sortBy: params?.get('sortBy') || 'recent',
+      page: parseInt(params?.get('page') || '1'),
+      limit: 12,
+    }
   });
   
   // Results and UI states
@@ -56,7 +79,7 @@ export default function BuscadorPage() {
   const [showDailyReward, setShowDailyReward] = useState(false);
   const [userPoints, setUserPoints] = useState(0);
   
-  // Update URL with clean path-based structure instead of query params
+  // Stable function references using useCallback
   const updateUrlWithCleanPath = useCallback((params: SearchParams) => {
     let newPath = '';
     
@@ -91,118 +114,11 @@ export default function BuscadorPage() {
       newPath += `?${queryString}`;
     }
     
-    // Navigate without reload
-    router.push(newPath, { scroll: false });
+    // Use replace to avoid excessive history entries during filtering/searching
+    router.replace(newPath, { scroll: false });
   }, [router]);
   
-  // Fetch publications based on search params
-  const fetchPublications = useCallback(async (params: SearchParams = searchState) => {
-    setLoading(true);
-    setError('');
-    
-    // Maximum retries
-    const maxRetries = 2;
-    let retries = 0;
-    let succeeded = false;
-    
-    while (retries <= maxRetries && !succeeded) {
-      try {
-        // Filter empty params
-        const queryParams: Record<string, string> = {};
-        Object.entries(params).forEach(([key, value]) => {
-          if (value && key !== 'limit') {
-            queryParams[key] = value.toString();
-          }
-        });
-        
-        // Set default limit
-        queryParams.limit = params.limit?.toString() || '12';
-        
-        // Use MongoDB browser adapter to fetch data
-        const response = await mongoFetch('/api/publications', { queryParams });
-        
-        // Check if we got publications
-        if (!response.publications) {
-          throw new Error('No se encontraron resultados');
-        }
-        
-        // Enhance results with UI data and normalize location
-        const publications = response.publications || [];
-        const enhancedPublications = publications.map((pub: Publication) => {
-          // Ensure location is properly formatted for React rendering
-          let locationText = '';
-          if (typeof pub.location === 'string') {
-            locationText = pub.location;
-          } else if (pub.location && typeof pub.location === 'object') {
-            locationText = pub.location.city || '';
-            if (pub.location.region && pub.location.region !== pub.location.city) {
-              locationText += pub.location.region ? `, ${pub.location.region}` : '';
-            }
-          }
-
-          return {
-            ...pub,
-            // Ensure location is a string for rendering
-            location: locationText,
-            premium: pub.premium || false,
-            verified: pub.verified || false
-          };
-        });
-        
-        setResults(enhancedPublications);
-        setTotalResults(response.total || 0);
-        setTotalPages(response.pages || 1);
-        
-        // Save search history if we have results
-        if (params.query && enhancedPublications.length > 0) {
-          saveSearchHistory(params.query);
-        }
-        
-        // Check for daily reward
-        checkForDailyReward();
-        
-        succeeded = true;
-      } catch (err: unknown) {
-        retries++;
-        console.error(`Error loading publications (attempt ${retries}/${maxRetries}):`, err);
-        
-        if (retries <= maxRetries) {
-          // Wait before retrying (exponential backoff)
-          await new Promise(resolve => setTimeout(resolve, 500 * retries));
-        } else {
-          // We've exhausted all retries
-          const errorMessage = err instanceof Error 
-            ? err.message 
-            : 'No se pudieron cargar los resultados';
-          setError(`API error: ${errorMessage}`);
-          setResults([]);
-          setTotalPages(1);
-          
-          toast({
-            title: "Error de conexión",
-            description: "No se pudo conectar con el servidor. Por favor, intenta más tarde.",
-            variant: "destructive"
-          });
-        }
-      }
-    }
-    
-    setLoading(false);
-  }, [searchState, toast]);
-  
-  // Load initial data
-  useEffect(() => {
-    fetchPublications();
-    
-    // Load user points from localStorage
-    const savedPoints = localStorage.getItem('userPoints');
-    if (savedPoints) {
-      setUserPoints(parseInt(savedPoints));
-    }
-  }, [fetchPublications]);
-  
-  // Save search history
-  const saveSearchHistory = (query: string) => {
+  const saveSearchHistory = useCallback((query: string) => {
     try {
       const savedHistory = localStorage.getItem('searchHistory');
       let history: string[] = savedHistory ? JSON.parse(savedHistory) : [];
@@ -215,10 +131,9 @@ export default function BuscadorPage() {
     } catch (e) {
       console.error('Error saving search history:', e);
     }
-  };
+  }, []);
   
-  // Daily reward system
-  const checkForDailyReward = () => {
+  const checkForDailyReward = useCallback(() => {
     try {
       const lastReward = localStorage.getItem('lastSearchReward');
       const today = new Date().toDateString();
@@ -226,29 +141,182 @@ export default function BuscadorPage() {
       if (lastReward !== today) {
         // Give daily reward
         const pointsToAdd = 15; // Puntos fijos en lugar de aleatorios
-        const newTotal = userPoints + pointsToAdd;
-        
-        setUserPoints(newTotal);
-        
-        // Save to localStorage
-        localStorage.setItem('userPoints', newTotal.toString());
-        localStorage.setItem('lastSearchReward', today);
-        
-        // Show reward modal
-        setShowDailyReward(true);
-        
-        // Show notification after modal is displayed
-        setTimeout(() => {
-          toast({
-            title: "¡Recompensa diaria!",
-            description: `Has ganado ${pointsToAdd} puntos por buscar hoy.`,
-          });
-        }, 1000);
+        setUserPoints(currentPoints => {
+          const newTotal = currentPoints + pointsToAdd;
+          localStorage.setItem('userPoints', newTotal.toString());
+          localStorage.setItem('lastSearchReward', today);
+          setShowDailyReward(true);
+          setTimeout(() => {
+            toast({
+              title: "¡Recompensa diaria!",
+              description: `Has ganado ${pointsToAdd} puntos por buscar hoy.`,
+            });
+          }, 1000);
+          return newTotal;
+        });
       }
     } catch (e) {
       console.error('Error with reward system:', e);
     }
-  };
+  }, [toast]);
+  
+  // Fetch publications based on search params
+  const fetchPublications = useCallback(async (paramsToFetch: SearchParams, isLoadMore: boolean = false) => {
+    console.log(`fetchPublications called. isLoadMore: ${isLoadMore}, Page: ${paramsToFetch.page}`);
+    setLoading(true);
+    if (!isLoadMore) {
+      setError(''); // Clear previous errors only on new searches/filters
+    }
+    
+    const maxRetries = 1; // Reduce retries to avoid spam on persistent errors
+    let retries = 0;
+    let succeeded = false;
+    
+    while (retries <= maxRetries && !succeeded) {
+      try {
+        const queryParams: Record<string, string> = {};
+        Object.entries(paramsToFetch).forEach(([key, value]) => {
+          if (value && key !== 'limit') {
+            queryParams[key] = value.toString();
+          }
+        });
+        
+        queryParams.limit = paramsToFetch.limit?.toString() || '12';
+        
+        console.log('Fetching /api/publications with:', queryParams);
+        
+        const response = await mongoFetch('/api/publications', { queryParams });
+        
+        if (!response.publications) {
+          throw new Error(response.errorFriendly || 'No se encontraron resultados');
+        }
+        
+        const publications = response.publications || [];
+        const enhancedPublications: Publication[] = publications.map((pub: unknown): Publication | null => {
+          if (!pub || typeof pub !== 'object') return null;
+          const potentialPub = pub as ApiPublicationData;
+
+          let locationText = '';
+          if (typeof potentialPub.location === 'string') locationText = potentialPub.location;
+          else if (potentialPub.location && typeof potentialPub.location === 'object') {
+            const loc = potentialPub.location as { city?: string; region?: string };
+            locationText = loc.city || '';
+            if (loc.region && loc.region !== loc.city) {
+              locationText += loc.region ? `, ${loc.region}` : '';
+            }
+          }
+
+          const id = potentialPub._id?.toString() || potentialPub.id;
+          const title = potentialPub.title;
+          const createdAt = potentialPub.createdAt || potentialPub.created_at || new Date().toISOString();
+
+          if (!id) return null;
+          if (!title) return null;
+
+          const finalPub: Publication = {
+            id: id,
+            title: title,
+            description: typeof potentialPub.description === 'string' ? potentialPub.description : '',
+            price: Number(potentialPub.price || 0),
+            currency: typeof potentialPub.currency === 'string' ? potentialPub.currency : 'PEN',
+            categorySlug: typeof potentialPub.categorySlug === 'string' ? potentialPub.categorySlug : (typeof potentialPub.category === 'string' ? potentialPub.category : 'unknown'),
+            location: locationText || 'Ubicación no especificada',
+            contactName: typeof potentialPub.contactName === 'string' ? potentialPub.contactName : '',
+            contactEmail: typeof potentialPub.contactEmail === 'string' ? potentialPub.contactEmail : undefined,
+            contactPhone: typeof potentialPub.contactPhone === 'string' ? potentialPub.contactPhone : undefined,
+            status: typeof potentialPub.status === 'string' ? potentialPub.status : 'active',
+            createdAt: typeof createdAt === 'string' ? createdAt : createdAt.toISOString(),
+            images: potentialPub.images && Array.isArray(potentialPub.images) ? potentialPub.images : ['/images/placeholder-image.jpg'],
+            premium: typeof potentialPub.premium === 'boolean' ? potentialPub.premium : false,
+            verified: typeof potentialPub.verified === 'boolean' ? potentialPub.verified : false,
+            subcategory: typeof potentialPub.subcategory === 'string' ? potentialPub.subcategory : undefined,
+            subsubcategory: typeof potentialPub.subsubcategory === 'string' ? potentialPub.subsubcategory : undefined,
+            rating: typeof potentialPub.rating === 'number' ? potentialPub.rating : undefined,
+            views: typeof potentialPub.views === 'number' ? potentialPub.views : undefined,
+            likes: typeof potentialPub.likes === 'number' ? potentialPub.likes : undefined,
+            bookmarks: typeof potentialPub.bookmarks === 'number' ? potentialPub.bookmarks : undefined,
+            slug: typeof potentialPub.slug === 'string' ? potentialPub.slug : undefined,
+            distance: typeof potentialPub.distance === 'number' ? potentialPub.distance : undefined,
+            attributes: typeof potentialPub.attributes === 'object' && potentialPub.attributes !== null ? potentialPub.attributes as Record<string, unknown> : undefined,
+            categoryName: typeof potentialPub.categoryName === 'string' ? potentialPub.categoryName : undefined,
+          };
+          return finalPub;
+        }).filter((p: Publication | null): p is Publication => p !== null);
+        
+        if (isLoadMore) {
+          setResults(prevResults => {
+            const existingIds = new Set(prevResults.map((item: Publication) => item.id));
+            const uniqueNewResults = enhancedPublications.filter((item: Publication) => !existingIds.has(item.id));
+            return uniqueNewResults.length > 0 ? [...prevResults, ...uniqueNewResults] : prevResults;
+          });
+        } else {
+          setResults(enhancedPublications);
+        }
+        
+        setTotalResults(response.total || 0);
+        setTotalPages(response.pages || 1);
+        
+        if (!isLoadMore && paramsToFetch.query && enhancedPublications.length > 0) {
+          saveSearchHistory(paramsToFetch.query);
+        }
+        if (!isLoadMore) {
+          checkForDailyReward(); // Check reward only on new searches/loads
+        }
+        
+        succeeded = true;
+      } catch (err: unknown) {
+        retries++;
+        const errorMsg = err instanceof Error ? err.message : 'Error desconocido';
+        console.error(`Error loading publications (attempt ${retries}/${maxRetries}):`, errorMsg);
+        
+        if (retries > maxRetries) {
+          setError(`Error API: ${errorMsg}`);
+          if (!isLoadMore) setResults([]); // Clear results only if it's not a load more action
+          setTotalPages(1);
+          
+          toast({
+            title: "Error de conexión",
+            description: `No se pudo cargar: ${errorMsg}. Intenta más tarde.`,
+            variant: "destructive"
+          });
+        } else {
+          await new Promise(resolve => setTimeout(resolve, 700 * retries)); // Slightly longer backoff
+        }
+      }
+    }
+    setLoading(false);
+  }, [toast, saveSearchHistory, checkForDailyReward]);
+  
+  // Effect for initial load and subsequent searches/filters based on searchState changes
+  useEffect(() => {
+    console.log("Search state changed, triggering fetch:", searchState);
+    fetchPublications(searchState, false); // Always fetch page 1 when searchState changes non-page properties
+    
+    // Load user points from localStorage only once on mount
+    const savedPoints = localStorage.getItem('userPoints');
+    if (savedPoints) {
+      setUserPoints(parseInt(savedPoints));
+    }
+  }, [
+    searchState.category,
+    searchState.subcategory,
+    searchState.subsubcategory,
+    searchState.query,
+    searchState.location,
+    searchState.minPrice,
+    searchState.maxPrice,
+    searchState.sortBy,
+    fetchPublications // fetchPublications is stable due to useCallback and its stable dependencies
+  ]);
+  
+  // Effect for pagination (loading more)
+  useEffect(() => {
+    // Fetch more only if page changed and it's > 1
+    if (searchState.page > 1) {
+      console.log("Page changed to > 1, fetching more:", searchState);
+      fetchPublications(searchState, true);
+    }
+  }, [searchState.page, fetchPublications]); // Depend only on page number and the stable fetch function
   
   // Handle search input
   const handleSearch = (query: string, options?: Record<string, string>) => {
@@ -258,10 +326,9 @@ export default function BuscadorPage() {
       page: 1, // Reset to page 1 with new search
       ...(options || {})
     };
-    
     setSearchState(newState);
     updateUrlWithCleanPath(newState);
-    fetchPublications(newState);
+    // Fetch is handled by the useEffect reacting to searchState change
   };
   
   // Handle filter changes
@@ -271,53 +338,34 @@ export default function BuscadorPage() {
       ...filters,
       page: 1 // Reset to page 1 with new filters
     };
-    
     setSearchState(newState);
     updateUrlWithCleanPath(newState);
-    fetchPublications(newState);
+    // Fetch is handled by the useEffect reacting to searchState change
   };
   
-  // Handle pagination / load more
-  const handleLoadMore = () => {
-    if (searchState.page < totalPages) {
-      const newState = {
-        ...searchState,
-        page: searchState.page + 1
-      };
-      
-      setSearchState(newState);
-      updateUrlWithCleanPath(newState);
-      
-      // Load next page and add to existing results
-      fetchPublications(newState).then(() => {
-        // Show achievement notification if page 3+
-        if (newState.page >= 3) {
-          toast({
-            title: "¡Explorador incansable!",
-            description: "Has desbloqueado un logro por tu búsqueda profunda",
-          });
-          
-          // Award extra points
-          const extraPoints = 5;
-          const newTotal = userPoints + extraPoints;
-          setUserPoints(newTotal);
-          localStorage.setItem('userPoints', newTotal.toString());
-        }
-      });
+  // Cargar más resultados
+  const handleLoadMore = useCallback(() => {
+    if (loading || searchState.page >= totalPages) {
+      console.log("Load more skipped:", { loading, page: searchState.page, totalPages });
+      return;
     }
-  };
+    console.log("handleLoadMore called");
+    // Just update the page number in state. The useEffect will handle the fetch.
+    setSearchState(prevState => ({ ...prevState, page: prevState.page + 1 }));
+  }, [loading, searchState.page, totalPages]); // Dependencies are primitive or state
   
   // Manejar cierre del modal de recompensa diaria
   const handleCloseReward = () => {
     setShowDailyReward(false);
   };
-
+  
   // Make sure modal click events don't propagate to the backdrop
   const handleModalClick = (e: React.MouseEvent) => {
     e.stopPropagation(); // Prevent clicks inside the modal from closing it
   };
   
-  if (error && !loading) {
+  // Render error state
+  if (error && !loading && results.length === 0) { // Show error prominently only if no results are loaded
     return (
       <div className="container mx-auto p-4 md:p-6 lg:p-8 bg-slate-900 min-h-screen text-white">
         <div className="bg-gradient-to-br from-red-900/80 to-red-950/80 text-red-100 p-6 rounded-lg shadow-lg border border-red-700 mb-6">
@@ -332,28 +380,16 @@ export default function BuscadorPage() {
           <div className="flex gap-3">
             <button
               className="bg-gradient-to-r from-red-700 to-red-800 hover:from-red-800 hover:to-red-900 text-white py-2 px-4 rounded-lg transition-colors"
-              onClick={() => fetchPublications()}
+              onClick={() => fetchPublications(searchState)} // Retry with current state
             >
               Intentar nuevamente
             </button>
             <button
               className="bg-slate-800 hover:bg-slate-700 text-slate-200 py-2 px-4 rounded-lg transition-colors"
               onClick={() => {
-                // Clear filters and try again
-                const resetState = {
-                  ...searchState,
-                  query: '',
-                  category: '',
-                  subcategory: '',
-                  subsubcategory: '',
-                  location: '',
-                  minPrice: '',
-                  maxPrice: '',
-                  page: 1
-                };
+                const resetState = { ...searchState, query: '', category: '', subcategory: '', subsubcategory: '', location: '', minPrice: '', maxPrice: '', page: 1 };
                 setSearchState(resetState);
                 updateUrlWithCleanPath(resetState);
-                fetchPublications(resetState);
               }}
             >
               Buscar sin filtros
@@ -381,6 +417,12 @@ export default function BuscadorPage() {
           totalResults={totalResults}
           showMap={true}
         />
+        {/* Display error subtly if results are already shown */}
+        {error && loading && results.length > 0 && (
+          <div className="mt-4 text-center text-red-400 text-sm">
+            Error al cargar más resultados: {error}
+          </div>
+        )}
       </div>
       
       {/* Modal de recompensa diaria */}

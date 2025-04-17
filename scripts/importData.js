@@ -1,32 +1,10 @@
-// Primero importamos los módulos necesarios
 const { MongoClient } = require("mongodb");
 const fs = require("fs");
 const path = require("path");
 
-// Luego cargamos las variables de entorno
-require("dotenv").config({ path: path.resolve(__dirname, "..", ".env.local") });
-
-// Mostrar información de depuración
-console.log("Directorio actual:", __dirname);
-console.log("Ruta de datos:", path.join(__dirname, "data-to-upload"));
-console.log(
-  "MONGODB_URI configurado:",
-  process.env.MONGODB_URI ? "Sí ✓" : "No ⚠️"
-);
-console.log(
-  "DB_NAME configurado:",
-  process.env.DB_NAME
-    ? process.env.DB_NAME
-    : 'Usando valor predeterminado: "buscadis"'
-);
-
-// URI alternativa para usar si no se encuentra en las variables de entorno
-const fallbackUri =
-  "mongodb+srv://buscadiss:UQA8DlAqm6N7DDNx@cluster0.4qbi1hu.mongodb.net/buscadis?retryWrites=true&w=majority";
-
 // --- Configuración ---
-// Lee la URI de MongoDB desde una variable de entorno o usa el fallback
-const uri = process.env.MONGODB_URI || fallbackUri;
+// Lee la URI de MongoDB desde una variable de entorno
+const uri = process.env.MONGODB_URI;
 const dbName = process.env.DB_NAME || "buscadis"; // Nombre de la BD (default: buscadis)
 const dataFolderPath = path.join(__dirname, "data-to-upload");
 const counterCollectionName = "counters";
