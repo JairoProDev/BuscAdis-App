@@ -29,7 +29,7 @@ const FALLBACK_PUBLICATION = {
   category: "productos",
   subcategory: "tecnologia",
   location: { city: "Lima", region: "Lima" },
-  contactName: "Soporte BuscAdis",
+  contactName: "Soporte BuscaDis",
   contactEmail: "soporte@buscadis.com",
   contactPhone: "+51 999 888 777",
   status: "active",
@@ -42,7 +42,8 @@ export async function GET(
   { params }: { params: { id: string } }
 ) {
   try {
-    const id = params.id
+    // Usar await para asegurarnos de que params.id sea accesible de forma asíncrona
+    const id = await Promise.resolve(params.id);
     console.log(`Buscando publicación con ID: ${id}`);
     
     let publication = null;
@@ -53,7 +54,7 @@ export async function GET(
     
     // 1. Si tenemos la categoría, buscar directamente en esa colección
     if (categoryFromQuery && categoryFromQuery in CATEGORY_COLLECTIONS) {
-      const collectionName = CATEGORY_COLLECTIONS[categoryFromQuery];
+      const collectionName = CATEGORY_COLLECTIONS[categoryFromQuery as ValidCategory];
       console.log(`Buscando en colección específica: ${collectionName}`);
       publication = await mongoDbGetById(collectionName, id);
     } 
@@ -119,7 +120,7 @@ export async function GET(
     // En desarrollo, retornar una publicación de ejemplo
     return NextResponse.json({
       ...FALLBACK_PUBLICATION,
-      id: params.id,
+      id: await Promise.resolve(params.id), // Usar await aquí también
       _fallback: true,
       _error: error instanceof Error ? error.message : 'Unknown error',
       message: "Esta es una publicación de ejemplo debido a un error en la obtención"

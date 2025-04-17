@@ -212,39 +212,36 @@ export default function SearchResults({
     })
   }
     */}
-  // Handle opening the publication modal
-  const handleOpenModal = useCallback((publicationId: string, event: React.MouseEvent) => {
-    event.preventDefault();
-    const publication = results.find(p => p.id === publicationId);
-    if (!publication) return;
-
-    // Save the current URL before changing it
-    setOriginalUrl(window.location.href);
-
-    setSelectedPublicationId(publicationId);
+  // Función para abrir el modal de publicación
+  const handleOpenModal = (id: string, e: React.MouseEvent<HTMLAnchorElement>) => {
+    e.preventDefault();
+    
+    // Validate that the ID exists
+    if (!id) {
+      console.error('ID de publicación inválido o vacío');
+      toast.error('No se pudo abrir esta publicación');
+      return;
+    }
+    
+    // Save original URL and update URL for SEO
+    setOriginalUrl(window.location.pathname + window.location.search);
+    
+    // Update browser URL without causing a navigation
+    const urlWithModalParam = new URL(window.location.href);
+    urlWithModalParam.searchParams.set('modal', id);
+    window.history.pushState({ modalOpen: true, id }, '', urlWithModalParam.toString());
+    
+    // Update state to show the modal
+    setSelectedPublicationId(id);
     setModalOpen(true);
-    
-    // Añadir clase modal-open al body para evitar scrolling
-    document.body.classList.add('modal-open');
-    document.documentElement.style.setProperty('--scrollbar-width', `${window.innerWidth - document.documentElement.clientWidth}px`);
-    
-    // Generate URL with category, subcategory, and subsubcategory when available
-    const modalUrl = generateSeoUrl(
-      publication.id, 
-      publication.title,
-      publication.categorySlug,
-      publication.subcategory,
-      publication.subsubcategory,
-      false // Don't include title in the URL for the modal state
-    );
-      
-    // Update URL without navigation using history.pushState
-    window.history.pushState({ modalOpen: true, publicationId }, '', modalUrl);
+  };
 
-  }, [results]);
-  
-  // Handle closing the modal
-  const handleCloseModal = useCallback(() => {
+  // Función para cerrar el modal de publicación
+  const handleCloseModal = () => {
+    // Log para depuración
+    console.log(`Cerrando modal para publicación ID: ${selectedPublicationId}`);
+    
+    // Actualizar estados
     setModalOpen(false);
     setSelectedPublicationId(null);
     
@@ -265,39 +262,33 @@ export default function SearchResults({
       const basePath = window.location.pathname.substring(0, window.location.pathname.lastIndexOf('/')) || '/'; 
       window.history.replaceState({modalOpen: false}, '', basePath + searchParams);
     }
-  }, [originalUrl]);
+  };
   
   // Modify the handleChangeViewMode function to fix layout issues
   const handleChangeViewMode = (mode: 'grid' | 'list') => {
     // Don't do anything if we're already in this mode
     if (viewMode === mode) return;
     
-    // Apply transition class to smooth the change
-    const resultsContainer = document.querySelector('.grid') || document.querySelector('.space-y-4');
-    if (resultsContainer) {
-      resultsContainer.classList.add('opacity-80', 'scale-95');
-      setTimeout(() => {
-        setViewMode(mode);
-        // Force layout recalculation after setting the view mode
-        setTimeout(() => {
-          const newContainer = document.querySelector('.grid') || document.querySelector('.space-y-4');
-          if (newContainer) {
-            newContainer.classList.remove('opacity-80', 'scale-95');
-          }
-        }, 50);
-      }, 100);
-    } else {
-      setViewMode(mode);
-    }
+    // Set the view mode immediately to prevent additional renders
+    setViewMode(mode);
     
     // Save preference to localStorage
     if (typeof window !== 'undefined') {
       localStorage.setItem('viewMode', mode);
     }
+    
+    // Let the transition happen naturally via CSS only
+    // Avoid DOM manipulation and setTimeout chains which can cause re-render loops
   };
   
   // Renderizar item en vista de cuadrícula
   const renderGridItem = (publication: Publication, index: number) => {
+    // Validate publication ID exists
+    if (!publication || !publication.id) {
+      console.warn('Publication or publication ID is missing', publication);
+      return null;
+    }
+
     const isNew = index < newItemsCount;
     const isPremium = publication.premium;
     const isLiked = likedItems.has(publication.id);
@@ -312,10 +303,10 @@ export default function SearchResults({
     // Generar seoUrl para el enlace
     const seoUrl = generateSeoUrl(
       publication.id,
-      publication.title,
-      publication.categorySlug,
-      publication.subcategory,
-      publication.subsubcategory,
+      publication.title || '',
+      publication.categorySlug || '',
+      publication.subcategory || null,
+      publication.subsubcategory || null,
       false // No incluir título en la URL cuando abrimos el modal
     );
 
@@ -351,7 +342,7 @@ export default function SearchResults({
     
     return (
       <motion.div
-        key={publication.id}
+        key={`grid-item-${publication.id}-${index}`}
         layoutId={`publication-${publication.id}`}
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
@@ -484,6 +475,12 @@ export default function SearchResults({
   
   // Renderizar item en vista de lista
   const renderListItem = (publication: Publication, index: number) => {
+    // Validate publication ID exists
+    if (!publication || !publication.id) {
+      console.warn('Publication or publication ID is missing', publication);
+      return null;
+    }
+
     const isNew = index < newItemsCount
     const isPremium = publication.premium
     const isLiked = likedItems.has(publication.id)
@@ -527,7 +524,7 @@ export default function SearchResults({
     
     return (
       <motion.div
-        key={publication.id}
+        key={`list-item-${publication.id}-${index}`}
         layoutId={`publication-list-${publication.id}`}
         initial={{ opacity: 0, x: -20 }}
         animate={{ opacity: 1, x: 0 }}
@@ -537,10 +534,10 @@ export default function SearchResults({
         <a 
           href={generateSeoUrl(
             publication.id,
-            publication.title,
-            publication.categorySlug,
-            publication.subcategory,
-            publication.subsubcategory,
+            publication.title || '',
+            publication.categorySlug || '',
+            publication.subcategory || null,
+            publication.subsubcategory || null,
             false // No incluir título en la URL cuando abrimos el modal
           )} 
           className="block w-full"
@@ -767,12 +764,20 @@ export default function SearchResults({
           {results.length > 0 ? (
             <React.Fragment key="results">
               {viewMode === 'grid' ? (
-                <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 gap-4 grid-auto-rows transition-all duration-300">
-                  {results.map((publication, index) => renderGridItem(publication, index))}
+                <div className="publications-grid grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 gap-4 grid-auto-rows transition-all duration-300">
+                  {results.filter(publication => publication && publication.id).map((publication, index) => (
+                    <React.Fragment key={`grid-item-${publication.id}-${index}`}>
+                      {renderGridItem(publication, index)}
+                    </React.Fragment>
+                  ))}
                 </div>
               ) : (
-                <div className="space-y-4 transition-all duration-300">
-                  {results.map((publication, index) => renderListItem(publication, index))}
+                <div className="publications-list space-y-4 transition-all duration-300">
+                  {results.filter(publication => publication && publication.id).map((publication, index) => (
+                    <React.Fragment key={`list-item-${publication.id}-${index}`}>
+                      {renderListItem(publication, index)}
+                    </React.Fragment>
+                  ))}
                 </div>
               )}
               

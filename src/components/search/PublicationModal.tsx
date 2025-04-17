@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useMemo, useRef } from 'react';
+import { useState, useEffect, useMemo, useRef, useCallback } from 'react';
 import { 
   ShareIcon,
   XMarkIcon,
@@ -71,13 +71,13 @@ export default function PublicationModal({ publicationId, isOpen, onClose, initi
     [publicationId]
   );
 
-  // Fetch publication data
-  const fetchPublicationData = async () => {
+  // Fetch publication data - memoized to prevent recreation
+  const fetchPublicationData = useCallback(async () => {
     if (!publicationId) return;
       
-      try {
-        setLoading(true);
-        setError('');
+    try {
+      setLoading(true);
+      setError('');
       const data = await PublicationsService.getPublicationById(cleanId);
       setPublication(data);
       
@@ -85,14 +85,14 @@ export default function PublicationModal({ publicationId, isOpen, onClose, initi
       if (typeof window !== 'undefined') {
         window.preloadedPublications = window.preloadedPublications || {};
         window.preloadedPublications[cleanId] = data;
-        }
-      } catch (err) {
+      }
+    } catch (err) {
       console.error('Error fetching publication:', err);
       setError('Error al cargar la publicación');
-      } finally {
-          setLoading(false);
-        }
-  };
+    } finally {
+      setLoading(false);
+    }
+  }, [publicationId, cleanId]);
 
   // When the modal is opened, store the current scroll position
   useEffect(() => {
@@ -129,7 +129,9 @@ export default function PublicationModal({ publicationId, isOpen, onClose, initi
     }
     
     // If we have preloaded data, use it immediately
-    if (window.preloadedPublications && window.preloadedPublications[cleanId]) {
+    if (typeof window !== 'undefined' && 
+        window.preloadedPublications && 
+        window.preloadedPublications[cleanId]) {
       setPublication(window.preloadedPublications[cleanId]);
       setLoading(false);
       return;
@@ -139,7 +141,7 @@ export default function PublicationModal({ publicationId, isOpen, onClose, initi
     if (isOpen && publicationId) {
       fetchPublicationData();
     }
-  }, [isOpen, publicationId, cleanId, initialData]);
+  }, [isOpen, publicationId, cleanId, initialData, fetchPublicationData]);
 
   // Manejar tecla ESC para cerrar modal
   useEffect(() => {
@@ -164,12 +166,30 @@ export default function PublicationModal({ publicationId, isOpen, onClose, initi
 
   // Ver publicación completa
   const handleViewFullPublication = () => {
-    if (!publication) return;
+    if (!publication) {
+      console.error("No hay datos de publicación disponibles para navegar");
+      toast.error("No se pudo abrir la página de detalles");
+      return;
+    }
     
-    // Asegurar que tenemos valores para todas las categorías
-    const categorySlug = publication.categorySlug || 'general';
-    const subcategorySlug = publication.subcategory || 'general';
-    const subsubcategorySlug = publication.subsubcategory || 'general';
+    // Asegurar que tenemos valores válidos para todas las categorías
+    const categorySlug = publication.categorySlug || 'publicaciones';
+    
+    // Verificar que no estamos pasando "undefined" o "null" como strings a la función de generación de URL
+    const subcategorySlug = publication.subcategory && publication.subcategory !== "undefined" && publication.subcategory !== "null" 
+      ? publication.subcategory 
+      : null;
+      
+    const subsubcategorySlug = publication.subsubcategory && publication.subsubcategory !== "undefined" && publication.subsubcategory !== "null" 
+      ? publication.subsubcategory 
+      : null;
+    
+    // Validar ID
+    if (!publication.id) {
+      console.error("ID de publicación no válido");
+      toast.error("No se pudo abrir la página de detalles");
+      return;
+    }
     
     // Generar URL con todos los parámetros necesarios
     const url = generateSeoUrl(
@@ -182,6 +202,15 @@ export default function PublicationModal({ publicationId, isOpen, onClose, initi
     );
     
     console.log('Navigating to complete publication:', url);
+    console.log('Publication data:', {
+      id: publication.id,
+      title: publication.title,
+      categorySlug,
+      subcategorySlug,
+      subsubcategorySlug
+    });
+    
+    // Navegar a la página completa
     router.push(url);
   };
 
@@ -286,13 +315,47 @@ export default function PublicationModal({ publicationId, isOpen, onClose, initi
 
   // Renderizar contenido de la publicación
   const renderPublicationContent = (pub: PublicationWithContact | null) => {
-    if (!pub) return null;
+    if (!pub) {
+      console.warn('No publication data available for rendering');
+      return (
+        <div className="p-8 text-center">
+          <div className="p-4 bg-slate-700/50 rounded-full mb-4 mx-auto w-16 h-16 flex items-center justify-center">
+            <svg xmlns="http://www.w3.org/2000/svg" className="h-8 w-8 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+          </div>
+          <h2 className="text-xl font-semibold text-white mb-2">Información no disponible</h2>
+          <p className="text-slate-400 mb-4">
+            No se pudo cargar la información de esta publicación.
+          </p>
+          <button
+            onClick={handleCloseModal}
+            className="bg-gradient-to-r from-teal-500 to-cyan-500 text-white px-4 py-2 rounded-lg"
+          >
+            Volver
+          </button>
+        </div>
+      );
+    }
+    
+    // Ensure we have valid data
+    const publicationId = pub.id || 'unknown';
+    const publicationTitle = pub.title || 'Título no disponible';
+    const publicationDesc = pub.description || 'Sin descripción';
+    const publicationPrice = pub.price || 0;
+    const publicationCurrency = pub.currency || 'PEN';
+    const publicationCategory = pub.categorySlug || '';
     
     // Check if publication has images
     const hasImages = pub.images && pub.images.length > 0;
     
     // Obtener imagen predeterminada según la categoría
-    const defaultImage = getDefaultImageByCategory(pub.categorySlug);
+    const defaultImage = getDefaultImageByCategory(publicationCategory);
+    
+    // Use a safe image URL
+    const imageUrl = hasImages && pub.images && pub.images[0] 
+      ? pub.images[0] 
+      : defaultImage;
 
     return (
       <div ref={exportRef} className="grid grid-cols-1 md:grid-cols-2 h-full">
@@ -319,8 +382,8 @@ export default function PublicationModal({ publicationId, isOpen, onClose, initi
             <div className="flex-grow flex items-center justify-center">
               <div className="relative h-64 sm:h-80 md:h-[400px] w-full overflow-hidden">
                 <Image
-                  src={pub.images?.[0] ?? defaultImage}
-                  alt={pub.title}
+                  src={imageUrl}
+                  alt={publicationTitle}
                   fill
                   sizes="(max-width: 768px) 100vw, 50vw"
                   priority={true}
@@ -389,11 +452,11 @@ export default function PublicationModal({ publicationId, isOpen, onClose, initi
         {/* Columna derecha - Información */}
         <div className={`p-6 dark:bg-slate-800 dark:text-white overflow-y-auto max-h-[80vh] md:max-h-[600px] flex flex-col ${!hasImages ? 'md:col-span-2' : ''}`}>
           <div className="flex-grow">
-            <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-white mb-3 leading-tight">{pub.title}</h1>
+            <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-white mb-3 leading-tight">{publicationTitle}</h1>
             
             <div className="flex flex-wrap justify-between items-center gap-2 mb-4">
               <div className="text-xl font-bold text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-900/30 px-3 py-1 rounded-lg">
-                {formatPrice(pub.price, pub.currency)}
+                {formatPrice(publicationPrice, publicationCurrency)}
               </div>
               
               <div className="flex items-center text-gray-500 dark:text-slate-400 text-sm bg-gray-100 dark:bg-slate-700 px-2 py-1 rounded-lg">
@@ -419,9 +482,9 @@ export default function PublicationModal({ publicationId, isOpen, onClose, initi
               <div 
                 className={`text-gray-600 dark:text-slate-300 whitespace-pre-line ${isExpanded ? '' : 'line-clamp-4'}`}
               >
-                {pub.description}
+                {publicationDesc}
               </div>
-              {pub.description && pub.description.length > 200 && (
+              {publicationDesc && publicationDesc.length > 200 && (
                 <button 
                   className="text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 text-sm mt-2 font-medium flex items-center"
                   onClick={toggleExpanded}
@@ -583,7 +646,7 @@ export default function PublicationModal({ publicationId, isOpen, onClose, initi
             {/* Publication ID information */}
             <div className="text-center text-xs text-gray-500 dark:text-slate-400 mt-2">
               <span className="flex items-center justify-center">
-                <span className="mr-1">ID: {pub.id}</span>
+                <span className="mr-1">ID: {publicationId}</span>
                 <span className="bg-blue-100 dark:bg-blue-900/30 px-2 py-0.5 rounded text-xs text-blue-700 dark:text-blue-400">
                   {new Date().toLocaleDateString()}
                 </span>
