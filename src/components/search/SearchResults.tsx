@@ -6,8 +6,6 @@ import {
   Squares2X2Icon, 
   ListBulletIcon, 
   FireIcon,
-  BookmarkIcon,
-  HeartIcon,
   MapPinIcon
 } from '@heroicons/react/24/outline'
 import {
@@ -19,6 +17,8 @@ import Image from 'next/image'
 import useMediaQuery from '@/hooks/useMediaQuery'
 import { generateSeoUrl } from '@/utils/url'
 import { toast } from 'react-hot-toast'
+import { HeartOutline } from '@/components/icons/Heart'
+import { BookmarkOutline } from '@/components/icons/Bookmark'
 
 export interface Publication {
   id: string
@@ -27,7 +27,7 @@ export interface Publication {
   price: number
   currency: string
   categorySlug: string
-  location: { city: string; region: string } | string  // Allow both object and string format
+  location: ExtendedLocation | string  // Update to use ExtendedLocation
   contactName: string
   status: string
   createdAt: string
@@ -55,6 +55,16 @@ interface SearchResultsProps {
   showMap?: boolean
   activeCategory?: string
   onPublicationClick?: (publication: Publication, e: React.MouseEvent<HTMLAnchorElement>) => void
+}
+
+// Define interface for location fields
+interface ExtendedLocation {
+  city?: string;
+  region?: string;
+  district?: string;
+  province?: string;
+  address?: string;
+  neighborhood?: string;
 }
 
 // Formato de precio
@@ -106,25 +116,29 @@ const getDefaultImageForCategory = (categorySlug?: string): string => {
   }
 };
 
-// Helper function to format location display
+// Formatear la ubicación para mostrarla
 const formatLocation = (location: Publication['location']): string => {
   if (!location) return 'Ubicación no especificada';
-  if (typeof location === 'string') return location; // If it's just a string
+  if (typeof location === 'string') return location;
+  return location.city || 'Ubicación no especificada';
+};
 
-  // Use only fields defined in the type: city and region
-  const city = location.city;
-  const region = location.region;
-
-  // Format based on available fields
-  if (city && region && city !== region) {
-    return `${city}, ${region}`;
-  } else if (city) {
-    return city;
-  } else if (region) {
-    return region;
-  }
-
-  return 'Ubicación no especificada'; // Fallback if neither city nor region exists
+// Format full location with all available fields
+const formatFullLocation = (location: Publication['location']): string => {
+  if (!location) return 'Ubicación no especificada';
+  
+  // Handle string locations
+  if (typeof location === 'string') return location;
+  
+  const locationParts = [];
+  if (location.district) locationParts.push(location.district);
+  if (location.neighborhood) locationParts.push(location.neighborhood);
+  if (location.address) locationParts.push(location.address);
+  if (location.city) locationParts.push(location.city);
+  if (location.province) locationParts.push(location.province);
+  if (location.region) locationParts.push(location.region);
+  
+  return locationParts.length > 0 ? locationParts.join(', ') : 'Ubicación no especificada';
 };
 
 export default function SearchResults({
@@ -194,6 +208,16 @@ export default function SearchResults({
   //   }
   //   // Dependency array includes entry to react to intersection changes
   // }, [inView, entry, loading, hasMore, onLoadMore]); // Removed currentPage dependency
+  
+  // Load view mode preference from localStorage
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const savedViewMode = localStorage.getItem('viewMode') as 'grid' | 'list' | null;
+      if (savedViewMode && (savedViewMode === 'grid' || savedViewMode === 'list')) {
+        setViewMode(savedViewMode);
+      }
+    }
+  }, []);
   
   // Cargar likes y guardados del localStorage al iniciar
   useEffect(() => {
@@ -271,21 +295,34 @@ export default function SearchResults({
     })
   }
     */}
-  // Modify the handleChangeViewMode function to fix layout issues
+  // Improved handleChangeViewMode function with smooth transitions
   const handleChangeViewMode = (mode: 'grid' | 'list') => {
     // Don't do anything if we're already in this mode
     if (viewMode === mode) return;
     
-    // Set the view mode immediately to prevent additional renders
-    setViewMode(mode);
+    // Apply transition classes to container
+    const container = document.querySelector('.publications-grid, .publications-list');
+    if (container) {
+      container.classList.add('view-transition');
+    }
+    
+    // Set timeout to allow transition to complete and avoid layout jumps
+    setTimeout(() => {
+      // Set the view mode
+      setViewMode(mode);
+      
+      // Force layout recalculation after changing view
+      setTimeout(() => {
+        if (container) {
+          container.classList.remove('view-transition');
+        }
+      }, 50);
+    }, 5);
     
     // Save preference to localStorage
     if (typeof window !== 'undefined') {
       localStorage.setItem('viewMode', mode);
     }
-    
-    // Let the transition happen naturally via CSS only
-    // Avoid DOM manipulation and setTimeout chains which can cause re-render loops
   };
   
   // Renderizar item en vista de cuadrícula
@@ -381,15 +418,26 @@ export default function SearchResults({
             <div className="absolute inset-0 bg-gradient-to-br from-black/10 to-black/30 z-10" />
             <Image
               src={imageUrl}
-              alt={publication.title}
+              alt={`Imagen de ${publication.title || 'publicación'}`}
               fill
               sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw"
-              className="object-cover"
-              onError={(e) => { e.currentTarget.src = '/images/placeholder-buscadis.jpg'; }}
+              className="object-cover transition-transform duration-500 hover:scale-105"
+              onError={(e) => { 
+                console.log(`Image load error for publication ${publication.id}:`, e);
+                e.currentTarget.src = '/images/placeholder-buscadis.jpg'; 
+              }}
+              priority={index < 4} // Prioritize loading first 4 images
             />
             
             {/* Badges */}
             <div className="absolute top-2 left-2 flex flex-col gap-1 z-20">
+              {/* Subsubcategory Badge (Always shown if available) */}
+              {publication.subsubcategory && (
+                <span className="bg-blue-600 text-white text-xs font-medium px-2 py-1 rounded-full shadow-sm">
+                  {publication.subsubcategory}
+                </span>
+              )}
+              
               {isPremium && (
                 <span className="bg-gradient-to-r from-teal-500 to-cyan-500 text-white text-xs font-medium px-2 py-1 rounded-full shadow-sm flex items-center">
                   <SparklesIcon className="w-3 h-3 mr-1" />
@@ -404,6 +452,43 @@ export default function SearchResults({
                 </span>
               )}
             </div>
+            
+            {/* Botones de interacción (like/save) */}
+            {showInteractionButtons && (
+              <div className="absolute top-2 right-2 flex gap-1 z-20">
+                <button
+                  onClick={(e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    toggleLike(publication.id);
+                  }}
+                  className={`p-1.5 rounded-full ${isLiked ? 'bg-red-500' : 'bg-white/80 hover:bg-white'} shadow-sm backdrop-blur-sm transition-colors`}
+                  aria-label={isLiked ? "Quitar me gusta" : "Me gusta"}
+                >
+                  {isLiked ? (
+                    <HeartSolid className="w-4 h-4 text-white" />
+                  ) : (
+                    <HeartOutline className="w-4 h-4 text-gray-700" />
+                  )}
+                </button>
+                
+                <button
+                  onClick={(e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    toggleSave(publication.id);
+                  }}
+                  className={`p-1.5 rounded-full ${isSaved ? 'bg-blue-500' : 'bg-white/80 hover:bg-white'} shadow-sm backdrop-blur-sm transition-colors`}
+                  aria-label={isSaved ? "Guardado" : "Guardar"}
+                >
+                  {isSaved ? (
+                    <BookmarkSolid className="w-4 h-4 text-white" />
+                  ) : (
+                    <BookmarkOutline className="w-4 h-4 text-gray-700" />
+                  )}
+                </button>
+              </div>
+            )}
             
             {/* Precio o botón de WhatsApp si no hay precio */}
             <div className="absolute bottom-2 right-2 z-10">
@@ -426,6 +511,20 @@ export default function SearchResults({
                 )
               )}
             </div>
+            
+            {/* WhatsApp button (always visible) */}
+            {publication.contactPhone && (
+              <button
+                onClick={handleWhatsAppClick}
+                className="absolute bottom-2 left-2 z-20 bg-green-500 hover:bg-green-600 text-white text-xs font-medium px-2 py-1 rounded-full shadow-sm flex items-center"
+                aria-label="Contactar por WhatsApp"
+              >
+                <svg className="w-3 h-3 mr-1" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                  <path d="M17.415 14.382c-.298-.149-1.759-.867-2.031-.967-.272-.099-.47-.148-.669.15-.198.296-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.019-.458.13-.606.134-.133.297-.347.446-.52.149-.174.198-.298.297-.497.1-.198.05-.371-.025-.52-.074-.149-.669-1.612-.916-2.207-.242-.579-.486-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.064 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.57-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z" />
+                </svg>
+                <span>Contactar</span>
+              </button>
+            )}
           </div>
           
           {/* Content */}
@@ -438,8 +537,8 @@ export default function SearchResults({
             <div className="footer">
               <div className="location">
                 <MapPinIcon className="w-3 h-3 mr-1 flex-shrink-0" />
-                <span title={formatLocation(publication.location)}>
-                  {formatLocation(publication.location)}
+                <span title={formatFullLocation(publication.location)}>
+                  {formatFullLocation(publication.location)}
                 </span>
               </div>
               
@@ -545,16 +644,27 @@ export default function SearchResults({
               <div className="relative w-full h-full min-h-[160px]">
                 <Image
                   src={imageUrl}
-                  alt={publication.title}
+                  alt={`Imagen de ${publication.title || 'publicación'}`}
                   fill
                   sizes="(max-width: 640px) 30vw, 120px"
                   className="object-cover transition-transform duration-500 group-hover:scale-110"
-                  onError={(e) => { e.currentTarget.src = '/images/placeholder-buscadis.jpg'; }}
+                  onError={(e) => { 
+                    console.log(`Image load error for publication ${publication.id}:`, e);
+                    e.currentTarget.src = '/images/placeholder-buscadis.jpg'; 
+                  }}
+                  priority={index < 4} // Prioritize loading first 4 images
                 />
               </div>
               
               {/* Badges */}
               <div className="absolute top-2 left-2 flex flex-col gap-1 z-20">
+                {/* Subsubcategory Badge (Always shown if available) */}
+                {publication.subsubcategory && (
+                  <span className="bg-blue-600 text-white text-xs font-medium px-2 py-0.5 rounded-full shadow-lg">
+                    {publication.subsubcategory}
+                  </span>
+                )}
+                
                 {isPremium && (
                   <span className="bg-gradient-to-r from-teal-500 to-cyan-500 text-white text-xs font-medium px-2 py-0.5 rounded-full shadow-lg flex items-center">
                     <SparklesIcon className="w-3 h-3 mr-1" />
@@ -580,7 +690,7 @@ export default function SearchResults({
                   <svg className="w-3 h-3 mr-1" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true">
                     <path d="M17.415 14.382c-.298-.149-1.759-.867-2.031-.967-.272-.099-.47-.148-.669.15-.198.296-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.019-.458.13-.606.134-.133.297-.347.446-.52.149-.174.198-.298.297-.497.1-.198.05-.371-.025-.52-.074-.149-.669-1.612-.916-2.207-.242-.579-.486-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.064 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.57-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z" />
                   </svg>
-                  <span className="hidden sm:inline">WhatsApp</span>
+                  <span className="hidden sm:inline">Contactar</span>
                 </button>
               )}
             </div>
@@ -606,8 +716,8 @@ export default function SearchResults({
               <div className="flex items-center justify-between">
                 <div className="flex items-center text-cyan-300/90 text-sm">
                   <MapPinIcon className="w-4 h-4 mr-1 flex-shrink-0" />
-                  <span className="truncate max-w-[150px]" title={formatLocation(publication.location)}>
-                    {formatLocation(publication.location)}
+                  <span className="truncate max-w-[150px]" title={formatFullLocation(publication.location)}>
+                    {formatFullLocation(publication.location)}
                   </span>
                 </div>
                 
@@ -659,7 +769,7 @@ export default function SearchResults({
                     {isLiked ? (
                       <HeartSolid className="w-4 h-4 text-white" />
                     ) : (
-                      <HeartIcon className="w-4 h-4 text-gray-700" />
+                      <HeartOutline className="w-4 h-4 text-gray-700" />
                     )}
                   </button>
                   
@@ -675,7 +785,7 @@ export default function SearchResults({
                     {isSaved ? (
                       <BookmarkSolid className="w-4 h-4 text-white" />
                     ) : (
-                      <BookmarkIcon className="w-4 h-4 text-gray-700" />
+                      <BookmarkOutline className="w-4 h-4 text-gray-700" />
                     )}
                   </button>
                 </div>
@@ -692,20 +802,47 @@ export default function SearchResults({
       <div className="w-full">
         <div className="flex items-center justify-between mb-4">
           <div className="h-8 w-40 bg-slate-700 rounded animate-pulse"></div>
-          <div className="h-10 w-20 bg-slate-700 rounded animate-pulse"></div>
+          <div className="flex gap-2">
+            <div className="h-10 w-32 bg-slate-700 rounded animate-pulse"></div>
+            <div className="h-10 w-20 bg-slate-700 rounded animate-pulse"></div>
+          </div>
         </div>
         
-        <div className={`grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4`}>
+        <div className={`grid grid-cols-1 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-3 gap-4`}>
           {Array.from({ length: getGridCols() * 2 }).map((_, index) => (
-            <div key={index} className="bg-slate-800 rounded-xl overflow-hidden shadow-lg h-80 animate-pulse">
-              <div className="h-52 bg-slate-700"></div>
-              <div className="p-4 space-y-2">
+            <div key={index} className="bg-slate-800 rounded-xl overflow-hidden shadow-lg h-auto animate-pulse publication-card">
+              <div className="h-48 bg-slate-700 relative">
+                {/* Shimmer effect */}
+                <div className="absolute inset-0 bg-gradient-to-r from-transparent via-slate-600/20 to-transparent shimmer"></div>
+              </div>
+              <div className="p-4 space-y-3">
                 <div className="h-5 bg-slate-700 rounded w-3/4"></div>
                 <div className="h-4 bg-slate-700 rounded w-1/2"></div>
+                <div className="h-3 bg-slate-700 rounded w-1/3"></div>
+                <div className="h-4 bg-slate-700 rounded w-full"></div>
+                <div className="flex justify-between items-center pt-2">
+                  <div className="h-3 bg-slate-700 rounded w-1/4"></div>
+                  <div className="h-6 bg-slate-700 rounded-full w-20"></div>
+                </div>
               </div>
             </div>
           ))}
         </div>
+        
+        {/* Add this CSS to the globals.css file for the shimmer effect */}
+        <style jsx>{`
+          @keyframes shimmer {
+            0% {
+              transform: translateX(-100%);
+            }
+            100% {
+              transform: translateX(100%);
+            }
+          }
+          .shimmer {
+            animation: shimmer 1.5s infinite;
+          }
+        `}</style>
       </div>
     )
   }
@@ -736,6 +873,7 @@ export default function SearchResults({
             <select 
               className="bg-slate-700 border border-slate-600 text-slate-300 text-sm rounded-lg focus:ring-teal-500 focus:border-teal-500 p-2 pr-8"
               aria-label="Ordenar resultados"
+              title="Ordenar resultados"
             >
               <option value="recentes">Más recientes</option>
               <option value="relevancia">Más relevantes</option>
@@ -744,13 +882,15 @@ export default function SearchResults({
             </select>
             
             {/* Toggle de vista cuadrícula/lista */}
-            <div className="flex rounded-lg overflow-hidden shadow-md">
+            <div className="flex rounded-lg overflow-hidden shadow-md" role="group" aria-label="Cambiar vista">
               <button
                 className={`p-2 ${viewMode === 'grid' 
                   ? 'bg-gradient-to-r from-teal-500 to-cyan-500 text-white' 
                   : 'bg-slate-700 text-slate-300 hover:bg-slate-600'}`}
                 onClick={() => handleChangeViewMode('grid')}
                 aria-label="Ver en cuadrícula"
+                aria-pressed={viewMode === 'grid'}
+                title="Ver en cuadrícula"
               >
                 <Squares2X2Icon className="w-5 h-5" />
               </button>
@@ -760,6 +900,8 @@ export default function SearchResults({
                   : 'bg-slate-700 text-slate-300 hover:bg-slate-600'}`}
                 onClick={() => handleChangeViewMode('list')}
                 aria-label="Ver en lista"
+                aria-pressed={viewMode === 'list'}
+                title="Ver en lista"
               >
                 <ListBulletIcon className="w-5 h-5" />
               </button>
@@ -773,7 +915,7 @@ export default function SearchResults({
             {allResults.length > 0 ? (
               <React.Fragment key="results">
                 {viewMode === 'grid' ? (
-                  <div className="publications-grid">
+                  <div className="publications-grid transition-all duration-300">
                     {allResults.filter(publication => publication && publication.id).map((publication, index) => (
                       <React.Fragment key={`grid-item-${publication.id}-${index}`}>
                         {renderGridItem(publication, index)}
@@ -781,7 +923,7 @@ export default function SearchResults({
                     ))}
                   </div>
                 ) : (
-                  <div className="publications-list">
+                  <div className="publications-list transition-all duration-300">
                     {allResults.filter(publication => publication && publication.id).map((publication, index) => (
                       <React.Fragment key={`list-item-${publication.id}-${index}`}>
                         {renderListItem(publication, index)}
@@ -795,9 +937,11 @@ export default function SearchResults({
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 className="flex flex-col items-center justify-center py-12 bg-slate-800 rounded-lg shadow-md border border-teal-500/20"
+                role="status"
+                aria-live="polite"
               >
                 <div className="p-4 bg-slate-700/50 rounded-full mb-4">
-                  <svg xmlns="http://www.w3.org/2000/svg" className="h-12 w-12 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <svg xmlns="http://www.w3.org/2000/svg" className="h-12 w-12 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
                   </svg>
                 </div>
@@ -806,7 +950,13 @@ export default function SearchResults({
                   Intenta modificar tu búsqueda o explora todas las categorías disponibles para encontrar lo que necesitas.
                 </p>
                 <button
-                  className="bg-gradient-to-r from-teal-500 to-cyan-500 hover:from-teal-600 hover:to-cyan-600 text-white font-medium py-2 px-6 rounded-lg transition-colors shadow-md hover:shadow-lg"
+                  className="bg-gradient-to-r from-teal-500 to-cyan-500 hover:from-teal-600 hover:to-cyan-600 text-white font-medium py-2 px-6 rounded-lg transition-colors shadow-md hover:shadow-lg focus:outline-none focus:ring-2 focus:ring-teal-500 focus:ring-offset-2 focus:ring-offset-slate-800"
+                  onClick={() => {
+                    // Navigate to all ads page or reset filters
+                    if (typeof window !== 'undefined') {
+                      window.location.href = '/publicaciones';
+                    }
+                  }}
                 >
                   Ver todos los anuncios
                 </button>

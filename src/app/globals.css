@@ -143,6 +143,8 @@
 
   /* === Publication Card Redesign === */
   .publication-card {
+    height: 100% !important;
+    display: flex;
     @apply flex flex-col bg-white dark:bg-slate-800 rounded-lg shadow-md hover:shadow-lg transition-shadow duration-300 overflow-hidden;
     /* Remove fixed heights */
     height: auto;
@@ -1094,4 +1096,24 @@ button[aria-label="Contactar por WhatsApp"] {
 /* Fix the cut-off issues */
 .search-results-container {
   min-height: 300px;
+}
+
+/* Shimmer animation for loading skeletons */
+@keyframes shimmer {
+  0% {
+    transform: translateX(-100%);
+  }
+  100% {
+    transform: translateX(100%);
+  }
+}
+
+.shimmer {
+  animation: shimmer 1.5s infinite;
+  background: linear-gradient(
+    90deg,
+    rgba(255, 255, 255, 0) 0%,
+    rgba(255, 255, 255, 0.1) 50%,
+    rgba(255, 255, 255, 0) 100%
+  );
 }
