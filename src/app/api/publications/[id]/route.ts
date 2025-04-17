@@ -19,23 +19,6 @@ const CATEGORY_COLLECTIONS: Record<string, string> = {
 // Categorías válidas
 type ValidCategory = keyof typeof CATEGORY_COLLECTIONS;
 
-// Una publicación de ejemplo para casos donde no se encuentra la real
-const FALLBACK_PUBLICATION = {
-  id: "sample_fallback",
-  title: "Anuncio de ejemplo",
-  description: "Este es un anuncio de ejemplo que se muestra cuando no se puede encontrar el anuncio solicitado.",
-  price: 1000,
-  currency: "USD",
-  category: "productos",
-  subcategory: "tecnologia",
-  location: { city: "Lima", region: "Lima" },
-  contactName: "Soporte BuscAdis",
-  contactEmail: "soporte@buscadis.com",
-  contactPhone: "+51 999 888 777",
-  status: "active",
-  images: ["/images/sample/product-1.jpg", "/images/sample/product-2.jpg"],
-  created_at: new Date().toISOString(),
-};
 
 export async function GET(
   request: Request,

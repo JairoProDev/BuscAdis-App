@@ -106,6 +106,27 @@ const getDefaultImageForCategory = (categorySlug?: string): string => {
   }
 };
 
+// Helper function to format location display
+const formatLocation = (location: Publication['location']): string => {
+  if (!location) return 'Ubicación no especificada';
+  if (typeof location === 'string') return location; // If it's just a string
+
+  // Use only fields defined in the type: city and region
+  const city = location.city;
+  const region = location.region;
+
+  // Format based on available fields
+  if (city && region && city !== region) {
+    return `${city}, ${region}`;
+  } else if (city) {
+    return city;
+  } else if (region) {
+    return region;
+  }
+
+  return 'Ubicación no especificada'; // Fallback if neither city nor region exists
+};
+
 export default function SearchResults({
   results: initialResults,
   loading: initialLoading,
@@ -290,14 +311,15 @@ export default function SearchResults({
         console.log("--- Publication Data (Grid Item) ---", JSON.stringify(publication, null, 2));
     }
 
-    // Generar seoUrl para el enlace
+    // Generar seoUrl para el enlace (Corrected arguments)
     const seoUrl = generateSeoUrl(
       publication.id,
       publication.title || '',
+      publication.slug, // Pass slug if available
       publication.categorySlug || '',
       publication.subcategory || undefined,
       publication.subsubcategory || undefined,
-      false
+      !publication.slug // includeTitleInSlug: true if no specific slug, false otherwise
     );
 
     // Formatear mensaje de WhatsApp
@@ -353,7 +375,7 @@ export default function SearchResults({
         >
           <div className="relative flex flex-col bg-white dark:bg-slate-800 rounded-xl overflow-hidden shadow-md hover:shadow-lg transition-all duration-300 h-full">
             {/* Imagen siempre se muestra, usando placeholder si no hay imágenes */}
-            <div className="relative w-full h-40 overflow-hidden bg-gray-100 dark:bg-slate-700">
+            <div className="relative w-full overflow-hidden bg-gray-100 dark:bg-slate-700 image-container aspect-video">
               <div className="absolute inset-0 bg-gradient-to-br from-black/10 to-black/30 z-10" />
               <Image
                 src={imageUrl}
@@ -402,10 +424,8 @@ export default function SearchResults({
               <div className="flex justify-between items-center text-xs text-gray-500 dark:text-gray-400 mt-1">
                 <div className="flex items-center">
                   <MapPinIcon className="w-3 h-3 mr-1" />
-                  <span className="truncate max-w-[80px]">
-                    {typeof publication.location === 'string' 
-                      ? publication.location 
-                      : publication.location?.city || 'Ubicación no especificada'}
+                  <span className="truncate max-w-[100px]" title={formatLocation(publication.location)}>
+                    {formatLocation(publication.location)}
                   </span>
                 </div>
                 
@@ -494,6 +514,17 @@ export default function SearchResults({
         console.log("--- Publication Data (List Item) ---", JSON.stringify(publication, null, 2));
     }
 
+    // Generar seoUrl para el enlace (Corrected arguments)
+    const seoUrl = generateSeoUrl(
+      publication.id,
+      publication.title || '',
+      publication.slug, // Pass slug if available
+      publication.categorySlug || '',
+      publication.subcategory || undefined,
+      publication.subsubcategory || undefined,
+      !publication.slug // includeTitleInSlug: true if no specific slug, false otherwise
+    );
+
     // Formatear mensaje de WhatsApp
     const formatWhatsAppMessage = () => {
       let message = `Hola, estoy interesado en tu publicación "${publication.title}" de BuscaDis.`;
@@ -534,14 +565,7 @@ export default function SearchResults({
         className="relative w-full list-view-item"
       >
         <a 
-          href={generateSeoUrl(
-            publication.id,
-            publication.title || '',
-            publication.categorySlug || '',
-            publication.subcategory || undefined,
-            publication.subsubcategory || undefined,
-            false
-          )} 
+          href={seoUrl} 
           className="block w-full"
           onClick={(e) => {
             if (onPublicationClick) {
@@ -554,7 +578,7 @@ export default function SearchResults({
         >
           <div className="relative flex flex-row bg-slate-800 rounded-xl overflow-hidden shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1 h-full">
             {/* Imagen */}
-            <div className="relative w-40 sm:w-48 flex-shrink-0 overflow-hidden h-auto">
+            <div className="relative w-40 sm:w-48 flex-shrink-0 overflow-hidden h-auto image-container aspect-video">
               <div className="absolute inset-0 bg-gradient-to-br from-slate-900/20 to-slate-900/60 z-10" />
               <div className="relative w-full h-full min-h-[160px]">
                 <Image
@@ -620,10 +644,8 @@ export default function SearchResults({
               <div className="flex items-center justify-between">
                 <div className="flex items-center text-cyan-300/90 text-sm">
                   <MapPinIcon className="w-4 h-4 mr-1 flex-shrink-0" />
-                  <span className="truncate max-w-[120px]">
-                    {typeof publication.location === 'string'
-                      ? publication.location
-                      : publication.location?.city || 'Ubicación no especificada'}
+                  <span className="truncate max-w-[150px]" title={formatLocation(publication.location)}>
+                    {formatLocation(publication.location)}
                   </span>
                 </div>
                 
@@ -774,7 +796,7 @@ export default function SearchResults({
             {allResults.length > 0 ? (
               <React.Fragment key="results">
                 {viewMode === 'grid' ? (
-                  <div className="publications-grid grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 gap-4 grid-auto-rows transition-all duration-300">
+                  <div className="publications-grid grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 grid-auto-rows transition-all duration-300">
                     {allResults.filter(publication => publication && publication.id).map((publication, index) => (
                       <React.Fragment key={`grid-item-${publication.id}-${index}`}>
                         {renderGridItem(publication, index)}
