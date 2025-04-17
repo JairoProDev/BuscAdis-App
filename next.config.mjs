@@ -1,41 +1,5 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  webpack: (config, { isServer }) => {
-    // Only handle server-only modules on client-side
-    if (!isServer) {
-      // Properly mark optional MongoDB dependencies as external in client bundles
-      config.resolve.fallback = {
-        ...config.resolve.fallback,
-        "mongodb-client-encryption": false,
-        kerberos: false,
-        "@mongodb-js/zstd": false,
-        snappy: false,
-        aws4: false,
-        "gcp-metadata": false,
-        socks: false,
-        "util/types": false,
-        fs: false,
-        net: false,
-        tls: false,
-        child_process: false,
-        dns: false,
-      };
-
-      // Use null-loader for MongoDB native modules
-      config.module.rules.push({
-        test: /\.node$/,
-        loader: "null-loader",
-      });
-
-      // Use null-loader for MongoDB and related modules
-      config.module.rules.push({
-        test: /mongodb\/.*\.js$|mongodb-client-encryption\/.*\.js$|kerberos\/.*\.js$|@mongodb-js\/zstd\/.*\.js$|snappy\/.*\.js$|aws4\/.*\.js$|socks\/.*\.js$|gcp-metadata\/.*\.js$/,
-        loader: "null-loader",
-      });
-    }
-
-    return config;
-  },
   // Handle MongoDB connection errors gracefully in production
   onDemandEntries: {
     maxInactiveAge: 25 * 1000,
@@ -69,13 +33,14 @@ const nextConfig = {
       },
     },
   },
-  // Configure image domains
+  // Configure image remote patterns (replaces deprecated domains)
   images: {
-    domains: [
-      "localhost",
-      "buscadis.com",
-      "storage.googleapis.com",
-      "cdn.buscadis.com",
+    remotePatterns: [
+      { protocol: "http", hostname: "localhost" }, // Added protocol for clarity
+      { protocol: "https", hostname: "buscadis.com" },
+      { protocol: "https", hostname: "storage.googleapis.com" },
+      { protocol: "https", hostname: "cdn.buscadis.com" },
+      // Add any other domains needed here
     ],
   },
 };

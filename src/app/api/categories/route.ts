@@ -38,7 +38,7 @@ export async function GET() {
     const CategoryModel = getCategoryModel();
     
     // Get categories from MongoDB
-    let categories = await CategoryModel.find({}).lean();
+    const categories = await CategoryModel.find({}).lean();
     
     // If no categories in DB, use static ones
     if (!categories || categories.length === 0) {
@@ -47,7 +47,8 @@ export async function GET() {
         id,
         name: category.name,
         description: category.description,
-        icon: typeof category.icon === 'function' ? category.iconName : category.icon,
+        icon: category.iconName || (typeof category.icon === 'string' ? category.icon : undefined),
+        iconName: category.iconName,
         slug: category.slug,
         imageUrl: category.imageUrl,
         count: category.count || 0
@@ -55,7 +56,14 @@ export async function GET() {
       
       // Try to seed the database with static categories
       try {
-        await CategoryModel.insertMany(categoriesArray);
+        // Ensure the model is available before inserting
+        const CategoryModelForSeed = getCategoryModel(); 
+        if (CategoryModelForSeed) {
+           await CategoryModelForSeed.insertMany(categoriesArray);
+           console.log('Successfully seeded categories into the database.');
+        } else {
+            console.error('Category model not available for seeding.');
+        }
       } catch (error) {
         console.error('Error seeding categories:', error);
         // Continue with the static categories even if seeding fails
@@ -73,7 +81,8 @@ export async function GET() {
       id,
       name: category.name,
       description: category.description,
-      icon: typeof category.icon === 'function' ? category.iconName : category.icon,
+      icon: category.iconName || (typeof category.icon === 'string' ? category.icon : undefined),
+      iconName: category.iconName,
       slug: category.slug,
       imageUrl: category.imageUrl,
       count: category.count || 0
