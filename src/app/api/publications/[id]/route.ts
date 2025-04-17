@@ -103,26 +103,17 @@ export async function GET(
     
     return NextResponse.json(publication);
   } catch (error) {
-    console.error('Error fetching publication:', error);
+    // Log the specific error that occurred during the fetch attempt
+    console.error(`Error fetching publication with ID ${params.id}:`, error);
     
-    // En producción, retornar error
-    if (process.env.NODE_ENV === 'production') {
-      return new NextResponse(
-        JSON.stringify({ 
-          error: 'Failed to fetch publication',
-          errorFriendly: 'Ocurrió un error al obtener la publicación. Por favor, intenta nuevamente.' 
-        }),
-        { status: 500 }
-      );
-    }
-    
-    // En desarrollo, retornar una publicación de ejemplo
-    return NextResponse.json({
-      ...FALLBACK_PUBLICATION,
-      id: params.id,
-      _fallback: true,
-      _error: error instanceof Error ? error.message : 'Unknown error',
-      message: "Esta es una publicación de ejemplo debido a un error en la obtención"
-    });
+    // Always return a 500 error if the fetch itself failed, regardless of environment
+    return new NextResponse(
+      JSON.stringify({ 
+        error: 'Failed to fetch publication',
+        errorDetails: error instanceof Error ? error.message : 'Unknown error',
+        errorFriendly: 'Ocurrió un error al intentar obtener la publicación. Por favor, intenta nuevamente.' 
+      }),
+      { status: 500 }
+    );
   }
 } 

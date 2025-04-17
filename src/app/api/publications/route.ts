@@ -95,36 +95,6 @@ const CATEGORY_COLLECTIONS: {[key: string]: string} = {
   'comunidad': 'publications_comunidad'
 };
 
-// Restore SAMPLE_PUBLICATIONS for seeding purposes
-const SAMPLE_PUBLICATIONS: Record<string, Partial<ApiPublicationData>[]> = {
-  'vehiculos': [
-    { id: "vehiculo_001", title: "Toyota Yaris 2019 Automático - Único Dueño", price: 14500, currency: "USD", subcategory: "autos", location: { city: "Lima", region: "Lima" }, images: ['/images/sample/vehiculo_001.jpg'] },
-    { id: "vehiculo_002", title: "Honda CR-V 2020 Full Equipo", price: 28500, currency: "USD", subcategory: "camionetas", location: { city: "Arequipa", region: "Arequipa" }, images: ['/images/sample/vehiculo_002.jpg'] },
-  ],
-  'inmuebles': [
-    { id: "inmueble_001", title: "Departamento 3 dormitorios San Miguel", price: 210000, currency: "USD", subcategory: "departamentos", location: { city: "Lima", region: "Lima" }, images: ['/images/sample/inmueble_001.jpg'] },
-    { id: "inmueble_002", title: "Casa de campo Cieneguilla 500m²", price: 320000, currency: "USD", subcategory: "casas", location: { city: "Lima", region: "Lima" }, images: ['/images/sample/inmueble_002.jpg'] },
-  ],
-  'empleos': [
-    { id: "empleo_001", title: "Desarrollador Full Stack - Software Perú", price: 5500, currency: "PEN", subcategory: "tecnologia", location: { city: "Lima", region: "Lima" }, images: ['/images/sample/empleo_001.jpg'] },
-  ],
-  'servicios': [
-    { id: "servicio_001", title: "Servicio Diseño Web Profesional", price: 1200, currency: "PEN", subcategory: "diseño", location: { city: "Lima", region: "Lima" }, images: ['/images/sample/servicio_001.jpg'] },
-  ],
-  'productos': [
-     { id: "producto_001", title: "MacBook Pro 2021 M1 Pro 16GB", price: 6800, currency: "PEN", subcategory: "computadoras", location: { city: "Lima", region: "Lima" }, images: ['/images/sample/producto_001.jpg'] },
-  ],
-   'eventos': [
-     { id: "evento_001", title: "Curso Fotografía Digital Básico", price: 350, currency: "PEN", subcategory: "cursos", location: { city: "Cusco", region: "Cusco" }, images: ['/images/sample/evento_001.jpg'] },
-   ],
-   'negocios': [
-     { id: "negocio_001", title: "Traspaso Cafetería Barranco", price: 45000, currency: "PEN", subcategory: "traspasos", location: { city: "Lima", region: "Lima" }, images: ['/images/sample/negocio_001.jpg'] },
-   ],
-   'comunidad': [
-     { id: "comunidad_001", title: "Clases Matemáticas Secundaria", price: 40, currency: "PEN", subcategory: "clases", location: { city: "Trujillo", region: "La Libertad" }, images: ['/images/sample/comunidad_001.jpg'] },
-   ],
-};
-
 // Fallback for absolute failure
 const ABSOLUTE_FALLBACK = [{ id: 'error', title: 'Error al cargar', description: 'No se pudieron cargar los anuncios.', price: 0, currency: 'PEN', categorySlug: 'error', location: 'Error', contactName: '', status: 'error', createdAt: new Date().toISOString() }];
 

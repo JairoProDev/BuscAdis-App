@@ -5,7 +5,7 @@ import { useState, useEffect, useCallback, useRef } from 'react';
 import { motion } from 'framer-motion';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { mongoFetch } from '@/lib/mongodb-browser';
-import { AlertCircle } from 'lucide-react';
+// import { AlertCircle } from 'lucide-react'; // Removed
 import SearchLayout from '@/components/search/SearchLayout';
 import { Publication } from '@/components/search/SearchResults';
 import { useToast } from '@/components/ui/use-toast';
@@ -83,6 +83,7 @@ export default function BuscadorPage() {
   const [selectedPublicationId, setSelectedPublicationId] = useState<string | null>(null);
   const [modalOpen, setModalOpen] = useState(false);
   const [currentFullUrl, setCurrentFullUrl] = useState<string>('');
+  const [isInitialLoad, setIsInitialLoad] = useState(true); // Track initial load
   
   // Refs to hold latest state values for use in callbacks without triggering dependency changes
   const loadingRef = useRef(loading);
@@ -175,41 +176,36 @@ export default function BuscadorPage() {
     }
   }, [toast]);
   
-  // Fetch publications based on search params
-  const fetchPublications = useCallback(async (paramsToFetch: SearchParams, isLoadMore: boolean = false) => {
-    console.log(`fetchPublications called. isLoadMore: ${isLoadMore}, Page: ${paramsToFetch.page}`);
+  // Fetch publications - Simplified, called explicitly now
+  const fetchPublications = useCallback(async (paramsToFetch: SearchParams) => {
+    console.log(`>>> fetchPublications explicitly called with:`, paramsToFetch);
     setLoading(true);
-    if (!isLoadMore) {
-      setError(''); // Clear previous errors only on new searches/filters
-    }
-    
-    const maxRetries = 1; // Reduce retries to avoid spam on persistent errors
-    let retries = 0;
-    let succeeded = false;
-    
-    while (retries <= maxRetries && !succeeded) {
-      try {
-        const queryParams: Record<string, string> = {};
-        Object.entries(paramsToFetch).forEach(([key, value]) => {
-          if (value && key !== 'limit') {
-            queryParams[key] = value.toString();
-          }
-        });
-        
-        queryParams.limit = paramsToFetch.limit?.toString() || '12';
-        
-        console.log('Fetching /api/publications with:', queryParams);
-        
-        const response = await mongoFetch('/api/publications', { queryParams });
-        
-        if (!response.publications) {
-          throw new Error(response.errorFriendly || 'No se encontraron resultados');
+    setError('');
+
+    // Simplified fetch logic (removed retries for clarity during debug)
+    try {
+      const queryParams: Record<string, string> = {};
+      Object.entries(paramsToFetch).forEach(([key, value]) => {
+        if (value && key !== 'limit' && key !== 'page') { // Exclude page/limit
+           queryParams[key] = value.toString();
         }
-        
-        const publications = response.publications || [];
-        const enhancedPublications: Publication[] = publications.map((pub: unknown): Publication | null => {
+      });
+      // No limit needed - API fetches all now
+      // queryParams.limit = '0'; 
+
+      console.log('Fetching /api/publications with:', queryParams);
+      const response = await mongoFetch('/api/publications', { queryParams });
+
+      if (!response.publications) {
+        throw new Error(response.errorFriendly || 'No se encontraron resultados');
+      }
+      console.log(`API Response: ${response.publications.length} publications, total: ${response.total}`);
+
+      const publications = response.publications || [];
+       // ... (mapping logic for enhancedPublications remains the same) ...
+       const enhancedPublications: Publication[] = publications.map((pub: unknown): Publication | null => { // Explicit return type
           if (!pub || typeof pub !== 'object') return null;
-          const potentialPub = pub as ApiPublicationData;
+          const potentialPub = pub as ApiPublicationData; // Use the new interface
 
           let locationText = '';
           if (typeof potentialPub.location === 'string') locationText = potentialPub.location;
@@ -225,9 +221,11 @@ export default function BuscadorPage() {
           const title = potentialPub.title;
           const createdAt = potentialPub.createdAt || potentialPub.created_at || new Date().toISOString();
 
+          // Basic validation
           if (!id) return null;
           if (!title) return null;
 
+          // Explicitly construct the Publication object matching the interface
           const finalPub: Publication = {
             id: id,
             title: title,
@@ -255,128 +253,85 @@ export default function BuscadorPage() {
             categoryName: typeof potentialPub.categoryName === 'string' ? potentialPub.categoryName : undefined,
           };
           return finalPub;
-        }).filter((p: Publication | null): p is Publication => p !== null);
-        
-        if (isLoadMore) {
-          setResults(prevResults => {
-            const existingIds = new Set(prevResults.map((item: Publication) => item.id));
-            const uniqueNewResults = enhancedPublications.filter((item: Publication) => !existingIds.has(item.id));
-            return uniqueNewResults.length > 0 ? [...prevResults, ...uniqueNewResults] : prevResults;
-          });
-        } else {
-          setResults(enhancedPublications);
-        }
-        
-        setTotalResults(response.total || 0);
-        setTotalPages(response.pages || 1);
-        
-        if (!isLoadMore && paramsToFetch.query && enhancedPublications.length > 0) {
-          saveSearchHistory(paramsToFetch.query);
-        }
-        if (!isLoadMore) {
-          checkForDailyReward(); // Check reward only on new searches/loads
-        }
-        
-        succeeded = true;
-      } catch (err: unknown) {
-        retries++;
-        const errorMsg = err instanceof Error ? err.message : 'Error desconocido';
-        console.error(`Error loading publications (attempt ${retries}/${maxRetries}):`, errorMsg);
-        
-        if (retries > maxRetries) {
-          setError(`Error API: ${errorMsg}`);
-          if (!isLoadMore) setResults([]); // Clear results only if it's not a load more action
-          setTotalPages(1);
-          
-          toast({
-            title: "Error de conexión",
-            description: `No se pudo cargar: ${errorMsg}. Intenta más tarde.`,
-            variant: "destructive"
-          });
-        } else {
-          await new Promise(resolve => setTimeout(resolve, 700 * retries)); // Slightly longer backoff
-        }
+
+        }).filter((p: Publication | null): p is Publication => p !== null); // Filter out null entries
+
+      setResults(enhancedPublications);
+      setTotalResults(response.total || 0);
+      setTotalPages(1); // Always 1 page now
+
+      if (paramsToFetch.query && enhancedPublications.length > 0) {
+        saveSearchHistory(paramsToFetch.query);
       }
+      checkForDailyReward();
+
+    } catch (err: unknown) {
+      const errorMsg = err instanceof Error ? err.message : 'Error desconocido';
+      console.error(`Error loading publications:`, errorMsg);
+      setError(`Error API: ${errorMsg}`);
+      setResults([]); // Clear results on error
+      setTotalPages(1);
+      toast({
+        title: "Error de conexión",
+        description: `No se pudo cargar: ${errorMsg}. Intenta más tarde.`,
+        variant: "destructive"
+      });
+    } finally {
+        setLoading(false);
+        setIsInitialLoad(false); // Mark initial load as complete
     }
-    setLoading(false);
-  }, [toast, saveSearchHistory, checkForDailyReward]);
-  
-  // Effect for initial load and subsequent searches/filters based on searchState changes
+  }, [toast, saveSearchHistory, checkForDailyReward]); // Removed searchState dependency
+
+  // Effect for initial load ONLY
   useEffect(() => {
-    console.log("Search state changed, triggering fetch:", searchState);
-    fetchPublications(searchState, false); // Always fetch page 1 when searchState changes non-page properties
-    
-    // Load user points from localStorage only once on mount
+    console.log("Initial Load Effect - Fetching initial data...");
+    // Fetch initial data based on URL params present on load
+    const initialParams: SearchParams = {
+        category: searchParams?.get('category') || '',
+        subcategory: searchParams?.get('subcategory') || '',
+        subsubcategory: searchParams?.get('subsubcategory') || '',
+        query: searchParams?.get('q') || '',
+        location: searchParams?.get('location') || '',
+        minPrice: searchParams?.get('minPrice') || '',
+        maxPrice: searchParams?.get('maxPrice') || '',
+        sortBy: searchParams?.get('sortBy') || 'recent',
+        page: 1, // Always page 1 for initial load
+        limit: 0 // API ignores this anyway now
+    };
+    fetchPublications(initialParams);
+
+    // Load user points
     const savedPoints = localStorage.getItem('userPoints');
-    if (savedPoints) {
-      setUserPoints(parseInt(savedPoints));
-    }
-  }, [
-    searchState.category,
-    searchState.subcategory,
-    searchState.subsubcategory,
-    searchState.query,
-    searchState.location,
-    searchState.minPrice,
-    searchState.maxPrice,
-    searchState.sortBy,
-    fetchPublications // fetchPublications is stable due to useCallback and its stable dependencies
-  ]);
-  
-  // This effect handles PAGINATION ONLY
-  useEffect(() => {
-    if (searchState.page > 1) {
-      console.log("Page changed to > 1, fetching more:", searchState);
-      fetchPublications(searchState, true); // Fetch page > 1
-    }
-    // Intentionally NOT depending on fetchPublications here if it causes loops.
-    // Relying on the fact that page changes *only* via handleLoadMore -> setSearchState
-  }, [searchState.page]); // Depend only on page number
-  
-  // Effect to handle modal state based on URL query param (for direct linking/refresh)
-  useEffect(() => {
-    const modalId = searchParams?.get('modal');
-    if (modalId) {
-      console.log("Modal ID found in URL, opening modal:", modalId);
-      setSelectedPublicationId(modalId);
-      setModalOpen(true);
-      if (!currentFullUrl) {
-           // Store the URL that triggered the modal open if not already stored
-           setCurrentFullUrl(window.location.href);
-      }
-    } else {
-      // If no modal ID in query, ensure modal is closed
-      if (modalOpen) {
-          console.log("No modal ID in URL, closing modal.");
-          setModalOpen(false);
-          setSelectedPublicationId(null);
-      }
-    }
-  }, [searchParams, modalOpen, currentFullUrl]); // Re-run if searchParams change
-  
+    if (savedPoints) setUserPoints(parseInt(savedPoints));
+
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []); // Empty dependency array ensures this runs only once on mount
+
   // Handle search input
   const handleSearch = (query: string, options?: Record<string, string>) => {
+    console.log("handleSearch triggered");
     const newState = {
       ...searchState,
       query,
-      page: 1, // Reset to page 1 with new search
+      page: 1,
       ...(options || {})
     };
     setSearchState(newState);
     updateUrlWithCleanPath(newState);
-    // Fetch is handled by the useEffect reacting to searchState change
+    fetchPublications(newState); // Fetch explicitly
   };
   
   // Handle filter changes
   const handleFilterChange = (filters: Partial<SearchParams>) => {
+    console.log("handleFilterChange triggered");
     const newState = {
       ...searchState,
       ...filters,
-      page: 1 // Reset to page 1 with new filters
+      page: 1
     };
     setSearchState(newState);
     updateUrlWithCleanPath(newState);
-    // Fetch is handled by the useEffect reacting to searchState change
+    fetchPublications(newState); // Fetch explicitly
   };
   
   // Function to open the modal
@@ -449,56 +404,30 @@ export default function BuscadorPage() {
     }
   };
   
-  // Render error state
-  if (error && !loading && results.length === 0) { // Show error prominently only if no results are loaded
-    return (
-      <div className="container mx-auto p-4 md:p-6 lg:p-8 bg-slate-900 min-h-screen text-white">
-        <div className="bg-gradient-to-br from-red-900/80 to-red-950/80 text-red-100 p-6 rounded-lg shadow-lg border border-red-700 mb-6">
-          <div className="flex items-center gap-3 mb-4">
-            <AlertCircle className="h-8 w-8 text-red-300" />
-            <h2 className="text-xl font-semibold">Error al cargar los resultados</h2>
+  // Show loading indicator ONLY on initial load
+  if (isInitialLoad && loading) {
+      return (
+          <div className="flex justify-center items-center min-h-screen bg-slate-900">
+              <p className="text-white text-xl">Cargando anuncios...</p>
+              {/* Optional: Add a spinner here */}
           </div>
-          <p className="mb-5">No pudimos conectar con nuestra base de datos de anuncios. Por favor, intenta nuevamente en unos momentos.</p>
-          <div className="text-sm text-red-300/80 mb-5">
-            Información técnica: {error}
-          </div>
-          <div className="flex gap-3">
-            <button
-              className="bg-gradient-to-r from-red-700 to-red-800 hover:from-red-800 hover:to-red-900 text-white py-2 px-4 rounded-lg transition-colors"
-              onClick={() => fetchPublications(searchState)} // Retry with current state
-            >
-              Intentar nuevamente
-            </button>
-            <button
-              className="bg-slate-800 hover:bg-slate-700 text-slate-200 py-2 px-4 rounded-lg transition-colors"
-              onClick={() => {
-                const resetState = { ...searchState, query: '', category: '', subcategory: '', subsubcategory: '', location: '', minPrice: '', maxPrice: '', page: 1 };
-                setSearchState(resetState);
-                updateUrlWithCleanPath(resetState);
-              }}
-            >
-              Buscar sin filtros
-            </button>
-          </div>
-        </div>
-      </div>
-    );
+      );
   }
   
   return (
     <main className="w-full bg-slate-900 min-h-screen text-white">
       <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8 lg:py-12">
-        {/* Contenedor principal de búsqueda */}
         <SearchLayout
-          initialResults={results}
+          initialResults={results} // Pass results
           initialCategory={searchState.category}
           initialSubcategory={searchState.subcategory}
           initialQuery={searchState.query}
-          loading={loading}
+          // Pass loading state, but SearchLayout might not need it anymore?
+          loading={loading && !isInitialLoad} // Indicate loading only after initial load
           onSearch={handleSearch}
           onFilterChange={handleFilterChange}
-          onLoadMore={undefined}
-          hasMore={false}
+          onLoadMore={undefined} // Removed
+          hasMore={false}        // Removed
           totalResults={totalResults}
           showMap={true}
           onPublicationClick={handleOpenModal}
