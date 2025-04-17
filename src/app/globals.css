@@ -148,8 +148,6 @@
     height: auto;
     min-height: 0;
     max-height: none;
-    padding-bottom: 40px; /* Add padding at the bottom for the WhatsApp button */
-    position: relative; /* Ensure relative positioning for the WhatsApp button */
   }
 
   .publication-card > a {
@@ -756,8 +754,6 @@
   height: auto;
   min-height: 0;
   max-height: none;
-  padding-bottom: 40px; /* Add padding at the bottom for the WhatsApp button */
-  position: relative; /* Ensure relative positioning for the WhatsApp button */
 }
 
 .publication-card > a {

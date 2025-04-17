@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server'
-import { mongoDbGetById, mongoDbQuery } from '@/lib/mongodb.server'
+import { mongoDbGetById } from '@/lib/mongodb.server'
 
 export const dynamic = 'force-dynamic' // Disable caching to ensure data is always fresh
 export const runtime = 'nodejs' // Mark as server-side only
@@ -19,6 +19,24 @@ const CATEGORY_COLLECTIONS: Record<string, string> = {
 // Categorías válidas
 type ValidCategory = keyof typeof CATEGORY_COLLECTIONS;
 
+// Fallback publication for development environment
+const FALLBACK_PUBLICATION = {
+  title: "Publicación de ejemplo",
+  description: "Esta es una publicación de ejemplo que se muestra cuando no se encuentra la publicación solicitada (solo en desarrollo).",
+  price: 0,
+  currency: "PEN",
+  categorySlug: "productos",
+  location: { city: "Lima", region: "Lima" },
+  contactName: "Usuario de Prueba",
+  contactPhone: "51999888777",
+  status: "active",
+  createdAt: new Date().toISOString(),
+  images: ["/images/placeholder-buscadis.jpg"],
+  premium: true,
+  verified: true,
+  subcategory: "ejemplo",
+  subsubcategory: "muestra"
+};
 
 export async function GET(
   request: Request,
