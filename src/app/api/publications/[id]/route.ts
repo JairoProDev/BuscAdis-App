@@ -39,10 +39,15 @@ const FALLBACK_PUBLICATION = {
 
 export async function GET(
   request: Request,
-  { params }: { params: { id: string } }
+  { params: { id } }: { params: { id: string } }
 ) {
+  // Log the ID early for debugging, now that it's directly available
+  console.log(`API Route: Received request for publication ID: ${id}`); 
+  
+  // Keep a reference to the original ID for error logging if needed
+  const originalIdForErrorLogging = id; 
+  
   try {
-    const id = params.id
     console.log(`Buscando publicación con ID: ${id}`);
     
     let publication = null;
@@ -104,7 +109,8 @@ export async function GET(
     return NextResponse.json(publication);
   } catch (error) {
     // Log the specific error that occurred during the fetch attempt
-    console.error(`Error fetching publication with ID ${params.id}:`, error);
+    // Use the original ID variable captured earlier for clarity in logs
+    console.error(`Error fetching publication with ID ${originalIdForErrorLogging}:`, error);
     
     // Always return a 500 error if the fetch itself failed, regardless of environment
     return new NextResponse(

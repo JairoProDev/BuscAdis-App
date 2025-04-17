@@ -68,7 +68,7 @@ export default function BuscadorPage() {
       maxPrice: params?.get('maxPrice') || '',
       sortBy: params?.get('sortBy') || 'recent',
       page: parseInt(params?.get('page') || '1'),
-      limit: 12,
+    limit: 12,
     }
   });
   
@@ -159,15 +159,15 @@ export default function BuscadorPage() {
         const pointsToAdd = 15; // Puntos fijos en lugar de aleatorios
         setUserPoints(currentPoints => {
           const newTotal = currentPoints + pointsToAdd;
-          localStorage.setItem('userPoints', newTotal.toString());
-          localStorage.setItem('lastSearchReward', today);
-          setShowDailyReward(true);
-          setTimeout(() => {
-            toast({
-              title: "¡Recompensa diaria!",
-              description: `Has ganado ${pointsToAdd} puntos por buscar hoy.`,
-            });
-          }, 1000);
+        localStorage.setItem('userPoints', newTotal.toString());
+        localStorage.setItem('lastSearchReward', today);
+        setShowDailyReward(true);
+        setTimeout(() => {
+          toast({
+            title: "¡Recompensa diaria!",
+            description: `Has ganado ${pointsToAdd} puntos por buscar hoy.`,
+          });
+        }, 1000);
           return newTotal;
         });
       }
@@ -306,7 +306,7 @@ export default function BuscadorPage() {
 
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []); // Empty dependency array ensures this runs only once on mount
-
+  
   // Handle search input
   const handleSearch = (query: string, options?: Record<string, string>) => {
     console.log("handleSearch triggered");
@@ -344,7 +344,7 @@ export default function BuscadorPage() {
 
     if (!id || !publication.categorySlug) {
       console.error('Cannot open modal: Invalid ID or missing categorySlug', publication);
-      toast({
+          toast({
         title: "Error",
         description: "No se pudo generar el enlace para esta publicación.",
         variant: "destructive"
@@ -406,12 +406,12 @@ export default function BuscadorPage() {
   
   // Show loading indicator ONLY on initial load
   if (isInitialLoad && loading) {
-      return (
+    return (
           <div className="flex justify-center items-center min-h-screen bg-slate-900">
               <p className="text-white text-xl">Cargando anuncios...</p>
               {/* Optional: Add a spinner here */}
-          </div>
-      );
+      </div>
+    );
   }
   
   return (

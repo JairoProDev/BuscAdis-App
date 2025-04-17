@@ -1,9 +1,11 @@
 'use client'
 
 import React from 'react'
-import { useState, useEffect } from 'react'
+// Removed useState, useEffect
 import Link from 'next/link'
 import { Category } from '@/types/marketplace'
+// Import static categories
+import { categories as staticCategoriesData } from '@/lib/constants';
 // Import all needed icons
 import { 
   BriefcaseIcon, 
@@ -20,7 +22,7 @@ interface CategoryRowProps {
   title: string
 }
 
-// Mapa de iconos estático
+// Mapa de iconos estático (Can be potentially moved to constants if not used elsewhere)
 const iconMap: Record<string, React.ElementType> = {
   'empleos': BriefcaseIcon,
   'inmuebles': HomeIcon,
@@ -32,7 +34,7 @@ const iconMap: Record<string, React.ElementType> = {
   'comunidad': UserGroupIcon
 };
 
-// Gradients for categories
+// Gradients for categories (Can be potentially moved to constants if not used elsewhere)
 const gradientMap: Record<string, string> = {
   'empleos': 'from-blue-500 to-blue-700',
   'inmuebles': 'from-green-500 to-green-700',
@@ -44,76 +46,20 @@ const gradientMap: Record<string, string> = {
   'comunidad': 'from-teal-500 to-teal-700'
 };
 
+// Convert static data to the format needed by the component
+const categories: Category[] = Object.entries(staticCategoriesData).map(([id, data]) => ({
+  id: id,
+  name: data.name,
+  // Assuming static data might not have gradient, add fallback
+  gradient: gradientMap[id] || 'from-gray-500 to-gray-600',
+  // Count is no longer fetched or used
+}));
+
 const CategoryRow = ({ title }: CategoryRowProps) => {
-  const [categories, setCategories] = useState<Category[]>([])
-  const [loading, setLoading] = useState(true)
+  // Removed useState, useEffect, and loading state
 
-  useEffect(() => {
-    // Fetch real categories from API
-    const loadCategories = async () => {
-      try {
-        setLoading(true);
-        // Fetch categories from API
-        const response = await fetch('/api/categories');
-        if (!response.ok) {
-          throw new Error('Failed to fetch categories');
-        }
-        
-        // Fetch category counts
-        const countResponse = await fetch('/api/categories/count');
-        let counts: Record<string, number> = {};
-        
-        if (countResponse.ok) {
-          const countData = await countResponse.json();
-          counts = countData.reduce((acc: Record<string, number>, curr: { id: string, count: number }) => {
-            acc[curr.id] = curr.count;
-            return acc;
-          }, {});
-        }
-        
-        const categoriesData = await response.json();
-        
-        // Add counts to categories
-        const enhancedCategories = categoriesData.map((category: any) => ({
-          id: category.id,
-          name: category.name,
-          gradient: gradientMap[category.id] || 'from-gray-500 to-gray-600',
-          count: counts[category.id] || 0
-        }));
-        
-        setCategories(enhancedCategories);
-      } catch (error) {
-        console.error('Error loading categories:', error);
-        
-        // Fallback to hardcoded categories if API fails
-        const fallbackCategories = [
-          { id: 'empleos', name: 'Empleos', gradient: 'from-blue-500 to-blue-700', count: 0 },
-          { id: 'inmuebles', name: 'Inmuebles', gradient: 'from-green-500 to-green-700', count: 0 },
-          { id: 'vehiculos', name: 'Vehículos', gradient: 'from-red-500 to-red-700', count: 0 },
-          { id: 'servicios', name: 'Servicios', gradient: 'from-purple-500 to-purple-700', count: 0 },
-          { id: 'productos', name: 'Productos', gradient: 'from-orange-500 to-orange-700', count: 0 },
-          { id: 'eventos', name: 'Eventos', gradient: 'from-pink-500 to-pink-700', count: 0 },
-          { id: 'negocios', name: 'Negocios', gradient: 'from-yellow-500 to-yellow-700', count: 0 },
-          { id: 'comunidad', name: 'Comunidad', gradient: 'from-teal-500 to-teal-700', count: 0 }
-        ];
-        setCategories(fallbackCategories);
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    loadCategories();
-  }, []);
-
-  if (loading) {
-    return (
-      <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
-        {[1, 2, 3, 4, 5, 6, 7, 8].map((i) => (
-          <div key={i} className="h-32 bg-gray-200 rounded-xl animate-pulse"></div>
-        ))}
-      </div>
-    )
-  }
+  // Loading state removed as data is static now
+  // if (loading) { ... }
 
   return (
     <div className="py-4">
@@ -124,27 +70,27 @@ const CategoryRow = ({ title }: CategoryRowProps) => {
       )}
       
       <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
+        {/* Map directly over the processed static categories array */} 
         {categories.map((category) => {
           // Obtener el componente de icono del mapa
+          // Use category.iconName from static data if available, otherwise map by id
           const IconComponent = iconMap[category.id] || null;
           
           return (
             <Link
               key={category.id}
-              href={`/${category.id}`}
+              // Use category.slug from static data for the link
+              href={`/${category.slug || category.id}`}
               className={`flex flex-col items-center justify-center h-32 rounded-xl bg-gradient-to-br ${
-                category.gradient || 'from-gray-500 to-gray-600'
+                category.gradient // Use the gradient assigned during mapping
               } text-white p-4 transform hover:scale-105 transition-all duration-300 shadow-md`}
             >
               {IconComponent && (
                 <IconComponent className="w-10 h-10 mb-2" />
               )}
               <span className="font-medium text-center">{category.name}</span>
-              {category.count !== undefined && (
-                <span className="text-xs bg-white/20 rounded-full px-2 py-1 mt-1">
-                  {category.count}
-                </span>
-              )}
+              {/* Removed count display */}
+              {/* {category.count !== undefined && ( ... )} */}
             </Link>
           );
         })}
