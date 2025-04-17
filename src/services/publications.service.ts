@@ -89,12 +89,18 @@ export class PublicationsService {
     /**
      * Fetch a single publication by ID
      */
-    static async getPublicationById(id: string, category?: string) {
+    static async getPublicationById(id: string, category?: string, subcategory?: string, subsubcategory?: string) {
         try {
             // Construir query params
             const params = new URLSearchParams();
             if (category) {
                 params.append('category', category);
+            }
+            if (subcategory) {
+                params.append('subcategory', subcategory);
+            }
+            if (subsubcategory) {
+                params.append('subsubcategory', subsubcategory);
             }
             
             // Fetch from API

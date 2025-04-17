@@ -40,15 +40,35 @@ export async function GET(
     
     let publication = null;
     
-    // Si la URL incluye categoría, se puede extraer
+    // Get all query parameters
     const url = new URL(request.url);
     const categoryFromQuery = url.searchParams.get('category');
+    const subcategoryFromQuery = url.searchParams.get('subcategory');
+    const subsubcategoryFromQuery = url.searchParams.get('subsubcategory');
+    
+    console.log('Query params:', { 
+      categoryFromQuery, 
+      subcategoryFromQuery, 
+      subsubcategoryFromQuery 
+    });
     
     // 1. Si tenemos la categoría, buscar directamente en esa colección
     if (categoryFromQuery && categoryFromQuery in CATEGORY_COLLECTIONS) {
       const collectionName = CATEGORY_COLLECTIONS[categoryFromQuery];
       console.log(`Buscando en colección específica: ${collectionName}`);
       publication = await mongoDbGetById(collectionName, id);
+      
+      // If found, update with subcategory and subsubcategory from query if they exist
+      if (publication) {
+        if (subcategoryFromQuery) {
+          // Use type assertion to tell TypeScript this property exists
+          (publication as any).subcategory = subcategoryFromQuery;
+        }
+        if (subsubcategoryFromQuery) {
+          // Use type assertion to tell TypeScript this property exists
+          (publication as any).subsubcategory = subsubcategoryFromQuery;
+        }
+      }
     } 
     
     // 2. Si no tenemos categoría o no se encontró, buscar en todas las colecciones

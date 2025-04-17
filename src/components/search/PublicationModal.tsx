@@ -78,13 +78,65 @@ export default function PublicationModal({ publicationId, isOpen, onClose, initi
     try {
       setLoading(true);
       setError('');
-      const data = await PublicationsService.getPublicationById(cleanId);
-      setPublication(data);
+      
+      // Parse URL to get category information if available
+      const url = window.location.href;
+      const urlParts = url.split('/');
+      
+      // Extract category, subcategory, and subsubcategory from URL if possible
+      let category, subcategory, subsubcategory;
+      
+      // Try to extract from URL path
+      for (let i = 0; i < urlParts.length; i++) {
+        if (urlParts[i] === 'inmuebles' || 
+            urlParts[i] === 'vehiculos' || 
+            urlParts[i] === 'empleos' || 
+            urlParts[i] === 'servicios' || 
+            urlParts[i] === 'productos' || 
+            urlParts[i] === 'negocios' || 
+            urlParts[i] === 'comunidad' ||
+            urlParts[i] === 'eventos') {
+          category = urlParts[i];
+          if (i + 1 < urlParts.length && !urlParts[i+1].includes(cleanId)) {
+            subcategory = urlParts[i+1];
+            if (i + 2 < urlParts.length && !urlParts[i+2].includes(cleanId)) {
+              subsubcategory = urlParts[i+2];
+            }
+          }
+          break;
+        }
+      }
+      
+      console.log("Fetching publication with params:", { 
+        id: cleanId, 
+        category, 
+        subcategory, 
+        subsubcategory 
+      });
+      
+      // Pass the category information to the service
+      const data = await PublicationsService.getPublicationById(
+        cleanId, 
+        category, 
+        subcategory, 
+        subsubcategory
+      );
+      
+      console.log("Received publication data:", data);
+      
+      // Make sure subcategory and subsubcategory are set correctly
+      const enhancedData = {
+        ...data,
+        subcategory: data.subcategory || subcategory,
+        subsubcategory: data.subsubcategory || subsubcategory
+      };
+      
+      setPublication(enhancedData);
       
       // Cache the publication data for future use
       if (typeof window !== 'undefined') {
         window.preloadedPublications = window.preloadedPublications || {};
-        window.preloadedPublications[cleanId] = data;
+        window.preloadedPublications[cleanId] = enhancedData;
       }
     } catch (err) {
       console.error('Error fetching publication:', err);
@@ -178,11 +230,11 @@ export default function PublicationModal({ publicationId, isOpen, onClose, initi
     // Verificar que no estamos pasando "undefined" o "null" como strings a la función de generación de URL
     const subcategorySlug = publication.subcategory && publication.subcategory !== "undefined" && publication.subcategory !== "null" 
       ? publication.subcategory 
-      : null;
+      : '';
       
     const subsubcategorySlug = publication.subsubcategory && publication.subsubcategory !== "undefined" && publication.subsubcategory !== "null" 
       ? publication.subsubcategory 
-      : null;
+      : '';
     
     // Validar ID
     if (!publication.id) {
@@ -191,24 +243,28 @@ export default function PublicationModal({ publicationId, isOpen, onClose, initi
       return;
     }
     
-    // Generar URL con todos los parámetros necesarios
-    const url = generateSeoUrl(
-      publication.id,
-      publication.title,
-      categorySlug,
-      subcategorySlug,
-      subsubcategorySlug,
-      true // Incluir el título en la URL para la página completa
-    );
-    
-    console.log('Navigating to complete publication:', url);
-    console.log('Publication data:', {
+    // Log para diagnosticar problemas
+    console.log("Generando URL con parámetros:", {
       id: publication.id,
       title: publication.title,
       categorySlug,
       subcategorySlug,
       subsubcategorySlug
     });
+    
+    // Generar URL con todos los parámetros necesarios
+    const url = generateSeoUrl(
+      publication.id,
+      publication.title,
+      undefined, // No usar slug específico
+      categorySlug,
+      subcategorySlug,
+      subsubcategorySlug,
+      true // Incluir título en el slug
+    );
+    
+    // Cerrar el modal primero
+    onClose();
     
     // Navegar a la página completa
     router.push(url);

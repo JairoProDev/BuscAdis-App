@@ -58,8 +58,8 @@ interface SearchResultsProps {
 }
 
 // Formato de precio
-function formatPrice(price: number, currency: string = 'PEN'): string {
-  if (!price) return 'Precio a consultar'
+function formatPrice(price: number, currency: string = 'PEN'): string | null {
+  if (!price) return null; // Return null instead of "Precio a consultar"
   
   try {
     return new Intl.NumberFormat('es-PE', {
@@ -405,11 +405,26 @@ export default function SearchResults({
               )}
             </div>
             
-            {/* Precio */}
+            {/* Precio o botón de WhatsApp si no hay precio */}
             <div className="absolute bottom-2 right-2 z-10">
-              <span className="bg-blue-600 text-white text-xs font-bold px-2 py-1 rounded-full shadow-sm">
-                {formatPrice(publication.price, publication.currency)}
-              </span>
+              {formatPrice(publication.price, publication.currency) ? (
+                <span className="bg-blue-600 text-white text-xs font-bold px-2 py-1 rounded-full shadow-sm">
+                  {formatPrice(publication.price, publication.currency)}
+                </span>
+              ) : (
+                publication.contactPhone && (
+                  <button
+                    onClick={handleWhatsAppClick}
+                    className="bg-green-500 hover:bg-green-600 text-white text-xs font-medium px-2 py-1 rounded-full shadow-sm flex items-center"
+                    aria-label="Contactar por WhatsApp"
+                  >
+                    <svg className="w-3 h-3 mr-1" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                      <path d="M17.415 14.382c-.298-.149-1.759-.867-2.031-.967-.272-.099-.47-.148-.669.15-.198.296-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.019-.458.13-.606.134-.133.297-.347.446-.52.149-.174.198-.298.297-.497.1-.198.05-.371-.025-.52-.074-.149-.669-1.612-.916-2.207-.242-.579-.486-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.064 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.57-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z" />
+                    </svg>
+                    <span>Consultar</span>
+                  </button>
+                )
+              )}
             </div>
           </div>
           
@@ -646,9 +661,24 @@ export default function SearchResults({
                   </span>
                 </div>
                 
-                <span className="bg-slate-900/80 backdrop-blur-sm text-white text-sm font-bold px-3 py-1 rounded-lg shadow-lg">
-                  {formatPrice(publication.price, publication.currency)}
-                </span>
+                {formatPrice(publication.price, publication.currency) ? (
+                  <span className="bg-slate-900/80 backdrop-blur-sm text-white text-sm font-bold px-3 py-1 rounded-lg shadow-lg">
+                    {formatPrice(publication.price, publication.currency)}
+                  </span>
+                ) : (
+                  publication.contactPhone && (
+                    <button
+                      onClick={handleWhatsAppClick}
+                      className="bg-green-500 hover:bg-green-600 text-white text-xs font-medium px-3 py-1 rounded-lg shadow-sm flex items-center"
+                      aria-label="Contactar por WhatsApp"
+                    >
+                      <svg className="w-3 h-3 mr-1" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                        <path d="M17.415 14.382c-.298-.149-1.759-.867-2.031-.967-.272-.099-.47-.148-.669.15-.198.296-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.019-.458.13-.606.134-.133.297-.347.446-.52.149-.174.198-.298.297-.497.1-.198.05-.371-.025-.52-.074-.149-.669-1.612-.916-2.207-.242-.579-.486-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.064 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.57-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z" />
+                      </svg>
+                      <span>Consultar precio</span>
+                    </button>
+                  )
+                )}
               </div>
               
               {/* Logo de Buscadis */}
