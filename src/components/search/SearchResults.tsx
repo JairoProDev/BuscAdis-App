@@ -296,6 +296,8 @@ export default function SearchResults({
       return null;
     }
 
+    console.log(`Rendering Card ID: ${publication.id}, Contact Phone: ${publication.contactPhone}`);
+    
     const isNew = index < newItemsCount;
     const isPremium = publication.premium;
     const isLiked = likedItems.has(publication.id);
@@ -375,7 +377,7 @@ export default function SearchResults({
         >
           <div className="relative flex flex-col bg-white dark:bg-slate-800 rounded-xl overflow-hidden shadow-md hover:shadow-lg transition-all duration-300 h-full">
             {/* Imagen siempre se muestra, usando placeholder si no hay imágenes */}
-            <div className="relative w-full overflow-hidden bg-gray-100 dark:bg-slate-700 image-container aspect-video">
+            <div className="relative w-full overflow-hidden bg-gray-100 dark:bg-slate-700 image-container">
               <div className="absolute inset-0 bg-gradient-to-br from-black/10 to-black/30 z-10" />
               <Image
                 src={imageUrl}
@@ -437,11 +439,11 @@ export default function SearchResults({
           </div>
         </a>
         
-        {/* WhatsApp Button */}
+        {/* --- WhatsApp Button Moved Outside Link --- */}
         {publication.contactPhone && (
           <button
             onClick={handleWhatsAppClick}
-            className="absolute bottom-3 right-3 z-20 bg-green-500 hover:bg-green-600 text-white text-xs font-medium px-2 py-1 rounded-full shadow-sm flex items-center"
+            className="absolute bottom-3 right-3 z-20 bg-green-500 hover:bg-green-600 text-white text-xs font-medium px-2 py-1 rounded-full shadow-sm flex items-center whatsapp-button"
             aria-label="Contactar por WhatsApp"
           >
             <svg className="w-3 h-3 mr-1" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true">
@@ -578,7 +580,7 @@ export default function SearchResults({
         >
           <div className="relative flex flex-row bg-slate-800 rounded-xl overflow-hidden shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1 h-full">
             {/* Imagen */}
-            <div className="relative w-40 sm:w-48 flex-shrink-0 overflow-hidden h-auto image-container aspect-video">
+            <div className="relative w-40 sm:w-48 flex-shrink-0 overflow-hidden h-auto image-container">
               <div className="absolute inset-0 bg-gradient-to-br from-slate-900/20 to-slate-900/60 z-10" />
               <div className="relative w-full h-full min-h-[160px]">
                 <Image
@@ -796,7 +798,7 @@ export default function SearchResults({
             {allResults.length > 0 ? (
               <React.Fragment key="results">
                 {viewMode === 'grid' ? (
-                  <div className="publications-grid grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 grid-auto-rows transition-all duration-300">
+                  <div className="publications-grid grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 md:gap-4 grid-auto-rows">
                     {allResults.filter(publication => publication && publication.id).map((publication, index) => (
                       <React.Fragment key={`grid-item-${publication.id}-${index}`}>
                         {renderGridItem(publication, index)}
@@ -804,7 +806,7 @@ export default function SearchResults({
                     ))}
                   </div>
                 ) : (
-                  <div className="publications-list space-y-4 transition-all duration-300">
+                  <div className="publications-list space-y-3">
                     {allResults.filter(publication => publication && publication.id).map((publication, index) => (
                       <React.Fragment key={`list-item-${publication.id}-${index}`}>
                         {renderListItem(publication, index)}

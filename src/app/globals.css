@@ -59,7 +59,7 @@
   }
 
   body {
-    @apply bg-background text-foreground antialiased;
+    @apply bg-background text-foreground antialiased overflow-x-hidden;
   }
   .dark {
     --background: 0 0% 3.9%;
@@ -140,6 +140,69 @@
     min-height: 350px !important;
     max-height: 350px !important;
   }
+
+  /* === Publication Card Redesign === */
+  .publication-card {
+    @apply flex flex-col bg-white dark:bg-slate-800 rounded-lg shadow-md hover:shadow-lg 
+           transition-shadow duration-300 overflow-hidden relative w-full;
+    /* Let height be determined by content */
+    height: auto;
+    min-height: 0;
+    max-height: none;
+  }
+
+  .publication-card > a {
+    @apply flex flex-col flex-grow h-full text-gray-900 dark:text-white no-underline;
+  }
+
+  .publication-card .image-container {
+    @apply relative w-full block flex-shrink-0 bg-gray-200 dark:bg-slate-700;
+    /* Aspect ratio 4:3 */
+    padding-bottom: 75%;
+  }
+
+  .publication-card .image-container img {
+    @apply absolute top-0 left-0 w-full h-full object-cover;
+  }
+
+  .publication-card .content {
+    @apply flex flex-col flex-grow p-3; /* Content takes remaining space */
+    min-height: 0; /* Allow shrinking */
+  }
+
+  .publication-card .title {
+    @apply text-sm font-semibold line-clamp-2 mb-1 text-gray-900 dark:text-white;
+  }
+
+  .publication-card .description {
+    @apply text-xs text-gray-600 dark:text-gray-400 line-clamp-2 mb-2 overflow-hidden text-ellipsis;
+    min-height: 2.25em; /* Roughly reserve space for 2 lines */
+  }
+
+  .publication-card .meta {
+    @apply flex justify-between items-center text-xs text-gray-500 dark:text-gray-300 mt-auto pt-1;
+    /* Sticks to bottom because .content is flex-col and flex-grow */
+  }
+
+  /* WhatsApp Button Styling (includes temporary visibility) */
+  .whatsapp-button {
+    @apply absolute bottom-2 right-2 z-20 
+           bg-green-500 hover:bg-green-600 text-white 
+           text-xs font-medium px-2 py-1 rounded-full 
+           shadow-md flex items-center transition-opacity duration-200;
+    /* Temporary - make it super obvious */
+    border: 2px solid red !important;
+    background-color: yellow !important;
+    color: black !important;
+  }
+
+  /* Interaction buttons (like/save) */
+  .interaction-buttons {
+    @apply absolute top-2 right-2 flex gap-1 z-20;
+  }
+  /* ... styles for buttons inside .interaction-buttons ... */
+
+  /* === End Publication Card Redesign === */
 }
 
 @layer utilities {
@@ -634,41 +697,83 @@
 
 /* Publication card styles - more compact */
 .publication-card {
-  /* Ensure cards can grow/shrink based on content, removing fixed height */
-  height: auto !important;
-  min-height: 0 !important; /* Remove min-height if it exists */
-  max-height: none !important; /* Remove max-height */
+  @apply flex flex-col bg-white dark:bg-slate-800 rounded-lg shadow-md hover:shadow-lg transition-shadow duration-300 overflow-hidden;
+  /* Remove fixed heights */
+  height: auto;
+  min-height: 0;
+  max-height: none;
+}
 
-  /* Keep other relevant styles */
-  @apply relative w-full rounded-xl overflow-hidden shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1 bg-white dark:bg-slate-800 flex flex-col;
+.publication-card > a {
+  @apply flex flex-col flex-grow h-full text-gray-900 dark:text-white no-underline;
 }
 
 .publication-card .image-container {
-  /* Fixed aspect ratio applied directly in JSX now */
-  /* Removed: @apply aspect-video; */
-  @apply relative w-full /* aspect-video */ overflow-hidden bg-gray-100 dark:bg-slate-700 flex-shrink-0;
+  @apply relative w-full block flex-shrink-0 bg-gray-200 dark:bg-slate-700;
+  /* Aspect ratio 4:3 - Adjust as needed */
+  padding-bottom: 75%;
+  max-height: 200px; /* Limit image height, especially on mobile */
+}
+
+.publication-card .image-container img {
+  @apply absolute top-0 left-0 w-full h-full object-cover transition-transform duration-300;
+}
+
+.publication-card:hover .image-container img {
+  @apply scale-105;
 }
 
 .publication-card .content {
-  /* Allow content area to grow but not shrink excessively */
-  @apply flex-1 p-3 flex flex-col justify-between;
-  min-height: 110px; /* Adjust as needed for minimum content space */
+  @apply flex flex-col flex-grow p-3; /* Reduced padding */
+  min-height: 0; /* Remove minimum height */
 }
 
 .publication-card .title {
-  /* Adjust title line clamp if needed */
-  @apply text-sm sm:text-base font-semibold text-gray-900 dark:text-white line-clamp-2 mb-1;
+  @apply text-sm font-semibold line-clamp-2 mb-1;
 }
 
 .publication-card .description {
-  /* Limit description lines and allow text to wrap naturally */
-  @apply text-xs text-gray-600 dark:text-gray-300 line-clamp-3 mb-1 overflow-hidden text-ellipsis;
-  /* Removed fixed height/min-height for description */
+  @apply text-xs text-gray-600 dark:text-gray-400 line-clamp-2 mb-2 flex-grow-0;
+  /* Allow description to take minimal space */
+  min-height: 0;
 }
 
 .publication-card .meta {
-  /* Keep meta styles */
-  @apply flex justify-between items-center text-xs text-gray-500 dark:text-gray-400 mt-auto pt-2;
+  @apply flex justify-between items-center text-xs text-gray-500 dark:text-gray-300 mt-auto pt-1;
+  /* Pushed to bottom */
+}
+
+/* Ensure WhatsApp button is visible if rendered */
+button[aria-label="Contactar por WhatsApp"] {
+  @apply absolute bottom-2 right-2 z-20 bg-green-500 hover:bg-green-600 text-white text-xs font-medium px-2 py-1 rounded-full shadow-sm flex items-center transition-opacity duration-200;
+  opacity: 0.9; /* Slightly transparent */
+}
+
+.publication-card:hover button[aria-label="Contactar por WhatsApp"] {
+  opacity: 1; /* Fully visible on hover */
+}
+
+/* Grid adjustments */
+.publications-grid {
+  @apply grid gap-3 md:gap-4;
+  /* Columns defined in component: grid-cols-2 md:grid-cols-3 lg:grid-cols-4 */
+  grid-auto-rows: auto; /* Let rows size automatically */
+}
+
+/* Remove conflicting/old height rules */
+.publication-card:not(.publication-no-image),
+.publication-card-no-image,
+.publications-grid > div,
+.grid.grid-cols-2 > div,
+.grid.grid-cols-3 > div,
+.publication-grid-item,
+.grid-cols-2 > div,
+.sm\:grid-cols-2 > div,
+.lg\:grid-cols-3 > div {
+  /* Remove all fixed height attempts */
+  height: auto !important;
+  min-height: 0 !important;
+  max-height: none !important;
 }
 
 /* Adjusted modal styles for better visibility */
