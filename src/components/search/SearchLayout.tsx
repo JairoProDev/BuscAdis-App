@@ -27,6 +27,7 @@ interface SearchLayoutProps {
   hasMore?: boolean
   totalResults?: number
   showMap?: boolean
+  onPublicationClick?: (publication: Publication, e: React.MouseEvent<HTMLAnchorElement>) => void
   children?: ReactNode
   className?: string
 }
@@ -43,6 +44,7 @@ export default function SearchLayout({
   hasMore = false,
   totalResults = 0,
   showMap = false,
+  onPublicationClick,
   children,
   className = ''
 }: SearchLayoutProps) {
@@ -421,10 +423,11 @@ export default function SearchLayout({
             <SearchResults
               results={results}
               loading={loading}
-              onLoadMore={onLoadMore}
-              hasMore={hasMore}
+              onLoadMore={undefined}
+              hasMore={false}
               activeCategory={category}
               showInteractionButtons={true}
+              onPublicationClick={onPublicationClick}
             />
           )}
         </div>

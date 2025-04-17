@@ -2,7 +2,6 @@
 
 import React, { useEffect, useState } from 'react'
 import { motion, AnimatePresence, LayoutGroup } from 'framer-motion'
-import { useInView } from 'react-intersection-observer'
 import { 
   Squares2X2Icon, 
   ListBulletIcon, 
@@ -18,7 +17,6 @@ import {
 import { SparklesIcon } from '@heroicons/react/24/solid'
 import Image from 'next/image'
 import useMediaQuery from '@/hooks/useMediaQuery'
-import PublicationModal from '@/components/search/PublicationModal'
 import { generateSeoUrl } from '@/utils/url'
 import { toast } from 'react-hot-toast'
 
@@ -52,12 +50,11 @@ export interface Publication {
 interface SearchResultsProps {
   results: Publication[]
   loading: boolean
-  onLoadMore?: () => void
-  hasMore?: boolean
   highlightNew?: boolean
   showInteractionButtons?: boolean
   showMap?: boolean
   activeCategory?: string
+  onPublicationClick?: (publication: Publication, e: React.MouseEvent<HTMLAnchorElement>) => void
 }
 
 // Formato de precio
@@ -112,11 +109,10 @@ const getDefaultImageForCategory = (categorySlug?: string): string => {
 export default function SearchResults({
   results: initialResults,
   loading: initialLoading,
-  onLoadMore,
-  hasMore = false,
   highlightNew = true,
   showInteractionButtons = true,
-  activeCategory
+  activeCategory,
+  onPublicationClick
 }: SearchResultsProps) {
   // Estado para alternar entre vista de cuadrícula y lista
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid')
@@ -125,20 +121,10 @@ export default function SearchResults({
   const [savedItems, setSavedItems] = useState<Set<string>>(new Set())
   // Referencia para los resultados más nuevos
   const [newItemsCount, setNewItemsCount] = useState(0)
-  // Modal state
-  const [modalOpen, setModalOpen] = useState(false)
-  const [selectedPublicationId, setSelectedPublicationId] = useState<string | null>(null)
-  const [originalUrl, setOriginalUrl] = useState<string>('')
   
   // Nuevos estados para el scroll infinito - Managed by parent now mostly
   const [allResults, setAllResults] = useState<Publication[]>(initialResults || [])
   const [loading, setLoading] = useState(initialLoading)
-  
-  // Referencia para infinite scroll
-  const { ref: loadMoreRef, inView, entry } = useInView({
-    threshold: 0.1,
-    triggerOnce: false
-  });
   
   // Media queries
   const isMd = useMediaQuery('(min-width: 768px)')
@@ -170,23 +156,23 @@ export default function SearchResults({
   }, [initialResults, initialLoading]);
   
   // Cargar más resultados cuando el elemento de carga está en vista
-  useEffect(() => {
-    // Log the state whenever inView changes or related states change
-    console.log('SearchResults: InView Effect Check', { 
-      inView, 
-      isIntersecting: entry?.isIntersecting, // More specific check
-      loading,
-      hasMore,
-      canLoadMore: !loading && hasMore && onLoadMore 
-    });
+  // useEffect(() => {
+  //   // Log the state whenever inView changes or related states change
+  //   console.log('SearchResults: InView Effect Check', { 
+  //     inView, 
+  //     isIntersecting: entry?.isIntersecting, // More specific check
+  //     loading,
+  //     hasMore,
+  //     canLoadMore: !loading && hasMore && onLoadMore 
+  //   });
 
-    // Use entry.isIntersecting for potentially more reliable detection
-    if (entry?.isIntersecting && !loading && hasMore && onLoadMore) {
-      console.log('SearchResults: ---> Loading more results TRIGGERED');
-      onLoadMore();
-    }
-    // Dependency array includes entry to react to intersection changes
-  }, [inView, entry, loading, hasMore, onLoadMore]); // Removed currentPage dependency
+  //   // Use entry.isIntersecting for potentially more reliable detection
+  //   if (entry?.isIntersecting && !loading && hasMore && onLoadMore) {
+  //     console.log('SearchResults: ---> Loading more results TRIGGERED');
+  //     onLoadMore();
+  //   }
+  //   // Dependency array includes entry to react to intersection changes
+  // }, [inView, entry, loading, hasMore, onLoadMore]); // Removed currentPage dependency
   
   // Cargar likes y guardados del localStorage al iniciar
   useEffect(() => {
@@ -264,47 +250,6 @@ export default function SearchResults({
     })
   }
     */}
-  // Función para abrir el modal de publicación
-  const handleOpenModal = (id: string, e: React.MouseEvent<HTMLAnchorElement>) => {
-    e.preventDefault();
-    
-    // Validate that the ID exists
-    if (!id) {
-      console.error('ID de publicación inválido o vacío');
-      toast.error('No se pudo abrir esta publicación');
-      return;
-    }
-    
-    // Save original URL and update URL for SEO
-    setOriginalUrl(window.location.pathname + window.location.search);
-    
-    // Update browser URL without causing a navigation
-    const urlWithModalParam = new URL(window.location.href);
-    urlWithModalParam.searchParams.set('modal', id);
-    window.history.pushState({ modalOpen: true, id }, '', urlWithModalParam.toString());
-    
-    // Update state to show the modal
-    setSelectedPublicationId(id);
-    setModalOpen(true);
-  };
-
-  // Función para cerrar el modal de publicación
-  const handleCloseModal = () => {
-    // Update states
-    setModalOpen(false);
-    setSelectedPublicationId(null);
-    
-    // Restore the original URL using replaceState
-    if (originalUrl) {
-      window.history.replaceState({ modalOpen: false }, '', originalUrl);
-      setOriginalUrl('');
-    } else {
-      // Fallback if originalUrl wasn't set
-      const basePath = window.location.pathname.substring(0, window.location.pathname.lastIndexOf('/')) || '/';
-      window.history.replaceState({modalOpen: false}, '', basePath + window.location.search);
-    }
-  };
-  
   // Modify the handleChangeViewMode function to fix layout issues
   const handleChangeViewMode = (mode: 'grid' | 'list') => {
     // Don't do anything if we're already in this mode
@@ -340,6 +285,11 @@ export default function SearchResults({
     const hasImages = Array.isArray(images) && images.length > 0 && images[0] !== '/images/placeholder-image.jpg' && images[0] !== '/images/defaults/default.jpg';
     const imageUrl = hasImages ? images[0] : getDefaultImageForCategory(publication.categorySlug);
     
+    // Log the publication object to inspect its structure
+    if (index === 0) { // Log only the first item
+        console.log("--- Publication Data (Grid Item) ---", JSON.stringify(publication, null, 2));
+    }
+
     // Generar seoUrl para el enlace
     const seoUrl = generateSeoUrl(
       publication.id,
@@ -392,7 +342,14 @@ export default function SearchResults({
         <a 
           href={seoUrl} 
           className="block w-full h-full"
-          onClick={(e) => handleOpenModal(publication.id, e)}
+          onClick={(e) => {
+            if (onPublicationClick) {
+              onPublicationClick(publication, e);
+            } else {
+              console.warn("onPublicationClick handler not provided to SearchResults");
+              e.preventDefault();
+            }
+          }}
         >
           <div className="relative flex flex-col bg-white dark:bg-slate-800 rounded-xl overflow-hidden shadow-md hover:shadow-lg transition-all duration-300 h-full">
             {/* Imagen siempre se muestra, usando placeholder si no hay imágenes */}
@@ -532,6 +489,11 @@ export default function SearchResults({
     const hasImages = Array.isArray(images) && images.length > 0 && images[0] !== '/images/placeholder-image.jpg' && images[0] !== '/images/defaults/default.jpg';
     const imageUrl = hasImages ? images[0] : getDefaultImageForCategory(publication.categorySlug);
 
+    // Log the publication object to inspect its structure
+    if (index === 0) { // Log only the first item
+        console.log("--- Publication Data (List Item) ---", JSON.stringify(publication, null, 2));
+    }
+
     // Formatear mensaje de WhatsApp
     const formatWhatsAppMessage = () => {
       let message = `Hola, estoy interesado en tu publicación "${publication.title}" de BuscaDis.`;
@@ -581,7 +543,14 @@ export default function SearchResults({
             false
           )} 
           className="block w-full"
-          onClick={(e) => handleOpenModal(publication.id, e)}
+          onClick={(e) => {
+            if (onPublicationClick) {
+              onPublicationClick(publication, e);
+            } else {
+              console.warn("onPublicationClick handler not provided to SearchResults");
+              e.preventDefault();
+            }
+          }}
         >
           <div className="relative flex flex-row bg-slate-800 rounded-xl overflow-hidden shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1 h-full">
             {/* Imagen */}
@@ -821,17 +790,6 @@ export default function SearchResults({
                     ))}
                   </div>
                 )}
-                
-                {/* Loader de "cargar más" */}
-                {hasMore && (
-                  <div ref={loadMoreRef} className="mt-8 flex justify-center">
-                    {loading ? (
-                      <div className="p-4 flex items-center justify-center">
-                        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-teal-500"></div>
-                      </div>
-                    ) : null}
-                  </div>
-                )}
               </React.Fragment>
             ) : (
               <motion.div
@@ -858,16 +816,6 @@ export default function SearchResults({
           </AnimatePresence>
         </LayoutGroup>
       </div>
-      
-      {/* Publication Modal */}
-      {selectedPublicationId && (
-        <PublicationModal
-          publicationId={selectedPublicationId}
-          isOpen={modalOpen}
-          onClose={handleCloseModal}
-          initialData={undefined}
-        />
-      )}
     </>
   )
 }
