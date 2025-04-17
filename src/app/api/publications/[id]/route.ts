@@ -4,6 +4,15 @@ import { mongoDbGetById } from '@/lib/mongodb.server'
 export const dynamic = 'force-dynamic' // Disable caching to ensure data is always fresh
 export const runtime = 'nodejs' // Mark as server-side only
 
+// Define Publication interface
+interface Publication {
+  id?: string;
+  categorySlug?: string;
+  subcategory?: string;
+  subsubcategory?: string;
+  [key: string]: any; // Allow for other properties
+}
+
 // Mapeo de categorías a colecciones
 const CATEGORY_COLLECTIONS: Record<string, string> = {
   empleos: 'publications_empleos',
@@ -20,7 +29,7 @@ const CATEGORY_COLLECTIONS: Record<string, string> = {
 type ValidCategory = keyof typeof CATEGORY_COLLECTIONS;
 
 // Fallback publication for development environment
-const FALLBACK_PUBLICATION = {
+const FALLBACK_PUBLICATION: Publication = {
   title: "Publicación de ejemplo",
   description: "Esta es una publicación de ejemplo que se muestra cuando no se encuentra la publicación solicitada (solo en desarrollo).",
   price: 0,
@@ -56,7 +65,7 @@ export async function GET(
     // 'id' is now available from the awaited params
     console.log(`Buscando publicación con ID: ${id}`);
     
-    let publication = null;
+    let publication: Publication | null = null;
     
     // Get all query parameters
     const url = new URL(request.url);
@@ -72,19 +81,17 @@ export async function GET(
     
     // 1. Si tenemos la categoría, buscar directamente en esa colección
     if (categoryFromQuery && categoryFromQuery in CATEGORY_COLLECTIONS) {
-      const collectionName = CATEGORY_COLLECTIONS[categoryFromQuery];
+      const collectionName = CATEGORY_COLLECTIONS[categoryFromQuery as ValidCategory];
       console.log(`Buscando en colección específica: ${collectionName}`);
       publication = await mongoDbGetById(collectionName, id);
       
       // If found, update with subcategory and subsubcategory from query if they exist
       if (publication) {
         if (subcategoryFromQuery) {
-          // Use type assertion to tell TypeScript this property exists
-          (publication as any).subcategory = subcategoryFromQuery;
+          publication.subcategory = subcategoryFromQuery;
         }
         if (subsubcategoryFromQuery) {
-          // Use type assertion to tell TypeScript this property exists
-          (publication as any).subsubcategory = subsubcategoryFromQuery;
+          publication.subsubcategory = subsubcategoryFromQuery;
         }
       }
     } 
@@ -96,7 +103,18 @@ export async function GET(
         try {
           const result = await mongoDbGetById(collectionName, id);
           if (result) {
-            publication = result;
+            publication = result as Publication;
+            // Ensure the category is set on the publication
+            if (!publication.categorySlug) {
+              publication.categorySlug = category;
+            }
+            // Add subcategory and subsubcategory from query if provided
+            if (subcategoryFromQuery) {
+              publication.subcategory = subcategoryFromQuery;
+            }
+            if (subsubcategoryFromQuery) {
+              publication.subsubcategory = subsubcategoryFromQuery;
+            }
             console.log(`Publicación encontrada en colección: ${collectionName}`);
             break;
           }
@@ -107,16 +125,18 @@ export async function GET(
       }
     }
     
-    // 3. Buscar publicaciones similares si se necesita
+    // 3. Si no se encuentra la publicación
     if (!publication) {
-      console.log('Publicación no encontrada en ninguna colección');
+      console.log(`Publicación no encontrada con ID: ${id}`);
       
-      // En producción, retornar 404
+      // En producción, retornar 404 con mensaje amigable
       if (process.env.NODE_ENV === 'production') {
         return new NextResponse(
           JSON.stringify({ 
             error: 'Publication not found',
-            errorFriendly: 'No pudimos encontrar la publicación solicitada.' 
+            errorFriendly: 'No pudimos encontrar la publicación solicitada.',
+            id: id,
+            status: 404
           }),
           { status: 404 }
         );
@@ -128,6 +148,9 @@ export async function GET(
         ...FALLBACK_PUBLICATION,
         id,
         _fallback: true,
+        categorySlug: categoryFromQuery || FALLBACK_PUBLICATION.categorySlug,
+        subcategory: subcategoryFromQuery || FALLBACK_PUBLICATION.subcategory,
+        subsubcategory: subsubcategoryFromQuery || FALLBACK_PUBLICATION.subsubcategory,
         message: "Esta es una publicación de ejemplo que se muestra solo en desarrollo"
       });
     }
@@ -135,15 +158,16 @@ export async function GET(
     return NextResponse.json(publication);
   } catch (error) {
     // Log the specific error that occurred during the fetch attempt
-    // Use the original ID variable captured earlier for clarity in logs
     console.error(`Error fetching publication with ID ${originalIdForErrorLogging}:`, error);
     
-    // Always return a 500 error if the fetch itself failed, regardless of environment
+    // Return a proper error response
     return new NextResponse(
       JSON.stringify({ 
         error: 'Failed to fetch publication',
         errorDetails: error instanceof Error ? error.message : 'Unknown error',
-        errorFriendly: 'Ocurrió un error al intentar obtener la publicación. Por favor, intenta nuevamente.' 
+        errorFriendly: 'Ocurrió un error al intentar obtener la publicación. Por favor, intenta nuevamente.',
+        id: originalIdForErrorLogging,
+        status: 500
       }),
       { status: 500 }
     );

@@ -86,20 +86,29 @@ export default function PublicationModal({ publicationId, isOpen, onClose, initi
       // Extract category, subcategory, and subsubcategory from URL if possible
       let category, subcategory, subsubcategory;
       
-      // Try to extract from URL path
+      // Define valid categories
+      const validCategories = [
+        'inmuebles', 'vehiculos', 'empleos', 'servicios', 
+        'productos', 'negocios', 'comunidad', 'eventos'
+      ];
+      
+      // Improved URL parsing logic
       for (let i = 0; i < urlParts.length; i++) {
-        if (urlParts[i] === 'inmuebles' || 
-            urlParts[i] === 'vehiculos' || 
-            urlParts[i] === 'empleos' || 
-            urlParts[i] === 'servicios' || 
-            urlParts[i] === 'productos' || 
-            urlParts[i] === 'negocios' || 
-            urlParts[i] === 'comunidad' ||
-            urlParts[i] === 'eventos') {
+        if (validCategories.includes(urlParts[i])) {
           category = urlParts[i];
-          if (i + 1 < urlParts.length && !urlParts[i+1].includes(cleanId)) {
+          
+          // Check for subcategory in the next segment
+          if (i + 1 < urlParts.length && 
+              urlParts[i+1] && 
+              !urlParts[i+1].includes(cleanId) && 
+              !validCategories.includes(urlParts[i+1])) {
             subcategory = urlParts[i+1];
-            if (i + 2 < urlParts.length && !urlParts[i+2].includes(cleanId)) {
+            
+            // Check for subsubcategory in the next segment
+            if (i + 2 < urlParts.length && 
+                urlParts[i+2] && 
+                !urlParts[i+2].includes(cleanId) && 
+                !validCategories.includes(urlParts[i+2])) {
               subsubcategory = urlParts[i+2];
             }
           }
@@ -128,7 +137,8 @@ export default function PublicationModal({ publicationId, isOpen, onClose, initi
       const enhancedData = {
         ...data,
         subcategory: data.subcategory || subcategory,
-        subsubcategory: data.subsubcategory || subsubcategory
+        subsubcategory: data.subsubcategory || subsubcategory,
+        categorySlug: data.categorySlug || category
       };
       
       setPublication(enhancedData);
@@ -372,27 +382,22 @@ export default function PublicationModal({ publicationId, isOpen, onClose, initi
   // Renderizar contenido de la publicación
   const renderPublicationContent = (pub: PublicationWithContact | null) => {
     if (!pub) {
-      console.warn('No publication data available for rendering');
       return (
-        <div className="p-8 text-center">
-          <div className="p-4 bg-slate-700/50 rounded-full mb-4 mx-auto w-16 h-16 flex items-center justify-center">
-            <svg xmlns="http://www.w3.org/2000/svg" className="h-8 w-8 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-            </svg>
-          </div>
-          <h2 className="text-xl font-semibold text-white mb-2">Información no disponible</h2>
-          <p className="text-slate-400 mb-4">
-            No se pudo cargar la información de esta publicación.
-          </p>
-          <button
-            onClick={handleCloseModal}
-            className="bg-gradient-to-r from-teal-500 to-cyan-500 text-white px-4 py-2 rounded-lg"
-          >
-            Volver
-          </button>
+        <div className="p-8 text-center text-red-500">
+          <p>No se encontraron datos de la publicación.</p>
         </div>
       );
     }
+
+    // Handle fallback publication cases
+    const isFallback = '_fallback' in pub;
+    
+    // Log useful debugging information
+    console.log('Rendering publication content:', {
+      id: pub.id,
+      title: pub.title,
+      isFallback: isFallback
+    });
     
     // Ensure we have valid data
     const publicationId = pub.id || 'unknown';
@@ -731,6 +736,7 @@ export default function PublicationModal({ publicationId, isOpen, onClose, initi
           <div 
             className="fixed inset-0 bg-black/70" 
             onClick={handleCloseModal}
+            aria-hidden="true"
           />
           
           {/* Modal container with improved animation and styles */}
@@ -743,7 +749,7 @@ export default function PublicationModal({ publicationId, isOpen, onClose, initi
             className="publication-modal bg-white dark:bg-slate-900 rounded-2xl overflow-hidden relative z-10 w-full max-w-4xl mx-4 shadow-xl max-h-[90vh]"
             id="publication-modal"
             onClick={(e) => {
-              e.stopPropagation(); // Prevent the click from reaching the backdrop
+              e.stopPropagation(); // Prevent the click from closing the modal
             }}
           >
             {/* Close button with improved positioning and appearance */}
@@ -763,7 +769,13 @@ export default function PublicationModal({ publicationId, isOpen, onClose, initi
               <SkeletonLoader />
             ) : error ? (
               <div className="p-8 text-center text-red-500">
-                <p>Error al cargar la publicación. Por favor, inténtalo de nuevo.</p>
+                <p>Error al cargar la publicación: {error}</p>
+                <button 
+                  onClick={() => fetchPublicationData()}
+                  className="mt-4 px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600"
+                >
+                  Intentar nuevamente
+                </button>
               </div>
             ) : (
               renderPublicationContent(publication)

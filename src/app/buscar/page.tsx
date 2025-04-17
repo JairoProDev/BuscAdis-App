@@ -24,6 +24,7 @@ interface ApiPublicationData {
   category?: string;
   categorySlug?: string; // Ensure this is potentially received
   subcategory?: string;
+  subsubcategory?: string; // Add this field
   location?: { city?: string; region?: string } | string;
   contactName?: string;
   contactEmail?: string;
@@ -34,6 +35,7 @@ interface ApiPublicationData {
   images?: string[];
   premium?: boolean;
   verified?: boolean;
+  slug?: string; // Add slug field
   [key: string]: unknown; // Allow other fields
 }
 
@@ -342,9 +344,9 @@ export default function BuscadorPage() {
     const id = publication.id;
     console.log("Raw ID received:", id);
 
-    if (!id || !publication.categorySlug) {
-      console.error('Cannot open modal: Invalid ID or missing categorySlug', publication);
-          toast({
+    if (!id) {
+      console.error('Cannot open modal: Invalid ID', publication);
+      toast({
         title: "Error",
         description: "No se pudo generar el enlace para esta publicación.",
         variant: "destructive"
@@ -355,33 +357,62 @@ export default function BuscadorPage() {
     // Store the current full URL before changing it
     setCurrentFullUrl(window.location.href);
 
+    // Make sure we have a category even if it's missing
+    const categorySlug = publication.categorySlug || searchState.category || 'productos';
+
     // Generate the correct SEO URL using the publication slug
     const seoUrl = generateSeoUrl(
-      publication.id, // Still needed for modal param lookup
-      publication.title, // Still needed for potential fallback slug generation
-      publication.slug, // *** Pass the publication slug here ***
-      publication.categorySlug,
-      publication.subcategory,
-      publication.subsubcategory,
-      // Assuming the publication.slug already contains the essence of the title
-      // If not, set this to true to append a title slug
-      false // *** Set to false if slug is self-contained, true otherwise ***
+      publication.id,
+      publication.title || '',
+      publication.slug,
+      categorySlug,
+      publication.subcategory || searchState.subcategory,
+      publication.subsubcategory || searchState.subsubcategory,
+      // If no slug is available, generate one from the title
+      !publication.slug
     );
     console.log("Generated SEO URL:", seoUrl);
 
     // Update browser URL to the SEO path with the modal query param
-    const urlWithModalParam = new URL(seoUrl, window.location.origin); 
-    // Use the original ID for the modal parameter for lookup consistency 
-    // (Alternatively, use publication.slug if the modal can fetch by slug)
+    const urlWithModalParam = new URL(seoUrl, window.location.origin);
+    // Include category, subcategory and subsubcategory as query params for the API
     urlWithModalParam.searchParams.set('modal', id);
+    urlWithModalParam.searchParams.set('category', categorySlug);
+    if (publication.subcategory || searchState.subcategory) {
+      urlWithModalParam.searchParams.set('subcategory', publication.subcategory || searchState.subcategory || '');
+    }
+    if (publication.subsubcategory || searchState.subsubcategory) {
+      urlWithModalParam.searchParams.set('subsubcategory', publication.subsubcategory || searchState.subsubcategory || '');
+    }
+    
     const newUrl = urlWithModalParam.toString();
     console.log("Pushing new URL with modal param:", newUrl);
     window.history.pushState({ modalOpen: true, id }, '', newUrl);
 
     // Update state to show the modal
     console.log("Setting selectedPublicationId:", id);
+    // Convert publication to PublicationWithContact interface before passing
+    const enhancedPublication = {
+      ...publication,
+      contactPhone: publication.contactPhone || '',
+      contact: {
+        phone: publication.contactPhone || '',
+        email: publication.contactEmail || '',
+        name: publication.contactName || ''
+      },
+      subcategory: publication.subcategory || searchState.subcategory,
+      subsubcategory: publication.subsubcategory || searchState.subsubcategory,
+      categorySlug: categorySlug
+    };
+    
     setSelectedPublicationId(id);
     setModalOpen(true);
+    
+    // Store the publication data in window.preloadedPublications for faster retrieval
+    if (typeof window !== 'undefined') {
+      window.preloadedPublications = window.preloadedPublications || {};
+      window.preloadedPublications[id] = enhancedPublication;
+    }
   };
 
   // Function to close the modal
