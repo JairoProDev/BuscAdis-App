@@ -27,11 +27,23 @@ export function generateSeoUrl(
     return '/'; // Return root or a default path
   }
 
-  // Use the provided publication slug if available, otherwise generate from title
-  const effectiveSlug = publicationSlug ? slugify(publicationSlug) : slugify(title);
+  // Create a clean slug from the title
+  const titleSlug = slugify(title);
   
-  // Generate a fallback title slug only if needed and not included in publicationSlug
-  const titleSlugForPath = includeTitleInSlug && !publicationSlug ? slugify(title) : '' ;
+  // Use the provided publication slug if available, otherwise use title slug
+  let effectiveSlug = '';
+  
+  if (publicationSlug) {
+    // Use the provided slug
+    effectiveSlug = slugify(publicationSlug);
+    // No need to append title, as publicationSlug should already be SEO-friendly
+    includeTitleInSlug = false;
+  } else {
+    // Generate slug from title
+    effectiveSlug = titleSlug;
+    // Since we're using the title as the slug, don't append it again
+    includeTitleInSlug = false;
+  }
 
   // Normalize category parts
   const normalizedCategory = category ? slugify(category) : '';
@@ -52,22 +64,15 @@ export function generateSeoUrl(
       }
     }
     
-    // Use the effective slug (publicationSlug or title slug) 
-    // Optionally add title slug if needed
+    // Just add the effective slug without appending the title again
     url += `/${effectiveSlug}`;
-    if (titleSlugForPath) {
-        url += `-${titleSlugForPath}`; // Append title if slug didn't contain it
-    }
 
   } else {
     // Fallback if no category: /publicaciones/effective-slug
     url = `/publicaciones/${effectiveSlug}`;
-    if (titleSlugForPath) {
-        url += `-${titleSlugForPath}`;
-    }
   }
   
-  // Remove trailing hyphens that might occur if titleSlugForPath is empty
+  // Remove trailing hyphens that might occur
   url = url.replace(/-+$/, ''); 
 
   return url;

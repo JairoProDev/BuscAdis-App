@@ -850,310 +850,90 @@ button[aria-label="Contactar por WhatsApp"] {
 }
 
 .publication-modal {
-  z-index: 50;
+  cursor: auto !important;
+  z-index: 60 !important;
+  pointer-events: auto !important;
+  -webkit-user-select: auto !important;
+  user-select: auto !important;
   position: relative;
-  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
-  transition: all 0.3s ease-in-out;
   max-height: 90vh;
+  overflow: hidden;
+  background-color: white;
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1),
+    0 10px 10px -5px rgba(0, 0, 0, 0.04);
+}
+
+.publication-modal * {
+  pointer-events: auto !important;
+}
+
+.publication-modal .image-container {
+  position: relative;
+  height: 100%;
+  min-height: 300px;
+  overflow: hidden;
+  background-color: #f7f7f7;
+}
+
+.publication-modal .content {
+  padding: 1rem;
   overflow-y: auto;
-  overscroll-behavior: contain; /* Prevent scrolling parent when modal is scrolled to edge */
+  max-height: 100%;
 }
 
-/* Prevent modal content from being clickable when loading or transitioning */
-.publication-modal.loading {
-  pointer-events: none;
+.publication-modal button {
+  cursor: pointer !important;
 }
 
-/* Ensure overlay blocks clicks properly */
-.modal-overlay {
-  position: fixed;
-  inset: 0;
-  background-color: rgba(0, 0, 0, 0.7);
-  z-index: 40;
+.publication-modal a {
+  cursor: pointer !important;
 }
 
-/* Add styles for modal content scroll container */
-.modal-content-scroll {
-  max-height: calc(90vh - 8rem);
-  overflow-y: auto;
-  scrollbar-width: thin;
-  scrollbar-color: rgba(156, 163, 175, 0.5) transparent;
-}
-
-.modal-content-scroll::-webkit-scrollbar {
-  width: 6px;
-}
-
-.modal-content-scroll::-webkit-scrollbar-track {
-  background: transparent;
-}
-
-.modal-content-scroll::-webkit-scrollbar-thumb {
-  background-color: rgba(156, 163, 175, 0.5);
-  border-radius: 20px;
-}
-
-/* Enhance keyboard focus for modal elements */
-.publication-modal button:focus,
-.publication-modal a:focus {
-  outline: 2px solid rgba(14, 165, 233, 0.5);
-  outline-offset: 2px;
-}
-
-/* Animation for modal backdrop */
-@keyframes fadeIn {
-  from {
-    opacity: 0;
-  }
-  to {
-    opacity: 1;
-  }
-}
-
+/* Modal backdrop */
 .modal-backdrop {
-  animation: fadeIn 0.2s ease-out forwards;
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.5);
+  z-index: 50;
+  cursor: pointer;
 }
 
-/* Fix height issues in grid view */
-.publications-grid {
-  @apply grid gap-4 grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4;
-  grid-auto-rows: auto; /* Let rows size based on content */
+/* Enhance z-index handling */
+.z-60 {
+  z-index: 60 !important;
 }
 
-@media (max-width: 640px) {
-  .publications-grid {
-    display: grid;
-    grid-template-columns: repeat(2, 1fr) !important;
-    gap: 0.75rem !important;
-    width: 100%;
-    margin: 0 auto;
-    padding: 0 0.25rem;
-  }
-
-  .publication-card {
-    height: auto !important;
-    min-height: unset !important;
-    margin-bottom: 0.75rem !important;
-  }
-
-  .publication-card .image-container {
-    height: 120px !important;
-    min-height: 120px !important;
-  }
-
-  .publication-card .content {
-    padding: 0.5rem !important;
-    min-height: unset !important;
-    max-height: unset !important;
-    height: auto !important;
-    display: flex;
-    flex-direction: column;
-  }
-
-  .publication-card h3 {
-    font-size: 0.85rem !important;
-    line-height: 1.2 !important;
-    margin-bottom: 0.25rem !important;
-    height: auto !important;
-    display: -webkit-box;
-    -webkit-line-clamp: 2;
-    -webkit-box-orient: vertical;
-    overflow: hidden;
-  }
-
-  .publication-card .description {
-    font-size: 0.7rem !important;
-    line-height: 1.1 !important;
-    margin-bottom: 0.25rem !important;
-    display: -webkit-box;
-    -webkit-line-clamp: 2;
-    -webkit-box-orient: vertical;
-    overflow: hidden;
-  }
-
-  .publication-card .footer {
-    margin-top: 0.25rem !important;
-    font-size: 0.65rem !important;
-    display: flex;
-    flex-wrap: wrap;
-    justify-content: space-between;
-  }
-
-  .publication-card .location,
-  .publication-card .date {
-    font-size: 0.65rem !important;
-    margin: 0 !important;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    max-width: 100%;
-    display: inline-block;
-  }
-
-  /* Fix WhatsApp button visibility */
-  .whatsapp-button {
-    position: absolute !important;
-    right: 0.25rem !important;
-    bottom: 0.25rem !important;
-    padding: 0.25rem 0.5rem !important;
-    font-size: 0.65rem !important;
-    z-index: 30 !important;
-    opacity: 1 !important;
-    visibility: visible !important;
-    display: flex !important;
-    align-items: center !important;
-  }
-
-  /* Fix list view on mobile */
-  .list-view-item {
-    margin-bottom: 0.75rem !important;
-    min-height: 100px !important;
-  }
-
-  /* Fix spacing between items */
-  .space-y-4 > :not([hidden]) ~ :not([hidden]) {
-    --tw-space-y-reverse: 0;
-    margin-top: calc(0.75rem * calc(1 - var(--tw-space-y-reverse))) !important;
-    margin-bottom: calc(0.75rem * var(--tw-space-y-reverse)) !important;
-  }
+.z-70 {
+  z-index: 70 !important;
 }
 
-/* Additional fixes to ensure consistent height and better transitions */
+/* Fix publication card height consistency */
 .publication-card {
+  height: 100% !important;
+  display: flex;
+  flex-direction: column;
+}
+
+.publication-card > a {
   display: flex;
   flex-direction: column;
   height: 100%;
-  transition: all 0.3s ease;
-}
-
-.publication-card .image-container {
-  position: relative;
-  height: 180px;
-  overflow: hidden;
 }
 
 .publication-card .content {
+  flex-grow: 1;
   display: flex;
   flex-direction: column;
   justify-content: space-between;
-  flex-grow: 1;
-  padding: 0.75rem;
-  background-color: white;
 }
 
-.publication-card h3 {
-  font-weight: 600;
-  font-size: 1rem;
-  line-height: 1.25;
-  color: #1f2937;
-  margin-bottom: 0.5rem;
-  display: -webkit-box;
-  -webkit-line-clamp: 2;
-  -webkit-box-orient: vertical;
-  overflow: hidden;
-}
-
-.publication-card .description {
-  font-size: 0.875rem;
-  color: #4b5563;
-  margin-bottom: 0.75rem;
-  flex-grow: 1;
-  display: -webkit-box;
-  -webkit-line-clamp: 3;
-  -webkit-box-orient: vertical;
-  overflow: hidden;
-}
-
-.publication-card .footer {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-top: auto;
-  font-size: 0.75rem;
-  color: #6b7280;
-}
-
-.publication-card .location {
-  display: flex;
-  align-items: center;
-  max-width: 60%;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-
-.publication-card .date {
-  font-size: 0.75rem;
-  color: #6b7280;
-}
-
-.whatsapp-button {
-  position: absolute;
-  right: 0.5rem;
-  bottom: 0.5rem;
-  background-color: #25d366;
-  color: white;
-  font-size: 0.75rem;
-  font-weight: 600;
-  padding: 0.35rem 0.6rem;
-  border-radius: 9999px;
-  display: flex;
-  align-items: center;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
-  z-index: 20;
-  transition: all 0.2s ease;
-}
-
-.whatsapp-button:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-}
-
-.whatsapp-button.hidden {
-  display: none !important;
-}
-
-/* Publication List Item Styles */
-.publications-list .publication-card {
-  flex-direction: row;
-  height: auto;
-  min-height: 120px;
-}
-
-.publications-list .publication-card a {
-  flex-direction: row;
-}
-
-.publications-list .publication-card .image-container {
-  width: 120px;
-  height: 120px;
-  flex-shrink: 0;
-}
-
-.publications-list .publication-card .content {
-  padding: 10px 12px;
-  flex: 1;
-}
-
-.publications-list .publication-card .whatsapp-button {
-  bottom: 10px;
-  right: 10px;
-}
-
-@media (max-width: 640px) {
-  .publications-list .publication-card .image-container {
-    width: 100px;
-    height: 100px;
-  }
-
-  .publications-list .publication-card {
-    min-height: 100px;
-  }
-}
-
-/* Transition classes */
+/* Improved view transitions */
 .view-transition {
-  transition: all 0.3s ease-in-out;
+  opacity: 0;
+  transition: opacity 300ms ease-in-out;
 }
 
 /* Fix the cut-off issues */

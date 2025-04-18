@@ -25,6 +25,9 @@ interface ApiPublicationData {
   categorySlug?: string; // Ensure this is potentially received
   subcategory?: string;
   subsubcategory?: string; // Add this field
+  // Database field names
+  subcategorySlug?: string;
+  subSubcategorySlug?: string;
   location?: { city?: string; region?: string } | string;
   contactName?: string;
   contactEmail?: string;
@@ -346,7 +349,7 @@ export default function BuscadorPage() {
 
     if (!id) {
       console.error('Cannot open modal: Invalid ID', publication);
-      toast({
+          toast({
         title: "Error",
         description: "No se pudo generar el enlace para esta publicación.",
         variant: "destructive"
@@ -360,14 +363,18 @@ export default function BuscadorPage() {
     // Make sure we have a category even if it's missing
     const categorySlug = publication.categorySlug || searchState.category || 'productos';
 
+    // Use database field names or fallback to old names
+    const subcategorySlug = publication.subcategorySlug || publication.subcategory || searchState.subcategory;
+    const subSubcategorySlug = publication.subSubcategorySlug || publication.subsubcategory || searchState.subsubcategory;
+
     // Generate the correct SEO URL using the publication slug
     const seoUrl = generateSeoUrl(
       publication.id,
       publication.title || '',
       publication.slug,
       categorySlug,
-      publication.subcategory || searchState.subcategory,
-      publication.subsubcategory || searchState.subsubcategory,
+      subcategorySlug,
+      subSubcategorySlug,
       // If no slug is available, generate one from the title
       !publication.slug
     );
@@ -378,11 +385,11 @@ export default function BuscadorPage() {
     // Include category, subcategory and subsubcategory as query params for the API
     urlWithModalParam.searchParams.set('modal', id);
     urlWithModalParam.searchParams.set('category', categorySlug);
-    if (publication.subcategory || searchState.subcategory) {
-      urlWithModalParam.searchParams.set('subcategory', publication.subcategory || searchState.subcategory || '');
+    if (subcategorySlug) {
+      urlWithModalParam.searchParams.set('subcategory', subcategorySlug);
     }
-    if (publication.subsubcategory || searchState.subsubcategory) {
-      urlWithModalParam.searchParams.set('subsubcategory', publication.subsubcategory || searchState.subsubcategory || '');
+    if (subSubcategorySlug) {
+      urlWithModalParam.searchParams.set('subsubcategory', subSubcategorySlug);
     }
     
     const newUrl = urlWithModalParam.toString();
@@ -400,8 +407,8 @@ export default function BuscadorPage() {
         email: publication.contactEmail || '',
         name: publication.contactName || ''
       },
-      subcategory: publication.subcategory || searchState.subcategory,
-      subsubcategory: publication.subsubcategory || searchState.subsubcategory,
+      subcategory: subcategorySlug,
+      subsubcategory: subSubcategorySlug,
       categorySlug: categorySlug
     };
     

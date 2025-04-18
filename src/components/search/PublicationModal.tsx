@@ -44,6 +44,9 @@ interface PublicationWithContact extends Publication {
   };
   subcategory?: string;
   subsubcategory?: string;
+  // Database field names
+  subcategorySlug?: string;
+  subSubcategorySlug?: string;
 }
 
 interface PublicationModalProps {
@@ -133,11 +136,12 @@ export default function PublicationModal({ publicationId, isOpen, onClose, initi
       
       console.log("Received publication data:", data);
       
-      // Make sure subcategory and subsubcategory are set correctly
+      // Normalize fields from DB to match frontend naming
       const enhancedData = {
         ...data,
-        subcategory: data.subcategory || subcategory,
-        subsubcategory: data.subsubcategory || subsubcategory,
+        // Support both naming conventions for compatibility
+        subcategory: data.subcategory || data.subcategorySlug || subcategory,
+        subsubcategory: data.subsubcategory || data.subSubcategorySlug || subsubcategory,
         categorySlug: data.categorySlug || category
       };
       
@@ -730,12 +734,21 @@ export default function PublicationModal({ publicationId, isOpen, onClose, initi
           exit={{ opacity: 0 }}
           transition={{ duration: 0.2 }}
           className="fixed inset-0 z-50 flex items-center justify-center overflow-hidden"
-          onClick={handleCloseModal}
+          onClick={(e) => {
+            // Only close if the click was directly on this container
+            if (e.target === e.currentTarget) {
+              handleCloseModal();
+            }
+          }}
         >
-          {/* Backdrop with darker opacity */}
+          {/* Backdrop with lighter opacity */}
           <div 
-            className="fixed inset-0 bg-black/70" 
-            onClick={handleCloseModal}
+            className="fixed inset-0 bg-black/50" 
+            onClick={(e) => {
+              // Stop propagation here to ensure clicks on the backdrop are handled only here
+              e.stopPropagation();
+              handleCloseModal();
+            }}
             aria-hidden="true"
           />
           
@@ -746,11 +759,13 @@ export default function PublicationModal({ publicationId, isOpen, onClose, initi
             animate={{ scale: 1, opacity: 1, y: 0 }}
             exit={{ scale: 0.98, opacity: 0, y: 10 }}
             transition={{ type: "spring", damping: 30, stiffness: 350 }}
-            className="publication-modal bg-white dark:bg-slate-900 rounded-2xl overflow-hidden relative z-10 w-full max-w-4xl mx-4 shadow-xl max-h-[90vh]"
+            className="publication-modal bg-white dark:bg-slate-900 rounded-2xl overflow-hidden relative z-60 w-full max-w-4xl mx-4 shadow-xl max-h-[90vh]"
             id="publication-modal"
             onClick={(e) => {
-              e.stopPropagation(); // Prevent the click from closing the modal
+              // Ensure clicks inside the modal don't bubble up
+              e.stopPropagation();
             }}
+            style={{ cursor: 'auto' }}
           >
             {/* Close button with improved positioning and appearance */}
             <button
@@ -758,7 +773,7 @@ export default function PublicationModal({ publicationId, isOpen, onClose, initi
                 e.stopPropagation();
                 handleCloseModal();
               }}
-              className="absolute top-4 right-4 z-30 bg-white/90 dark:bg-slate-800/90 rounded-full p-2 shadow-lg hover:bg-white dark:hover:bg-slate-700 transition-all duration-200"
+              className="absolute top-4 right-4 z-70 bg-white/90 dark:bg-slate-800/90 rounded-full p-2 shadow-lg hover:bg-white dark:hover:bg-slate-700 transition-all duration-200"
               aria-label="Cerrar"
             >
               <XMarkIcon className="h-5 w-5 text-gray-700 dark:text-gray-200" />

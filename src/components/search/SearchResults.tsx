@@ -45,6 +45,9 @@ export interface Publication {
   attributes?: Record<string, unknown>
   subcategory?: string
   subsubcategory?: string
+  subcategorySlug?: string
+  subSubcategorySlug?: string
+  contactEmail?: string
 }
 
 interface SearchResultsProps {

@@ -7,7 +7,11 @@ export const runtime = 'nodejs' // Mark as server-side only
 // Define Publication interface
 interface Publication {
   id?: string;
-  categorySlug?: string;
+  _id?: string;
+  categorySlug?: string; // Database field name
+  subcategorySlug?: string; // Database field name
+  subSubcategorySlug?: string; // Database field name
+  // For backward compatibility
   subcategory?: string;
   subsubcategory?: string;
   [key: string]: any; // Allow for other properties
@@ -43,8 +47,8 @@ const FALLBACK_PUBLICATION: Publication = {
   images: ["/images/placeholder-buscadis.jpg"],
   premium: true,
   verified: true,
-  subcategory: "ejemplo",
-  subsubcategory: "muestra"
+  subcategorySlug: "ejemplo",
+  subSubcategorySlug: "muestra"
 };
 
 export async function GET(
@@ -88,10 +92,12 @@ export async function GET(
       // If found, update with subcategory and subsubcategory from query if they exist
       if (publication) {
         if (subcategoryFromQuery) {
-          publication.subcategory = subcategoryFromQuery;
+          publication.subcategorySlug = subcategoryFromQuery;
+          publication.subcategory = subcategoryFromQuery; // For backward compatibility
         }
         if (subsubcategoryFromQuery) {
-          publication.subsubcategory = subsubcategoryFromQuery;
+          publication.subSubcategorySlug = subsubcategoryFromQuery;
+          publication.subsubcategory = subsubcategoryFromQuery; // For backward compatibility
         }
       }
     } 
@@ -110,10 +116,12 @@ export async function GET(
             }
             // Add subcategory and subsubcategory from query if provided
             if (subcategoryFromQuery) {
-              publication.subcategory = subcategoryFromQuery;
+              publication.subcategorySlug = subcategoryFromQuery;
+              publication.subcategory = subcategoryFromQuery; // For backward compatibility
             }
             if (subsubcategoryFromQuery) {
-              publication.subsubcategory = subsubcategoryFromQuery;
+              publication.subSubcategorySlug = subsubcategoryFromQuery;
+              publication.subsubcategory = subsubcategoryFromQuery; // For backward compatibility
             }
             console.log(`Publicación encontrada en colección: ${collectionName}`);
             break;
@@ -149,10 +157,22 @@ export async function GET(
         id,
         _fallback: true,
         categorySlug: categoryFromQuery || FALLBACK_PUBLICATION.categorySlug,
-        subcategory: subcategoryFromQuery || FALLBACK_PUBLICATION.subcategory,
-        subsubcategory: subsubcategoryFromQuery || FALLBACK_PUBLICATION.subsubcategory,
+        subcategorySlug: subcategoryFromQuery || FALLBACK_PUBLICATION.subcategorySlug,
+        subSubcategorySlug: subsubcategoryFromQuery || FALLBACK_PUBLICATION.subSubcategorySlug,
+        // For backward compatibility
+        subcategory: subcategoryFromQuery || FALLBACK_PUBLICATION.subcategorySlug,
+        subsubcategory: subsubcategoryFromQuery || FALLBACK_PUBLICATION.subSubcategorySlug,
         message: "Esta es una publicación de ejemplo que se muestra solo en desarrollo"
       });
+    }
+    
+    // Ensure backward compatibility for frontend that may expect subcategory/subsubcategory
+    if (publication.subcategorySlug && !publication.subcategory) {
+      publication.subcategory = publication.subcategorySlug;
+    }
+    
+    if (publication.subSubcategorySlug && !publication.subsubcategory) {
+      publication.subsubcategory = publication.subSubcategorySlug;
     }
     
     return NextResponse.json(publication);
