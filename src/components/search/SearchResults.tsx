@@ -119,13 +119,6 @@ const getDefaultImageForCategory = (categorySlug?: string): string => {
   }
 };
 
-// Formatear la ubicación para mostrarla
-const formatLocation = (location: Publication['location']): string => {
-  if (!location) return 'Ubicación no especificada';
-  if (typeof location === 'string') return location;
-  return location.city || 'Ubicación no especificada';
-};
-
 // Format full location with all available fields
 const formatFullLocation = (location: Publication['location']): string => {
   if (!location) return 'Ubicación no especificada';
@@ -892,8 +885,7 @@ export default function SearchResults({
                   : 'bg-slate-700 text-slate-300 hover:bg-slate-600'}`}
                 onClick={() => handleChangeViewMode('grid')}
                 aria-label="Ver en cuadrícula"
-                aria-pressed={viewMode === 'grid'}
-                title="Ver en cuadrícula"
+                aria-pressed={viewMode === 'grid' ? 'true' : 'false'}
               >
                 <Squares2X2Icon className="w-5 h-5" />
               </button>
@@ -903,8 +895,7 @@ export default function SearchResults({
                   : 'bg-slate-700 text-slate-300 hover:bg-slate-600'}`}
                 onClick={() => handleChangeViewMode('list')}
                 aria-label="Ver en lista"
-                aria-pressed={viewMode === 'list'}
-                title="Ver en lista"
+                aria-pressed={viewMode === 'list' ? 'true' : 'false'}
               >
                 <ListBulletIcon className="w-5 h-5" />
               </button>

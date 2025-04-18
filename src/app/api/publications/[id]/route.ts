@@ -14,7 +14,7 @@ interface Publication {
   // For backward compatibility
   subcategory?: string;
   subsubcategory?: string;
-  [key: string]: any; // Allow for other properties
+  [key: string]: unknown; // Allow for other properties with unknown type instead of any
 }
 
 // Mapeo de categorías a colecciones
