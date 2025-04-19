@@ -137,8 +137,8 @@ export async function GET(
     if (!publication) {
       console.log(`Publicación no encontrada con ID: ${id}`);
       
-      // En producción, retornar 404 con mensaje amigable
-      if (process.env.NODE_ENV === 'production') {
+      // En desarrollo o producción, retornar 404 con mensaje amigable
+      if (process.env.NODE_ENV === 'production' || true) {
         return new NextResponse(
           JSON.stringify({ 
             error: 'Publication not found',
@@ -149,21 +149,6 @@ export async function GET(
           { status: 404 }
         );
       }
-      
-      // En desarrollo, retornar una publicación de ejemplo para facilitar pruebas
-      console.log('Retornando publicación de ejemplo');
-      return NextResponse.json({
-        ...FALLBACK_PUBLICATION,
-        id,
-        _fallback: true,
-        categorySlug: categoryFromQuery || FALLBACK_PUBLICATION.categorySlug,
-        subcategorySlug: subcategoryFromQuery || FALLBACK_PUBLICATION.subcategorySlug,
-        subSubcategorySlug: subsubcategoryFromQuery || FALLBACK_PUBLICATION.subSubcategorySlug,
-        // For backward compatibility
-        subcategory: subcategoryFromQuery || FALLBACK_PUBLICATION.subcategorySlug,
-        subsubcategory: subsubcategoryFromQuery || FALLBACK_PUBLICATION.subSubcategorySlug,
-        message: "Esta es una publicación de ejemplo que se muestra solo en desarrollo"
-      });
     }
     
     // Ensure backward compatibility for frontend that may expect subcategory/subsubcategory
@@ -180,7 +165,7 @@ export async function GET(
     // Log the specific error that occurred during the fetch attempt
     console.error(`Error fetching publication with ID ${originalIdForErrorLogging}:`, error);
     
-    // Return a proper error response
+    // Return a proper error response for both development and production
     return new NextResponse(
       JSON.stringify({ 
         error: 'Failed to fetch publication',
