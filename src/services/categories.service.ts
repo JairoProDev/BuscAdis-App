@@ -127,7 +127,7 @@ export class CategoriesService {
     // If subcategories should also be static, this needs to be rewritten.
     // For now, keep the browser fetch attempt, but expect it might fail.
     const isBrowser = typeof window !== 'undefined';
-    if (isBrowser) {
+      if (isBrowser) {
         try {
           const response = await fetch(`/api/categories/${categoryId}/subcategories`);
           if (!response.ok) {
@@ -145,7 +145,7 @@ export class CategoriesService {
       // This part will fail if the API route is gone. 
       // Consider removing or replacing with static logic if needed.
       console.warn('Server-side fetching of subcategories in CategoriesService is not implemented with static data.')
-      return []; 
+      return [];
   }
   
   // Removed the old getCategories implementation that used fetch/mongoDbQuery
