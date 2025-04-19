@@ -840,7 +840,7 @@ button[aria-label="Contactar por WhatsApp"] {
 .fixed.inset-0 > .bg-black\/20,
 .fixed.inset-0 > .bg-black\/50,
 .fixed.inset-0 > .bg-black\/70 {
-  background-color: rgba(0, 0, 0, 0.7) !important;
+  background-color: rgba(0, 0, 0, 0.5) !important;
 }
 
 /* Modal styles */
@@ -851,7 +851,7 @@ button[aria-label="Contactar por WhatsApp"] {
 
 .publication-modal {
   cursor: auto !important;
-  z-index: 60 !important;
+  z-index: 9999 !important;
   pointer-events: auto !important;
   -webkit-user-select: auto !important;
   user-select: auto !important;
@@ -865,6 +865,12 @@ button[aria-label="Contactar por WhatsApp"] {
 
 .publication-modal * {
   pointer-events: auto !important;
+  cursor: auto !important;
+}
+
+.publication-modal button,
+.publication-modal a {
+  cursor: pointer !important;
 }
 
 .publication-modal .image-container {
@@ -881,24 +887,20 @@ button[aria-label="Contactar por WhatsApp"] {
   max-height: 100%;
 }
 
-.publication-modal button {
-  cursor: pointer !important;
+/* Fix for modal backdrop */
+.fixed.inset-0 {
+  position: fixed !important;
+  top: 0 !important;
+  right: 0 !important;
+  bottom: 0 !important;
+  left: 0 !important;
+  pointer-events: auto !important;
 }
 
-.publication-modal a {
-  cursor: pointer !important;
-}
-
-/* Modal backdrop */
-.modal-backdrop {
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background-color: rgba(0, 0, 0, 0.5);
-  z-index: 50;
-  cursor: pointer;
+/* Ensure the backdrop doesn't interfere with modal content */
+.fixed.inset-0 > .bg-black\/50 {
+  position: fixed !important;
+  z-index: -1 !important;
 }
 
 /* Enhance z-index handling */

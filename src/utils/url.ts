@@ -4,7 +4,7 @@
 
 /**
  * Genera una URL SEO-friendly para una publicación
- * @param id - ID de la publicación (MongoDB _id, puede seguir siendo necesario para lookup)
+ * @param id - ID de la publicación (MongoDB _id, no visible en URL)
  * @param title - Título de la publicación
  * @param publicationSlug - Slug único y SEO-friendly de la publicación (preferido sobre el ID en la URL visible)
  * @param category - Categoría de la publicación (opcional)
@@ -14,16 +14,16 @@
  * @returns URL SEO-friendly
  */
 export function generateSeoUrl(
-  id: string, // Keep ID for potential lookup / modal param
+  id: string, // ID is only for data reference, not for URL display
   title: string,
-  publicationSlug?: string, // Add dedicated slug parameter
+  publicationSlug?: string, // Dedicated slug parameter
   category?: string,
   subcategory?: string,
   subsubcategory?: string,
-  includeTitleInSlug: boolean = true // Renamed parameter for clarity
+  includeTitleInSlug: boolean = true // Whether to include title in the slug
 ): string {
-  if (!id && !publicationSlug) {
-    console.warn('generateSeoUrl: ID and publicationSlug are both missing');
+  if (!title && !publicationSlug) {
+    console.warn('generateSeoUrl: title and publicationSlug are both missing');
     return '/'; // Return root or a default path
   }
 
@@ -31,19 +31,7 @@ export function generateSeoUrl(
   const titleSlug = slugify(title);
   
   // Use the provided publication slug if available, otherwise use title slug
-  let effectiveSlug = '';
-  
-  if (publicationSlug) {
-    // Use the provided slug
-    effectiveSlug = slugify(publicationSlug);
-    // No need to append title, as publicationSlug should already be SEO-friendly
-    includeTitleInSlug = false;
-  } else {
-    // Generate slug from title
-    effectiveSlug = titleSlug;
-    // Since we're using the title as the slug, don't append it again
-    includeTitleInSlug = false;
-  }
+  const effectiveSlug = publicationSlug ? slugify(publicationSlug) : titleSlug;
 
   // Normalize category parts
   const normalizedCategory = category ? slugify(category) : '';
@@ -64,9 +52,8 @@ export function generateSeoUrl(
       }
     }
     
-    // Just add the effective slug without appending the title again
+    // Add the slug at the end
     url += `/${effectiveSlug}`;
-
   } else {
     // Fallback if no category: /publicaciones/effective-slug
     url = `/publicaciones/${effectiveSlug}`;

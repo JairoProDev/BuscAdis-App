@@ -367,7 +367,7 @@ export default function BuscadorPage() {
     const subcategorySlug = publication.subcategorySlug || publication.subcategory || searchState.subcategory;
     const subSubcategorySlug = publication.subSubcategorySlug || publication.subsubcategory || searchState.subsubcategory;
 
-    // Generate the correct SEO URL using the publication slug
+    // Generate the clean SEO URL with all category levels and title
     const seoUrl = generateSeoUrl(
       publication.id,
       publication.title || '',
@@ -380,21 +380,8 @@ export default function BuscadorPage() {
     );
     console.log("Generated SEO URL:", seoUrl);
 
-    // Update browser URL to the SEO path with the modal query param
-    const urlWithModalParam = new URL(seoUrl, window.location.origin);
-    // Include category, subcategory and subsubcategory as query params for the API
-    urlWithModalParam.searchParams.set('modal', id);
-    urlWithModalParam.searchParams.set('category', categorySlug);
-    if (subcategorySlug) {
-      urlWithModalParam.searchParams.set('subcategory', subcategorySlug);
-    }
-    if (subSubcategorySlug) {
-      urlWithModalParam.searchParams.set('subsubcategory', subSubcategorySlug);
-    }
-    
-    const newUrl = urlWithModalParam.toString();
-    console.log("Pushing new URL with modal param:", newUrl);
-    window.history.pushState({ modalOpen: true, id }, '', newUrl);
+    // Update browser URL to the clean SEO path without any query parameters
+    window.history.pushState({ modalOpen: true, id }, '', seoUrl);
 
     // Update state to show the modal
     console.log("Setting selectedPublicationId:", id);
@@ -427,19 +414,19 @@ export default function BuscadorPage() {
     console.log("--- handleCloseModal called ---");
     setModalOpen(false);
     setSelectedPublicationId(null);
-    // Restore the previous full URL *without* the modal param
+    
+    // Restore the previous URL without any modal parameters
     if (currentFullUrl) {
-        const url = new URL(currentFullUrl);
-        url.searchParams.delete('modal'); // Remove modal param
-        const restoredUrl = url.pathname + url.search; // Keep other query params
-        console.log("Restoring URL to:", restoredUrl);
-        window.history.pushState(null, '', restoredUrl); // Use pushState to allow going back
-        setCurrentFullUrl(''); // Clear the stored URL
+      // Parse the URL to extract only the path portion without query parameters
+      const url = new URL(currentFullUrl);
+      const cleanPath = url.pathname;
+      console.log("Restoring URL to:", cleanPath);
+      window.history.pushState(null, '', cleanPath);
+      setCurrentFullUrl('');
     } else {
-        // Fallback: go back or clear modal param from current URL
-         const url = new URL(window.location.href);
-         url.searchParams.delete('modal');
-         window.history.pushState(null, '', url.pathname + url.search);
+      // If no previous URL, just remove any query parameters from current URL
+      const url = new URL(window.location.href);
+      window.history.pushState(null, '', url.pathname);
     }
   };
   

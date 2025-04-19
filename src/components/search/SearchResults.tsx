@@ -346,15 +346,20 @@ export default function SearchResults({
         console.log("--- Publication Data (Grid Item) ---", JSON.stringify(publication, null, 2));
     }
 
-    // Generar seoUrl para el enlace (Corrected arguments)
+    // Ensure we have the correct category levels
+    const categorySlug = publication.categorySlug || '';
+    const subcategorySlug = publication.subcategory || publication.subcategorySlug || '';
+    const subsubcategorySlug = publication.subsubcategory || publication.subSubcategorySlug || '';
+
+    // Generate SEO-friendly URL with all category levels
     const seoUrl = generateSeoUrl(
       publication.id,
       publication.title || '',
-      publication.slug, // Pass slug if available
-      publication.categorySlug || '',
-      publication.subcategory || undefined,
-      publication.subsubcategory || undefined,
-      !publication.slug // includeTitleInSlug: true if no specific slug, false otherwise
+      publication.slug,
+      categorySlug,
+      subcategorySlug,
+      subsubcategorySlug,
+      !publication.slug
     );
 
     // Formatear mensaje de WhatsApp
@@ -453,35 +458,31 @@ export default function SearchResults({
             {showInteractionButtons && (
               <div className="absolute top-2 right-2 flex gap-1 z-20">
                 <button
+                  className={`flex items-center justify-center px-3 py-1.5 rounded transition-all ${
+                    isLiked ? 'text-red-500 bg-red-100 dark:bg-red-900/20 border-red-200 dark:border-red-800/30' : 'text-slate-500 bg-slate-100 dark:bg-slate-800/50 dark:border-slate-700'
+                  }`}
                   onClick={(e) => {
-                    e.preventDefault();
                     e.stopPropagation();
+                    e.preventDefault();
                     toggleLike(publication.id);
                   }}
-                  className={`p-1.5 rounded-full ${isLiked ? 'bg-red-500' : 'bg-white/80 hover:bg-white'} shadow-sm backdrop-blur-sm transition-colors`}
                   aria-label={isLiked ? "Quitar me gusta" : "Me gusta"}
                 >
-                  {isLiked ? (
-                    <HeartSolid className="w-4 h-4 text-white" />
-                  ) : (
-                    <HeartOutline className="w-4 h-4 text-gray-700" />
-                  )}
+                  {isLiked ? <HeartSolid className="w-5 h-5" /> : <HeartOutline className="w-5 h-5" />}
                 </button>
                 
                 <button
+                  className={`flex items-center justify-center px-3 py-1.5 rounded transition-all ${
+                    isSaved ? 'text-blue-500 bg-blue-100 dark:bg-blue-900/20 border-blue-200 dark:border-blue-800/30' : 'text-slate-500 bg-slate-100 dark:bg-slate-800/50 dark:border-slate-700'
+                  }`}
                   onClick={(e) => {
-                    e.preventDefault();
                     e.stopPropagation();
+                    e.preventDefault();
                     toggleSave(publication.id);
                   }}
-                  className={`p-1.5 rounded-full ${isSaved ? 'bg-blue-500' : 'bg-white/80 hover:bg-white'} shadow-sm backdrop-blur-sm transition-colors`}
-                  aria-label={isSaved ? "Guardado" : "Guardar"}
+                  aria-label={isSaved ? "Quitar de guardados" : "Guardar publicación"}
                 >
-                  {isSaved ? (
-                    <BookmarkSolid className="w-4 h-4 text-white" />
-                  ) : (
-                    <BookmarkOutline className="w-4 h-4 text-gray-700" />
-                  )}
+                  {isSaved ? <BookmarkSolid className="w-5 h-5" /> : <BookmarkOutline className="w-5 h-5" />}
                 </button>
               </div>
             )}
@@ -571,15 +572,20 @@ export default function SearchResults({
         console.log("--- Publication Data (List Item) ---", JSON.stringify(publication, null, 2));
     }
 
-    // Generar seoUrl para el enlace (Corrected arguments)
+    // Ensure we have the correct category levels
+    const categorySlug = publication.categorySlug || '';
+    const subcategorySlug = publication.subcategory || publication.subcategorySlug || '';
+    const subsubcategorySlug = publication.subsubcategory || publication.subSubcategorySlug || '';
+
+    // Generate SEO-friendly URL with all category levels
     const seoUrl = generateSeoUrl(
       publication.id,
       publication.title || '',
-      publication.slug, // Pass slug if available
-      publication.categorySlug || '',
-      publication.subcategory || undefined,
-      publication.subsubcategory || undefined,
-      !publication.slug // includeTitleInSlug: true if no specific slug, false otherwise
+      publication.slug,
+      categorySlug,
+      subcategorySlug,
+      subsubcategorySlug,
+      !publication.slug
     );
 
     // Formatear mensaje de WhatsApp
@@ -754,35 +760,31 @@ export default function SearchResults({
               {showInteractionButtons && (
                 <div className="absolute top-2 right-2 flex gap-1 z-20">
                   <button
+                    className={`flex items-center justify-center px-3 py-1.5 rounded transition-all ${
+                      isLiked ? 'text-red-500 bg-red-100 dark:bg-red-900/20 border-red-200 dark:border-red-800/30' : 'text-slate-500 bg-slate-100 dark:bg-slate-800/50 dark:border-slate-700'
+                    }`}
                     onClick={(e) => {
-                      e.preventDefault();
                       e.stopPropagation();
+                      e.preventDefault();
                       toggleLike(publication.id);
                     }}
-                    className={`p-1.5 rounded-full ${isLiked ? 'bg-red-500' : 'bg-white/80 hover:bg-white'} shadow-sm backdrop-blur-sm transition-colors`}
                     aria-label={isLiked ? "Quitar me gusta" : "Me gusta"}
                   >
-                    {isLiked ? (
-                      <HeartSolid className="w-4 h-4 text-white" />
-                    ) : (
-                      <HeartOutline className="w-4 h-4 text-gray-700" />
-                    )}
+                    {isLiked ? <HeartSolid className="w-5 h-5" /> : <HeartOutline className="w-5 h-5" />}
                   </button>
                   
                   <button
+                    className={`flex items-center justify-center px-3 py-1.5 rounded transition-all ${
+                      isSaved ? 'text-blue-500 bg-blue-100 dark:bg-blue-900/20 border-blue-200 dark:border-blue-800/30' : 'text-slate-500 bg-slate-100 dark:bg-slate-800/50 dark:border-slate-700'
+                    }`}
                     onClick={(e) => {
-                      e.preventDefault();
                       e.stopPropagation();
+                      e.preventDefault();
                       toggleSave(publication.id);
                     }}
-                    className={`p-1.5 rounded-full ${isSaved ? 'bg-blue-500' : 'bg-white/80 hover:bg-white'} shadow-sm backdrop-blur-sm transition-colors`}
-                    aria-label={isSaved ? "Guardado" : "Guardar"}
+                    aria-label={isSaved ? "Quitar de guardados" : "Guardar publicación"}
                   >
-                    {isSaved ? (
-                      <BookmarkSolid className="w-4 h-4 text-white" />
-                    ) : (
-                      <BookmarkOutline className="w-4 h-4 text-gray-700" />
-                    )}
+                    {isSaved ? <BookmarkSolid className="w-5 h-5" /> : <BookmarkOutline className="w-5 h-5" />}
                   </button>
                 </div>
               )}
@@ -880,22 +882,16 @@ export default function SearchResults({
             {/* Toggle de vista cuadrícula/lista */}
             <div className="flex rounded-lg overflow-hidden shadow-md" role="group" aria-label="Cambiar vista">
               <button
-                className={`p-2 ${viewMode === 'grid' 
-                  ? 'bg-gradient-to-r from-teal-500 to-cyan-500 text-white' 
-                  : 'bg-slate-700 text-slate-300 hover:bg-slate-600'}`}
+                className={`p-2 rounded-lg ${viewMode === 'grid' ? 'bg-slate-200 dark:bg-slate-700' : 'bg-white hover:bg-slate-100 dark:bg-slate-800 dark:hover:bg-slate-700'}`}
                 onClick={() => handleChangeViewMode('grid')}
                 aria-label="Ver en cuadrícula"
-                aria-pressed={viewMode === 'grid' ? 'true' : 'false'}
               >
                 <Squares2X2Icon className="w-5 h-5" />
               </button>
               <button
-                className={`p-2 ${viewMode === 'list' 
-                  ? 'bg-gradient-to-r from-teal-500 to-cyan-500 text-white' 
-                  : 'bg-slate-700 text-slate-300 hover:bg-slate-600'}`}
+                className={`p-2 rounded-lg ${viewMode === 'list' ? 'bg-slate-200 dark:bg-slate-700' : 'bg-white hover:bg-slate-100 dark:bg-slate-800 dark:hover:bg-slate-700'}`}
                 onClick={() => handleChangeViewMode('list')}
                 aria-label="Ver en lista"
-                aria-pressed={viewMode === 'list' ? 'true' : 'false'}
               >
                 <ListBulletIcon className="w-5 h-5" />
               </button>

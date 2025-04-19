@@ -78,16 +78,13 @@ export default function PublicationModal({ publicationId, isOpen, onClose, initi
   const fetchPublicationData = useCallback(async () => {
     if (!publicationId) return;
       
-      try {
-        setLoading(true);
-        setError('');
+    try {
+      setLoading(true);
+      setError('');
         
-      // Parse URL to get category information if available
+      // Parse URL to get category information from URL path segments
       const url = window.location.href;
-      const urlParts = url.split('/');
-      
-      // Extract category, subcategory, and subsubcategory from URL if possible
-      let category, subcategory, subsubcategory;
+      const urlParts = url.split('/').filter(part => part);
       
       // Define valid categories
       const validCategories = [
@@ -95,31 +92,31 @@ export default function PublicationModal({ publicationId, isOpen, onClose, initi
         'productos', 'negocios', 'comunidad', 'eventos'
       ];
       
-      // Improved URL parsing logic
-      for (let i = 0; i < urlParts.length; i++) {
-        if (validCategories.includes(urlParts[i])) {
-          category = urlParts[i];
+      // Extract category, subcategory, and subsubcategory from URL path
+      let category, subcategory, subsubcategory;
+      
+      // Find where the category starts in the URL path
+      const categoryIndex = urlParts.findIndex(part => validCategories.includes(part));
+      
+      if (categoryIndex !== -1) {
+        // Get category
+        category = urlParts[categoryIndex];
+        
+        // Check if there's a subcategory after the category
+        if (categoryIndex + 1 < urlParts.length) {
+          subcategory = urlParts[categoryIndex + 1];
           
-          // Check for subcategory in the next segment
-          if (i + 1 < urlParts.length && 
-              urlParts[i+1] && 
-              !urlParts[i+1].includes(cleanId) && 
-              !validCategories.includes(urlParts[i+1])) {
-            subcategory = urlParts[i+1];
-            
-            // Check for subsubcategory in the next segment
-            if (i + 2 < urlParts.length && 
-                urlParts[i+2] && 
-                !urlParts[i+2].includes(cleanId) && 
-                !validCategories.includes(urlParts[i+2])) {
-              subsubcategory = urlParts[i+2];
+          // Check if there's a subsubcategory after the subcategory
+          if (categoryIndex + 2 < urlParts.length) {
+            // The last part might be the title-slug, so we need to check if there's another part after it
+            if (categoryIndex + 3 < urlParts.length) {
+              subsubcategory = urlParts[categoryIndex + 2];
             }
           }
-          break;
         }
       }
       
-      console.log("Fetching publication with params:", { 
+      console.log("Fetching publication with params extracted from URL path:", { 
         id: cleanId, 
         category, 
         subcategory, 
@@ -266,7 +263,7 @@ export default function PublicationModal({ publicationId, isOpen, onClose, initi
       subsubcategorySlug
     });
     
-    // Generar URL con todos los parámetros necesarios
+    // Generar URL con todos los parámetros necesarios, sin incluir query params
     const url = generateSeoUrl(
       publication.id,
       publication.title,
@@ -386,7 +383,7 @@ export default function PublicationModal({ publicationId, isOpen, onClose, initi
   // Renderizar contenido de la publicación
   const renderPublicationContent = (pub: PublicationWithContact | null) => {
     if (!pub) {
-  return (
+      return (
         <div className="p-8 text-center text-red-500">
           <p>No se encontraron datos de la publicación.</p>
         </div>
@@ -441,7 +438,7 @@ export default function PublicationModal({ publicationId, isOpen, onClose, initi
             {loading && (
               <div className="absolute top-2 right-2 z-10">
                 <LoadingSpinner size="sm" color="primary" />
-                </div>
+              </div>
             )}
             
             <div className="flex-grow flex items-center justify-center">
@@ -460,7 +457,7 @@ export default function PublicationModal({ publicationId, isOpen, onClose, initi
                 {pub.images && pub.images.length > 1 && (
                   <div className="absolute bottom-4 left-0 right-0 flex justify-center space-x-2">
                     {pub.images.slice(0, 5).map((_, idx) => (
-                  <button 
+                      <button 
                         key={idx} 
                         className={`w-2 h-2 rounded-full ${idx === 0 ? 'bg-blue-500' : 'bg-gray-300 dark:bg-gray-600'}`}
                         aria-label={`Ir a imagen ${idx + 1}`}
@@ -469,12 +466,12 @@ export default function PublicationModal({ publicationId, isOpen, onClose, initi
                   </div>
                 )}
               </div>
-                </div>
+            </div>
             
             {/* BuscaDis branding in the left column bottom */}
             <div className="bg-gradient-to-r from-gray-50 to-gray-100 dark:from-slate-900/50 dark:to-slate-800/50 py-4 px-4 text-center border-t border-gray-100 dark:border-slate-700/50">
               <div className="flex items-center justify-center">
-                          <Image
+                <Image
                   src="/logo.png" 
                   alt="BuscaDis" 
                   width={80} 
@@ -486,11 +483,11 @@ export default function PublicationModal({ publicationId, isOpen, onClose, initi
                 </span>
               </div>
             </div>
-                        </div>
-                      ) : (
+          </div>
+        ) : (
           // Placeholder when no images are available
           <div className="bg-gray-50 dark:bg-slate-800 flex flex-col items-center justify-center p-6 border-r border-gray-100 dark:border-slate-700/50 h-auto">
-                          <div className="p-8 text-center">
+            <div className="p-8 text-center">
               <PhotoIcon className="h-16 w-16 mx-auto text-gray-400 dark:text-slate-500 mb-4" />
               <p className="text-gray-500 dark:text-slate-400 mb-2">Sin imágenes disponibles</p>
               <p className="text-sm text-gray-400 dark:text-slate-500">Este anuncio no contiene imágenes</p>
@@ -510,35 +507,35 @@ export default function PublicationModal({ publicationId, isOpen, onClose, initi
                   Tu marketplace de confianza
                 </span>
               </div>
-                          </div>
-                        </div>
-                      )}
-                    
-                    {/* Columna derecha - Información */}
+            </div>
+          </div>
+        )}
+        
+        {/* Columna derecha - Información */}
         <div className={`p-6 dark:bg-slate-800 dark:text-white overflow-y-auto max-h-[80vh] md:max-h-[600px] flex flex-col ${!hasImages ? 'md:col-span-2' : ''}`}>
           <div className="flex-grow">
             <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-white mb-3 leading-tight">{publicationTitle}</h1>
-                        
-                        <div className="flex flex-wrap justify-between items-center gap-2 mb-4">
+            
+            <div className="flex flex-wrap justify-between items-center gap-2 mb-4">
               <div className="text-xl font-bold text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-900/30 px-3 py-1 rounded-lg">
                 {formatPrice(publicationPrice, publicationCurrency)}
-                          </div>
-                          
+              </div>
+              
               <div className="flex items-center text-gray-500 dark:text-slate-400 text-sm bg-gray-100 dark:bg-slate-700 px-2 py-1 rounded-lg">
-                            <CalendarIcon className="w-4 h-4 mr-1" />
+                <CalendarIcon className="w-4 h-4 mr-1" />
                 <span>{formatDate(pub.createdAt)}</span>
-                          </div>
-                        </div>
-                        
+              </div>
+            </div>
+            
             <div className="flex items-center text-gray-600 dark:text-slate-300 text-sm mb-4 bg-gray-100 dark:bg-slate-700 px-2 py-1 rounded-lg inline-block">
               <MapPinIcon className="w-4 h-4 mr-1 flex-shrink-0" />
-                          <span>
+              <span>
                 {typeof pub.location === 'string' 
                   ? pub.location 
                   : pub.location?.city || 'Ubicación no especificada'}
-                          </span>
-                        </div>
-                        
+              </span>
+            </div>
+            
             <div className="mb-6 bg-gray-50 dark:bg-slate-700/50 p-4 rounded-lg">
               <h2 className="text-lg font-semibold text-gray-800 dark:text-white mb-2 flex items-center">
                 Descripción
@@ -548,23 +545,23 @@ export default function PublicationModal({ publicationId, isOpen, onClose, initi
                 className={`text-gray-600 dark:text-slate-300 whitespace-pre-line ${isExpanded ? '' : 'line-clamp-4'}`}
               >
                 {publicationDesc}
-                          </div>
+              </div>
               {publicationDesc && publicationDesc.length > 200 && (
-                            <button 
+                <button 
                   className="text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 text-sm mt-2 font-medium flex items-center"
-                              onClick={toggleExpanded}
-                            >
-                              {isExpanded ? 'Ver menos' : 'Ver más'}
+                  onClick={toggleExpanded}
+                >
+                  {isExpanded ? 'Ver menos' : 'Ver más'}
                   <svg xmlns="http://www.w3.org/2000/svg" className={`h-4 w-4 ml-1 transition-transform ${isExpanded ? 'rotate-180' : ''}`} fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
                   </svg>
-                            </button>
-                          )}
+                </button>
+              )}
             </div>
-                        </div>
-                        
+          </div>
+          
           <div className="mt-auto space-y-3">
-                          {/* Contacto */}
+            {/* Contacto */}
             <motion.a 
               href={`tel:${pub.contactPhone || pub.contact?.phone || ''}`}
               className="flex items-center justify-center w-full bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white py-3 px-4 rounded-lg transition-all shadow-md"
@@ -578,8 +575,8 @@ export default function PublicationModal({ publicationId, isOpen, onClose, initi
             {/* WhatsApp with explicit SVG icon */}
             <motion.a 
               href={`https://wa.me/${(pub.contactPhone || pub.contact?.phone || '').replace(/[^0-9]/g, '')}?text=${formatWhatsAppMessage()}`}
-                            target="_blank" 
-                            rel="noopener noreferrer"
+              target="_blank" 
+              rel="noopener noreferrer"
               className="flex items-center justify-center w-full bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white py-3 px-4 rounded-lg transition-all shadow-md"
               whileHover={{ scale: 1.02, boxShadow: "0px 4px 12px rgba(0, 0, 0, 0.15)" }}
               whileTap={{ scale: 0.98 }}
@@ -590,8 +587,8 @@ export default function PublicationModal({ publicationId, isOpen, onClose, initi
               </svg>
               <span className="font-medium">WhatsApp</span>
             </motion.a>
-                          
-                          {/* Botones adicionales */}
+            
+            {/* Botones adicionales */}
             <div className="grid grid-cols-2 gap-3 mt-2">
               <motion.button
                 whileHover={{ scale: 1.02, boxShadow: "0px 4px 8px rgba(0, 0, 0, 0.1)" }}
@@ -601,8 +598,8 @@ export default function PublicationModal({ publicationId, isOpen, onClose, initi
                   handleViewFullPublication();
                 }}
                 className="flex items-center justify-center bg-gray-100 hover:bg-gray-200 dark:bg-slate-700 dark:hover:bg-slate-600 text-gray-800 dark:text-white py-3 px-4 rounded-lg transition-all shadow-md"
-                            >
-                              <ArrowTopRightOnSquareIcon className="w-5 h-5 mr-2" />
+              >
+                <ArrowTopRightOnSquareIcon className="w-5 h-5 mr-2" />
                 <span className="font-medium">Ver completo</span>
               </motion.button>
               
@@ -614,11 +611,11 @@ export default function PublicationModal({ publicationId, isOpen, onClose, initi
                   handleShare();
                 }}
                 className="flex items-center justify-center bg-gray-100 hover:bg-gray-200 dark:bg-slate-700 dark:hover:bg-slate-600 text-gray-800 dark:text-white py-3 px-4 rounded-lg transition-all shadow-md"
-                            >
-                              <ShareIcon className="w-5 h-5 mr-2" />
+              >
+                <ShareIcon className="w-5 h-5 mr-2" />
                 <span className="font-medium">Compartir</span>
               </motion.button>
-                          </div>
+            </div>
 
             {/* Botón de exportar como imagen */}
             <motion.button
@@ -706,7 +703,7 @@ export default function PublicationModal({ publicationId, isOpen, onClose, initi
                   <path fillRule="evenodd" d="M12 2C6.477 2 2 6.477 2 12c0 1.593.371 3.097 1.031 4.438l-1.002 3.666 3.736-.982A9.962 9.962 0 0012 22c5.523 0 10-4.477 10-10S17.523 2 12 2zm0 18c-1.49 0-2.946-.38-4.222-1.089l-.3-.18-3.126.815.834-3.05-.2-.32A7.957 7.957 0 014 12c0-4.411 3.589-8 8-8s8 3.589 8 8-3.589 8-8 8z" clipRule="evenodd" />
                 </svg>
               </motion.button>
-                        </div>
+            </div>
             
             {/* Publication ID information */}
             <div className="text-center text-xs text-gray-500 dark:text-slate-400 mt-2">
@@ -716,10 +713,10 @@ export default function PublicationModal({ publicationId, isOpen, onClose, initi
                   {new Date().toLocaleDateString()}
                 </span>
               </span>
-                      </div>
-                    </div>
-                  </div>
-                </div>
+            </div>
+          </div>
+        </div>
+      </div>
     );
   };
 
@@ -741,14 +738,9 @@ export default function PublicationModal({ publicationId, isOpen, onClose, initi
             }
           }}
         >
-          {/* Backdrop with lighter opacity */}
+          {/* Backdrop with lighter opacity - no longer has a click handler */}
           <div 
             className="fixed inset-0 bg-black/50" 
-            onClick={(e) => {
-              // Stop propagation here to ensure clicks on the backdrop are handled only here
-              e.stopPropagation();
-              handleCloseModal();
-            }}
             aria-hidden="true"
           />
           
@@ -761,10 +753,7 @@ export default function PublicationModal({ publicationId, isOpen, onClose, initi
             transition={{ type: "spring", damping: 30, stiffness: 350 }}
             className="publication-modal bg-white dark:bg-slate-900 rounded-2xl overflow-hidden relative z-60 w-full max-w-4xl mx-4 shadow-xl max-h-[90vh]"
             id="publication-modal"
-            onClick={(e) => {
-              // Ensure clicks inside the modal don't bubble up
-              e.stopPropagation();
-            }}
+            onClick={(e) => e.stopPropagation()}
             style={{ cursor: 'auto' }}
           >
             {/* Close button with improved positioning and appearance */}
@@ -791,7 +780,7 @@ export default function PublicationModal({ publicationId, isOpen, onClose, initi
                 >
                   Intentar nuevamente
                 </button>
-            </div>
+              </div>
             ) : (
               renderPublicationContent(publication)
             )}
