@@ -456,10 +456,12 @@ export default function SearchResults({
             
             {/* Botones de interacción (like/save) */}
             {showInteractionButtons && (
-              <div className="absolute top-2 right-2 flex gap-1 z-20">
+              <div className="absolute top-2 right-2 flex gap-2 z-20">
                 <button
-                  className={`flex items-center justify-center px-3 py-1.5 rounded transition-all ${
-                    isLiked ? 'text-red-500 bg-red-100 dark:bg-red-900/20 border-red-200 dark:border-red-800/30' : 'text-slate-500 bg-slate-100 dark:bg-slate-800/50 dark:border-slate-700'
+                  className={`flex items-center justify-center transition-all rounded-full w-8 h-8 ${
+                    isLiked
+                      ? "bg-red-500 text-white"
+                      : "text-white border border-transparent hover:border-white"
                   }`}
                   onClick={(e) => {
                     e.stopPropagation();
@@ -468,12 +470,18 @@ export default function SearchResults({
                   }}
                   aria-label={isLiked ? "Quitar me gusta" : "Me gusta"}
                 >
-                  {isLiked ? <HeartSolid className="w-5 h-5" /> : <HeartOutline className="w-5 h-5" />}
+                  {isLiked ? (
+                    <HeartSolid className="w-5 h-5" />
+                  ) : (
+                    <HeartOutline className="w-5 h-5" />
+                  )}
                 </button>
-                
+
                 <button
-                  className={`flex items-center justify-center px-3 py-1.5 rounded transition-all ${
-                    isSaved ? 'text-blue-500 bg-blue-100 dark:bg-blue-900/20 border-blue-200 dark:border-blue-800/30' : 'text-slate-500 bg-slate-100 dark:bg-slate-800/50 dark:border-slate-700'
+                  className={`flex items-center justify-center transition-all rounded-full w-8 h-8 ${
+                    isSaved
+                      ? "bg-blue-500 text-white"
+                      : "text-white border border-transparent hover:border-white"
                   }`}
                   onClick={(e) => {
                     e.stopPropagation();
@@ -482,7 +490,11 @@ export default function SearchResults({
                   }}
                   aria-label={isSaved ? "Quitar de guardados" : "Guardar publicación"}
                 >
-                  {isSaved ? <BookmarkSolid className="w-5 h-5" /> : <BookmarkOutline className="w-5 h-5" />}
+                  {isSaved ? (
+                    <BookmarkSolid className="w-5 h-5" />
+                  ) : (
+                    <BookmarkOutline className="w-5 h-5" />
+                  )}
                 </button>
               </div>
             )}
