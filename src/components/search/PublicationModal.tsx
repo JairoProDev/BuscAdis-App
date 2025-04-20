@@ -8,10 +8,8 @@ import {
   MapPinIcon,
   CalendarIcon,
   PhoneIcon,
-  PhotoIcon,
   ArrowDownTrayIcon,
-  CheckCircleIcon,
-  CameraIcon
+  CheckCircleIcon
 } from '@heroicons/react/24/outline';
 import { PublicationsService } from '@/services/publications.service';
 import { formatDate } from '@/utils/date';
@@ -505,10 +503,10 @@ export default function PublicationModal({ publicationId, isOpen, onClose, initi
     const hasMultipleNumbers = contactNumbers.length > 1;
 
     return (
-      <div ref={exportRef} className="grid grid-cols-1 md:grid-cols-2 h-full">
-        {/* Columna izquierda - Imágenes (mostrar solo si hay imágenes) */}
-        {hasImages ? (
-          <div className="bg-gray-50 dark:bg-slate-900 relative group flex flex-col justify-between">
+      <div ref={exportRef} className="grid grid-cols-1 md:grid-cols-1 h-full">
+        {/* Solo mostrar la columna de imágenes cuando realmente hay imágenes disponibles */}
+        {hasImages && (
+          <div className="bg-gray-50 dark:bg-slate-900 relative group flex flex-col justify-between md:border-r md:border-gray-200 dark:md:border-slate-700">
             {/* Badge premium */}
             {pub.premium && (
               <div className="absolute top-3 left-3 z-10 bg-gradient-to-r from-amber-500 to-yellow-500 text-white text-xs font-bold px-3 py-1 rounded-full shadow-lg flex items-center">
@@ -527,7 +525,7 @@ export default function PublicationModal({ publicationId, isOpen, onClose, initi
             )}
             
             <div className="flex-grow flex items-center justify-center">
-              <div className="relative h-64 sm:h-80 md:h-[400px] w-full overflow-hidden">
+              <div className="relative h-56 sm:h-64 md:h-[320px] w-full overflow-hidden">
                 <Image
                   src={imageUrl}
                   alt={publicationTitle}
@@ -540,7 +538,7 @@ export default function PublicationModal({ publicationId, isOpen, onClose, initi
                 
                 {/* Botones de navegación para más imágenes */}
                 {pub.images && pub.images.length > 1 && (
-                  <div className="absolute bottom-4 left-0 right-0 flex justify-center space-x-2">
+                  <div className="absolute bottom-2 left-0 right-0 flex justify-center space-x-2">
                     {pub.images.slice(0, 5).map((_, idx) => (
                       <button 
                         key={idx} 
@@ -569,46 +567,15 @@ export default function PublicationModal({ publicationId, isOpen, onClose, initi
               </div>
             </div>
           </div>
-        ) : (
-          // Placeholder when no images are available
-          <div className="bg-gray-50 dark:bg-slate-800 flex flex-col items-center justify-center p-6 border-r border-gray-100 dark:border-slate-700/50 h-auto">
-            <div className="p-8 text-center">
-              <Image
-                src={defaultImage}
-                alt={publicationTitle}
-                width={200}
-                height={200}
-                className="mx-auto mb-4 object-contain"
-              />
-              <p className="text-gray-500 dark:text-slate-400 mb-2">Sin imágenes disponibles</p>
-              <p className="text-sm text-gray-400 dark:text-slate-500">Se muestra imagen por defecto</p>
-            </div>
-            
-            {/* BuscaDis branding when no images */}
-            <div className="mt-auto bg-gradient-to-r from-gray-50 to-gray-100 dark:from-slate-900/50 dark:to-slate-800/50 py-4 px-4 text-center border-t border-gray-100 dark:border-slate-700/50 w-full">
-              <div className="flex items-center justify-center">
-                <Image 
-                  src="/logo.png" 
-                  alt="BuscaDis" 
-                  width={80} 
-                  height={20} 
-                  className="mr-2"
-                />
-                <span className="text-sm text-gray-500 dark:text-slate-400 font-medium">
-                  En Buscadis: Lo encontramos por ti😉
-                </span>
-              </div>
-            </div>
-          </div>
         )}
         
-        {/* Columna derecha - Información */}
-        <div className={`p-6 dark:bg-slate-800 dark:text-white overflow-y-auto max-h-[80vh] md:max-h-[600px] flex flex-col ${!hasImages ? 'md:col-span-2' : ''}`}>
+        {/* Columna de información - Ocupa todo el ancho cuando no hay imágenes */}
+        <div className={`p-4 dark:bg-slate-800 dark:text-white overflow-y-auto md:max-h-[500px] flex flex-col ${hasImages ? 'md:col-span-1' : 'md:col-span-1'}`}>
           <div className="flex-grow">
-            <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-white mb-3 leading-tight">{publicationTitle}</h1>
+            <h1 className="text-xl sm:text-2xl font-bold text-gray-900 dark:text-white mb-2 leading-tight">{publicationTitle}</h1>
             
-            <div className="flex flex-wrap justify-between items-center gap-2 mb-4">
-              <div className="text-xl font-bold text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-900/30 px-3 py-1 rounded-lg">
+            <div className="flex flex-wrap justify-between items-center gap-2 mb-3">
+              <div className="text-lg font-bold text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-900/30 px-3 py-1 rounded-lg">
                 {formatPrice(publicationPrice, publicationCurrency)}
               </div>
               
@@ -618,7 +585,7 @@ export default function PublicationModal({ publicationId, isOpen, onClose, initi
               </div>
             </div>
             
-            <div className="flex items-center text-gray-600 dark:text-slate-300 text-sm mb-4 bg-gray-100 dark:bg-slate-700 px-2 py-1 rounded-lg inline-block">
+            <div className="flex items-center text-gray-600 dark:text-slate-300 text-sm mb-3 bg-gray-100 dark:bg-slate-700 px-2 py-1 rounded-lg inline-block">
               <MapPinIcon className="w-4 h-4 mr-1 flex-shrink-0" />
               <span>
                 {typeof pub.location === 'string' 
@@ -627,23 +594,23 @@ export default function PublicationModal({ publicationId, isOpen, onClose, initi
               </span>
             </div>
             
-            <div className="mb-6 bg-gray-50 dark:bg-slate-700/50 p-4 rounded-lg">
-              <h2 className="text-lg font-semibold text-gray-800 dark:text-white mb-2 flex items-center">
+            <div className="mb-4 bg-gray-50 dark:bg-slate-700/50 p-3 rounded-lg">
+              <h2 className="text-lg font-semibold text-gray-800 dark:text-white mb-1 flex items-center">
                 Descripción
                 {loading && <LoadingSpinner size="sm" className="ml-2 opacity-70" />}
               </h2>
               <div 
-                className={`text-gray-600 dark:text-slate-300 whitespace-pre-line ${isExpanded ? '' : 'line-clamp-4'}`}
+                className={`text-gray-600 dark:text-slate-300 whitespace-pre-line text-sm ${isExpanded ? '' : 'line-clamp-3'}`}
               >
                 {publicationDesc}
               </div>
-              {publicationDesc && publicationDesc.length > 200 && (
+              {publicationDesc && publicationDesc.length > 150 && (
                 <button 
-                  className="text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 text-sm mt-2 font-medium flex items-center"
+                  className="text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 text-xs mt-1 font-medium flex items-center"
                   onClick={toggleExpanded}
                 >
                   {isExpanded ? 'Ver menos' : 'Ver más'}
-                  <svg xmlns="http://www.w3.org/2000/svg" className={`h-4 w-4 ml-1 transition-transform ${isExpanded ? 'rotate-180' : ''}`} fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <svg xmlns="http://www.w3.org/2000/svg" className={`h-3 w-3 ml-1 transition-transform ${isExpanded ? 'rotate-180' : ''}`} fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
                   </svg>
                 </button>
@@ -850,6 +817,11 @@ export default function PublicationModal({ publicationId, isOpen, onClose, initi
 
   if (!isOpen) return null;
 
+  // Determinar si hay imágenes para ajustar el tamaño del modal
+  const hasRealImages = publication?.images && 
+                      publication.images.length > 0 && 
+                      !publication.images.every(url => url.includes('placeholder'));
+
   return (
     <AnimatePresence>
       {isOpen && (
@@ -881,7 +853,7 @@ export default function PublicationModal({ publicationId, isOpen, onClose, initi
               animate={{ scale: 1, opacity: 1, y: 0 }}
               exit={{ scale: 0.98, opacity: 0, y: 10 }}
               transition={{ type: "spring", damping: 30, stiffness: 350 }}
-              className="publication-modal bg-white dark:bg-slate-900 rounded-2xl overflow-hidden relative z-60 w-full max-w-4xl mx-4 shadow-xl max-h-[90vh] pointer-events-auto"
+              className={`publication-modal bg-white dark:bg-slate-900 rounded-2xl overflow-hidden relative z-60 w-full ${hasRealImages ? 'max-w-4xl' : 'max-w-lg'} mx-4 shadow-xl max-h-[85vh] pointer-events-auto`}
               id="publication-modal"
               onClick={(e) => {
                 // Detener propagación para evitar que los clics dentro del modal lo cierren
@@ -929,18 +901,26 @@ export default function PublicationModal({ publicationId, isOpen, onClose, initi
 
 // Función para el componente de esqueleto de carga mejorado
 const SkeletonLoader = () => (
-  <div className="grid grid-cols-1 md:grid-cols-2 h-full w-full">
-    <div className="w-full bg-gray-200 h-64 md:h-[320px] flex items-center justify-center">
-      <CameraIcon className="h-20 w-20 text-gray-300" />
-    </div>
-    <div className="w-full p-6 space-y-4">
-      <div className="h-8 bg-gray-200 rounded-md w-3/4"></div>
-      <div className="h-6 bg-gray-200 rounded-md w-1/3"></div>
-      <div className="h-6 bg-gray-200 rounded-md w-1/2"></div>
-      <div className="space-y-2">
-        <div className="h-4 bg-gray-200 rounded-md w-full"></div>
-        <div className="h-4 bg-gray-200 rounded-md w-full"></div>
-        <div className="h-4 bg-gray-200 rounded-md w-2/3"></div>
+  <div className="p-6 w-full">
+    <div className="animate-pulse space-y-4">
+      <div className="h-7 bg-gray-200 dark:bg-gray-700 rounded-md w-3/4"></div>
+      <div className="flex justify-between items-center">
+        <div className="h-6 bg-gray-200 dark:bg-gray-700 rounded-md w-1/4"></div>
+        <div className="h-5 bg-gray-200 dark:bg-gray-700 rounded-md w-1/5"></div>
+      </div>
+      <div className="h-5 bg-gray-200 dark:bg-gray-700 rounded-md w-1/3"></div>
+      <div className="space-y-2 mt-4">
+        <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded-md w-full"></div>
+        <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded-md w-full"></div>
+        <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded-md w-3/4"></div>
+      </div>
+      <div className="space-y-3 mt-6">
+        <div className="h-10 bg-gray-200 dark:bg-gray-700 rounded-lg w-full"></div>
+        <div className="h-10 bg-gray-200 dark:bg-gray-700 rounded-lg w-full"></div>
+        <div className="grid grid-cols-2 gap-3">
+          <div className="h-10 bg-gray-200 dark:bg-gray-700 rounded-lg"></div>
+          <div className="h-10 bg-gray-200 dark:bg-gray-700 rounded-lg"></div>
+        </div>
       </div>
     </div>
   </div>
