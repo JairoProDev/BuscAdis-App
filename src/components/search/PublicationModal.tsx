@@ -26,6 +26,7 @@ import 'react-loading-skeleton/dist/skeleton.css';
 import { toast } from 'react-hot-toast';
 import { toPng } from 'html-to-image';
 import { getDefaultImageByCategory } from '@/utils/image-helpers';
+import PublicationModalStyles from './PublicationModalStyles';
 
 // Declarar tipo global para la caché de publicaciones
 declare global {
@@ -37,8 +38,10 @@ declare global {
 // Extender la interfaz Publication para incluir las propiedades de contacto
 interface PublicationWithContact extends Publication {
   contactPhone?: string;
+  contactPhones?: string[]; // Soporte para múltiples números de teléfono
   contact?: {
     phone?: string;
+    phones?: string[]; // Soporte para múltiples números de teléfono en el objeto contact
     email?: string;
     name?: string;
   };
@@ -397,7 +400,10 @@ export default function PublicationModal({ publicationId, isOpen, onClose, initi
     console.log('Rendering publication content:', {
       id: pub.id,
       title: pub.title,
-      isFallback: isFallback
+      isFallback: isFallback,
+      contactPhone: pub.contactPhone,
+      contact: pub.contact,
+      images: pub.images
     });
     
     // Ensure we have valid data
@@ -409,15 +415,94 @@ export default function PublicationModal({ publicationId, isOpen, onClose, initi
     const publicationCategory = pub.categorySlug || '';
     
     // Check if publication has images
-    const hasImages = pub.images && pub.images.length > 0;
+    const hasImages = pub.images && 
+                     pub.images.length > 0 && 
+                     !pub.images.every(url => url.includes('placeholder'));
     
     // Obtener imagen predeterminada según la categoría
     const defaultImage = getDefaultImageByCategory(publicationCategory);
     
-    // Use a safe image URL
+    // Use a safe image URL - asegurarse de usar la misma imagen que en la tarjeta de publicación
     const imageUrl = hasImages && pub.images && pub.images[0] 
       ? pub.images[0] 
       : defaultImage;
+
+    console.log('[PublicationModal] Image details:', {
+      hasImages,
+      categorySlug: publicationCategory,
+      defaultImage,
+      imageUrl,
+      originalImages: pub.images
+    });
+
+    // Preparar números de contacto (pueden ser múltiples)
+    const contactNumbers: string[] = [];
+    
+    // Agregar número principal si existe
+    if (pub.contactPhone && pub.contactPhone.trim()) {
+      contactNumbers.push(pub.contactPhone.trim());
+    }
+    
+    // Agregar números del arreglo contactPhones si existe
+    if (pub.contactPhones && Array.isArray(pub.contactPhones)) {
+      pub.contactPhones.forEach(phone => {
+        if (phone && phone.trim() && !contactNumbers.includes(phone.trim())) {
+          contactNumbers.push(phone.trim());
+        }
+      });
+    }
+    
+    // Agregar número del contacto si existe y es diferente
+    if (pub.contact?.phone && pub.contact.phone.trim() && 
+        !contactNumbers.includes(pub.contact.phone.trim())) {
+      contactNumbers.push(pub.contact.phone.trim());
+    }
+    
+    // Agregar números del arreglo contact.phones si existe
+    if (pub.contact?.phones && Array.isArray(pub.contact.phones)) {
+      pub.contact.phones.forEach(phone => {
+        if (phone && phone.trim() && !contactNumbers.includes(phone.trim())) {
+          contactNumbers.push(phone.trim());
+        }
+      });
+    }
+    
+    // Verificar si hay números extraídos de la descripción (ejemplo: 910629557)
+    if (publicationDesc) {
+      // Expresión regular más completa para detectar varios formatos de números peruanos
+      // Detecta: 910629557, 91 062 9557, 910-629-557, etc.
+      const phoneRegex = /(\b9\d[\s\-]?\d[\s\-]?\d[\s\-]?\d[\s\-]?\d[\s\-]?\d[\s\-]?\d[\s\-]?\d\b)|(\b\d[\s\-]?\d[\s\-]?\d[\s\-]?\d[\s\-]?\d[\s\-]?\d\b)/g;
+      
+      // Buscar en la descripción
+      const matches = publicationDesc.match(phoneRegex);
+      
+      // También buscar "razón Cel" o "teléfono" seguido de números
+      const contactPhraseRegex = /(razón|razon)\s+(cel|celular|telefono|teléfono|cel\.|telf\.|telf|tlf\.)[:\s]+([0-9\s\-]+)/gi;
+      const contactMatches = publicationDesc.matchAll(contactPhraseRegex);
+      
+      if (matches) {
+        matches.forEach(match => {
+          // Limpiar el número de espacios y guiones
+          const cleanNumber = match.replace(/[\s\-]/g, '');
+          if (cleanNumber.length >= 7 && !contactNumbers.includes(cleanNumber)) {
+            contactNumbers.push(cleanNumber);
+          }
+        });
+      }
+      
+      // Procesar coincidencias de frases con números
+      for (const contactMatch of Array.from(contactMatches || [])) {
+        if (contactMatch && contactMatch[3]) {
+          const cleanNumber = contactMatch[3].replace(/[\s\-]/g, '');
+          if (cleanNumber.length >= 7 && !contactNumbers.includes(cleanNumber)) {
+            contactNumbers.push(cleanNumber);
+          }
+        }
+      }
+    }
+    
+    // Si no hay números, usar un array vacío
+    const hasMultipleNumbers = contactNumbers.length > 1;
 
     return (
       <div ref={exportRef} className="grid grid-cols-1 md:grid-cols-2 h-full">
@@ -479,7 +564,7 @@ export default function PublicationModal({ publicationId, isOpen, onClose, initi
                   className="mr-2"
                 />
                 <span className="text-sm text-gray-500 dark:text-slate-400 font-medium">
-                  Tu marketplace de confianza
+                  En Buscadis: Lo encontramos por ti😉
                 </span>
               </div>
             </div>
@@ -488,9 +573,15 @@ export default function PublicationModal({ publicationId, isOpen, onClose, initi
           // Placeholder when no images are available
           <div className="bg-gray-50 dark:bg-slate-800 flex flex-col items-center justify-center p-6 border-r border-gray-100 dark:border-slate-700/50 h-auto">
             <div className="p-8 text-center">
-              <PhotoIcon className="h-16 w-16 mx-auto text-gray-400 dark:text-slate-500 mb-4" />
+              <Image
+                src={defaultImage}
+                alt={publicationTitle}
+                width={200}
+                height={200}
+                className="mx-auto mb-4 object-contain"
+              />
               <p className="text-gray-500 dark:text-slate-400 mb-2">Sin imágenes disponibles</p>
-              <p className="text-sm text-gray-400 dark:text-slate-500">Este anuncio no contiene imágenes</p>
+              <p className="text-sm text-gray-400 dark:text-slate-500">Se muestra imagen por defecto</p>
             </div>
             
             {/* BuscaDis branding when no images */}
@@ -504,7 +595,7 @@ export default function PublicationModal({ publicationId, isOpen, onClose, initi
                   className="mr-2"
                 />
                 <span className="text-sm text-gray-500 dark:text-slate-400 font-medium">
-                  Tu marketplace de confianza
+                  En Buscadis: Lo encontramos por ti😉
                 </span>
               </div>
             </div>
@@ -561,32 +652,69 @@ export default function PublicationModal({ publicationId, isOpen, onClose, initi
           </div>
           
           <div className="mt-auto space-y-3">
-            {/* Contacto */}
-            <motion.a 
-              href={`tel:${pub.contactPhone || pub.contact?.phone || ''}`}
-              className="flex items-center justify-center w-full bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white py-3 px-4 rounded-lg transition-all shadow-md"
-              whileHover={{ scale: 1.02, boxShadow: "0px 4px 12px rgba(0, 0, 0, 0.15)" }}
-              whileTap={{ scale: 0.98 }}
-            >
-              <PhoneIcon className="w-5 h-5 mr-2" />
-              <span className="font-medium">Llamar ahora</span>
-            </motion.a>
+            {/* Contacto - Si hay múltiples números, mostrarlos como opciones */}
+            {contactNumbers.length > 0 && (
+              <>
+                {contactNumbers.map((phoneNumber, index) => (
+                  <motion.a 
+                    key={`phone-${index}`}
+                    href={`tel:${phoneNumber}`}
+                    className={`flex items-center justify-center w-full ${
+                      hasMultipleNumbers && index === 0 
+                        ? 'bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800'
+                        : hasMultipleNumbers
+                        ? 'bg-gradient-to-r from-indigo-600 to-indigo-700 hover:from-indigo-700 hover:to-indigo-800' 
+                        : 'bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800'
+                    } text-white py-3 px-4 rounded-lg transition-all shadow-md`}
+                    whileHover={{ scale: 1.02, boxShadow: "0px 4px 12px rgba(0, 0, 0, 0.15)" }}
+                    whileTap={{ scale: 0.98 }}
+                  >
+                    <PhoneIcon className="w-5 h-5 mr-2" />
+                    <span className="font-medium">
+                      {hasMultipleNumbers ? `Llamar (Opción ${index + 1})` : 'Llamar ahora'}
+                    </span>
+                  </motion.a>
+                ))}
+              </>
+            )}
             
-            {/* WhatsApp with explicit SVG icon */}
-            <motion.a 
-              href={`https://wa.me/${(pub.contactPhone || pub.contact?.phone || '').replace(/[^0-9]/g, '')}?text=${formatWhatsAppMessage()}`}
-              target="_blank" 
-              rel="noopener noreferrer"
-              className="flex items-center justify-center w-full bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white py-3 px-4 rounded-lg transition-all shadow-md"
-              whileHover={{ scale: 1.02, boxShadow: "0px 4px 12px rgba(0, 0, 0, 0.15)" }}
-              whileTap={{ scale: 0.98 }}
-            >
-              <svg className="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 24 24">
-                <path fillRule="evenodd" d="M17.415 14.382c-.298-.149-1.759-.867-2.031-.967-.272-.099-.47-.148-.669.15-.198.296-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.019-.458.13-.606.134-.133.297-.347.446-.52.149-.174.198-.298.297-.497.1-.198.05-.371-.025-.52-.074-.149-.669-1.612-.916-2.207-.242-.579-.486-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.064 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.57-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z" clipRule="evenodd" />
-                <path fillRule="evenodd" d="M12 2C6.477 2 2 6.477 2 12c0 1.593.371 3.097 1.031 4.438l-1.002 3.666 3.736-.982A9.962 9.962 0 0012 22c5.523 0 10-4.477 10-10S17.523 2 12 2zm0 18c-1.49 0-2.946-.38-4.222-1.089l-.3-.18-3.126.815.834-3.05-.2-.32A7.957 7.957 0 014 12c0-4.411 3.589-8 8-8s8 3.589 8 8-3.589 8-8 8z" clipRule="evenodd" />
-              </svg>
-              <span className="font-medium">WhatsApp</span>
-            </motion.a>
+            {/* WhatsApp - Si hay múltiples números, mostrarlos como opciones */}
+            {contactNumbers.length > 0 && (
+              <>
+                {contactNumbers.map((phoneNumber, index) => (
+                  <motion.a 
+                    key={`whatsapp-${index}`}
+                    href={`https://wa.me/${phoneNumber.replace(/[^0-9]/g, '')}?text=${formatWhatsAppMessage()}`}
+                    target="_blank" 
+                    rel="noopener noreferrer"
+                    className={`flex items-center justify-center w-full ${
+                      hasMultipleNumbers && index === 0 
+                        ? 'bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700'
+                        : hasMultipleNumbers
+                        ? 'bg-gradient-to-r from-emerald-500 to-emerald-600 hover:from-emerald-600 hover:to-emerald-700' 
+                        : 'bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700'
+                    } text-white py-3 px-4 rounded-lg transition-all shadow-md`}
+                    whileHover={{ scale: 1.02, boxShadow: "0px 4px 12px rgba(0, 0, 0, 0.15)" }}
+                    whileTap={{ scale: 0.98 }}
+                  >
+                    <svg className="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 24 24">
+                      <path fillRule="evenodd" d="M17.415 14.382c-.298-.149-1.759-.867-2.031-.967-.272-.099-.47-.148-.669.15-.198.296-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.019-.458.13-.606.134-.133.297-.347.446-.52.149-.174.198-.298.297-.497.1-.198.05-.371-.025-.52-.074-.149-.669-1.612-.916-2.207-.242-.579-.486-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.064 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.57-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z" clipRule="evenodd" />
+                      <path fillRule="evenodd" d="M12 2C6.477 2 2 6.477 2 12c0 1.593.371 3.097 1.031 4.438l-1.002 3.666 3.736-.982A9.962 9.962 0 0012 22c5.523 0 10-4.477 10-10S17.523 2 12 2zm0 18c-1.49 0-2.946-.38-4.222-1.089l-.3-.18-3.126.815.834-3.05-.2-.32A7.957 7.957 0 014 12c0-4.411 3.589-8 8-8s8 3.589 8 8-3.589 8-8 8z" clipRule="evenodd" />
+                    </svg>
+                    <span className="font-medium">
+                      {hasMultipleNumbers ? `WhatsApp (Opción ${index + 1})` : 'WhatsApp'}
+                    </span>
+                  </motion.a>
+                ))}
+              </>
+            )}
+            
+            {/* Mostrar mensaje si no hay números de contacto */}
+            {contactNumbers.length === 0 && (
+              <div className="bg-yellow-50 dark:bg-yellow-900/30 text-yellow-800 dark:text-yellow-200 p-3 rounded-lg text-center text-sm">
+                No hay información de contacto disponible para esta publicación.
+              </div>
+            )}
             
             {/* Botones adicionales */}
             <div className="grid grid-cols-2 gap-3 mt-2">
@@ -725,67 +853,75 @@ export default function PublicationModal({ publicationId, isOpen, onClose, initi
   return (
     <AnimatePresence>
       {isOpen && (
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          exit={{ opacity: 0 }}
-          transition={{ duration: 0.2 }}
-          className="fixed inset-0 z-50 flex items-center justify-center overflow-hidden"
-          onClick={(e) => {
-            // Only close if the click was directly on this container
-            if (e.target === e.currentTarget) {
-              handleCloseModal();
-            }
-          }}
-        >
-          {/* Backdrop with lighter opacity - no longer has a click handler */}
-          <div 
-            className="fixed inset-0 bg-black/50" 
-            aria-hidden="true"
-          />
-          
-          {/* Modal container with improved animation and styles */}
+        <>
+          <PublicationModalStyles />
           <motion.div
-            ref={modalRef}
-            initial={{ scale: 0.95, opacity: 0, y: 20 }}
-            animate={{ scale: 1, opacity: 1, y: 0 }}
-            exit={{ scale: 0.98, opacity: 0, y: 10 }}
-            transition={{ type: "spring", damping: 30, stiffness: 350 }}
-            className="publication-modal bg-white dark:bg-slate-900 rounded-2xl overflow-hidden relative z-60 w-full max-w-4xl mx-4 shadow-xl max-h-[90vh]"
-            id="publication-modal"
-            onClick={(e) => e.stopPropagation()}
-            style={{ cursor: 'auto' }}
-          >
-            {/* Close button with improved positioning and appearance */}
-            <button
-              onClick={(e) => {
-                e.stopPropagation();
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.2 }}
+            className="fixed inset-0 z-50 flex items-center justify-center overflow-hidden"
+            onClick={(e) => {
+              // Solo cerrar si el clic fue directamente en este contenedor (el fondo oscuro)
+              if (e.target === e.currentTarget) {
                 handleCloseModal();
-              }}
-              className="absolute top-4 right-4 z-70 bg-white/90 dark:bg-slate-800/90 rounded-full p-2 shadow-lg hover:bg-white dark:hover:bg-slate-700 transition-all duration-200"
-              aria-label="Cerrar"
-            >
-              <XMarkIcon className="h-5 w-5 text-gray-700 dark:text-gray-200" />
-            </button>
+              }
+            }}
+          >
+            {/* Backdrop solo fondo */}
+            <div 
+              className="fixed inset-0 bg-black/70 pointer-events-none" 
+              aria-hidden="true"
+            />
             
-            {/* Content */}
-            {loading ? (
-              <SkeletonLoader />
-            ) : error ? (
-              <div className="p-8 text-center text-red-500">
-                <p>Error al cargar la publicación: {error}</p>
-                <button 
-                  onClick={() => fetchPublicationData()}
-                  className="mt-4 px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600"
-                >
-                  Intentar nuevamente
-                </button>
-              </div>
-            ) : (
-              renderPublicationContent(publication)
-            )}
+            {/* Modal container with improved animation and styles */}
+            <motion.div
+              ref={modalRef}
+              initial={{ scale: 0.95, opacity: 0, y: 20 }}
+              animate={{ scale: 1, opacity: 1, y: 0 }}
+              exit={{ scale: 0.98, opacity: 0, y: 10 }}
+              transition={{ type: "spring", damping: 30, stiffness: 350 }}
+              className="publication-modal bg-white dark:bg-slate-900 rounded-2xl overflow-hidden relative z-60 w-full max-w-4xl mx-4 shadow-xl max-h-[90vh] pointer-events-auto"
+              id="publication-modal"
+              onClick={(e) => {
+                // Detener propagación para evitar que los clics dentro del modal lo cierren
+                e.stopPropagation();
+              }}
+            >
+              {/* Close button with improved positioning and appearance */}
+              <button
+                onClick={(e) => {
+                  e.stopPropagation();
+                  handleCloseModal();
+                }}
+                className="absolute top-4 right-4 z-70 bg-white/90 dark:bg-slate-800/90 rounded-full p-2 shadow-lg hover:bg-white dark:hover:bg-slate-700 transition-all duration-200 cursor-pointer pointer-events-auto"
+                aria-label="Cerrar"
+              >
+                <XMarkIcon className="h-5 w-5 text-gray-700 dark:text-gray-200" />
+              </button>
+              
+              {/* Content */}
+              {loading ? (
+                <SkeletonLoader />
+              ) : error ? (
+                <div className="p-8 text-center text-red-500">
+                  <p>Error al cargar la publicación: {error}</p>
+                  <button 
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      fetchPublicationData();
+                    }}
+                    className="mt-4 px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 cursor-pointer pointer-events-auto"
+                  >
+                    Intentar nuevamente
+                  </button>
+                </div>
+              ) : (
+                renderPublicationContent(publication)
+              )}
+            </motion.div>
           </motion.div>
-        </motion.div>
+        </>
       )}
     </AnimatePresence>
   );
@@ -808,103 +944,4 @@ const SkeletonLoader = () => (
       </div>
     </div>
   </div>
-);
-
-// Necesitamos añadir un poco de CSS para mejorar la experiencia
-const modalStyles = `
-  /* Estilos para mostrar durante la exportación */
-  .exporting-only {
-    display: none;
-  }
-  
-  .exporting .exporting-only {
-    display: block;
-  }
-  
-  /* Asegurar que no se muestre el scrollbar durante la exportación */
-  .exporting {
-    overflow: hidden !important;
-    max-height: none !important;
-  }
-
-  /* Prevenir scroll cuando el modal está abierto */
-  body.modal-open {
-    overflow: hidden;
-    position: fixed;
-    width: 100%;
-  }
-
-  /* Mejorar la apariencia de las imágenes en el modal */
-  .publication-modal img {
-    transition: transform 0.3s ease;
-  }
-
-  /* Añadir efecto de iluminación al hacer hover en las imágenes */
-  .publication-modal .group:hover::before {
-    content: '';
-    position: absolute;
-    inset: 0;
-    background: radial-gradient(circle at center, rgba(255,255,255,0.1) 0%, transparent 70%);
-    pointer-events: none;
-    z-index: 5;
-  }
-
-  /* Mejorar la sombra del modal */
-  .publication-modal {
-    filter: drop-shadow(0 8px 16px rgba(0, 0, 0, 0.1));
-    overflow: auto;
-    pointer-events: auto !important;
-  }
-
-  /* Animación para el skeleton */
-  @keyframes shimmer {
-    0% {
-      background-position: -1000px 0;
-    }
-    100% {
-      background-position: 1000px 0;
-    }
-  }
-
-  /* Fix para asegurar que los botones y enlaces del modal sean clickeables */
-  .publication-modal a,
-  .publication-modal button,
-  .publication-modal .modal-content {
-    pointer-events: auto !important;
-    cursor: pointer !important;
-    z-index: 10 !important;
-  }
-
-  /* Asegurarnos que el modal no se cierre al hacer click en él */
-  .publication-modal {
-    cursor: default !important;
-  }
-  
-  /* Grid layout for desktop and mobile */
-  @media (min-width: 768px) {
-    .publication-modal .grid {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      max-height: 85vh;
-    }
-    
-    .publication-modal .overflow-y-auto {
-      max-height: 85vh;
-    }
-  }
-  
-  @media (max-width: 767px) {
-    .publication-modal .grid {
-      display: grid;
-      grid-template-columns: 1fr;
-      grid-template-rows: auto 1fr;
-    }
-  }
-`;
-
-// Insertar estilos en el documento
-if (typeof document !== 'undefined') {
-  const style = document.createElement('style');
-  style.textContent = modalStyles;
-  document.head.appendChild(style);
-} 
+); 

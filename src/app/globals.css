@@ -834,6 +834,7 @@ button[aria-label="Contactar por WhatsApp"] {
 [role="dialog"],
 .fixed.inset-0 {
   z-index: 9999 !important;
+  pointer-events: auto !important;
 }
 
 /* Darker backdrop for better modal visibility */
@@ -841,75 +842,52 @@ button[aria-label="Contactar por WhatsApp"] {
 .fixed.inset-0 > .bg-black\/50,
 .fixed.inset-0 > .bg-black\/70 {
   background-color: rgba(0, 0, 0, 0.5) !important;
+  pointer-events: auto !important;
 }
 
 /* Modal styles */
 .modal-open {
-  overflow: hidden !important;
-  padding-right: 15px; /* Compensate for scrollbar disappearance */
+  overflow: hidden;
+  position: fixed;
+  width: 100%;
 }
 
 .publication-modal {
-  cursor: auto !important;
-  z-index: 9999 !important;
   pointer-events: auto !important;
-  -webkit-user-select: auto !important;
-  user-select: auto !important;
-  position: relative;
-  max-height: 90vh;
-  overflow: hidden;
-  background-color: white;
-  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1),
-    0 10px 10px -5px rgba(0, 0, 0, 0.04);
-}
-
-.publication-modal * {
-  pointer-events: auto !important;
-  cursor: auto !important;
+  cursor: default !important;
 }
 
 .publication-modal button,
 .publication-modal a {
-  cursor: pointer !important;
-}
-
-.publication-modal .image-container {
-  position: relative;
-  height: 100%;
-  min-height: 300px;
-  overflow: hidden;
-  background-color: #f7f7f7;
-}
-
-.publication-modal .content {
-  padding: 1rem;
-  overflow-y: auto;
-  max-height: 100%;
-}
-
-/* Fix for modal backdrop */
-.fixed.inset-0 {
-  position: fixed !important;
-  top: 0 !important;
-  right: 0 !important;
-  bottom: 0 !important;
-  left: 0 !important;
   pointer-events: auto !important;
+  cursor: pointer !important;
+  z-index: 10 !important;
 }
 
-/* Ensure the backdrop doesn't interfere with modal content */
-.fixed.inset-0 > .bg-black\/50 {
-  position: fixed !important;
+.fixed.inset-0.z-50 {
+  z-index: 9999 !important;
+}
+
+.fixed.inset-0.z-50 > .fixed.inset-0.bg-black\/70 {
+  pointer-events: none !important;
   z-index: -1 !important;
 }
 
-/* Enhance z-index handling */
+/* Arreglo para los botones de acción */
+.publication-modal .motion-button,
+.publication-modal motion-button {
+  pointer-events: auto !important;
+  cursor: pointer !important;
+  z-index: 20 !important;
+}
+
+/* Garantizar que el modal está por encima de todo */
 .z-60 {
-  z-index: 60 !important;
+  z-index: 9998 !important;
 }
 
 .z-70 {
-  z-index: 70 !important;
+  z-index: 9999 !important;
 }
 
 /* Fix publication card height consistency */

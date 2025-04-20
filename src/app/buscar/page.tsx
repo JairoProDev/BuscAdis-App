@@ -383,14 +383,22 @@ export default function BuscadorPage() {
     // Update browser URL to the clean SEO path without any query parameters
     window.history.pushState({ modalOpen: true, id }, '', seoUrl);
 
+    // Extract contact information (supporting multiple phone numbers)
+    const contactPhones: string[] = [];
+    if (publication.contactPhone) {
+      contactPhones.push(publication.contactPhone);
+    }
+    
     // Update state to show the modal
     console.log("Setting selectedPublicationId:", id);
     // Convert publication to PublicationWithContact interface before passing
     const enhancedPublication = {
       ...publication,
       contactPhone: publication.contactPhone || '',
+      contactPhones: contactPhones.length > 0 ? contactPhones : undefined,
       contact: {
         phone: publication.contactPhone || '',
+        phones: contactPhones.length > 0 ? contactPhones : undefined,
         email: publication.contactEmail || '',
         name: publication.contactName || ''
       },
