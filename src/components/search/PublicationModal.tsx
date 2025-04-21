@@ -140,7 +140,12 @@ export default function PublicationModal({ publicationId, isOpen, onClose, initi
         // Support both naming conventions for compatibility
         subcategory: data.subcategory || data.subcategorySlug || subcategory,
         subsubcategory: data.subsubcategory || data.subSubcategorySlug || subsubcategory,
-        categorySlug: data.categorySlug || category
+        categorySlug: data.categorySlug || category,
+        // Asegurar que el contacto esté bien estructurado con soporte para phones
+        contact: {
+          ...(data.contact || {}),
+          phones: data.contact?.phones || []
+        }
       };
       
       setPublication(enhancedData);
@@ -433,74 +438,111 @@ export default function PublicationModal({ publicationId, isOpen, onClose, initi
       originalImages: pub.images
     });
 
-    // Preparar números de contacto (pueden ser múltiples)
+    // Prepare contact numbers list
     const contactNumbers: string[] = [];
     
-    // Agregar número principal si existe
-    if (pub.contactPhone && pub.contactPhone.trim()) {
+    // El problema parece estar en cómo se accede a los números de contacto
+    // Simplificar para asegurar que funcione correctamente con la estructura de la BD
+    console.log('[PublicationModal] Original publication data:', pub);
+    
+    // Verificar si contact está definido correctamente
+    if (!pub.contact) {
+      console.log('[PublicationModal] No contact object found');
+    } else if (typeof pub.contact === 'string') {
+      // Caso donde contact es una string por error de serialización
+      try {
+        const parsedContact = JSON.parse(pub.contact);
+        console.log('[PublicationModal] Parsed contact from string:', parsedContact);
+        
+        // Actualizar pub.contact para accesos posteriores
+        pub.contact = parsedContact;
+      } catch (e) {
+        console.error('[PublicationModal] Failed to parse contact string:', e);
+      }
+    }
+    
+    // 1. Acceso directo a contact.phones que es un array enumerado desde 0
+    if (pub.contact && typeof pub.contact === 'object' && pub.contact !== null) {
+      // Verificar si phones es un string por serialización incorrecta
+      if (pub.contact.phones && typeof pub.contact.phones === 'string') {
+        try {
+          pub.contact.phones = JSON.parse(pub.contact.phones);
+          console.log('[PublicationModal] Parsed phones from string:', pub.contact.phones);
+        } catch (e) {
+          console.error('[PublicationModal] Failed to parse phones string:', e);
+        }
+      }
+      
+      // Acceso al array phones normalizado
+      if (pub.contact.phones && Array.isArray(pub.contact.phones)) {
+        // Mostrar claramente los números encontrados para debugging
+        console.log('[PublicationModal] Found contact.phones array:', pub.contact.phones);
+        
+        // Iterar sobre cada elemento del array
+        for (let i = 0; i < pub.contact.phones.length; i++) {
+          const phone = pub.contact.phones[i];
+          if (typeof phone === 'string' && phone.trim() !== '') {
+            contactNumbers.push(phone.trim());
+            console.log(`[PublicationModal] Added phone number ${i}:`, phone);
+          } else if (phone && typeof phone === 'object' && phone !== null) {
+            // Caso donde cada elemento podría ser un objeto con propiedades
+            const phoneObj = phone as Record<string, string | undefined>;
+            const phoneValue = phoneObj.number || phoneObj.value || phoneObj.phone;
+            if (typeof phoneValue === 'string' && phoneValue.trim() !== '') {
+              contactNumbers.push(phoneValue.trim());
+              console.log(`[PublicationModal] Added phone object number ${i}:`, phoneValue);
+            }
+          }
+        }
+      } else {
+        console.log('[PublicationModal] No phones array found or not an array:', pub.contact.phones);
+      }
+      
+      // También verificar contact.phone (singular) por compatibilidad
+      if (typeof pub.contact.phone === 'string' && pub.contact.phone.trim() !== '') {
+        contactNumbers.push(pub.contact.phone.trim());
+        console.log('[PublicationModal] Added contact.phone:', pub.contact.phone);
+      }
+    } else {
+      console.log('[PublicationModal] No contact object found or not an object type:', pub.contact);
+    }
+    
+    // Verificar campos directos para compatibilidad con distintos esquemas
+    if (typeof pub.contactPhone === 'string' && pub.contactPhone.trim() !== '') {
       contactNumbers.push(pub.contactPhone.trim());
+      console.log('[PublicationModal] Added contactPhone:', pub.contactPhone);
     }
     
-    // Agregar números del arreglo contactPhones si existe
+    // Si contactPhones existe como array, procesarlo
     if (pub.contactPhones && Array.isArray(pub.contactPhones)) {
-      pub.contactPhones.forEach(phone => {
-        if (phone && phone.trim() && !contactNumbers.includes(phone.trim())) {
+      pub.contactPhones.forEach((phone, i) => {
+        if (typeof phone === 'string' && phone.trim() !== '' && !contactNumbers.includes(phone.trim())) {
           contactNumbers.push(phone.trim());
+          console.log(`[PublicationModal] Added contactPhones[${i}]:`, phone);
         }
       });
     }
     
-    // Agregar número del contacto si existe y es diferente
-    if (pub.contact?.phone && pub.contact.phone.trim() && 
-        !contactNumbers.includes(pub.contact.phone.trim())) {
-      contactNumbers.push(pub.contact.phone.trim());
-    }
+    // Eliminar duplicados y filtrar valores nulos/vacíos
+    const uniqueContactNumbers = [...new Set(contactNumbers)].filter(Boolean);
     
-    // Agregar números del arreglo contact.phones si existe
-    if (pub.contact?.phones && Array.isArray(pub.contact.phones)) {
-      pub.contact.phones.forEach(phone => {
-        if (phone && phone.trim() && !contactNumbers.includes(phone.trim())) {
-          contactNumbers.push(phone.trim());
-        }
-      });
-    }
+    // Verificar la estructura exacta para detectar posibles problemas
+    console.log('[PublicationModal] Contact structure:', {
+      hasContactObject: !!pub.contact,
+      contactObjectType: pub.contact ? typeof pub.contact : 'undefined',
+      contactPhonesType: pub.contact?.phones ? typeof pub.contact.phones : 'undefined',
+      contactPhonesIsArray: pub.contact?.phones ? Array.isArray(pub.contact.phones) : false,
+      contactPhonesLength: pub.contact?.phones && Array.isArray(pub.contact.phones) ? pub.contact.phones.length : 0
+    });
     
-    // Verificar si hay números extraídos de la descripción (ejemplo: 910629557)
-    if (publicationDesc) {
-      // Expresión regular más completa para detectar varios formatos de números peruanos
-      // Detecta: 910629557, 91 062 9557, 910-629-557, etc.
-      const phoneRegex = /(\b9\d[\s\-]?\d[\s\-]?\d[\s\-]?\d[\s\-]?\d[\s\-]?\d[\s\-]?\d[\s\-]?\d\b)|(\b\d[\s\-]?\d[\s\-]?\d[\s\-]?\d[\s\-]?\d[\s\-]?\d\b)/g;
-      
-      // Buscar en la descripción
-      const matches = publicationDesc.match(phoneRegex);
-      
-      // También buscar "razón Cel" o "teléfono" seguido de números
-      const contactPhraseRegex = /(razón|razon)\s+(cel|celular|telefono|teléfono|cel\.|telf\.|telf|tlf\.)[:\s]+([0-9\s\-]+)/gi;
-      const contactMatches = publicationDesc.matchAll(contactPhraseRegex);
-      
-      if (matches) {
-        matches.forEach(match => {
-          // Limpiar el número de espacios y guiones
-          const cleanNumber = match.replace(/[\s\-]/g, '');
-          if (cleanNumber.length >= 7 && !contactNumbers.includes(cleanNumber)) {
-            contactNumbers.push(cleanNumber);
-          }
-        });
-      }
-      
-      // Procesar coincidencias de frases con números
-      for (const contactMatch of Array.from(contactMatches || [])) {
-        if (contactMatch && contactMatch[3]) {
-          const cleanNumber = contactMatch[3].replace(/[\s\-]/g, '');
-          if (cleanNumber.length >= 7 && !contactNumbers.includes(cleanNumber)) {
-            contactNumbers.push(cleanNumber);
-          }
-        }
-      }
-    }
+    // Verificar datos extraídos
+    console.log('[PublicationModal] Extracted contact numbers:', uniqueContactNumbers);
     
     // Si no hay números, usar un array vacío
-    const hasMultipleNumbers = contactNumbers.length > 1;
+    const hasMultipleNumbers = uniqueContactNumbers.length > 1;
+
+    // Actualizar la referencia de contactNumbers
+    const finalContactNumbers = uniqueContactNumbers;
 
     return (
       <div ref={exportRef} className="grid grid-cols-1 md:grid-cols-1 h-full">
@@ -620,9 +662,9 @@ export default function PublicationModal({ publicationId, isOpen, onClose, initi
           
           <div className="mt-auto space-y-3">
             {/* Contacto - Si hay múltiples números, mostrarlos como opciones */}
-            {contactNumbers.length > 0 && (
+            {finalContactNumbers.length > 0 && (
               <>
-                {contactNumbers.map((phoneNumber, index) => (
+                {finalContactNumbers.map((phoneNumber, index) => (
                   <motion.a 
                     key={`phone-${index}`}
                     href={`tel:${phoneNumber}`}
@@ -646,9 +688,9 @@ export default function PublicationModal({ publicationId, isOpen, onClose, initi
             )}
             
             {/* WhatsApp - Si hay múltiples números, mostrarlos como opciones */}
-            {contactNumbers.length > 0 && (
+            {finalContactNumbers.length > 0 && (
               <>
-                {contactNumbers.map((phoneNumber, index) => (
+                {finalContactNumbers.map((phoneNumber, index) => (
                   <motion.a 
                     key={`whatsapp-${index}`}
                     href={`https://wa.me/${phoneNumber.replace(/[^0-9]/g, '')}?text=${formatWhatsAppMessage()}`}
@@ -677,7 +719,7 @@ export default function PublicationModal({ publicationId, isOpen, onClose, initi
             )}
             
             {/* Mostrar mensaje si no hay números de contacto */}
-            {contactNumbers.length === 0 && (
+            {finalContactNumbers.length === 0 && (
               <div className="bg-yellow-50 dark:bg-yellow-900/30 text-yellow-800 dark:text-yellow-200 p-3 rounded-lg text-center text-sm">
                 No hay información de contacto disponible para esta publicación.
               </div>
