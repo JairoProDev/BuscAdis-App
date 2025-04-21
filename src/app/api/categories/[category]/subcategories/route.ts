@@ -1,8 +1,6 @@
 import { NextResponse } from 'next/server'
-import { mongoDbQuery } from '@/lib/mongodb.server'
 
 export const dynamic = 'force-dynamic' // Disable caching to ensure data is always fresh
-export const runtime = 'nodejs' // Mark as server-side only
 
 // Get subcategories for a specific category
 export async function GET(
@@ -12,20 +10,8 @@ export async function GET(
   try {
     // Properly await and access the category parameter
     const categoryId = params.category;
-    
-    // Mapping of category collections for counting
-    const categoryCollections = {
-      'empleos': 'publications_empleos',
-      'inmuebles': 'publications_inmuebles',
-      'vehiculos': 'publications_vehiculos',
-      'servicios': 'publications_servicios',
-      'productos': 'publications_productos',
-      'eventos': 'publications_eventos',
-      'negocios': 'publications_negocios',
-      'comunidad': 'publications_comunidad'
-    };
 
-    // Static subcategories mapping - will be populated with real counts
+    // Static subcategories definition - used exclusively
     const subcategories = {
       'empleos': [
         { id: 'empleos-tecnologia', name: 'Tecnología', count: 0 },
@@ -76,69 +62,17 @@ export async function GET(
       ]
     };
 
-    // Check if we have static subcategories for this category
+    // Check if we have subcategories for this category
     if (subcategories[categoryId as keyof typeof subcategories]) {
-      // Get the collection name for this category
-      const collectionName = categoryCollections[categoryId as keyof typeof categoryCollections];
-      
-      if (collectionName) {
-        try {
-          // Get the subcategories for this category
-          const subcatsForCategory = subcategories[categoryId as keyof typeof subcategories];
-          
-          // Update counts for each subcategory
-          const updatedSubcats = await Promise.all(
-            subcatsForCategory.map(async (subcat) => {
-              const subcatName = subcat.name.toLowerCase();
-              try {
-                // Query the database for documents with this subcategory
-                const results = await mongoDbQuery(
-                  collectionName, 
-                  { subcategory: subcatName }, 
-                  { count: true }
-                );
-                
-                // Update the count
-                return {
-                  ...subcat,
-                  count: typeof results === 'number' ? results : 
-                         (Array.isArray(results) ? results.length : 0)
-                };
-              } catch (err) {
-                console.error(`Error counting subcategory ${subcatName}:`, err);
-                return subcat; // Return original subcat if there's an error
-              }
-            })
-          );
-          
-          return NextResponse.json(updatedSubcats);
-        } catch (error) {
-          console.error(`Error counting subcategories for ${categoryId}:`, error);
-          // Fall back to static subcategories without counts
-          return NextResponse.json(subcategories[categoryId as keyof typeof subcategories]);
-        }
-      }
-      
-      // If no collection name found, return static subcategories
       return NextResponse.json(subcategories[categoryId as keyof typeof subcategories]);
     }
 
-    // If no static subcategories, try to get from database
-    const results = await mongoDbQuery('subcategories', { categoryId }, {});
-    
-    if (results) {
-      // Handle both array and number return types
-      if (Array.isArray(results) && results.length > 0) {
-        return NextResponse.json(results);
-      }
-    }
-
-    // Return empty array if no subcategories found
+    // Return empty array if no subcategories found for this category
     return NextResponse.json([]);
   } catch (error: any) {
-    console.error('Error fetching subcategories:', error);
+    console.error('Error processing subcategories:', error);
     return NextResponse.json(
-      { error: `Failed to fetch subcategories: ${error.message}` },
+      { error: `Failed to process subcategories: ${error.message}` },
       { status: 500 }
     );
   }

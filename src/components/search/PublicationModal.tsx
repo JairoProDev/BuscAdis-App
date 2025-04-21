@@ -125,14 +125,70 @@ export default function PublicationModal({ publicationId, isOpen, onClose, initi
       });
       
       // Pass the category information to the service
-      const data = await PublicationsService.getPublicationById(
+      let data = await PublicationsService.getPublicationById(
         cleanId, 
         category, 
         subcategory, 
         subsubcategory
       );
       
-      console.log("Received publication data:", data);
+      // CRUCIAL: Verificar si la respuesta necesita ser procesada
+      if (typeof data === 'string') {
+        try {
+          data = JSON.parse(data);
+          console.log("Parsed response data from string:", data);
+        } catch (err) {
+          console.error("Response is a string but not valid JSON:", err);
+        }
+      }
+      
+      console.log("Received raw publication data:", data);
+
+      // SOLUCIÓN CLAVE: Verificar y preservar explícitamente la estructura de phones
+      let contactData = data.contact || {};
+      
+      // Si contactData está definido pero es nulo, inicializarlo como objeto vacío
+      if (contactData === null) {
+        contactData = {};
+      }
+      
+      // Verificación crítica: si data.contact viene como string, parsearlo correctamente
+      if (typeof contactData === 'string') {
+        try {
+          const parsed = JSON.parse(contactData);
+          contactData = parsed;
+          console.log("Parsed contact data from string:", contactData);
+        } catch (err) {
+          console.error("Failed to parse contact string:", err);
+          contactData = { phone: contactData };
+        }
+      }
+      
+      // Verificar que phones sea un array y preservarlo
+      let phonesData = contactData.phones || [];
+      
+      // Verificar si phones es un string y necesita ser parseado
+      if (typeof phonesData === 'string') {
+        try {
+          const parsed = JSON.parse(phonesData);
+          phonesData = Array.isArray(parsed) ? parsed : [phonesData];
+          console.log("Parsed phones data from string:", phonesData);
+        } catch (err) {
+          // Si no es JSON válido, tratarlo como un solo número
+          phonesData = [phonesData];
+        }
+      }
+      
+      console.log("Original phones data:", phonesData);
+      
+      // Asegurar que la estructura sea consistente
+      const normalizedContact = {
+        ...contactData,
+        phones: Array.isArray(phonesData) ? phonesData : 
+                typeof phonesData === 'string' ? [phonesData] : []
+      };
+      
+      console.log("Normalized contact data:", normalizedContact);
       
       // Normalize fields from DB to match frontend naming
       const enhancedData = {
@@ -141,12 +197,22 @@ export default function PublicationModal({ publicationId, isOpen, onClose, initi
         subcategory: data.subcategory || data.subcategorySlug || subcategory,
         subsubcategory: data.subsubcategory || data.subSubcategorySlug || subsubcategory,
         categorySlug: data.categorySlug || category,
-        // Asegurar que el contacto esté bien estructurado con soporte para phones
-        contact: {
-          ...(data.contact || {}),
-          phones: data.contact?.phones || []
-        }
+        // IMPORTANTE: Usar la estructura de contacto normalizada
+        contact: normalizedContact
       };
+      
+      // Log enhancedData para debugging
+      console.log("Enhanced publication data:", enhancedData);
+      
+      // Verificar específicamente los datos de contacto
+      console.log("Contact data structure:", {
+        originalContact: data.contact,
+        normalizedContact: normalizedContact,
+        enhancedContact: enhancedData.contact,
+        hasPhones: !!enhancedData.contact?.phones,
+        phonesIsArray: Array.isArray(enhancedData.contact?.phones),
+        phonesValue: enhancedData.contact?.phones
+      });
       
       setPublication(enhancedData);
       
@@ -154,13 +220,13 @@ export default function PublicationModal({ publicationId, isOpen, onClose, initi
       if (typeof window !== 'undefined') {
         window.preloadedPublications = window.preloadedPublications || {};
         window.preloadedPublications[cleanId] = enhancedData;
-        }
-      } catch (err) {
+      }
+    } catch (err) {
       console.error('Error fetching publication:', err);
       setError('Error al cargar la publicación');
-      } finally {
-          setLoading(false);
-        }
+    } finally {
+      setLoading(false);
+    }
   }, [publicationId, cleanId]);
 
   // When the modal is opened, store the current scroll position
@@ -192,6 +258,7 @@ export default function PublicationModal({ publicationId, isOpen, onClose, initi
   useEffect(() => {
     // Skip fetching if we already have initialData
     if (initialData && publicationId === initialData.id) {
+      console.log('[PublicationModal] Using initialData:', initialData);
       setPublication(initialData);
       setLoading(false);
       return;
@@ -201,6 +268,7 @@ export default function PublicationModal({ publicationId, isOpen, onClose, initi
     if (typeof window !== 'undefined' && 
         window.preloadedPublications && 
         window.preloadedPublications[cleanId]) {
+      console.log('[PublicationModal] Using preloaded data:', window.preloadedPublications[cleanId]);
       setPublication(window.preloadedPublications[cleanId]);
       setLoading(false);
       return;
@@ -396,18 +464,9 @@ export default function PublicationModal({ publicationId, isOpen, onClose, initi
       );
     }
 
-    // Handle fallback publication cases
-    const isFallback = '_fallback' in pub;
-    
-    // Log useful debugging information
-    console.log('Rendering publication content:', {
-      id: pub.id,
-      title: pub.title,
-      isFallback: isFallback,
-      contactPhone: pub.contactPhone,
-      contact: pub.contact,
-      images: pub.images
-    });
+    // Logging para diagnóstico
+    console.log('[PublicationModal] Processing publication:', pub.id, pub.title);
+    console.log('[PublicationModal] Contact object:', pub.contact);
     
     // Ensure we have valid data
     const publicationId = pub.id || 'unknown';
@@ -430,119 +489,60 @@ export default function PublicationModal({ publicationId, isOpen, onClose, initi
       ? pub.images[0] 
       : defaultImage;
 
-    console.log('[PublicationModal] Image details:', {
-      hasImages,
-      categorySlug: publicationCategory,
-      defaultImage,
-      imageUrl,
-      originalImages: pub.images
-    });
-
-    // Prepare contact numbers list
+    // Prepare contact numbers list - SIMPLIFICADO Y MEJORADO
     const contactNumbers: string[] = [];
     
-    // El problema parece estar en cómo se accede a los números de contacto
-    // Simplificar para asegurar que funcione correctamente con la estructura de la BD
-    console.log('[PublicationModal] Original publication data:', pub);
-    
-    // Verificar si contact está definido correctamente
-    if (!pub.contact) {
-      console.log('[PublicationModal] No contact object found');
-    } else if (typeof pub.contact === 'string') {
-      // Caso donde contact es una string por error de serialización
-      try {
-        const parsedContact = JSON.parse(pub.contact);
-        console.log('[PublicationModal] Parsed contact from string:', parsedContact);
-        
-        // Actualizar pub.contact para accesos posteriores
-        pub.contact = parsedContact;
-      } catch (e) {
-        console.error('[PublicationModal] Failed to parse contact string:', e);
-      }
-    }
-    
-    // 1. Acceso directo a contact.phones que es un array enumerado desde 0
-    if (pub.contact && typeof pub.contact === 'object' && pub.contact !== null) {
-      // Verificar si phones es un string por serialización incorrecta
-      if (pub.contact.phones && typeof pub.contact.phones === 'string') {
-        try {
-          pub.contact.phones = JSON.parse(pub.contact.phones);
-          console.log('[PublicationModal] Parsed phones from string:', pub.contact.phones);
-        } catch (e) {
-          console.error('[PublicationModal] Failed to parse phones string:', e);
-        }
-      }
-      
-      // Acceso al array phones normalizado
+    // IMPORTANTE: Extraer números directamente del objeto contact.phones
+    if (pub.contact && typeof pub.contact === 'object') {
+      // 1. Verificar si hay phones como array (formato correcto)
       if (pub.contact.phones && Array.isArray(pub.contact.phones)) {
-        // Mostrar claramente los números encontrados para debugging
-        console.log('[PublicationModal] Found contact.phones array:', pub.contact.phones);
+        console.log('[PublicationModal] Found phones array with length:', pub.contact.phones.length);
         
-        // Iterar sobre cada elemento del array
-        for (let i = 0; i < pub.contact.phones.length; i++) {
-          const phone = pub.contact.phones[i];
+        // Procesar cada número en el array
+        pub.contact.phones.forEach((phone, index) => {
           if (typeof phone === 'string' && phone.trim() !== '') {
             contactNumbers.push(phone.trim());
-            console.log(`[PublicationModal] Added phone number ${i}:`, phone);
-          } else if (phone && typeof phone === 'object' && phone !== null) {
-            // Caso donde cada elemento podría ser un objeto con propiedades
-            const phoneObj = phone as Record<string, string | undefined>;
-            const phoneValue = phoneObj.number || phoneObj.value || phoneObj.phone;
-            if (typeof phoneValue === 'string' && phoneValue.trim() !== '') {
-              contactNumbers.push(phoneValue.trim());
-              console.log(`[PublicationModal] Added phone object number ${i}:`, phoneValue);
-            }
+            console.log(`[PublicationModal] Added phone[${index}]:`, phone);
           }
-        }
-      } else {
-        console.log('[PublicationModal] No phones array found or not an array:', pub.contact.phones);
+        });
       }
-      
-      // También verificar contact.phone (singular) por compatibilidad
-      if (typeof pub.contact.phone === 'string' && pub.contact.phone.trim() !== '') {
+      // 2. Verificar phone (singular) como fallback
+      else if (pub.contact.phone && typeof pub.contact.phone === 'string' && pub.contact.phone.trim() !== '') {
         contactNumbers.push(pub.contact.phone.trim());
-        console.log('[PublicationModal] Added contact.phone:', pub.contact.phone);
+        console.log('[PublicationModal] Added single phone:', pub.contact.phone);
       }
-    } else {
-      console.log('[PublicationModal] No contact object found or not an object type:', pub.contact);
     }
     
-    // Verificar campos directos para compatibilidad con distintos esquemas
-    if (typeof pub.contactPhone === 'string' && pub.contactPhone.trim() !== '') {
+    // 3. Verificar otros formatos posibles para compatibilidad
+    if (pub.contactPhone && typeof pub.contactPhone === 'string' && pub.contactPhone.trim() !== '') {
       contactNumbers.push(pub.contactPhone.trim());
       console.log('[PublicationModal] Added contactPhone:', pub.contactPhone);
     }
     
-    // Si contactPhones existe como array, procesarlo
-    if (pub.contactPhones && Array.isArray(pub.contactPhones)) {
-      pub.contactPhones.forEach((phone, i) => {
-        if (typeof phone === 'string' && phone.trim() !== '' && !contactNumbers.includes(phone.trim())) {
-          contactNumbers.push(phone.trim());
-          console.log(`[PublicationModal] Added contactPhones[${i}]:`, phone);
-        }
-      });
+    // 4. Si no hay números, intentar extraer de la descripción solo como último recurso
+    if (contactNumbers.length === 0 && publicationDesc) {
+      const phoneRegex = /(\b9\d[\s\-]?\d[\s\-]?\d[\s\-]?\d[\s\-]?\d[\s\-]?\d[\s\-]?\d[\s\-]?\d\b)|(\b\d[\s\-]?\d[\s\-]?\d[\s\-]?\d[\s\-]?\d[\s\-]?\d\b)/g;
+      const matches = publicationDesc.match(phoneRegex);
+      
+      if (matches) {
+        matches.forEach(match => {
+          const cleanNumber = match.replace(/[\s\-]/g, '');
+          if (cleanNumber.length >= 7) {
+            contactNumbers.push(cleanNumber);
+            console.log('[PublicationModal] Added phone from description:', cleanNumber);
+          }
+        });
+      }
     }
     
-    // Eliminar duplicados y filtrar valores nulos/vacíos
-    const uniqueContactNumbers = [...new Set(contactNumbers)].filter(Boolean);
+    // Eliminar duplicados y filtrar valores vacíos
+    const finalContactNumbers = [...new Set(contactNumbers)].filter(Boolean);
     
-    // Verificar la estructura exacta para detectar posibles problemas
-    console.log('[PublicationModal] Contact structure:', {
-      hasContactObject: !!pub.contact,
-      contactObjectType: pub.contact ? typeof pub.contact : 'undefined',
-      contactPhonesType: pub.contact?.phones ? typeof pub.contact.phones : 'undefined',
-      contactPhonesIsArray: pub.contact?.phones ? Array.isArray(pub.contact.phones) : false,
-      contactPhonesLength: pub.contact?.phones && Array.isArray(pub.contact.phones) ? pub.contact.phones.length : 0
-    });
+    // Logging final para confirmar números encontrados
+    console.log('[PublicationModal] Final contact numbers:', finalContactNumbers);
     
-    // Verificar datos extraídos
-    console.log('[PublicationModal] Extracted contact numbers:', uniqueContactNumbers);
-    
-    // Si no hay números, usar un array vacío
-    const hasMultipleNumbers = uniqueContactNumbers.length > 1;
-
-    // Actualizar la referencia de contactNumbers
-    const finalContactNumbers = uniqueContactNumbers;
+    // Si hay múltiples números
+    const hasMultipleNumbers = finalContactNumbers.length > 1;
 
     return (
       <div ref={exportRef} className="grid grid-cols-1 md:grid-cols-1 h-full">
