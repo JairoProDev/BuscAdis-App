@@ -28,6 +28,7 @@
     "amazon-cognito-identity-js": "^6.3.12",
     "aws-amplify": "^6.13.6",
     "axios": "^1.7.9",
+    "canvas-confetti": "^1.9.3",
     "class-variance-authority": "^0.7.1",
     "cloudinary": "^2.6.0",
     "clsx": "^2.1.1",

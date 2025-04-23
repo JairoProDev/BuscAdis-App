@@ -86,34 +86,58 @@ export enum PublicationStatus {
   DELETED = 'deleted'
 }
 
-export interface PublicationImage {
-  url: string;
-  publicId?: string;
-  width?: number;
-  height?: number;
-  caption?: string;
-  isPrimary?: boolean;
-  secureUrl?: string; // Para URLs HTTPS de Cloudinary
+export interface GeoCoordinates {
+  lat: number;
+  lng: number;
 }
 
 export interface PublicationLocation {
-  city: string;
-  region: string;
+  province: string;
   district?: string;
   address?: string;
-  latitude?: number;
-  longitude?: number;
-  reference?: string;
+  referencePoint?: string;
+  coordinates?: GeoCoordinates | null;
 }
 
-export interface PublicationPrice {
-  amount: number;
-  currency: 'PEN' | 'USD';
-  isNegotiable?: boolean;
-  rangeMin?: number;
-  rangeMax?: number;
-  period?: 'hour' | 'day' | 'week' | 'month' | 'year';
+export interface PublicationContact {
+  phones: string[];
+  email?: string;
+  name?: string;
+  website?: string;
 }
+
+export interface PublicationImage {
+  url: string;
+  isPrimary?: boolean;
+}
+
+export interface PublicationAttributes {
+  [key: string]: string | number | boolean;
+}
+
+export interface Publication {
+  id?: string;
+  title: string;
+  description: string;
+  categorySlug: string;
+  subcategorySlug: string;
+  subSubcategorySlug?: string;
+  transactionType: 'venta' | 'alquiler' | 'servicio' | 'busqueda';
+  amount: number | null;
+  currency: string;
+  negotiable: boolean;
+  location: PublicationLocation;
+  contact: PublicationContact;
+  attributes: PublicationAttributes;
+  images: string[];
+  status: 'pending' | 'active' | 'inactive' | 'rejected';
+  premium: boolean;
+  createdAt?: Date;
+  updatedAt?: Date;
+}
+
+// Para facilitar el uso en el formulario de creación
+export type PublicationFormData = Partial<Publication>;
 
 // Tipos específicos para cada categoría de publicación
 export interface VehiclePublication {

@@ -1,4 +1,3 @@
-// src/components/publish/LivePreview.tsx
 'use client';
 
 import React from 'react';
@@ -56,4 +55,4 @@ const LivePreview: React.FC<LivePreviewProps> = ({ ad }) => {
     );
 };
 
-export default LivePreview;
+export default LivePreview; 

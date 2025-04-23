@@ -1,13 +1,33 @@
-export const formatPrice = (amount: number, type: string = 'fixed'): string => {
-  if (type === 'free') return 'Gratis';
+/**
+ * Utility functions for formatting data
+ */
+
+/**
+ * Format a number as currency
+ * @param amount Amount to format
+ * @param currency Currency code (default: 'PEN')
+ * @returns Formatted currency string
+ */
+export const formatCurrency = (amount: number, currency = 'PEN'): string => {
+  if (amount === 0) return 'Gratis';
   
-  const formatted = new Intl.NumberFormat('es-PE', {
+  return new Intl.NumberFormat('es-PE', {
     style: 'currency',
-    currency: 'PEN',
-    minimumFractionDigits: 2
+    currency,
+    minimumFractionDigits: 0,
+    maximumFractionDigits: 0
   }).format(amount);
+};
+
+/**
+ * Format a price with currency and optional negotiable flag
+ */
+export const formatPrice = (price: { amount: number | null, currency: string, negotiable?: boolean }) => {
+  if (!price || price.amount === null || price.amount === undefined) return 'Consultar';
+  if (price.amount === 0 && !price.negotiable) return 'Gratis';
   
-  return type === 'negotiable' ? `${formatted} (Negociable)` : formatted;
+  const formatted = formatCurrency(price.amount, price.currency);
+  return price.negotiable ? `${formatted} (Negociable)` : formatted;
 };
 
 export const formatPhoneNumber = (phone: string): string => {
@@ -21,3 +41,12 @@ export const formatPhoneNumber = (phone: string): string => {
   
   return phone;
 };
+
+// Exportación por defecto de todas las funciones de formato
+const formatUtils = {
+  formatCurrency,
+  formatPrice,
+  formatPhoneNumber
+};
+
+export default formatUtils;
