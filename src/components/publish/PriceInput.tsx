@@ -122,7 +122,7 @@ const PriceInput: React.FC<PriceInputProps> = ({
                 value={internalAmount}
                 onChange={handleAmountChange}
                 onBlur={handleAmountBlur} // Notificar cambio en blur
-                className={`w-full pl-10 pr-20 py-2 bg-white rounded-lg border ${isFree ? 'bg-gray-100 cursor-not-allowed' : 'border-gray-300 focus:border-primary-500 focus:ring-1 focus:ring-primary-500'} transition-all`}
+                className={`w-full pl-10 pr-20 py-2 bg-white rounded-lg border text-gray-900 ${isFree ? 'bg-gray-100 cursor-not-allowed' : 'border-gray-300 focus:border-primary-500 focus:ring-1 focus:ring-primary-500'} transition-all`}
                 placeholder="0.00"
                 step="0.01"
                 min="0"
@@ -136,7 +136,7 @@ const PriceInput: React.FC<PriceInputProps> = ({
                     name="currency"
                     value={internalCurrency ?? ''}
                     onChange={handleCurrencyChange}
-                    className={`h-full py-0 pl-2 pr-7 border-transparent bg-transparent text-gray-500 ${isFree ? 'cursor-not-allowed' : 'focus:border-primary-500 focus:ring-1 focus:ring-primary-500'} rounded-md`}
+                    className={`h-full py-0 pl-2 pr-7 border-transparent bg-transparent text-gray-600 ${isFree ? 'cursor-not-allowed' : 'focus:border-primary-500 focus:ring-1 focus:ring-primary-500'} rounded-md`}
                     disabled={isFree}
                 >
                     {currencies.map(c => (

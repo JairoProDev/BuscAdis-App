@@ -23,6 +23,8 @@ export interface LocationData {
   city: string;
   country: string;
   district?: string;
+  province?: string;
+  reference?: string;
   coordinates?: {
     lat: number;
     lon: number;
