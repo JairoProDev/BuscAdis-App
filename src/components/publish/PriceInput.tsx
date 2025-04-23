@@ -1,33 +1,44 @@
-import React, { useState, useCallback } from 'react';
+// src/components/publish/PriceInput.tsx
+'use client';
+
+import React, { useState, useCallback, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { CurrencyDollarIcon, TagIcon } from '@heroicons/react/24/outline';
-import { Logger } from '@/services/logging.service';
-import DynamicField from './DynamicField';
-import { PriceData } from '@/contexts/PublicationContext';
+import { CurrencyDollarIcon } from '@heroicons/react/24/outline';
+import { Logger } from '@/services/logging.service'; // Asumiendo que existe
+
+// Define la estructura de datos esperada (ajustada)
+interface PriceData {
+  amount?: number | null;
+  currency?: 'PEN' | 'USD' | null;
+  negotiable?: boolean | null;
+}
 
 interface PriceInputProps {
-  value?: PriceData;
-  onChange: (price: PriceData) => void;
-  currencies?: Array<{
-    code: string;
-    symbol: string;
-    name: string;
-  }>;
+  value?: PriceData; // Recibe el valor actual
+  onChange: (price: PriceData) => void; // Notifica cambios al padre
+  currencies?: Array<{ code: string; symbol: string; name: string }>;
   className?: string;
 }
 
 const DEFAULT_CURRENCIES = [
   { code: 'PEN', symbol: 'S/', name: 'Soles' },
   { code: 'USD', symbol: '$', name: 'Dólares' },
-  { code: 'EUR', symbol: '€', name: 'Euros' }
+  // { code: 'EUR', symbol: '€', name: 'Euros' } // Puedes añadir más si es necesario
 ];
 
-const PRICE_TYPES = [
-  { id: 'fixed', label: 'Precio fijo', icon: CurrencyDollarIcon },
-  { id: 'negotiable', label: 'Negociable', icon: TagIcon },
-  { id: 'free', label: 'Gratis', icon: TagIcon },
-  { id: 'exchange', label: 'Intercambio', icon: CurrencyDollarIcon }
-];
+// Helper para formatear moneda localmente (o usar uno global)
+const formatLocalCurrency = (amount: number, currency: string) => {
+    try {
+        return new Intl.NumberFormat('es-PE', {
+          style: 'decimal', // Cambiado de 'currency' para no incluir el símbolo aquí
+          minimumFractionDigits: 2,
+          maximumFractionDigits: 2
+        }).format(amount);
+    } catch (e) {
+        Logger.error('Error formatting currency:', e);
+        return amount.toFixed(2); // Fallback
+    }
+};
 
 const PriceInput: React.FC<PriceInputProps> = ({
   value,
@@ -35,174 +46,157 @@ const PriceInput: React.FC<PriceInputProps> = ({
   currencies = DEFAULT_CURRENCIES,
   className = ''
 }) => {
-  const [price, setPrice] = useState<PriceData>(value || {
-    amount: 0,
-    currency: 'PEN',
-    type: 'fixed'
-  });
+  // Estado local para manejar los inputs, inicializado desde props
+  const [internalAmount, setInternalAmount] = useState<string>(value?.amount?.toString() || '');
+  const [internalCurrency, setInternalCurrency] = useState<'PEN' | 'USD' | null>(value?.currency || 'PEN');
+  const [isNegotiable, setIsNegotiable] = useState<boolean>(value?.negotiable || false);
+  const [isFree, setIsFree] = useState<boolean>(value?.amount === 0 && !value?.negotiable); // Estado para gratuito
+
+   // Sincronizar estado interno si las props cambian desde fuera
+   useEffect(() => {
+    setInternalAmount(value?.amount?.toString() || '');
+    setInternalCurrency(value?.currency || 'PEN');
+    setIsNegotiable(value?.negotiable || false);
+    setIsFree(value?.amount === 0 && !value?.negotiable);
+  }, [value]);
+
+
+  // Notificar al padre cuando cambie cualquier parte del precio
+  const notifyChange = useCallback((newAmountStr: string, newCurrency: string | null, newNegotiable: boolean, newFree: boolean) => {
+      let finalAmount: number | null = null;
+      if (!newFree) {
+          const parsedAmount = parseFloat(newAmountStr);
+          finalAmount = isNaN(parsedAmount) ? null : parsedAmount; // null si no es número válido
+      } else {
+          finalAmount = 0; // Si es gratis, el monto es 0
+      }
+
+      onChange({
+          amount: finalAmount,
+          currency: newFree ? null : (newCurrency as 'PEN' | 'USD' | null), // Sin moneda si es gratis
+          negotiable: newFree ? false : newNegotiable, // No negociable si es gratis
+      });
+      Logger.debug('Price changed', { amount: finalAmount, currency: newCurrency, negotiable: newNegotiable, free: newFree });
+  }, [onChange]);
 
   const handleAmountChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
-    const amount = parseFloat(e.target.value) || 0;
-    const updatedPrice = { ...price, amount };
-    setPrice(updatedPrice);
-    onChange(updatedPrice);
-    Logger.debug('Price amount changed', { amount });
-  }, [price, onChange]);
+    const amountStr = e.target.value;
+    setInternalAmount(amountStr);
+    // No notificar hasta onBlur o similar para evitar updates en cada tecla
+  }, []);
+
+   const handleAmountBlur = useCallback(() => {
+      // Notificar al padre al perder el foco
+      notifyChange(internalAmount, internalCurrency, isNegotiable, isFree);
+  }, [internalAmount, internalCurrency, isNegotiable, isFree, notifyChange]);
+
 
   const handleCurrencyChange = useCallback((e: React.ChangeEvent<HTMLSelectElement>) => {
-    const currency = e.target.value;
-    const updatedPrice = { ...price, currency };
-    setPrice(updatedPrice);
-    onChange(updatedPrice);
-    Logger.debug('Currency changed', { currency });
-  }, [price, onChange]);
+    const currency = e.target.value as 'PEN' | 'USD' | null;
+    setInternalCurrency(currency);
+    notifyChange(internalAmount, currency, isNegotiable, isFree);
+  }, [internalAmount, isNegotiable, isFree, notifyChange]);
 
-  const handleTypeChange = useCallback((e: React.ChangeEvent<HTMLSelectElement>) => {
-    const type = e.target.value;
-    const updatedPrice = { ...price, type };
-    setPrice(updatedPrice);
-    onChange(updatedPrice);
-    Logger.debug('Price type changed', { type });
-  }, [price, onChange]);
+  const handleNegotiableToggle = useCallback(() => {
+    const newNegotiable = !isNegotiable;
+    setIsNegotiable(newNegotiable);
+    setIsFree(false); // No puede ser negociable y gratis a la vez
+    notifyChange(internalAmount, internalCurrency, newNegotiable, false);
+  }, [isNegotiable, internalAmount, internalCurrency, notifyChange]);
 
-  const formatAmount = (amount: number) => {
-    return new Intl.NumberFormat('es-PE', {
-      style: 'decimal',
-      minimumFractionDigits: 2,
-      maximumFractionDigits: 2
-    }).format(amount);
-  };
+    const handleFreeToggle = useCallback(() => {
+        const newFree = !isFree;
+        setIsFree(newFree);
+        setIsNegotiable(false); // No puede ser gratis y negociable
+        setInternalAmount(newFree ? '0' : ''); // Poner 0 si es gratis, limpiar si no
+        notifyChange(newFree ? '0' : internalAmount, internalCurrency, false, newFree);
+    }, [isFree, internalAmount, internalCurrency, notifyChange]);
 
-  const isPriceDisabled = price.type === 'free' || price.type === 'exchange';
+
+  const currentSymbol = currencies.find(c => c.code === internalCurrency)?.symbol || '';
+  const displayAmount = amount === 0 && isFree ? 'Gratis' : `${currentSymbol} ${formatLocalCurrency(amount ?? 0, currency ?? 'PEN')}`;
 
   return (
-    <div className={`space-y-6 ${className}`}>
-      {/* Tipo de precio */}
-      <div className="space-y-2">
-        <label className="block text-sm font-medium text-gray-700">
-          Tipo de precio
-        </label>
-        <div className="grid grid-cols-4 gap-3">
-          {PRICE_TYPES.map(type => {
-            const Icon = type.icon;
-            return (
-              <button
-                key={type.id}
-                type="button"
-                onClick={() => handleTypeChange(type.id as PriceData['type'])}
-                className={`flex items-center justify-center gap-2 p-3 rounded-xl border-2 transition-all ${
-                  price.type === type.id
-                    ? 'border-primary-500 bg-primary-50 text-primary-700'
-                    : 'border-gray-200 hover:border-primary-200'
-                }`}
-              >
-                <Icon className="w-5 h-5" />
-                <span className="font-medium">{type.label}</span>
-              </button>
-            );
-          })}
-        </div>
+    <div className={`space-y-4 ${className}`}>
+      <label className="block text-sm font-medium text-primary-700 mb-1">Precio</label>
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 items-end">
+         {/* Input Amount y Currency */}
+         <div className="relative">
+            <label htmlFor="amount" className="sr-only">Monto</label>
+            <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+               {/* Icono dinámico basado en moneda */}
+               <span className="text-gray-500 sm:text-sm">{currentSymbol || '$'}</span>
+            </div>
+            <input
+                type="number"
+                name="amount"
+                id="amount"
+                value={internalAmount}
+                onChange={handleAmountChange}
+                onBlur={handleAmountBlur} // Notificar cambio en blur
+                className={`w-full pl-10 pr-20 py-2 bg-white rounded-lg border ${isFree ? 'bg-gray-100 cursor-not-allowed' : 'border-gray-300 focus:border-primary-500 focus:ring-1 focus:ring-primary-500'} transition-all`}
+                placeholder="0.00"
+                step="0.01"
+                min="0"
+                disabled={isFree} // Deshabilitar si es gratis
+                aria-describedby="price-currency"
+            />
+            <div className="absolute inset-y-0 right-0 flex items-center">
+                <label htmlFor="currency" className="sr-only">Moneda</label>
+                <select
+                    id="currency"
+                    name="currency"
+                    value={internalCurrency ?? ''}
+                    onChange={handleCurrencyChange}
+                    className={`h-full py-0 pl-2 pr-7 border-transparent bg-transparent text-gray-500 ${isFree ? 'cursor-not-allowed' : 'focus:border-primary-500 focus:ring-1 focus:ring-primary-500'} rounded-md`}
+                    disabled={isFree}
+                >
+                    {currencies.map(c => (
+                        <option key={c.code} value={c.code}>{c.code}</option>
+                    ))}
+                </select>
+            </div>
+         </div>
+
+         {/* Checkboxes para Negociable y Gratis */}
+         <div className="flex items-center space-x-4 pt-2 md:pt-0">
+            <div className="flex items-center">
+                <input
+                    id="negotiable"
+                    name="negotiable"
+                    type="checkbox"
+                    checked={isNegotiable}
+                    onChange={handleNegotiableToggle}
+                    className={`h-4 w-4 text-primary-600 border-gray-300 rounded focus:ring-primary-500 ${isFree ? 'opacity-50 cursor-not-allowed' : ''}`}
+                    disabled={isFree}
+                />
+                <label htmlFor="negotiable" className={`ml-2 block text-sm ${isFree ? 'text-gray-400' : 'text-gray-700'}`}>
+                    Negociable
+                </label>
+            </div>
+            <div className="flex items-center">
+                 <input
+                     id="free"
+                     name="free"
+                     type="checkbox"
+                     checked={isFree}
+                     onChange={handleFreeToggle}
+                     className={`h-4 w-4 text-green-600 border-gray-300 rounded focus:ring-green-500 ${isNegotiable ? 'opacity-50 cursor-not-allowed' : ''}`}
+                     disabled={isNegotiable && parseFloat(internalAmount) > 0} // Deshabilitar si es negociable y tiene precio > 0
+                 />
+                 <label htmlFor="free" className={`ml-2 block text-sm ${isNegotiable && parseFloat(internalAmount) > 0 ? 'text-gray-400' : 'text-gray-700'}`}>
+                     Gratis
+                 </label>
+            </div>
+         </div>
       </div>
 
-      {/* Campo de precio */}
-      {!isPriceDisabled && (
-        <motion.div
-          initial={{ opacity: 0, height: 0 }}
-          animate={{ opacity: 1, height: 'auto' }}
-          exit={{ opacity: 0, height: 0 }}
-          className="space-y-4"
-        >
-          <div className="relative">
-            <DynamicField
-              type="number"
-              label="Precio"
-              name="price"
-              value={price.amount}
-              onChange={handleAmountChange}
-              onBlur={() => setFocused(false)}
-              placeholder="0.00"
-              required={price.type === 'fixed'}
-              validation={{
-                min: 0,
-                max: 999999999
-              }}
-              helperText={
-                price.type === 'negotiable'
-                  ? 'Establece un precio de referencia'
-                  : 'Ingresa el precio exacto'
-              }
-            />
-
-            {/* Selector de moneda */}
-            <div className="absolute right-0 top-8">
-              <select
-                value={price.currency}
-                onChange={handleCurrencyChange}
-                className="h-12 pl-3 pr-8 border-l-2 border-gray-200 rounded-r-xl bg-gray-50 text-gray-700 focus:outline-none focus:ring-2 focus:ring-primary-500/20"
-                aria-label="Seleccionar moneda"
-              >
-                {currencies.map(currency => (
-                  <option key={currency.code} value={currency.code}>
-                    {currency.symbol} {currency.code}
-                  </option>
-                ))}
-              </select>
-            </div>
-          </div>
-
-          {/* Vista previa del precio */}
-          <motion.div
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            className="flex items-center justify-between px-4 py-3 bg-gray-50 rounded-xl"
-          >
-            <span className="text-sm text-gray-600">Vista previa:</span>
-            <div className="text-right">
-              <span className="text-lg font-bold text-gray-900">
-                {currencies.find(c => c.code === price.currency)?.symbol}{' '}
-                {formatAmount(price.amount)}
-              </span>
-              {price.type === 'negotiable' && (
-                <span className="block text-sm text-gray-500">(Negociable)</span>
-              )}
-            </div>
-          </motion.div>
-        </motion.div>
-      )}
-
-      {/* Mensaje para precio gratis */}
-      {price.type === 'free' && (
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          className="flex items-center gap-3 p-4 bg-green-50 text-green-700 rounded-xl"
-        >
-          <TagIcon className="w-5 h-5" />
-          <span>Este artículo será publicado como gratuito</span>
-        </motion.div>
-      )}
-
-      {price.type === 'exchange' && (
-        <div className="bg-blue-50 rounded-md p-4">
-          <div className="flex">
-            <div className="flex-shrink-0">
-              <CurrencyDollarIcon className="h-5 w-5 text-blue-400" aria-hidden="true" />
-            </div>
-            <div className="ml-3">
-              <h3 className="text-sm font-medium text-blue-800">
-                Intercambio
-              </h3>
-              <div className="mt-2 text-sm text-blue-700">
-                <p>
-                  Has marcado este artículo para intercambio. Puedes especificar qué buscas en la descripción.
-                </p>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
+       {/* Vista previa simplificada */}
+       <div className="text-right text-xs text-gray-500 italic mt-1">
+           {isFree ? "Se mostrará como Gratis" : (isNegotiable ? "Precio base negociable" : "Precio fijo")}
+       </div>
     </div>
   );
 };
 
-export default PriceInput; 
+export default PriceInput;
