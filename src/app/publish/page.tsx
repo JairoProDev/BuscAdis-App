@@ -28,7 +28,7 @@ const STEPS = {
   PREVIEW: 5
 } as const;
 
-const STEP_NAMES = ['Categoría', 'Detalles', 'Imágenes', 'Contacto', 'Publicar'];
+const STEP_NAMES = ['Clasificación', 'Detalles', 'Imágenes', 'Contacto', 'Publicar'];
 
 type StepKey = keyof typeof STEPS;
 type StepValue = typeof STEPS[StepKey];

@@ -25,19 +25,6 @@ const DEFAULT_CURRENCIES = [
 ];
 
 // Helper para formatear moneda localmente (o usar uno global)
-const formatLocalCurrency = (amount: number, currencyCode: string) => {
-    try {
-        return new Intl.NumberFormat('es-PE', {
-          style: 'decimal', // Cambiado de 'currency' para no incluir el símbolo aquí
-          minimumFractionDigits: 2,
-          maximumFractionDigits: 2
-        }).format(amount);
-    } catch (e) {
-        Logger.error('Error formatting currency:', e as Record<string, any>);
-        return amount.toFixed(2); // Fallback
-    }
-};
-
 const PriceInput: React.FC<PriceInputProps> = ({
   initialValue: value, // Renombramos internamente para no cambiar todo el código
   onChange,
@@ -78,7 +65,7 @@ const PriceInput: React.FC<PriceInputProps> = ({
         Logger.debug('Price changed', { amount: finalAmount, currency: newCurrency, negotiable: newNegotiable, free: newFree });
       } catch (e) {
         // Silently fail if logger throws an error
-        console.error('Logging error:', e);
+        console.error('Logging error:', (e as Error).message);
       }
   }, [onChange]);
 
@@ -114,10 +101,6 @@ const PriceInput: React.FC<PriceInputProps> = ({
         setInternalAmount(newFree ? '0' : ''); // Poner 0 si es gratis, limpiar si no
         notifyChange(newFree ? '0' : internalAmount, internalCurrency, false, newFree);
     }, [isFree, internalAmount, internalCurrency, notifyChange]);
-
-  // Calcular amount desde el estado interno
-  const amount = internalAmount ? parseFloat(internalAmount) : null;
-  const currency = internalCurrency;
 
   const currentSymbol = currencies.find(c => c.code === internalCurrency)?.symbol || '';
 
