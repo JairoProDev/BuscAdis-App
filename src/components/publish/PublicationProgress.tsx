@@ -1,51 +1,87 @@
 'use client';
 
 import React from 'react';
+import { CheckIcon } from '@heroicons/react/24/solid';
 
 interface PublicationProgressProps {
   progress: number;
-  steps?: string[];
-  currentStep?: number;
+  steps: string[];
+  currentStep: number;
 }
 
-const PublicationProgress: React.FC<PublicationProgressProps> = ({ 
-  progress, 
-  steps = [], 
-  currentStep = 0 
-}) => {
+const PublicationProgress: React.FC<PublicationProgressProps> = ({ progress, steps, currentStep }) => {
   return (
-    <div className="w-full mb-6">
-      <div className="relative pt-1">
-        <div className="flex mb-2 items-center justify-between">
-          <div>
-            <span className="text-xs font-semibold inline-block py-1 px-2 uppercase rounded-full text-primary-600 bg-primary-200">
-              Progreso
-            </span>
-          </div>
-          <div className="text-right">
-            <span className="text-xs font-semibold inline-block text-primary-600">
-              {Math.round(progress)}%
-            </span>
-          </div>
+    <div className="mb-8">
+      <div className="flex justify-between items-center mb-1">
+        <h1 className="text-2xl font-bold text-gray-900">Publicar Anuncio</h1>
+        <div className="text-sm font-medium text-primary-700">
+          {Math.round(progress)}% completado
         </div>
-        <div className="overflow-hidden h-2 mb-4 text-xs flex rounded bg-primary-200">
-          <div 
-            style={{ width: `${progress}%` }}
-            className="shadow-none flex flex-col text-center whitespace-nowrap text-white justify-center bg-primary-500 transition-all duration-300"
-          />
-        </div>
-        {steps.length > 0 && (
-          <div className="flex justify-between">
-            {steps.map((step, index) => (
+      </div>
+      
+      {/* Barra de progreso */}
+      <div className="w-full bg-gray-200 rounded-full h-2.5 mb-4">
+        <div
+          className="h-2.5 rounded-full bg-gradient-to-r from-primary-400 to-primary-600 transition-all duration-500 ease-out"
+          style={{ width: `${progress}%` }}
+        />
+      </div>
+
+      {/* Pasos (versión dispositivos medianos y grandes) */}
+      <div className="hidden md:flex justify-between">
+        {steps.map((step, index) => {
+          const isCompleted = index < currentStep;
+          const isCurrent = index === currentStep;
+          
+          return (
+            <div key={index} className="flex flex-col items-center">
               <div 
-                key={step} 
-                className={`flex-1 text-center ${index <= currentStep ? 'text-primary-600 font-semibold' : 'text-gray-400'}`}
+                className={`flex items-center justify-center w-8 h-8 rounded-full mb-1 transition-all ${
+                  isCompleted 
+                    ? 'bg-primary-600 text-white' 
+                    : isCurrent 
+                      ? 'bg-primary-100 text-primary-700 border-2 border-primary-600' 
+                      : 'bg-gray-100 text-gray-500'
+                }`}
               >
-                {step}
+                {isCompleted ? (
+                  <CheckIcon className="w-5 h-5" />
+                ) : (
+                  <span className="text-sm font-medium">{index + 1}</span>
+                )}
               </div>
-            ))}
+              <span className={`text-xs ${
+                isCurrent ? 'font-semibold text-primary-700' : 
+                isCompleted ? 'font-medium text-gray-700' : 'text-gray-500'
+              }`}>
+                {step}
+              </span>
+            </div>
+          );
+        })}
+      </div>
+
+      {/* Pasos (versión móvil) */}
+      <div className="md:hidden flex items-center justify-between bg-gray-50 p-2 rounded-lg">
+        <div className="flex items-center">
+          <div 
+            className={`flex items-center justify-center w-6 h-6 rounded-full mr-2 ${
+              currentStep > 0 ? 'bg-primary-600 text-white' : 'bg-primary-100 text-primary-700 border-2 border-primary-600'
+            }`}
+          >
+            {currentStep > 0 ? (
+              <CheckIcon className="w-4 h-4" />
+            ) : (
+              <span className="text-xs font-medium">1</span>
+            )}
           </div>
-        )}
+          <span className="text-sm font-medium text-gray-800">
+            {steps[currentStep]}
+          </span>
+        </div>
+        <span className="text-xs text-gray-500">
+          Paso {currentStep + 1} de {steps.length}
+        </span>
       </div>
     </div>
   );

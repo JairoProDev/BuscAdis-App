@@ -261,7 +261,7 @@ export default function PublishPage() {
   type ClassificationData = {
     categorySlug: string;
     subcategorySlug: string;
-    subSubcategorySlug: string | null;
+    subSubcategorySlug?: string | null;
   };
 
   type PriceData = {
@@ -270,19 +270,9 @@ export default function PublishPage() {
     negotiable: boolean;
   };
 
-  type LocationData = {
-    district: string;
-    address: string;
-    referencePoint: string;
-    coordinates: { lat: number; lng: number } | null;
-  };
+  type LocationData = PublicationLocation;
 
-  type ContactData = {
-    phones: string[];
-    email: string;
-    name: string;
-    website: string;
-  };
+  type ContactData = PublicationContact;
 
   const handleClassificationChange = useCallback((slugs: ClassificationData) => {
     updateAd({
@@ -403,12 +393,12 @@ export default function PublishPage() {
       case STEPS.CATEGORY:
         return (
           <CategorySelector 
-            initialValue={{
+            selectedCategory={{
               categorySlug: ad.categorySlug || '',
               subcategorySlug: ad.subcategorySlug || '',
               subSubcategorySlug: ad.subSubcategorySlug || ''
             }}
-            onSelect={handleClassificationChange}
+            onCategorySelect={handleClassificationChange}
           />
         );
       case STEPS.DETAILS:
@@ -445,19 +435,19 @@ export default function PublishPage() {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div>
                 <PriceInput
-                  initialValue={{
+                  price={{
                     amount: ad.amount || null,
                     currency: ad.currency || 'PEN',
                     negotiable: ad.negotiable || false
                   }}
-                  onChange={handlePriceChange}
+                  onPriceChange={handlePriceChange}
                 />
               </div>
               
               <div>
                 <LocationSelector
-                  initialValue={ad.location}
-                  onChange={handleLocationChange}
+                  location={ad.location as PublicationLocation}
+                  onLocationChange={handleLocationChange}
                 />
               </div>
             </div>
@@ -474,8 +464,8 @@ export default function PublishPage() {
       case STEPS.CONTACT:
         return (
           <ContactForm
-            initialValue={ad.contact}
-            onChange={handleContactChange}
+            contactData={ad.contact as PublicationContact}
+            onContactChange={handleContactChange}
           />
         );
       case STEPS.PREVIEW:
@@ -521,10 +511,9 @@ export default function PublishPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 py-6">
-      <div className="max-w-6xl mx-auto px-4">
+    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 py-6">
+      <div className="max-w-7xl mx-auto px-4">
         <div className="mb-6">
-          <h1 className="text-2xl font-bold text-gray-900 mb-2">Publicar anuncio</h1>
           <PublicationProgress 
             progress={progress} 
             steps={STEP_NAMES}
@@ -534,8 +523,8 @@ export default function PublishPage() {
 
         <div className="flex flex-col lg:flex-row gap-6">
           {/* Columna principal */}
-          <div className="lg:w-8/12">
-            <div className="bg-white shadow rounded-lg p-5 mb-6">
+          <div className="lg:w-7/12">
+            <div className="bg-white shadow-lg rounded-xl p-6 mb-6 border border-gray-200">
               {/* Tip de optimización */}
               <div className="mb-4 bg-blue-50 border-l-4 border-blue-500 p-3 rounded">
                 <div className="flex">
@@ -560,7 +549,7 @@ export default function PublishPage() {
                     animate={{ opacity: 1, y: 0 }}
                     exit={{ opacity: 0, y: -10 }}
                     transition={{ duration: 0.2 }}
-                    className="max-h-[480px] overflow-y-auto pr-1 custom-scrollbar"
+                    className="max-h-[520px] overflow-y-auto pr-1 custom-scrollbar"
                   >
                     {renderStepContent()}
                   </motion.div>
@@ -585,9 +574,9 @@ export default function PublishPage() {
             </div>
             
             {/* Indicador de calidad */}
-            <div className="bg-white shadow rounded-lg p-4 mb-6">
+            <div className="bg-white shadow-lg rounded-xl p-5 mb-6 border border-gray-200">
               <div className="flex items-center justify-between mb-2">
-                <h3 className="text-sm font-semibold">Calidad del anuncio</h3>
+                <h3 className="text-sm font-semibold text-gray-800">Calidad del anuncio</h3>
                 <div className="flex items-center">
                   {[1,2,3,4,5].map((star) => (
                     <StarIcon 
@@ -614,21 +603,30 @@ export default function PublishPage() {
           </div>
           
           {/* Columna de vista previa */}
-          <div className="lg:w-4/12">
+          <div className="lg:w-5/12">
             <div className="sticky top-6">
-              <div className="bg-white shadow rounded-lg p-4 mb-4">
-                <h3 className="text-sm font-medium text-gray-700 mb-3 flex items-center">
-                  <span className="mr-2">Vista previa en vivo</span>
-                  <span className="animate-pulse flex h-2 w-2 rounded-full bg-green-500"></span>
+              <div className="bg-white shadow-lg rounded-xl p-4 mb-4">
+                <h3 className="text-sm font-medium text-gray-700 mb-3 flex items-center justify-between">
+                  <span className="flex items-center">
+                    <span className="animate-pulse h-2 w-2 rounded-full bg-green-500 mr-2"></span>
+                    Vista previa en vivo
+                  </span>
+                  <span className="text-xs text-gray-500">Actualización automática</span>
                 </h3>
                 <LivePreview ad={ad} />
               </div>
               
-              <div className="bg-white shadow rounded-lg p-4">
-                <h3 className="text-sm font-medium text-gray-700 mb-3">Logros</h3>
-                <div className="space-y-3">
+              <div className="bg-white shadow-lg rounded-xl p-5 border border-gray-200">
+                <h3 className="text-sm font-semibold text-gray-800 mb-3 flex items-center">
+                  <StarIcon className="h-4 w-4 text-yellow-500 mr-1.5" />
+                  Logros desbloqueados
+                </h3>
+                <div className="space-y-3 mb-4">
                   <div className="flex items-center justify-between">
-                    <span className="text-xs text-gray-600">Categoría seleccionada</span>
+                    <span className="text-xs text-gray-600 flex items-center">
+                      <span className={`h-3 w-3 rounded-full mr-1.5 ${achievements.completed.includes('category') ? 'bg-green-500' : 'bg-gray-200'}`}></span>
+                      Categoría seleccionada
+                    </span>
                     {achievements.completed.includes('category') ? (
                       <CheckIcon className="h-4 w-4 text-green-500" />
                     ) : (
@@ -636,7 +634,10 @@ export default function PublishPage() {
                     )}
                   </div>
                   <div className="flex items-center justify-between">
-                    <span className="text-xs text-gray-600">Título y descripción</span>
+                    <span className="text-xs text-gray-600 flex items-center">
+                      <span className={`h-3 w-3 rounded-full mr-1.5 ${achievements.completed.includes('details') ? 'bg-green-500' : 'bg-gray-200'}`}></span>
+                      Título y descripción
+                    </span>
                     {achievements.completed.includes('details') ? (
                       <CheckIcon className="h-4 w-4 text-green-500" />
                     ) : (
@@ -644,7 +645,10 @@ export default function PublishPage() {
                     )}
                   </div>
                   <div className="flex items-center justify-between">
-                    <span className="text-xs text-gray-600">Ubicación</span>
+                    <span className="text-xs text-gray-600 flex items-center">
+                      <span className={`h-3 w-3 rounded-full mr-1.5 ${achievements.completed.includes('location') ? 'bg-green-500' : 'bg-gray-200'}`}></span>
+                      Ubicación
+                    </span>
                     {achievements.completed.includes('location') ? (
                       <CheckIcon className="h-4 w-4 text-green-500" />
                     ) : (
@@ -652,7 +656,10 @@ export default function PublishPage() {
                     )}
                   </div>
                   <div className="flex items-center justify-between">
-                    <span className="text-xs text-gray-600">Imágenes (min. 2)</span>
+                    <span className="text-xs text-gray-600 flex items-center">
+                      <span className={`h-3 w-3 rounded-full mr-1.5 ${achievements.completed.includes('images') ? 'bg-green-500' : 'bg-gray-200'}`}></span>
+                      Imágenes (min. 2)
+                    </span>
                     {achievements.completed.includes('images') ? (
                       <CheckIcon className="h-4 w-4 text-green-500" />
                     ) : (
@@ -660,19 +667,42 @@ export default function PublishPage() {
                     )}
                   </div>
                   <div className="flex items-center justify-between">
-                    <span className="text-xs text-gray-600">Contacto</span>
+                    <span className="text-xs text-gray-600 flex items-center">
+                      <span className={`h-3 w-3 rounded-full mr-1.5 ${achievements.completed.includes('contact') ? 'bg-green-500' : 'bg-gray-200'}`}></span>
+                      Contacto
+                    </span>
                     {achievements.completed.includes('contact') ? (
                       <CheckIcon className="h-4 w-4 text-green-500" />
                     ) : (
                       <div className="h-4 w-4 rounded-full border border-gray-300"></div>
                     )}
                   </div>
-                  <div className="pt-2 text-center">
-                    <span className="text-xs font-semibold bg-primary-100 text-primary-800 px-2 py-1 rounded-full">
-                      {achievements.points} puntos
-                    </span>
-                  </div>
                 </div>
+                <div className="bg-gray-50 rounded-lg p-3 flex justify-between items-center">
+                  <div className="flex items-center">
+                    <FireIcon className="h-4 w-4 text-orange-500 mr-1.5" />
+                    <span className="text-xs font-medium text-gray-700">Puntos acumulados</span>
+                  </div>
+                  <span className="text-xs font-bold bg-gradient-to-r from-primary-500 to-primary-700 text-white px-3 py-1 rounded-full">
+                    {achievements.points} pts
+                  </span>
+                </div>
+                {achievements.badges.length > 0 && (
+                  <div className="mt-3 flex flex-wrap gap-2 justify-center">
+                    {achievements.badges.map((badge) => (
+                      <div key={badge} className="flex flex-col items-center">
+                        <div className={`w-8 h-8 rounded-full flex items-center justify-center ${
+                          badge === 'bronce' ? 'bg-amber-700' : 
+                          badge === 'plata' ? 'bg-gray-400' : 
+                          'bg-yellow-500'
+                        } text-white shadow-md`}>
+                          <CheckIcon className="h-5 w-5" />
+                        </div>
+                        <span className="text-[10px] mt-1 capitalize">{badge}</span>
+                      </div>
+                    ))}
+                  </div>
+                )}
               </div>
             </div>
           </div>
