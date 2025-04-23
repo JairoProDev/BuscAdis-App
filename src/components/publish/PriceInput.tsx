@@ -14,7 +14,7 @@ interface PriceData {
 }
 
 interface PriceInputProps {
-  value?: PriceData; // Recibe el valor actual
+  initialValue?: PriceData; // Cambiado de value a initialValue
   onChange: (price: PriceData) => void; // Notifica cambios al padre
   currencies?: Array<{ code: string; symbol: string; name: string }>;
   className?: string;
@@ -41,7 +41,7 @@ const formatLocalCurrency = (amount: number, currency: string) => {
 };
 
 const PriceInput: React.FC<PriceInputProps> = ({
-  value,
+  initialValue: value, // Renombramos internamente para no cambiar todo el código
   onChange,
   currencies = DEFAULT_CURRENCIES,
   className = ''

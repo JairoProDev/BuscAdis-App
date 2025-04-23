@@ -6,7 +6,7 @@ import { MapPinIcon, GlobeAltIcon } from '@heroicons/react/24/outline'
 import { Logger } from '@/services/logging.service'
 
 interface LocationSelectorProps {
-  value?: LocationData
+  initialValue?: LocationData
   onChange: (location: LocationData) => void
   className?: string
 }
@@ -30,7 +30,7 @@ const cities = {
 }
 
 const LocationSelector: React.FC<LocationSelectorProps> = ({ 
-  value,
+  initialValue: value,
   onChange,
   className = ''
 }) => {

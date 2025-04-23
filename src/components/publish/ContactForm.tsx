@@ -12,13 +12,13 @@ import 'react-international-phone/style.css'; // Estilos para PhoneInput
 type ContactFormData = Publication['contact'];
 
 interface ContactFormProps {
-  value?: Partial<ContactFormData>; // Puede recibir datos parciales
+  initialValue?: Partial<ContactFormData>; // Puede recibir datos parciales
   onChange: (contactData: ContactFormData) => void;
   className?: string;
 }
 
 const ContactForm: React.FC<ContactFormProps> = ({
-  value,
+  initialValue: value,
   onChange,
   className = ''
 }) => {

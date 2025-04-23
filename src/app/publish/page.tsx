@@ -15,8 +15,9 @@ import StepNavigation from '@/components/publish/StepNavigation';
 import SuccessMessage from '@/components/publish/SuccessMessage';
 import PublishAchievements from '@/components/publish/PublishAchievements';
 import { StarIcon, FireIcon, CheckIcon } from '@heroicons/react/24/solid';
-import { PublicationFormData } from '@/types/publication';
+import { PublicationFormData, PublicationLocation, PublicationContact } from '@/types/publication';
 import { Logger } from '@/services/logging.service';
+import { categoriesList } from '@/data/categories-data';
 
 // Definir los pasos
 const STEPS = {
@@ -192,16 +193,34 @@ export default function PublishPage() {
     return Math.min(100, quality);
   }, [ad]);
 
-  // Validación de pasos
+  // Definir tipos para los datos que pasan a los componentes
+  type ClassificationData = {
+    categorySlug: string;
+    subcategorySlug: string;
+    subSubcategorySlug?: string | null;
+  };
+
+  type PriceData = {
+    amount: number | null;
+    currency: string;
+    negotiable: boolean;
+  };
+
+  type LocationData = PublicationLocation;
+
+  type ContactData = PublicationContact;
+
+  // Validación de pasos - Definido primero para evitar el error de inicialización
   const validateStep = useCallback((currentStep: StepValue): boolean => {
     const errors: string[] = [];
     setError('');
 
     switch (currentStep) {
       case STEPS.CATEGORY:
-        if (!ad.categorySlug || !ad.subcategorySlug) {
-          errors.push('Debes seleccionar categoría y subcategoría.');
+        if (!ad.categorySlug) {
+          errors.push('Debes seleccionar una categoría.');
         }
+        // No validar subcategoría aquí, para permitir selección en un solo paso
         break;
       case STEPS.DETAILS:
         if (!ad.title || ad.title.trim().length < 5) {
@@ -240,7 +259,22 @@ export default function PublishPage() {
       return false;
     }
     return true;
-  }, [ad]);
+  }, [ad, setError]);
+
+  // Navegación entre pasos - Definido después de validateStep
+  const handleNext = useCallback(() => {
+    if (validateStep(step)) {
+      setError('');
+      setStep(prevStep => Math.min(prevStep + 1, Object.keys(STEPS).length) as StepValue);
+      Logger.info(`Avanzando al paso ${step + 1}`);
+    }
+  }, [step, validateStep, setError]);
+
+  const handlePrevious = useCallback(() => {
+    setError('');
+    setStep(prevStep => Math.max(prevStep - 1, 1) as StepValue);
+    Logger.info(`Retrocediendo al paso ${step - 1}`);
+  }, [step]);
 
   // Actualizar anuncio y logros
   const updateAd = useCallback((newAdData: Partial<PublicationFormData>) => {
@@ -257,33 +291,45 @@ export default function PublishPage() {
     updateAd({ [name]: value });
   }, [updateAd]);
 
-  // Definir tipos para los datos que pasan a los componentes
-  type ClassificationData = {
-    categorySlug: string;
-    subcategorySlug: string;
-    subSubcategorySlug?: string | null;
-  };
-
-  type PriceData = {
-    amount: number | null;
-    currency: string;
-    negotiable: boolean;
-  };
-
-  type LocationData = PublicationLocation;
-
-  type ContactData = PublicationContact;
-
   const handleClassificationChange = useCallback((slugs: ClassificationData) => {
     updateAd({
       categorySlug: slugs.categorySlug,
       subcategorySlug: slugs.subcategorySlug,
       subSubcategorySlug: slugs.subSubcategorySlug || '',
     });
+    
+    // Si se ha completado la selección completa (categoría, subcategoría y subSubcategoría), avanzar automáticamente
+    if (slugs.categorySlug && slugs.subcategorySlug && slugs.subSubcategorySlug) {
+      // Pequeño retraso para permitir que la UI se actualice
+      setTimeout(() => {
+        if (validateStep(STEPS.CATEGORY)) {
+          setStep(prevStep => Math.min(prevStep + 1, Object.keys(STEPS).length) as StepValue);
+          Logger.info(`Avanzando al paso ${step + 1} automáticamente después de seleccionar sub-subcategoría`);
+        }
+      }, 800);
+    } 
+    // También avanzar si se seleccionó subcategoría sin sub-subcategoría disponible
+    else if (slugs.categorySlug && slugs.subcategorySlug) {
+      // Comprobar si esta subcategoría tiene sub-subcategorías
+      const category = categoriesList.find(c => c.id === slugs.categorySlug);
+      const subcategory = category?.subcategories?.find(s => s.id === slugs.subcategorySlug);
+      const hasSubSubcategories = subcategory?.subSubcategories && subcategory.subSubcategories.length > 0;
+      
+      if (!hasSubSubcategories) {
+        // Pequeño retraso para permitir que la UI se actualice
+        setTimeout(() => {
+          if (validateStep(STEPS.CATEGORY)) {
+            setStep(prevStep => Math.min(prevStep + 1, Object.keys(STEPS).length) as StepValue);
+            Logger.info(`Avanzando al paso ${step + 1} automáticamente después de seleccionar subcategoría final`);
+          }
+        }, 800);
+      }
+    }
+    
     Logger.info('Categoría seleccionada', slugs);
-  }, [updateAd]);
+  }, [updateAd, validateStep, setStep, step, categoriesList]);
 
-  const handlePriceChange = useCallback((priceData: PriceData) => {
+  const handlePriceChange = useCallback((priceData: any) => {
     updateAd({
       amount: priceData.amount,
       currency: priceData.currency,
@@ -291,51 +337,35 @@ export default function PublishPage() {
     });
   }, [updateAd]);
 
-  const handleLocationChange = useCallback((locationData: LocationData) => {
+  const handleLocationChange = useCallback((locationData: any) => {
+    // Asegurarse de que los datos de ubicación tienen la estructura correcta
     updateAd({
       location: {
-        ...ad.location!,
-        province: 'Cusco',
-        district: locationData.district,
-        address: locationData.address,
-        referencePoint: locationData.referencePoint,
-        coordinates: locationData.coordinates,
+        province: locationData.province || 'Cusco',
+        district: locationData.district || '',
+        address: locationData.address || '',
+        referencePoint: locationData.referencePoint || '',
+        coordinates: locationData.coordinates || null,
       }
     });
-  }, [ad.location, updateAd]);
+  }, [updateAd]);
 
-  const handleContactChange = useCallback((contactData: ContactData) => {
+  const handleContactChange = useCallback((contactData: any) => {
     updateAd({
       contact: {
-        ...ad.contact!,
-        phones: contactData.phones,
-        email: contactData.email,
-        name: contactData.name,
-        website: contactData.website,
+        phones: contactData.phones || [],
+        email: contactData.email || '',
+        name: contactData.name || '',
+        website: contactData.website || '',
       }
     });
-  }, [ad.contact, updateAd]);
+  }, [updateAd]);
 
   const handleImagesChange = useCallback((imageUrls: string[]) => {
     updateAd({
       images: imageUrls
     });
   }, [updateAd]);
-
-  // Navegación entre pasos
-  const handleNext = useCallback(() => {
-    if (validateStep(step)) {
-      setError('');
-      setStep(prevStep => Math.min(prevStep + 1, Object.keys(STEPS).length) as StepValue);
-      Logger.info(`Avanzando al paso ${step + 1}`);
-    }
-  }, [step, validateStep]);
-
-  const handlePrevious = useCallback(() => {
-    setError('');
-    setStep(prevStep => Math.max(prevStep - 1, 1) as StepValue);
-    Logger.info(`Retrocediendo al paso ${step - 1}`);
-  }, [step]);
 
   // Submit final
   const handleSubmit = useCallback(async () => {
@@ -399,6 +429,7 @@ export default function PublishPage() {
               subSubcategorySlug: ad.subSubcategorySlug || ''
             }}
             onCategorySelect={handleClassificationChange}
+            autoAdvance={true}
           />
         );
       case STEPS.DETAILS:
@@ -435,19 +466,19 @@ export default function PublishPage() {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div>
                 <PriceInput
-                  price={{
+                  initialValue={{
                     amount: ad.amount || null,
                     currency: ad.currency || 'PEN',
                     negotiable: ad.negotiable || false
                   }}
-                  onPriceChange={handlePriceChange}
+                  onChange={handlePriceChange}
                 />
               </div>
               
               <div>
                 <LocationSelector
-                  location={ad.location as PublicationLocation}
-                  onLocationChange={handleLocationChange}
+                  initialValue={ad.location as PublicationLocation}
+                  onChange={handleLocationChange}
                 />
               </div>
             </div>
@@ -464,8 +495,8 @@ export default function PublishPage() {
       case STEPS.CONTACT:
         return (
           <ContactForm
-            contactData={ad.contact as PublicationContact}
-            onContactChange={handleContactChange}
+            initialValue={ad.contact as PublicationContact}
+            onChange={handleContactChange}
           />
         );
       case STEPS.PREVIEW:
