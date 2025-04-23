@@ -2,8 +2,6 @@
 'use client';
 
 import React, { useState, useCallback, useEffect } from 'react';
-import { motion } from 'framer-motion';
-import { CurrencyDollarIcon } from '@heroicons/react/24/outline';
 import { Logger } from '@/services/logging.service'; // Asumiendo que existe
 
 // Define la estructura de datos esperada (ajustada)
@@ -27,7 +25,7 @@ const DEFAULT_CURRENCIES = [
 ];
 
 // Helper para formatear moneda localmente (o usar uno global)
-const formatLocalCurrency = (amount: number, currency: string) => {
+const formatLocalCurrency = (amount: number, currencyCode: string) => {
     try {
         return new Intl.NumberFormat('es-PE', {
           style: 'decimal', // Cambiado de 'currency' para no incluir el símbolo aquí
@@ -35,7 +33,7 @@ const formatLocalCurrency = (amount: number, currency: string) => {
           maximumFractionDigits: 2
         }).format(amount);
     } catch (e) {
-        Logger.error('Error formatting currency:', e);
+        Logger.error('Error formatting currency:', e as Record<string, any>);
         return amount.toFixed(2); // Fallback
     }
 };
@@ -76,7 +74,12 @@ const PriceInput: React.FC<PriceInputProps> = ({
           currency: newFree ? null : (newCurrency as 'PEN' | 'USD' | null), // Sin moneda si es gratis
           negotiable: newFree ? false : newNegotiable, // No negociable si es gratis
       });
-      Logger.debug('Price changed', { amount: finalAmount, currency: newCurrency, negotiable: newNegotiable, free: newFree });
+      try {
+        Logger.debug('Price changed', { amount: finalAmount, currency: newCurrency, negotiable: newNegotiable, free: newFree });
+      } catch (e) {
+        // Silently fail if logger throws an error
+        console.error('Logging error:', e);
+      }
   }, [onChange]);
 
   const handleAmountChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
@@ -112,9 +115,11 @@ const PriceInput: React.FC<PriceInputProps> = ({
         notifyChange(newFree ? '0' : internalAmount, internalCurrency, false, newFree);
     }, [isFree, internalAmount, internalCurrency, notifyChange]);
 
+  // Calcular amount desde el estado interno
+  const amount = internalAmount ? parseFloat(internalAmount) : null;
+  const currency = internalCurrency;
 
   const currentSymbol = currencies.find(c => c.code === internalCurrency)?.symbol || '';
-  const displayAmount = amount === 0 && isFree ? 'Gratis' : `${currentSymbol} ${formatLocalCurrency(amount ?? 0, currency ?? 'PEN')}`;
 
   return (
     <div className={`space-y-4 ${className}`}>
