@@ -1,3 +1,5 @@
+'use client';
+
 import { useState, useEffect } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import Image from 'next/image';
@@ -16,7 +18,7 @@ import {
   EyeIcon,
   HomeIcon,
   KeyIcon,
-  SquaresFourIcon
+  Squares2X2Icon
 } from '@heroicons/react/24/outline';
 import { generateSeoUrl, slugify } from '@/utils/url';
 import RelatedPublications from '@/components/publication/RelatedPublications';
@@ -195,7 +197,7 @@ export default function InmuebleDetailPageContent({ publication: initialPublicat
                   <div className="grid grid-cols-2 md:grid-cols-3 gap-4 text-sm">
                     {attributes.area && (
                       <div className="flex items-center text-gray-600">
-                        <SquaresFourIcon className="w-4 h-4 mr-2 text-blue-500" />
+                        <Squares2X2Icon className="w-4 h-4 mr-2 text-blue-500" />
                         <span>Área: {attributes.area} m²</span>
                       </div>
                     )}

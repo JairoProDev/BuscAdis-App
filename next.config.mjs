@@ -36,11 +36,15 @@ const nextConfig = {
   // Configure image remote patterns (replaces deprecated domains)
   images: {
     remotePatterns: [
-      { protocol: "http", hostname: "localhost" }, // Added protocol for clarity
+      { protocol: "http", hostname: "localhost" },
       { protocol: "https", hostname: "buscadis.com" },
       { protocol: "https", hostname: "storage.googleapis.com" },
       { protocol: "https", hostname: "cdn.buscadis.com" },
-      // Add any other domains needed here
+      { protocol: "https", hostname: "buscadis-storage.s3.amazonaws.com" },
+      { protocol: "https", hostname: "images.unsplash.com" },
+      { protocol: "https", hostname: "randomuser.me" },
+      { protocol: "https", hostname: "res.cloudinary.com" },
+      { protocol: "https", hostname: "via.placeholder.com" },
     ],
   },
 };

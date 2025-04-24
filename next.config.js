@@ -10,12 +10,27 @@ const nextConfig = {
     ignoreDuringBuilds: true,
   },
   images: {
-    domains: [
-      "buscadis-storage.s3.amazonaws.com",
-      "images.unsplash.com",
-      "randomuser.me",
-      "res.cloudinary.com",
-      "via.placeholder.com",
+    remotePatterns: [
+      {
+        protocol: "https",
+        hostname: "buscadis-storage.s3.amazonaws.com",
+      },
+      {
+        protocol: "https",
+        hostname: "images.unsplash.com",
+      },
+      {
+        protocol: "https",
+        hostname: "randomuser.me",
+      },
+      {
+        protocol: "https",
+        hostname: "res.cloudinary.com",
+      },
+      {
+        protocol: "https",
+        hostname: "via.placeholder.com",
+      },
     ],
   },
   // Provide MongoDB URI via serverRuntimeConfig for server-side only

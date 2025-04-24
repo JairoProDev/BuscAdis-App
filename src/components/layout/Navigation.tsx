@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
+import Image from 'next/image'
 import { HomeIcon, NewspaperIcon, MagnifyingGlassIcon, PlusCircleIcon, MegaphoneIcon } from '@heroicons/react/24/outline'
 import { UserCircleIcon, BellIcon } from '@heroicons/react/24/solid'; // Iconos adicionales
 import { motion, useScroll } from 'framer-motion';
@@ -56,9 +57,15 @@ export default function Navigation() {
                 <div className="flex items-center justify-between h-full">
                     {/* Logo y Navegación Izquierda (Desktop y Mobile) */}
                     <div className="flex items-center justify-between w-full md:w-auto">
-                        <Link href="/" className={`text-2xl font-bold ${logoTextColor}`}>
+                        <Link href="/" className={`text-2xl font-bold ${logoTextColor} flex items-center gap-2`}>
+                            <Image 
+                                src="/favicon.ico" 
+                                alt="BuscAdis Logo" 
+                                width={32} 
+                                height={32}
+                                className="w-8 h-8"
+                            />
                             BuscAdis
-                            {/* Puedes añadir tu logo aquí */}
                         </Link>
                         {/* Botón del menú móvil */}
                         <div className="md:hidden">
