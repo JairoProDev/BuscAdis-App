@@ -5,6 +5,7 @@ import Image from 'next/image';
 import { cn } from '@/lib/utils';
 import { Category, SubSubcategory, Subcategory } from '../types';
 import { getCategoryColor } from '../utils';
+import { motion } from 'framer-motion';
 
 export type CategoryCardVariant = 'square' | 'horizontal';
 
@@ -35,41 +36,44 @@ export const CategoryCard: React.FC<CategoryCardProps> = ({
   // Obtener el color para la categoría (aplica a todos los tipos)
   const color = getCategoryColor(category.slug);
 
-  // Configurar clases base para el botón
-  const baseClasses = 'group relative rounded-lg transition-all duration-200 overflow-hidden';
-  
-  // Clases específicas según el tipo de variante
-  const variantClasses = {
-    square: isActive
-      ? `bg-${color}-100 border-2 border-${color}-400 shadow-md`
-      : `bg-white border border-gray-200 hover:border-${color}-400 hover:shadow-md`,
-    horizontal: isActive
-      ? `bg-${color}-100 border-2 border-${color}-400 shadow-md`
-      : `bg-white border border-gray-200 hover:border-${color}-400 hover:shadow-md`,
-  };
-
   return (
-    <button
+    <motion.button
       onClick={onClick}
+      whileHover={{ scale: 1.03 }}
+      whileTap={{ scale: 0.98 }}
+      transition={{ duration: 0.2 }}
       className={cn(
-        baseClasses,
-        variantClasses[variant],
-        {
-          'w-full h-28 p-2 flex flex-col items-center justify-center text-center': variant === 'square',
-          'w-full p-3 flex items-center gap-3': variant === 'horizontal',
-        }
+        'group relative rounded-xl overflow-hidden transition-all duration-300',
+        variant === 'square' ? 'w-full h-32 flex flex-col items-center justify-center text-center' : 'w-full py-3 px-4 flex items-center gap-4',
+        isActive 
+          ? `bg-gradient-to-br from-white to-${color}-50 shadow-md border border-${color}-300` 
+          : `bg-white hover:bg-gradient-to-br hover:from-white hover:to-${color}-50 border border-gray-100 hover:border-${color}-200 hover:shadow-lg`
       )}
     >
+      {/* Círculo decorativo de fondo */}
+      <div 
+        className={cn(
+          'absolute opacity-0 group-hover:opacity-100 transition-opacity duration-300',
+          variant === 'square' ? '-bottom-6 -right-6' : '-right-4 top-1/2 transform -translate-y-1/2'
+        )}
+        style={{
+          width: variant === 'square' ? '120px' : '80px',
+          height: variant === 'square' ? '120px' : '80px',
+          background: `radial-gradient(circle, rgba(var(--${color}-200-rgb), 0.4) 0%, rgba(var(--${color}-200-rgb), 0) 70%)`,
+          borderRadius: '50%',
+        }}
+      />
+
       {isMainCategory && (
         <div className={cn(
-          variant === 'square' ? 'w-12 h-12 mb-2' : 'w-10 h-10',
-          'relative overflow-hidden rounded-lg'
+          variant === 'square' ? 'w-16 h-16 mb-3' : 'w-12 h-12',
+          'relative overflow-hidden rounded-full shadow-sm'
         )}>
           <Image
             src={category.image as string}
             alt={category.name}
-            width={variant === 'square' ? 48 : 40}
-            height={variant === 'square' ? 48 : 40}
+            width={variant === 'square' ? 64 : 48}
+            height={variant === 'square' ? 64 : 48}
             className="object-cover"
           />
         </div>
@@ -77,7 +81,7 @@ export const CategoryCard: React.FC<CategoryCardProps> = ({
 
       {isSubcategory && !isMainCategory && (
         <div className={cn(
-          variant === 'square' ? 'w-12 h-12 mb-2 mx-auto' : 'w-10 h-10',
+          variant === 'square' ? 'w-16 h-16 mb-3 mx-auto' : 'w-12 h-12',
           `text-${color}-500 p-1`
         )}>
           {React.createElement(category.icon as React.ElementType, {
@@ -88,30 +92,34 @@ export const CategoryCard: React.FC<CategoryCardProps> = ({
 
       {isSubSubcategory && (
         <div className={cn(
-          variant === 'square' ? 'text-2xl mb-1' : 'text-xl',
+          variant === 'square' ? 'text-3xl mb-2' : 'text-2xl',
           'flex items-center justify-center'
         )}>
           {category.emoji}
         </div>
       )}
 
-      <div className={variant === 'horizontal' ? 'flex-1' : ''}>
+      <div className={cn(
+        'z-10 relative', 
+        variant === 'horizontal' ? 'flex-1' : ''
+      )}>
         <p className={cn(
           'font-medium overflow-hidden',
-          variant === 'square' ? 'text-sm line-clamp-2' : 'text-base text-left'
+          variant === 'square' ? 'text-sm line-clamp-2' : 'text-base text-left',
+          `group-hover:text-${color}-700 transition-colors duration-200`
         )}>
           {category.name}
         </p>
         
         {showCount && category.count !== undefined && (
           <p className={cn(
-            'text-gray-500 text-xs',
-            variant === 'horizontal' ? 'text-left mt-0.5' : 'mt-1'
+            `text-${color}-500 text-xs`,
+            variant === 'horizontal' ? 'text-left mt-1' : 'mt-1.5'
           )}>
             {category.count.toLocaleString()} {category.count === 1 ? 'anuncio' : 'anuncios'}
           </p>
         )}
       </div>
-    </button>
+    </motion.button>
   );
 }; 
