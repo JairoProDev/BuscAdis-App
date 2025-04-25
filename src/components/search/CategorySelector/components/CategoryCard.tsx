@@ -44,7 +44,7 @@ export const CategoryCard: React.FC<CategoryCardProps> = ({
       transition={{ duration: 0.2 }}
       className={cn(
         'group relative rounded-xl overflow-hidden transition-all duration-300',
-        variant === 'square' ? 'w-full h-32 flex flex-col items-center justify-center text-center' : 'w-full py-3 px-4 flex items-center gap-4',
+        variant === 'square' ? 'w-full h-28 flex flex-col items-center justify-center text-center' : 'w-full py-2 px-3 flex items-center gap-3',
         isActive 
           ? `bg-gradient-to-br from-white to-${color}-50 shadow-md border border-${color}-300` 
           : `bg-white hover:bg-gradient-to-br hover:from-white hover:to-${color}-50 border border-gray-100 hover:border-${color}-200 hover:shadow-lg`
@@ -57,8 +57,8 @@ export const CategoryCard: React.FC<CategoryCardProps> = ({
           variant === 'square' ? '-bottom-6 -right-6' : '-right-4 top-1/2 transform -translate-y-1/2'
         )}
         style={{
-          width: variant === 'square' ? '120px' : '80px',
-          height: variant === 'square' ? '120px' : '80px',
+          width: variant === 'square' ? '100px' : '70px',
+          height: variant === 'square' ? '100px' : '70px',
           background: `radial-gradient(circle, rgba(var(--${color}-200-rgb), 0.4) 0%, rgba(var(--${color}-200-rgb), 0) 70%)`,
           borderRadius: '50%',
         }}
@@ -66,14 +66,14 @@ export const CategoryCard: React.FC<CategoryCardProps> = ({
 
       {isMainCategory && (
         <div className={cn(
-          variant === 'square' ? 'w-16 h-16 mb-3' : 'w-12 h-12',
+          variant === 'square' ? 'w-14 h-14 mb-2' : 'w-10 h-10',
           'relative overflow-hidden rounded-full shadow-sm'
         )}>
           <Image
             src={category.image as string}
             alt={category.name}
-            width={variant === 'square' ? 64 : 48}
-            height={variant === 'square' ? 64 : 48}
+            width={variant === 'square' ? 56 : 40}
+            height={variant === 'square' ? 56 : 40}
             className="object-cover"
           />
         </div>
@@ -81,7 +81,7 @@ export const CategoryCard: React.FC<CategoryCardProps> = ({
 
       {isSubcategory && !isMainCategory && (
         <div className={cn(
-          variant === 'square' ? 'w-16 h-16 mb-3 mx-auto' : 'w-12 h-12',
+          variant === 'square' ? 'w-14 h-14 mb-2 mx-auto' : 'w-10 h-10',
           `text-${color}-500 p-1`
         )}>
           {React.createElement(category.icon as React.ElementType, {
@@ -92,7 +92,7 @@ export const CategoryCard: React.FC<CategoryCardProps> = ({
 
       {isSubSubcategory && (
         <div className={cn(
-          variant === 'square' ? 'text-3xl mb-2' : 'text-2xl',
+          variant === 'square' ? 'text-2xl mb-1' : 'text-xl',
           'flex items-center justify-center'
         )}>
           {category.emoji}
@@ -114,7 +114,7 @@ export const CategoryCard: React.FC<CategoryCardProps> = ({
         {showCount && category.count !== undefined && (
           <p className={cn(
             `text-${color}-500 text-xs`,
-            variant === 'horizontal' ? 'text-left mt-1' : 'mt-1.5'
+            variant === 'horizontal' ? 'text-left mt-0.5' : 'mt-1'
           )}>
             {category.count.toLocaleString()} {category.count === 1 ? 'anuncio' : 'anuncios'}
           </p>

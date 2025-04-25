@@ -79,24 +79,30 @@ export default function CategorySelector({
             
             if (activeSubSubcategory && subcategory.subSubcategories) {
               const subsubcategory = subcategory.subSubcategories.find(s => s.slug === activeSubSubcategory || s.id === activeSubSubcategory)
+              setSelectedSubSubcategory(subsubcategory || null)
               
               if (subsubcategory) {
                 crumbs.push({ type: 'subsubcategory', id: subsubcategory.id, name: subsubcategory.name })
               }
+            } else {
+              setSelectedSubSubcategory(null)
             }
           }
         } else {
           setSelectedSubcategory(null)
+          setSelectedSubSubcategory(null)
         }
       } else {
         setSelectedCategory(null)
         setSelectedSubcategory(null)
+        setSelectedSubSubcategory(null)
       }
       
       setBreadcrumbs(crumbs)
     } else {
       setSelectedCategory(null)
       setSelectedSubcategory(null)
+      setSelectedSubSubcategory(null)
       setBreadcrumbs([])
     }
   }, [activeCategory, activeSubcategory, activeSubSubcategory, categories])
@@ -183,15 +189,24 @@ export default function CategorySelector({
   
   // Manejar la selección de sub-subcategoría
   const handleSubSubcategorySelect = (subsubcategory: SubSubcategory) => {
+    setSelectedSubSubcategory(subsubcategory)
+    
     if (onSubSubcategoryChange) {
       onSubSubcategoryChange(subsubcategory.id)
     }
     
-    // Navigate directly to subsubcategory page with clean URL, exactamente igual que las otras funciones
-    if (typeof window !== 'undefined' && selectedCategory && selectedSubcategory) {
-      window.history.pushState({}, '', `/${selectedCategory.slug}/${selectedSubcategory.slug}/${subsubcategory.slug}`)
-      // Actualizar el estado de la subsubcategoría seleccionada
-      setSelectedSubSubcategory(subsubcategory)
+    // Update breadcrumbs with the selected subsubcategory
+    if (selectedCategory && selectedSubcategory) {
+      setBreadcrumbs([
+        { type: 'category', id: selectedCategory.id, name: selectedCategory.name },
+        { type: 'subcategory', id: selectedSubcategory.id, name: selectedSubcategory.name },
+        { type: 'subsubcategory', id: subsubcategory.id, name: subsubcategory.name }
+      ])
+      
+      // Navigate directly to subsubcategory page with clean URL
+      if (typeof window !== 'undefined') {
+        window.history.pushState({}, '', `/${selectedCategory.slug}/${selectedSubcategory.slug}/${subsubcategory.slug}`)
+      }
     }
   }
   
@@ -200,12 +215,12 @@ export default function CategorySelector({
     return (
       <div className="w-full relative">
         <motion.div 
-          className="relative px-1 py-2 overflow-hidden rounded-xl backdrop-blur-md bg-slate-900/80 border border-slate-800/80 shadow-xl"
+          className="relative px-1 py-1 overflow-hidden rounded-xl backdrop-blur-md bg-slate-900/80 border border-slate-800/80 shadow-xl"
           initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.3 }}
         >
-          <div className="flex overflow-x-auto hide-scrollbar py-1 -mx-1 relative z-10">
+          <div className="flex overflow-x-auto hide-scrollbar py-1 -mx-1 relative z-10 justify-center">
             {showAllOption && (
               <Link
                 href="/buscar"
@@ -297,10 +312,10 @@ export default function CategorySelector({
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -10 }}
               transition={{ duration: 0.3, delay: 0.1 }}
-              className="mt-4 pt-3 border-t border-slate-700/30"
+              className="mt-2 pt-2 border-t border-slate-700/30"
             >
-              <div className="relative px-1 py-2 overflow-hidden rounded-xl backdrop-blur-sm bg-slate-900/60 border border-slate-800/60 shadow-lg">
-                <div className="flex overflow-x-auto hide-scrollbar py-2 px-1 -mx-1 gap-2 relative z-10">
+              <div className="relative px-1 py-1 overflow-hidden rounded-xl backdrop-blur-sm bg-slate-900/60 border border-slate-800/60 shadow-lg">
+                <div className="flex overflow-x-auto hide-scrollbar py-1 px-1 -mx-1 gap-2 relative z-10">
                   {subcategories.map((subcategory) => {
                     const IconComponent = subcategory.icon;
                     return (
@@ -311,7 +326,7 @@ export default function CategorySelector({
                           e.preventDefault()
                           handleSubcategoryClick(activeCategory || '', subcategory.slug)
                         }}
-                        className={`flex items-center px-4 py-2 rounded-lg mr-1 text-sm whitespace-nowrap transition-all duration-200 ${
+                        className={`flex items-center px-4 py-1.5 rounded-lg mr-1 text-sm whitespace-nowrap transition-all duration-200 ${
                           activeSubcategory === subcategory.id || activeSubcategory === subcategory.slug
                             ? 'bg-gradient-to-r from-teal-500 to-teal-400 text-white shadow-md' 
                             : 'bg-slate-800/80 hover:bg-slate-700/80 text-white border border-slate-700/40 hover:border-slate-600/40 hover:scale-105'
@@ -346,10 +361,10 @@ export default function CategorySelector({
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -10 }}
               transition={{ duration: 0.3, delay: 0.2 }}
-              className="mt-3"
+              className="mt-2"
             >
-              <div className="relative px-1 py-2 overflow-hidden rounded-xl backdrop-blur-sm bg-slate-900/40 border border-slate-800/40 shadow-lg">
-                <div className="flex overflow-x-auto hide-scrollbar py-2 px-1 -mx-1 gap-2 relative z-10">
+              <div className="relative px-1 py-1 overflow-hidden rounded-xl backdrop-blur-sm bg-slate-900/40 border border-slate-800/40 shadow-lg">
+                <div className="flex overflow-x-auto hide-scrollbar py-1 px-1 -mx-1 gap-2 relative z-10">
                   {selectedSubcategory.subSubcategories.map((subsubcategory) => (
                     <Link
                       key={subsubcategory.id}
@@ -526,7 +541,7 @@ export default function CategorySelector({
     if (breadcrumbs.length === 0) return null
     
     return (
-      <div className="flex items-center flex-wrap text-sm py-2 mb-4">
+      <div className="flex items-center flex-wrap text-sm py-2 mb-2">
         <Link href="/buscar" className="text-teal-400 hover:text-teal-300 transition-colors">
           Buscar
         </Link>
@@ -542,7 +557,9 @@ export default function CategorySelector({
                 href={`/buscar/${
                   crumb.type === 'category'
                     ? crumb.id
-                    : `${breadcrumbs[0].id}/${crumb.id}`
+                    : crumb.type === 'subcategory'
+                    ? `${breadcrumbs[0].id}/${crumb.id}`
+                    : `${breadcrumbs[0].id}/${breadcrumbs[1].id}/${crumb.id}`
                 }`}
                 className="text-teal-400 hover:text-teal-300 transition-colors"
               >
