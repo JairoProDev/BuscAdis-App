@@ -215,7 +215,7 @@ export default function CategorySelector({
     return (
       <div className="w-full relative">
         <motion.div 
-          className="relative px-1 py-1 overflow-hidden rounded-xl backdrop-blur-md bg-slate-900/80 border border-slate-800/80 shadow-xl"
+          className="relative px-1 py-1 overflow-hidden rounded-md backdrop-blur-md bg-slate-900/80 border border-slate-800/80 shadow-xl"
           initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.3 }}
@@ -228,7 +228,7 @@ export default function CategorySelector({
                   e.preventDefault();
                   if (onCategoryChange) onCategoryChange('');
                 }}
-                className={`flex flex-col items-center justify-center px-4 py-2 min-w-[100px] rounded-xl transition-all hover:scale-105 ${
+                className={`flex flex-col items-center justify-center px-4 py-2 min-w-[100px] rounded-md transition-all hover:scale-105 ${
                   !activeCategory
                     ? 'bg-gradient-to-br from-purple-600 to-violet-700 text-white shadow-lg shadow-purple-500/20 border border-purple-500/30'
                     : 'bg-slate-800/90 hover:bg-slate-700/90 text-white backdrop-blur-sm border border-slate-700/50 hover:border-slate-600/50'
@@ -254,7 +254,7 @@ export default function CategorySelector({
                     e.preventDefault();
                     handleCategoryClick(category.slug);
                   }}
-                  className={`group flex flex-col items-center justify-center px-4 py-2 min-w-[100px] rounded-xl mr-1 transition-all duration-200 hover:scale-105 ${
+                  className={`group flex flex-col items-center justify-center px-4 py-2 min-w-[100px] rounded-md mr-1 transition-all duration-200 hover:scale-105 ${
                     activeCategory === category.id || activeCategory === category.slug
                       ? 'bg-gradient-to-r from-teal-500 to-cyan-600 text-white shadow-lg shadow-teal-500/20'
                       : 'bg-slate-800/90 hover:bg-slate-700/90 text-white backdrop-blur-sm border border-slate-700/50 hover:border-slate-600/50'
@@ -286,7 +286,7 @@ export default function CategorySelector({
             {expanded === false && categories.length > maxVisible && (
               <button
                 onClick={() => setExpanded(true)}
-                className="flex flex-col items-center justify-center min-w-[100px] px-4 py-2 rounded-xl transition-all hover:scale-105 bg-slate-800/90 hover:bg-slate-700/90 text-white backdrop-blur-sm border border-slate-700/50 hover:border-slate-600/50"
+                className="flex flex-col items-center justify-center min-w-[100px] px-4 py-2 rounded-md transition-all hover:scale-105 bg-slate-800/90 hover:bg-slate-700/90 text-white backdrop-blur-sm border border-slate-700/50 hover:border-slate-600/50"
               >
                 <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 mb-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M19 9l-7 7-7-7" />
@@ -314,7 +314,7 @@ export default function CategorySelector({
               transition={{ duration: 0.3, delay: 0.1 }}
               className="mt-2 pt-2 border-t border-slate-700/30"
             >
-              <div className="relative px-1 py-1 overflow-hidden rounded-xl backdrop-blur-sm bg-slate-900/60 border border-slate-800/60 shadow-lg">
+              <div className="relative px-1 py-1 overflow-hidden rounded-md backdrop-blur-sm bg-slate-900/60 border border-slate-800/60 shadow-lg">
                 <div className="flex overflow-x-auto hide-scrollbar py-1 px-1 -mx-1 gap-2 relative z-10">
                   {subcategories.map((subcategory) => {
                     const IconComponent = subcategory.icon;
@@ -326,7 +326,7 @@ export default function CategorySelector({
                           e.preventDefault()
                           handleSubcategoryClick(activeCategory || '', subcategory.slug)
                         }}
-                        className={`flex items-center px-4 py-1.5 rounded-lg mr-1 text-sm whitespace-nowrap transition-all duration-200 ${
+                        className={`flex items-center px-4 py-1.5 rounded-md mr-1 text-sm whitespace-nowrap transition-all duration-200 ${
                           activeSubcategory === subcategory.id || activeSubcategory === subcategory.slug
                             ? 'bg-gradient-to-r from-teal-500 to-teal-400 text-white shadow-md' 
                             : 'bg-slate-800/80 hover:bg-slate-700/80 text-white border border-slate-700/40 hover:border-slate-600/40 hover:scale-105'
@@ -363,7 +363,7 @@ export default function CategorySelector({
               transition={{ duration: 0.3, delay: 0.2 }}
               className="mt-2"
             >
-              <div className="relative px-1 py-1 overflow-hidden rounded-xl backdrop-blur-sm bg-slate-900/40 border border-slate-800/40 shadow-lg">
+              <div className="relative px-1 py-1 overflow-hidden rounded-md backdrop-blur-sm bg-slate-900/40 border border-slate-800/40 shadow-lg">
                 <div className="flex overflow-x-auto hide-scrollbar py-1 px-1 -mx-1 gap-2 relative z-10">
                   {selectedSubcategory.subSubcategories.map((subsubcategory) => (
                     <Link
@@ -373,7 +373,7 @@ export default function CategorySelector({
                         e.preventDefault()
                         handleSubSubcategorySelect(subsubcategory)
                       }}
-                      className={`flex items-center px-3 py-1.5 rounded-lg mr-1 text-xs whitespace-nowrap transition-all duration-200 ${
+                      className={`flex items-center px-3 py-1.5 rounded-md mr-1 text-xs whitespace-nowrap transition-all duration-200 ${
                         activeSubSubcategory === subsubcategory.id || 
                         activeSubSubcategory === subsubcategory.slug || 
                         selectedSubSubcategory?.id === subsubcategory.id

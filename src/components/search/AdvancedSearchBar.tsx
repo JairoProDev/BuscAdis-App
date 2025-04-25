@@ -307,7 +307,7 @@ export default function AdvancedSearchBar({
   
   // Renderizar barra de búsqueda avanzada tipo Airbnb
   const renderAdvancedSearchBar = () => (
-    <div className="relative w-full rounded-full overflow-hidden bg-white dark:bg-slate-900 shadow-lg hover:shadow-xl transition-shadow duration-300">
+    <div className="relative w-full overflow-hidden bg-white dark:bg-slate-900 shadow-lg hover:shadow-xl transition-shadow duration-300">
       <Tab.Group>
         <div className="flex flex-col">
           <div className="flex items-center p-1 rounded-full">
@@ -317,7 +317,7 @@ export default function AdvancedSearchBar({
               onClick={() => setIsExpanded(!isExpanded)}
             >
               <div className="flex flex-col">
-                <span className="text-xs font-medium mb-1">Categoría</span>
+                <span className="text-xs font-medium mb-1">Clasificación</span>
                 <span className="font-medium truncate">
                   {activeCategory ? activeCategory : 'Todas las categorías'}
                 </span>

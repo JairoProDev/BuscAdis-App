@@ -43,7 +43,7 @@ export const CategoryCard: React.FC<CategoryCardProps> = ({
       whileTap={{ scale: 0.98 }}
       transition={{ duration: 0.2 }}
       className={cn(
-        'group relative rounded-xl overflow-hidden transition-all duration-300',
+        'group relative rounded-md overflow-hidden transition-all duration-300',
         variant === 'square' ? 'w-full h-28 flex flex-col items-center justify-center text-center' : 'w-full py-2 px-3 flex items-center gap-3',
         isActive 
           ? `bg-gradient-to-br from-white to-${color}-50 shadow-md border border-${color}-300` 

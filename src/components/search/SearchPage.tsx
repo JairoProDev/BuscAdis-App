@@ -87,7 +87,7 @@ export default function SearchPage() {
         <div className="grid grid-cols-1 md:grid-cols-12 gap-6">
           {/* Selector de categorías en sidebar */}
           <div className="md:col-span-3">
-            <div className="bg-slate-800/50 backdrop-blur-sm rounded-xl p-4 shadow-lg border border-slate-700/50">
+            <div className="bg-slate-800/50 backdrop-blur-sm rounded-md p-4 shadow-lg border border-slate-700/50">
               <h2 className="font-semibold text-xl mb-4">Categorías</h2>
               <CategorySelector
                 activeCategory={selectedCategory}
@@ -104,7 +104,7 @@ export default function SearchPage() {
           
           {/* Resultados de búsqueda */}
           <div className="md:col-span-9">
-            <div className="bg-slate-800/50 backdrop-blur-sm rounded-xl p-6 shadow-lg border border-slate-700/50">
+            <div className="bg-slate-800/50 backdrop-blur-sm rounded-md p-6 shadow-lg border border-slate-700/50">
               <div className="flex justify-between items-center mb-6">
                 <h2 className="font-semibold text-xl">
                   {searchQuery ? (
