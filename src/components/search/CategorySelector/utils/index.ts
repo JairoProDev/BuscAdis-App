@@ -1,4 +1,5 @@
 import { Category, Subcategory, SubSubcategory } from '../types';
+import { categoriesList, getSubcategories, getSubSubcategories } from '@/data/categories-data';
 import { 
   BriefcaseIcon, 
   HomeIcon, 
@@ -8,7 +9,13 @@ import {
   CalendarIcon, 
   ChartBarIcon, 
   UserGroupIcon,
-  StarIcon
+  StarIcon,
+  ComputerDesktopIcon,
+  BuildingOfficeIcon,
+  HeartIcon,
+  AcademicCapIcon,
+  BeakerIcon,
+  BuildingStorefrontIcon
 } from '@heroicons/react/24/outline';
 
 // Mapeo de iconos por categoría
@@ -21,13 +28,13 @@ export const CATEGORY_ICONS: Record<string, React.ElementType> = {
   'eventos': CalendarIcon,
   'negocios': ChartBarIcon,
   'comunidad': UserGroupIcon,
+  'tecnologia': ComputerDesktopIcon,
+  'administracion': BuildingOfficeIcon,
+  'salud': HeartIcon,
+  'educacion': AcademicCapIcon,
+  'hosteleria': BeakerIcon,
+  'construccion': BuildingStorefrontIcon,
   'default': StarIcon,
-  'tecnologia': StarIcon,  // Añadir icono real
-  'administracion': StarIcon,  // Añadir icono real
-  'salud': StarIcon,  // Añadir icono real
-  'educacion': StarIcon,  // Añadir icono real
-  'hosteleria': StarIcon,  // Añadir icono real
-  'construccion': StarIcon,  // Añadir icono real
 };
 
 // Colores para categorías (tailwind)
@@ -40,13 +47,13 @@ export const CATEGORY_COLORS: Record<string, string> = {
   'eventos': 'pink',
   'negocios': 'yellow',
   'comunidad': 'teal',
-  'default': 'gray',
   'tecnologia': 'cyan',
   'administracion': 'indigo',
   'salud': 'emerald',
   'educacion': 'sky',
   'hosteleria': 'amber',
-  'construccion': 'lime'
+  'construccion': 'lime',
+  'default': 'gray'
 };
 
 // Obtener ícono para una categoría
@@ -57,6 +64,26 @@ export function getCategoryIcon(categorySlug: string): React.ElementType {
 // Obtener color para una categoría
 export function getCategoryColor(categorySlug: string): string {
   return CATEGORY_COLORS[categorySlug] || CATEGORY_COLORS.default;
+}
+
+// Cargar categorías desde el archivo de datos
+export function getCategories(): Category[] {
+  return categoriesList.map(category => ({
+    id: category.id,
+    slug: category.id,
+    name: category.name,
+    description: category.description,
+    subcategories: category.subcategories?.map(sub => ({
+      id: sub.id,
+      slug: sub.id,
+      name: sub.name,
+      subsubcategories: sub.subSubcategories?.map(subsub => ({
+        id: subsub.id,
+        slug: subsub.id,
+        name: subsub.name
+      }))
+    }))
+  }));
 }
 
 // Construir ruta para navegación

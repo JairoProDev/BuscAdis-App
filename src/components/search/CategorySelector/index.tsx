@@ -2,14 +2,14 @@
 
 import React, { useState, useEffect, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { CategoriesService } from '@/services/categories.service';
 import { Category, CategorySelectorProps, Subcategory, SubSubcategory } from './types';
-import { generateBreadcrumbs } from './utils';
+import { generateBreadcrumbs, getCategories } from './utils';
 import GridView from './components/GridView';
 import SubcategoryList from './components/SubcategoryList';
 import SubSubcategoryList from './components/SubSubcategoryList';
 import Breadcrumbs from '@/components/layout/Breadcrumbs';
 import LoadingSpinner from '@/components/ui/LoadingSpinner';
+import { getSubcategories, getSubSubcategories } from '@/data/categories-data';
 
 const CategorySelector: React.FC<CategorySelectorProps> = ({
   activeCategory,
@@ -38,41 +38,18 @@ const CategorySelector: React.FC<CategorySelectorProps> = ({
   
   // Cargar categorías al iniciar
   useEffect(() => {
-    const loadCategories = async () => {
-      try {
-        setLoading(true);
-        const data = await CategoriesService.getCategories();
-        setCategories(data);
-        setLoading(false);
-      } catch (err) {
-        console.error('Error fetching categories:', err);
-        setError('No se pudieron cargar las categorías');
-        setLoading(false);
-      }
-    };
-    
-    loadCategories();
-  }, []);
-  
-  // Función para cargar subcategorías
-  const fetchSubcategories = useCallback(async (categorySlug: string): Promise<Subcategory[]> => {
-    if (!categorySlug || categorySlug === 'all') return [];
-    
     try {
-      // Si la categoría ya tiene subcategorías, usarlas
-      const category = categories.find(cat => cat.slug === categorySlug);
-      if (category && category.subcategories) {
-        return category.subcategories;
-      }
-      
-      // Si no, intentar cargarlas desde el servicio
-      const result = await CategoriesService.getCategoryWithTypes(categorySlug);
-      return result || [];
-    } catch (error) {
-      console.error('Error loading subcategories:', error);
-      return [];
+      setLoading(true);
+      // Usar la función getCategories de utils que carga desde categories-data.ts
+      const data = getCategories();
+      setCategories(data);
+      setLoading(false);
+    } catch (err) {
+      console.error('Error loading categories:', err);
+      setError('No se pudieron cargar las categorías');
+      setLoading(false);
     }
-  }, [categories]);
+  }, []);
   
   // Cargar subcategorías cuando cambia la categoría activa
   useEffect(() => {
@@ -82,25 +59,45 @@ const CategorySelector: React.FC<CategorySelectorProps> = ({
       return;
     }
     
-    const loadSubcategories = async () => {
-      const subcategoriesData = await fetchSubcategories(activeCategory);
-      setCurrentSubcategories(subcategoriesData);
+    try {
+      // Usar getSubcategories del archivo categories-data.ts
+      const subcats = getSubcategories(activeCategory);
       
-      // Cargar sub-subcategorías si hay una subcategoría activa
-      if (activeSubcategory && subcategoriesData.length > 0) {
-        const subcategory = subcategoriesData.find(sub => sub.slug === activeSubcategory);
-        if (subcategory && subcategory.subsubcategories) {
-          setCurrentSubSubcategories(subcategory.subsubcategories);
-        } else {
-          setCurrentSubSubcategories([]);
-        }
+      // Convertir al formato que espera el componente
+      const formattedSubcats: Subcategory[] = subcats.map(sub => ({
+        id: sub.id,
+        slug: sub.id,
+        name: sub.name,
+        subsubcategories: sub.subSubcategories?.map(subsub => ({
+          id: subsub.id,
+          slug: subsub.id,
+          name: subsub.name
+        }))
+      }));
+      
+      setCurrentSubcategories(formattedSubcats);
+      
+      // Si hay una subcategoría activa, cargar sus subsubcategorías
+      if (activeSubcategory) {
+        const subsubcats = getSubSubcategories(activeCategory, activeSubcategory);
+        
+        // Convertir al formato que espera el componente
+        const formattedSubSubcats: SubSubcategory[] = subsubcats.map(subsub => ({
+          id: subsub.id,
+          slug: subsub.id,
+          name: subsub.name
+        }));
+        
+        setCurrentSubSubcategories(formattedSubSubcats);
       } else {
         setCurrentSubSubcategories([]);
       }
-    };
-    
-    loadSubcategories();
-  }, [activeCategory, activeSubcategory, fetchSubcategories]);
+    } catch (err) {
+      console.error('Error loading subcategories:', err);
+      setCurrentSubcategories([]);
+      setCurrentSubSubcategories([]);
+    }
+  }, [activeCategory, activeSubcategory]);
   
   // Manejar selección de categoría
   const handleCategoryClick = useCallback((categorySlug: string) => {
