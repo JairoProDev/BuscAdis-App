@@ -1,4 +1,8 @@
 // Definición de tipos para el CategorySelector
+import { ElementType } from 'react';
+
+export type CategoryCardVariant = 'square' | 'horizontal';
+
 export interface CategoryItem {
   _id?: string;
   id: string;
@@ -7,39 +11,44 @@ export interface CategoryItem {
   count?: number;
 }
 
-export interface Category extends CategoryItem {
-  color?: string;
-  icon?: string;
-  gradient?: string;
-  description?: string;
-  image?: string;
-  imageUrl?: string;
-  subcategories?: Subcategory[];
+export interface Category {
+  id: string;
+  name: string;
+  slug: string;
+  count?: number;
+  image: string;
+  subcategories: Subcategory[];
 }
 
-export interface Subcategory extends CategoryItem {
-  parent?: string;
-  icon?: string;
-  subsubcategories?: SubSubcategory[];
+export interface Subcategory {
+  id: string;
+  name: string;
+  slug: string;
+  count?: number;
+  icon: ElementType;
+  parentId: string;
+  subSubcategories: SubSubcategory[];
 }
 
-export interface SubSubcategory extends CategoryItem {
-  parent?: string;
+export interface SubSubcategory {
+  id: string;
+  name: string;
+  slug: string;
+  count?: number;
+  emoji: string;
+  parentId: string;
 }
 
 export interface CategorySelectorProps {
-  activeCategory?: string;
-  activeSubcategory?: string;
-  activeSubSubcategory?: string;
-  onCategoryChange?: (category: string) => void;
-  onSubcategoryChange?: (subcategory: string) => void;
-  onSubSubcategoryChange?: (subsubcategory: string) => void;
-  showCounts?: boolean;
-  variant?: 'horizontal' | 'vertical' | 'grid' | 'tabs';
-  showAllOption?: boolean;
-  maxVisible?: number;
+  onSelectCategory?: (category: Category | null) => void;
+  onSelectSubcategory?: (subcategory: Subcategory | null) => void;
+  onSelectSubSubcategory?: (subSubcategory: SubSubcategory | null) => void;
+  variant?: CategoryCardVariant;
   className?: string;
-  showSubcategories?: boolean;
+  showCounts?: boolean;
+  initialCategorySlug?: string;
+  initialSubcategorySlug?: string;
+  initialSubSubcategorySlug?: string;
 }
 
 export interface CategoryCardProps {
@@ -47,6 +56,7 @@ export interface CategoryCardProps {
   isActive: boolean;
   onClick: () => void;
   variant?: 'square' | 'horizontal';
+  showImage?: boolean;
 }
 
 export interface SubcategoryListProps {

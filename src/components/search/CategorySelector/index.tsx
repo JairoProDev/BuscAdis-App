@@ -3,7 +3,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Category, CategorySelectorProps, Subcategory, SubSubcategory } from './types';
-import { generateBreadcrumbs, getCategories } from './utils';
+import { generateBreadcrumbs, getCategories, getCategoryIcon, getSubSubcategoryEmoji } from './utils';
 import GridView from './components/GridView';
 import SubcategoryList from './components/SubcategoryList';
 import SubSubcategoryList from './components/SubSubcategoryList';
@@ -40,7 +40,7 @@ const CategorySelector: React.FC<CategorySelectorProps> = ({
   useEffect(() => {
     try {
       setLoading(true);
-      // Usar la función getCategories de utils que carga desde categories-data.ts
+      // Cargar categorías desde categories-data
       const data = getCategories();
       setCategories(data);
       setLoading(false);
@@ -60,7 +60,7 @@ const CategorySelector: React.FC<CategorySelectorProps> = ({
     }
     
     try {
-      // Usar getSubcategories del archivo categories-data.ts
+      // Obtener subcategorías del servicio
       const subcats = getSubcategories(activeCategory);
       
       // Convertir al formato que espera el componente
@@ -68,10 +68,14 @@ const CategorySelector: React.FC<CategorySelectorProps> = ({
         id: sub.id,
         slug: sub.id,
         name: sub.name,
+        // Cada subcategoría debe tener su propio icono
+        icon: getCategoryIcon(sub.id),
         subsubcategories: sub.subSubcategories?.map(subsub => ({
           id: subsub.id,
           slug: subsub.id,
-          name: subsub.name
+          name: subsub.name,
+          // Cada subsubcategoría debe tener su propio emoji
+          emoji: getSubSubcategoryEmoji(subsub.id)
         }))
       }));
       
@@ -85,7 +89,8 @@ const CategorySelector: React.FC<CategorySelectorProps> = ({
         const formattedSubSubcats: SubSubcategory[] = subsubcats.map(subsub => ({
           id: subsub.id,
           slug: subsub.id,
-          name: subsub.name
+          name: subsub.name,
+          emoji: getSubSubcategoryEmoji(subsub.id)
         }));
         
         setCurrentSubSubcategories(formattedSubSubcats);
@@ -162,6 +167,7 @@ const CategorySelector: React.FC<CategorySelectorProps> = ({
             activeCategory={activeCategory}
             onCategorySelect={handleCategoryClick}
             showAllOption={showAllOption}
+            cols={4}
           />
         </motion.div>
       </AnimatePresence>

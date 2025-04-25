@@ -2,14 +2,16 @@
 
 import React from 'react';
 import { motion } from 'framer-motion';
-import CategoryCard from './CategoryCard';
 import { Category } from '../types';
+import CategoryCard from './CategoryCard';
+import { StarIcon } from '@heroicons/react/24/outline';
 
 interface GridViewProps {
   categories: Category[];
   activeCategory?: string;
   onCategorySelect: (categorySlug: string) => void;
   showAllOption?: boolean;
+  cols?: number;
 }
 
 const GridView: React.FC<GridViewProps> = ({
@@ -17,19 +19,13 @@ const GridView: React.FC<GridViewProps> = ({
   activeCategory,
   onCategorySelect,
   showAllOption = true,
+  cols = 4
 }) => {
-  // Agregar opción "Todos" si es necesario
-  const allCategories = showAllOption
-    ? [
-        {
-          id: 'all',
-          name: 'Todos',
-          slug: 'all',
-        },
-        ...categories
-      ]
-    : categories;
-  
+  // Validar que se muestren solo las 8 categorías principales
+  const validCategories = categories.filter(cat => 
+    ['empleos', 'inmuebles', 'vehiculos', 'servicios', 'productos', 'eventos', 'negocios', 'comunidad'].includes(cat.slug)
+  );
+
   // Animaciones para el contenedor y los elementos
   const containerVariants = {
     hidden: { opacity: 0 },
@@ -41,7 +37,7 @@ const GridView: React.FC<GridViewProps> = ({
       }
     }
   };
-  
+
   const itemVariants = {
     hidden: { opacity: 0, y: 20 },
     visible: { opacity: 1, y: 0 }
@@ -49,21 +45,48 @@ const GridView: React.FC<GridViewProps> = ({
 
   return (
     <motion.div
-      className="grid grid-cols-2 sm:grid-cols-4 md:grid-cols-6 lg:grid-cols-8 gap-3 mb-6"
+      className="w-full"
       initial="hidden"
       animate="visible"
       variants={containerVariants}
     >
-      {allCategories.map((category) => (
-        <motion.div key={category.id} variants={itemVariants} className="h-24">
-          <CategoryCard
-            category={category}
-            isActive={category.slug === activeCategory}
-            onClick={() => onCategorySelect(category.slug)}
-            variant="square"
-          />
-        </motion.div>
-      ))}
+      <div className={`grid grid-cols-2 sm:grid-cols-2 md:grid-cols-${cols} gap-3`}>
+        {/* Opción "Todas las categorías" */}
+        {showAllOption && (
+          <motion.div
+            variants={itemVariants}
+            className="aspect-square"
+          >
+            <CategoryCard
+              category={{
+                id: 'all',
+                slug: 'all',
+                name: 'Todas',
+                icon: StarIcon
+              }}
+              isActive={activeCategory === 'all' || !activeCategory}
+              onClick={() => onCategorySelect('all')}
+              showImage={false}
+            />
+          </motion.div>
+        )}
+        
+        {/* Listar categorías */}
+        {validCategories.map((category) => (
+          <motion.div
+            key={category.id}
+            variants={itemVariants}
+            className="aspect-square"
+          >
+            <CategoryCard
+              category={category}
+              isActive={category.slug === activeCategory}
+              onClick={() => onCategorySelect(category.slug)}
+              showImage={true}
+            />
+          </motion.div>
+        ))}
+      </div>
     </motion.div>
   );
 };

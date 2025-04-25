@@ -44,6 +44,7 @@ const SubSubcategoryList: React.FC<SubSubcategoryListProps> = ({
       <div className="flex flex-wrap gap-2">
         {subsubcategories.map((subsubcategory) => {
           const isActive = subsubcategory.slug === activeSubSubcategory;
+          const emoji = subsubcategory.emoji || '🔹';
           
           return (
             <motion.button
@@ -56,6 +57,7 @@ const SubSubcategoryList: React.FC<SubSubcategoryListProps> = ({
               onClick={() => onSubSubcategoryClick(subsubcategory)}
               variants={itemVariants}
             >
+              <span className="mr-1">{emoji}</span>
               <span>{subsubcategory.name}</span>
             </motion.button>
           );
