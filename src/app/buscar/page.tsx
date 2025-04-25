@@ -441,9 +441,80 @@ export default function BuscadorPage() {
   // Show loading indicator ONLY on initial load
   if (isInitialLoad && loading) {
     return (
-          <div className="flex justify-center items-center min-h-screen bg-slate-900">
-              <p className="text-white text-xl">Cargando anuncios...</p>
-              {/* Optional: Add a spinner here */}
+      <div className="min-h-screen bg-slate-900">
+        <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8 lg:py-12">
+          {/* Skeleton para barra de búsqueda */}
+          <div className="mb-6 w-full bg-slate-800/40 rounded-xl p-4 animate-pulse">
+            <div className="h-12 bg-slate-700 rounded-xl w-full"></div>
+          </div>
+          
+          {/* Skeleton para título y controles */}
+          <div className="flex justify-between items-center mb-8">
+            <div>
+              <div className="h-8 bg-slate-700 rounded w-64 mb-2"></div>
+              <div className="h-5 bg-slate-700 rounded w-40"></div>
+            </div>
+            <div className="flex gap-2">
+              <div className="h-10 w-10 bg-slate-700 rounded"></div>
+              <div className="h-10 w-10 bg-slate-700 rounded"></div>
+            </div>
+          </div>
+          
+          {/* Layout principal con sidebar */}
+          <div className="flex flex-col lg:flex-row gap-6">
+            {/* Skeleton del sidebar de filtros */}
+            <div className="hidden lg:block w-72 flex-shrink-0">
+              <div className="bg-slate-800 rounded-xl p-6 border border-slate-700">
+                <div className="h-7 bg-slate-700 rounded w-32 mb-6"></div>
+                <div className="space-y-6">
+                  <div>
+                    <div className="h-5 bg-slate-700 rounded w-24 mb-3"></div>
+                    <div className="space-y-2">
+                      <div className="h-10 bg-slate-700 rounded w-full"></div>
+                      <div className="h-10 bg-slate-700 rounded w-full"></div>
+                    </div>
+                  </div>
+                  <div>
+                    <div className="h-5 bg-slate-700 rounded w-28 mb-3"></div>
+                    <div className="h-10 bg-slate-700 rounded w-full"></div>
+                  </div>
+                  <div>
+                    <div className="h-5 bg-slate-700 rounded w-40 mb-3"></div>
+                    <div className="space-y-2">
+                      <div className="h-6 bg-slate-700 rounded w-full"></div>
+                      <div className="h-6 bg-slate-700 rounded w-full"></div>
+                      <div className="h-6 bg-slate-700 rounded w-full"></div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            
+            {/* Skeleton de resultados */}
+            <div className="flex-grow">
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                {Array.from({ length: 6 }).map((_, index) => (
+                  <div key={index} className="bg-slate-800 rounded-xl overflow-hidden shadow-lg h-auto animate-pulse">
+                    <div className="h-48 bg-slate-700 relative">
+                      {/* Efecto shimmer */}
+                      <div className="absolute inset-0 bg-gradient-to-r from-transparent via-slate-600/20 to-transparent shimmer"></div>
+                    </div>
+                    <div className="p-4 space-y-3">
+                      <div className="h-5 bg-slate-700 rounded w-3/4"></div>
+                      <div className="h-4 bg-slate-700 rounded w-1/2"></div>
+                      <div className="h-3 bg-slate-700 rounded w-1/3"></div>
+                      <div className="h-4 bg-slate-700 rounded w-full"></div>
+                      <div className="flex justify-between items-center pt-2">
+                        <div className="h-3 bg-slate-700 rounded w-1/4"></div>
+                        <div className="h-6 bg-slate-700 rounded-full w-20"></div>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
     );
   }
