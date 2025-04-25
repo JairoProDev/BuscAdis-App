@@ -4,7 +4,6 @@ import { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import Image from 'next/image'
 import Link from 'next/link'
-import { useRouter } from 'next/navigation'
 import { ChevronRightIcon } from '@heroicons/react/24/outline'
 import LoadingSpinner from '@/components/ui/LoadingSpinner'
 
@@ -48,11 +47,12 @@ export default function CategorySelector({
   className = '',
   showSubcategories = true
 }: CategorySelectorProps) {
-  const router = useRouter()
+  // No necesitamos el router ya que usamos history.pushState
   
   const [expanded, setExpanded] = useState(false)
   const [selectedCategory, setSelectedCategory] = useState<Category | null>(null)
   const [selectedSubcategory, setSelectedSubcategory] = useState<Subcategory | null>(null)
+  const [selectedSubSubcategory, setSelectedSubSubcategory] = useState<SubSubcategory | null>(null)
   const [breadcrumbs, setBreadcrumbs] = useState<{type: string, id: string, name: string}[]>([])
   const [categories, setCategories] = useState<Category[]>([])
   const [subcategories, setSubcategories] = useState<Subcategory[]>([])
@@ -185,9 +185,13 @@ export default function CategorySelector({
   const handleSubSubcategorySelect = (subsubcategory: SubSubcategory) => {
     if (onSubSubcategoryChange) {
       onSubSubcategoryChange(subsubcategory.id)
-    } else if (selectedCategory && selectedSubcategory) {
-      // Navegar usando el router
-      router.push(`/buscar/${selectedCategory.slug}/${selectedSubcategory.slug}/${subsubcategory.slug}`)
+    }
+    
+    // Navigate directly to subsubcategory page with clean URL, exactamente igual que las otras funciones
+    if (typeof window !== 'undefined' && selectedCategory && selectedSubcategory) {
+      window.history.pushState({}, '', `/${selectedCategory.slug}/${selectedSubcategory.slug}/${subsubcategory.slug}`)
+      // Actualizar el estado de la subsubcategoría seleccionada
+      setSelectedSubSubcategory(subsubcategory)
     }
   }
   
@@ -327,7 +331,9 @@ export default function CategorySelector({
                     handleSubSubcategorySelect(subsubcategory)
                   }}
                   className={`flex items-center px-3 py-1 rounded-full mr-2 text-xs whitespace-nowrap transition-all ${
-                    activeSubSubcategory === subsubcategory.id || activeSubSubcategory === subsubcategory.slug
+                    activeSubSubcategory === subsubcategory.id || 
+                    activeSubSubcategory === subsubcategory.slug || 
+                    selectedSubSubcategory?.id === subsubcategory.id
                       ? 'bg-cyan-500 text-white shadow-sm' 
                       : 'bg-slate-700/70 hover:bg-slate-600 text-white'
                   }`}
