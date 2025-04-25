@@ -10,10 +10,9 @@ import {
   XMarkIcon,
   FunnelIcon
 } from '@heroicons/react/24/outline'
-import SearchBar from './SearchBar'
-import CategorySelector from './CategorySelector'
 import SearchResults, { Publication } from './SearchResults'
 import useMediaQuery from '@/hooks/useMediaQuery'
+import AdvancedSearchBar from './AdvancedSearchBar'
 
 interface SearchLayoutProps {
   initialResults?: Publication[]
@@ -56,6 +55,7 @@ export default function SearchLayout({
   const [searchQuery, setSearchQuery] = useState(initialQuery || searchParams?.get('q') || '')
   const [category, setCategory] = useState(initialCategory || searchParams?.get('category') || '')
   const [subcategory, setSubcategory] = useState(initialSubcategory || searchParams?.get('subcategory') || '')
+  const [selectedSubSubcategory, setSelectedSubSubcategory] = useState(searchParams?.get('subsubcategory') || '')
   const [results, setResults] = useState<Publication[]>(initialResults)
   const [isFilterOpen, setIsFilterOpen] = useState(false)
   const [isMapView, setIsMapView] = useState(false)
@@ -76,6 +76,19 @@ export default function SearchLayout({
   const handleSearch = (query: string, options?: any) => {
     setSearchQuery(query)
     
+    // Si hay categoría/subcategoría/subsubcategoría en las opciones, actualizar estados
+    if (options?.category) {
+      setCategory(options.category)
+    }
+    
+    if (options?.subcategory) {
+      setSubcategory(options.subcategory)
+    }
+    
+    if (options?.subsubcategory) {
+      setSelectedSubSubcategory(options.subsubcategory)
+    }
+    
     // Actualizar URL sin causar recarga de página
     const params = new URLSearchParams(searchParams?.toString())
     
@@ -85,21 +98,28 @@ export default function SearchLayout({
       params.delete('q')
     }
     
-    if (category) {
-      params.set('category', category)
+    if (options?.category || category) {
+      params.set('category', options?.category || category)
     }
     
-    if (subcategory) {
-      params.set('subcategory', subcategory)
+    if (options?.subcategory || subcategory) {
+      params.set('subcategory', options?.subcategory || subcategory)
+    }
+    
+    if (options?.subsubcategory || selectedSubSubcategory) {
+      params.set('subsubcategory', options?.subsubcategory || selectedSubSubcategory)
     }
     
     const newPath = `${pathname}?${params.toString()}`
-    // Uso de shallow y scroll false para evitar recargas completas
     router.push(newPath, { scroll: false })
     
     // Llamar al callback si está definido
     if (onSearch) {
-      onSearch(query, { ...options, category, subcategory })
+      onSearch(query, { 
+        category: options?.category || category, 
+        subcategory: options?.subcategory || subcategory,
+        subsubcategory: options?.subsubcategory || selectedSubSubcategory
+      })
     }
   }
   
@@ -107,75 +127,28 @@ export default function SearchLayout({
   const handleCategoryChange = (newCategory: string) => {
     setCategory(newCategory)
     setSubcategory('')
-    
-    // Actualizar URL sin causar recarga de página
-    const params = new URLSearchParams(searchParams?.toString())
-    params.set('category', newCategory)
-    params.delete('subcategory')
-    params.delete('subsubcategory')
-    
-    if (searchQuery) {
-      params.set('q', searchQuery)
-    }
-    
-    const newPath = `${pathname}?${params.toString()}`
-    // Uso de shallow y scroll false para evitar recargas completas
-    router.push(newPath, { scroll: false })
+    setSelectedSubSubcategory('')
     
     // Llamar al callback si está definido
     if (onFilterChange) {
-      onFilterChange({ category: newCategory, subcategory: '' })
+      onFilterChange({ category: newCategory, subcategory: '', subsubcategory: '' })
     }
   }
   
   // Manejar cambio de subcategoría
   const handleSubcategoryChange = (newSubcategory: string) => {
     setSubcategory(newSubcategory)
-    
-    // Actualizar URL sin causar recarga de página
-    const params = new URLSearchParams(searchParams?.toString())
-    params.set('subcategory', newSubcategory)
-    params.delete('subsubcategory')
-    
-    if (category) {
-      params.set('category', category)
-    }
-    
-    if (searchQuery) {
-      params.set('q', searchQuery)
-    }
-    
-    const newPath = `${pathname}?${params.toString()}`
-    // Uso de shallow y scroll false para evitar recargas completas
-    router.push(newPath, { scroll: false })
+    setSelectedSubSubcategory('')
     
     // Llamar al callback si está definido
     if (onFilterChange) {
-      onFilterChange({ category, subcategory: newSubcategory })
+      onFilterChange({ category, subcategory: newSubcategory, subsubcategory: '' })
     }
   }
   
-  // Manejar cambio de subsubcategoría (añadido para compatibilidad)
+  // Manejar cambio de subsubcategoría
   const handleSubSubcategoryChange = (newSubSubcategory: string) => {
-    // Actualizar URL sin causar recarga de página
-    const params = new URLSearchParams(searchParams?.toString())
-    params.set('subsubcategory', newSubSubcategory)
-    
-    if (category) {
-      params.set('category', category)
-    }
-    
-    if (subcategory) {
-      params.set('subcategory', subcategory)
-    }
-    
-    if (searchQuery) {
-      params.set('q', searchQuery)
-    }
-    
-    const newPath = `${pathname}?${params.toString()}`
-    // Uso de shallow y scroll false para evitar recargas completas
-    router.push(newPath, { scroll: false })
+    setSelectedSubSubcategory(newSubSubcategory)
     
     // Llamar al callback si está definido
     if (onFilterChange) {
@@ -194,27 +167,17 @@ export default function SearchLayout({
     return (
       <div className="mb-6">
         <div className="flex flex-col gap-4">
-          {/* Selector de categorías */}
-          <div className="mb-4">
-            <CategorySelector 
-              activeCategory={category}
-              activeSubcategory={subcategory}
-              onCategoryChange={handleCategoryChange}
-              onSubcategoryChange={handleSubcategoryChange}
-              onSubSubcategoryChange={handleSubSubcategoryChange}
-              showAllOption={true}
-              showSubcategories={true}
-            />
-          </div>
-          
-          {/* Barra de búsqueda principal */}
-          <SearchBar 
+          {/* Barra de búsqueda avanzada */}
+          <AdvancedSearchBar 
             initialValue={searchQuery}
             onSearch={handleSearch}
             selectedCategory={category}
+            selectedSubcategory={subcategory}
+            selectedSubSubcategory={selectedSubSubcategory}
             onSelectCategory={handleCategoryChange}
+            onSelectSubcategory={handleSubcategoryChange}
+            onSelectSubSubcategory={handleSubSubcategoryChange}
             placeholder="¿Qué estás buscando en BuscAdis?"
-            isAnimated={false}
           />
         </div>
       </div>

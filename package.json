@@ -17,7 +17,7 @@
     "@aws-sdk/credential-providers": "^3.768.0",
     "@aws-sdk/s3-request-presigner": "^3.758.0",
     "@emotion/styled": "^11.14.0",
-    "@headlessui/react": "^2.2.0",
+    "@headlessui/react": "^2.2.2",
     "@heroicons/react": "^2.2.0",
     "@mui/material": "^6.4.1",
     "@radix-ui/react-toast": "^1.2.6",
