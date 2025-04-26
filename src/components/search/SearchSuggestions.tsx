@@ -189,9 +189,10 @@ export default function SearchSuggestions({
           animate={{ opacity: 1, y: 0 }}
           exit={{ opacity: 0, y: position === 'top' ? -10 : 10 }}
           transition={{ duration: 0.2 }}
-          className={`absolute z-50 ${position === 'top' ? 'bottom-full mb-2' : 'top-full mt-2'} left-0 w-full max-h-[70vh] overflow-y-auto rounded-xl shadow-xl ${
+          className={`absolute z-50 ${position === 'top' ? 'bottom-full mb-2' : 'top-full mt-2'} left-0 w-full max-h-[400px] overflow-y-auto rounded-xl shadow-xl ${
             appearance === 'dark' ? 'bg-slate-800 text-slate-200' : 'bg-white text-slate-900'
           } border ${appearance === 'dark' ? 'border-slate-700' : 'border-slate-200'}`}
+          style={{ scrollbarWidth: 'thin', scrollbarColor: appearance === 'dark' ? '#334155 #1e293b' : '#e2e8f0 #f8fafc' }}
         >
           <div className="p-4 space-y-3">
             {/* Loading indicator */}
@@ -274,6 +275,8 @@ export default function SearchSuggestions({
                       setSearchHistory([])
                     }}
                     className="text-xs opacity-60 hover:opacity-100"
+                    aria-label="Borrar historial de búsquedas"
+                    title="Borrar historial de búsquedas"
                   >
                     Borrar historial
                   </button>
@@ -302,6 +305,8 @@ export default function SearchSuggestions({
                           localStorage.setItem('searchHistory', JSON.stringify(filtered.map(item => item.text)))
                         }}
                         className="opacity-60 hover:opacity-100"
+                        aria-label="Eliminar esta búsqueda del historial"
+                        title="Eliminar esta búsqueda"
                       >
                         <X className="h-3 w-3" />
                       </button>

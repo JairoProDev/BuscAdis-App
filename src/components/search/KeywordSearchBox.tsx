@@ -12,6 +12,10 @@ interface KeywordSearchBoxProps {
   label?: string;
   showLabel?: boolean;
   autoFocus?: boolean;
+  showVoiceSearch?: boolean;
+  showImageSearch?: boolean;
+  showAiAssist?: boolean;
+  placeholder?: string;
 }
 
 export default function KeywordSearchBox({
@@ -22,6 +26,10 @@ export default function KeywordSearchBox({
   label = 'Palabras clave',
   showLabel = true,
   autoFocus = false,
+  showVoiceSearch = true,
+  showImageSearch = true,
+  showAiAssist = true,
+  placeholder = '¿Qué estás buscando?',
 }: KeywordSearchBoxProps) {
   const router = useRouter();
   const [searchValue, setSearchValue] = useState(initialValue);
@@ -51,13 +59,13 @@ export default function KeywordSearchBox({
       <EnhancedSearchInput
         initialValue={initialValue}
         onSearch={handleSearch}
-        placeholder="¿Qué estás buscando?"
+        placeholder={placeholder}
         appearance={appearance}
         autoFocus={autoFocus}
         showSuggestions={true}
-        showVoiceSearch={true}
-        showImageSearch={true}
-        showAiAssist={true}
+        showVoiceSearch={showVoiceSearch}
+        showImageSearch={showImageSearch}
+        showAiAssist={showAiAssist}
       />
     </div>
   );

@@ -4,6 +4,7 @@ import { useState, useRef, useEffect } from 'react';
 import { Search, X, Mic, Camera, Sparkles } from 'lucide-react';
 import { motion } from 'framer-motion';
 import SearchSuggestions from './SearchSuggestions';
+import { useMediaQuery } from '@/hooks/useMediaQuery';
 
 interface EnhancedSearchInputProps {
   initialValue?: string;
@@ -37,6 +38,7 @@ export default function EnhancedSearchInput({
   const [isRecording, setIsRecording] = useState(false);
   const [isAiThinking, setIsAiThinking] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
+  const isMobile = useMediaQuery('(max-width: 640px)');
   
   // Focus input on mount if autoFocus is true
   useEffect(() => {
@@ -76,7 +78,8 @@ export default function EnhancedSearchInput({
         console.error('Error saving search history:', e);
       }
       
-      setIsFocused(false);
+      // Don't close suggestions right away in case the user wants to 
+      // see immediate search results suggestions
     }
   };
   
@@ -275,12 +278,13 @@ export default function EnhancedSearchInput({
             {/* Search button */}
             <button
               type="submit"
-              className="flex-shrink-0 ml-1 mr-1 p-2 bg-gradient-to-r from-rose-500 to-pink-600 text-white rounded-full hover:shadow-md transition-shadow"
+              className={`flex-shrink-0 ml-1 mr-1 ${isMobile ? 'p-2' : 'p-2 sm:px-4 sm:py-2'} bg-gradient-to-r from-rose-500 to-pink-600 text-white rounded-full hover:shadow-md transition-shadow flex items-center justify-center`}
               aria-label="Buscar"
               title="Buscar"
               disabled={isRecording || isAiThinking}
             >
               <Search className="h-5 w-5" />
+              {!isMobile && <span className="ml-1 hidden sm:inline-block">Buscar</span>}
             </button>
           </div>
         </div>
@@ -294,7 +298,6 @@ export default function EnhancedSearchInput({
           onSelectSuggestion={(suggestion) => {
             setSearchTerm(suggestion);
             onSearch(suggestion);
-            setIsFocused(false);
           }}
           onClose={() => setIsFocused(false)}
           position={suggestionsPosition}

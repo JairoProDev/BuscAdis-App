@@ -171,13 +171,18 @@ export default function SearchLayout({
       <div className="mb-6">
         <div className="flex flex-col gap-4">
           {useEnhancedSearch ? (
-            // Usar nuestro nuevo componente KeywordSearchBox
+            // Usar nuestro nuevo componente KeywordSearchBox con todas las opciones
             <KeywordSearchBox
               initialValue={searchQuery}
               onSearch={handleSearch}
               appearance="dark"
               showLabel={false}
               autoFocus={true}
+              placeholder="¿Qué estás buscando hoy?"
+              showVoiceSearch={true}
+              showImageSearch={true}
+              showAiAssist={true}
+              className="w-full"
             />
           ) : (
             // Usar la barra de búsqueda avanzada existente

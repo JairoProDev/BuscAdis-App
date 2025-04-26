@@ -312,18 +312,30 @@ export default function BuscadorPage() {
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []); // Empty dependency array ensures this runs only once on mount
   
-  // Handle search input
+  // Handle search input - improved to better handle the search functionality
   const handleSearch = (query: string, options?: Record<string, string>) => {
-    console.log("handleSearch triggered");
+    console.log("handleSearch triggered with query:", query);
+
+    if (!query.trim()) {
+      console.log("Empty query, not searching");
+      return; // Don't perform empty searches
+    }
+    
     const newState = {
       ...searchState,
       query,
       page: 1,
       ...(options || {})
     };
+    
+    // Save to search history immediately when performing a search
+    saveSearchHistory(query);
+    
     setSearchState(newState);
     updateUrlWithCleanPath(newState);
-    fetchPublications(newState); // Fetch explicitly
+    
+    // Always fetch new results when searching
+    fetchPublications(newState);
   };
   
   // Handle filter changes
@@ -523,20 +535,19 @@ export default function BuscadorPage() {
     <main className="w-full bg-slate-900 min-h-screen text-white">
       <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8 lg:py-12">
         <SearchLayout
-          initialResults={results} // Pass results
+          initialResults={results}
           initialCategory={searchState.category}
           initialSubcategory={searchState.subcategory}
           initialQuery={searchState.query}
-          // Pass loading state, but SearchLayout might not need it anymore?
-          loading={loading && !isInitialLoad} // Indicate loading only after initial load
+          loading={loading && !isInitialLoad}
           onSearch={handleSearch}
           onFilterChange={handleFilterChange}
-          onLoadMore={undefined} // Removed
-          hasMore={false}        // Removed
+          onLoadMore={undefined}
+          hasMore={false}
           totalResults={totalResults}
           showMap={true}
           onPublicationClick={handleOpenModal}
-          useEnhancedSearch={true} // Enable enhanced search with suggestions
+          useEnhancedSearch={true}
         />
         {/* Display error subtly if results are already shown */}
         {error && loading && results.length > 0 && (
