@@ -403,12 +403,12 @@ export default function SearchLayout({
                       {/* <HorizontalFilterBar filters={definicionDeFiltros} onChange={handleFilterChange} /> */}
 
                       {/* Chips de filtros - Nuevo diseño */}
-                      <div className="mb-2">
+                      <div className="mb-2 relative z-20 overflow-visible">
                         <FilterChips
                           category={category}
                           activeFilters={activeFilters}
                           onFilterChange={handleFilterChange}
-                          className=""
+                          className="pt-1 pb-0"
                         />
                       </div>
                  </div>

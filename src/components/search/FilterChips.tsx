@@ -1,481 +1,352 @@
-import React, { useState, useEffect } from 'react';
-import { ChevronDownIcon, XMarkIcon } from '@heroicons/react/24/outline';
-import { Button } from '@/components/ui/Button';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/Select';
-import { Slider } from '@/components/ui/slider';
-import { Switch } from '@/components/ui/switch';
-import { Badge } from '@/components/ui/Badge';
-import { filtersByCategory } from '@/data/filterConfig';
+import React, { useRef, useState, useEffect, MouseEvent } from 'react'
+import { Button } from '@/components/ui/Button'
+import { Input } from '@/components/ui/Input'
+import { Slider } from '@/components/ui/slider'
+import { Checkbox } from '@/components/ui/Checkbox'
+import { CategoryFilters, FilterValue } from '@/types/search'
+import { cn } from '@/lib/utils'
+import { getFiltersForCategory } from '@/utils/filterUtils'
+import { X, ChevronDown } from 'lucide-react'
+import { Switch } from '@/components/ui/switch'
+import { Badge } from '@/components/ui/Badge'
 
 interface FilterChipsProps {
-  category: string;
-  activeFilters: Record<string, any>;
-  onFilterChange: (filters: Record<string, any>) => void;
-  className?: string;
+  category: string
+  activeFilters: Record<string, FilterValue>
+  onFilterChange: (key: string, value: FilterValue) => void
+  className?: string
 }
 
-export default function FilterChips({
+export function FilterChips({
   category,
   activeFilters,
   onFilterChange,
-  className = '',
+  className
 }: FilterChipsProps) {
-  // Estado para el filtro actualmente abierto
-  const [openFilterId, setOpenFilterId] = useState<string | null>(null);
-  const [filterOptions, setFilterOptions] = useState<any[]>([]);
-  
-  // Cerrar dropdown cuando se hace clic fuera
-  useEffect(() => {
-    const handleClickOutside = (event: MouseEvent) => {
-      if (openFilterId && !(event.target as Element).closest('.filter-dropdown')) {
-        setOpenFilterId(null);
-      }
-    };
+  const [openFilter, setOpenFilter] = useState<string | null>(null)
+  const [temporaryFilters, setTemporaryFilters] = useState<Record<string, FilterValue>>(activeFilters)
+  const filterContainerRef = useRef<HTMLDivElement>(null)
+  const buttonRefs = useRef<Record<string, HTMLButtonElement | null>>({})
+  const dropdownRefs = useRef<Record<string, HTMLDivElement | null>>({})
 
-    document.addEventListener('mousedown', handleClickOutside);
+  // Reset temporary filters when active filters change
+  useEffect(() => {
+    setTemporaryFilters(activeFilters)
+  }, [activeFilters])
+
+  // Handle click outside to close dropdown
+  useEffect(() => {
+    function handleClickOutside(event: MouseEvent) {
+      if (openFilter && filterContainerRef.current) {
+        const target = event.target as Node
+        
+        // Check if click was inside the current open dropdown
+        const currentDropdownRef = dropdownRefs.current[openFilter]
+        const currentButtonRef = buttonRefs.current[openFilter]
+        
+        if (
+          currentDropdownRef && 
+          !currentDropdownRef.contains(target) && 
+          currentButtonRef && 
+          !currentButtonRef.contains(target)
+        ) {
+          setOpenFilter(null)
+        }
+      }
+    }
+
+    document.addEventListener('mousedown', handleClickOutside as unknown as EventListener)
     return () => {
-      document.removeEventListener('mousedown', handleClickOutside);
-    };
-  }, [openFilterId]);
-
-  // Obtener filtros para la categoría actual
-  useEffect(() => {
-    if (!category || !filtersByCategory[category]) {
-      setFilterOptions([]);
-      return;
+      document.removeEventListener('mousedown', handleClickOutside as unknown as EventListener)
     }
-    
-    const allFilters = [];
-    // Obtener todos los filtros de todas las secciones para esta categoría
-    for (const section of filtersByCategory[category].sections) {
-      for (const filter of section.filters) {
-        allFilters.push(filter);
-      }
-    }
-    setFilterOptions(allFilters);
-  }, [category]);
+  }, [openFilter])
 
-  // Manejar cambio de filtro
-  const handleFilterChange = (filterId: string, value: any) => {
-    const newFilters = { ...activeFilters };
-    
-    // Remover valores vacíos
-    if (value === '' || value === null || value === undefined || 
-        (Array.isArray(value) && value.length === 0)) {
-      delete newFilters[filterId];
-    } else {
-      newFilters[filterId] = value;
-    }
-    
-    onFilterChange(newFilters);
-  };
-
-  // Limpiar todos los filtros
-  const clearAllFilters = () => {
-    const newFilters = {};
-    onFilterChange(newFilters);
-  };
-
-  // Renderizar contenido del filtro según su tipo
-  const renderFilterContent = (filter: any) => {
-    const value = activeFilters[filter.id];
-    
-    switch (filter.type) {
-      case 'range':
-        return (
-          <div className="p-4 bg-slate-800 rounded-lg border border-slate-700 shadow-lg min-w-[250px]">
-            <div className="flex justify-between mb-2">
-              <span className="text-sm text-slate-300 font-medium">{filter.label}</span>
-              <span className="text-sm text-slate-400">
-                {filter.format ? filter.format(value?.[0] || filter.min) : value?.[0] || filter.min} - 
-                {filter.format ? filter.format(value?.[1] || filter.max) : value?.[1] || filter.max}
-              </span>
-            </div>
-            <Slider
-              defaultValue={[value?.[0] || filter.min, value?.[1] || filter.max]}
-              min={filter.min}
-              max={filter.max}
-              step={filter.step || 1}
-              onValueChange={(newValue) => handleFilterChange(filter.id, newValue)}
-            />
-            <div className="flex justify-end gap-2 mt-4">
-              <Button 
-                variant="outline" 
-                size="sm"
-                onClick={() => setOpenFilterId(null)}
-              >
-                Cerrar
-              </Button>
-              <Button 
-                size="sm"
-                onClick={() => {
-                  handleFilterChange(filter.id, [filter.min, filter.max]);
-                  setOpenFilterId(null);
-                }}
-              >
-                Aplicar
-              </Button>
-            </div>
-          </div>
-        );
-        
-      case 'select':
-        return (
-          <div className="p-3 bg-slate-800 rounded-lg border border-slate-700 shadow-lg min-w-[200px]">
-            <div className="flex flex-col gap-1">
-              {[{value: "", label: "Todos"}].concat(filter.options || []).map((option) => (
-                <div 
-                  key={option.value} 
-                  className={`px-3 py-1.5 rounded cursor-pointer flex items-center justify-between ${
-                    value === option.value ? 'bg-teal-600 text-white' : 'hover:bg-slate-700 text-slate-300'
-                  }`}
-                  onClick={() => {
-                    handleFilterChange(filter.id, option.value);
-                    setOpenFilterId(null);
-                  }}
-                >
-                  <span>{option.label}</span>
-                  {option.count !== undefined && (
-                    <span className="text-xs bg-slate-700 px-1.5 py-0.5 rounded-full">
-                      {option.count}
-                    </span>
-                  )}
-                </div>
-              ))}
-            </div>
-          </div>
-        );
-        
-      case 'multiselect':
-        const selectedValues = value || [];
-        return (
-          <div className="p-3 bg-slate-800 rounded-lg border border-slate-700 shadow-lg min-w-[200px] max-h-[300px] overflow-y-auto">
-            <div className="flex flex-col gap-1">
-              {filter.options?.map((option: any) => (
-                <div 
-                  key={option.value} 
-                  className={`px-3 py-1.5 rounded cursor-pointer flex items-center justify-between ${
-                    selectedValues.includes(option.value) ? 'bg-teal-600 text-white' : 'hover:bg-slate-700 text-slate-300'
-                  }`}
-                  onClick={() => {
-                    const newValues = selectedValues.includes(option.value)
-                      ? selectedValues.filter((v: string) => v !== option.value)
-                      : [...selectedValues, option.value];
-                    handleFilterChange(filter.id, newValues.length ? newValues : null);
-                  }}
-                >
-                  <span>{option.label}</span>
-                  {option.count !== undefined && (
-                    <span className="text-xs bg-slate-700 px-1.5 py-0.5 rounded-full">
-                      {option.count}
-                    </span>
-                  )}
-                </div>
-              ))}
-            </div>
-            <div className="flex justify-end mt-3">
-              <Button 
-                size="sm" 
-                variant="outline"
-                onClick={() => setOpenFilterId(null)}
-              >
-                Cerrar
-              </Button>
-            </div>
-          </div>
-        );
-        
-      case 'location':
-        // Filtro especializado para lugares (similar a Computrabajo)
-        return (
-          <div className="p-4 bg-slate-800 rounded-lg border border-slate-700 shadow-lg w-[350px]">
-            <div className="grid grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <h4 className="text-sm font-medium text-slate-300">Modalidad</h4>
-                {filter.modes?.map((mode: any) => (
-                  <div 
-                    key={mode.value} 
-                    className="flex items-center gap-2"
-                  >
-                    <Switch
-                      checked={value?.modes?.includes(mode.value) || false}
-                      onCheckedChange={(checked) => {
-                        const currentModes = value?.modes || [];
-                        const newModes = checked
-                          ? [...currentModes, mode.value]
-                          : currentModes.filter((m: string) => m !== mode.value);
-                        
-                        handleFilterChange(filter.id, {
-                          ...value,
-                          modes: newModes
-                        });
-                      }}
-                    />
-                    <span className="text-sm text-slate-300">{mode.label}</span>
-                    {mode.count && (
-                      <span className="text-xs bg-slate-700 px-1.5 py-0.5 rounded-full">
-                        {mode.count}
-                      </span>
-                    )}
-                  </div>
-                ))}
-              </div>
-              
-              <div className="space-y-2">
-                <h4 className="text-sm font-medium text-slate-300">Lugares</h4>
-                <div className="max-h-[200px] overflow-y-auto space-y-1">
-                  {filter.locations?.map((location: any) => (
-                    <div 
-                      key={location.value} 
-                      className={`px-3 py-1.5 rounded cursor-pointer flex items-center justify-between ${
-                        value?.locations?.includes(location.value) ? 'bg-teal-600 text-white' : 'hover:bg-slate-700 text-slate-300'
-                      }`}
-                      onClick={() => {
-                        const currentLocations = value?.locations || [];
-                        const newLocations = currentLocations.includes(location.value)
-                          ? currentLocations.filter((l: string) => l !== location.value)
-                          : [...currentLocations, location.value];
-                        
-                        handleFilterChange(filter.id, {
-                          ...value,
-                          locations: newLocations
-                        });
-                      }}
-                    >
-                      <span>{location.label}</span>
-                      {location.count && (
-                        <span className="text-xs bg-slate-700 px-1.5 py-0.5 rounded-full">
-                          {location.count}
-                        </span>
-                      )}
-                    </div>
-                  ))}
-                </div>
-              </div>
-            </div>
-            
-            <div className="flex justify-end gap-2 mt-4">
-              <Button 
-                variant="outline" 
-                size="sm"
-                onClick={() => setOpenFilterId(null)}
-              >
-                Cerrar
-              </Button>
-              <Button 
-                size="sm"
-                onClick={() => setOpenFilterId(null)}
-              >
-                Aplicar
-              </Button>
-            </div>
-          </div>
-        );
-        
-      case 'toggle':
-        return (
-          <div className="p-3 bg-slate-800 rounded-lg border border-slate-700 shadow-lg min-w-[200px]">
-            <div className="flex items-center justify-between space-x-2">
-              <span className="text-sm text-slate-300 font-medium">{filter.label}</span>
-              <Switch
-                checked={!!value}
-                onCheckedChange={(checked) => {
-                  handleFilterChange(filter.id, checked);
-                  setOpenFilterId(null);
-                }}
-              />
-            </div>
-            <div className="flex justify-end mt-3">
-              <Button 
-                size="sm" 
-                variant="outline"
-                onClick={() => setOpenFilterId(null)}
-              >
-                Cerrar
-              </Button>
-            </div>
-          </div>
-        );
-        
-      default:
-        return null;
-    }
-  };
-
-  // Si no hay categoría o filtros, no mostrar nada
-  if (!category || !filtersByCategory[category] || filterOptions.length === 0) {
-    // Si es la categoría empleos pero no hay configuración, mostrar un conjunto de filtros por defecto
-    if (category === 'empleos') {
-      return (
-        <div className={`w-full ${className}`}>
-          {/* Barra horizontal de chips de filtros específicos para empleos */}
-          <div className="flex items-center space-x-2 overflow-x-auto py-2 px-0.5">
-            {/* Filtro: Salario */}
-            <div className="relative filter-dropdown">
-              <button
-                className={`flex items-center gap-1 py-2 px-4 rounded-lg text-sm font-medium transition-colors whitespace-nowrap bg-slate-800 text-white hover:bg-slate-700`}
-                onClick={() => {}}
-              >
-                <span>Salario</span>
-                <ChevronDownIcon className="h-4 w-4 transition-transform" />
-              </button>
-            </div>
-            
-            {/* Filtro: Tipo de empleo */}
-            <div className="relative filter-dropdown">
-              <button
-                className={`flex items-center gap-1 py-2 px-4 rounded-lg text-sm font-medium transition-colors whitespace-nowrap bg-slate-800 text-white hover:bg-slate-700`}
-                onClick={() => {}}
-              >
-                <span>Tipo de empleo</span>
-                <ChevronDownIcon className="h-4 w-4 transition-transform" />
-              </button>
-            </div>
-            
-            {/* Filtro: Modalidad */}
-            <div className="relative filter-dropdown">
-              <button
-                className={`flex items-center gap-1 py-2 px-4 rounded-lg text-sm font-medium transition-colors whitespace-nowrap bg-slate-800 text-white hover:bg-slate-700`}
-                onClick={() => {}}
-              >
-                <span>Modalidad</span>
-                <ChevronDownIcon className="h-4 w-4 transition-transform" />
-              </button>
-            </div>
-            
-            {/* Filtro: Experiencia */}
-            <div className="relative filter-dropdown">
-              <button
-                className={`flex items-center gap-1 py-2 px-4 rounded-lg text-sm font-medium transition-colors whitespace-nowrap bg-slate-800 text-white hover:bg-slate-700`}
-                onClick={() => {}}
-              >
-                <span>Experiencia</span>
-                <ChevronDownIcon className="h-4 w-4 transition-transform" />
-              </button>
-            </div>
-            
-            {/* Filtro: Educación */}
-            <div className="relative filter-dropdown">
-              <button
-                className={`flex items-center gap-1 py-2 px-4 rounded-lg text-sm font-medium transition-colors whitespace-nowrap bg-slate-800 text-white hover:bg-slate-700`}
-                onClick={() => {}}
-              >
-                <span>Educación</span>
-                <ChevronDownIcon className="h-4 w-4 transition-transform" />
-              </button>
-            </div>
-            
-            {/* Filtro: Habilidades */}
-            <div className="relative filter-dropdown">
-              <button
-                className={`flex items-center gap-1 py-2 px-4 rounded-lg text-sm font-medium transition-colors whitespace-nowrap bg-slate-800 text-white hover:bg-slate-700`}
-                onClick={() => {}}
-              >
-                <span>Habilidades</span>
-                <ChevronDownIcon className="h-4 w-4 transition-transform" />
-              </button>
-            </div>
-          </div>
-        </div>
-      );
-    }
-    return null;
+  const toggleDropdown = (filterId: string) => {
+    setOpenFilter(openFilter === filterId ? null : filterId)
   }
 
-  return (
-    <div className={`w-full ${className}`}>
-      {/* Barra horizontal de chips de filtros */}
-      <div className="flex items-center space-x-2 overflow-x-auto py-2 px-0.5">
-        {filterOptions.map((filter) => {
-          const isActive = activeFilters[filter.id] !== undefined;
-          const isOpen = openFilterId === filter.id;
-          
-          return (
-            <div className="relative filter-dropdown" key={filter.id}>
-              <button
-                className={`flex items-center gap-1 py-2 px-4 rounded-lg text-sm font-medium transition-colors whitespace-nowrap ${
-                  isActive 
-                    ? 'bg-teal-500 text-white' 
-                    : isOpen
-                      ? 'bg-slate-700 text-white'
-                      : 'bg-slate-800 text-white hover:bg-slate-700'
-                }`}
-                onClick={() => setOpenFilterId(isOpen ? null : filter.id)}
-              >
-                <span>{filter.label}</span>
-                <ChevronDownIcon className={`h-4 w-4 transition-transform ${isOpen ? 'rotate-180' : ''}`} />
-              </button>
-              
-              {/* Menú desplegable para este filtro */}
-              {isOpen && (
-                <div className="absolute z-40 left-0 mt-1 filter-content">
-                  {renderFilterContent(filter)}
-                </div>
-              )}
-            </div>
-          );
-        })}
-        
-        {/* Botón de limpiar filtros */}
-        {Object.keys(activeFilters).length > 0 && (
-          <Button 
-            variant="outline" 
-            size="sm"
-            className="text-teal-400 hover:text-teal-300 bg-slate-800 border-slate-700"
-            onClick={clearAllFilters}
-          >
-            Limpiar filtros ({Object.keys(activeFilters).length})
-          </Button>
-        )}
-      </div>
+  const handleTempFilterChange = (key: string, value: FilterValue) => {
+    setTemporaryFilters((prev) => ({
+      ...prev,
+      [key]: value
+    }))
+  }
 
-      {/* Mostrar chips de filtros activos */}
-      {Object.keys(activeFilters).length > 0 && (
-        <div className="flex flex-wrap gap-2 mt-3">
-          {Object.entries(activeFilters).map(([key, value]) => {
-            const filter = filterOptions.find(f => f.id === key);
-            if (!filter) return null;
+  const applyFilter = (key: string) => {
+    onFilterChange(key, temporaryFilters[key])
+    setOpenFilter(null)
+  }
+
+  const clearFilter = (key: string) => {
+    const availableFilters = getFiltersForCategory(category as CategoryFilters)
+    const filter = availableFilters.find(f => f.id === key)
+    
+    if (filter) {
+      const defaultValue = filter.type === 'range' 
+        ? [filter.min || 0, filter.max || 100] 
+        : filter.type === 'toggle' 
+          ? false 
+          : null
+          
+      onFilterChange(key, defaultValue)
+    }
+  }
+
+  const isFilterActive = (key: string): boolean => {
+    if (!activeFilters[key]) return false
+    
+    if (Array.isArray(activeFilters[key])) {
+      // For range filters with 2 values
+      if (activeFilters[key].length === 2) {
+        const filter = getFiltersForCategory(category as CategoryFilters).find(f => f.id === key)
+        if (!filter) return false
+        
+        // Check if range filter is at default values
+        return (
+          activeFilters[key][0] !== (filter.min || 0) ||
+          activeFilters[key][1] !== (filter.max || 100)
+        )
+      }
+      
+      // For multiselect filters
+      return (activeFilters[key] as any[]).length > 0
+    }
+    
+    // For toggle filters
+    if (typeof activeFilters[key] === 'boolean') {
+      return activeFilters[key] === true
+    }
+    
+    // For select filters
+    return activeFilters[key] !== null && activeFilters[key] !== undefined
+  }
+
+  const getFilterLabel = (filter: any, value: FilterValue): string => {
+    if (!value) return filter.label || filter.id
+    
+    if (filter.type === 'range' && Array.isArray(value)) {
+      const unit = filter.unit || ''
+      return `${filter.label}: ${value[0]}${unit} - ${value[1]}${unit}`
+    }
+    
+    if (filter.type === 'select' && value) {
+      const option = filter.options?.find((opt: any) => opt.value === value)
+      return `${filter.label}: ${option?.label || value}`
+    }
+    
+    if (filter.type === 'multiselect' && Array.isArray(value) && value.length > 0) {
+      if (value.length === 1) {
+        const option = filter.options?.find((opt: any) => opt.value === value[0])
+        return `${filter.label}: ${option?.label || value[0]}`
+      }
+      return `${filter.label}: ${value.length} seleccionados`
+    }
+    
+    if (filter.type === 'toggle' && value === true) {
+      return filter.label
+    }
+    
+    return filter.label || filter.id
+  }
+
+  const renderFilterContent = (filter: any) => {
+    const value = temporaryFilters[filter.id]
+    
+    switch (filter.type) {
+      case 'range': {
+        const rangeValue = (value as number[] || [filter.min || 0, filter.max || 100])
+        return (
+          <div className="space-y-4 w-full p-3">
+            <div className="flex justify-between text-sm">
+              <div>
+                {filter.label} {rangeValue[0]}{filter.unit}
+              </div>
+              <div>
+                {rangeValue[1]}{filter.unit}
+              </div>
+            </div>
             
-            // Determinar valor a mostrar
-            let displayValue = value;
-            if (filter.type === 'select') {
-              const option = filter.options?.find((o: any) => o.value === value);
-              displayValue = option ? option.label : value;
-            } else if (filter.type === 'multiselect' && Array.isArray(value)) {
-              displayValue = `${value.length} seleccionados`;
-            } else if (filter.type === 'range' && Array.isArray(value)) {
-              displayValue = `${filter.format ? filter.format(value[0]) : value[0]} - ${filter.format ? filter.format(value[1]) : value[1]}`;
-            } else if (filter.type === 'location' && typeof value === 'object') {
-              const modesCount = value.modes?.length || 0;
-              const locationsCount = value.locations?.length || 0;
-              const parts = [];
-              if (modesCount > 0) parts.push(`${modesCount} modalidad${modesCount > 1 ? 'es' : ''}`);
-              if (locationsCount > 0) parts.push(`${locationsCount} lugar${locationsCount > 1 ? 'es' : ''}`);
-              displayValue = parts.length > 0 ? parts.join(', ') : 'Seleccionado';
-            } else if (filter.type === 'toggle') {
-              displayValue = value ? 'Sí' : 'No';
-            }
+            <Slider
+              value={rangeValue}
+              min={filter.min || 0}
+              max={filter.max || 100}
+              step={filter.step || 1}
+              onValueChange={(newValue) => handleTempFilterChange(filter.id, newValue)}
+            />
             
-            return (
-              <Badge 
-                key={key}
-                variant="outline"
-                className="bg-slate-800 border-teal-600/30 text-white flex items-center gap-1 py-1.5 px-3"
+            <div className="flex justify-between gap-2">
+              <Input
+                type="number"
+                min={filter.min || 0}
+                max={filter.max || 100}
+                value={rangeValue[0]}
+                onChange={(e) => {
+                  const newValue = parseInt(e.target.value) || filter.min || 0
+                  handleTempFilterChange(filter.id, [newValue, rangeValue[1]])
+                }}
+                className="w-full"
+              />
+              <Input
+                type="number"
+                min={filter.min || 0}
+                max={filter.max || 100}
+                value={rangeValue[1]}
+                onChange={(e) => {
+                  const newValue = parseInt(e.target.value) || filter.max || 100
+                  handleTempFilterChange(filter.id, [rangeValue[0], newValue])
+                }}
+                className="w-full"
+              />
+            </div>
+            
+            <div className="flex justify-end">
+              <Button size="sm" onClick={() => applyFilter(filter.id)}>
+                Aplicar
+              </Button>
+            </div>
+          </div>
+        )
+      }
+      
+      case 'select':
+        return (
+          <div className="p-3 space-y-2 w-full min-w-[200px]">
+            {filter.options?.map((option: any) => (
+              <div
+                key={option.value}
+                className={cn(
+                  "cursor-pointer px-3 py-2 rounded hover:bg-slate-700 transition-colors",
+                  value === option.value && "bg-slate-700"
+                )}
+                onClick={() => {
+                  handleTempFilterChange(filter.id, option.value)
+                  applyFilter(filter.id)
+                }}
               >
-                <span className="font-medium">{filter.label}:</span> 
-                <span>{displayValue}</span>
-                <button
-                  onClick={() => handleFilterChange(key, null)}
-                  className="ml-2 hover:text-red-400"
-                  aria-label={`Eliminar filtro ${filter.label}`}
+                {option.label}
+              </div>
+            ))}
+          </div>
+        )
+      
+      case 'multiselect':
+        return (
+          <div className="p-3 space-y-2 min-w-[200px]">
+            {filter.options?.map((option: any) => (
+              <div key={option.value} className="flex items-center space-x-2">
+                <Checkbox
+                  id={`${filter.id}-${option.value}`}
+                  checked={(value as string[] || []).includes(option.value)}
+                  onCheckedChange={(checked) => {
+                    const currentValues = (value as string[] || [])
+                    const newValues = checked
+                      ? [...currentValues, option.value]
+                      : currentValues.filter(v => v !== option.value)
+                    handleTempFilterChange(filter.id, newValues)
+                  }}
+                />
+                <label
+                  htmlFor={`${filter.id}-${option.value}`}
+                  className="text-sm cursor-pointer"
                 >
-                  <XMarkIcon className="h-3 w-3" />
-                </button>
-              </Badge>
-            );
-          })}
+                  {option.label}
+                </label>
+              </div>
+            ))}
+            
+            <div className="flex justify-end mt-2">
+              <Button size="sm" onClick={() => applyFilter(filter.id)}>
+                Aplicar
+              </Button>
+            </div>
+          </div>
+        )
+      
+      case 'toggle':
+        return (
+          <div className="p-3 flex items-center justify-between min-w-[200px]">
+            <span>{filter.label}</span>
+            <Switch
+              checked={!!value}
+              onCheckedChange={(checked) => {
+                handleTempFilterChange(filter.id, checked)
+                applyFilter(filter.id)
+              }}
+            />
+          </div>
+        )
+      
+      default:
+        return null
+    }
+  }
+
+  const filters = getFiltersForCategory(category as CategoryFilters)
+
+  return (
+    <div 
+      ref={filterContainerRef} 
+      className={cn("flex flex-wrap gap-2 relative", className)}
+    >
+      {filters.map((filter) => (
+        <div key={filter.id} className="relative">
+          <Button
+            variant={isFilterActive(filter.id) ? "secondary" : "outline"}
+            size="sm"
+            onClick={() => toggleDropdown(filter.id)}
+            className={cn(
+              "flex items-center gap-1 h-8",
+              isFilterActive(filter.id) && "font-medium"
+            )}
+            ref={(el) => (buttonRefs.current[filter.id] = el)}
+          >
+            {getFilterLabel(filter, activeFilters[filter.id])}
+            <ChevronDown size={14} className={cn(
+              "transition-transform", 
+              openFilter === filter.id && "transform rotate-180"
+            )} />
+            
+            {isFilterActive(filter.id) && (
+              <X
+                size={14}
+                className="ml-1 opacity-70 hover:opacity-100"
+                onClick={(e) => {
+                  e.stopPropagation()
+                  clearFilter(filter.id)
+                }}
+              />
+            )}
+          </Button>
+          
+          {openFilter === filter.id && (
+            <div
+              ref={(el) => (dropdownRefs.current[filter.id] = el)}
+              className="absolute top-full left-0 mt-1 z-[100] bg-slate-800 rounded-lg border border-slate-700 shadow-lg min-w-[200px] max-h-[80vh] overflow-y-auto"
+              style={{ 
+                position: 'absolute',
+                width: 'max-content'
+              }}
+            >
+              {renderFilterContent(filter)}
+            </div>
+          )}
         </div>
+      ))}
+      
+      {Object.keys(activeFilters).length > 0 && (
+        <Button
+          variant="ghost"
+          size="sm"
+          className="h-8 text-muted-foreground hover:text-foreground"
+          onClick={() => {
+            // Clear all filters
+            const availableFilters = getFiltersForCategory(category as CategoryFilters)
+            availableFilters.forEach(filter => clearFilter(filter.id))
+          }}
+        >
+          Limpiar filtros
+        </Button>
       )}
     </div>
-  );
+  )
 } 
