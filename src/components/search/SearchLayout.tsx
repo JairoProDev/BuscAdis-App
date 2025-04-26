@@ -14,6 +14,7 @@ import SearchResults, { Publication } from './SearchResults'
 import useMediaQuery from '@/hooks/useMediaQuery'
 import AdvancedSearchBar from './AdvancedSearchBar'
 import KeywordSearchBox from './KeywordSearchBox'
+import CategorySelector from './CategorySelector'
 
 interface SearchLayoutProps {
   initialResults?: Publication[]
@@ -168,7 +169,7 @@ export default function SearchLayout({
   // Renderizar barra superior de búsqueda
   const renderSearchHeader = () => {
     return (
-      <div className="mb-6">
+      <div className="mb-2">
         <div className="flex flex-col gap-4">
           {useEnhancedSearch ? (
             // Usar nuestro nuevo componente KeywordSearchBox con todas las opciones
@@ -199,6 +200,25 @@ export default function SearchLayout({
             />
           )}
         </div>
+      </div>
+    )
+  }
+  
+  // Renderizar selector de categorías
+  const renderCategorySelector = () => {
+    return (
+      <div className="mb-6 bg-slate-800/50 p-4 rounded-xl border border-slate-700">
+        <CategorySelector
+          activeCategory={category}
+          activeSubcategory={subcategory}
+          activeSubSubcategory={selectedSubSubcategory}
+          onCategoryChange={handleCategoryChange}
+          onSubcategoryChange={handleSubcategoryChange}
+          onSubSubcategoryChange={handleSubSubcategoryChange}
+          showCounts={true}
+          variant="horizontal"
+          className="w-full"
+        />
       </div>
     )
   }
@@ -416,6 +436,9 @@ export default function SearchLayout({
     <div className={`w-full ${className}`}>
       {/* Cabecera de búsqueda */}
       {renderSearchHeader()}
+      
+      {/* Selector de Categorías */}
+      {renderCategorySelector()}
       
       {/* Barra de filtro y controles */}
       {renderFilterBar()}
