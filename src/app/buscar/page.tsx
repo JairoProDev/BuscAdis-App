@@ -536,6 +536,7 @@ export default function BuscadorPage() {
           totalResults={totalResults}
           showMap={true}
           onPublicationClick={handleOpenModal}
+          useEnhancedSearch={true} // Enable enhanced search with suggestions
         />
         {/* Display error subtly if results are already shown */}
         {error && loading && results.length > 0 && (

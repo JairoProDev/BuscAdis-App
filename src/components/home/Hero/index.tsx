@@ -3,12 +3,21 @@
 
 import { motion } from 'framer-motion';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import Container from '@/components/shared/Container';
-import SearchBar from '@/components/search/SearchBar';
+import KeywordSearchBox from '@/components/search/KeywordSearchBox';
 import FeaturedAd from '../FeaturedAd';
 import { SparklesIcon } from '@heroicons/react/24/solid';
 
 export default function Hero() {
+    const router = useRouter();
+    
+    const handleSearch = (query: string) => {
+        if (query.trim()) {
+            router.push(`/buscar?q=${encodeURIComponent(query)}`);
+        }
+    };
+    
     return (
         <section className="relative min-h-[calc(100vh-4rem)] md:min-h-screen bg-gradient-to-r from-teal-900 via-slate-900 to-cyan-900 pt-6">
             <div className="absolute inset-0">
@@ -123,7 +132,19 @@ export default function Hero() {
                                 Encuentra todo lo que necesitas en un solo lugar, con la confianza y seguridad que mereces
                             </motion.p>
 
-                            <SearchBar onSearch={(query) => console.log('Búsqueda:', query)} />
+                            <motion.div
+                                initial={{ opacity: 0, y: 20 }}
+                                animate={{ opacity: 1, y: 0 }}
+                                transition={{ delay: 0.7, duration: 0.7 }}
+                            >
+                                <KeywordSearchBox 
+                                    onSearch={handleSearch}
+                                    appearance="dark"
+                                    showLabel={false}
+                                    autoFocus={false}
+                                    className="w-full max-w-2xl"
+                                />
+                            </motion.div>
 
                             <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 sm:gap-6 md:gap-8 py-4">
                                 <motion.div

@@ -13,6 +13,7 @@ import {
 import SearchResults, { Publication } from './SearchResults'
 import useMediaQuery from '@/hooks/useMediaQuery'
 import AdvancedSearchBar from './AdvancedSearchBar'
+import KeywordSearchBox from './KeywordSearchBox'
 
 interface SearchLayoutProps {
   initialResults?: Publication[]
@@ -29,6 +30,7 @@ interface SearchLayoutProps {
   onPublicationClick?: (publication: Publication, e: React.MouseEvent<HTMLAnchorElement>) => void
   children?: ReactNode
   className?: string
+  useEnhancedSearch?: boolean
 }
 
 export default function SearchLayout({
@@ -45,7 +47,8 @@ export default function SearchLayout({
   showMap = false,
   onPublicationClick,
   children,
-  className = ''
+  className = '',
+  useEnhancedSearch = true,
 }: SearchLayoutProps) {
   const router = useRouter()
   const pathname = usePathname()
@@ -167,18 +170,29 @@ export default function SearchLayout({
     return (
       <div className="mb-6">
         <div className="flex flex-col gap-4">
-          {/* Barra de búsqueda avanzada */}
-          <AdvancedSearchBar 
-            initialValue={searchQuery}
-            onSearch={handleSearch}
-            selectedCategory={category}
-            selectedSubcategory={subcategory}
-            selectedSubSubcategory={selectedSubSubcategory}
-            onSelectCategory={handleCategoryChange}
-            onSelectSubcategory={handleSubcategoryChange}
-            onSelectSubSubcategory={handleSubSubcategoryChange}
-            placeholder="¿Qué estás buscando en BuscAdis?"
-          />
+          {useEnhancedSearch ? (
+            // Usar nuestro nuevo componente KeywordSearchBox
+            <KeywordSearchBox
+              initialValue={searchQuery}
+              onSearch={handleSearch}
+              appearance="dark"
+              showLabel={false}
+              autoFocus={true}
+            />
+          ) : (
+            // Usar la barra de búsqueda avanzada existente
+            <AdvancedSearchBar 
+              initialValue={searchQuery}
+              onSearch={handleSearch}
+              selectedCategory={category}
+              selectedSubcategory={subcategory}
+              selectedSubSubcategory={selectedSubSubcategory}
+              onSelectCategory={handleCategoryChange}
+              onSelectSubcategory={handleSubcategoryChange}
+              onSelectSubSubcategory={handleSubSubcategoryChange}
+              placeholder="¿Qué estás buscando en BuscAdis?"
+            />
+          )}
         </div>
       </div>
     )
@@ -234,7 +248,7 @@ export default function SearchLayout({
           )}
           
           {/* Toggle de vista de columnas (solo en desktop) */}
-          {isLg && (
+          {(
             <button
               onClick={() => setCurrentView(currentView === 'list' ? 'grid' : 'list')}
               className={`p-2 rounded-lg border ${
@@ -271,9 +285,10 @@ export default function SearchLayout({
         </div>
         
         {/* Aquí irían los filtros específicos */}
-        <div className="space-y-6">
-          {/* Filtros por precío */}
+        {(
           <div>
+          {/* Filtros por precío */}
+          <div className="mb-6">
             <h3 className="text-sm font-medium text-slate-300 mb-3">Precio</h3>
             <div className="space-y-2">
               <div className="flex items-center gap-2">
@@ -296,7 +311,7 @@ export default function SearchLayout({
           </div>
           
           {/* Filtro por ubicación */}
-          <div>
+          <div className="mb-6">
             <h3 className="text-sm font-medium text-slate-300 mb-3">Ubicación</h3>
             <select 
               className="w-full py-2 px-3 bg-slate-700 border border-slate-600 rounded-lg text-white focus:ring-teal-500 focus:border-teal-500"
@@ -311,7 +326,7 @@ export default function SearchLayout({
           </div>
           
           {/* Filtro por fecha */}
-          <div>
+          <div className="mb-6">
             <h3 className="text-sm font-medium text-slate-300 mb-3">Fecha de publicación</h3>
             <div className="space-y-2">
               <label className="flex items-center">
@@ -335,17 +350,17 @@ export default function SearchLayout({
           
           {/* Más filtros específicos de categoría */}
           {category && (
-            <div>
+            <div className="mb-6">
               <h3 className="text-sm font-medium text-slate-300 mb-3">Filtros específicos</h3>
               <p className="text-slate-400 text-sm">
                 Filtros adaptados para la categoría {category}
               </p>
             </div>
           )}
-        </div>
+        
         
         {/* Botones de acción */}
-        <div className="mt-8 space-y-2">
+        <div className="space-y-2">
           <button className="w-full py-2.5 bg-gradient-to-r from-teal-500 to-cyan-500 hover:from-teal-600 hover:to-cyan-600 text-white font-medium rounded-lg transition-colors shadow-md hover:shadow-lg">
             Aplicar filtros
           </button>
@@ -353,6 +368,8 @@ export default function SearchLayout({
             Limpiar filtros
           </button>
         </div>
+        </div>
+        )}
       </div>
     )
   }
@@ -419,11 +436,12 @@ export default function SearchLayout({
             <SearchResults
               results={results}
               loading={loading}
-              onLoadMore={undefined}
-              hasMore={false}
+              onLoadMore={onLoadMore}
+              hasMore={hasMore}
               activeCategory={category}
               showInteractionButtons={true}
               onPublicationClick={onPublicationClick}
+              viewType={currentView}
             />
           )}
         </div>
