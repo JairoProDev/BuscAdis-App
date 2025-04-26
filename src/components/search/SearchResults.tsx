@@ -6,7 +6,8 @@ import {
   Squares2X2Icon, 
   ListBulletIcon, 
   FireIcon,
-  MapPinIcon
+  MapPinIcon,
+  MagnifyingGlassIcon as SearchIcon
 } from '@heroicons/react/24/outline'
 import {
   HeartIcon as HeartSolid,
@@ -50,13 +51,15 @@ export interface Publication {
   contactEmail?: string
 }
 
-interface SearchResultsProps {
+export interface SearchResultsProps {
   results: Publication[]
   loading: boolean
   highlightNew?: boolean
   showInteractionButtons?: boolean
   showMap?: boolean
   activeCategory?: string
+  viewType?: 'grid' | 'list' | 'map'
+  hasMore?: boolean // Used in previous implementation for infinite loading, kept for API compatibility
   onPublicationClick?: (publication: Publication, e: React.MouseEvent<HTMLAnchorElement>) => void
 }
 
@@ -143,10 +146,9 @@ export default function SearchResults({
   highlightNew = true,
   showInteractionButtons = true,
   activeCategory,
+  viewType = 'grid',
   onPublicationClick
 }: SearchResultsProps) {
-  // Estado para alternar entre vista de cuadrícula y lista
-  const [viewMode, setViewMode] = useState<'grid' | 'list'>('list')
   // Estado para interacciones del usuario (likes, guardados)
   const [likedItems, setLikedItems] = useState<Set<string>>(new Set())
   const [savedItems, setSavedItems] = useState<Set<string>>(new Set())
@@ -186,57 +188,43 @@ export default function SearchResults({
     setLoading(initialLoading);
   }, [initialResults, initialLoading]);
   
-  // Cargar más resultados cuando el elemento de carga está en vista
-  // useEffect(() => {
-  //   // Log the state whenever inView changes or related states change
-  //   console.log('SearchResults: InView Effect Check', { 
-  //     inView, 
-  //     isIntersecting: entry?.isIntersecting, // More specific check
-  //     loading,
-  //     hasMore,
-  //     canLoadMore: !loading && hasMore && onLoadMore 
-  //   });
-
-  //   // Use entry.isIntersecting for potentially more reliable detection
-  //   if (entry?.isIntersecting && !loading && hasMore && onLoadMore) {
-  //     console.log('SearchResults: ---> Loading more results TRIGGERED');
-  //     onLoadMore();
-  //   }
-  //   // Dependency array includes entry to react to intersection changes
-  // }, [inView, entry, loading, hasMore, onLoadMore]); // Removed currentPage dependency
-  
-  // Load view mode preference from localStorage
+  // Load likes and saved items from localStorage
   useEffect(() => {
     if (typeof window !== 'undefined') {
-      const savedViewMode = localStorage.getItem('viewMode') as 'grid' | 'list' | null;
-      if (savedViewMode && (savedViewMode === 'grid' || savedViewMode === 'list')) {
-        setViewMode(savedViewMode);
+      const likedFromStorage = localStorage.getItem('likedItems')
+      const savedFromStorage = localStorage.getItem('savedItems')
+      
+      if (likedFromStorage) {
+        try {
+          setLikedItems(new Set(JSON.parse(likedFromStorage)))
+        } catch (error) {
+          console.error('Error parsing liked items from localStorage:', error)
+        }
+      }
+      
+      if (savedFromStorage) {
+        try {
+          setSavedItems(new Set(JSON.parse(savedFromStorage)))
+        } catch (error) {
+          console.error('Error parsing saved items from localStorage:', error)
+        }
       }
     }
-  }, []);
-  
-  // Cargar likes y guardados del localStorage al iniciar
-  useEffect(() => {
-    const loadInteractions = () => {
-      try {
-        const savedLikes = localStorage.getItem('likedItems')
-        const savedBookmarks = localStorage.getItem('savedItems')
-        
-        if (savedLikes) {
-          setLikedItems(new Set(JSON.parse(savedLikes)))
-        }
-        
-        if (savedBookmarks) {
-          setSavedItems(new Set(JSON.parse(savedBookmarks)))
-        }
-      } catch (error) {
-        console.error('Error loading user interactions:', error)
-      }
-    }
-    
-    loadInteractions()
   }, [])
+
+  // Actualizar localStorage cuando cambien likes o guardados
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      localStorage.setItem('likedItems', JSON.stringify([...likedItems]))
+    }
+  }, [likedItems])
   
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      localStorage.setItem('savedItems', JSON.stringify([...savedItems]))
+    }
+  }, [savedItems])
+
   // Detectar nuevos resultados
   useEffect(() => {
     // Simular algunos elementos como "nuevos"
@@ -258,9 +246,6 @@ export default function SearchResults({
       } else {
         newSet.add(id)
       }
-      
-      // Guardar en localStorage
-      localStorage.setItem('likedItems', JSON.stringify(Array.from(newSet)))
       return newSet
     })
   }
@@ -273,16 +258,12 @@ export default function SearchResults({
       } else {
         newSet.add(id)
       }
-      
-      // Guardar en localStorage
-      localStorage.setItem('savedItems', JSON.stringify(Array.from(newSet)))
       return newSet
     })
   }
 
-  
   // Marcar elemento como visto al hacer scroll
- {/* 
+  {/* 
   const handleItemVisible = (id: string) => {
     setVisibleItems(prev => {
       const newSet = new Set(prev)
@@ -293,32 +274,9 @@ export default function SearchResults({
     */}
   // Improved handleChangeViewMode function with smooth transitions
   const handleChangeViewMode = (mode: 'grid' | 'list') => {
-    // Don't do anything if we're already in this mode
-    if (viewMode === mode) return;
-    
-    // Apply transition classes to container
-    const container = document.querySelector('.publications-grid, .publications-list');
-    if (container) {
-      container.classList.add('view-transition');
-    }
-    
-    // Set timeout to allow transition to complete and avoid layout jumps
-    setTimeout(() => {
-      // Set the view mode
-      setViewMode(mode);
-      
-      // Force layout recalculation after changing view
-      setTimeout(() => {
-        if (container) {
-          container.classList.remove('view-transition');
-        }
-      }, 50);
-    }, 5);
-    
-    // Save preference to localStorage
-    if (typeof window !== 'undefined') {
-      localStorage.setItem('viewMode', mode);
-    }
+    // No hacemos nada aquí porque ahora el viewType es manejado por el componente padre
+    console.log('View mode changed to', mode);
+    // El modo de vista ahora es controlado por el padre
   };
   
   // Renderizar item en vista de cuadrícula
@@ -858,115 +816,102 @@ export default function SearchResults({
   }
   
   return (
-    <>
-      {/* Results list */}
-      <div className="relative z-10">
-        {/* Control de vista y resultados */}
-        <div className="flex flex-wrap items-center justify-between mb-4">
-          <div className="flex items-center space-x-1">
-            <span className="text-sm font-medium text-slate-400">
-              {allResults.length} resultado{allResults.length !== 1 ? 's' : ''}
-              {activeCategory && <span className="ml-1">en {activeCategory}</span>}
-            </span>
-            
-            {newItemsCount > 0 && (
-              <span className="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-amber-500/20 text-amber-400">
-                <FireIcon className="w-3 h-3 mr-0.5" />
-                {newItemsCount} nuevo{newItemsCount !== 1 ? 's' : ''}
-              </span>
-            )}
-          </div>
-          
-          {/* Controles de vista */}
-          <div className="flex items-center gap-2">
-            {/* Selector de orden */}
-            <select 
-              className="bg-slate-700 border border-slate-600 text-slate-300 text-sm rounded-lg focus:ring-teal-500 focus:border-teal-500 p-2 pr-8"
-              aria-label="Ordenar resultados"
-              title="Ordenar resultados"
-            >
-              <option value="recentes">Más recientes</option>
-              <option value="relevancia">Más relevantes</option>
-              <option value="precio_asc">Precio: menor a mayor</option>
-              <option value="precio_desc">Precio: mayor a menor</option>
-            </select>
-            
-            {/* Toggle de vista cuadrícula/lista */}
-            <div className="flex rounded-lg overflow-hidden shadow-md" role="group" aria-label="Cambiar vista">
-              <button
-                className={`p-2 rounded-lg ${viewMode === 'grid' ? 'bg-slate-200 dark:bg-slate-700' : 'bg-white hover:bg-slate-100 dark:bg-slate-800 dark:hover:bg-slate-700'}`}
-                onClick={() => handleChangeViewMode('grid')}
-                aria-label="Ver en cuadrícula"
-              >
-                <Squares2X2Icon className="w-5 h-5" />
-              </button>
-              <button
-                className={`p-2 rounded-lg ${viewMode === 'list' ? 'bg-slate-200 dark:bg-slate-700' : 'bg-white hover:bg-slate-100 dark:bg-slate-800 dark:hover:bg-slate-700'}`}
-                onClick={() => handleChangeViewMode('list')}
-                aria-label="Ver en lista"
-              >
-                <ListBulletIcon className="w-5 h-5" />
-              </button>
+    <div>
+      {/* Toggle de vista (grid/list) */}
+      <div className="flex justify-end mb-4">
+        <div className="inline-flex bg-slate-800 rounded-lg p-1 border border-slate-700">
+          <button 
+            className={`p-2 rounded ${viewType === 'grid' ? 'bg-teal-500 text-white' : 'text-slate-400 hover:text-white'}`}
+            onClick={() => handleChangeViewMode('grid')}
+            aria-label="Ver en cuadrícula"
+          >
+            <Squares2X2Icon className="w-5 h-5" />
+          </button>
+          <button 
+            className={`p-2 rounded ${viewType === 'list' ? 'bg-teal-500 text-white' : 'text-slate-400 hover:text-white'}`}
+            onClick={() => handleChangeViewMode('list')}
+            aria-label="Ver en lista"
+          >
+            <ListBulletIcon className="w-5 h-5" />
+          </button>
+        </div>
+      </div>
+
+      {/* Toggle para resultados recientes (solo si hay resultados nuevos) */}
+      {newItemsCount > 0 && (
+        <div className="mb-4">
+          <button 
+            className="w-full bg-teal-500 hover:bg-teal-600 text-white py-2 px-4 rounded-lg flex items-center justify-center gap-2"
+            onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
+          >
+            <SparklesIcon className="w-5 h-5" />
+            <span>Mostrar {newItemsCount} {newItemsCount === 1 ? 'resultado' : 'resultados'} recientes</span>
+          </button>
+        </div>
+      )}
+
+      {/* Estado de carga */}
+      {loading && allResults.length === 0 && (
+        <div className="flex flex-col items-center justify-center p-8">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-teal-500 mb-4"></div>
+          <p className="text-slate-400">Cargando resultados...</p>
+        </div>
+      )}
+
+      {/* Mensaje de no resultados */}
+      {!loading && allResults.length === 0 && (
+        <div className="bg-slate-800/50 rounded-xl p-8 text-center border border-slate-700">
+          <div className="flex justify-center mb-4">
+            <div className="p-4 bg-slate-700/50 rounded-full">
+              <SearchIcon className="w-10 h-10 text-slate-400" />
             </div>
           </div>
+          <h3 className="text-xl font-semibold text-white mb-2">No se encontraron resultados</h3>
+          <p className="text-slate-400 mb-4">
+            Intenta con otros términos de búsqueda o filtros diferentes.
+          </p>
+          
+          {activeCategory && (
+            <p className="text-teal-400">
+              Estás buscando en la categoría <span className="font-semibold">{activeCategory}</span>
+            </p>
+          )}
         </div>
-        
-        {/* Resultados */}
-        <LayoutGroup>
-          <AnimatePresence mode="wait">
-            {allResults.length > 0 ? (
-              <React.Fragment key="results">
-                {viewMode === 'grid' ? (
-                  <div className="publications-grid transition-all duration-300">
-                    {allResults.filter(publication => publication && publication.id).map((publication, index) => (
-                      <React.Fragment key={`grid-item-${publication.id}-${index}`}>
-                        {renderGridItem(publication, index)}
-                      </React.Fragment>
-                    ))}
-                  </div>
-                ) : (
-                  <div className="publications-list transition-all duration-300">
-                    {allResults.filter(publication => publication && publication.id).map((publication, index) => (
-                      <React.Fragment key={`list-item-${publication.id}-${index}`}>
-                        {renderListItem(publication, index)}
-                      </React.Fragment>
-                    ))}
-                  </div>
-                )}
-              </React.Fragment>
-            ) : (
+      )}
+
+      {/* Resultados en cuadrícula o lista */}
+      {!loading && allResults.length > 0 && (
+        <AnimatePresence>
+          {viewType === 'grid' ? (
+            <LayoutGroup>
               <motion.div
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
-                className="flex flex-col items-center justify-center py-12 bg-slate-800 rounded-lg shadow-md border border-teal-500/20"
-                role="status"
-                aria-live="polite"
+                className={`grid grid-cols-2 md:grid-cols-${getGridCols()} gap-4`}
               >
-                <div className="p-4 bg-slate-700/50 rounded-full mb-4">
-                  <svg xmlns="http://www.w3.org/2000/svg" className="h-12 w-12 text-slate-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-                  </svg>
-                </div>
-                <h2 className="text-2xl font-semibold text-white mb-2">No se encontraron resultados</h2>
-                <p className="text-slate-400 text-center mb-6 max-w-md">
-                  Intenta modificar tu búsqueda o explora todas las categorías disponibles para encontrar lo que necesitas.
-                </p>
-                <button
-                  className="bg-gradient-to-r from-teal-500 to-cyan-500 hover:from-teal-600 hover:to-cyan-600 text-white font-medium py-2 px-6 rounded-lg transition-colors shadow-md hover:shadow-lg focus:outline-none focus:ring-2 focus:ring-teal-500 focus:ring-offset-2 focus:ring-offset-slate-800"
-                  onClick={() => {
-                    // Navigate to all ads page or reset filters
-                    if (typeof window !== 'undefined') {
-                      window.location.href = '/publicaciones';
-                    }
-                  }}
-                >
-                  Ver todos los anuncios
-                </button>
+                {allResults.map((publication, index) => renderGridItem(publication, index))}
               </motion.div>
-            )}
-          </AnimatePresence>
-        </LayoutGroup>
-      </div>
-    </>
+            </LayoutGroup>
+          ) : (
+            <LayoutGroup>
+              <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                className="flex flex-col gap-4"
+              >
+                {allResults.map((publication, index) => renderListItem(publication, index))}
+              </motion.div>
+            </LayoutGroup>
+          )}
+        </AnimatePresence>
+      )}
+
+      {/* "Cargar más" indicator */}
+      {loading && allResults.length > 0 && (
+        <div className="text-center py-4">
+          <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-teal-500"></div>
+        </div>
+      )}
+    </div>
   )
 }

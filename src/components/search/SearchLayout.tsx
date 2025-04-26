@@ -1,20 +1,19 @@
 'use client'
 
-import { useState, useEffect, ReactNode } from 'react'
-import { motion, AnimatePresence } from 'framer-motion'
+import { useState, useEffect, type ReactNode } from 'react'
 import { useRouter, usePathname, useSearchParams } from 'next/navigation'
 import { 
   ViewColumnsIcon, 
-  MapIcon, 
-  AdjustmentsHorizontalIcon,
-  XMarkIcon,
-  FunnelIcon
+  MapIcon
 } from '@heroicons/react/24/outline'
 import SearchResults, { Publication } from './SearchResults'
 import useMediaQuery from '@/hooks/useMediaQuery'
 import AdvancedSearchBar from './AdvancedSearchBar'
 import KeywordSearchBox from './KeywordSearchBox'
 import CategorySelector from './CategorySelector'
+import AdvancedFilterDrawer from './AdvancedFilterDrawer'
+import SearchFilters from './SearchFilters'
+import { CategoriesService } from '@/services/categories.service'
 
 interface SearchLayoutProps {
   initialResults?: Publication[]
@@ -22,8 +21,8 @@ interface SearchLayoutProps {
   initialSubcategory?: string
   initialQuery?: string
   loading?: boolean
-  onSearch?: (query: string, options?: any) => void
-  onFilterChange?: (filters: any) => void
+  onSearch?: (query: string, options?: Record<string, string>) => void
+  onFilterChange?: (filters: Record<string, unknown>) => void
   onLoadMore?: () => void
   hasMore?: boolean
   totalResults?: number
@@ -47,7 +46,6 @@ export default function SearchLayout({
   totalResults = 0,
   showMap = false,
   onPublicationClick,
-  children,
   className = '',
   useEnhancedSearch = true,
 }: SearchLayoutProps) {
@@ -61,13 +59,27 @@ export default function SearchLayout({
   const [subcategory, setSubcategory] = useState(initialSubcategory || searchParams?.get('subcategory') || '')
   const [selectedSubSubcategory, setSelectedSubSubcategory] = useState(searchParams?.get('subsubcategory') || '')
   const [results, setResults] = useState<Publication[]>(initialResults)
-  const [isFilterOpen, setIsFilterOpen] = useState(false)
-  const [isMapView, setIsMapView] = useState(false)
   const [currentView, setCurrentView] = useState<'grid' | 'list' | 'map'>('grid')
+  const [activeFilters, setActiveFilters] = useState<Record<string, unknown>>({})
+  const [filterCount, setFilterCount] = useState(0)
+  const [categories, setCategories] = useState<Array<{id: string, name: string}>>([])
   
   // Responsive
-  const isMd = useMediaQuery('(min-width: 768px)')
   const isLg = useMediaQuery('(min-width: 1024px)')
+  
+  // Cargar categorías
+  useEffect(() => {
+    const loadCategories = async () => {
+      try {
+        const response = await CategoriesService.getCategories()
+        setCategories(response)
+      } catch (error) {
+        console.error('Failed to load categories:', error)
+      }
+    }
+    
+    loadCategories()
+  }, [])
   
   // Actualizar resultados cuando cambian las props iniciales
   useEffect(() => {
@@ -77,7 +89,7 @@ export default function SearchLayout({
   }, [initialResults])
   
   // Manejar la búsqueda
-  const handleSearch = (query: string, options?: any) => {
+  const handleSearch = (query: string, options?: Record<string, string>) => {
     setSearchQuery(query)
     
     // Si hay categoría/subcategoría/subsubcategoría en las opciones, actualizar estados
@@ -132,10 +144,27 @@ export default function SearchLayout({
     setCategory(newCategory)
     setSubcategory('')
     setSelectedSubSubcategory('')
+    setActiveFilters({})
+    setFilterCount(0)
     
     // Llamar al callback si está definido
     if (onFilterChange) {
       onFilterChange({ category: newCategory, subcategory: '', subsubcategory: '' })
+    }
+  }
+  
+  // Manejar cambio de filtros
+  const handleFilterChange = (filters: Record<string, unknown>) => {
+    setActiveFilters(filters)
+    setFilterCount(Object.keys(filters).length)
+    
+    if (onFilterChange) {
+      onFilterChange({ 
+        ...filters, 
+        category, 
+        subcategory, 
+        subsubcategory: selectedSubSubcategory 
+      })
     }
   }
   
@@ -146,7 +175,12 @@ export default function SearchLayout({
     
     // Llamar al callback si está definido
     if (onFilterChange) {
-      onFilterChange({ category, subcategory: newSubcategory, subsubcategory: '' })
+      onFilterChange({ 
+        ...activeFilters,
+        category, 
+        subcategory: newSubcategory, 
+        subsubcategory: '' 
+      })
     }
   }
   
@@ -156,13 +190,17 @@ export default function SearchLayout({
     
     // Llamar al callback si está definido
     if (onFilterChange) {
-      onFilterChange({ category, subcategory, subsubcategory: newSubSubcategory })
+      onFilterChange({ 
+        ...activeFilters,
+        category, 
+        subcategory, 
+        subsubcategory: newSubSubcategory 
+      })
     }
   }
   
   // Alternar vista de mapa
   const toggleMapView = () => {
-    setIsMapView(!isMapView)
     setCurrentView(currentView === 'map' ? 'grid' : 'map')
   }
   
@@ -231,7 +269,7 @@ export default function SearchLayout({
         <div>
           <h1 className="text-2xl font-bold text-white mb-1">
             {searchQuery ? (
-              <span>Resultados para "{searchQuery}"</span>
+              <span>Resultados para &quot;{searchQuery}&quot;</span>
             ) : category ? (
               <span>{initialCategory || category}</span>
             ) : (
@@ -246,15 +284,18 @@ export default function SearchLayout({
         
         {/* Controles de vista */}
         <div className="flex items-center space-x-2">
-          {/* Botón de filtros (solo en móvil) */}
+          {/* Botón de filtros - Mobile lo muestra como botón, Desktop como panel */}
           {!isLg && (
-            <button
-              onClick={() => setIsFilterOpen(true)}
-              className="p-2 bg-slate-800 text-white rounded-lg border border-slate-700 hover:bg-slate-700"
-              aria-label="Mostrar filtros"
-            >
-              <FunnelIcon className="w-5 h-5" />
-            </button>
+            <AdvancedFilterDrawer
+              selectedCategory={category || undefined}
+              initialFilters={activeFilters}
+              categories={categories}
+              onCategoryChange={(cat) => {
+                if (cat) handleCategoryChange(cat.id);
+              }}
+              onFilterChange={handleFilterChange}
+              filterCount={filterCount}
+            />
           )}
           
           {/* Toggle de vista de mapa */}
@@ -262,11 +303,11 @@ export default function SearchLayout({
             <button
               onClick={toggleMapView}
               className={`p-2 rounded-lg border ${
-                isMapView 
+                currentView === 'map' 
                   ? 'bg-teal-500 border-teal-600 text-white' 
                   : 'bg-slate-800 border-slate-700 text-white hover:bg-slate-700'
               }`}
-              aria-label={isMapView ? "Mostrar lista" : "Mostrar mapa"}
+              aria-label={currentView === 'map' ? "Mostrar lista" : "Mostrar mapa"}
             >
               <MapIcon className="w-5 h-5" />
             </button>
@@ -291,147 +332,6 @@ export default function SearchLayout({
     )
   }
   
-  // Renderizar panel de filtros
-  const renderFilters = () => {
-    return (
-      <div className="bg-slate-800 rounded-xl p-6 border border-slate-700 sticky top-4">
-        <div className="flex items-center justify-between mb-4">
-          <h2 className="text-lg font-semibold text-white">Filtros</h2>
-          
-          {!isLg && (
-            <button
-              onClick={() => setIsFilterOpen(false)}
-              className="text-slate-400 hover:text-white"
-              aria-label="Cerrar filtros"
-            >
-              <XMarkIcon className="w-5 h-5" />
-            </button>
-          )}
-        </div>
-        
-        {/* Aquí irían los filtros específicos */}
-        {(
-          <div>
-          {/* Filtros por precío */}
-          <div className="mb-6">
-            <h3 className="text-sm font-medium text-slate-300 mb-3">Precio</h3>
-            <div className="space-y-2">
-              <div className="flex items-center gap-2">
-                <input 
-                  type="number" 
-                  placeholder="Mínimo" 
-                  className="w-full py-2 px-3 bg-slate-700 border border-slate-600 rounded-lg text-white placeholder-slate-400 focus:ring-teal-500 focus:border-teal-500"
-                />
-                <span className="text-slate-400">-</span>
-                <input 
-                  type="number" 
-                  placeholder="Máximo" 
-                  className="w-full py-2 px-3 bg-slate-700 border border-slate-600 rounded-lg text-white placeholder-slate-400 focus:ring-teal-500 focus:border-teal-500"
-                />
-              </div>
-              <button className="w-full py-2 bg-teal-500 hover:bg-teal-600 text-white rounded-lg transition-colors">
-                Aplicar
-              </button>
-            </div>
-          </div>
-          
-          {/* Filtro por ubicación */}
-          <div className="mb-6">
-            <h3 className="text-sm font-medium text-slate-300 mb-3">Ubicación</h3>
-            <select 
-              className="w-full py-2 px-3 bg-slate-700 border border-slate-600 rounded-lg text-white focus:ring-teal-500 focus:border-teal-500"
-              aria-label="Filtrar por ubicación"
-            >
-              <option value="">Todas las ubicaciones</option>
-              <option value="cusco">Cusco</option>
-              <option value="lima">Lima</option>
-              <option value="arequipa">Arequipa</option>
-              <option value="trujillo">Trujillo</option>
-            </select>
-          </div>
-          
-          {/* Filtro por fecha */}
-          <div className="mb-6">
-            <h3 className="text-sm font-medium text-slate-300 mb-3">Fecha de publicación</h3>
-            <div className="space-y-2">
-              <label className="flex items-center">
-                <input type="radio" className="text-teal-500 focus:ring-teal-500" name="date" value="all" defaultChecked />
-                <span className="ml-2 text-white">Todas</span>
-              </label>
-              <label className="flex items-center">
-                <input type="radio" className="text-teal-500 focus:ring-teal-500" name="date" value="today" />
-                <span className="ml-2 text-white">Hoy</span>
-              </label>
-              <label className="flex items-center">
-                <input type="radio" className="text-teal-500 focus:ring-teal-500" name="date" value="week" />
-                <span className="ml-2 text-white">Esta semana</span>
-              </label>
-              <label className="flex items-center">
-                <input type="radio" className="text-teal-500 focus:ring-teal-500" name="date" value="month" />
-                <span className="ml-2 text-white">Este mes</span>
-              </label>
-            </div>
-          </div>
-          
-          {/* Más filtros específicos de categoría */}
-          {category && (
-            <div className="mb-6">
-              <h3 className="text-sm font-medium text-slate-300 mb-3">Filtros específicos</h3>
-              <p className="text-slate-400 text-sm">
-                Filtros adaptados para la categoría {category}
-              </p>
-            </div>
-          )}
-        
-        
-        {/* Botones de acción */}
-        <div className="space-y-2">
-          <button className="w-full py-2.5 bg-gradient-to-r from-teal-500 to-cyan-500 hover:from-teal-600 hover:to-cyan-600 text-white font-medium rounded-lg transition-colors shadow-md hover:shadow-lg">
-            Aplicar filtros
-          </button>
-          <button className="w-full py-2 text-slate-300 hover:text-white transition-colors">
-            Limpiar filtros
-          </button>
-        </div>
-        </div>
-        )}
-      </div>
-    )
-  }
-  
-  // Renderizar modal de filtros para móvil
-  const renderMobileFilterModal = () => {
-    return (
-      <AnimatePresence>
-        {isFilterOpen && !isLg && (
-          <>
-            {/* Overlay */}
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              className="fixed inset-0 bg-black/60 z-40"
-              onClick={() => setIsFilterOpen(false)}
-            />
-            
-            {/* Panel lateral */}
-            <motion.div
-              initial={{ x: '100%' }}
-              animate={{ x: 0 }}
-              exit={{ x: '100%' }}
-              transition={{ type: 'spring', damping: 25 }}
-              className="fixed right-0 top-0 bottom-0 w-[90%] max-w-md bg-slate-900 z-50 overflow-y-auto"
-            >
-              <div className="p-6">
-                {renderFilters()}
-              </div>
-            </motion.div>
-          </>
-        )}
-      </AnimatePresence>
-    )
-  }
-  
   return (
     <div className={`w-full ${className}`}>
       {/* Cabecera de búsqueda */}
@@ -448,13 +348,19 @@ export default function SearchLayout({
         {/* Panel de filtros (visible solo en desktop) */}
         {isLg && (
           <div className="w-full lg:w-72 flex-shrink-0">
-            {renderFilters()}
+            <SearchFilters
+              category={category}
+              activeFilters={activeFilters}
+              onFiltersChange={handleFilterChange}
+              className="sticky top-4"
+              compact={false}
+            />
           </div>
         )}
         
         {/* Resultados */}
         <div className="flex-grow">
-          {isMapView ? (
+          {currentView === 'map' ? (
             // Vista de mapa
             <div className="bg-slate-800 rounded-xl overflow-hidden border border-slate-700 h-[600px] flex items-center justify-center">
               <p className="text-slate-400">Vista de mapa en desarrollo</p>
@@ -464,7 +370,6 @@ export default function SearchLayout({
             <SearchResults
               results={results}
               loading={loading}
-              onLoadMore={onLoadMore}
               hasMore={hasMore}
               activeCategory={category}
               showInteractionButtons={true}
@@ -472,11 +377,20 @@ export default function SearchLayout({
               viewType={currentView}
             />
           )}
+          
+          {/* Botón Cargar Más */}
+          {hasMore && onLoadMore && (
+            <div className="mt-6 text-center">
+              <button 
+                onClick={onLoadMore} 
+                className="px-6 py-2 bg-teal-500 hover:bg-teal-600 text-white rounded-lg transition-colors"
+              >
+                Cargar más resultados
+              </button>
+            </div>
+          )}
         </div>
       </div>
-      
-      {/* Modal de filtros para móvil */}
-      {renderMobileFilterModal()}
     </div>
   )
 } 

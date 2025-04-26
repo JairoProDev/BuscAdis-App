@@ -9,8 +9,8 @@ import {
   SelectItem,
   SelectTrigger,
   SelectValue 
-} from '@/components/ui/select'
-import { Badge } from '@/components/ui/badge'
+} from '@/components/ui/Select'
+import { Badge } from '@/components/ui/Badge'
 import { Switch } from '@/components/ui/switch'
 import { Label } from '@/components/ui/label'
 
@@ -36,15 +36,16 @@ export default function FilterSection({
             <div className="flex justify-between">
               <Label htmlFor={filter.id} className="text-sm font-medium">{filter.label}</Label>
               <span className="text-sm text-gray-500">
-                {filter.format(value?.[0] || filter.min)} - {filter.format(value?.[1] || filter.max)}
+                {filter.format ? filter.format(value?.[0] || filter.min || 0) : value?.[0] || filter.min || 0} - 
+                {filter.format ? filter.format(value?.[1] || filter.max || 100) : value?.[1] || filter.max || 100}
               </span>
             </div>
             <Slider
               id={filter.id}
-              defaultValue={[value?.[0] || filter.min, value?.[1] || filter.max]}
-              min={filter.min}
-              max={filter.max}
-              step={filter.step}
+              defaultValue={[value?.[0] || filter.min || 0, value?.[1] || filter.max || 100]}
+              min={filter.min || 0}
+              max={filter.max || 100}
+              step={filter.step || 1}
               onValueChange={(newValue) => onFilterChange(filter.id, newValue)}
               className="mt-2"
             />
@@ -64,7 +65,7 @@ export default function FilterSection({
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="">Todos</SelectItem>
-                {filter.options.map((option) => (
+                {filter.options?.map((option) => (
                   <SelectItem key={option.value} value={option.value}>
                     {option.label}
                   </SelectItem>
@@ -80,7 +81,7 @@ export default function FilterSection({
           <div className="space-y-2" key={filter.id}>
             <Label className="text-sm font-medium">{filter.label}</Label>
             <div className="flex flex-wrap gap-2 mt-1">
-              {filter.options.map((option) => (
+              {filter.options?.map((option) => (
                 <Badge
                   key={option.value}
                   variant={selectedValues.includes(option.value) ? "default" : "outline"}
