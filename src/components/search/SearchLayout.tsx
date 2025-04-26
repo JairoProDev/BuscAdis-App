@@ -12,7 +12,7 @@ import AdvancedSearchBar from './AdvancedSearchBar'
 import KeywordSearchBox from './KeywordSearchBox'
 import CategorySelector from './CategorySelector'
 import AdvancedFilterDrawer from './AdvancedFilterDrawer'
-import SearchFilters from './SearchFilters'
+import HorizontalFilterBar from './HorizontalFilterBar'
 import { CategoriesService } from '@/services/categories.service'
 
 interface SearchLayoutProps {
@@ -340,12 +340,25 @@ export default function SearchLayout({
       {/* Selector de Categorías */}
       {renderCategorySelector()}
       
+      {/* Horizontal Filter Bar - New! */}
+      {category && (
+        <div className="mb-6">
+          <HorizontalFilterBar
+            category={category}
+            activeFilters={activeFilters}
+            onFilterChange={handleFilterChange}
+            className="bg-slate-800/50 p-2 rounded-xl border border-slate-700"
+          />
+        </div>
+      )}
+      
       {/* Barra de filtro y controles */}
       {renderFilterBar()}
       
       {/* Contenido principal */}
       <div className="flex flex-col lg:flex-row gap-6">
-        {/* Panel de filtros (visible solo en desktop) */}
+        {/* Panel de filtros (Optional - can be commented out if only using horizontal filters) */}
+        {/*
         {isLg && (
           <div className="w-full lg:w-72 flex-shrink-0">
             <SearchFilters
@@ -357,9 +370,10 @@ export default function SearchLayout({
             />
           </div>
         )}
+        */}
         
-        {/* Resultados */}
-        <div className="flex-grow">
+        {/* Resultados - make it full width now */}
+        <div className="flex-grow w-full">
           {currentView === 'map' ? (
             // Vista de mapa
             <div className="bg-slate-800 rounded-xl overflow-hidden border border-slate-700 h-[600px] flex items-center justify-center">
