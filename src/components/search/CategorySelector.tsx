@@ -294,7 +294,7 @@ export default function CategorySelector({
                     : 'bg-slate-800 hover:bg-slate-700 border border-slate-700'
                 }`}
               >
-                <div className="w-10 h-10 mb-1 flex items-center justify-center bg-slate-700 rounded-lg">
+                <div className="w-10 h-10 mb-1 flex items-center justify-center rounded-lg">
                   <HomeIcon className="w-5 h-5 text-teal-400" />
                 </div>
                 <span className="text-xs font-medium whitespace-nowrap text-center text-white">Todos</span>
