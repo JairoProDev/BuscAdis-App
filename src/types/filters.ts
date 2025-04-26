@@ -1,6 +1,30 @@
+export type FilterType = 'range' | 'select' | 'multiselect' | 'toggle'
+
 export interface FilterOption {
-  value: string
   label: string
+  value: string
+}
+
+export interface Filter {
+  id: string
+  label: string
+  type: FilterType
+  // For range filters
+  min?: number
+  max?: number
+  step?: number
+  format?: (value: number) => string
+  // For select and multiselect filters
+  options?: FilterOption[]
+}
+
+export interface FilterValue {
+  [filterId: string]: any
+}
+
+export interface CategoryFilter {
+  category: string
+  filters: Filter[]
 }
 
 export interface BaseFilter {
@@ -66,8 +90,4 @@ export interface CategoryFilters {
 
 export interface FiltersByCategory {
   [key: string]: CategoryFilters
-}
-
-export type FilterValue = {
-  [key: string]: any
 } 

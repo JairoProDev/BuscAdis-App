@@ -12,6 +12,7 @@ import { useToast } from '@/components/ui/use-toast';
 import { SparklesIcon } from '@heroicons/react/24/outline';
 import PublicationModal from '@/components/search/PublicationModal';
 import { generateSeoUrl } from '@/utils/url';
+import SearchFilters from "@/components/search/SearchFilters";
 
 // Interface for raw data structure from API (might include _id, etc.)
 interface ApiPublicationData {
@@ -548,7 +549,13 @@ export default function BuscadorPage() {
           showMap={true}
           onPublicationClick={handleOpenModal}
           useEnhancedSearch={true}
-        />
+        >
+          <SearchFilters 
+            category={searchState.category || ''} 
+            activeFilters={searchState}
+            onFiltersChange={setSearchState}
+          />
+        </SearchLayout>
         {/* Display error subtly if results are already shown */}
         {error && loading && results.length > 0 && (
           <div className="mt-4 text-center text-red-400 text-sm">
