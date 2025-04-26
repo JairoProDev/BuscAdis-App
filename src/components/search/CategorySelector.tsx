@@ -308,8 +308,8 @@ export default function CategorySelector({
                 onClick={() => handleCategoryClick(category.slug)}
                 className={`flex flex-col items-center min-w-[80px] max-w-[80px] py-2 px-1 rounded-lg transition-all ${
                   activeCategory === category.slug
-                    ? 'bg-gradient-to-b from-slate-700 to-slate-800 border border-slate-600 shadow-md'
-                    : 'bg-slate-800 hover:bg-slate-700 border border-slate-700'
+                    ? 'bg-gradient-to-b from-slate-700 to-slate-800  shadow-md'
+                    : ' hover:bg-slate-700'
                 }`}
               >
                 <div className="w-10 h-10 mb-1 rounded-lg overflow-hidden relative">
@@ -375,7 +375,7 @@ export default function CategorySelector({
                     className={`flex items-center space-x-2 rounded-md py-1 px-2 text-sm transition-colors whitespace-nowrap ${
                       activeSubcategory === subcategory.slug
                         ? 'bg-gradient-to-r from-teal-500 to-teal-600 text-white'
-                        : 'bg-slate-800 text-white hover:bg-slate-700'
+                        : ' text-white hover:bg-slate-700'
                     }`}
                   >
                     <div className={`flex-shrink-0 w-5 h-5 rounded p-1 ${
@@ -421,7 +421,7 @@ export default function CategorySelector({
                   className={`inline-flex items-center py-1 px-2 text-xs rounded transition-colors whitespace-nowrap ${
                     activeSubSubcategory === subsubcategory.slug
                       ? 'bg-gradient-to-r from-blue-500 to-blue-600 text-white'
-                      : 'bg-slate-800 text-white hover:bg-slate-700'
+                      : ' text-white hover:bg-slate-700'
                   }`}
                 >
                   <span className="mr-1.5">{subsubcategory.emoji}</span>
