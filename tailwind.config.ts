@@ -1,4 +1,5 @@
 import type { Config } from "tailwindcss";
+import { fontFamily } from 'tailwindcss/defaultTheme'
 
 const config: Config = {
     darkMode: ["class"],
@@ -102,6 +103,9 @@ const config: Config = {
   				lg: '4rem',
   				xl: '5rem',
   				'2xl': '6rem'
+  			},
+  			screens: {
+  				'2xl': '1400px',
   			}
   		},
   		backdropBlur: {
@@ -142,13 +146,17 @@ const config: Config = {
   			lg: 'var(--radius)',
   			md: 'calc(var(--radius) - 2px)',
   			sm: 'calc(var(--radius) - 4px)'
-  		}
+  		},
+  		fontFamily: {
+  			sans: ['var(--font-sans)', ...fontFamily.sans],
+  		},
   	}
   },
   plugins: [
     require('@tailwindcss/forms'),
     require('@tailwindcss/aspect-ratio'),
-      require("tailwindcss-animate")
+    require("tailwindcss-animate"),
+    require('tailwind-scrollbar')(),
 ],
 }
 

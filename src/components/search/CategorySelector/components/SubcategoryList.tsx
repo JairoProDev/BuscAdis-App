@@ -27,33 +27,35 @@ const SubcategoryList: React.FC<SubcategoryListProps> = ({
   };
 
   const itemVariants = {
-    hidden: { opacity: 0, y: 10 },
-    visible: { opacity: 1, y: 0 }
+    hidden: { opacity: 0, x: 10 },
+    visible: { opacity: 1, x: 0 }
   };
 
   return (
     <motion.div
-      className="mt-4 mb-4"
+      className="my-2"
       initial="hidden"
       animate="visible"
       variants={containerVariants}
     >
-      <h3 className="text-sm font-medium text-gray-400 dark:text-gray-400 mb-2">
-        Subcategorías
-      </h3>
-      
-      <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2">
-        {subcategories.map((subcategory) => (
-          <motion.div key={subcategory.id} variants={itemVariants}>
-            <CategoryCard
-              category={subcategory}
-              isActive={subcategory.slug === activeSubcategory}
-              onClick={() => onSubcategoryClick(subcategory.slug)}
-              variant="horizontal"
-              showCount={true}
-            />
-          </motion.div>
-        ))}
+      <div className="flex items-center gap-2">
+        <h3 className="text-sm font-medium text-gray-400 dark:text-gray-400 whitespace-nowrap">
+          Subcategorías:
+        </h3>
+        
+        <div className="overflow-x-auto flex gap-2 pb-2 scrollbar-thin scrollbar-thumb-gray-300 dark:scrollbar-thumb-gray-600 scrollbar-track-transparent">
+          {subcategories.map((subcategory) => (
+            <motion.div key={subcategory.id} variants={itemVariants} className="flex-shrink-0">
+              <CategoryCard
+                category={subcategory}
+                isActive={subcategory.slug === activeSubcategory}
+                onClick={() => onSubcategoryClick(subcategory.slug)}
+                variant="horizontal"
+                showCount={true}
+              />
+            </motion.div>
+          ))}
+        </div>
       </div>
     </motion.div>
   );
