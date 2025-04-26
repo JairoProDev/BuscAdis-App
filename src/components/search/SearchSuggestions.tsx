@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect, useRef } from 'react'
+import { useState, useEffect, useRef, MouseEvent } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { Search, TrendingUp, Clock, Sparkles, X, Tag, Filter, MapPin, Star, Flame } from 'lucide-react'
 import Image from 'next/image'
@@ -247,6 +247,13 @@ export default function SearchSuggestions({
     return Math.min(height, 400);
   };
   
+  // Manejar clic en sugerencia de forma segura
+  const handleSuggestionClick = (e: React.MouseEvent, text: string) => {
+    e.preventDefault();
+    e.stopPropagation(); // Detener la propagación del evento para evitar que se cierre el panel
+    onSelectSuggestion(text);
+  };
+  
   if (!searchTerm && !trendingSearches.length && !searchHistory.length && !aiSuggestions.length) return null;
   
   return (
@@ -264,8 +271,13 @@ export default function SearchSuggestions({
         scrollbarWidth: 'thin', 
         scrollbarColor: appearance === 'dark' ? '#334155 #1e293b' : '#e2e8f0 #f8fafc' 
       }}
+      onClick={(e) => e.stopPropagation()}
+      onMouseDown={(e) => e.preventDefault()} // Evitar que el evento mousedown llegue al documento
     >
-      <div className="p-2 space-y-3">
+      <div 
+        className="p-2 space-y-3"
+        onMouseDown={(e) => e.preventDefault()} // Detener la propagación también aquí
+      >
         {/* Loading indicator */}
         {loading && (
           <div className="flex items-center justify-center py-1">
@@ -281,9 +293,37 @@ export default function SearchSuggestions({
           </div>
         )}
         
+        {/* Autocomplete suggestions */}
+        {searchTerm && suggestions.length > 0 && (
+          <div className="space-y-1" onMouseDown={(e) => e.preventDefault()}>
+            <div className="flex items-center mb-1">
+              <Search className="h-4 w-4 mr-1 text-blue-500" />
+              <h3 className="text-sm font-medium">Sugerencias</h3>
+            </div>
+            <ul className="flex flex-wrap gap-1.5">
+              {suggestions.map((item, index) => (
+                <li 
+                  key={`suggestion-${index}`}
+                  data-index={index}
+                  onClick={(e) => handleSuggestionClick(e, item.text)}
+                  onMouseDown={(e) => e.preventDefault()}
+                  className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg cursor-pointer text-sm ${
+                    highlightedIndex === index 
+                      ? appearance === 'dark' ? 'bg-slate-700' : 'bg-slate-100'
+                      : 'hover:bg-opacity-10 hover:bg-white'
+                  }`}
+                >
+                  <Search className="h-4 w-4 opacity-70 flex-shrink-0" />
+                  <span className="truncate">{item.text}</span>
+                </li>
+              ))}
+            </ul>
+          </div>
+        )}
+        
         {/* Quick filters */}
         {!searchTerm && (
-          <div className="border-b pb-2 mb-2">
+          <div className="border-b pb-2 mb-2" onMouseDown={(e) => e.preventDefault()}>
             <div className="flex items-center mb-1">
               <Filter className="h-4 w-4 mr-1 text-blue-500" />
               <h3 className="text-sm font-medium">Filtros rápidos</h3>
@@ -292,7 +332,11 @@ export default function SearchSuggestions({
               {quickFilters.map(filter => (
                 <button
                   key={filter.id}
-                  onClick={() => setSelectedFilter(filter.id === selectedFilter ? null : filter.id)}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setSelectedFilter(filter.id === selectedFilter ? null : filter.id);
+                  }}
+                  onMouseDown={(e) => e.preventDefault()}
                   className={`flex items-center gap-1 px-3 py-1 rounded-full text-sm transition-colors ${
                     selectedFilter === filter.id
                       ? appearance === 'dark' 
@@ -311,40 +355,38 @@ export default function SearchSuggestions({
           </div>
         )}
         
-        
-        {/* Autocomplete suggestions */}
-        {searchTerm && suggestions.length > 0 && (
-          <div className="space-y-1">
+        {/* Exclusive offers */}
+        {!searchTerm && (
+          <div 
+            className="bg-gradient-to-r from-blue-500/20 to-purple-500/20 rounded-lg p-2 mb-2"
+            onClick={(e) => e.stopPropagation()}
+            onMouseDown={(e) => e.preventDefault()}
+          >
             <div className="flex items-center mb-1">
-              <Search className="h-4 w-4 mr-1 text-blue-500" />
-              <h3 className="text-sm font-medium">Sugerencias</h3>
+              <Tag className="h-4 w-4 mr-1 text-blue-500" />
+              <h3 className="text-sm font-medium">Ofertas exclusivas</h3>
             </div>
-            <ul className="flex flex-wrap gap-1.5">
-              {suggestions.map((item, index) => (
-                <li 
-                  key={`suggestion-${index}`}
-                  data-index={index}
-                  onClick={() => onSelectSuggestion(item.text)}
-                  className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg cursor-pointer text-sm ${
-                    highlightedIndex === index 
-                      ? appearance === 'dark' ? 'bg-slate-700' : 'bg-slate-100'
-                      : 'hover:bg-opacity-10 hover:bg-white'
-                  }`}
+            <div className="space-y-1">
+              {exclusiveOffers.map((offer, index) => (
+                <div 
+                  key={index}
+                  className="flex items-center gap-2 text-sm"
+                  onMouseDown={(e) => e.preventDefault()}
                 >
-                  <Search className="h-4 w-4 opacity-70 flex-shrink-0" />
-                  <span className="truncate">{item.text}</span>
-                </li>
+                  <Star className="h-3 w-3 text-yellow-500 flex-shrink-0" />
+                  <span>{offer}</span>
+                </div>
               ))}
-            </ul>
+            </div>
           </div>
         )}
-        
+
         {/* Trending, History and AI in a horizontal layout when no search term */}
         {!searchTerm && (
-          <div className="space-y-3">
+          <div className="space-y-3" onMouseDown={(e) => e.preventDefault()}>
             {/* Trending searches */}
             {trendingSearches.length > 0 && (
-              <div className="space-y-1.5">
+              <div className="space-y-1.5" onMouseDown={(e) => e.preventDefault()}>
                 <div className="flex items-center mb-1">
                   <TrendingUp className="h-4 w-4 mr-1 text-rose-500" />
                   <h3 className="text-sm font-medium">Tendencias</h3>
@@ -354,7 +396,8 @@ export default function SearchSuggestions({
                     <button 
                       key={`trending-${index}`}
                       data-index={suggestions.length + index}
-                      onClick={() => onSelectSuggestion(item.text)}
+                      onClick={(e) => handleSuggestionClick(e, item.text)}
+                      onMouseDown={(e) => e.preventDefault()}
                       className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-sm cursor-pointer ${
                         highlightedIndex === (suggestions.length + index)
                           ? appearance === 'dark' ? 'bg-slate-700' : 'bg-slate-100'
@@ -371,17 +414,19 @@ export default function SearchSuggestions({
 
             {/* Search history */}
             {searchHistory.length > 0 && (
-              <div className="space-y-1.5">
+              <div className="space-y-1.5" onMouseDown={(e) => e.preventDefault()}>
                 <div className="flex items-center justify-between">
                   <div className="flex items-center">
                     <Clock className="h-4 w-4 mr-1 text-blue-500" />
                     <h3 className="text-sm font-medium">Búsquedas recientes</h3>
                   </div>
                   <button 
-                    onClick={() => {
-                      localStorage.removeItem('searchHistory')
-                      setSearchHistory([])
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      localStorage.removeItem('searchHistory');
+                      setSearchHistory([]);
                     }}
+                    onMouseDown={(e) => e.preventDefault()}
                     className="text-xs opacity-60 hover:opacity-100"
                     aria-label="Borrar historial de búsquedas"
                     title="Borrar historial de búsquedas"
@@ -399,16 +444,24 @@ export default function SearchSuggestions({
                           ? appearance === 'dark' ? 'bg-slate-700' : 'bg-slate-100'
                           : appearance === 'dark' ? 'bg-slate-800 hover:bg-slate-700' : 'bg-slate-50 hover:bg-slate-100'
                       } border ${appearance === 'dark' ? 'border-slate-700' : 'border-slate-200'}`}
+                      onMouseDown={(e) => e.preventDefault()}
                     >
                       <Clock className="h-3.5 w-3.5 opacity-70 mr-1.5" />
-                      <span className="truncate cursor-pointer" onClick={() => onSelectSuggestion(item.text)}>{item.text}</span>
+                      <span 
+                        className="truncate cursor-pointer" 
+                        onClick={(e) => handleSuggestionClick(e, item.text)}
+                        onMouseDown={(e) => e.preventDefault()}
+                      >
+                        {item.text}
+                      </span>
                       <button
                         onClick={(e) => {
-                          e.stopPropagation()
-                          const filtered = searchHistory.filter((_, i) => i !== index)
-                          setSearchHistory(filtered)
-                          localStorage.setItem('searchHistory', JSON.stringify(filtered.map(item => item.text)))
+                          e.stopPropagation();
+                          const filtered = searchHistory.filter((_, i) => i !== index);
+                          setSearchHistory(filtered);
+                          localStorage.setItem('searchHistory', JSON.stringify(filtered.map(item => item.text)));
                         }}
+                        onMouseDown={(e) => e.preventDefault()}
                         className="ml-1.5 opacity-60 hover:opacity-100"
                         aria-label="Eliminar esta búsqueda del historial"
                         title="Eliminar esta búsqueda"
@@ -420,41 +473,21 @@ export default function SearchSuggestions({
                 </div>
               </div>
             )}
-
-        {/* Exclusive offers */}
-        {!searchTerm && (
-          <div className="bg-gradient-to-r from-blue-500/20 to-purple-500/20 rounded-lg p-2 mb-2">
-            <div className="flex items-center mb-1">
-              <Tag className="h-4 w-4 mr-1 text-blue-500" />
-              <h3 className="text-sm font-medium">Ofertas exclusivas</h3>
-            </div>
-            <div className="space-y-1">
-              {exclusiveOffers.map((offer, index) => (
-                <div 
-                  key={index}
-                  className="flex items-center gap-2 text-sm"
-                >
-                  <Star className="h-3 w-3 text-yellow-500 flex-shrink-0" />
-                  <span>{offer}</span>
-                </div>
-              ))}
-            </div>
-          </div>
-        )}
-                    
+            
             {/* AI suggestions - in a horizontal layout */}
-            {aiSuggestions.length > 0 && (
-              <div className="space-y-1.5">
+            {randomizedAiSuggestions.length > 0 && (
+              <div className="space-y-1.5" onMouseDown={(e) => e.preventDefault()}>
                 <div className="flex items-center">
                   <Sparkles className="h-4 w-4 mr-1 text-purple-500" />
                   <h3 className="text-sm font-medium">Sugerencias inteligentes</h3>
                 </div>
                 <div className="flex flex-wrap gap-1.5">
-                  {aiSuggestions.map((item, index) => (
+                  {randomizedAiSuggestions.map((item, index) => (
                     <button 
                       key={`ai-${index}`}
                       data-index={item.dataIndex}
-                      onClick={() => onSelectSuggestion(item.text)}
+                      onClick={(e) => handleSuggestionClick(e, item.text)}
+                      onMouseDown={(e) => e.preventDefault()}
                       className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-sm cursor-pointer ${
                         highlightedIndex === item.dataIndex
                           ? appearance === 'dark' ? 'bg-slate-700' : 'bg-slate-100'

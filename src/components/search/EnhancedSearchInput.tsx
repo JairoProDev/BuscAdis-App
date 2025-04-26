@@ -37,13 +37,14 @@ export default function EnhancedSearchInput({
   onFocusChange,
 }: EnhancedSearchInputProps) {
   const [searchTerm, setSearchTerm] = useState(initialValue);
-  const [isFocused, setIsFocused] = useState(false);
+  const [showSuggestionsPanel, setShowSuggestionsPanel] = useState(false);
   const [isRecording, setIsRecording] = useState(false);
   const [isAiThinking, setIsAiThinking] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
   const [isImageSearchActive, setIsImageSearchActive] = useState(false);
   const [selectedImage, setSelectedImage] = useState<File | null>(null);
   const imageInputRef = useRef<HTMLInputElement>(null);
+  const searchContainerRef = useRef<HTMLDivElement>(null);
   
   // Initialize speech recognition
   const [recognition, setRecognition] = useState<SpeechRecognitionType | null>(null);
@@ -52,20 +53,34 @@ export default function EnhancedSearchInput({
   useEffect(() => {
     if (autoFocus && inputRef.current) {
       inputRef.current.focus();
+      setShowSuggestionsPanel(true);
     }
   }, [autoFocus]);
   
   // Handle click outside to close suggestions
   useEffect(() => {
     const handleClickOutside = (e: MouseEvent) => {
-      if (inputRef.current && !inputRef.current.contains(e.target as Node)) {
-        setIsFocused(false);
+      if (
+        searchContainerRef.current && 
+        !searchContainerRef.current.contains(e.target as Node)
+      ) {
+        setShowSuggestionsPanel(false);
+        if (onFocusChange) {
+          onFocusChange(false);
+        }
       }
     };
     
     document.addEventListener('mousedown', handleClickOutside);
     return () => document.removeEventListener('mousedown', handleClickOutside);
-  }, []);
+  }, [onFocusChange]);
+  
+  // Update onFocusChange when suggestions panel visibility changes
+  useEffect(() => {
+    if (onFocusChange) {
+      onFocusChange(showSuggestionsPanel);
+    }
+  }, [showSuggestionsPanel, onFocusChange]);
   
   // Initialize Web Speech API if available
   useEffect(() => {
@@ -105,13 +120,6 @@ export default function EnhancedSearchInput({
     setSearchTerm(initialValue);
   }, [initialValue]);
   
-  // Trigger onFocusChange when focus state changes
-  useEffect(() => {
-    if (onFocusChange) {
-      onFocusChange(isFocused);
-    }
-  }, [isFocused, onFocusChange]);
-  
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (searchTerm.trim()) {
@@ -128,10 +136,17 @@ export default function EnhancedSearchInput({
       } catch (error) {
         console.error('Error saving to search history:', error);
       }
-      
-      // Don't close suggestions right away in case the user wants to 
-      // see immediate search results suggestions
     }
+  };
+  
+  // Handler para seleccionar una sugerencia
+  const handleSelectSuggestion = (suggestion: string) => {
+    setSearchTerm(suggestion);
+    
+    // Ejecutar búsqueda automáticamente cuando se selecciona una sugerencia
+    setTimeout(() => {
+      onSearch(suggestion, null);
+    }, 100);
   };
   
   const handleClearInput = () => {
@@ -364,11 +379,11 @@ export default function EnhancedSearchInput({
   };
   
   return (
-    <div className={cn('relative w-full', className)}>
+    <div className={cn('relative w-full', className)} ref={searchContainerRef}>
       <form
         className={cn(
           'flex items-center bg-white rounded-lg ring-1 ring-slate-200 focus-within:ring-blue-500 transition-all overflow-hidden',
-          isFocused && 'ring-blue-500 shadow-sm',
+          showSuggestionsPanel && 'ring-blue-500 shadow-sm',
           appearance === 'dark' && 'bg-slate-800 ring-slate-700 focus-within:ring-blue-500',
           className
         )}
@@ -379,8 +394,7 @@ export default function EnhancedSearchInput({
           type="text"
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
-          onFocus={() => setIsFocused(true)}
-          onBlur={() => setIsFocused(false)}
+          onFocus={() => setShowSuggestionsPanel(true)}
           className={cn(
             'flex-1 py-2 px-3 outline-none bg-transparent',
             appearance === 'dark' && 'text-white placeholder:text-slate-400'
@@ -502,18 +516,15 @@ export default function EnhancedSearchInput({
       </form>
       
       {/* Search suggestions */}
-      {isFocused && showSuggestions && (
-        <SearchSuggestions
-          searchTerm={searchTerm}
-          onSelectSuggestion={(text) => {
-            setSearchTerm(text);
-            if (onSearch) {
-              onSearch(text, null);
-            }
-          }}
-          appearance={appearance === 'dark' ? 'dark' : 'light'}
-          position={suggestionsPosition}
-        />
+      {showSuggestionsPanel && showSuggestions && (
+        <div className="absolute z-50 w-full">
+          <SearchSuggestions
+            searchTerm={searchTerm}
+            onSelectSuggestion={handleSelectSuggestion}
+            appearance={appearance === 'dark' ? 'dark' : 'light'}
+            position={suggestionsPosition}
+          />
+        </div>
       )}
     </div>
   );
