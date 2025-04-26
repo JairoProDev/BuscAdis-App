@@ -66,6 +66,7 @@ export default function SearchLayout({
   
   // Responsive
   const isLg = useMediaQuery('(min-width: 1024px)')
+  const isMobile = useMediaQuery('(max-width: 640px)')
   
   // Cargar categorías
   useEffect(() => {
@@ -139,7 +140,7 @@ export default function SearchLayout({
     }
   }
   
-  // Manejar cambio de categoría
+  // Manejar cambio de categoría con preservación de la consulta
   const handleCategoryChange = (newCategory: string) => {
     setCategory(newCategory)
     setSubcategory('')
@@ -147,9 +148,17 @@ export default function SearchLayout({
     setActiveFilters({})
     setFilterCount(0)
     
+    // Preservar la consulta de búsqueda actual
+    const currentQuery = searchQuery || ''
+    
     // Llamar al callback si está definido
     if (onFilterChange) {
-      onFilterChange({ category: newCategory, subcategory: '', subsubcategory: '' })
+      onFilterChange({ 
+        category: newCategory, 
+        subcategory: '', 
+        subsubcategory: '',
+        q: currentQuery  // Preservar la consulta
+      })
     }
   }
   
@@ -168,10 +177,13 @@ export default function SearchLayout({
     }
   }
   
-  // Manejar cambio de subcategoría
+  // Manejar cambio de subcategoría con preservación de la consulta
   const handleSubcategoryChange = (newSubcategory: string) => {
     setSubcategory(newSubcategory)
     setSelectedSubSubcategory('')
+    
+    // Preservar la consulta de búsqueda actual
+    const currentQuery = searchQuery || ''
     
     // Llamar al callback si está definido
     if (onFilterChange) {
@@ -179,14 +191,18 @@ export default function SearchLayout({
         ...activeFilters,
         category, 
         subcategory: newSubcategory, 
-        subsubcategory: '' 
+        subsubcategory: '',
+        q: currentQuery  // Preservar la consulta
       })
     }
   }
   
-  // Manejar cambio de subsubcategoría
+  // Manejar cambio de subsubcategoría con preservación de la consulta
   const handleSubSubcategoryChange = (newSubSubcategory: string) => {
     setSelectedSubSubcategory(newSubSubcategory)
+    
+    // Preservar la consulta de búsqueda actual
+    const currentQuery = searchQuery || ''
     
     // Llamar al callback si está definido
     if (onFilterChange) {
@@ -194,7 +210,8 @@ export default function SearchLayout({
         ...activeFilters,
         category, 
         subcategory, 
-        subsubcategory: newSubSubcategory 
+        subsubcategory: newSubSubcategory,
+        q: currentQuery  // Preservar la consulta
       })
     }
   }
@@ -242,21 +259,26 @@ export default function SearchLayout({
     )
   }
   
-  // Renderizar selector de categorías
+  // Renderizar selector de categorías con estilo mejorado
   const renderCategorySelector = () => {
     return (
-      <div className="mb-4">
-        <CategorySelector
-          activeCategory={category}
-          activeSubcategory={subcategory}
-          activeSubSubcategory={selectedSubSubcategory}
-          onCategoryChange={handleCategoryChange}
-          onSubcategoryChange={handleSubcategoryChange}
-          onSubSubcategoryChange={handleSubSubcategoryChange}
-          showCounts={true}
-          variant="horizontal"
-          className="w-full"
-        />
+      <div className="mb-4 bg-slate-800/60 rounded-xl p-3 border border-slate-700/50 shadow-sm">
+        <div className="flex flex-col space-y-2">
+          <h2 className="text-lg font-medium text-white mb-1 px-1">Categorías</h2>
+          <CategorySelector
+            activeCategory={category}
+            activeSubcategory={subcategory}
+            activeSubSubcategory={selectedSubSubcategory}
+            onCategoryChange={handleCategoryChange}
+            onSubcategoryChange={handleSubcategoryChange}
+            onSubSubcategoryChange={handleSubSubcategoryChange}
+            showCounts={true}
+            variant="horizontal"
+            className="w-full"
+            showAllOption={true}
+            maxVisible={isMobile ? 4 : 8}
+          />
+        </div>
       </div>
     )
   }

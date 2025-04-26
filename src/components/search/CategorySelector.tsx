@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useCallback, useEffect, useMemo, useState, memo } from 'react'
+import React, { useCallback, useEffect, useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import Image from 'next/image'
 import Link from 'next/link'
@@ -49,9 +49,12 @@ export default function CategorySelector({
 }: CategorySelectorProps) {
   // No necesitamos el router ya que usamos history.pushState
   
+  // State for showing more categories
   const [expanded, setExpanded] = useState(false)
   const [selectedCategory, setSelectedCategory] = useState<Category | null>(null)
   const [selectedSubcategory, setSelectedSubcategory] = useState<Subcategory | null>(null)
+  // We need to track this state even if not directly used in render - it's updated in effects
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const [selectedSubSubcategory, setSelectedSubSubcategory] = useState<SubSubcategory | null>(null)
   const [breadcrumbs, setBreadcrumbs] = useState<{type: string, id: string, name: string}[]>([])
   const [categories, setCategories] = useState<Category[]>([])
@@ -220,6 +223,8 @@ export default function CategorySelector({
       ? categories 
       : categories.slice(0, maxVisible)
 
+    const hasMoreCategories = categories.length > maxVisible;
+
     return (
       <div className="flex flex-col">
         <div className="flex items-center gap-2">
@@ -274,7 +279,7 @@ export default function CategorySelector({
                 }`}
               >
                 <span className="flex items-center justify-center w-8 h-8 rounded-lg bg-slate-800 text-teal-500">
-                  {category.icon && (
+                  {category.icon && typeof category.icon === 'string' && (
                     <Image 
                       src={category.icon} 
                       alt={category.name} 
@@ -292,6 +297,27 @@ export default function CategorySelector({
                 )}
               </button>
             ))}
+            
+            {/* Botón para mostrar/ocultar más categorías */}
+            {hasMoreCategories && (
+              <button
+                onClick={() => setExpanded(!expanded)}
+                className="flex items-center justify-center py-2 px-3 rounded-lg text-sm text-slate-300 hover:bg-slate-800/60 transition-colors"
+              >
+                <span className="flex items-center justify-center w-8 h-8 rounded-lg bg-slate-800 text-teal-500">
+                  {expanded ? (
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-5 h-5">
+                      <path fillRule="evenodd" d="M12 2.25c-5.385 0-9.75 4.365-9.75 9.75s4.365 9.75 9.75 9.75 9.75-4.365 9.75-9.75S17.385 2.25 12 2.25zm3 10.5a.75.75 0 000-1.5H9a.75.75 0 000 1.5h6z" clipRule="evenodd" />
+                    </svg>
+                  ) : (
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-5 h-5">
+                      <path fillRule="evenodd" d="M12 2.25c-5.385 0-9.75 4.365-9.75 9.75s4.365 9.75 9.75 9.75 9.75-4.365 9.75-9.75S17.385 2.25 12 2.25zM12.75 9a.75.75 0 00-1.5 0v2.25H9a.75.75 0 000 1.5h2.25V15a.75.75 0 001.5 0v-2.25H15a.75.75 0 000-1.5h-2.25V9z" clipRule="evenodd" />
+                    </svg>
+                  )}
+                </span>
+                <span className="ml-2">{expanded ? 'Mostrar menos' : 'Mostrar más'}</span>
+              </button>
+            )}
           </div>
         </div>
         
@@ -317,7 +343,7 @@ export default function CategorySelector({
                           : 'text-slate-300 hover:bg-slate-800/60'
                       }`}
                     >
-                      {subcategory.icon && (
+                      {subcategory.icon && typeof subcategory.icon === 'string' && (
                         <span className="text-blue-400 mr-2 text-lg">
                           {subcategory.icon}
                         </span>
@@ -376,7 +402,7 @@ export default function CategorySelector({
         )}
       </div>
     )
-  }, [categories, subcategories, activeCategory, activeSubcategory, activeSubSubcategory, expanded, maxVisible, breadcrumbs, showCounts, showAllOption, showSubcategories])
+  }, [categories, subcategories, activeCategory, activeSubcategory, activeSubSubcategory, expanded, maxVisible, breadcrumbs, showCounts, showAllOption, showSubcategories, onCategoryChange, onSubcategoryChange, onSubSubcategoryChange])
   
   // Modificar la función que renderiza las migas de pan
   const renderBreadcrumbs = () => {

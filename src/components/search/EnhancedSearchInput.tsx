@@ -20,6 +20,7 @@ interface EnhancedSearchInputProps {
   showImageSearch?: boolean;
   showAiAssist?: boolean;
   onFocusChange?: (isFocused: boolean) => void;
+  compactSuggestions?: boolean;
 }
 
 export default function EnhancedSearchInput({
@@ -35,6 +36,7 @@ export default function EnhancedSearchInput({
   showImageSearch = false,
   showAiAssist = true,
   onFocusChange,
+  compactSuggestions = true,
 }: EnhancedSearchInputProps) {
   const [searchTerm, setSearchTerm] = useState(initialValue);
   const [showSuggestionsPanel, setShowSuggestionsPanel] = useState(false);
@@ -523,6 +525,7 @@ export default function EnhancedSearchInput({
             onSelectSuggestion={handleSelectSuggestion}
             appearance={appearance === 'dark' ? 'dark' : 'light'}
             position={suggestionsPosition}
+            compact={compactSuggestions}
           />
         </div>
       )}
