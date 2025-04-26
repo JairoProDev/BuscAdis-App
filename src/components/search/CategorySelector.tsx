@@ -1,11 +1,14 @@
 'use client'
 
-import React, { useCallback, useEffect, useState } from 'react'
+import React, { useCallback, useEffect, useState, useMemo } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import Image from 'next/image'
 import Link from 'next/link'
-import { ChevronRightIcon } from '@heroicons/react/24/outline'
+import { ChevronRightIcon, HomeIcon } from '@heroicons/react/24/outline'
 import LoadingSpinner from '@/components/ui/LoadingSpinner'
+import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area'
+import { Skeleton } from '@/components/ui/skeleton'
+import { Badge } from '@/components/ui/badge'
 
 // Importar las utilidades de categorías
 import { 
@@ -26,11 +29,12 @@ interface CategorySelectorProps {
   onSubcategoryChange?: (subcategory: string) => void
   onSubSubcategoryChange?: (subsubcategory: string) => void
   showCounts?: boolean
-  variant?: 'horizontal' | 'vertical' | 'grid' | 'tabs'
+  variant?: 'horizontal' | 'vertical' | 'grid' | 'tabs' | 'menu'
   showAllOption?: boolean
   maxVisible?: number
   className?: string
   showSubcategories?: boolean
+  showBreadcrumbs?: boolean
 }
 
 export default function CategorySelector({
@@ -45,7 +49,8 @@ export default function CategorySelector({
   showAllOption = true,
   maxVisible = 8,
   className = '',
-  showSubcategories = true
+  showSubcategories = true,
+  showBreadcrumbs = true
 }: CategorySelectorProps) {
   // No necesitamos el router ya que usamos history.pushState
   
@@ -61,6 +66,7 @@ export default function CategorySelector({
   const [subcategories, setSubcategories] = useState<Subcategory[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
+  const [showMore, setShowMore] = useState(false)
   
   // Encontrar la categoría seleccionada
   useEffect(() => {
@@ -213,8 +219,59 @@ export default function CategorySelector({
     }
   }
   
-  // Modificar la función que renderiza los enlaces de categoría para que sean más limpios y pulidos
-  const renderHorizontalSelector = useCallback(() => {
+  // Modificar la función que renderiza las migas de pan
+  const renderBreadcrumbs = () => {
+    if (breadcrumbs.length === 0) return null
+    
+    return (
+      <div className="flex items-center text-sm">
+        <Link href="/buscar" className="text-teal-500 hover:text-teal-400">
+          Buscar
+        </Link>
+        
+        {breadcrumbs.map((crumb, index) => (
+          <React.Fragment key={crumb.id}>
+            <ChevronRightIcon className="w-4 h-4 mx-1 text-slate-500" />
+            
+            {index === breadcrumbs.length - 1 ? (
+              <span className="text-white font-medium">{crumb.name}</span>
+            ) : (
+              <Link
+                href={`/${breadcrumbs.slice(0, index + 1).map(c => c.id).join('/')}`}
+                className="text-teal-500 hover:text-teal-400"
+              >
+                {crumb.name}
+              </Link>
+            )}
+          </React.Fragment>
+        ))}
+      </div>
+    )
+  }
+  
+  // Seleccionar la variante apropiada
+  const renderSelector = () => {
+    switch(variant) {
+      case 'horizontal':
+        return renderHorizontalSelector()
+      case 'grid':
+        // Pendiente para implementar
+        return renderHorizontalSelector()
+      case 'vertical':
+        // Pendiente para implementar
+        return renderHorizontalSelector()
+      case 'tabs':
+        // Pendiente para implementar
+        return renderHorizontalSelector()
+      case 'menu':
+        return renderMenuSelector()
+      default:
+        return renderHorizontalSelector()
+    }
+  }
+  
+  // Renderizar interfaz horizontal o vertical estándar
+  const renderHorizontalSelector = () => {
     if (categories.length === 0) {
       return <div className="flex items-center justify-center"><LoadingSpinner /></div>
     }
@@ -227,10 +284,12 @@ export default function CategorySelector({
 
     return (
       <div className="flex flex-col">
-        <div className="flex items-center gap-2">
-          {/* Breadcrumbs en formato horizontal */}
-          {breadcrumbs.length > 0 && renderBreadcrumbs()}
-        </div>
+        {/* Breadcrumbs en formato horizontal - movidos arriba */}
+        {breadcrumbs.length > 0 && (
+          <div className="flex items-center gap-2 mb-2">
+            {renderBreadcrumbs()}
+          </div>
+        )}
         
         <div className="overflow-x-auto scrollbar-hide">
           <div className="flex items-center min-w-max gap-1 mt-1">
@@ -381,7 +440,7 @@ export default function CategorySelector({
                       className={`flex items-center py-1 px-3 rounded-lg text-sm transition-colors ${
                         activeSubSubcategory === subsubcategory.slug
                           ? 'bg-purple-600/70 text-white font-medium'
-                          : 'text-slate-300 hover:bg-slate-800/60'
+                          : 'text-slate-300 hover:bg-slate-800/60 border border-purple-900/30'
                       }`}
                     >
                       {subsubcategory.emoji && (
@@ -402,61 +461,120 @@ export default function CategorySelector({
         )}
       </div>
     )
-  }, [categories, subcategories, activeCategory, activeSubcategory, activeSubSubcategory, expanded, maxVisible, breadcrumbs, showCounts, showAllOption, showSubcategories, onCategoryChange, onSubcategoryChange, onSubSubcategoryChange])
+  }
   
-  // Modificar la función que renderiza las migas de pan
-  const renderBreadcrumbs = () => {
-    if (breadcrumbs.length === 0) return null
-    
+  // Renderizar como menú
+  const renderMenuSelector = () => {
+    if (categories.length === 0) {
+      return <div className="flex items-center justify-center"><LoadingSpinner /></div>
+    }
+
     return (
-      <div className="flex items-center text-sm">
-        <Link href="/buscar" className="text-teal-500 hover:text-teal-400">
-          Buscar
-        </Link>
-        
-        {breadcrumbs.map((crumb, index) => (
-          <React.Fragment key={crumb.id}>
-            <ChevronRightIcon className="w-4 h-4 mx-1 text-slate-500" />
+      <div className="space-y-1">
+        {categories.map((category) => (
+          <div key={category.id}>
+            <button
+              onClick={() => handleCategoryClick(category.id)}
+              className={`w-full text-left px-3 py-2 rounded-lg flex items-center justify-between ${
+                activeCategory === category.id
+                  ? 'bg-teal-500 text-white font-medium'
+                  : 'hover:bg-slate-700/50 text-slate-200'
+              }`}
+            >
+              <div className="flex items-center">
+                {category.icon ? (
+                  <div className="w-5 h-5 mr-2 relative flex-shrink-0">
+                    <Image
+                      src={`/images/categories/${category.icon}`}
+                      alt={category.name}
+                      width={20}
+                      height={20}
+                      className="object-contain"
+                    />
+                  </div>
+                ) : (
+                  <span className="mr-2">📦</span>
+                )}
+                <span>{category.name}</span>
+              </div>
+              {category.subcategories && category.subcategories.length > 0 && (
+                <ChevronRightIcon className="w-4 h-4" />
+              )}
+            </button>
             
-            {index === breadcrumbs.length - 1 ? (
-              <span className="text-white font-medium">{crumb.name}</span>
-            ) : (
-              <Link
-                href={`/${breadcrumbs.slice(0, index + 1).map(c => c.id).join('/')}`}
-                className="text-teal-500 hover:text-teal-400"
-              >
-                {crumb.name}
-              </Link>
+            {activeCategory === category.id && category.subcategories && (
+              <div className="pl-4 mt-1 space-y-1">
+                {category.subcategories.map((subcategory) => (
+                  <div key={subcategory.id}>
+                    <button
+                      onClick={() => handleSubcategoryClick(subcategory.id)}
+                      className={`w-full text-left px-3 py-1.5 rounded-lg flex items-center justify-between ${
+                        activeSubcategory === subcategory.id
+                          ? 'bg-teal-500/80 text-white font-medium'
+                          : 'hover:bg-slate-700/40 text-slate-300'
+                      }`}
+                    >
+                      <div className="flex items-center">
+                        {subcategory.icon ? (
+                          <div className="w-4 h-4 mr-2 relative flex-shrink-0">
+                            <Image
+                              src={`/images/categories/${subcategory.icon}`}
+                              alt={subcategory.name}
+                              width={16}
+                              height={16}
+                              className="object-contain"
+                            />
+                          </div>
+                        ) : (
+                          <span className="mr-2">📋</span>
+                        )}
+                        <span>{subcategory.name}</span>
+                      </div>
+                      {subcategory.subsubcategories && 
+                       subcategory.subsubcategories.length > 0 && (
+                        <ChevronRightIcon className="w-3 h-3" />
+                      )}
+                    </button>
+                    
+                    {activeSubcategory === subcategory.id && 
+                     subcategory.subsubcategories && (
+                      <div className="pl-4 mt-1 space-y-1">
+                        {subcategory.subsubcategories.map((subsubcategory) => (
+                          <button
+                            key={subsubcategory.id}
+                            onClick={() => 
+                              handleSubSubcategorySelect(subsubcategory)
+                            }
+                            className={`w-full text-left px-3 py-1 rounded-lg flex items-center ${
+                              activeSubSubcategory === subsubcategory.id
+                                ? 'bg-teal-500/60 text-white'
+                                : 'hover:bg-slate-700/30 text-slate-400'
+                            }`}
+                          >
+                            <span className="mr-2">
+                              {subsubcategory.emoji || '🏷️'}
+                            </span>
+                            <span className="text-sm">{subsubcategory.name}</span>
+                          </button>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                ))}
+              </div>
             )}
-          </React.Fragment>
+          </div>
         ))}
       </div>
     )
   }
   
-  // Seleccionar la variante apropiada
-  const renderSelector = () => {
-    switch(variant) {
-      case 'horizontal':
-        return renderHorizontalSelector()
-      case 'grid':
-        // Pendiente para implementar
-        return renderHorizontalSelector()
-      case 'vertical':
-        // Pendiente para implementar
-        return renderHorizontalSelector()
-      case 'tabs':
-        // Pendiente para implementar
-        return renderHorizontalSelector()
-      default:
-        return renderHorizontalSelector()
-    }
-  }
-  
   if (loading) {
     return (
-      <div className="flex justify-center py-4">
-        <LoadingSpinner size="md" />
+      <div className={`${className} ${variant === 'horizontal' ? 'space-y-2' : 'flex space-x-4'}`}>
+        {Array.from({ length: 6 }).map((_, i) => (
+          <Skeleton key={i} className="h-10 w-full rounded-lg" />
+        ))}
       </div>
     )
   }

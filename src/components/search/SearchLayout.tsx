@@ -264,7 +264,6 @@ export default function SearchLayout({
     return (
       <div className="mb-4 bg-slate-800/60 rounded-xl p-3 border border-slate-700/50 shadow-sm">
         <div className="flex flex-col space-y-2">
-          <h2 className="text-lg font-medium text-white mb-1 px-1">Categorías</h2>
           <CategorySelector
             activeCategory={category}
             activeSubcategory={subcategory}
@@ -356,11 +355,11 @@ export default function SearchLayout({
   
   return (
     <div className={`w-full ${className}`}>
+      {/* Selector de Categorías (que ahora contiene los breadcrumbs) */}
+      {renderCategorySelector()}
+      
       {/* Cabecera de búsqueda */}
       {renderSearchHeader()}
-      
-      {/* Selector de Categorías */}
-      {renderCategorySelector()}
       
       {/* Horizontal Filter Bar - New! */}
       {category && (
