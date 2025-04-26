@@ -281,7 +281,7 @@ export default function HorizontalFilterBar({
       
       {/* Main filter bar */}
       <div 
-        className={`w-full overflow-x-auto bg-slate-800/60 rounded-lg border border-slate-700/50 p-2 ${openFilter ? 'shadow-md' : ''}`}
+        className={`w-full overflow-x-auto p-2 ${openFilter ? 'shadow-md' : ''}`}
         onClick={() => setOpenFilter(null)}
       >
         <div className="flex items-center space-x-1 min-w-max">
