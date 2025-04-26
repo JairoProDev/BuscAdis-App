@@ -365,34 +365,6 @@ export default function SearchSuggestions({
 
             {/* Main content sections in horizontal layout if compact */}
             <div className={`${compact ? 'grid grid-cols-3 gap-2' : 'space-y-3'}`}>
-              {/* Trending searches */}
-              {trendingSearches.length > 0 && (
-                <div className="space-y-1.5" onMouseDown={(e) => e.preventDefault()}>
-                  <div className="flex items-center mb-1">
-                    <TrendingUp className="h-4 w-4 mr-1 text-rose-500" />
-                    <h3 className="text-sm font-medium">Tendencias</h3>
-                  </div>
-                  <div className="flex flex-wrap gap-1.5">
-                    {trendingSearches.slice(0, compact ? 4 : trendingSearches.length).map((item, index) => (
-                      <button 
-                        key={`trending-${index}`}
-                        data-index={suggestions.length + index}
-                        onClick={(e) => handleSuggestionClick(e, item.text)}
-                        onMouseDown={(e) => e.preventDefault()}
-                        className={`flex items-center gap-1 ${compact ? 'px-2 py-0.5 text-xs' : 'px-3 py-1.5 text-sm'} rounded-full cursor-pointer ${
-                          highlightedIndex === (suggestions.length + index)
-                            ? appearance === 'dark' ? 'bg-slate-700' : 'bg-slate-100'
-                            : appearance === 'dark' ? 'bg-slate-800 hover:bg-slate-700' : 'bg-slate-50 hover:bg-slate-100'
-                        } border ${appearance === 'dark' ? 'border-slate-700' : 'border-slate-200'}`}
-                      >
-                        <TrendingUp className={`${compact ? 'h-3 w-3' : 'h-3.5 w-3.5'} text-rose-500`} />
-                        <span className="truncate">{item.text}</span>
-                      </button>
-                    ))}
-                  </div>
-                </div>
-              )}
-
               {/* Search history */}
               {searchHistory.length > 0 && (
                 <div className="space-y-1.5" onMouseDown={(e) => e.preventDefault()}>
@@ -457,6 +429,34 @@ export default function SearchSuggestions({
                         } border ${appearance === 'dark' ? 'border-purple-500/30' : 'border-purple-200'}`}
                       >
                         <Sparkles className={`${compact ? 'h-3 w-3' : 'h-3.5 w-3.5'} text-purple-500`} />
+                        <span className="truncate">{item.text}</span>
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* Trending searches */}
+              {trendingSearches.length > 0 && (
+                <div className="space-y-1.5" onMouseDown={(e) => e.preventDefault()}>
+                  <div className="flex items-center mb-1">
+                    <TrendingUp className="h-4 w-4 mr-1 text-rose-500" />
+                    <h3 className="text-sm font-medium">Tendencias</h3>
+                  </div>
+                  <div className="flex flex-wrap gap-1.5">
+                    {trendingSearches.slice(0, compact ? 4 : trendingSearches.length).map((item, index) => (
+                      <button 
+                        key={`trending-${index}`}
+                        data-index={suggestions.length + index}
+                        onClick={(e) => handleSuggestionClick(e, item.text)}
+                        onMouseDown={(e) => e.preventDefault()}
+                        className={`flex items-center gap-1 ${compact ? 'px-2 py-0.5 text-xs' : 'px-3 py-1.5 text-sm'} rounded-full cursor-pointer ${
+                          highlightedIndex === (suggestions.length + index)
+                            ? appearance === 'dark' ? 'bg-slate-700' : 'bg-slate-100'
+                            : appearance === 'dark' ? 'bg-slate-800 hover:bg-slate-700' : 'bg-slate-50 hover:bg-slate-100'
+                        } border ${appearance === 'dark' ? 'border-slate-700' : 'border-slate-200'}`}
+                      >
+                        <TrendingUp className={`${compact ? 'h-3 w-3' : 'h-3.5 w-3.5'} text-rose-500`} />
                         <span className="truncate">{item.text}</span>
                       </button>
                     ))}
