@@ -203,7 +203,7 @@ export const SUBSUBCATEGORY_EMOJIS: Record<string, string> = {
 // Mapeo de iconos para subcategorías
 export const SUBCATEGORY_ICONS: Record<string, ElementType> = {
   // Empleos
-  'administracion-oficina-contable': BuildingOfficeIcon,
+  'oficina': BuildingOfficeIcon,
   'ventas-comercial-marketing': CurrencyDollarIcon,
   'hosteleria-restaurantes-turismo': BuildingStorefrontIcon,
   'construccion-mantenimiento-oficios': WrenchScrewdriverIcon,

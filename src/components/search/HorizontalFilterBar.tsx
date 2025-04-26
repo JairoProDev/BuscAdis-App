@@ -73,12 +73,6 @@ export default function HorizontalFilterBar({
     onFilterChange(newFilters);
   };
 
-  // Get the category title if available
-  const getCategoryTitle = () => {
-    if (!category || !filtersByCategory[category]) return 'Filtros';
-    return filtersByCategory[category].title || 'Filtros';
-  };
-
   // Render a single filter dropdown
   const renderFilterDropdown = (filterId: string, label: string, content: React.ReactNode) => {
     const isActive = openFilter === filterId;
@@ -87,20 +81,15 @@ export default function HorizontalFilterBar({
     return (
       <div className="relative" key={filterId}>
         <button
-          className={`flex items-center gap-1 py-1.5 px-2.5 rounded-lg text-sm transition-colors ${
-            hasActiveValue 
-              ? 'bg-teal-800/70 text-white font-medium hover:bg-teal-700/80'
-              : 'text-slate-200 hover:bg-slate-700/40'
+          className={`flex items-center gap-1 py-2 px-4 rounded-lg text-sm font-medium transition-colors ${
+            isActive || hasActiveValue
+              ? 'bg-teal-500 text-white' 
+              : 'bg-slate-800 text-white hover:bg-slate-700'
           }`}
           onClick={() => setOpenFilter(isActive ? null : filterId)}
         >
           <span>{label}</span>
-          {hasActiveValue && (
-            <span className="inline-flex items-center justify-center bg-teal-500 text-white w-4 h-4 rounded-full text-xs font-medium ml-1">
-              ✓
-            </span>
-          )}
-          <ChevronDownIcon className={`h-3 w-3 transition-transform ml-1 ${isActive ? 'rotate-180' : ''}`} />
+          <ChevronDownIcon className={`h-4 w-4 transition-transform ml-1 ${isActive ? 'rotate-180' : ''}`} />
         </button>
         
         {isActive && (
@@ -116,7 +105,7 @@ export default function HorizontalFilterBar({
   };
 
   // Render filter content based on type
-  const renderFilterContent = (filter: any) => {
+  const renderFilterContent = (filter: FilterOption) => {
     const value = activeFilters[filter.id];
     
     switch (filter.type) {
@@ -255,53 +244,49 @@ export default function HorizontalFilterBar({
 
   return (
     <div className={`relative ${className}`}>
-      {/* Filter bar header with title and counter */}
-      <div className="flex items-center justify-between mb-2 px-1">
+      {/* Título y etiqueta de "Filtros" */}
+      <div className="flex items-center mb-2 px-1">
         <div className="flex items-center gap-2">
           <FunnelIcon className="h-4 w-4 text-teal-500" />
-          <h3 className="text-sm font-medium text-white">{getCategoryTitle()}</h3>
-          {filterCount > 0 && (
-            <Badge variant="secondary" className="bg-teal-800 text-teal-200 text-xs">
-              {filterCount} {filterCount === 1 ? 'filtro activo' : 'filtros activos'}
-            </Badge>
-          )}
+          <h3 className="text-sm font-medium text-white">Filtros de {filtersByCategory[category]?.title || category}</h3>
         </div>
-        
-        {filterCount > 0 && (
-          <Button
-            variant="link"
-            size="sm"
-            className="text-xs text-teal-400 hover:text-teal-300 h-auto p-0"
-            onClick={clearAllFilters}
-          >
-            Limpiar filtros
-          </Button>
-        )}
       </div>
       
-      {/* Main filter bar */}
+      {/* Barra de filtros principal - diseño horizontal con scroll */}
       <div 
-        className={`w-full overflow-x-auto p-2 ${openFilter ? 'shadow-md' : ''}`}
+        className="w-full overflow-x-auto py-2"
         onClick={() => setOpenFilter(null)}
       >
-        <div className="flex items-center space-x-1 min-w-max">
-          {/* Ordenar filter (always first) */}
+        <div className="flex items-center space-x-2 min-w-max px-1">
+          {/* Ordenar filter (siempre primero) */}
           {filters.find(f => f.id === 'sortBy' || f.id === 'orderBy') && 
             renderFilterDropdown(
               'sortBy', 
               'Ordenar', 
-              renderFilterContent(filters.find(f => f.id === 'sortBy' || f.id === 'orderBy'))
+              renderFilterContent(filters.find(f => f.id === 'sortBy' || f.id === 'orderBy') as FilterOption)
             )
           }
           
-          {/* Show all other filters */}
-          {filters.filter(f => f.id !== 'sortBy' && f.id !== 'orderBy').map(filter => 
-            renderFilterDropdown(filter.id, filter.label, renderFilterContent(filter))
+          {/* Mostrar otros filtros importantes */}
+          {filters
+            .filter(f => f.id !== 'sortBy' && f.id !== 'orderBy')
+            .map(filter => renderFilterDropdown(filter.id, filter.label, renderFilterContent(filter as FilterOption)))}
+          
+          {/* Botón para limpiar filtros - solo visible si hay filtros activos */}
+          {filterCount > 0 && (
+            <Button
+              variant="outline"
+              size="sm"
+              className="ml-2 text-xs text-teal-400 hover:text-teal-300 bg-slate-800 border-slate-700"
+              onClick={clearAllFilters}
+            >
+              Limpiar filtros ({filterCount})
+            </Button>
           )}
         </div>
       </div>
       
-      {/* Active filters display */}
+      {/* Lista de filtros activos */}
       {filterCount > 0 && (
         <div className="flex flex-wrap gap-1 mt-2">
           {Object.entries(activeFilters)
@@ -311,7 +296,7 @@ export default function HorizontalFilterBar({
               const filter = filters.find(f => f.id === key);
               if (!filter) return null;
               
-              // For select/multiselect filters, show the option label instead of value
+              // Determine display value based on filter type
               let displayValue = value;
               if (filter.type === 'select' && typeof value === 'string') {
                 const option = filter.options?.find((o: FilterOption) => o.value === value);

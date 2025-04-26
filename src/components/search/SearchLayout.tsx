@@ -13,6 +13,7 @@ import KeywordSearchBox from './KeywordSearchBox'
 import CategorySelector from './CategorySelector'
 import AdvancedFilterDrawer from './AdvancedFilterDrawer'
 import HorizontalFilterBar from './HorizontalFilterBar'
+import FilterChips from '@/components/search/FilterChips'
 import { CategoriesService } from '@/services/categories.service'
 
 interface SearchLayoutProps {
@@ -303,23 +304,22 @@ export default function SearchLayout({
           </p>
         </div>
         
-        {/* Controles de vista */}
+        {/* Controles de vista - Ahora están en la parte superior */}
         <div className="flex items-center space-x-2">
-          {/* Botón de filtros - Mobile lo muestra como botón, Desktop como panel */}
-          {!isLg && (
-            <AdvancedFilterDrawer
-              selectedCategory={category || undefined}
-              initialFilters={activeFilters}
-              categories={categories}
-              onCategoryChange={(cat) => {
-                if (cat) handleCategoryChange(cat.id);
-              }}
-              onFilterChange={handleFilterChange}
-              filterCount={filterCount}
-            />
-          )}
+          {/* Toggle de vista de columnas */}
+          <button
+            onClick={() => setCurrentView(currentView === 'list' ? 'grid' : 'list')}
+            className={`p-2 rounded-lg border ${
+              currentView === 'list' 
+                ? 'bg-teal-500 border-teal-600 text-white' 
+                : 'bg-slate-800 border-slate-700 text-white hover:bg-slate-700'
+            }`}
+            aria-label={currentView === 'list' ? "Ver en cuadrícula" : "Ver en lista"}
+          >
+            <ViewColumnsIcon className="w-5 h-5" />
+          </button>
           
-          {/* Toggle de vista de mapa */}
+          {/* Toggle de vista de mapa - Solo si está habilitado */}
           {showMap && (
             <button
               onClick={toggleMapView}
@@ -331,21 +331,6 @@ export default function SearchLayout({
               aria-label={currentView === 'map' ? "Mostrar lista" : "Mostrar mapa"}
             >
               <MapIcon className="w-5 h-5" />
-            </button>
-          )}
-          
-          {/* Toggle de vista de columnas (solo en desktop) */}
-          {(
-            <button
-              onClick={() => setCurrentView(currentView === 'list' ? 'grid' : 'list')}
-              className={`p-2 rounded-lg border ${
-                currentView === 'list' 
-                  ? 'bg-teal-500 border-teal-600 text-white' 
-                  : 'bg-slate-800 border-slate-700 text-white hover:bg-slate-700'
-              }`}
-              aria-label={currentView === 'list' ? "Ver en cuadrícula" : "Ver en lista"}
-            >
-              <ViewColumnsIcon className="w-5 h-5" />
             </button>
           )}
         </div>
@@ -361,11 +346,10 @@ export default function SearchLayout({
       {/* Cabecera de búsqueda */}
       {renderSearchHeader()}
       
-      {/* Horizontal Filter Bar - New! */}
+      {/* Chips de filtros - Nuevo diseño */}
       {category && (
         <div className="mb-2">
-          <HorizontalFilterBar
-            category={category}
+          <FilterChips
             activeFilters={activeFilters}
             onFilterChange={handleFilterChange}
             className=""

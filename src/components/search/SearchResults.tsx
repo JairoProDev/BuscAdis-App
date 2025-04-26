@@ -838,6 +838,7 @@ export default function SearchResults({
       </div>
 
       {/* Toggle para resultados recientes (solo si hay resultados nuevos) */}
+      {/*
       {newItemsCount > 0 && (
         <div className="mb-4">
           <button 
@@ -849,7 +850,6 @@ export default function SearchResults({
           </button>
         </div>
       )}
-
       {/* Estado de carga */}
       {loading && allResults.length === 0 && (
         <div className="flex flex-col items-center justify-center p-8">

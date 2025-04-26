@@ -66,8 +66,8 @@ export interface SubSubcategory {
       description: 'Ofertas y Búsqueda de Trabajo',
       subcategories: [
         {
-          id: 'administracion-oficina-contable',
-          name: 'Administración, Oficina y Contable',
+          id: 'oficina',
+          name: 'Oficina',
           subSubcategories: [
             { id: 'asistente-administrativo', name: 'Asistente Administrativo' },
             { id: 'secretario-recepcionista', name: 'Secretario/a o Recepcionista' },
