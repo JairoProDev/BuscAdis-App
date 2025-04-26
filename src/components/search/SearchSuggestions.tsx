@@ -7,11 +7,9 @@ import Image from 'next/image'
 
 interface SearchSuggestionsProps {
   searchTerm: string
-  isVisible: boolean
   onSelectSuggestion: (suggestion: string) => void
-  onClose: () => void
-  position?: 'top' | 'bottom'
   appearance?: 'light' | 'dark'
+  position?: 'top' | 'bottom'
 }
 
 interface SuggestionItem {
@@ -24,11 +22,9 @@ interface SuggestionItem {
 
 export default function SearchSuggestions({
   searchTerm,
-  isVisible,
   onSelectSuggestion,
-  onClose,
+  appearance = 'light',
   position = 'bottom',
-  appearance = 'dark',
 }: SearchSuggestionsProps) {
   const [suggestions, setSuggestions] = useState<SuggestionItem[]>([])
   const [trendingSearches, setTrendingSearches] = useState<SuggestionItem[]>([])
@@ -105,9 +101,7 @@ export default function SearchSuggestions({
   // Handle keyboard navigation
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
-      if (!isVisible) return
-      
-      const allItems = [...suggestions, ...trendingSearches, ...searchHistory]
+      const allItems = [...suggestions, ...trendingSearches, ...searchHistory, ...aiSuggestions]
       
       switch (e.key) {
         case 'ArrowDown':
@@ -126,19 +120,18 @@ export default function SearchSuggestions({
           if (highlightedIndex >= 0 && highlightedIndex < allItems.length) {
             e.preventDefault()
             onSelectSuggestion(allItems[highlightedIndex].text)
-            onClose()
           }
           break
         case 'Escape':
           e.preventDefault()
-          onClose()
+          setHighlightedIndex(-1)
           break
       }
     }
     
     document.addEventListener('keydown', handleKeyDown)
     return () => document.removeEventListener('keydown', handleKeyDown)
-  }, [isVisible, suggestions, trendingSearches, searchHistory, highlightedIndex, onSelectSuggestion, onClose])
+  }, [suggestions, trendingSearches, searchHistory, highlightedIndex, onSelectSuggestion])
   
   // Auto-scroll to highlighted item
   useEffect(() => {
@@ -160,111 +153,132 @@ export default function SearchSuggestions({
     ...(!searchTerm ? searchHistory.map((item, index) => ({ ...item, dataIndex: suggestions.length + trendingSearches.length + index })) : [])
   ]
   
-  // Generate some AI suggestions based on current context
+  // Generate more AI suggestions based on current context
   const aiSuggestions = !searchTerm ? [
-    { 
-      text: "Departamentos con vista al mar", 
-      type: 'ai' as const,
-      dataIndex: allItems.length
-    },
-    { 
-      text: "Autos familiares económicos", 
-      type: 'ai' as const,
-      dataIndex: allItems.length + 1
-    }
+    { text: "Departamentos con vista al mar", type: 'ai' as const, dataIndex: allItems.length },
+    { text: "Autos familiares económicos", type: 'ai' as const, dataIndex: allItems.length + 1 },
+    { text: "Casas en venta con jardín", type: 'ai' as const, dataIndex: allItems.length + 2 },
+    { text: "Motos usadas buen estado", type: 'ai' as const, dataIndex: allItems.length + 3 },
+    { text: "Oficinas en alquiler centro", type: 'ai' as const, dataIndex: allItems.length + 4 },
+    { text: "Terrenos construcción cerca ciudad", type: 'ai' as const, dataIndex: allItems.length + 5 },
+    { text: "Teléfonos móviles gama alta", type: 'ai' as const, dataIndex: allItems.length + 6 },
+    { text: "Portatiles para estudiantes", type: 'ai' as const, dataIndex: allItems.length + 7 },
+    { text: "Bicicletas montaña aluminio", type: 'ai' as const, dataIndex: allItems.length + 8 },
+    { text: "Muebles oficina ergonómicos", type: 'ai' as const, dataIndex: allItems.length + 9 }
   ] : []
   
   // Add AI suggestions to all items
   const displayItems = [...allItems, ...aiSuggestions]
   
-  // Don't render anything if not visible
-  if (!isVisible) return null
+  // Calculate max height based on content
+  const getMaxHeight = () => {
+    let height = 0;
+    
+    if (loading) height += 50;
+    if (searchTerm && suggestions.length === 0 && !loading) height += 50;
+    if (searchTerm && suggestions.length > 0) height += 40 + Math.min(suggestions.length, 5) * 40;
+    
+    if (!searchTerm) {
+      if (trendingSearches.length > 0) height += 50;
+      if (searchHistory.length > 0) height += 50;
+      if (aiSuggestions.length > 0) height += 50;
+    }
+    
+    return Math.min(height, 350);
+  };
+  
+  if (!searchTerm && !trendingSearches.length && !searchHistory.length && !aiSuggestions.length) return null;
   
   return (
-    <AnimatePresence>
-      {isVisible && (
-        <motion.div
-          ref={suggestionsRef}
-          initial={{ opacity: 0, y: position === 'top' ? -10 : 10 }}
-          animate={{ opacity: 1, y: 0 }}
-          exit={{ opacity: 0, y: position === 'top' ? -10 : 10 }}
-          transition={{ duration: 0.2 }}
-          className={`absolute z-50 ${position === 'top' ? 'bottom-full mb-2' : 'top-full mt-2'} left-0 w-full max-h-[400px] overflow-y-auto rounded-xl shadow-xl ${
-            appearance === 'dark' ? 'bg-slate-800 text-slate-200' : 'bg-white text-slate-900'
-          } border ${appearance === 'dark' ? 'border-slate-700' : 'border-slate-200'}`}
-          style={{ scrollbarWidth: 'thin', scrollbarColor: appearance === 'dark' ? '#334155 #1e293b' : '#e2e8f0 #f8fafc' }}
-        >
-          <div className="p-4 space-y-3">
-            {/* Loading indicator */}
-            {loading && (
-              <div className="flex items-center justify-center py-2">
-                <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-blue-500"></div>
-                <span className="ml-2 text-sm">Buscando sugerencias...</span>
-              </div>
-            )}
-            
-            {/* No results message */}
-            {searchTerm && !loading && suggestions.length === 0 && (
-              <div className="py-3 text-center text-sm opacity-70">
-                No se encontraron sugerencias para &quot;{searchTerm}&quot;
-              </div>
-            )}
-            
-            {/* Autocomplete suggestions */}
-            {searchTerm && suggestions.length > 0 && (
-              <div className="space-y-2">
-                <h3 className="text-xs font-medium uppercase opacity-60">Sugerencias</h3>
-                <ul className="space-y-1">
-                  {suggestions.map((item, index) => (
-                    <li 
-                      key={`suggestion-${index}`}
-                      data-index={index}
-                      onClick={() => onSelectSuggestion(item.text)}
-                      className={`flex items-center gap-2 p-2 rounded-lg cursor-pointer ${
-                        highlightedIndex === index 
-                          ? appearance === 'dark' ? 'bg-slate-700' : 'bg-slate-100'
-                          : 'hover:bg-opacity-10 hover:bg-white'
-                      }`}
-                    >
-                      <Search className="h-4 w-4 opacity-70" />
-                      <span>{item.text}</span>
-                    </li>
-                  ))}
-                </ul>
-              </div>
-            )}
-            
+    <motion.div
+      ref={suggestionsRef}
+      initial={{ opacity: 0, y: position === 'top' ? -10 : 10 }}
+      animate={{ opacity: 1, y: 0 }}
+      exit={{ opacity: 0, y: position === 'top' ? -10 : 10 }}
+      transition={{ duration: 0.15 }}
+      className={`absolute z-50 ${position === 'top' ? 'bottom-full mb-2' : 'top-full mt-2'} left-0 w-full overflow-y-auto rounded-xl shadow-xl ${
+        appearance === 'dark' ? 'bg-slate-800 text-slate-200' : 'bg-white text-slate-900'
+      } border ${appearance === 'dark' ? 'border-slate-700' : 'border-slate-200'}`}
+      style={{ 
+        maxHeight: `${getMaxHeight()}px`,
+        scrollbarWidth: 'thin', 
+        scrollbarColor: appearance === 'dark' ? '#334155 #1e293b' : '#e2e8f0 #f8fafc' 
+      }}
+    >
+      <div className="p-2 space-y-2">
+        {/* Loading indicator */}
+        {loading && (
+          <div className="flex items-center justify-center py-1">
+            <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-blue-500"></div>
+            <span className="ml-2 text-xs">Buscando sugerencias...</span>
+          </div>
+        )}
+        
+        {/* No results message */}
+        {searchTerm && !loading && suggestions.length === 0 && (
+          <div className="py-1 text-center text-xs opacity-70">
+            No se encontraron sugerencias para &quot;{searchTerm}&quot;
+          </div>
+        )}
+        
+        {/* Autocomplete suggestions */}
+        {searchTerm && suggestions.length > 0 && (
+          <div className="space-y-1">
+            <h3 className="text-xs font-medium uppercase opacity-60 px-1">Sugerencias</h3>
+            <ul className="flex flex-wrap gap-1">
+              {suggestions.map((item, index) => (
+                <li 
+                  key={`suggestion-${index}`}
+                  data-index={index}
+                  onClick={() => onSelectSuggestion(item.text)}
+                  className={`flex items-center gap-1 px-2 py-1 rounded-lg cursor-pointer text-xs ${
+                    highlightedIndex === index 
+                      ? appearance === 'dark' ? 'bg-slate-700' : 'bg-slate-100'
+                      : 'hover:bg-opacity-10 hover:bg-white'
+                  }`}
+                >
+                  <Search className="h-3 w-3 opacity-70 flex-shrink-0" />
+                  <span className="truncate">{item.text}</span>
+                </li>
+              ))}
+            </ul>
+          </div>
+        )}
+        
+        {/* Trending, History and AI in a horizontal layout when no search term */}
+        {!searchTerm && (
+          <div className="space-y-2">
             {/* Trending searches */}
-            {!searchTerm && trendingSearches.length > 0 && (
-              <div className="space-y-2">
-                <h3 className="text-xs font-medium uppercase flex items-center gap-1 opacity-60">
+            {trendingSearches.length > 0 && (
+              <div className="space-y-1">
+                <h3 className="text-xs font-medium uppercase flex items-center gap-1 opacity-60 px-1">
                   <TrendingUp className="h-3 w-3" />
                   Tendencias
                 </h3>
-                <ul className="space-y-1">
+                <div className="flex flex-wrap gap-1">
                   {trendingSearches.map((item, index) => (
-                    <li 
+                    <button 
                       key={`trending-${index}`}
                       data-index={suggestions.length + index}
                       onClick={() => onSelectSuggestion(item.text)}
-                      className={`flex items-center gap-2 p-2 rounded-lg cursor-pointer ${
+                      className={`flex items-center gap-1 px-2 py-0.5 rounded-full text-xs cursor-pointer ${
                         highlightedIndex === (suggestions.length + index)
                           ? appearance === 'dark' ? 'bg-slate-700' : 'bg-slate-100'
-                          : 'hover:bg-opacity-10 hover:bg-white'
-                      }`}
+                          : appearance === 'dark' ? 'bg-slate-800 hover:bg-slate-700' : 'bg-slate-50 hover:bg-slate-100'
+                      } border ${appearance === 'dark' ? 'border-slate-700' : 'border-slate-200'}`}
                     >
-                      <TrendingUp className="h-4 w-4 text-rose-500" />
-                      <span>{item.text}</span>
-                    </li>
+                      <TrendingUp className="h-3 w-3 text-rose-500" />
+                      <span className="truncate">{item.text}</span>
+                    </button>
                   ))}
-                </ul>
+                </div>
               </div>
             )}
-            
+
             {/* Search history */}
-            {!searchTerm && searchHistory.length > 0 && (
-              <div className="space-y-2">
-                <div className="flex items-center justify-between">
+            {searchHistory.length > 0 && (
+              <div className="space-y-1">
+                <div className="flex items-center justify-between px-1">
                   <h3 className="text-xs font-medium uppercase flex items-center gap-1 opacity-60">
                     <Clock className="h-3 w-3" />
                     Búsquedas recientes
@@ -278,25 +292,22 @@ export default function SearchSuggestions({
                     aria-label="Borrar historial de búsquedas"
                     title="Borrar historial de búsquedas"
                   >
-                    Borrar historial
+                    Borrar
                   </button>
                 </div>
-                <ul className="space-y-1">
+                <div className="flex flex-wrap gap-1">
                   {searchHistory.map((item, index) => (
-                    <li 
+                    <div 
                       key={`history-${index}`}
                       data-index={suggestions.length + trendingSearches.length + index}
-                      onClick={() => onSelectSuggestion(item.text)}
-                      className={`flex items-center justify-between gap-2 p-2 rounded-lg cursor-pointer ${
+                      className={`flex items-center px-2 py-0.5 rounded-full text-xs cursor-pointer ${
                         highlightedIndex === (suggestions.length + trendingSearches.length + index)
                           ? appearance === 'dark' ? 'bg-slate-700' : 'bg-slate-100'
-                          : 'hover:bg-opacity-10 hover:bg-white'
-                      }`}
+                          : appearance === 'dark' ? 'bg-slate-800 hover:bg-slate-700' : 'bg-slate-50 hover:bg-slate-100'
+                      } border ${appearance === 'dark' ? 'border-slate-700' : 'border-slate-200'}`}
                     >
-                      <div className="flex items-center gap-2">
-                        <Clock className="h-4 w-4 opacity-70" />
-                        <span>{item.text}</span>
-                      </div>
+                      <Clock className="h-3 w-3 opacity-70 mr-1" />
+                      <span className="truncate cursor-pointer" onClick={() => onSelectSuggestion(item.text)}>{item.text}</span>
                       <button
                         onClick={(e) => {
                           e.stopPropagation()
@@ -304,49 +315,49 @@ export default function SearchSuggestions({
                           setSearchHistory(filtered)
                           localStorage.setItem('searchHistory', JSON.stringify(filtered.map(item => item.text)))
                         }}
-                        className="opacity-60 hover:opacity-100"
+                        className="ml-1 opacity-60 hover:opacity-100"
                         aria-label="Eliminar esta búsqueda del historial"
                         title="Eliminar esta búsqueda"
                       >
                         <X className="h-3 w-3" />
                       </button>
-                    </li>
+                    </div>
                   ))}
-                </ul>
+                </div>
               </div>
             )}
             
-            {/* AI suggestions */}
-            {!searchTerm && aiSuggestions.length > 0 && (
-              <div className="space-y-2">
-                <h3 className="text-xs font-medium uppercase flex items-center gap-1 opacity-60">
+            {/* AI suggestions - in a horizontal layout */}
+            {aiSuggestions.length > 0 && (
+              <div className="space-y-1">
+                <h3 className="text-xs font-medium uppercase flex items-center gap-1 opacity-60 px-1">
                   <Sparkles className="h-3 w-3" />
                   Sugerencias inteligentes
                 </h3>
-                <ul className="space-y-1">
+                <div className="flex flex-wrap gap-1">
                   {aiSuggestions.map((item, index) => (
-                    <li 
+                    <button 
                       key={`ai-${index}`}
                       data-index={item.dataIndex}
                       onClick={() => onSelectSuggestion(item.text)}
-                      className={`flex items-center gap-2 p-2 rounded-lg cursor-pointer ${
+                      className={`flex items-center gap-1 px-2 py-0.5 rounded-full text-xs cursor-pointer ${
                         highlightedIndex === item.dataIndex
                           ? appearance === 'dark' ? 'bg-slate-700' : 'bg-slate-100'
-                          : 'hover:bg-opacity-10 hover:bg-white'
-                      }`}
+                          : appearance === 'dark' ? 'bg-slate-800 hover:bg-slate-700' : 'bg-slate-50 hover:bg-slate-100'
+                      } border ${appearance === 'dark' ? 'border-slate-700' : 'border-slate-200'} ${index < 4 ? 'bg-gradient-to-r from-blue-500/10 to-purple-500/10' : ''}`}
                     >
-                      <div className="flex items-center justify-center h-4 w-4 bg-gradient-to-br from-blue-500 to-purple-500 rounded-full">
-                        <Sparkles className="h-3 w-3 text-white" />
+                      <div className="flex-shrink-0 flex items-center justify-center h-3 w-3 bg-gradient-to-br from-blue-500 to-purple-500 rounded-full">
+                        <Sparkles className="h-2 w-2 text-white" />
                       </div>
-                      <span>{item.text}</span>
-                    </li>
+                      <span className="truncate">{item.text}</span>
+                    </button>
                   ))}
-                </ul>
+                </div>
               </div>
             )}
           </div>
-        </motion.div>
-      )}
-    </AnimatePresence>
+        )}
+      </div>
+    </motion.div>
   )
 } 

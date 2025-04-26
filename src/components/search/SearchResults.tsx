@@ -146,7 +146,7 @@ export default function SearchResults({
   onPublicationClick
 }: SearchResultsProps) {
   // Estado para alternar entre vista de cuadrícula y lista
-  const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid')
+  const [viewMode, setViewMode] = useState<'grid' | 'list'>('list')
   // Estado para interacciones del usuario (likes, guardados)
   const [likedItems, setLikedItems] = useState<Set<string>>(new Set())
   const [savedItems, setSavedItems] = useState<Set<string>>(new Set())

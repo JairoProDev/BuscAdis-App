@@ -1,16 +1,18 @@
 'use client';
 
 import { useState, useRef, useEffect } from 'react';
-import { Search, X, Mic, Camera, Sparkles } from 'lucide-react';
+import { Search, X, Mic, Camera, Sparkles, MicOff } from 'lucide-react';
 import { motion } from 'framer-motion';
 import SearchSuggestions from './SearchSuggestions';
 import { useMediaQuery } from '@/hooks/useMediaQuery';
+import { cn } from '@/lib/utils';
+import { Button } from '@/components/ui/Button';
 
 interface EnhancedSearchInputProps {
   initialValue?: string;
   placeholder?: string;
   appearance?: 'light' | 'dark';
-  onSearch: (query: string) => void;
+  onSearch: (query: string, selectedImage?: File | null) => void;
   className?: string;
   autoFocus?: boolean;
   showSuggestions?: boolean;
@@ -18,6 +20,7 @@ interface EnhancedSearchInputProps {
   showVoiceSearch?: boolean;
   showImageSearch?: boolean;
   showAiAssist?: boolean;
+  onFocusChange?: (isFocused: boolean) => void;
 }
 
 export default function EnhancedSearchInput({
@@ -32,13 +35,19 @@ export default function EnhancedSearchInput({
   showVoiceSearch = true,
   showImageSearch = false,
   showAiAssist = true,
+  onFocusChange,
 }: EnhancedSearchInputProps) {
   const [searchTerm, setSearchTerm] = useState(initialValue);
   const [isFocused, setIsFocused] = useState(false);
   const [isRecording, setIsRecording] = useState(false);
   const [isAiThinking, setIsAiThinking] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
-  const isMobile = useMediaQuery('(max-width: 640px)');
+  const [isImageSearchActive, setIsImageSearchActive] = useState(false);
+  const [selectedImage, setSelectedImage] = useState<File | null>(null);
+  const imageInputRef = useRef<HTMLInputElement>(null);
+  
+  // Initialize speech recognition
+  const [recognition, setRecognition] = useState<SpeechRecognitionType | null>(null);
   
   // Focus input on mount if autoFocus is true
   useEffect(() => {
@@ -59,23 +68,66 @@ export default function EnhancedSearchInput({
     return () => document.removeEventListener('mousedown', handleClickOutside);
   }, []);
   
+  // Initialize Web Speech API if available
+  useEffect(() => {
+    if ('webkitSpeechRecognition' in window || 'SpeechRecognition' in window) {
+      const SpeechRecognition = (window as any).webkitSpeechRecognition || (window as any).SpeechRecognition;
+      const recognitionInstance = new SpeechRecognition();
+      recognitionInstance.continuous = false;
+      recognitionInstance.interimResults = true;
+      recognitionInstance.lang = 'es-ES';
+      
+      // Handle recognition results
+      recognitionInstance.onresult = (event: any) => {
+        const transcript = Array.from(event.results)
+          .map((result: any) => result[0].transcript)
+          .join('');
+        
+        setSearchTerm(transcript);
+      };
+      
+      // Handle end of recognition
+      recognitionInstance.onend = () => {
+        setIsRecording(false);
+      };
+      
+      // Handle errors
+      recognitionInstance.onerror = (event: any) => {
+        console.error('Error with speech recognition:', event.error);
+        setIsRecording(false);
+      };
+      
+      setRecognition(recognitionInstance);
+    }
+  }, []);
+  
+  // Reset component when initialValue changes
+  useEffect(() => {
+    setSearchTerm(initialValue);
+  }, [initialValue]);
+  
+  // Trigger onFocusChange when focus state changes
+  useEffect(() => {
+    if (onFocusChange) {
+      onFocusChange(isFocused);
+    }
+  }, [isFocused, onFocusChange]);
+  
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (searchTerm.trim()) {
-      onSearch(searchTerm);
+      onSearch(searchTerm, selectedImage);
       
       // Save to search history
       try {
-        const savedHistory = localStorage.getItem('searchHistory');
-        let history: string[] = savedHistory ? JSON.parse(savedHistory) : [];
+        const savedHistory = localStorage.getItem('searchHistory') || '[]';
+        const parsedHistory = JSON.parse(savedHistory);
         
-        // Add only if it doesn't exist and limit to 10 items
-        if (!history.includes(searchTerm)) {
-          history = [searchTerm, ...history].slice(0, 10);
-          localStorage.setItem('searchHistory', JSON.stringify(history));
-        }
-      } catch (e) {
-        console.error('Error saving search history:', e);
+        // Add to beginning of array and keep only unique values
+        const newHistory = [searchTerm, ...parsedHistory.filter((item: string) => item !== searchTerm)].slice(0, 10);
+        localStorage.setItem('searchHistory', JSON.stringify(newHistory));
+      } catch (error) {
+        console.error('Error saving to search history:', error);
       }
       
       // Don't close suggestions right away in case the user wants to 
@@ -85,49 +137,56 @@ export default function EnhancedSearchInput({
   
   const handleClearInput = () => {
     setSearchTerm('');
+    setSelectedImage(null);
     if (inputRef.current) {
       inputRef.current.focus();
     }
   };
   
   const handleVoiceSearch = () => {
-    if ('webkitSpeechRecognition' in window || 'SpeechRecognition' in window) {
-      setIsRecording(!isRecording);
-      
-      // Simulation of voice recognition
-      if (!isRecording) {
-        setTimeout(() => {
-          const simulatedText = "departamentos en alquiler";
-          setSearchTerm(simulatedText);
-          setIsRecording(false);
-          
-          // Auto-submit after recognition
-          setTimeout(() => {
-            onSearch(simulatedText);
-          }, 1000);
-        }, 2000);
-      }
-    } else {
-      alert("Lo sentimos, tu navegador no soporta reconocimiento de voz");
+    if (isRecording) {
+      setIsRecording(false);
+      return;
+    }
+    
+    if (!recognition) return;
+    
+    try {
+      setIsRecording(true);
+      recognition.start();
+    } catch (error) {
+      console.error('Speech recognition error:', error);
+      setIsRecording(false);
+      alert('Hubo un error al iniciar el reconocimiento de voz. Por favor intenta nuevamente.');
     }
   };
   
   const handleImageSearch = () => {
-    // Simulate image upload for search
-    const fileInput = document.createElement('input');
-    fileInput.type = 'file';
-    fileInput.accept = 'image/*';
-    fileInput.click();
+    setIsImageSearchActive(!isImageSearchActive);
+    if (!isImageSearchActive && imageInputRef.current) {
+      imageInputRef.current.click();
+    } else {
+      setSelectedImage(null);
+    }
+  };
+  
+  const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
     
-    fileInput.onchange = () => {
-      if (fileInput.files && fileInput.files[0]) {
-        // Simulate processing and searching with the image
-        setTimeout(() => {
-          setSearchTerm("búsqueda por imagen");
-          onSearch("búsqueda por imagen");
-        }, 1000);
-      }
-    };
+    // Check file size (max 5MB)
+    if (file.size > 5 * 1024 * 1024) {
+      alert('La imagen es demasiado grande. Por favor sube una imagen de menos de 5MB.');
+      return;
+    }
+    
+    // Check file type
+    if (!file.type.startsWith('image/')) {
+      alert('Por favor sube un archivo de imagen válido (JPG, PNG, etc.).');
+      return;
+    }
+    
+    setSelectedImage(file);
   };
   
   const handleAiAssist = () => {
@@ -148,7 +207,7 @@ export default function EnhancedSearchInput({
       
       // Auto-submit after a short delay
       setTimeout(() => {
-        onSearch(randomSuggestion);
+        onSearch(randomSuggestion, null);
       }, 500);
     }, 1500);
   };
@@ -166,144 +225,195 @@ export default function EnhancedSearchInput({
     : 'border-slate-200 focus-within:border-slate-300';
 
   return (
-    <div className={`relative ${className}`}>
-      <form onSubmit={handleSubmit} className="w-full">
-        <div className="relative group">
-          {/* Glow effect on focus */}
-          <div className="absolute -inset-0.5 bg-gradient-to-r from-rose-500 to-purple-500 rounded-full opacity-0 group-focus-within:opacity-70 blur-sm transition duration-300"></div>
-          
-          {/* Main input container */}
-          <div className={`relative flex items-center ${bgColorClass} rounded-full border ${borderClass} shadow-sm transition-all duration-300 focus-within:shadow-lg`}>
-            {/* Search icon */}
-            <div className="flex-shrink-0 pl-4">
-              <Search className={`h-5 w-5 ${appearance === 'dark' ? 'text-slate-400' : 'text-slate-500'}`} />
-            </div>
-            
-            {/* Search input */}
-            <input
-              ref={inputRef}
-              type="text"
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              onFocus={() => setIsFocused(true)}
-              placeholder={placeholder}
-              className={`flex-grow py-3 px-3 bg-transparent border-0 focus:ring-0 focus:outline-none ${textColorClass}`}
-              disabled={isRecording || isAiThinking}
+    <div className={cn('relative w-full', className)}>
+      <form
+        className={cn(
+          'flex items-center bg-white rounded-lg ring-1 ring-slate-200 focus-within:ring-blue-500 transition-all overflow-hidden',
+          isFocused && 'ring-blue-500 shadow-sm',
+          appearance === 'dark' && 'bg-slate-800 ring-slate-700 focus-within:ring-blue-500',
+          className
+        )}
+        onSubmit={handleSubmit}
+      >
+        <input
+          ref={inputRef}
+          type="text"
+          value={searchTerm}
+          onChange={(e) => setSearchTerm(e.target.value)}
+          onFocus={() => setIsFocused(true)}
+          onBlur={() => setIsFocused(false)}
+          className={cn(
+            'flex-1 py-2 px-3 outline-none bg-transparent',
+            appearance === 'dark' && 'text-white placeholder:text-slate-400'
+          )}
+          placeholder={placeholder}
+          aria-label="Search"
+        />
+        
+        {/* Show selected image thumbnail */}
+        {selectedImage && (
+          <div className="relative mr-2">
+            <img 
+              src={URL.createObjectURL(selectedImage)} 
+              alt="Imagen para búsqueda" 
+              className="h-8 w-8 object-cover rounded"
             />
-            
-            {/* Clear button */}
-            {searchTerm && (
-              <button
-                type="button"
-                onClick={handleClearInput}
-                className={`flex-shrink-0 ${appearance === 'dark' ? 'text-slate-400 hover:text-slate-300' : 'text-slate-500 hover:text-slate-700'}`}
-                aria-label="Borrar texto de búsqueda"
-                title="Borrar"
-              >
-                <X className="h-5 w-5" />
-              </button>
-            )}
-            
-            {/* AI assist button */}
-            {showAiAssist && !isRecording && !isAiThinking && (
-              <button
-                type="button"
-                onClick={handleAiAssist}
-                className={`flex-shrink-0 mx-1 p-1.5 rounded-full ${appearance === 'dark' ? 'text-purple-400 hover:text-purple-300 hover:bg-slate-700' : 'text-purple-600 hover:text-purple-700 hover:bg-slate-100'}`}
-                aria-label="Sugerencia de IA"
-                title="Obtener sugerencia inteligente"
-              >
-                <Sparkles className="h-5 w-5" />
-              </button>
-            )}
-            
-            {/* AI thinking indicator */}
-            {isAiThinking && (
-              <div className="flex-shrink-0 mx-2">
-                <motion.div 
-                  animate={{ rotate: 360 }} 
-                  transition={{ duration: 2, repeat: Infinity, ease: 'linear' }}
-                  className="h-5 w-5 rounded-full border-2 border-purple-500 border-t-transparent"
-                />
-              </div>
-            )}
-            
-            {/* Voice search button */}
-            {showVoiceSearch && !isRecording && (
-              <button
-                type="button"
-                onClick={handleVoiceSearch}
-                className={`flex-shrink-0 mx-1 p-1.5 rounded-full ${appearance === 'dark' ? 'text-rose-400 hover:text-rose-300 hover:bg-slate-700' : 'text-rose-500 hover:text-rose-600 hover:bg-slate-100'}`}
-                aria-label="Búsqueda por voz"
-                title="Buscar con tu voz"
-              >
-                <Mic className="h-5 w-5" />
-              </button>
-            )}
-            
-            {/* Voice recording indicator */}
-            {isRecording && (
-              <div className="flex-shrink-0 mx-2 flex items-center">
-                <motion.div 
-                  animate={{ scale: [1, 1.2, 1] }} 
-                  transition={{ duration: 1.5, repeat: Infinity }}
-                  className="h-3 w-3 bg-rose-500 rounded-full mr-2"
-                />
-                <span className="text-sm text-rose-400">Grabando...</span>
-                <button
-                  type="button"
-                  onClick={() => setIsRecording(false)}
-                  className="ml-2 text-slate-400 hover:text-slate-300"
-                  aria-label="Detener grabación"
-                  title="Detener"
-                >
-                  <X className="h-4 w-4" />
-                </button>
-              </div>
-            )}
-            
-            {/* Image search button */}
-            {showImageSearch && !isRecording && (
-              <button
-                type="button"
-                onClick={handleImageSearch}
-                className={`flex-shrink-0 mx-1 p-1.5 rounded-full ${appearance === 'dark' ? 'text-cyan-400 hover:text-cyan-300 hover:bg-slate-700' : 'text-cyan-500 hover:text-cyan-600 hover:bg-slate-100'}`}
-                aria-label="Búsqueda por imagen"
-                title="Buscar con una imagen"
-              >
-                <Camera className="h-5 w-5" />
-              </button>
-            )}
-            
-            {/* Search button */}
             <button
-              type="submit"
-              className={`flex-shrink-0 ml-1 mr-1 ${isMobile ? 'p-2' : 'p-2 sm:px-4 sm:py-2'} bg-gradient-to-r from-rose-500 to-pink-600 text-white rounded-full hover:shadow-md transition-shadow flex items-center justify-center`}
-              aria-label="Buscar"
-              title="Buscar"
-              disabled={isRecording || isAiThinking}
+              type="button"
+              onClick={() => setSelectedImage(null)}
+              className="absolute -top-1 -right-1 h-4 w-4 bg-slate-800 rounded-full flex items-center justify-center"
+              aria-label="Eliminar imagen"
+              title="Eliminar imagen"
             >
-              <Search className="h-5 w-5" />
-              {!isMobile && <span className="ml-1 hidden sm:inline-block">Buscar</span>}
+              <X className="h-3 w-3 text-white" />
             </button>
           </div>
-        </div>
+        )}
+        
+        {/* Input for file upload */}
+        <input
+          ref={imageInputRef}
+          type="file"
+          accept="image/*"
+          className="hidden"
+          onChange={handleImageUpload}
+          aria-label="Subir imagen para búsqueda"
+          title="Subir imagen para búsqueda"
+        />
+        
+        {searchTerm && (
+          <button
+            type="button"
+            onClick={handleClearInput}
+            className={cn(
+              'p-2 focus:outline-none',
+              appearance === 'dark' ? 'text-slate-400 hover:text-white' : 'text-slate-400 hover:text-slate-700'
+            )}
+            aria-label="Clear search"
+          >
+            <X className="h-5 w-5" />
+          </button>
+        )}
+        
+        {showVoiceSearch && (
+          <button
+            type="button"
+            onClick={handleVoiceSearch}
+            className={cn(
+              'p-2 focus:outline-none',
+              isRecording ? 'text-red-500' : appearance === 'dark' ? 'text-slate-400 hover:text-white' : 'text-slate-400 hover:text-slate-700'
+            )}
+            aria-label={isRecording ? 'Stop recording' : 'Voice search'}
+            title={isRecording ? 'Detener grabación' : 'Búsqueda por voz'}
+          >
+            {isRecording ? <MicOff className="h-5 w-5 animate-pulse" /> : <Mic className="h-5 w-5" />}
+          </button>
+        )}
+        
+        {showImageSearch && (
+          <button 
+            type="button" 
+            onClick={handleImageSearch}
+            className="flex items-center justify-center h-8 w-8 rounded-full hover:bg-slate-100/10"
+            aria-label="Buscar por imagen"
+            title="Buscar por imagen"
+          >
+            <Camera className={cn("h-4 w-4", isImageSearchActive ? "text-blue-400" : "text-slate-400")} />
+          </button>
+        )}
+        
+        {showAiAssist && !isRecording && !isAiThinking && (
+          <button
+            type="button"
+            onClick={handleAiAssist}
+            className={cn(
+              'p-2 focus:outline-none',
+              appearance === 'dark' ? 'text-purple-400 hover:text-purple-300' : 'text-purple-500 hover:text-purple-700'
+            )}
+            aria-label="AI search assistant"
+            title="Asistente de búsqueda AI"
+          >
+            <Sparkles className="h-5 w-5" />
+          </button>
+        )}
+        
+        {/* AI thinking indicator */}
+        {isAiThinking && (
+          <div className="flex-shrink-0 mx-2">
+            <motion.div 
+              animate={{ rotate: 360 }} 
+              transition={{ duration: 2, repeat: Infinity, ease: 'linear' }}
+              className="h-5 w-5 rounded-full border-2 border-purple-500 border-t-transparent"
+            />
+          </div>
+        )}
+        
+        <Button
+          type="submit"
+          size="sm"
+          className={cn(
+            'px-4 py-2 h-full rounded-l-none',
+            appearance === 'dark' ? 'bg-slate-700 hover:bg-slate-600 text-white' : ''
+          )}
+          variant={appearance === 'dark' ? 'default' : 'default'}
+        >
+          <Search className="h-4 w-4 mr-2" />
+          Buscar
+        </Button>
       </form>
       
-      {/* Search suggestions dropdown */}
-      {showSuggestions && (
+      {/* Search suggestions */}
+      {isFocused && showSuggestions && (
         <SearchSuggestions
           searchTerm={searchTerm}
-          isVisible={isFocused}
-          onSelectSuggestion={(suggestion) => {
-            setSearchTerm(suggestion);
-            onSearch(suggestion);
+          onSelectSuggestion={(text) => {
+            setSearchTerm(text);
+            if (onSearch) {
+              onSearch(text, null);
+            }
           }}
-          onClose={() => setIsFocused(false)}
+          appearance={appearance === 'dark' ? 'dark' : 'light'}
           position={suggestionsPosition}
-          appearance={appearance}
         />
       )}
     </div>
   );
+}
+
+// Add type declaration for Web Speech API
+declare global {
+  interface Window {
+    SpeechRecognition: SpeechRecognitionConstructor;
+    webkitSpeechRecognition: SpeechRecognitionConstructor;
+  }
+}
+
+// Define types for Speech Recognition
+interface SpeechRecognitionConstructor {
+  new (): SpeechRecognitionType;
+}
+
+interface SpeechRecognitionType {
+  continuous: boolean;
+  interimResults: boolean;
+  lang: string;
+  start(): void;
+  stop(): void;
+  onresult: (event: SpeechRecognitionEvent) => void;
+  onend: () => void;
+  onerror: (event: SpeechRecognitionError) => void;
+}
+
+interface SpeechRecognitionEvent {
+  results: {
+    [index: number]: {
+      [index: number]: {
+        transcript: string;
+      };
+    };
+  };
+}
+
+interface SpeechRecognitionError {
+  error: string;
 } 
