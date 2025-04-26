@@ -3,6 +3,7 @@
 import React from 'react';
 import { motion } from 'framer-motion';
 import { SubSubcategoryListProps } from '../types';
+import { getCategoryColor } from '../utils';
 
 const SubSubcategoryList: React.FC<SubSubcategoryListProps> = ({
   subsubcategories,
@@ -45,19 +46,20 @@ const SubSubcategoryList: React.FC<SubSubcategoryListProps> = ({
         {subsubcategories.map((subsubcategory) => {
           const isActive = subsubcategory.slug === activeSubSubcategory;
           const emoji = subsubcategory.emoji || '🔹';
+          const color = getCategoryColor(subsubcategory.slug);
           
           return (
             <motion.button
               key={subsubcategory.id}
-              className={`inline-flex items-center py-1 px-3 text-xs rounded-md transition-colors ${
+              className={`inline-flex items-center py-1.5 px-3 text-sm rounded-md transition-colors ${
                 isActive
-                  ? 'bg-indigo-500 text-white'
-                  : 'bg-slate-800 text-white hover:bg-slate-700'
+                  ? `bg-${color}-500 text-white`
+                  : `bg-white dark:bg-slate-800 text-gray-700 dark:text-white hover:bg-gray-100 dark:hover:bg-slate-700 border border-gray-200 dark:border-slate-700`
               }`}
               onClick={() => onSubSubcategoryClick(subsubcategory)}
               variants={itemVariants}
             >
-              <span className="mr-1">{emoji}</span>
+              <span className="mr-1.5">{emoji}</span>
               <span>{subsubcategory.name}</span>
             </motion.button>
           );

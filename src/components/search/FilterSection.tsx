@@ -1,71 +1,109 @@
 'use client'
 
-import React from 'react'
-import { Filter, FilterValue } from '@/types/filters'
+import React, { useState } from 'react'
+import { motion, AnimatePresence } from 'framer-motion'
+import { Badge } from '@/components/ui/Badge'
 import { Slider } from '@/components/ui/slider'
 import { 
   Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
+  SelectContent, 
+  SelectItem, 
+  SelectTrigger, 
   SelectValue 
 } from '@/components/ui/Select'
-import { Badge } from '@/components/ui/Badge'
 import { Switch } from '@/components/ui/switch'
 import { Label } from '@/components/ui/label'
+import { ChevronDownIcon, ChevronUpIcon } from '@heroicons/react/24/outline'
+import { FilterOption, FilterType, FilterValue } from '@/types/filters'
 
 interface FilterSectionProps {
-  filters: Filter[]
-  activeFilters: FilterValue
-  onFilterChange: (filterId: string, value: any) => void
+  title: string
+  description?: string
+  type: FilterType
+  options?: FilterOption[]
+  min?: number
+  max?: number
+  step?: number
+  value: any
+  onChange: (value: any) => void
+  onApply?: () => void
+  className?: string
+  activeFilters?: FilterValue
 }
 
 export default function FilterSection({
-  filters,
+  title,
+  description,
+  type,
+  options = [],
+  min = 0,
+  max = 100,
+  step = 1,
+  value,
+  onChange,
+  onApply,
+  className = '',
   activeFilters,
-  onFilterChange
 }: FilterSectionProps) {
-  // Render different filter types
-  const renderFilter = (filter: Filter) => {
-    const value = activeFilters[filter.id]
+  const [isOpen, setIsOpen] = useState(false)
+  
+  // Determinar si hay valores seleccionados
+  const hasSelection = () => {
+    if (!value) return false
     
-    switch (filter.type) {
+    switch (type) {
+      case 'range':
+        // Verificar si el rango está en su valor por defecto
+        return Array.isArray(value) && (value[0] !== min || value[1] !== max)
+      case 'select':
+        return !!value
+      case 'multiselect':
+        return Array.isArray(value) && value.length > 0
+      case 'toggle':
+        return value === true
+      default:
+        return false
+    }
+  }
+  
+  // Renderizar el contenido basado en el tipo de filtro
+  const renderFilterContent = () => {
+    switch (type) {
       case 'range':
         return (
-          <div className="space-y-2" key={filter.id}>
-            <div className="flex justify-between">
-              <Label htmlFor={filter.id} className="text-sm font-medium">{filter.label}</Label>
-              <span className="text-sm text-gray-500">
-                {filter.format ? filter.format(value?.[0] || filter.min || 0) : value?.[0] || filter.min || 0} - 
-                {filter.format ? filter.format(value?.[1] || filter.max || 100) : value?.[1] || filter.max || 100}
-              </span>
-            </div>
+          <div className="pt-2 pb-4 px-2">
             <Slider
-              id={filter.id}
-              defaultValue={[value?.[0] || filter.min || 0, value?.[1] || filter.max || 100]}
-              min={filter.min || 0}
-              max={filter.max || 100}
-              step={filter.step || 1}
-              onValueChange={(newValue) => onFilterChange(filter.id, newValue)}
-              className="mt-2"
+              min={min}
+              max={max}
+              step={step}
+              value={value || [min, max]}
+              onValueChange={onChange}
+              className="my-6"
             />
+            <div className="flex justify-between text-sm text-slate-300 mt-1">
+              <div>
+                {value?.[0] !== undefined ? value[0].toLocaleString() : min.toLocaleString()}
+              </div>
+              <div>
+                {value?.[1] !== undefined ? value[1].toLocaleString() : max.toLocaleString()}
+              </div>
+            </div>
           </div>
         )
         
       case 'select':
         return (
-          <div className="space-y-1" key={filter.id}>
-            <Label htmlFor={filter.id} className="text-sm font-medium">{filter.label}</Label>
+          <div className="p-3">
             <Select
               value={value || ''}
-              onValueChange={(newValue) => onFilterChange(filter.id, newValue)}
+              onValueChange={onChange}
             >
-              <SelectTrigger id={filter.id} className="w-full">
-                <SelectValue placeholder="Seleccionar" />
+              <SelectTrigger className="w-full">
+                <SelectValue placeholder="Seleccionar opción" />
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="">Todos</SelectItem>
-                {filter.options?.map((option) => (
+                {options.map((option) => (
                   <SelectItem key={option.value} value={option.value}>
                     {option.label}
                   </SelectItem>
@@ -76,39 +114,61 @@ export default function FilterSection({
         )
         
       case 'multiselect':
-        const selectedValues = value || []
         return (
-          <div className="space-y-2" key={filter.id}>
-            <Label className="text-sm font-medium">{filter.label}</Label>
-            <div className="flex flex-wrap gap-2 mt-1">
-              {filter.options?.map((option) => (
-                <Badge
-                  key={option.value}
-                  variant={selectedValues.includes(option.value) ? "default" : "outline"}
-                  className="cursor-pointer"
-                  onClick={() => {
-                    const newValues = selectedValues.includes(option.value)
-                      ? selectedValues.filter(v => v !== option.value)
-                      : [...selectedValues, option.value]
-                    onFilterChange(filter.id, newValues)
-                  }}
-                >
-                  {option.label}
-                </Badge>
-              ))}
+          <div className="p-3 space-y-2">
+            <div className="flex flex-wrap gap-2">
+              {options.map((option) => {
+                const isSelected = Array.isArray(value) && value.includes(option.value)
+                
+                return (
+                  <Badge
+                    key={option.value}
+                    variant={isSelected ? "default" : "outline"}
+                    className={`cursor-pointer ${
+                      isSelected 
+                        ? 'bg-teal-500 hover:bg-teal-600' 
+                        : 'bg-slate-800 hover:bg-slate-700'
+                    }`}
+                    onClick={() => {
+                      if (!Array.isArray(value)) {
+                        onChange([option.value])
+                        return
+                      }
+                      
+                      if (isSelected) {
+                        onChange(value.filter(v => v !== option.value))
+                      } else {
+                        onChange([...value, option.value])
+                      }
+                    }}
+                  >
+                    {option.label}
+                  </Badge>
+                )
+              })}
             </div>
+            
+            {Array.isArray(value) && value.length > 0 && (
+              <button
+                onClick={() => onChange([])}
+                className="text-xs text-slate-400 hover:text-slate-300"
+              >
+                Limpiar selección
+              </button>
+            )}
           </div>
         )
         
       case 'toggle':
         return (
-          <div className="flex items-center justify-between space-x-2" key={filter.id}>
-            <Label htmlFor={filter.id} className="text-sm font-medium">{filter.label}</Label>
+          <div className="p-3 flex items-center justify-between">
+            <span className="text-sm text-slate-300">
+              {description || 'Activar/Desactivar'}
+            </span>
             <Switch
-              id={filter.id}
               checked={!!value}
-              onCheckedChange={(checked) => onFilterChange(filter.id, checked)}
-              aria-label={filter.label}
+              onCheckedChange={onChange}
+              className="data-[state=checked]:bg-teal-500"
             />
           </div>
         )
@@ -117,10 +177,51 @@ export default function FilterSection({
         return null
     }
   }
-
+  
   return (
-    <div className="space-y-4">
-      {filters.map(renderFilter)}
+    <div className={`bg-slate-900 border border-slate-800 rounded-lg overflow-hidden ${className}`}>
+      <button
+        onClick={() => setIsOpen(!isOpen)}
+        className="w-full px-4 py-3 flex items-center justify-between text-left"
+      >
+        <div className="flex items-center">
+          <span className="font-medium text-white">{title}</span>
+          {hasSelection() && (
+            <Badge className="ml-2 bg-teal-500 text-xs py-0.5">Activo</Badge>
+          )}
+        </div>
+        
+        {isOpen ? (
+          <ChevronUpIcon className="w-5 h-5 text-slate-400" />
+        ) : (
+          <ChevronDownIcon className="w-5 h-5 text-slate-400" />
+        )}
+      </button>
+      
+      <AnimatePresence>
+        {isOpen && (
+          <motion.div
+            initial={{ height: 0, opacity: 0 }}
+            animate={{ height: 'auto', opacity: 1 }}
+            exit={{ height: 0, opacity: 0 }}
+            transition={{ duration: 0.2 }}
+            className="border-t border-slate-800"
+          >
+            {renderFilterContent()}
+            
+            {onApply && (
+              <div className="px-3 pb-3 flex justify-end">
+                <button
+                  onClick={onApply}
+                  className="bg-teal-500 hover:bg-teal-600 text-white py-1.5 px-3 rounded-md text-sm transition-colors"
+                >
+                  Aplicar
+                </button>
+              </div>
+            )}
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   )
 } 

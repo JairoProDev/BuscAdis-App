@@ -262,7 +262,7 @@ export default function SearchLayout({
   // Renderizar selector de categorías con estilo mejorado
   const renderCategorySelector = () => {
     return (
-      <div className="mb-4 bg-slate-800/60 rounded-xl p-3 border border-slate-700/50 shadow-sm">
+      <div className="mb-4 p3 ">
         <div className="flex flex-col space-y-2">
           <CategorySelector
             activeCategory={category}

@@ -3,8 +3,9 @@
 import React from 'react';
 import { motion } from 'framer-motion';
 import { Category } from '../types';
-import CategoryCard from './CategoryCard';
+import { CategoryCard } from './CategoryCard';
 import { StarIcon } from '@heroicons/react/24/outline';
+import { getCategoryImage } from '../utils';
 
 interface GridViewProps {
   categories: Category[];
@@ -62,11 +63,11 @@ const GridView: React.FC<GridViewProps> = ({
                 id: 'all',
                 slug: 'all',
                 name: 'Todas',
-                icon: StarIcon
+                image: getCategoryImage('default') // Adding an image for the "All" option
               }}
               isActive={activeCategory === 'all' || !activeCategory}
               onClick={() => onCategorySelect('all')}
-              showImage={false}
+              variant="square"
             />
           </motion.div>
         )}
@@ -82,7 +83,7 @@ const GridView: React.FC<GridViewProps> = ({
               category={category}
               isActive={category.slug === activeCategory}
               onClick={() => onCategorySelect(category.slug)}
-              showImage={true}
+              variant="square"
             />
           </motion.div>
         ))}

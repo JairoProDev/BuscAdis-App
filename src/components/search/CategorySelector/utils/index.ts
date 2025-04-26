@@ -50,8 +50,9 @@ export const CATEGORY_COLORS: Record<string, string> = {
   'all': 'gray'
 };
 
-// Imágenes para categorías principales (SOLO PARA CATEGORÍAS PRINCIPALES)
+// Mapeo de imágenes para categorías principales
 export const CATEGORY_IMAGES: Record<string, string> = {
+  // Valores actualizados utilizando las imágenes de /public/images/categories/
   'empleos': '/images/categories/empleos.jpg',
   'inmuebles': '/images/categories/inmuebles.jpg',
   'vehiculos': '/images/categories/vehiculos.jpg',
@@ -60,6 +61,7 @@ export const CATEGORY_IMAGES: Record<string, string> = {
   'eventos': '/images/categories/eventos.jpg',
   'negocios': '/images/categories/negocios.jpg',
   'comunidad': '/images/categories/comunidad.jpg',
+  'all': '/images/categories/default.jpg',
   'default': '/images/categories/default.jpg'
 };
 

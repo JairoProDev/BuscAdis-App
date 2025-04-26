@@ -6,9 +6,9 @@ import Image from 'next/image'
 import Link from 'next/link'
 import { ChevronRightIcon, HomeIcon } from '@heroicons/react/24/outline'
 import LoadingSpinner from '@/components/ui/LoadingSpinner'
-import { ScrollArea, ScrollBar } from '@/components/ui/scroll-area'
-import { Skeleton } from '@/components/ui/skeleton'
-import { Badge } from '@/components/ui/badge'
+import { ScrollArea } from '@/components/ui/scroll-area'
+import { Skeleton } from '@/components/ui/Skeleton'
+import { Badge } from '@/components/ui/Badge'
 
 // Importar las utilidades de categorías
 import { 
@@ -66,7 +66,6 @@ export default function CategorySelector({
   const [subcategories, setSubcategories] = useState<Subcategory[]>([])
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState('')
-  const [showMore, setShowMore] = useState(false)
   
   // Encontrar la categoría seleccionada
   useEffect(() => {
@@ -270,198 +269,178 @@ export default function CategorySelector({
     }
   }
   
-  // Renderizar interfaz horizontal o vertical estándar
+  // Renderizar selector horizontal con imágenes
   const renderHorizontalSelector = () => {
-    if (categories.length === 0) {
-      return <div className="flex items-center justify-center"><LoadingSpinner /></div>
-    }
-
-    const visibleCategories = expanded 
-      ? categories 
-      : categories.slice(0, maxVisible)
-
-    const hasMoreCategories = categories.length > maxVisible;
-
-    return (
-      <div className="flex flex-col">
-        {/* Breadcrumbs en formato horizontal - movidos arriba */}
-        {breadcrumbs.length > 0 && (
-          <div className="flex items-center gap-2 mb-2">
-            {renderBreadcrumbs()}
-          </div>
-        )}
-        
-        <div className="overflow-x-auto scrollbar-hide">
-          <div className="flex items-center min-w-max gap-1 mt-1">
-            {/* Opción "Todos" */}
+    const renderCategories = () => {
+      const visibleCount = expanded ? categories.length : Math.min(maxVisible, categories.length);
+      const visibleCategories = categories.slice(0, visibleCount);
+      
+      return (
+        <ScrollArea className="w-full pb-4" orientation="horizontal">
+          <div className="flex space-x-2 px-1 py-1">
+            {/* Opción "Todas las categorías" */}
             {showAllOption && (
               <button
                 onClick={() => {
-                  setSelectedCategory(null)
-                  setSelectedSubcategory(null)
-                  setSelectedSubSubcategory(null)
-                  setBreadcrumbs([])
-                  
                   if (onCategoryChange) onCategoryChange('')
-                  if (onSubcategoryChange) onSubcategoryChange('')
-                  if (onSubSubcategoryChange) onSubSubcategoryChange('')
+                  // Navegar a la página de búsqueda
+                  if (typeof window !== 'undefined') {
+                    window.history.pushState({}, '', '/buscar')
+                  }
                 }}
-                className={`flex items-center justify-center py-2 px-3 rounded-lg text-sm transition-colors ${
-                  !activeCategory 
-                    ? 'bg-teal-600/70 text-white font-medium'
-                    : 'text-slate-300 hover:bg-slate-800/60'
+                className={`flex flex-col items-center min-w-[90px] max-w-[90px] py-3 px-2 rounded-lg transition-all ${
+                  !activeCategory
+                    ? 'bg-gradient-to-b from-slate-700 to-slate-800 border border-slate-600 shadow-md'
+                    : 'bg-slate-800 hover:bg-slate-700 border border-slate-700'
                 }`}
               >
-                <span className="flex items-center justify-center w-8 h-8 rounded-lg bg-slate-800 text-teal-500">
-                  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-5 h-5">
-                    <path fillRule="evenodd" d="M3 6a3 3 0 013-3h2.25a3 3 0 013 3v2.25a3 3 0 01-3 3H6a3 3 0 01-3-3V6zm9.75 0a3 3 0 013-3H18a3 3 0 013 3v2.25a3 3 0 01-3 3h-2.25a3 3 0 01-3-3V6zM3 15.75a3 3 0 013-3h2.25a3 3 0 013 3V18a3 3 0 01-3 3H6a3 3 0 01-3-3v-2.25zm9.75 0a3 3 0 013-3H18a3 3 0 013 3V18a3 3 0 01-3 3h-2.25a3 3 0 01-3-3v-2.25z" clipRule="evenodd" />
-                  </svg>
-                </span>
-                <span className="ml-2">Todos</span>
-                {showCounts && (
-                  <span className="ml-2 text-xs py-0.5 px-2 rounded-full bg-slate-700/50 text-slate-300">
-                    6605
-                  </span>
-                )}
+                <div className="w-12 h-12 mb-2 flex items-center justify-center bg-slate-700 rounded-lg">
+                  <HomeIcon className="w-6 h-6 text-teal-400" />
+                </div>
+                <span className="text-xs font-medium whitespace-nowrap text-center text-white">Todos</span>
               </button>
             )}
             
-            {/* Lista de categorías */}
+            {/* Categorías */}
             {visibleCategories.map((category) => (
               <button
                 key={category.id}
                 onClick={() => handleCategoryClick(category.slug)}
-                className={`flex items-center justify-center py-2 px-3 rounded-lg text-sm transition-colors ${
-                  activeCategory === category.slug 
-                    ? 'bg-teal-600/70 text-white font-medium'
-                    : 'text-slate-300 hover:bg-slate-800/60'
+                className={`flex flex-col items-center min-w-[90px] max-w-[90px] py-3 px-2 rounded-lg transition-all ${
+                  activeCategory === category.slug
+                    ? 'bg-gradient-to-b from-slate-700 to-slate-800 border border-slate-600 shadow-md'
+                    : 'bg-slate-800 hover:bg-slate-700 border border-slate-700'
                 }`}
               >
-                <span className="flex items-center justify-center w-8 h-8 rounded-lg bg-slate-800 text-teal-500">
-                  {category.icon && typeof category.icon === 'string' && (
-                    <Image 
-                      src={category.icon} 
-                      alt={category.name} 
-                      width={24} 
-                      height={24} 
-                      className="w-5 h-5"
-                    />
-                  )}
+                <div className="w-12 h-12 mb-2 rounded-lg overflow-hidden relative">
+                  <Image
+                    src={`/images/categories/${category.slug}.jpg`}
+                    alt={category.name}
+                    fill
+                    sizes="48px"
+                    className="object-cover"
+                    onError={(e) => {
+                      // Fallback a la imagen predeterminada
+                      (e.target as HTMLImageElement).src = '/images/categories/default.jpg';
+                    }}
+                  />
+                </div>
+                <span className="text-xs font-medium whitespace-nowrap text-center text-white">
+                  {category.name}
                 </span>
-                <span className="ml-2">{category.name}</span>
                 {showCounts && category.count && (
-                  <span className="ml-2 text-xs py-0.5 px-2 rounded-full bg-slate-700/50 text-slate-300">
-                    {category.count}
+                  <span className="text-[10px] text-slate-400">
+                    {category.count.toLocaleString()}
                   </span>
                 )}
               </button>
             ))}
             
-            {/* Botón para mostrar/ocultar más categorías */}
-            {hasMoreCategories && (
+            {/* Botón "Ver más" si hay más categorías */}
+            {categories.length > maxVisible && !expanded && (
               <button
-                onClick={() => setExpanded(!expanded)}
-                className="flex items-center justify-center py-2 px-3 rounded-lg text-sm text-slate-300 hover:bg-slate-800/60 transition-colors"
+                onClick={() => setExpanded(true)}
+                className="flex flex-col items-center min-w-[90px] max-w-[90px] py-3 px-2 rounded-lg bg-slate-800 hover:bg-slate-700 border border-slate-700"
               >
-                <span className="flex items-center justify-center w-8 h-8 rounded-lg bg-slate-800 text-teal-500">
-                  {expanded ? (
-                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-5 h-5">
-                      <path fillRule="evenodd" d="M12 2.25c-5.385 0-9.75 4.365-9.75 9.75s4.365 9.75 9.75 9.75 9.75-4.365 9.75-9.75S17.385 2.25 12 2.25zm3 10.5a.75.75 0 000-1.5H9a.75.75 0 000 1.5h6z" clipRule="evenodd" />
-                    </svg>
-                  ) : (
-                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-5 h-5">
-                      <path fillRule="evenodd" d="M12 2.25c-5.385 0-9.75 4.365-9.75 9.75s4.365 9.75 9.75 9.75 9.75-4.365 9.75-9.75S17.385 2.25 12 2.25zM12.75 9a.75.75 0 00-1.5 0v2.25H9a.75.75 0 000 1.5h2.25V15a.75.75 0 001.5 0v-2.25H15a.75.75 0 000-1.5h-2.25V9z" clipRule="evenodd" />
-                    </svg>
-                  )}
-                </span>
-                <span className="ml-2">{expanded ? 'Mostrar menos' : 'Mostrar más'}</span>
+                <div className="w-12 h-12 mb-2 flex items-center justify-center bg-slate-700 rounded-lg">
+                  <ChevronRightIcon className="w-6 h-6 text-teal-400" />
+                </div>
+                <span className="text-xs font-medium whitespace-nowrap text-white">Ver más</span>
               </button>
             )}
           </div>
+        </ScrollArea>
+      );
+    };
+    
+    // Renderizar subcategorías si hay una categoría seleccionada
+    const renderSubcategories = () => {
+      if (!activeCategory || !showSubcategories || subcategories.length === 0) {
+        return null;
+      }
+
+      return (
+        <div className="mt-4">
+          <h3 className="text-sm font-medium text-slate-400 mb-2">Subcategorías</h3>
+          <ScrollArea className="w-full pb-2" orientation="horizontal">
+            <div className="flex flex-wrap gap-2 py-1">
+              {subcategories.map((subcategory) => {
+                const Icon = subcategory.icon;
+                return (
+                  <button
+                    key={subcategory.id}
+                    onClick={() => handleSubcategoryClick(activeCategory, subcategory.slug)}
+                    className={`flex items-center space-x-2 rounded-md py-1.5 px-3 text-sm transition-colors ${
+                      activeSubcategory === subcategory.slug
+                        ? 'bg-gradient-to-r from-teal-500 to-teal-600 text-white'
+                        : 'bg-slate-800 text-white hover:bg-slate-700'
+                    }`}
+                  >
+                    <div className={`flex-shrink-0 w-6 h-6 rounded p-1 ${
+                      activeSubcategory === subcategory.slug 
+                        ? 'bg-teal-400/20 text-white' 
+                        : 'bg-slate-700 text-teal-400'
+                    }`}>
+                      {Icon && <Icon className="w-full h-full" />}
+                    </div>
+                    <span>{subcategory.name}</span>
+                  </button>
+                );
+              })}
+            </div>
+          </ScrollArea>
         </div>
-        
-        {/* Subcategorías para la categoría seleccionada */}
-        {selectedCategory && showSubcategories && (
-          <div className="mt-3">
-            <AnimatePresence>
-              <motion.div
-                initial={{ opacity: 0, height: 0 }}
-                animate={{ opacity: 1, height: 'auto' }}
-                exit={{ opacity: 0, height: 0 }}
-                transition={{ duration: 0.2 }}
-                className="overflow-x-auto scrollbar-hide"
-              >
-                <div className="flex items-center min-w-max gap-1">
-                  {subcategories.map((subcategory) => (
-                    <button
-                      key={subcategory.id}
-                      onClick={() => handleSubcategoryClick(selectedCategory.slug, subcategory.slug)}
-                      className={`flex items-center py-1.5 px-3 rounded-lg text-sm transition-colors ${
-                        activeSubcategory === subcategory.slug 
-                          ? 'bg-blue-600/70 text-white font-medium'
-                          : 'text-slate-300 hover:bg-slate-800/60'
-                      }`}
-                    >
-                      {subcategory.icon && typeof subcategory.icon === 'string' && (
-                        <span className="text-blue-400 mr-2 text-lg">
-                          {subcategory.icon}
-                        </span>
-                      )}
-                      <span>{subcategory.name}</span>
-                      {showCounts && subcategory.count && (
-                        <span className="ml-2 text-xs py-0.5 px-2 rounded-full bg-slate-700/50 text-slate-300">
-                          {subcategory.count}
-                        </span>
-                      )}
-                    </button>
-                  ))}
-                </div>
-              </motion.div>
-            </AnimatePresence>
-          </div>
-        )}
-        
-        {/* Sub-subcategorías para la subcategoría seleccionada */}
-        {selectedSubcategory && showSubcategories && (
-          <div className="mt-2">
-            <AnimatePresence>
-              <motion.div
-                initial={{ opacity: 0, height: 0 }}
-                animate={{ opacity: 1, height: 'auto' }}
-                exit={{ opacity: 0, height: 0 }}
-                transition={{ duration: 0.2 }}
-                className="overflow-x-auto scrollbar-hide"
-              >
-                <div className="flex items-center min-w-max gap-1">
-                  {selectedSubcategory.subSubcategories?.map((subsubcategory) => (
-                    <button
-                      key={subsubcategory.id}
-                      onClick={() => handleSubSubcategorySelect(subsubcategory)}
-                      className={`flex items-center py-1 px-3 rounded-lg text-sm transition-colors ${
-                        activeSubSubcategory === subsubcategory.slug
-                          ? 'bg-purple-600/70 text-white font-medium'
-                          : 'text-slate-300 hover:bg-slate-800/60 border border-purple-900/30'
-                      }`}
-                    >
-                      {subsubcategory.emoji && (
-                        <span className="mr-2">{subsubcategory.emoji}</span>
-                      )}
-                      <span>{subsubcategory.name}</span>
-                      {showCounts && subsubcategory.count && (
-                        <span className="ml-2 text-xs py-0.5 px-2 rounded-full bg-slate-700/50 text-slate-300">
-                          {subsubcategory.count}
-                        </span>
-                      )}
-                    </button>
-                  ))}
-                </div>
-              </motion.div>
-            </AnimatePresence>
-          </div>
-        )}
+      );
+    };
+    
+    // Renderizar sub-subcategorías si hay una subcategoría seleccionada
+    const renderSubSubcategories = () => {
+      if (!activeCategory || !activeSubcategory || !showSubcategories) {
+        return null;
+      }
+      
+      const selectedSubcat = subcategories.find(sub => sub.slug === activeSubcategory)
+      
+      if (!selectedSubcat || !selectedSubcat.subSubcategories || selectedSubcat.subSubcategories.length === 0) {
+        return null
+      }
+
+      return (
+        <div className="mt-3">
+          <h3 className="text-sm font-medium text-slate-400 mb-2">Especialidades</h3>
+          <ScrollArea className="w-full pb-2" orientation="horizontal">
+            <div className="flex flex-wrap gap-2 py-1">
+              {selectedSubcat.subSubcategories.map((subsubcategory) => (
+                <button
+                  key={subsubcategory.id}
+                  onClick={() => handleSubSubcategorySelect(subsubcategory)}
+                  className={`inline-flex items-center py-1 px-2.5 text-xs rounded transition-colors ${
+                    activeSubSubcategory === subsubcategory.slug
+                      ? 'bg-gradient-to-r from-blue-500 to-blue-600 text-white'
+                      : 'bg-slate-800 text-white hover:bg-slate-700'
+                  }`}
+                >
+                  <span className="mr-1.5">{subsubcategory.emoji}</span>
+                  <span>{subsubcategory.name}</span>
+                </button>
+              ))}
+            </div>
+          </ScrollArea>
+        </div>
+      );
+    };
+
+    return (
+      <div className="w-full">
+        {showBreadcrumbs && renderBreadcrumbs()}
+        <div className="space-y-2 mt-2">
+          {renderCategories()}
+          {renderSubcategories()}
+          {renderSubSubcategories()}
+        </div>
       </div>
-    )
-  }
+    );
+  };
   
   // Renderizar como menú
   const renderMenuSelector = () => {

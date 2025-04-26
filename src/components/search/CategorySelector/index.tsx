@@ -3,7 +3,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Category, CategorySelectorProps, Subcategory, SubSubcategory } from './types';
-import { generateBreadcrumbs, getCategories, getCategoryIcon, getSubSubcategoryEmoji } from './utils';
+import { generateBreadcrumbs, getCategories, getCategoryIcon, getSubSubcategoryEmoji, getCategoryImage } from './utils';
 import GridView from './components/GridView';
 import SubcategoryList from './components/SubcategoryList';
 import SubSubcategoryList from './components/SubSubcategoryList';
@@ -42,7 +42,14 @@ const CategorySelector: React.FC<CategorySelectorProps> = ({
       setLoading(true);
       // Cargar categorías desde categories-data
       const data = getCategories();
-      setCategories(data);
+      
+      // Asegurarse de que todas las categorías tengan una imagen válida
+      const categoriesWithImages = data.map(category => ({
+        ...category,
+        image: getCategoryImage(category.slug)
+      }));
+      
+      setCategories(categoriesWithImages);
       setLoading(false);
     } catch (err) {
       console.error('Error loading categories:', err);
@@ -70,13 +77,7 @@ const CategorySelector: React.FC<CategorySelectorProps> = ({
         name: sub.name,
         // Cada subcategoría debe tener su propio icono
         icon: getCategoryIcon(sub.id),
-        subsubcategories: sub.subSubcategories?.map(subsub => ({
-          id: subsub.id,
-          slug: subsub.id,
-          name: subsub.name,
-          // Cada subsubcategoría debe tener su propio emoji
-          emoji: getSubSubcategoryEmoji(subsub.id)
-        }))
+        parentId: activeCategory
       }));
       
       setCurrentSubcategories(formattedSubcats);
@@ -90,7 +91,8 @@ const CategorySelector: React.FC<CategorySelectorProps> = ({
           id: subsub.id,
           slug: subsub.id,
           name: subsub.name,
-          emoji: getSubSubcategoryEmoji(subsub.id)
+          emoji: getSubSubcategoryEmoji(subsub.id),
+          parentId: activeSubcategory
         }));
         
         setCurrentSubSubcategories(formattedSubSubcats);

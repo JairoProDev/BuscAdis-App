@@ -3,7 +3,7 @@
 import React from 'react';
 import { motion } from 'framer-motion';
 import { SubcategoryListProps } from '../types';
-import CategoryCard from './CategoryCard';
+import { CategoryCard } from './CategoryCard';
 
 const SubcategoryList: React.FC<SubcategoryListProps> = ({
   subcategories,
@@ -50,6 +50,7 @@ const SubcategoryList: React.FC<SubcategoryListProps> = ({
               isActive={subcategory.slug === activeSubcategory}
               onClick={() => onSubcategoryClick(subcategory.slug)}
               variant="horizontal"
+              showCount={true}
             />
           </motion.div>
         ))}

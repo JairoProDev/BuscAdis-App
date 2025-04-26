@@ -44,7 +44,9 @@ export const CategoryCard: React.FC<CategoryCardProps> = ({
       transition={{ duration: 0.2 }}
       className={cn(
         'group relative rounded-md overflow-hidden transition-all duration-300',
-        variant === 'square' ? 'w-full h-28 flex flex-col items-center justify-center text-center' : 'w-full py-2 px-3 flex items-center gap-3',
+        variant === 'square' 
+          ? 'w-full h-36 flex flex-col items-center justify-center text-center'
+          : 'w-full py-2 px-3 flex items-center gap-3',
         isActive 
           ? `bg-gradient-to-br from-white to-${color}-50 shadow-md border border-${color}-300` 
           : `bg-white hover:bg-gradient-to-br hover:from-white hover:to-${color}-50 border border-gray-100 hover:border-${color}-200 hover:shadow-lg`
@@ -66,14 +68,16 @@ export const CategoryCard: React.FC<CategoryCardProps> = ({
 
       {isMainCategory && (
         <div className={cn(
-          variant === 'square' ? 'w-14 h-14 mb-2' : 'w-10 h-10',
-          'relative overflow-hidden rounded-full shadow-sm'
+          variant === 'square' 
+            ? 'w-20 h-20 mb-3'
+            : 'w-10 h-10',
+          'relative overflow-hidden rounded-lg shadow-sm'
         )}>
           <Image
             src={category.image as string}
             alt={category.name}
-            width={variant === 'square' ? 56 : 40}
-            height={variant === 'square' ? 56 : 40}
+            width={variant === 'square' ? 80 : 40}
+            height={variant === 'square' ? 80 : 40}
             className="object-cover"
           />
         </div>
@@ -82,7 +86,7 @@ export const CategoryCard: React.FC<CategoryCardProps> = ({
       {isSubcategory && !isMainCategory && (
         <div className={cn(
           variant === 'square' ? 'w-14 h-14 mb-2 mx-auto' : 'w-10 h-10',
-          `text-${color}-500 p-1`
+          `bg-${color}-100 rounded-md text-${color}-500 p-1`
         )}>
           {React.createElement(category.icon as React.ElementType, {
             className: 'w-full h-full'
