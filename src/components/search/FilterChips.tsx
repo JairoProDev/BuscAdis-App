@@ -5,10 +5,13 @@ import { Slider } from '@/components/ui/slider'
 import { Checkbox } from '@/components/ui/Checkbox'
 import { CategoryFilters, FilterValue } from '@/types/search'
 import { cn } from '@/lib/utils'
-import { getFiltersForCategory } from '@/utils/filterUtils'
+import { getFiltersForCategory, findFilterById, isFilterActive } from '@/utils/filterUtils'
 import { X, ChevronDown } from 'lucide-react'
 import { Switch } from '@/components/ui/switch'
 import { Badge } from '@/components/ui/Badge'
+
+// Importaciones de tipos
+import { FilterOption } from '@/types/filters'
 
 interface FilterChipsProps {
   category: string
@@ -17,7 +20,7 @@ interface FilterChipsProps {
   className?: string
 }
 
-export function FilterChips({
+export default function FilterChips({
   category,
   activeFilters,
   onFilterChange,
@@ -78,8 +81,7 @@ export function FilterChips({
   }
 
   const clearFilter = (key: string) => {
-    const availableFilters = getFiltersForCategory(category as CategoryFilters)
-    const filter = availableFilters.find(f => f.id === key)
+    const filter = findFilterById(category, key)
     
     if (filter) {
       const defaultValue = filter.type === 'range' 
@@ -92,36 +94,16 @@ export function FilterChips({
     }
   }
 
-  const isFilterActive = (key: string): boolean => {
+  const isFilterActiveCheck = (key: string): boolean => {
     if (!activeFilters[key]) return false
     
-    if (Array.isArray(activeFilters[key])) {
-      // For range filters with 2 values
-      if (activeFilters[key].length === 2) {
-        const filter = getFiltersForCategory(category as CategoryFilters).find(f => f.id === key)
-        if (!filter) return false
-        
-        // Check if range filter is at default values
-        return (
-          activeFilters[key][0] !== (filter.min || 0) ||
-          activeFilters[key][1] !== (filter.max || 100)
-        )
-      }
-      
-      // For multiselect filters
-      return (activeFilters[key] as any[]).length > 0
-    }
+    const filter = findFilterById(category, key)
+    if (!filter) return false
     
-    // For toggle filters
-    if (typeof activeFilters[key] === 'boolean') {
-      return activeFilters[key] === true
-    }
-    
-    // For select filters
-    return activeFilters[key] !== null && activeFilters[key] !== undefined
+    return isFilterActive(filter, activeFilters[key])
   }
 
-  const getFilterLabel = (filter: any, value: FilterValue): string => {
+  const getFilterLabel = (filter: FilterOption, value: FilterValue): string => {
     if (!value) return filter.label || filter.id
     
     if (filter.type === 'range' && Array.isArray(value)) {
@@ -130,13 +112,13 @@ export function FilterChips({
     }
     
     if (filter.type === 'select' && value) {
-      const option = filter.options?.find((opt: any) => opt.value === value)
+      const option = filter.options?.find((opt) => opt.value === value)
       return `${filter.label}: ${option?.label || value}`
     }
     
     if (filter.type === 'multiselect' && Array.isArray(value) && value.length > 0) {
       if (value.length === 1) {
-        const option = filter.options?.find((opt: any) => opt.value === value[0])
+        const option = filter.options?.find((opt) => opt.value === value[0])
         return `${filter.label}: ${option?.label || value[0]}`
       }
       return `${filter.label}: ${value.length} seleccionados`
@@ -149,7 +131,7 @@ export function FilterChips({
     return filter.label || filter.id
   }
 
-  const renderFilterContent = (filter: any) => {
+  const renderFilterContent = (filter: FilterOption) => {
     const value = temporaryFilters[filter.id]
     
     switch (filter.type) {
@@ -180,7 +162,7 @@ export function FilterChips({
                 min={filter.min || 0}
                 max={filter.max || 100}
                 value={rangeValue[0]}
-                onChange={(e) => {
+                onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
                   const newValue = parseInt(e.target.value) || filter.min || 0
                   handleTempFilterChange(filter.id, [newValue, rangeValue[1]])
                 }}
@@ -191,7 +173,7 @@ export function FilterChips({
                 min={filter.min || 0}
                 max={filter.max || 100}
                 value={rangeValue[1]}
-                onChange={(e) => {
+                onChange={(e: React.ChangeEvent<HTMLInputElement>) => {
                   const newValue = parseInt(e.target.value) || filter.max || 100
                   handleTempFilterChange(filter.id, [rangeValue[0], newValue])
                 }}
@@ -211,7 +193,7 @@ export function FilterChips({
       case 'select':
         return (
           <div className="p-3 space-y-2 w-full min-w-[200px]">
-            {filter.options?.map((option: any) => (
+            {filter.options?.map((option) => (
               <div
                 key={option.value}
                 className={cn(
@@ -232,7 +214,7 @@ export function FilterChips({
       case 'multiselect':
         return (
           <div className="p-3 space-y-2 min-w-[200px]">
-            {filter.options?.map((option: any) => (
+            {filter.options?.map((option) => (
               <div key={option.value} className="flex items-center space-x-2">
                 <Checkbox
                   id={`${filter.id}-${option.value}`}
@@ -281,7 +263,7 @@ export function FilterChips({
     }
   }
 
-  const filters = getFiltersForCategory(category as CategoryFilters)
+  const filters = getFiltersForCategory(category)
 
   return (
     <div 
@@ -291,14 +273,16 @@ export function FilterChips({
       {filters.map((filter) => (
         <div key={filter.id} className="relative">
           <Button
-            variant={isFilterActive(filter.id) ? "secondary" : "outline"}
+            variant={isFilterActiveCheck(filter.id) ? "secondary" : "outline"}
             size="sm"
             onClick={() => toggleDropdown(filter.id)}
             className={cn(
               "flex items-center gap-1 h-8",
-              isFilterActive(filter.id) && "font-medium"
+              isFilterActiveCheck(filter.id) && "font-medium"
             )}
-            ref={(el) => (buttonRefs.current[filter.id] = el)}
+            ref={(el) => {
+              buttonRefs.current[filter.id] = el
+            }}
           >
             {getFilterLabel(filter, activeFilters[filter.id])}
             <ChevronDown size={14} className={cn(
@@ -306,7 +290,7 @@ export function FilterChips({
               openFilter === filter.id && "transform rotate-180"
             )} />
             
-            {isFilterActive(filter.id) && (
+            {isFilterActiveCheck(filter.id) && (
               <X
                 size={14}
                 className="ml-1 opacity-70 hover:opacity-100"
@@ -320,7 +304,9 @@ export function FilterChips({
           
           {openFilter === filter.id && (
             <div
-              ref={(el) => (dropdownRefs.current[filter.id] = el)}
+              ref={(el) => {
+                dropdownRefs.current[filter.id] = el
+              }}
               className="absolute top-full left-0 mt-1 z-[100] bg-slate-800 rounded-lg border border-slate-700 shadow-lg min-w-[200px] max-h-[80vh] overflow-y-auto"
               style={{ 
                 position: 'absolute',
@@ -340,7 +326,7 @@ export function FilterChips({
           className="h-8 text-muted-foreground hover:text-foreground"
           onClick={() => {
             // Clear all filters
-            const availableFilters = getFiltersForCategory(category as CategoryFilters)
+            const availableFilters = getFiltersForCategory(category)
             availableFilters.forEach(filter => clearFilter(filter.id))
           }}
         >
@@ -349,4 +335,7 @@ export function FilterChips({
       )}
     </div>
   )
-} 
+}
+
+// También exportamos como componente nombrado para mantener compatibilidad
+export { FilterChips } 

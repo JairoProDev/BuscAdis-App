@@ -1,8 +1,67 @@
-export type FilterType = 'range' | 'select' | 'multiselect' | 'toggle'
+import { ReactNode } from 'react'
 
-export interface FilterOption {
-  label: string
+// Tipos de filtros disponibles
+export enum FilterType {
+  RANGE = 'range',
+  SELECT = 'select',
+  MULTISELECT = 'multiselect',
+  TOGGLE = 'toggle'
+}
+
+// Opción para filtros de tipo select/multiselect
+export interface FilterSelectOption {
   value: string
+  label: string
+}
+
+// Configuración base de un filtro
+export interface FilterOption {
+  id: string
+  type: FilterType | string // Permitimos tipo como string para compatibilidad
+  label: string
+  min?: number // Para filtros de rango
+  max?: number // Para filtros de rango
+  step?: number // Para filtros de rango
+  unit?: string // Unidad de medida opcional (m², km, €, etc.)
+  options?: FilterSelectOption[] // Para filtros select/multiselect
+  format?: (value: number) => string // Formateador opcional para valores numéricos
+}
+
+// Valor de un filtro
+export type FilterValue = string | number | boolean | Array<string | number> | null
+
+// Sección de filtros
+export interface FilterSection {
+  title: string
+  filters: FilterOption[]
+}
+
+// Filtros para una categoría
+export interface CategoryFilters {
+  title: string
+  sections: FilterSection[]
+}
+
+// Filtros por categoría
+export interface FiltersByCategory {
+  [key: string]: CategoryFilters
+}
+
+// Para usarse en componentes que muestran filtros
+export interface FilterContainerProps {
+  category: string
+  activeFilters: Record<string, FilterValue>
+  onFilterChange: (filters: Record<string, unknown>) => void
+  className?: string
+  children?: ReactNode
+}
+
+// Props específicos para chips de filtros
+export interface FilterChipsProps {
+  category: string
+  activeFilters: Record<string, FilterValue>
+  onFilterChange: (key: string, value: FilterValue) => void
+  className?: string
 }
 
 export interface Filter {
@@ -16,10 +75,6 @@ export interface Filter {
   format?: (value: number) => string
   // For select and multiselect filters
   options?: FilterOption[]
-}
-
-export interface FilterValue {
-  [filterId: string]: any
 }
 
 export interface CategoryFilter {
