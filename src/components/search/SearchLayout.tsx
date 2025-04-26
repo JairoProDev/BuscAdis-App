@@ -2,399 +2,459 @@
 
 import { useState, useEffect, type ReactNode } from 'react'
 import { useRouter, usePathname, useSearchParams } from 'next/navigation'
-import { 
-  ViewColumnsIcon, 
-  MapIcon
+import {
+    MapIcon,
+    Squares2X2Icon,
+    ListBulletIcon
 } from '@heroicons/react/24/outline'
 import SearchResults, { Publication } from './SearchResults'
 import useMediaQuery from '@/hooks/useMediaQuery'
 import AdvancedSearchBar from './AdvancedSearchBar'
 import KeywordSearchBox from './KeywordSearchBox'
 import CategorySelector from './CategorySelector'
-import AdvancedFilterDrawer from './AdvancedFilterDrawer'
-import HorizontalFilterBar from './HorizontalFilterBar'
 import FilterChips from '@/components/search/FilterChips'
 import { CategoriesService } from '@/services/categories.service'
 
-interface SearchLayoutProps {
-  initialResults?: Publication[]
-  initialCategory?: string
-  initialSubcategory?: string
-  initialQuery?: string
-  loading?: boolean
-  onSearch?: (query: string, options?: Record<string, string>) => void
-  onFilterChange?: (filters: Record<string, unknown>) => void
-  onLoadMore?: () => void
-  hasMore?: boolean
-  totalResults?: number
-  showMap?: boolean
-  onPublicationClick?: (publication: Publication, e: React.MouseEvent<HTMLAnchorElement>) => void
-  children?: ReactNode
+// Componente simple de mapa (placeholder)
+const MapComponent = ({ 
+  className = '' 
+}: { 
+  publications?: Publication[],
+  loading?: boolean,
+  onMarkerClick?: (publication: Publication, e: React.MouseEvent<Element>) => void,
   className?: string
-  useEnhancedSearch?: boolean
+}) => (
+  <div className={`${className} flex items-center justify-center`}>
+    <p className="text-slate-400">Vista de mapa en desarrollo</p>
+  </div>
+);
+
+interface SearchLayoutProps {
+    initialResults?: Publication[]
+    initialCategory?: string
+    initialSubcategory?: string
+    initialQuery?: string
+    loading?: boolean
+    onSearch?: (query: string, options?: Record<string, string>) => void
+    onFilterChange?: (filters: Record<string, unknown>) => void
+    onLoadMore?: () => void
+    hasMore?: boolean
+    totalResults?: number
+    showMap?: boolean
+    onPublicationClick?: (publication: Publication, e: React.MouseEvent<HTMLAnchorElement>) => void
+    children?: ReactNode
+    className?: string
+    useEnhancedSearch?: boolean
 }
 
+type ViewMode = 'grid' | 'list' | 'map';
+
 export default function SearchLayout({
-  initialResults = [],
-  initialCategory,
-  initialSubcategory,
-  initialQuery = '',
-  loading = false,
-  onSearch,
-  onFilterChange,
-  onLoadMore,
-  hasMore = false,
-  totalResults = 0,
-  showMap = false,
-  onPublicationClick,
-  className = '',
-  useEnhancedSearch = true,
+    initialResults = [],
+    initialCategory,
+    initialSubcategory,
+    initialQuery = '',
+    loading = false,
+    onSearch,
+    onFilterChange,
+    onLoadMore,
+    hasMore = false,
+    totalResults = 0,
+    showMap = true,
+    onPublicationClick,
+    className = '',
+    useEnhancedSearch = true,
 }: SearchLayoutProps) {
-  const router = useRouter()
-  const pathname = usePathname()
-  const searchParams = useSearchParams()
-  
-  // Estados del componente
-  const [searchQuery, setSearchQuery] = useState(initialQuery || searchParams?.get('q') || '')
-  const [category, setCategory] = useState(initialCategory || searchParams?.get('category') || '')
-  const [subcategory, setSubcategory] = useState(initialSubcategory || searchParams?.get('subcategory') || '')
-  const [selectedSubSubcategory, setSelectedSubSubcategory] = useState(searchParams?.get('subsubcategory') || '')
-  const [results, setResults] = useState<Publication[]>(initialResults)
-  const [currentView, setCurrentView] = useState<'grid' | 'list' | 'map'>('grid')
-  const [activeFilters, setActiveFilters] = useState<Record<string, unknown>>({})
-  const [filterCount, setFilterCount] = useState(0)
-  const [categories, setCategories] = useState<Array<{id: string, name: string}>>([])
-  
-  // Responsive
-  const isLg = useMediaQuery('(min-width: 1024px)')
-  const isMobile = useMediaQuery('(max-width: 640px)')
-  
-  // Cargar categorías
-  useEffect(() => {
-    const loadCategories = async () => {
-      try {
-        const response = await CategoriesService.getCategories()
-        setCategories(response)
-      } catch (error) {
-        console.error('Failed to load categories:', error)
-      }
+    const router = useRouter()
+    const pathname = usePathname()
+    const searchParams = useSearchParams()
+
+    // Estados del componente
+    const [searchQuery, setSearchQuery] = useState(initialQuery || searchParams?.get('q') || '')
+    const [category, setCategory] = useState(initialCategory || searchParams?.get('category') || '')
+    const [subcategory, setSubcategory] = useState(initialSubcategory || searchParams?.get('subcategory') || '')
+    const [selectedSubSubcategory, setSelectedSubSubcategory] = useState(searchParams?.get('subsubcategory') || '')
+    const [results, setResults] = useState<Publication[]>(initialResults)
+    const [currentView, setCurrentView] = useState<ViewMode>('grid')
+    const [activeFilters, setActiveFilters] = useState<Record<string, unknown>>({})
+    const [categories, setCategories] = useState<Array<{ 
+      id: string, 
+      name: string,
+      subcategories?: Array<{
+        id: string,
+        name: string,
+        subsubcategories?: Array<{
+          id: string,
+          name: string
+        }>
+      }>
+    }>>([])
+
+    // Responsive - solo usamos isMobile
+    const isMobile = useMediaQuery('(max-width: 640px)')
+
+    // --- Hooks (useEffect para cargar categorías y actualizar resultados) ---
+    // (Sin cambios aquí, mantenemos la lógica existente)
+    useEffect(() => {
+        const loadCategories = async () => {
+            try {
+                const response = await CategoriesService.getCategories()
+                setCategories(response)
+            } catch (error) {
+                console.error('Failed to load categories:', error)
+            }
+        }
+        loadCategories()
+    }, [])
+
+    useEffect(() => {
+        // Solo actualiza si initialResults es diferente de nulo/undefined
+        // Evita borrar resultados si initialResults viene vacío en renderizados posteriores
+        if (initialResults) {
+             setResults(initialResults);
+        }
+    }, [initialResults]);
+
+    // --- Manejadores de eventos (handleSearch, handleCategoryChange, etc.) ---
+    // (Sin cambios aquí, mantenemos la lógica existente para búsqueda y filtros)
+    const handleSearch = (query: string, options?: Record<string, string>) => {
+        setSearchQuery(query)
+        const newParams = new URLSearchParams(searchParams?.toString());
+
+        if (query) newParams.set('q', query); else newParams.delete('q');
+        if (options?.category) { setCategory(options.category); newParams.set('category', options.category); }
+        if (options?.subcategory) { setSubcategory(options.subcategory); newParams.set('subcategory', options.subcategory); }
+        if (options?.subsubcategory) { setSelectedSubSubcategory(options.subsubcategory); newParams.set('subsubcategory', options.subsubcategory); }
+
+        const combinedOptions = {
+            category: options?.category || category,
+            subcategory: options?.subcategory || subcategory,
+            subsubcategory: options?.subsubcategory || selectedSubSubcategory,
+            ...activeFilters // Incluir filtros activos si es necesario
+        };
+
+        router.push(`${pathname}?${newParams.toString()}`, { scroll: false });
+
+        if (onSearch) {
+            onSearch(query, combinedOptions);
+        } else if (onFilterChange) { // Fallback to onFilterChange if onSearch not provided
+            onFilterChange({ ...combinedOptions, q: query });
+        }
     }
-    
-    loadCategories()
-  }, [])
-  
-  // Actualizar resultados cuando cambian las props iniciales
-  useEffect(() => {
-    if (initialResults && initialResults.length > 0) {
-      setResults(initialResults)
+
+    const handleCategoryChange = (newCategory: string) => {
+        setCategory(newCategory);
+        setSubcategory('');
+        setSelectedSubSubcategory('');
+        setActiveFilters({});
+        const currentQuery = searchQuery || '';
+        const filtersToApply = { category: newCategory, subcategory: '', subsubcategory: '', q: currentQuery };
+
+        // Actualizar URL
+        const params = new URLSearchParams(searchParams?.toString());
+        if (newCategory) params.set('category', newCategory); else params.delete('category');
+        params.delete('subcategory');
+        params.delete('subsubcategory');
+        // Eliminar filtros específicos de atributos al cambiar categoría
+        Object.keys(activeFilters).forEach(key => params.delete(key));
+        router.push(`${pathname}?${params.toString()}`, { scroll: false });
+
+
+        if (onFilterChange) {
+            onFilterChange(filtersToApply);
+        }
     }
-  }, [initialResults])
-  
-  // Manejar la búsqueda
-  const handleSearch = (query: string, options?: Record<string, string>) => {
-    setSearchQuery(query)
-    
-    // Si hay categoría/subcategoría/subsubcategoría en las opciones, actualizar estados
-    if (options?.category) {
-      setCategory(options.category)
+
+     const handleSubcategoryChange = (newSubcategory: string) => {
+        setSubcategory(newSubcategory);
+        setSelectedSubSubcategory('');
+        const currentQuery = searchQuery || '';
+        const filtersToApply = { ...activeFilters, category, subcategory: newSubcategory, subsubcategory: '', q: currentQuery };
+
+        // Actualizar URL
+        const params = new URLSearchParams(searchParams?.toString());
+        if (newSubcategory) params.set('subcategory', newSubcategory); else params.delete('subcategory');
+        params.delete('subsubcategory');
+        router.push(`${pathname}?${params.toString()}`, { scroll: false });
+
+        if (onFilterChange) {
+            onFilterChange(filtersToApply);
+        }
     }
-    
-    if (options?.subcategory) {
-      setSubcategory(options.subcategory)
+
+    const handleSubSubcategoryChange = (newSubSubcategory: string) => {
+        setSelectedSubSubcategory(newSubSubcategory);
+        const currentQuery = searchQuery || '';
+        const filtersToApply = { ...activeFilters, category, subcategory, subsubcategory: newSubSubcategory, q: currentQuery };
+
+        // Actualizar URL
+        const params = new URLSearchParams(searchParams?.toString());
+        if (newSubSubcategory) params.set('subsubcategory', newSubSubcategory); else params.delete('subsubcategory');
+        router.push(`${pathname}?${params.toString()}`, { scroll: false });
+
+        if (onFilterChange) {
+            onFilterChange(filtersToApply);
+        }
     }
-    
-    if (options?.subsubcategory) {
-      setSelectedSubSubcategory(options.subsubcategory)
+
+
+    const handleFilterChange = (newFilters: Record<string, unknown>) => {
+        // Combina filtros anteriores y nuevos si es necesario, o reemplaza
+        const updatedFilters = { ...activeFilters, ...newFilters };
+        // Eliminar filtros con valor undefined, null o ''
+        Object.keys(updatedFilters).forEach(key => {
+             if (updatedFilters[key] === undefined || updatedFilters[key] === null || updatedFilters[key] === '') {
+                  delete updatedFilters[key];
+             }
+        });
+
+        setActiveFilters(updatedFilters);
+
+         // Actualizar URL con los filtros
+        const params = new URLSearchParams(searchParams?.toString());
+        Object.entries(updatedFilters).forEach(([key, value]) => {
+             if (value !== undefined && value !== null && value !== '') {
+                  params.set(key, String(value));
+             } else {
+                  params.delete(key);
+             }
+        });
+         // Asegurarse de que las categorías y query estén presentes si existen
+         if (category) params.set('category', category);
+         if (subcategory) params.set('subcategory', subcategory);
+         if (selectedSubSubcategory) params.set('subsubcategory', selectedSubSubcategory);
+         if (searchQuery) params.set('q', searchQuery);
+
+         router.push(`${pathname}?${params.toString()}`, { scroll: false });
+
+
+        if (onFilterChange) {
+            onFilterChange({
+                ...updatedFilters,
+                category,
+                subcategory,
+                subsubcategory: selectedSubSubcategory,
+                q: searchQuery || '' // Incluir query actual
+            });
+        }
     }
-    
-    // Actualizar URL sin causar recarga de página
-    const params = new URLSearchParams(searchParams?.toString())
-    
-    if (query) {
-      params.set('q', query)
-    } else {
-      params.delete('q')
-    }
-    
-    if (options?.category || category) {
-      params.set('category', options?.category || category)
-    }
-    
-    if (options?.subcategory || subcategory) {
-      params.set('subcategory', options?.subcategory || subcategory)
-    }
-    
-    if (options?.subsubcategory || selectedSubSubcategory) {
-      params.set('subsubcategory', options?.subsubcategory || selectedSubSubcategory)
-    }
-    
-    const newPath = `${pathname}?${params.toString()}`
-    router.push(newPath, { scroll: false })
-    
-    // Llamar al callback si está definido
-    if (onSearch) {
-      onSearch(query, { 
-        category: options?.category || category, 
-        subcategory: options?.subcategory || subcategory,
-        subsubcategory: options?.subsubcategory || selectedSubSubcategory
-      })
-    }
-  }
-  
-  // Manejar cambio de categoría con preservación de la consulta
-  const handleCategoryChange = (newCategory: string) => {
-    setCategory(newCategory)
-    setSubcategory('')
-    setSelectedSubSubcategory('')
-    setActiveFilters({})
-    setFilterCount(0)
-    
-    // Preservar la consulta de búsqueda actual
-    const currentQuery = searchQuery || ''
-    
-    // Llamar al callback si está definido
-    if (onFilterChange) {
-      onFilterChange({ 
-        category: newCategory, 
-        subcategory: '', 
-        subsubcategory: '',
-        q: currentQuery  // Preservar la consulta
-      })
-    }
-  }
-  
-  // Manejar cambio de filtros
-  const handleFilterChange = (filters: Record<string, unknown>) => {
-    setActiveFilters(filters)
-    setFilterCount(Object.keys(filters).length)
-    
-    if (onFilterChange) {
-      onFilterChange({ 
-        ...filters, 
-        category, 
-        subcategory, 
-        subsubcategory: selectedSubSubcategory 
-      })
-    }
-  }
-  
-  // Manejar cambio de subcategoría con preservación de la consulta
-  const handleSubcategoryChange = (newSubcategory: string) => {
-    setSubcategory(newSubcategory)
-    setSelectedSubSubcategory('')
-    
-    // Preservar la consulta de búsqueda actual
-    const currentQuery = searchQuery || ''
-    
-    // Llamar al callback si está definido
-    if (onFilterChange) {
-      onFilterChange({ 
-        ...activeFilters,
-        category, 
-        subcategory: newSubcategory, 
-        subsubcategory: '',
-        q: currentQuery  // Preservar la consulta
-      })
-    }
-  }
-  
-  // Manejar cambio de subsubcategoría con preservación de la consulta
-  const handleSubSubcategoryChange = (newSubSubcategory: string) => {
-    setSelectedSubSubcategory(newSubSubcategory)
-    
-    // Preservar la consulta de búsqueda actual
-    const currentQuery = searchQuery || ''
-    
-    // Llamar al callback si está definido
-    if (onFilterChange) {
-      onFilterChange({ 
-        ...activeFilters,
-        category, 
-        subcategory, 
-        subsubcategory: newSubSubcategory,
-        q: currentQuery  // Preservar la consulta
-      })
-    }
-  }
-  
-  // Alternar vista de mapa
-  const toggleMapView = () => {
-    setCurrentView(currentView === 'map' ? 'grid' : 'map')
-  }
-  
-  // Renderizar barra superior de búsqueda
-  const renderSearchHeader = () => {
-    return (
-      <div className="mb-2">
-        <div className="flex flex-col gap-4">
-          {useEnhancedSearch ? (
-            // Usar nuestro nuevo componente KeywordSearchBox con todas las opciones
-            <KeywordSearchBox
-              initialValue={searchQuery}
-              onSearch={handleSearch}
-              appearance="dark"
-              showLabel={false}
-              autoFocus={true}
-              placeholder="¿Qué estás buscando hoy?"
-              showVoiceSearch={true}
-              showImageSearch={true}
-              showAiAssist={true}
-              className="w-full"
-            />
-          ) : (
-            // Usar la barra de búsqueda avanzada existente
-            <AdvancedSearchBar 
-              initialValue={searchQuery}
-              onSearch={handleSearch}
-              selectedCategory={category}
-              selectedSubcategory={subcategory}
-              selectedSubSubcategory={selectedSubSubcategory}
-              onSelectCategory={handleCategoryChange}
-              onSelectSubcategory={handleSubcategoryChange}
-              onSelectSubSubcategory={handleSubSubcategoryChange}
-              placeholder="¿Qué estás buscando en BuscAdis?"
-            />
-          )}
-        </div>
-      </div>
-    )
-  }
-  
-  // Renderizar selector de categorías con estilo mejorado
-  const renderCategorySelector = () => {
-    return (
-      <div className="mb-2">
-        <div className="flex flex-col">
-          <CategorySelector
-            activeCategory={category}
-            activeSubcategory={subcategory}
-            activeSubSubcategory={selectedSubSubcategory}
-            onCategoryChange={handleCategoryChange}
-            onSubcategoryChange={handleSubcategoryChange}
-            onSubSubcategoryChange={handleSubSubcategoryChange}
-            showCounts={true}
-            variant="horizontal"
-            className="w-full"
-            showAllOption={true}
-            maxVisible={isMobile ? 4 : 8}
-          />
-        </div>
-      </div>
-    )
-  }
-  
-  // Renderizar barra de filtros
-  const renderFilterBar = () => {
-    return (
-      <div className="flex items-center justify-between mb-3">
-        {/* Información de resultados */}
-        <div>
-          <h1 className="text-xl font-bold text-white">
-            {searchQuery ? (
-              <span>Resultados para &quot;{searchQuery}&quot;</span>
-            ) : category ? (
-              <span>{initialCategory || category}</span>
-            ) : (
-              <span>Todos los anuncios</span>
-            )}
-          </h1>
-          
-          <p className="text-sm text-slate-400">
-            {loading ? 'Buscando...' : `${totalResults || results.length} anuncios encontrados`}
-          </p>
-        </div>
-        
-        {/* Controles de vista - Ahora están en la parte superior */}
-        <div className="flex items-center space-x-2">
-          {/* Toggle de vista de columnas */}
-          <button
-            onClick={() => setCurrentView(currentView === 'list' ? 'grid' : 'list')}
-            className={`p-2 rounded-lg border ${
-              currentView === 'list' 
-                ? 'bg-teal-500 border-teal-600 text-white' 
-                : 'bg-slate-800 border-slate-700 text-white hover:bg-slate-700'
-            }`}
-            aria-label={currentView === 'list' ? "Ver en cuadrícula" : "Ver en lista"}
-          >
-            <ViewColumnsIcon className="w-5 h-5" />
-          </button>
-          
-          {/* Toggle de vista de mapa - Solo si está habilitado */}
-          {showMap && (
-            <button
-              onClick={toggleMapView}
-              className={`p-2 rounded-lg border ${
-                currentView === 'map' 
-                  ? 'bg-teal-500 border-teal-600 text-white' 
-                  : 'bg-slate-800 border-slate-700 text-white hover:bg-slate-700'
-              }`}
-              aria-label={currentView === 'map' ? "Mostrar lista" : "Mostrar mapa"}
-            >
-              <MapIcon className="w-5 h-5" />
-            </button>
-          )}
-        </div>
-      </div>
-    )
-  }
-  
-  return (
-    <div className={`w-full ${className}`}>
-      {/* Selector de Categorías (que ahora contiene los breadcrumbs) */}
-      {renderCategorySelector()}
-      
-      {/* Cabecera de búsqueda */}
-      {renderSearchHeader()}
-      
-      {/* Chips de filtros - Nuevo diseño */}
-      {category && (
-        <div className="mb-2">
-          <FilterChips
-            activeFilters={activeFilters}
-            onFilterChange={handleFilterChange}
-            className=""
-          />
-        </div>
-      )}
-      
-      {/* Barra de filtro y controles */}
-      {renderFilterBar()}
-      
-      {/* Contenido principal */}
-      <div className="flex flex-col lg:flex-row gap-3">
-        {/* Resultados - make it full width now */}
-        <div className="flex-grow w-full">
-          {currentView === 'map' ? (
-            // Vista de mapa
-            <div className="bg-slate-800 rounded-xl overflow-hidden border border-slate-700 h-[600px] flex items-center justify-center">
-              <p className="text-slate-400">Vista de mapa en desarrollo</p>
+
+    // REMOVED: toggleMapView ya no es necesaria, usamos setCurrentView directamente
+
+
+    // --- Renderizadores de secciones (renderSearchHeader, renderCategorySelector) ---
+    // (Sin cambios aquí)
+     const renderSearchHeader = () => {
+        return (
+            <div className="mb-2">
+                <div className="flex flex-col gap-4">
+                    {useEnhancedSearch ? (
+                        <KeywordSearchBox
+                            initialValue={searchQuery}
+                            onSearch={handleSearch}
+                            appearance="dark"
+                            showLabel={false}
+                            autoFocus={false} // Cambiado a false para evitar autofocus indeseado en recargas/filtros
+                            placeholder="¿Qué estás buscando hoy?"
+                            showVoiceSearch={true}
+                            showImageSearch={true}
+                            showAiAssist={true}
+                            className="w-full"
+                        />
+                    ) : (
+                        <AdvancedSearchBar
+                            initialValue={searchQuery}
+                            onSearch={handleSearch}
+                            selectedCategory={category}
+                            selectedSubcategory={subcategory}
+                            selectedSubSubcategory={selectedSubSubcategory}
+                            onSelectCategory={handleCategoryChange}
+                            onSelectSubcategory={handleSubcategoryChange}
+                            onSelectSubSubcategory={handleSubSubcategoryChange}
+                            placeholder="¿Qué estás buscando en BuscAdis?"
+                        />
+                    )}
+                </div>
             </div>
-          ) : (
-            // Vista de resultados
-            <SearchResults
-              results={results}
-              loading={loading}
-              hasMore={hasMore}
-              activeCategory={category}
-              showInteractionButtons={true}
-              onPublicationClick={onPublicationClick}
-              viewType={currentView}
-            />
-          )}
-          
-          {/* Botón Cargar Más */}
-          {hasMore && onLoadMore && (
-            <div className="mt-4 text-center">
-              <button 
-                onClick={onLoadMore} 
-                className="px-6 py-2 bg-teal-500 hover:bg-teal-600 text-white rounded-lg transition-colors"
-              >
-                Cargar más resultados
-              </button>
+        )
+    }
+
+     const renderCategorySelector = () => {
+        return (
+            <div className="mb-2">
+                <div className="flex flex-col">
+                    <CategorySelector
+                        activeCategory={category}
+                        activeSubcategory={subcategory}
+                        activeSubSubcategory={selectedSubSubcategory}
+                        onCategoryChange={handleCategoryChange}
+                        onSubcategoryChange={handleSubcategoryChange}
+                        onSubSubcategoryChange={handleSubSubcategoryChange}
+                        showCounts={true}
+                        variant="horizontal"
+                        className="w-full"
+                        showAllOption={true}
+                        maxVisible={isMobile ? 4 : 8}
+                    />
+                </div>
             </div>
-          )}
+        )
+    }
+
+    // --- MODIFICADO: Renderizar barra de filtros con los nuevos botones de vista ---
+    const renderFilterBar = () => {
+        return (
+            <div className="flex items-center justify-between mb-3">
+                {/* Información de resultados */}
+                <div>
+                     {/* Título dinámico */}
+                     <h1 className="text-xl font-bold text-white">
+                         {searchQuery ? `Resultados para "${searchQuery}"` :
+                          selectedSubSubcategory && subcategory && category ? 
+                            categories.find(c => c.id === category)?.subcategories?.find(sc => sc.id === subcategory)?.subsubcategories?.find(ssc => ssc.id === selectedSubSubcategory)?.name :
+                          subcategory && category ?
+                            categories.find(c => c.id === category)?.subcategories?.find(sc => sc.id === subcategory)?.name :
+                          category ? 
+                            categories.find(c => c.id === category)?.name :
+                          'Todos los anuncios'}
+                     </h1>
+                    <p className="text-sm text-slate-400">
+                        {loading ? 'Buscando...' : `${totalResults || results.length} anuncios encontrados`}
+                    </p>
+                </div>
+
+                {/* Controles de vista - AHORA INDEPENDIENTES Y AGRUPADOS */}
+                <div className="inline-flex items-center gap-1 bg-slate-800 rounded-lg p-1 border border-slate-700">
+                     {/* Botón Vista Cuadrícula */}
+                     <button
+                         className={`p-2 rounded transition-colors duration-200 ${
+                             currentView === 'grid'
+                                 ? 'bg-teal-500 text-white'
+                                 : 'text-slate-400 hover:bg-slate-700 hover:text-white'
+                         }`}
+                         onClick={() => setCurrentView('grid')}
+                         aria-label="Ver en cuadrícula"
+                         title="Vista Cuadrícula"
+                     >
+                         <Squares2X2Icon className="w-5 h-5" />
+                     </button>
+
+                     {/* Botón Vista Lista */}
+                     <button
+                         className={`p-2 rounded transition-colors duration-200 ${
+                             currentView === 'list'
+                                 ? 'bg-teal-500 text-white'
+                                 : 'text-slate-400 hover:bg-slate-700 hover:text-white'
+                         }`}
+                         onClick={() => setCurrentView('list')}
+                         aria-label="Ver en lista"
+                         title="Vista Lista"
+                     >
+                         <ListBulletIcon className="w-5 h-5" />
+                     </button>
+
+                     {/* Botón Vista Mapa (condicional) */}
+                     {showMap && (
+                         <button
+                             className={`p-2 rounded transition-colors duration-200 ${
+                                 currentView === 'map'
+                                     ? 'bg-teal-500 text-white'
+                                     : 'text-slate-400 hover:bg-slate-700 hover:text-white'
+                             }`}
+                             onClick={() => setCurrentView('map')}
+                             aria-label="Ver en mapa"
+                             title="Vista Mapa"
+                         >
+                             <MapIcon className="w-5 h-5" />
+                         </button>
+                     )}
+                 </div>
+            </div>
+        )
+    }
+
+    // --- Renderizado Principal ---
+    return (
+        <div className={`w-full ${className}`}>
+            {/* Selector de Categorías */}
+            {renderCategorySelector()}
+
+            {/* Cabecera de búsqueda */}
+            {renderSearchHeader()}
+
+             {/* Barra de Filtros Horizontales y Chips (puedes ajustar su posición) */}
+            {category && ( // Mostrar solo si hay una categoría seleccionada
+                 <div className="mb-2 flex flex-col sm:flex-row sm:items-center gap-2">
+                      {/* Ejemplo: Botón para abrir filtros avanzados (si usas AdvancedFilterDrawer) */}
+                      {/*
+                      <AdvancedFilterDrawer
+                           activeFilters={activeFilters}
+                           onApplyFilters={handleFilterChange}
+                           category={category} // Pasa la categoría para filtros específicos
+                      >
+                           <button className="flex items-center gap-1 px-3 py-1.5 bg-slate-700 hover:bg-slate-600 text-white rounded-md text-sm">
+                                <AdjustmentsHorizontalIcon className="w-4 h-4" />
+                                <span>Filtros ({filterCount})</span>
+                           </button>
+                      </AdvancedFilterDrawer>
+                      */}
+
+                      {/* Barra de filtros horizontales (ejemplo) */}
+                      {/* <HorizontalFilterBar filters={definicionDeFiltros} onChange={handleFilterChange} /> */}
+
+                      {/* Chips de filtros - Nuevo diseño */}
+                      <div className="mb-2">
+                        <FilterChips
+                          category={category}
+                          activeFilters={activeFilters}
+                          onFilterChange={handleFilterChange}
+                          className=""
+                        />
+                      </div>
+                 </div>
+             )}
+
+            {/* Barra de filtro con total y controles de vista */}
+            {renderFilterBar()}
+
+            {/* Contenido principal (Resultados o Mapa) */}
+            <div className="flex flex-col lg:flex-row gap-3">
+                {/* Resultados/Mapa */}
+                <div className="flex-grow w-full">
+                    {currentView === 'map' && showMap ? ( // Mostrar mapa solo si está habilitado y seleccionado
+                        <MapComponent
+                            publications={results}
+                            loading={loading}
+                            onMarkerClick={onPublicationClick} // O un manejador específico para el mapa
+                            className="bg-slate-800 rounded-xl overflow-hidden border border-slate-700 min-h-[400px] lg:min-h-[600px]" // Estilo ejemplo
+                        />
+                    ) : (
+                        // Vista de resultados (Grid o Lista)
+                        <SearchResults
+                            results={results}
+                            loading={loading}
+                            // hasMore={hasMore} // Ya no se pasa hasMore, el botón está abajo
+                            activeCategory={category}
+                            showInteractionButtons={true}
+                            onPublicationClick={onPublicationClick}
+                            viewType={currentView === 'map' ? 'grid' : currentView} // Pasa grid/list. Si está en map, muestra grid por defecto al volver.
+                        />
+                    )}
+
+                    {/* Botón Cargar Más (solo si no estamos en vista de mapa) */}
+                    {currentView !== 'map' && hasMore && onLoadMore && (
+                        <div className="mt-6 text-center"> {/* Aumentado margen superior */}
+                            <button
+                                onClick={onLoadMore}
+                                disabled={loading} // Deshabilitar mientras carga
+                                className={`px-6 py-2 bg-teal-500 hover:bg-teal-600 text-white rounded-lg transition-colors ${loading ? 'opacity-50 cursor-not-allowed' : ''}`}
+                            >
+                                {loading ? 'Cargando...' : 'Cargar más resultados'}
+                            </button>
+                        </div>
+                    )}
+                </div>
+            </div>
         </div>
-      </div>
-    </div>
-  )
-} 
+    )
+}

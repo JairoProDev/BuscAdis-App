@@ -272,12 +272,7 @@ export default function SearchResults({
     })
   }
     */}
-  // Improved handleChangeViewMode function with smooth transitions
-  const handleChangeViewMode = (mode: 'grid' | 'list') => {
-    // No hacemos nada aquí porque ahora el viewType es manejado por el componente padre
-    console.log('View mode changed to', mode);
-    // El modo de vista ahora es controlado por el padre
-  };
+
   
   // Renderizar item en vista de cuadrícula
   const renderGridItem = (publication: Publication, index: number) => {
@@ -817,25 +812,7 @@ export default function SearchResults({
   
   return (
     <div>
-      {/* Toggle de vista (grid/list) */}
-      <div className="flex justify-end mb-4">
-        <div className="inline-flex bg-slate-800 rounded-lg p-1 border border-slate-700">
-          <button 
-            className={`p-2 rounded ${viewType === 'grid' ? 'bg-teal-500 text-white' : 'text-slate-400 hover:text-white'}`}
-            onClick={() => handleChangeViewMode('grid')}
-            aria-label="Ver en cuadrícula"
-          >
-            <Squares2X2Icon className="w-5 h-5" />
-          </button>
-          <button 
-            className={`p-2 rounded ${viewType === 'list' ? 'bg-teal-500 text-white' : 'text-slate-400 hover:text-white'}`}
-            onClick={() => handleChangeViewMode('list')}
-            aria-label="Ver en lista"
-          >
-            <ListBulletIcon className="w-5 h-5" />
-          </button>
-        </div>
-      </div>
+
 
       {/* Toggle para resultados recientes (solo si hay resultados nuevos) */}
       {/*
