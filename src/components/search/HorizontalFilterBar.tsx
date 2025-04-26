@@ -80,28 +80,26 @@ export default function HorizontalFilterBar({
     
     return (
       <div className="relative" key={filterId}>
-        <Button
-          variant="outline"
-          size="sm"
-          className={`flex items-center gap-2 px-4 py-2 rounded-lg ${
+        <button
+          className={`flex items-center gap-1 py-2 px-3 rounded-lg text-sm transition-colors ${
             hasActiveValue 
-              ? 'bg-blue-100 text-blue-800 border-blue-200 dark:bg-blue-900/30 dark:text-blue-300 dark:border-blue-800/50'
-              : 'bg-white dark:bg-slate-800 text-slate-800 dark:text-white border-slate-200 dark:border-slate-700'
+              ? 'bg-blue-800/60 text-white font-medium hover:bg-blue-700/70'
+              : 'text-slate-200 hover:bg-slate-700/40'
           }`}
           onClick={() => setOpenFilter(isActive ? null : filterId)}
         >
           <span>{label}</span>
           {hasActiveValue && (
-            <span className="flex items-center justify-center bg-blue-500 text-white w-5 h-5 rounded-full text-xs font-medium">
+            <span className="inline-flex items-center justify-center bg-blue-500 text-white w-4 h-4 rounded-full text-xs font-medium ml-1">
               ✓
             </span>
           )}
-          <ChevronDownIcon className={`h-4 w-4 transition-transform ${isActive ? 'rotate-180' : ''}`} />
-        </Button>
+          <ChevronDownIcon className={`h-3 w-3 transition-transform ml-1 ${isActive ? 'rotate-180' : ''}`} />
+        </button>
         
         {isActive && (
           <div 
-            className="absolute z-30 top-full left-0 mt-1 min-w-[250px] max-w-[350px] bg-white dark:bg-slate-800 rounded-lg shadow-lg border border-slate-200 dark:border-slate-700 p-4"
+            className="absolute z-30 top-full left-0 mt-1 min-w-[220px] bg-slate-800 rounded-lg shadow-xl border border-slate-700 p-3"
             onClick={(e) => e.stopPropagation()}
           >
             {content}
@@ -118,10 +116,10 @@ export default function HorizontalFilterBar({
     switch (filter.type) {
       case 'range':
         return (
-          <div className="space-y-4 min-w-[200px]">
+          <div className="space-y-3 min-w-[180px]">
             <div className="flex justify-between">
-              <span className="text-sm text-slate-800 dark:text-white font-medium">{filter.label}</span>
-              <span className="text-sm text-slate-600 dark:text-slate-300">
+              <span className="text-xs text-slate-300 font-medium">{filter.label}</span>
+              <span className="text-xs text-slate-400">
                 {filter.format ? filter.format(value?.[0] || filter.min || 0) : value?.[0] || filter.min || 0} - 
                 {filter.format ? filter.format(value?.[1] || filter.max || 100) : value?.[1] || filter.max || 100}
               </span>
@@ -134,34 +132,33 @@ export default function HorizontalFilterBar({
               onValueChange={(newValue) => handleFilterChange(filter.id, newValue)}
             />
             <div className="pt-2 flex justify-between">
-              <Button 
-                variant="ghost" 
-                size="sm" 
+              <button 
+                className="text-xs text-slate-400 hover:text-slate-300"
                 onClick={() => setOpenFilter(null)}
               >
                 Cerrar
-              </Button>
-              <Button 
-                size="sm" 
+              </button>
+              <button 
+                className="text-xs text-blue-400 hover:text-blue-300 font-medium"
                 onClick={() => {
                   handleFilterChange(filter.id, [filter.min || 0, filter.max || 100]);
                   setOpenFilter(null);
                 }}
               >
                 Aplicar
-              </Button>
+              </button>
             </div>
           </div>
         );
         
       case 'select':
         return (
-          <div className="space-y-4 min-w-[200px]">
+          <div className="space-y-3 min-w-[180px]">
             <Select
               value={value || ''}
               onValueChange={(newValue) => handleFilterChange(filter.id, newValue)}
             >
-              <SelectTrigger>
+              <SelectTrigger className="border-slate-700 bg-slate-800 text-white text-sm">
                 <SelectValue placeholder="Seleccionar" />
               </SelectTrigger>
               <SelectContent>
@@ -173,14 +170,13 @@ export default function HorizontalFilterBar({
                 ))}
               </SelectContent>
             </Select>
-            <div className="pt-2 flex justify-end">
-              <Button 
-                variant="ghost" 
-                size="sm" 
+            <div className="pt-1 flex justify-end">
+              <button 
+                className="text-xs text-slate-400 hover:text-slate-300"
                 onClick={() => setOpenFilter(null)}
               >
                 Cerrar
-              </Button>
+              </button>
             </div>
           </div>
         );
@@ -188,13 +184,13 @@ export default function HorizontalFilterBar({
       case 'multiselect':
         const selectedValues = value || [];
         return (
-          <div className="space-y-4 min-w-[200px]">
-            <div className="flex flex-wrap gap-2">
+          <div className="space-y-3 min-w-[180px]">
+            <div className="flex flex-wrap gap-1">
               {filter.options?.map((option: FilterOption) => (
                 <Badge
                   key={option.value}
                   variant={selectedValues.includes(option.value) ? "default" : "outline"}
-                  className="cursor-pointer"
+                  className="cursor-pointer text-xs py-0.5 px-2"
                   onClick={() => {
                     const newValues = selectedValues.includes(option.value)
                       ? selectedValues.filter((v: string) => v !== option.value)
@@ -206,36 +202,34 @@ export default function HorizontalFilterBar({
                 </Badge>
               ))}
             </div>
-            <div className="pt-2 flex justify-end">
-              <Button 
-                variant="ghost" 
-                size="sm" 
+            <div className="pt-1 flex justify-end">
+              <button 
+                className="text-xs text-slate-400 hover:text-slate-300"
                 onClick={() => setOpenFilter(null)}
               >
                 Cerrar
-              </Button>
+              </button>
             </div>
           </div>
         );
         
       case 'toggle':
         return (
-          <div className="space-y-4 min-w-[200px]">
+          <div className="space-y-3 min-w-[180px]">
             <div className="flex items-center justify-between space-x-2">
-              <span className="text-sm text-slate-800 dark:text-white font-medium">{filter.label}</span>
+              <span className="text-xs text-slate-300 font-medium">{filter.label}</span>
               <Switch
                 checked={!!value}
                 onCheckedChange={(checked) => handleFilterChange(filter.id, checked)}
               />
             </div>
-            <div className="pt-2 flex justify-end">
-              <Button 
-                variant="ghost" 
-                size="sm" 
+            <div className="pt-1 flex justify-end">
+              <button 
+                className="text-xs text-slate-400 hover:text-slate-300"
                 onClick={() => setOpenFilter(null)}
               >
                 Cerrar
-              </Button>
+              </button>
             </div>
           </div>
         );
@@ -255,10 +249,10 @@ export default function HorizontalFilterBar({
 
   return (
     <div 
-      className={`w-full overflow-x-auto py-2 ${className}`}
+      className={`w-full overflow-x-auto pb-1 ${className}`}
       onClick={() => setOpenFilter(null)}
     >
-      <div className="flex items-center space-x-2 min-w-max">
+      <div className="flex items-center space-x-1 min-w-max">
         {/* Ordenar filter (always first) */}
         {filters.find(f => f.id === 'sortBy' || f.id === 'orderBy') && 
           renderFilterDropdown(
@@ -275,17 +269,15 @@ export default function HorizontalFilterBar({
         
         {/* Clear filters button (if any active) */}
         {filterCount > 0 && (
-          <Button
-            variant="ghost"
-            size="sm"
+          <button
             onClick={(e) => {
               e.stopPropagation();
               clearAllFilters();
             }}
-            className="text-red-500 hover:text-red-700 dark:text-red-400 dark:hover:text-red-300"
+            className="text-xs text-red-400 hover:text-red-300 ml-2"
           >
             Limpiar filtros ({filterCount})
-          </Button>
+          </button>
         )}
       </div>
     </div>

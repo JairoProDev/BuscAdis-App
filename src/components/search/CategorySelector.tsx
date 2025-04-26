@@ -210,175 +210,152 @@ export default function CategorySelector({
     }
   }
   
-  // Containerizar las categorías
-  const renderListSelector = () => {
+  // Modificar la función que renderiza los enlaces de categoría para que sean más limpios y pulidos
+  const renderHorizontalSelector = useCallback(() => {
+    if (categories.length === 0) {
+      return <div className="flex items-center justify-center"><LoadingSpinner /></div>
+    }
+
+    const visibleCategories = expanded 
+      ? categories 
+      : categories.slice(0, maxVisible)
+
     return (
-      <div className="w-full relative">
-        <motion.div 
-          className="relative px-1 py-1 overflow-hidden rounded-md backdrop-blur-md bg-slate-900/80 border border-slate-800/80 shadow-xl"
-          initial={{ opacity: 0, y: -20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.3 }}
-        >
-          <div className="flex overflow-x-auto hide-scrollbar py-1 -mx-1 relative z-10 justify-center">
+      <div className="flex flex-col">
+        <div className="flex items-center gap-2">
+          {/* Breadcrumbs en formato horizontal */}
+          {breadcrumbs.length > 0 && renderBreadcrumbs()}
+        </div>
+        
+        <div className="overflow-x-auto scrollbar-hide">
+          <div className="flex items-center min-w-max gap-1 mt-1">
+            {/* Opción "Todos" */}
             {showAllOption && (
-              <Link
-                href="/buscar"
-                onClick={(e) => {
-                  e.preventDefault();
-                  if (onCategoryChange) onCategoryChange('');
+              <button
+                onClick={() => {
+                  setSelectedCategory(null)
+                  setSelectedSubcategory(null)
+                  setSelectedSubSubcategory(null)
+                  setBreadcrumbs([])
+                  
+                  if (onCategoryChange) onCategoryChange('')
+                  if (onSubcategoryChange) onSubcategoryChange('')
+                  if (onSubSubcategoryChange) onSubSubcategoryChange('')
                 }}
-                className={`flex flex-col items-center justify-center px-4 py-2 min-w-[100px] rounded-md transition-all hover:scale-105 ${
-                  !activeCategory
-                    ? 'bg-gradient-to-br from-purple-600 to-violet-700 text-white shadow-lg shadow-purple-500/20 border border-purple-500/30'
-                    : 'bg-slate-800/90 hover:bg-slate-700/90 text-white backdrop-blur-sm border border-slate-700/50 hover:border-slate-600/50'
+                className={`flex items-center justify-center py-2 px-3 rounded-lg text-sm transition-colors ${
+                  !activeCategory 
+                    ? 'bg-teal-600/70 text-white font-medium'
+                    : 'text-slate-300 hover:bg-slate-800/60'
                 }`}
               >
-                <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 mb-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-                </svg>
-                <span className="text-sm font-medium">Todos</span>
+                <span className="flex items-center justify-center w-8 h-8 rounded-lg bg-slate-800 text-teal-500">
+                  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-5 h-5">
+                    <path fillRule="evenodd" d="M3 6a3 3 0 013-3h2.25a3 3 0 013 3v2.25a3 3 0 01-3 3H6a3 3 0 01-3-3V6zm9.75 0a3 3 0 013-3H18a3 3 0 013 3v2.25a3 3 0 01-3 3h-2.25a3 3 0 01-3-3V6zM3 15.75a3 3 0 013-3h2.25a3 3 0 013 3V18a3 3 0 01-3 3H6a3 3 0 01-3-3v-2.25zm9.75 0a3 3 0 013-3H18a3 3 0 013 3V18a3 3 0 01-3 3h-2.25a3 3 0 01-3-3v-2.25z" clipRule="evenodd" />
+                  </svg>
+                </span>
+                <span className="ml-2">Todos</span>
                 {showCounts && (
-                  <span className="text-xs opacity-80 font-mono mt-1">{categories.reduce((acc, cat) => acc + (cat.count || 0), 0)}</span>
+                  <span className="ml-2 text-xs py-0.5 px-2 rounded-full bg-slate-700/50 text-slate-300">
+                    6605
+                  </span>
                 )}
-              </Link>
-            )}
-
-            {categories.map((category) => {
-              const IconComponent = category.icon;
-              return (
-                <Link
-                  key={category.id}
-                  href={`/buscar/${category.slug}`}
-                  onClick={(e) => {
-                    e.preventDefault();
-                    handleCategoryClick(category.slug);
-                  }}
-                  className={`group flex flex-col items-center justify-center px-4 py-2 min-w-[100px] rounded-md mr-1 transition-all duration-200 hover:scale-105 ${
-                    activeCategory === category.id || activeCategory === category.slug
-                      ? 'bg-gradient-to-r from-teal-500 to-cyan-600 text-white shadow-lg shadow-teal-500/20'
-                      : 'bg-slate-800/90 hover:bg-slate-700/90 text-white backdrop-blur-sm border border-slate-700/50 hover:border-slate-600/50'
-                  }`}
-                >
-                  {category.image ? (
-                    <div className="h-8 w-8 mb-1 relative">
-                      <Image
-                        src={category.image}
-                        alt={category.name}
-                        width={32}
-                        height={32}
-                        className="object-contain drop-shadow-xl"
-                      />
-                    </div>
-                  ) : IconComponent ? (
-                    <IconComponent className="h-6 w-6 mb-1" />
-                  ) : (
-                    <div className="h-6 w-6 mb-1 bg-slate-700/50 rounded-lg"></div>
-                  )}
-                  <span className="text-sm font-medium">{category.name}</span>
-                  {showCounts && category.count && (
-                    <span className="text-xs opacity-80 font-mono mt-1">{category.count}</span>
-                  )}
-                </Link>
-              );
-            })}
-
-            {expanded === false && categories.length > maxVisible && (
-              <button
-                onClick={() => setExpanded(true)}
-                className="flex flex-col items-center justify-center min-w-[100px] px-4 py-2 rounded-md transition-all hover:scale-105 bg-slate-800/90 hover:bg-slate-700/90 text-white backdrop-blur-sm border border-slate-700/50 hover:border-slate-600/50"
-              >
-                <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 mb-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M19 9l-7 7-7-7" />
-                </svg>
-                <span className="text-sm font-medium">Ver más</span>
-                <span className="text-xs opacity-80 font-mono mt-1">+{categories.length - maxVisible}</span>
               </button>
             )}
+            
+            {/* Lista de categorías */}
+            {visibleCategories.map((category) => (
+              <button
+                key={category.id}
+                onClick={() => handleCategoryClick(category.slug)}
+                className={`flex items-center justify-center py-2 px-3 rounded-lg text-sm transition-colors ${
+                  activeCategory === category.slug 
+                    ? 'bg-teal-600/70 text-white font-medium'
+                    : 'text-slate-300 hover:bg-slate-800/60'
+                }`}
+              >
+                <span className="flex items-center justify-center w-8 h-8 rounded-lg bg-slate-800 text-teal-500">
+                  {category.icon && (
+                    <Image 
+                      src={category.icon} 
+                      alt={category.name} 
+                      width={24} 
+                      height={24} 
+                      className="w-5 h-5"
+                    />
+                  )}
+                </span>
+                <span className="ml-2">{category.name}</span>
+                {showCounts && category.count && (
+                  <span className="ml-2 text-xs py-0.5 px-2 rounded-full bg-slate-700/50 text-slate-300">
+                    {category.count}
+                  </span>
+                )}
+              </button>
+            ))}
           </div>
-          
-          <div className="absolute inset-0 pointer-events-none">
-            <div className="absolute left-0 top-0 bottom-0 w-8 bg-gradient-to-r from-slate-900/90 to-transparent z-20"></div>
-            <div className="absolute right-0 top-0 bottom-0 w-8 bg-gradient-to-l from-slate-900/90 to-transparent z-20"></div>
+        </div>
+        
+        {/* Subcategorías para la categoría seleccionada */}
+        {selectedCategory && showSubcategories && (
+          <div className="mt-3">
+            <AnimatePresence>
+              <motion.div
+                initial={{ opacity: 0, height: 0 }}
+                animate={{ opacity: 1, height: 'auto' }}
+                exit={{ opacity: 0, height: 0 }}
+                transition={{ duration: 0.2 }}
+                className="overflow-x-auto scrollbar-hide"
+              >
+                <div className="flex items-center min-w-max gap-1">
+                  {subcategories.map((subcategory) => (
+                    <button
+                      key={subcategory.id}
+                      onClick={() => handleSubcategoryClick(selectedCategory.slug, subcategory.slug)}
+                      className={`flex items-center py-1.5 px-3 rounded-lg text-sm transition-colors ${
+                        activeSubcategory === subcategory.slug 
+                          ? 'bg-blue-600/70 text-white font-medium'
+                          : 'text-slate-300 hover:bg-slate-800/60'
+                      }`}
+                    >
+                      {subcategory.icon && (
+                        <span className="text-blue-400 mr-2 text-lg">
+                          {subcategory.icon}
+                        </span>
+                      )}
+                      <span>{subcategory.name}</span>
+                      {showCounts && subcategory.count && (
+                        <span className="ml-2 text-xs py-0.5 px-2 rounded-full bg-slate-700/50 text-slate-300">
+                          {subcategory.count}
+                        </span>
+                      )}
+                    </button>
+                  ))}
+                </div>
+              </motion.div>
+            </AnimatePresence>
           </div>
-        </motion.div>
-
-        {/* Sub-navegación si hay una categoría seleccionada */}
-        <AnimatePresence mode="wait">
-          {subcategories.length > 0 && (
-            <motion.div
-              key="subcategories"
-              initial={{ opacity: 0, y: -10 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -10 }}
-              transition={{ duration: 0.3, delay: 0.1 }}
-              className="mt-2 pt-2 border-t border-slate-700/30"
-            >
-              <div className="relative px-1 py-1 overflow-hidden rounded-md backdrop-blur-sm bg-slate-900/60 border border-slate-800/60 shadow-lg">
-                <div className="flex overflow-x-auto hide-scrollbar py-1 px-1 -mx-1 gap-2 relative z-10">
-                  {subcategories.map((subcategory) => {
-                    const IconComponent = subcategory.icon;
-                    return (
-                      <Link
-                        key={subcategory.id}
-                        href={`/buscar/${activeCategory}/${subcategory.slug}`}
-                        onClick={(e) => {
-                          e.preventDefault()
-                          handleSubcategoryClick(activeCategory || '', subcategory.slug)
-                        }}
-                        className={`flex items-center px-4 py-1.5 rounded-md mr-1 text-sm whitespace-nowrap transition-all duration-200 ${
-                          activeSubcategory === subcategory.id || activeSubcategory === subcategory.slug
-                            ? 'bg-gradient-to-r from-teal-500 to-teal-400 text-white shadow-md' 
-                            : 'bg-slate-800/80 hover:bg-slate-700/80 text-white border border-slate-700/40 hover:border-slate-600/40 hover:scale-105'
-                        }`}
-                      >
-                        {subcategory.icon && (
-                          <IconComponent className="w-4 h-4 mr-2" />
-                        )}
-                        <span>{subcategory.name}</span>
-                        {showCounts && subcategory.count && (
-                          <span className="ml-2 px-2 py-0.5 bg-black/20 rounded-md text-xs font-mono">
-                            {subcategory.count}
-                          </span>
-                        )}
-                      </Link>
-                    );
-                  })}
-                </div>
-                <div className="absolute inset-0 pointer-events-none">
-                  <div className="absolute left-0 top-0 bottom-0 w-8 bg-gradient-to-r from-slate-900/90 to-transparent z-20"></div>
-                  <div className="absolute right-0 top-0 bottom-0 w-8 bg-gradient-to-l from-slate-900/90 to-transparent z-20"></div>
-                </div>
-              </div>
-            </motion.div>
-          )}
-          
-          {/* Sub-sub-navegación si hay una subcategoría seleccionada */}
-          {selectedSubcategory?.subSubcategories && selectedSubcategory.subSubcategories.length > 0 && (
-            <motion.div
-              key="subsubcategories"
-              initial={{ opacity: 0, y: -10 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -10 }}
-              transition={{ duration: 0.3, delay: 0.2 }}
-              className="mt-2"
-            >
-              <div className="relative px-1 py-1 overflow-hidden rounded-md backdrop-blur-sm bg-slate-900/40 border border-slate-800/40 shadow-lg">
-                <div className="flex overflow-x-auto hide-scrollbar py-1 px-1 -mx-1 gap-2 relative z-10">
-                  {selectedSubcategory.subSubcategories.map((subsubcategory) => (
-                    <Link
+        )}
+        
+        {/* Sub-subcategorías para la subcategoría seleccionada */}
+        {selectedSubcategory && showSubcategories && (
+          <div className="mt-2">
+            <AnimatePresence>
+              <motion.div
+                initial={{ opacity: 0, height: 0 }}
+                animate={{ opacity: 1, height: 'auto' }}
+                exit={{ opacity: 0, height: 0 }}
+                transition={{ duration: 0.2 }}
+                className="overflow-x-auto scrollbar-hide"
+              >
+                <div className="flex items-center min-w-max gap-1">
+                  {selectedSubcategory.subSubcategories?.map((subsubcategory) => (
+                    <button
                       key={subsubcategory.id}
-                      href={`/buscar/${selectedCategory?.slug}/${selectedSubcategory.slug}/${subsubcategory.slug}`}
-                      onClick={(e) => {
-                        e.preventDefault()
-                        handleSubSubcategorySelect(subsubcategory)
-                      }}
-                      className={`flex items-center px-3 py-1.5 rounded-md mr-1 text-xs whitespace-nowrap transition-all duration-200 ${
-                        activeSubSubcategory === subsubcategory.id || 
-                        activeSubSubcategory === subsubcategory.slug || 
-                        selectedSubSubcategory?.id === subsubcategory.id
-                          ? 'bg-gradient-to-r from-cyan-500 to-cyan-400 text-white shadow-md' 
-                          : 'bg-slate-800/60 hover:bg-slate-700/60 text-white border border-slate-700/40 hover:scale-105'
+                      onClick={() => handleSubSubcategorySelect(subsubcategory)}
+                      className={`flex items-center py-1 px-3 rounded-lg text-sm transition-colors ${
+                        activeSubSubcategory === subsubcategory.slug
+                          ? 'bg-purple-600/70 text-white font-medium'
+                          : 'text-slate-300 hover:bg-slate-800/60'
                       }`}
                     >
                       {subsubcategory.emoji && (
@@ -386,187 +363,46 @@ export default function CategorySelector({
                       )}
                       <span>{subsubcategory.name}</span>
                       {showCounts && subsubcategory.count && (
-                        <span className="ml-2 px-2 py-0.5 bg-black/20 rounded-md text-xs font-mono">
+                        <span className="ml-2 text-xs py-0.5 px-2 rounded-full bg-slate-700/50 text-slate-300">
                           {subsubcategory.count}
                         </span>
                       )}
-                    </Link>
+                    </button>
                   ))}
                 </div>
-                <div className="absolute inset-0 pointer-events-none">
-                  <div className="absolute left-0 top-0 bottom-0 w-8 bg-gradient-to-r from-slate-900/90 to-transparent z-20"></div>
-                  <div className="absolute right-0 top-0 bottom-0 w-8 bg-gradient-to-l from-slate-900/90 to-transparent z-20"></div>
-                </div>
-              </div>
-            </motion.div>
-          )}
-        </AnimatePresence>
+              </motion.div>
+            </AnimatePresence>
+          </div>
+        )}
       </div>
     )
-  }
+  }, [categories, subcategories, activeCategory, activeSubcategory, activeSubSubcategory, expanded, maxVisible, breadcrumbs, showCounts, showAllOption, showSubcategories])
   
-  // Renderizar selector en cuadrícula
-  const renderGridSelector = () => (
-    <div className="w-full p-2 pb-8">
-      <motion.div 
-        className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-4 w-full mb-6"
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        transition={{ duration: 0.3 }}
-      >
-        {/* Opción de "Todos" */}
-        <motion.div
-          whileHover={{ scale: 1.05 }}
-          whileTap={{ scale: 0.95 }}
-          className="col-span-full"
-        >
-          <Link
-            href="/buscar"
-            className={`flex flex-col items-center justify-center p-4 rounded-lg transition-all ${
-              !selectedCategory ? 'bg-primary/15 text-primary ring-2 ring-primary' : 'bg-muted/90 hover:bg-primary/10 text-muted-foreground hover:text-primary'
-            }`}
-            onClick={() => {
-              if (onCategoryChange) onCategoryChange('');
-            }}
-          >
-            <span className="font-semibold">Todos</span>
-          </Link>
-        </motion.div>
-
-        {/* Renderizar categorías */}
-        {categories.map((category, index) => (
-          <motion.div
-            key={category.id}
-            whileHover={{ scale: 1.05 }}
-            whileTap={{ scale: 0.95 }}
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.3, delay: index * 0.05 }}
-          >
-            <Link
-              href="#"
-              className={`flex flex-col items-center justify-center p-4 rounded-lg transition-all ${
-                selectedCategory?.id === category.id ? 'bg-primary/15 text-primary ring-2 ring-primary' : 'bg-muted/90 hover:bg-primary/10 text-muted-foreground hover:text-primary'
-              }`}
-              onClick={() => handleCategoryClick(category.slug)}
-            >
-              {category.image && (
-                <div className="p-2 rounded-full mb-2">
-                  <Image src={category.image} alt={category.name} width={40} height={40} className="transition-transform" />
-                </div>
-              )}
-              <span className="font-semibold text-center">{category.name}</span>
-            </Link>
-          </motion.div>
-        ))}
-      </motion.div>
-
-      {/* Subcategorías */}
-      <AnimatePresence>
-        {selectedCategory && (
-          <motion.div
-            initial={{ opacity: 0, height: 0 }}
-            animate={{ opacity: 1, height: 'auto' }}
-            exit={{ opacity: 0, height: 0 }}
-            transition={{ duration: 0.3 }}
-            className="mb-6"
-          >
-            <h3 className="font-semibold text-lg mb-3 px-2">Subcategorías de {selectedCategory.name}</h3>
-            <motion.div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3">
-              {selectedCategory.subcategories?.map((subcategory, index) => (
-                <motion.div
-                  key={subcategory.id}
-                  whileHover={{ scale: 1.03 }}
-                  whileTap={{ scale: 0.97 }}
-                  initial={{ opacity: 0, y: 10 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.2, delay: index * 0.03 }}
-                >
-                  <Link
-                    href="#"
-                    className={`flex items-center p-3 rounded-md transition-all ${
-                      selectedSubcategory?.id === subcategory.id ? 'bg-primary/15 text-primary ring-1 ring-primary' : 'bg-muted/80 hover:bg-primary/10 text-muted-foreground hover:text-primary'
-                    }`}
-                    onClick={() => handleSubcategoryClick(selectedCategory.slug, subcategory.slug)}
-                  >
-                    <span className="text-sm font-medium">{subcategory.name}</span>
-                  </Link>
-                </motion.div>
-              ))}
-            </motion.div>
-          </motion.div>
-        )}
-      </AnimatePresence>
-
-      {/* Sub-subcategorías */}
-      <AnimatePresence>
-        {selectedSubcategory && selectedSubcategory.subSubcategories && selectedSubcategory.subSubcategories.length > 0 && (
-          <motion.div
-            initial={{ opacity: 0, height: 0 }}
-            animate={{ opacity: 1, height: 'auto' }}
-            exit={{ opacity: 0, height: 0 }}
-            transition={{ duration: 0.3 }}
-          >
-            <h3 className="font-semibold text-lg mb-3 px-2">Subcategorías de {selectedSubcategory.name}</h3>
-            <motion.div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-3">
-              {selectedSubcategory.subSubcategories.map((subsubcategory, index) => (
-                <motion.div
-                  key={subsubcategory.id}
-                  whileHover={{ scale: 1.03 }}
-                  whileTap={{ scale: 0.97 }}
-                  initial={{ opacity: 0, y: 10 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.2, delay: index * 0.03 }}
-                >
-                  <Link
-                    href="#"
-                    className={`flex items-center p-3 rounded-md transition-all ${
-                      selectedSubSubcategory?.id === subsubcategory.id ? 'bg-primary/15 text-primary ring-1 ring-primary' : 'bg-muted/80 hover:bg-primary/10 text-muted-foreground hover:text-primary'
-                    }`}
-                    onClick={() => handleSubSubcategorySelect(subsubcategory)}
-                  >
-                    <span className="text-sm font-medium">{subsubcategory.name}</span>
-                  </Link>
-                </motion.div>
-              ))}
-            </motion.div>
-          </motion.div>
-        )}
-      </AnimatePresence>
-    </div>
-  )
-  
-  // Renderizar breadcrumbs de navegación
+  // Modificar la función que renderiza las migas de pan
   const renderBreadcrumbs = () => {
     if (breadcrumbs.length === 0) return null
     
     return (
-      <div className="flex items-center flex-wrap text-sm py-2 mb-2">
-        <Link href="/buscar" className="text-teal-400 hover:text-teal-300 transition-colors">
+      <div className="flex items-center text-sm">
+        <Link href="/buscar" className="text-teal-500 hover:text-teal-400">
           Buscar
         </Link>
         
         {breadcrumbs.map((crumb, index) => (
-          <div key={crumb.id} className="flex items-center">
-            <ChevronRightIcon className="h-4 w-4 mx-2 text-slate-500" />
+          <React.Fragment key={crumb.id}>
+            <ChevronRightIcon className="w-4 h-4 mx-1 text-slate-500" />
             
             {index === breadcrumbs.length - 1 ? (
-              <span className="font-medium text-white">{crumb.name}</span>
+              <span className="text-white font-medium">{crumb.name}</span>
             ) : (
               <Link
-                href={`/buscar/${
-                  crumb.type === 'category'
-                    ? crumb.id
-                    : crumb.type === 'subcategory'
-                    ? `${breadcrumbs[0].id}/${crumb.id}`
-                    : `${breadcrumbs[0].id}/${breadcrumbs[1].id}/${crumb.id}`
-                }`}
-                className="text-teal-400 hover:text-teal-300 transition-colors"
+                href={`/${breadcrumbs.slice(0, index + 1).map(c => c.id).join('/')}`}
+                className="text-teal-500 hover:text-teal-400"
               >
                 {crumb.name}
               </Link>
             )}
-          </div>
+          </React.Fragment>
         ))}
       </div>
     )
@@ -576,17 +412,18 @@ export default function CategorySelector({
   const renderSelector = () => {
     switch(variant) {
       case 'horizontal':
-        return renderListSelector()
+        return renderHorizontalSelector()
       case 'grid':
-        return renderGridSelector()
+        // Pendiente para implementar
+        return renderHorizontalSelector()
       case 'vertical':
         // Pendiente para implementar
-        return renderListSelector()
+        return renderHorizontalSelector()
       case 'tabs':
         // Pendiente para implementar
-        return renderListSelector()
+        return renderHorizontalSelector()
       default:
-        return renderListSelector()
+        return renderHorizontalSelector()
     }
   }
   
@@ -604,7 +441,6 @@ export default function CategorySelector({
   
   return (
     <div className={`w-full ${className}`}>
-      {renderBreadcrumbs()}
       {renderSelector()}
     </div>
   )

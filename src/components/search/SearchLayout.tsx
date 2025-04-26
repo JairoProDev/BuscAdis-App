@@ -245,7 +245,7 @@ export default function SearchLayout({
   // Renderizar selector de categorías
   const renderCategorySelector = () => {
     return (
-      <div className="mb-6 bg-slate-800/50 p-4 rounded-xl border border-slate-700">
+      <div className="mb-4">
         <CategorySelector
           activeCategory={category}
           activeSubcategory={subcategory}
@@ -342,12 +342,12 @@ export default function SearchLayout({
       
       {/* Horizontal Filter Bar - New! */}
       {category && (
-        <div className="mb-6">
+        <div className="mb-4">
           <HorizontalFilterBar
             category={category}
             activeFilters={activeFilters}
             onFilterChange={handleFilterChange}
-            className="bg-slate-800/50 p-2 rounded-xl border border-slate-700"
+            className=""
           />
         </div>
       )}
