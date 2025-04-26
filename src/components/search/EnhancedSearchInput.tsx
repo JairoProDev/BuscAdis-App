@@ -4,7 +4,6 @@ import { useState, useRef, useEffect } from 'react';
 import { Search, X, Mic, Camera, Sparkles, MicOff } from 'lucide-react';
 import { motion } from 'framer-motion';
 import SearchSuggestions from './SearchSuggestions';
-import { useMediaQuery } from '@/hooks/useMediaQuery';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/Button';
 
@@ -78,7 +77,7 @@ export default function EnhancedSearchInput({
       recognitionInstance.lang = 'es-ES';
       
       // Handle recognition results
-      recognitionInstance.onresult = (event: any) => {
+      recognitionInstance.onresult = (event: SpeechRecognitionEvent) => {
         const transcript = Array.from(event.results)
           .map((result: any) => result[0].transcript)
           .join('');
@@ -92,7 +91,7 @@ export default function EnhancedSearchInput({
       };
       
       // Handle errors
-      recognitionInstance.onerror = (event: any) => {
+      recognitionInstance.onerror = (event: SpeechRecognitionError) => {
         console.error('Error with speech recognition:', event.error);
         setIsRecording(false);
       };

@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useRef } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { Search, TrendingUp, Clock, Sparkles, X } from 'lucide-react'
+import { Search, TrendingUp, Clock, Sparkles, X, Tag, Filter, MapPin, Star, Flame } from 'lucide-react'
 import Image from 'next/image'
 
 interface SearchSuggestionsProps {
@@ -31,6 +31,7 @@ export default function SearchSuggestions({
   const [searchHistory, setSearchHistory] = useState<SuggestionItem[]>([])
   const [loading, setLoading] = useState(false)
   const [highlightedIndex, setHighlightedIndex] = useState(-1)
+  const [selectedFilter, setSelectedFilter] = useState<string | null>(null)
   const suggestionsRef = useRef<HTMLDivElement>(null)
   
   // Fetch suggestions from API based on search term
@@ -167,6 +168,21 @@ export default function SearchSuggestions({
     { text: "Muebles oficina ergonómicos", type: 'ai' as const, dataIndex: allItems.length + 9 }
   ] : []
   
+  // Quick filters
+  const quickFilters = [
+    { id: 'location', label: 'Ubicación', icon: <MapPin className="h-3 w-3" /> },
+    { id: 'price', label: 'Precio', icon: <Tag className="h-3 w-3" /> },
+    { id: 'rating', label: 'Valoración', icon: <Star className="h-3 w-3" /> },
+    { id: 'new', label: 'Más recientes', icon: <Flame className="h-3 w-3" /> },
+  ]
+  
+  // Mock exclusive offers
+  const exclusiveOffers = [
+    "¡30% descuento en anuncios destacados!",
+    "Publica gratis durante este fin de semana",
+    "Destaca tu anuncio con fotos premium"
+  ]
+  
   // Add AI suggestions to all items
   const displayItems = [...allItems, ...aiSuggestions]
   
@@ -179,12 +195,17 @@ export default function SearchSuggestions({
     if (searchTerm && suggestions.length > 0) height += 40 + Math.min(suggestions.length, 5) * 40;
     
     if (!searchTerm) {
-      if (trendingSearches.length > 0) height += 50;
-      if (searchHistory.length > 0) height += 50;
-      if (aiSuggestions.length > 0) height += 50;
+      // Add height for exclusive offers
+      height += 70;
+      // Add height for quick filters
+      height += 50;
+      
+      if (trendingSearches.length > 0) height += 70;
+      if (searchHistory.length > 0) height += 70;
+      if (aiSuggestions.length > 0) height += 100;
     }
     
-    return Math.min(height, 350);
+    return Math.min(height, 400);
   };
   
   if (!searchTerm && !trendingSearches.length && !searchHistory.length && !aiSuggestions.length) return null;
@@ -205,39 +226,93 @@ export default function SearchSuggestions({
         scrollbarColor: appearance === 'dark' ? '#334155 #1e293b' : '#e2e8f0 #f8fafc' 
       }}
     >
-      <div className="p-2 space-y-2">
+      <div className="p-2 space-y-3">
         {/* Loading indicator */}
         {loading && (
           <div className="flex items-center justify-center py-1">
             <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-blue-500"></div>
-            <span className="ml-2 text-xs">Buscando sugerencias...</span>
+            <span className="ml-2 text-sm">Buscando sugerencias...</span>
           </div>
         )}
         
         {/* No results message */}
         {searchTerm && !loading && suggestions.length === 0 && (
-          <div className="py-1 text-center text-xs opacity-70">
+          <div className="py-1 text-center text-sm opacity-70">
             No se encontraron sugerencias para &quot;{searchTerm}&quot;
+          </div>
+        )}
+        
+        {/* Quick filters */}
+        {!searchTerm && (
+          <div className="border-b pb-2 mb-2">
+            <div className="flex items-center mb-1">
+              <Filter className="h-4 w-4 mr-1 text-blue-500" />
+              <h3 className="text-sm font-medium">Filtros rápidos</h3>
+            </div>
+            <div className="flex flex-wrap gap-2">
+              {quickFilters.map(filter => (
+                <button
+                  key={filter.id}
+                  onClick={() => setSelectedFilter(filter.id === selectedFilter ? null : filter.id)}
+                  className={`flex items-center gap-1 px-3 py-1 rounded-full text-sm transition-colors ${
+                    selectedFilter === filter.id
+                      ? appearance === 'dark' 
+                        ? 'bg-blue-600 text-white' 
+                        : 'bg-blue-100 text-blue-700'
+                      : appearance === 'dark'
+                        ? 'bg-slate-700 hover:bg-slate-600'
+                        : 'bg-slate-100 hover:bg-slate-200'
+                  }`}
+                >
+                  {filter.icon}
+                  <span>{filter.label}</span>
+                </button>
+              ))}
+            </div>
+          </div>
+        )}
+        
+        {/* Exclusive offers */}
+        {!searchTerm && (
+          <div className="bg-gradient-to-r from-blue-500/20 to-purple-500/20 rounded-lg p-2 mb-2">
+            <div className="flex items-center mb-1">
+              <Tag className="h-4 w-4 mr-1 text-blue-500" />
+              <h3 className="text-sm font-medium">Ofertas exclusivas</h3>
+            </div>
+            <div className="space-y-1">
+              {exclusiveOffers.map((offer, index) => (
+                <div 
+                  key={index}
+                  className="flex items-center gap-2 text-sm"
+                >
+                  <Star className="h-3 w-3 text-yellow-500 flex-shrink-0" />
+                  <span>{offer}</span>
+                </div>
+              ))}
+            </div>
           </div>
         )}
         
         {/* Autocomplete suggestions */}
         {searchTerm && suggestions.length > 0 && (
           <div className="space-y-1">
-            <h3 className="text-xs font-medium uppercase opacity-60 px-1">Sugerencias</h3>
-            <ul className="flex flex-wrap gap-1">
+            <div className="flex items-center mb-1">
+              <Search className="h-4 w-4 mr-1 text-blue-500" />
+              <h3 className="text-sm font-medium">Sugerencias</h3>
+            </div>
+            <ul className="flex flex-wrap gap-1.5">
               {suggestions.map((item, index) => (
                 <li 
                   key={`suggestion-${index}`}
                   data-index={index}
                   onClick={() => onSelectSuggestion(item.text)}
-                  className={`flex items-center gap-1 px-2 py-1 rounded-lg cursor-pointer text-xs ${
+                  className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg cursor-pointer text-sm ${
                     highlightedIndex === index 
                       ? appearance === 'dark' ? 'bg-slate-700' : 'bg-slate-100'
                       : 'hover:bg-opacity-10 hover:bg-white'
                   }`}
                 >
-                  <Search className="h-3 w-3 opacity-70 flex-shrink-0" />
+                  <Search className="h-4 w-4 opacity-70 flex-shrink-0" />
                   <span className="truncate">{item.text}</span>
                 </li>
               ))}
@@ -247,27 +322,27 @@ export default function SearchSuggestions({
         
         {/* Trending, History and AI in a horizontal layout when no search term */}
         {!searchTerm && (
-          <div className="space-y-2">
+          <div className="space-y-3">
             {/* Trending searches */}
             {trendingSearches.length > 0 && (
-              <div className="space-y-1">
-                <h3 className="text-xs font-medium uppercase flex items-center gap-1 opacity-60 px-1">
-                  <TrendingUp className="h-3 w-3" />
-                  Tendencias
-                </h3>
-                <div className="flex flex-wrap gap-1">
+              <div className="space-y-1.5">
+                <div className="flex items-center mb-1">
+                  <TrendingUp className="h-4 w-4 mr-1 text-rose-500" />
+                  <h3 className="text-sm font-medium">Tendencias</h3>
+                </div>
+                <div className="flex flex-wrap gap-1.5">
                   {trendingSearches.map((item, index) => (
                     <button 
                       key={`trending-${index}`}
                       data-index={suggestions.length + index}
                       onClick={() => onSelectSuggestion(item.text)}
-                      className={`flex items-center gap-1 px-2 py-0.5 rounded-full text-xs cursor-pointer ${
+                      className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-sm cursor-pointer ${
                         highlightedIndex === (suggestions.length + index)
                           ? appearance === 'dark' ? 'bg-slate-700' : 'bg-slate-100'
                           : appearance === 'dark' ? 'bg-slate-800 hover:bg-slate-700' : 'bg-slate-50 hover:bg-slate-100'
                       } border ${appearance === 'dark' ? 'border-slate-700' : 'border-slate-200'}`}
                     >
-                      <TrendingUp className="h-3 w-3 text-rose-500" />
+                      <TrendingUp className="h-3.5 w-3.5 text-rose-500" />
                       <span className="truncate">{item.text}</span>
                     </button>
                   ))}
@@ -277,12 +352,12 @@ export default function SearchSuggestions({
 
             {/* Search history */}
             {searchHistory.length > 0 && (
-              <div className="space-y-1">
-                <div className="flex items-center justify-between px-1">
-                  <h3 className="text-xs font-medium uppercase flex items-center gap-1 opacity-60">
-                    <Clock className="h-3 w-3" />
-                    Búsquedas recientes
-                  </h3>
+              <div className="space-y-1.5">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center">
+                    <Clock className="h-4 w-4 mr-1 text-blue-500" />
+                    <h3 className="text-sm font-medium">Búsquedas recientes</h3>
+                  </div>
                   <button 
                     onClick={() => {
                       localStorage.removeItem('searchHistory')
@@ -295,18 +370,18 @@ export default function SearchSuggestions({
                     Borrar
                   </button>
                 </div>
-                <div className="flex flex-wrap gap-1">
+                <div className="flex flex-wrap gap-1.5">
                   {searchHistory.map((item, index) => (
                     <div 
                       key={`history-${index}`}
                       data-index={suggestions.length + trendingSearches.length + index}
-                      className={`flex items-center px-2 py-0.5 rounded-full text-xs cursor-pointer ${
+                      className={`flex items-center px-3 py-1.5 rounded-full text-sm cursor-pointer ${
                         highlightedIndex === (suggestions.length + trendingSearches.length + index)
                           ? appearance === 'dark' ? 'bg-slate-700' : 'bg-slate-100'
                           : appearance === 'dark' ? 'bg-slate-800 hover:bg-slate-700' : 'bg-slate-50 hover:bg-slate-100'
                       } border ${appearance === 'dark' ? 'border-slate-700' : 'border-slate-200'}`}
                     >
-                      <Clock className="h-3 w-3 opacity-70 mr-1" />
+                      <Clock className="h-3.5 w-3.5 opacity-70 mr-1.5" />
                       <span className="truncate cursor-pointer" onClick={() => onSelectSuggestion(item.text)}>{item.text}</span>
                       <button
                         onClick={(e) => {
@@ -315,11 +390,11 @@ export default function SearchSuggestions({
                           setSearchHistory(filtered)
                           localStorage.setItem('searchHistory', JSON.stringify(filtered.map(item => item.text)))
                         }}
-                        className="ml-1 opacity-60 hover:opacity-100"
+                        className="ml-1.5 opacity-60 hover:opacity-100"
                         aria-label="Eliminar esta búsqueda del historial"
                         title="Eliminar esta búsqueda"
                       >
-                        <X className="h-3 w-3" />
+                        <X className="h-3.5 w-3.5" />
                       </button>
                     </div>
                   ))}
@@ -329,24 +404,24 @@ export default function SearchSuggestions({
             
             {/* AI suggestions - in a horizontal layout */}
             {aiSuggestions.length > 0 && (
-              <div className="space-y-1">
-                <h3 className="text-xs font-medium uppercase flex items-center gap-1 opacity-60 px-1">
-                  <Sparkles className="h-3 w-3" />
-                  Sugerencias inteligentes
-                </h3>
-                <div className="flex flex-wrap gap-1">
+              <div className="space-y-1.5">
+                <div className="flex items-center">
+                  <Sparkles className="h-4 w-4 mr-1 text-purple-500" />
+                  <h3 className="text-sm font-medium">Sugerencias inteligentes</h3>
+                </div>
+                <div className="flex flex-wrap gap-1.5">
                   {aiSuggestions.map((item, index) => (
                     <button 
                       key={`ai-${index}`}
                       data-index={item.dataIndex}
                       onClick={() => onSelectSuggestion(item.text)}
-                      className={`flex items-center gap-1 px-2 py-0.5 rounded-full text-xs cursor-pointer ${
+                      className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-sm cursor-pointer ${
                         highlightedIndex === item.dataIndex
                           ? appearance === 'dark' ? 'bg-slate-700' : 'bg-slate-100'
                           : appearance === 'dark' ? 'bg-slate-800 hover:bg-slate-700' : 'bg-slate-50 hover:bg-slate-100'
                       } border ${appearance === 'dark' ? 'border-slate-700' : 'border-slate-200'} ${index < 4 ? 'bg-gradient-to-r from-blue-500/10 to-purple-500/10' : ''}`}
                     >
-                      <div className="flex-shrink-0 flex items-center justify-center h-3 w-3 bg-gradient-to-br from-blue-500 to-purple-500 rounded-full">
+                      <div className="flex-shrink-0 flex items-center justify-center h-3.5 w-3.5 bg-gradient-to-br from-blue-500 to-purple-500 rounded-full">
                         <Sparkles className="h-2 w-2 text-white" />
                       </div>
                       <span className="truncate">{item.text}</span>
