@@ -276,8 +276,8 @@ export default function CategorySelector({
       const visibleCategories = categories.slice(0, visibleCount);
       
       return (
-        <ScrollArea className="w-full pb-4" orientation="horizontal">
-          <div className="flex space-x-2 px-1 py-1">
+        <div className="w-full overflow-x-auto pb-2">
+          <div className="inline-flex space-x-2 px-1">
             {/* Opción "Todas las categorías" */}
             {showAllOption && (
               <button
@@ -288,14 +288,14 @@ export default function CategorySelector({
                     window.history.pushState({}, '', '/buscar')
                   }
                 }}
-                className={`flex flex-col items-center min-w-[90px] max-w-[90px] py-3 px-2 rounded-lg transition-all ${
+                className={`flex flex-col items-center min-w-[80px] max-w-[80px] py-2 px-1 rounded-lg transition-all ${
                   !activeCategory
                     ? 'bg-gradient-to-b from-slate-700 to-slate-800 border border-slate-600 shadow-md'
                     : 'bg-slate-800 hover:bg-slate-700 border border-slate-700'
                 }`}
               >
-                <div className="w-12 h-12 mb-2 flex items-center justify-center bg-slate-700 rounded-lg">
-                  <HomeIcon className="w-6 h-6 text-teal-400" />
+                <div className="w-10 h-10 mb-1 flex items-center justify-center bg-slate-700 rounded-lg">
+                  <HomeIcon className="w-5 h-5 text-teal-400" />
                 </div>
                 <span className="text-xs font-medium whitespace-nowrap text-center text-white">Todos</span>
               </button>
@@ -306,18 +306,18 @@ export default function CategorySelector({
               <button
                 key={category.id}
                 onClick={() => handleCategoryClick(category.slug)}
-                className={`flex flex-col items-center min-w-[90px] max-w-[90px] py-3 px-2 rounded-lg transition-all ${
+                className={`flex flex-col items-center min-w-[80px] max-w-[80px] py-2 px-1 rounded-lg transition-all ${
                   activeCategory === category.slug
                     ? 'bg-gradient-to-b from-slate-700 to-slate-800 border border-slate-600 shadow-md'
                     : 'bg-slate-800 hover:bg-slate-700 border border-slate-700'
                 }`}
               >
-                <div className="w-12 h-12 mb-2 rounded-lg overflow-hidden relative">
+                <div className="w-10 h-10 mb-1 rounded-lg overflow-hidden relative">
                   <Image
                     src={`/images/categories/${category.slug}.jpg`}
                     alt={category.name}
                     fill
-                    sizes="48px"
+                    sizes="40px"
                     className="object-cover"
                     onError={(e) => {
                       // Fallback a la imagen predeterminada
@@ -340,16 +340,16 @@ export default function CategorySelector({
             {categories.length > maxVisible && !expanded && (
               <button
                 onClick={() => setExpanded(true)}
-                className="flex flex-col items-center min-w-[90px] max-w-[90px] py-3 px-2 rounded-lg bg-slate-800 hover:bg-slate-700 border border-slate-700"
+                className="flex flex-col items-center min-w-[80px] max-w-[80px] py-2 px-1 rounded-lg bg-slate-800 hover:bg-slate-700 border border-slate-700"
               >
-                <div className="w-12 h-12 mb-2 flex items-center justify-center bg-slate-700 rounded-lg">
-                  <ChevronRightIcon className="w-6 h-6 text-teal-400" />
+                <div className="w-10 h-10 mb-1 flex items-center justify-center bg-slate-700 rounded-lg">
+                  <ChevronRightIcon className="w-5 h-5 text-teal-400" />
                 </div>
                 <span className="text-xs font-medium whitespace-nowrap text-white">Ver más</span>
               </button>
             )}
           </div>
-        </ScrollArea>
+        </div>
       );
     };
     
@@ -360,23 +360,25 @@ export default function CategorySelector({
       }
 
       return (
-        <div className="mt-4">
-          <h3 className="text-sm font-medium text-slate-400 mb-2">Subcategorías</h3>
-          <ScrollArea className="w-full pb-2" orientation="horizontal">
-            <div className="flex flex-wrap gap-2 py-1">
+        <div className="mt-2">
+          <div className="flex items-center mb-1">
+            <h3 className="text-xs font-medium text-slate-400">Subcategorías</h3>
+          </div>
+          <div className="w-full overflow-x-auto">
+            <div className="inline-flex gap-2 py-1 flex-nowrap">
               {subcategories.map((subcategory) => {
                 const Icon = subcategory.icon;
                 return (
                   <button
                     key={subcategory.id}
                     onClick={() => handleSubcategoryClick(activeCategory, subcategory.slug)}
-                    className={`flex items-center space-x-2 rounded-md py-1.5 px-3 text-sm transition-colors ${
+                    className={`flex items-center space-x-2 rounded-md py-1 px-2 text-sm transition-colors whitespace-nowrap ${
                       activeSubcategory === subcategory.slug
                         ? 'bg-gradient-to-r from-teal-500 to-teal-600 text-white'
                         : 'bg-slate-800 text-white hover:bg-slate-700'
                     }`}
                   >
-                    <div className={`flex-shrink-0 w-6 h-6 rounded p-1 ${
+                    <div className={`flex-shrink-0 w-5 h-5 rounded p-1 ${
                       activeSubcategory === subcategory.slug 
                         ? 'bg-teal-400/20 text-white' 
                         : 'bg-slate-700 text-teal-400'
@@ -388,7 +390,7 @@ export default function CategorySelector({
                 );
               })}
             </div>
-          </ScrollArea>
+          </div>
         </div>
       );
     };
@@ -406,15 +408,17 @@ export default function CategorySelector({
       }
 
       return (
-        <div className="mt-3">
-          <h3 className="text-sm font-medium text-slate-400 mb-2">Especialidades</h3>
-          <ScrollArea className="w-full pb-2" orientation="horizontal">
-            <div className="flex flex-wrap gap-2 py-1">
+        <div className="mt-2">
+          <div className="flex items-center mb-1">
+            <h3 className="text-xs font-medium text-slate-400">Especialidades</h3>
+          </div>
+          <div className="w-full overflow-x-auto">
+            <div className="inline-flex gap-2 py-1 flex-nowrap">
               {selectedSubcat.subSubcategories.map((subsubcategory) => (
                 <button
                   key={subsubcategory.id}
                   onClick={() => handleSubSubcategorySelect(subsubcategory)}
-                  className={`inline-flex items-center py-1 px-2.5 text-xs rounded transition-colors ${
+                  className={`inline-flex items-center py-1 px-2 text-xs rounded transition-colors whitespace-nowrap ${
                     activeSubSubcategory === subsubcategory.slug
                       ? 'bg-gradient-to-r from-blue-500 to-blue-600 text-white'
                       : 'bg-slate-800 text-white hover:bg-slate-700'
@@ -425,7 +429,7 @@ export default function CategorySelector({
                 </button>
               ))}
             </div>
-          </ScrollArea>
+          </div>
         </div>
       );
     };
@@ -433,7 +437,7 @@ export default function CategorySelector({
     return (
       <div className="w-full">
         {showBreadcrumbs && renderBreadcrumbs()}
-        <div className="space-y-2 mt-2">
+        <div className="space-y-1">
           {renderCategories()}
           {renderSubcategories()}
           {renderSubSubcategories()}

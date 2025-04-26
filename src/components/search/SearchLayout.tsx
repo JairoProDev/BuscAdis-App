@@ -262,8 +262,8 @@ export default function SearchLayout({
   // Renderizar selector de categorías con estilo mejorado
   const renderCategorySelector = () => {
     return (
-      <div className="mb-4 p3 ">
-        <div className="flex flex-col space-y-2">
+      <div className="mb-2">
+        <div className="flex flex-col">
           <CategorySelector
             activeCategory={category}
             activeSubcategory={subcategory}
@@ -285,10 +285,10 @@ export default function SearchLayout({
   // Renderizar barra de filtros
   const renderFilterBar = () => {
     return (
-      <div className="flex items-center justify-between mb-8">
+      <div className="flex items-center justify-between mb-3">
         {/* Información de resultados */}
         <div>
-          <h1 className="text-2xl font-bold text-white mb-1">
+          <h1 className="text-xl font-bold text-white">
             {searchQuery ? (
               <span>Resultados para &quot;{searchQuery}&quot;</span>
             ) : category ? (
@@ -298,7 +298,7 @@ export default function SearchLayout({
             )}
           </h1>
           
-          <p className="text-slate-400">
+          <p className="text-sm text-slate-400">
             {loading ? 'Buscando...' : `${totalResults || results.length} anuncios encontrados`}
           </p>
         </div>
@@ -363,7 +363,7 @@ export default function SearchLayout({
       
       {/* Horizontal Filter Bar - New! */}
       {category && (
-        <div className="mb-4">
+        <div className="mb-2">
           <HorizontalFilterBar
             category={category}
             activeFilters={activeFilters}
@@ -377,22 +377,7 @@ export default function SearchLayout({
       {renderFilterBar()}
       
       {/* Contenido principal */}
-      <div className="flex flex-col lg:flex-row gap-6">
-        {/* Panel de filtros (Optional - can be commented out if only using horizontal filters) */}
-        {/*
-        {isLg && (
-          <div className="w-full lg:w-72 flex-shrink-0">
-            <SearchFilters
-              category={category}
-              activeFilters={activeFilters}
-              onFiltersChange={handleFilterChange}
-              className="sticky top-4"
-              compact={false}
-            />
-          </div>
-        )}
-        */}
-        
+      <div className="flex flex-col lg:flex-row gap-3">
         {/* Resultados - make it full width now */}
         <div className="flex-grow w-full">
           {currentView === 'map' ? (
@@ -415,7 +400,7 @@ export default function SearchLayout({
           
           {/* Botón Cargar Más */}
           {hasMore && onLoadMore && (
-            <div className="mt-6 text-center">
+            <div className="mt-4 text-center">
               <button 
                 onClick={onLoadMore} 
                 className="px-6 py-2 bg-teal-500 hover:bg-teal-600 text-white rounded-lg transition-colors"
