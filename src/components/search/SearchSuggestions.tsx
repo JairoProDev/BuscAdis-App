@@ -156,17 +156,59 @@ export default function SearchSuggestions({
   
   // Generate more AI suggestions based on current context
   const aiSuggestions = !searchTerm ? [
-    { text: "Departamentos con vista al mar", type: 'ai' as const, dataIndex: allItems.length },
-    { text: "Autos familiares económicos", type: 'ai' as const, dataIndex: allItems.length + 1 },
-    { text: "Casas en venta con jardín", type: 'ai' as const, dataIndex: allItems.length + 2 },
-    { text: "Motos usadas buen estado", type: 'ai' as const, dataIndex: allItems.length + 3 },
-    { text: "Oficinas en alquiler centro", type: 'ai' as const, dataIndex: allItems.length + 4 },
-    { text: "Terrenos construcción cerca ciudad", type: 'ai' as const, dataIndex: allItems.length + 5 },
-    { text: "Teléfonos móviles gama alta", type: 'ai' as const, dataIndex: allItems.length + 6 },
-    { text: "Portatiles para estudiantes", type: 'ai' as const, dataIndex: allItems.length + 7 },
-    { text: "Bicicletas montaña aluminio", type: 'ai' as const, dataIndex: allItems.length + 8 },
-    { text: "Muebles oficina ergonómicos", type: 'ai' as const, dataIndex: allItems.length + 9 }
-  ] : []
+    // Inmuebles
+    { text: "Departamentos con vista al mar", type: 'ai' as const, category: 'inmuebles', dataIndex: allItems.length },
+    { text: "Casas en venta con jardín", type: 'ai' as const, category: 'inmuebles', dataIndex: allItems.length + 1 },
+    { text: "Oficinas en alquiler centro", type: 'ai' as const, category: 'inmuebles', dataIndex: allItems.length + 2 },
+    { text: "Terrenos construcción cerca ciudad", type: 'ai' as const, category: 'inmuebles', dataIndex: allItems.length + 3 },
+    
+    // Vehículos
+    { text: "Autos familiares económicos", type: 'ai' as const, category: 'vehiculos', dataIndex: allItems.length + 4 },
+    { text: "Motos usadas buen estado", type: 'ai' as const, category: 'vehiculos', dataIndex: allItems.length + 5 },
+    { text: "Camionetas 4x4 seminuevas", type: 'ai' as const, category: 'vehiculos', dataIndex: allItems.length + 6 },
+    { text: "Autos eléctricos segunda mano", type: 'ai' as const, category: 'vehiculos', dataIndex: allItems.length + 7 },
+    
+    // Tecnología
+    { text: "Teléfonos móviles gama alta", type: 'ai' as const, category: 'tecnologia', dataIndex: allItems.length + 8 },
+    { text: "Laptops para estudiantes", type: 'ai' as const, category: 'tecnologia', dataIndex: allItems.length + 9 },
+    { text: "Cámaras digitales profesionales", type: 'ai' as const, category: 'tecnologia', dataIndex: allItems.length + 10 },
+    { text: "Smartwatches con GPS", type: 'ai' as const, category: 'tecnologia', dataIndex: allItems.length + 11 },
+    
+    // Hogar
+    { text: "Muebles oficina ergonómicos", type: 'ai' as const, category: 'hogar', dataIndex: allItems.length + 12 },
+    { text: "Electrodomésticos eficientes", type: 'ai' as const, category: 'hogar', dataIndex: allItems.length + 13 },
+    { text: "Muebles exterior resistentes agua", type: 'ai' as const, category: 'hogar', dataIndex: allItems.length + 14 },
+    { text: "Colchones ortopédicos nuevos", type: 'ai' as const, category: 'hogar', dataIndex: allItems.length + 15 },
+    
+    // Empleos
+    { text: "Trabajos remotos programación", type: 'ai' as const, category: 'empleos', dataIndex: allItems.length + 16 },
+    { text: "Empleos medio tiempo estudiantes", type: 'ai' as const, category: 'empleos', dataIndex: allItems.length + 17 },
+    { text: "Ofertas trabajo sin experiencia", type: 'ai' as const, category: 'empleos', dataIndex: allItems.length + 18 },
+    { text: "Vacantes bilingües marketing", type: 'ai' as const, category: 'empleos', dataIndex: allItems.length + 19 },
+    
+    // Servicios
+    { text: "Clases particulares matemáticas", type: 'ai' as const, category: 'servicios', dataIndex: allItems.length + 20 },
+    { text: "Técnicos reparación emergencias", type: 'ai' as const, category: 'servicios', dataIndex: allItems.length + 21 },
+    { text: "Cuidadores mascotas fines semana", type: 'ai' as const, category: 'servicios', dataIndex: allItems.length + 22 },
+    { text: "Diseñadores web freelance", type: 'ai' as const, category: 'servicios', dataIndex: allItems.length + 23 },
+  ] : [];
+  
+  // Función para seleccionar aleatoriamente 10 sugerencias de la lista completa
+  const getRandomizedAiSuggestions = () => {
+    if (aiSuggestions.length === 0) return [];
+    
+    // Desordenar la lista
+    const shuffled = [...aiSuggestions].sort(() => Math.random() - 0.5);
+    
+    // Tomar los primeros 10 elementos (o menos si no hay suficientes)
+    return shuffled.slice(0, 10);
+  };
+  
+  // Obtener sugerencias IA aleatorizadas
+  const randomizedAiSuggestions = getRandomizedAiSuggestions();
+  
+  // Add AI suggestions to all items
+  const displayItems = [...allItems, ...randomizedAiSuggestions];
   
   // Quick filters
   const quickFilters = [
@@ -182,9 +224,6 @@ export default function SearchSuggestions({
     "Publica gratis durante este fin de semana",
     "Destaca tu anuncio con fotos premium"
   ]
-  
-  // Add AI suggestions to all items
-  const displayItems = [...allItems, ...aiSuggestions]
   
   // Calculate max height based on content
   const getMaxHeight = () => {
@@ -272,26 +311,6 @@ export default function SearchSuggestions({
           </div>
         )}
         
-        {/* Exclusive offers */}
-        {!searchTerm && (
-          <div className="bg-gradient-to-r from-blue-500/20 to-purple-500/20 rounded-lg p-2 mb-2">
-            <div className="flex items-center mb-1">
-              <Tag className="h-4 w-4 mr-1 text-blue-500" />
-              <h3 className="text-sm font-medium">Ofertas exclusivas</h3>
-            </div>
-            <div className="space-y-1">
-              {exclusiveOffers.map((offer, index) => (
-                <div 
-                  key={index}
-                  className="flex items-center gap-2 text-sm"
-                >
-                  <Star className="h-3 w-3 text-yellow-500 flex-shrink-0" />
-                  <span>{offer}</span>
-                </div>
-              ))}
-            </div>
-          </div>
-        )}
         
         {/* Autocomplete suggestions */}
         {searchTerm && suggestions.length > 0 && (
@@ -401,7 +420,28 @@ export default function SearchSuggestions({
                 </div>
               </div>
             )}
-            
+
+        {/* Exclusive offers */}
+        {!searchTerm && (
+          <div className="bg-gradient-to-r from-blue-500/20 to-purple-500/20 rounded-lg p-2 mb-2">
+            <div className="flex items-center mb-1">
+              <Tag className="h-4 w-4 mr-1 text-blue-500" />
+              <h3 className="text-sm font-medium">Ofertas exclusivas</h3>
+            </div>
+            <div className="space-y-1">
+              {exclusiveOffers.map((offer, index) => (
+                <div 
+                  key={index}
+                  className="flex items-center gap-2 text-sm"
+                >
+                  <Star className="h-3 w-3 text-yellow-500 flex-shrink-0" />
+                  <span>{offer}</span>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+                    
             {/* AI suggestions - in a horizontal layout */}
             {aiSuggestions.length > 0 && (
               <div className="space-y-1.5">

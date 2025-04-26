@@ -77,8 +77,8 @@ export default function EnhancedSearchInput({
       recognitionInstance.lang = 'es-ES';
       
       // Handle recognition results
-      recognitionInstance.onresult = (event: SpeechRecognitionEvent) => {
-        const transcript = Array.from(event.results)
+      recognitionInstance.onresult = (event: any) => {
+        const transcript = Array.from(event.results as any)
           .map((result: any) => result[0].transcript)
           .join('');
         
@@ -91,7 +91,7 @@ export default function EnhancedSearchInput({
       };
       
       // Handle errors
-      recognitionInstance.onerror = (event: SpeechRecognitionError) => {
+      recognitionInstance.onerror = (event: any) => {
         console.error('Error with speech recognition:', event.error);
         setIsRecording(false);
       };
@@ -191,38 +191,178 @@ export default function EnhancedSearchInput({
   const handleAiAssist = () => {
     setIsAiThinking(true);
     
-    // Simulate AI thinking and generating suggestions
+    // Simulación de procesamiento AI y generación de sugerencias contextuales
     setTimeout(() => {
-      const aiSuggestions = [
-        "Departamentos cerca de universidades",
-        "Trabajos de medio tiempo en tecnología",
-        "Autos económicos con buen rendimiento"
+      // Lista ampliada de sugerencias por categorías
+      const suggestionsByCategory: Record<string, string[]> = {
+        // Inmuebles
+        inmuebles: [
+          "Departamentos con vista al mar en Lima",
+          "Casas con jardín cerca de colegios",
+          "Oficinas en alquiler zona financiera",
+          "Locales comerciales en avenidas principales",
+          "Terrenos para construcción con servicios",
+          "Departamentos amueblados para estudiantes",
+          "Casas de campo a menos de 1 hora de la ciudad",
+          "Habitaciones para estudiantes cerca de universidades",
+          "Departamentos pet friendly con terraza",
+          "Oficinas de coworking por día",
+          "Estacionamientos en venta zona residencial",
+          "Terrenos industriales cerca de carreteras principales"
+        ],
+        // Vehículos
+        vehiculos: [
+          "Autos familiares económicos en combustible",
+          "Camionetas 4x4 para trabajo pesado",
+          "Motos usadas en buen estado",
+          "Autos híbridos de segunda mano",
+          "Furgonetas para reparto a buen precio",
+          "Autos clásicos restaurados",
+          "Camiones pequeños para mudanzas",
+          "Motos de alta cilindrada",
+          "Autos automáticos con poco kilometraje",
+          "Vehículos con sistema GPS integrado",
+          "Motos scooter para ciudad",
+          "Camionetas con asientos para niños"
+        ],
+        // Empleos
+        empleos: [
+          "Trabajos de medio tiempo en tecnología",
+          "Empleos de marketing digital con inglés",
+          "Vacantes para desarrolladores web remotos",
+          "Puestos administrativos sin experiencia",
+          "Empleos en educación con horario flexible",
+          "Trabajos para estudiantes fin de semana",
+          "Oportunidades en startups con beneficios",
+          "Empleos de atención al cliente bilingües",
+          "Puestos en logística y distribución",
+          "Trabajos para profesionales de la salud",
+          "Empleos en hostelería temporada alta",
+          "Oportunidades para diseñadores freelance"
+        ],
+        // Electrónica y tecnología
+        tecnologia: [
+          "Laptops para estudiantes bajo presupuesto",
+          "Smartphones con buena cámara usados",
+          "Tablets para diseño gráfico",
+          "Consolas de videojuegos última generación",
+          "Televisores Smart TV 4K en oferta",
+          "Cámaras fotográficas profesionales",
+          "Auriculares inalámbricos calidad/precio",
+          "Componentes para PC gaming",
+          "Impresoras multifunción para oficina",
+          "Drones con cámara estabilizada",
+          "Monitores ultrawide para trabajo",
+          "Dispositivos smart home económicos"
+        ],
+        // Servicios
+        servicios: [
+          "Servicios de limpieza por horas",
+          "Profesores particulares a domicilio",
+          "Técnicos de reparación electrodomésticos",
+          "Servicios de catering para eventos pequeños",
+          "Abogados consulta online",
+          "Contadores para pequeñas empresas",
+          "Diseñadores web freelance",
+          "Fotógrafos para eventos familiares",
+          "Servicios de jardinería semanal",
+          "Plomeros con disponibilidad inmediata",
+          "Electricistas certificados",
+          "Servicios de traducción urgentes"
+        ],
+        // Hogar y muebles
+        hogar: [
+          "Muebles de oficina ergonómicos",
+          "Sofás cama para espacios pequeños",
+          "Cocinas integrales a medida",
+          "Electrodomésticos seminuevos garantizados",
+          "Mesas extensibles para comedores",
+          "Camas con almacenamiento inferior",
+          "Sillas de oficina con soporte lumbar",
+          "Muebles de exterior resistentes",
+          "Lámparas de diseño económicas",
+          "Armarios modulares para habitaciones",
+          "Juegos de comedor para familias grandes",
+          "Escritorios minimalistas para home office"
+        ],
+        // Categoría general
+        general: [
+          "Artículos deportivos poco uso",
+          "Instrumentos musicales para principiantes",
+          "Ropa de marca segunda mano",
+          "Libros universitarios actualizados",
+          "Bicicletas urbanas ligeras",
+          "Juguetes educativos por edad",
+          "Herramientas profesionales de construcción",
+          "Artículos para mascotas grandes",
+          "Maquinaria para pequeños negocios",
+          "Artículos coleccionables vintage",
+          "Equipamiento para gimnasio en casa",
+          "Productos orgánicos y ecológicos"
+        ]
+      };
+      
+      // Identificar la categoría seleccionada (esto sería implementado según la estructura de tu app)
+      // Por ahora simulamos una detección básica basada en el último término buscado o una categoría por defecto
+      let detectedCategory = 'general';
+      
+      try {
+        // Intentar obtener la última búsqueda para inferir interés
+        const lastSearches = JSON.parse(localStorage.getItem('searchHistory') || '[]');
+        const lastSearch = lastSearches[0]?.toLowerCase() || '';
+        
+        // Lógica simple para inferir la categoría por palabras clave
+        if (lastSearch.includes('departamento') || lastSearch.includes('casa') || lastSearch.includes('alquiler') || 
+            lastSearch.includes('terreno') || lastSearch.includes('oficina')) {
+          detectedCategory = 'inmuebles';
+        } else if (lastSearch.includes('auto') || lastSearch.includes('moto') || lastSearch.includes('camioneta') || 
+                  lastSearch.includes('vehículo') || lastSearch.includes('coche')) {
+          detectedCategory = 'vehiculos';
+        } else if (lastSearch.includes('trabajo') || lastSearch.includes('empleo') || lastSearch.includes('vacante') || 
+                  lastSearch.includes('curriculum') || lastSearch.includes('salario')) {
+          detectedCategory = 'empleos';
+        } else if (lastSearch.includes('laptop') || lastSearch.includes('smartphone') || lastSearch.includes('tablet') || 
+                  lastSearch.includes('electrónica') || lastSearch.includes('gadget')) {
+          detectedCategory = 'tecnologia';
+        } else if (lastSearch.includes('limpieza') || lastSearch.includes('servicio') || lastSearch.includes('técnico') || 
+                  lastSearch.includes('reparación') || lastSearch.includes('profesional')) {
+          detectedCategory = 'servicios';
+        } else if (lastSearch.includes('mueble') || lastSearch.includes('sofá') || lastSearch.includes('mesa') || 
+                  lastSearch.includes('cama') || lastSearch.includes('silla')) {
+          detectedCategory = 'hogar';
+        }
+      } catch (error) {
+        console.error('Error al analizar historial de búsqueda:', error);
+        // Mantener categoría general por defecto
+      }
+      
+      // Seleccionar sugerencias de la categoría detectada y algunas generales
+      const categorySpecificSuggestions = suggestionsByCategory[detectedCategory] || [];
+      const generalSuggestions = suggestionsByCategory.general;
+      
+      // Combinar y mezclar 
+      const combinedSuggestions = [
+        ...categorySpecificSuggestions,
+        ...generalSuggestions.slice(0, 4) // Agregar algunas sugerencias generales
       ];
       
-      // Pick a random suggestion
-      const randomSuggestion = aiSuggestions[Math.floor(Math.random() * aiSuggestions.length)];
+      // Desordenar el array para mostrar resultados aleatorios
+      const shuffledSuggestions = combinedSuggestions.sort(() => Math.random() - 0.5);
+      
+      // Seleccionar una sugerencia aleatoria
+      const randomSuggestion = shuffledSuggestions[Math.floor(Math.random() * shuffledSuggestions.length)];
+      
+      // Solo mostrar la sugerencia en el campo de búsqueda sin ejecutar la búsqueda
       setSearchTerm(randomSuggestion);
       setIsAiThinking(false);
       
-      // Auto-submit after a short delay
-      setTimeout(() => {
-        onSearch(randomSuggestion, null);
-      }, 500);
+      // Enfocar el campo de búsqueda para mejorar UX
+      if (inputRef.current) {
+        inputRef.current.focus();
+      }
     }, 1500);
   };
   
-  const bgColorClass = appearance === 'dark' 
-    ? 'bg-slate-800/70 focus-within:bg-slate-700/90' 
-    : 'bg-white focus-within:bg-white';
-    
-  const textColorClass = appearance === 'dark'
-    ? 'text-slate-200 placeholder-slate-400'
-    : 'text-slate-900 placeholder-slate-500';
-    
-  const borderClass = appearance === 'dark'
-    ? 'border-slate-700 focus-within:border-slate-600'
-    : 'border-slate-200 focus-within:border-slate-300';
-
   return (
     <div className={cn('relative w-full', className)}>
       <form
