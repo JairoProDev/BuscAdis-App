@@ -393,38 +393,121 @@ export default function SearchLayout({
     // --- Renderizado Principal - COMPLETAMENTE RESTRUCTURADO
     return (
         <div className={`w-full ${className}`}>
-            {/* Main container - split into left (search UI) and right (map) */}
+            {/* COMPLETELY RESTRUCTURED: Fixed two-column layout */}
             <div className="flex flex-col lg:flex-row h-[calc(100vh-120px)] min-h-[600px]">
-                {/* Left side - Search UI and Results (constrained width) */}
-                <div className={`${!isMobile && isMapVisible ? 'lg:w-[55%] xl:w-[50%] pr-4' : 'w-full'} flex flex-col overflow-hidden`}>
-                    {/* Search UI Elements */}
-                    <div className="flex-none mb-4">
-                        {/* Category selector */}
-                        {renderCategorySelector()}
-                        
-                        {/* Search bar */}
-                        {renderSearchHeader()}
-                        
-                        {/* Filters */}
-                        {category && (
-                            <div className="mb-4">
-                                <div className="relative z-20 overflow-visible">
-                                    <FilterChips
-                                        category={category}
-                                        activeFilters={activeFilters}
-                                        onFilterChange={handleFilterChange}
-                                        className="pt-1 pb-0"
-                                    />
-                                </div>
-                            </div>
-                        )}
-                        
-                        {/* Result counts and view controls */}
-                        {renderFilterBar()}
+                {/* LEFT COLUMN - Search interface and results */}
+                <div className="w-full lg:w-1/2 lg:pr-4">
+                    {/* Category selector - constrained to left column */}
+                    <div className="mb-4">
+                        <CategorySelector
+                            activeCategory={category}
+                            activeSubcategory={subcategory}
+                            activeSubSubcategory={selectedSubSubcategory}
+                            onCategoryChange={handleCategoryChange}
+                            onSubcategoryChange={handleSubcategoryChange}
+                            onSubSubcategoryChange={handleSubSubcategoryChange}
+                            showCounts={true}
+                            variant="horizontal"
+                            className="w-full"
+                            showAllOption={true}
+                            maxVisible={isMobile ? 4 : 8}
+                        />
                     </div>
                     
-                    {/* Search Results - scrollable */}
-                    <div className="flex-grow overflow-y-auto pr-2">
+                    {/* Search bar - constrained to left column */}
+                    <div className="mb-4">
+                        {useEnhancedSearch ? (
+                            <KeywordSearchBox
+                                initialValue={searchQuery}
+                                onSearch={handleSearch}
+                                appearance="dark"
+                                showLabel={false}
+                                autoFocus={false}
+                                placeholder="¿Qué estás buscando hoy?"
+                                showVoiceSearch={true}
+                                showImageSearch={true}
+                                showAiAssist={true}
+                                className="w-full"
+                            />
+                        ) : (
+                            <AdvancedSearchBar
+                                initialValue={searchQuery}
+                                onSearch={handleSearch}
+                                selectedCategory={category}
+                                selectedSubcategory={subcategory}
+                                selectedSubSubcategory={selectedSubSubcategory}
+                                onSelectCategory={handleCategoryChange}
+                                onSelectSubcategory={handleSubcategoryChange}
+                                onSelectSubSubcategory={handleSubSubcategoryChange}
+                                placeholder="¿Qué estás buscando en BuscAdis?"
+                            />
+                        )}
+                    </div>
+                    
+                    {/* Filter chips - constrained to left column */}
+                    {category && (
+                        <div className="mb-4">
+                            <FilterChips
+                                category={category}
+                                activeFilters={activeFilters}
+                                onFilterChange={handleFilterChange}
+                                className="pt-1 pb-0"
+                            />
+                        </div>
+                    )}
+                    
+                    {/* Result header and view toggles - constrained to left column */}
+                    <div className="flex items-center justify-between mb-4">
+                        <div>
+                            <h1 className="text-xl font-bold text-white">
+                                {searchQuery ? `Resultados para "${searchQuery}"` :
+                                 selectedSubSubcategory && subcategory && category ? 
+                                   categories.find(c => c.id === category)?.subcategories?.find(sc => sc.id === subcategory)?.subsubcategories?.find(ssc => ssc.id === selectedSubSubcategory)?.name :
+                                 subcategory && category ?
+                                   categories.find(c => c.id === category)?.subcategories?.find(sc => sc.id === subcategory)?.name :
+                                 category ? 
+                                   categories.find(c => c.id === category)?.name :
+                                 'Todos los anuncios'}
+                            </h1>
+                            <p className="text-sm text-slate-400">
+                                {loading ? 'Buscando...' : `${totalResults || results.length} anuncios encontrados`}
+                            </p>
+                        </div>
+
+                        {/* View toggle buttons - ONLY IN LEFT COLUMN */}
+                        <div className="inline-flex items-center gap-1 bg-slate-800 rounded-lg p-1 border border-slate-700">
+                            {/* Grid view button */}
+                            <button
+                                className={`p-2 rounded transition-colors duration-200 ${
+                                    listViewMode === 'grid'
+                                        ? 'bg-teal-500 text-white'
+                                        : 'text-slate-400 hover:bg-slate-700 hover:text-white'
+                                }`}
+                                onClick={() => setListViewMode('grid')}
+                                aria-label="Ver en cuadrícula"
+                                title="Vista Cuadrícula"
+                            >
+                                <Squares2X2Icon className="w-5 h-5" />
+                            </button>
+
+                            {/* List view button */}
+                            <button
+                                className={`p-2 rounded transition-colors duration-200 ${
+                                    listViewMode === 'list'
+                                        ? 'bg-teal-500 text-white'
+                                        : 'text-slate-400 hover:bg-slate-700 hover:text-white'
+                                }`}
+                                onClick={() => setListViewMode('list')}
+                                aria-label="Ver en lista"
+                                title="Vista Lista"
+                            >
+                                <ListBulletIcon className="w-5 h-5" />
+                            </button>
+                        </div>
+                    </div>
+                    
+                    {/* Search results - scrollable area in left column */}
+                    <div className="h-[calc(100vh-300px)] overflow-y-auto pr-2">
                         <SearchResults
                             results={results}
                             loading={loading}
@@ -453,97 +536,109 @@ export default function SearchLayout({
                     </div>
                 </div>
                 
-                {/* Right side - Map or Publication Details */}
-                {(!isMobile || (isMobile && isMapVisible)) && showMap && (
-                    <div className="lg:w-[45%] xl:w-[50%] lg:pl-2 h-full flex-shrink-0 mt-4 lg:mt-0">
-                        {selectedPublication ? (
-                            // Publication details
-                            <div className="bg-slate-800 rounded-xl overflow-hidden border border-slate-700 h-full p-4">
-                                <div className="flex justify-between items-start mb-4">
-                                    <h2 className="text-xl font-bold text-white">{selectedPublication.title}</h2>
-                                    <button
-                                        onClick={() => setSelectedPublication(null)}
-                                        className="p-1 rounded-full bg-slate-700 hover:bg-slate-600 text-slate-300"
-                                        aria-label="Cerrar detalles"
-                                        title="Cerrar"
-                                    >
-                                        <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                                        </svg>
-                                    </button>
-                                </div>
-                                
-                                {selectedPublication.images && selectedPublication.images.length > 0 && (
-                                    <div className="relative h-64 mb-4 rounded-lg overflow-hidden">
-                                        <img
-                                            src={selectedPublication.images[0]}
-                                            alt={selectedPublication.title}
-                                            className="w-full h-full object-cover"
-                                        />
-                                    </div>
-                                )}
-                                
-                                {selectedPublication.price && (
-                                    <p className="text-2xl font-bold text-teal-400 mb-2">
-                                        {new Intl.NumberFormat('es-PE', {
-                                            style: 'currency',
-                                            currency: selectedPublication.currency || 'PEN',
-                                            maximumFractionDigits: 0
-                                        }).format(selectedPublication.price)}
-                                    </p>
-                                )}
-                                
-                                <p className="text-slate-300 mb-4">{selectedPublication.description}</p>
-                                
-                                {selectedPublication.location && typeof selectedPublication.location !== 'string' && (
-                                    <div className="mb-4">
-                                        <h3 className="text-lg font-semibold text-white mb-2">Ubicación</h3>
-                                        <div className="flex items-center text-slate-400 mb-1">
-                                            <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2 text-teal-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
-                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                {/* RIGHT COLUMN - Map or Publication details */}
+                {!isMobile && showMap && (
+                    <div className="w-full lg:w-1/2 lg:pl-4 h-full">
+                        <div className="relative h-full">
+                            {/* Toggle button for map visibility */}
+                            <button
+                                className="absolute top-4 right-4 z-10 flex items-center justify-center gap-1 px-3 py-1.5 rounded-lg bg-teal-500 text-white hover:bg-teal-600 transition-colors shadow-lg"
+                                onClick={toggleMapVisibility}
+                                aria-label={isMapVisible ? 'Ocultar mapa' : 'Mostrar mapa'}
+                                title={isMapVisible ? 'Ocultar mapa' : 'Mostrar mapa'}
+                            >
+                                <MapIcon className="w-5 h-5" />
+                                <span className="font-medium">{isMapVisible ? 'Ocultar mapa' : 'Mostrar mapa'}</span>
+                            </button>
+                            
+                            {/* Either show the map or publication details */}
+                            {selectedPublication ? (
+                                // Publication details
+                                <div className="bg-slate-800 rounded-xl overflow-hidden border border-slate-700 h-full p-4">
+                                    <div className="flex justify-between items-start mb-4">
+                                        <h2 className="text-xl font-bold text-white">{selectedPublication.title}</h2>
+                                        <button
+                                            onClick={() => setSelectedPublication(null)}
+                                            className="p-1 rounded-full bg-slate-700 hover:bg-slate-600 text-slate-300"
+                                            aria-label="Cerrar detalles"
+                                            title="Cerrar"
+                                        >
+                                            <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
                                             </svg>
-                                            <span>
-                                                {[
-                                                    selectedPublication.location.address, 
-                                                    selectedPublication.location.district, 
-                                                    selectedPublication.location.province
-                                                ].filter(Boolean).join(', ')}
-                                            </span>
-                                        </div>
+                                        </button>
                                     </div>
-                                )}
-                                
-                                <div className="flex gap-2 mt-4">
-                                    <button 
-                                        className="flex-1 py-2 bg-teal-500 hover:bg-teal-600 text-white font-medium rounded-lg"
-                                        aria-label="Contactar"
-                                    >
-                                        Contactar
-                                    </button>
-                                    <button 
-                                        className="px-3 py-2 bg-slate-700 hover:bg-slate-600 text-white rounded-lg"
-                                        aria-label="Me gusta"
-                                        title="Me gusta"
-                                    >
-                                        <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
-                                        </svg>
-                                    </button>
-                                    <button 
-                                        className="px-3 py-2 bg-slate-700 hover:bg-slate-600 text-white rounded-lg"
-                                        aria-label="Guardar"
-                                        title="Guardar"
-                                    >
-                                        <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z" />
-                                        </svg>
-                                    </button>
+                                    
+                                    {selectedPublication.images && selectedPublication.images.length > 0 && (
+                                        <div className="relative h-64 mb-4 rounded-lg overflow-hidden">
+                                            <img
+                                                src={selectedPublication.images[0]}
+                                                alt={selectedPublication.title}
+                                                className="w-full h-full object-cover"
+                                            />
+                                        </div>
+                                    )}
+                                    
+                                    {selectedPublication.price && (
+                                        <p className="text-2xl font-bold text-teal-400 mb-2">
+                                            {new Intl.NumberFormat('es-PE', {
+                                                style: 'currency',
+                                                currency: selectedPublication.currency || 'PEN',
+                                                maximumFractionDigits: 0
+                                            }).format(selectedPublication.price)}
+                                        </p>
+                                    )}
+                                    
+                                    <p className="text-slate-300 mb-4">{selectedPublication.description}</p>
+                                    
+                                    {selectedPublication.location && typeof selectedPublication.location !== 'string' && (
+                                        <div className="mb-4">
+                                            <h3 className="text-lg font-semibold text-white mb-2">Ubicación</h3>
+                                            <div className="flex items-center text-slate-400 mb-1">
+                                                <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2 text-teal-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                                                </svg>
+                                                <span>
+                                                    {[
+                                                        selectedPublication.location.address, 
+                                                        selectedPublication.location.district, 
+                                                        selectedPublication.location.province
+                                                    ].filter(Boolean).join(', ')}
+                                                </span>
+                                            </div>
+                                        </div>
+                                    )}
+                                    
+                                    <div className="flex gap-2 mt-4">
+                                        <button 
+                                            className="flex-1 py-2 bg-teal-500 hover:bg-teal-600 text-white font-medium rounded-lg"
+                                            aria-label="Contactar"
+                                        >
+                                            Contactar
+                                        </button>
+                                        <button 
+                                            className="px-3 py-2 bg-slate-700 hover:bg-slate-600 text-white rounded-lg"
+                                            aria-label="Me gusta"
+                                            title="Me gusta"
+                                        >
+                                            <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
+                                            </svg>
+                                        </button>
+                                        <button 
+                                            className="px-3 py-2 bg-slate-700 hover:bg-slate-600 text-white rounded-lg"
+                                            aria-label="Guardar"
+                                            title="Guardar"
+                                        >
+                                            <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z" />
+                                            </svg>
+                                        </button>
+                                    </div>
                                 </div>
-                            </div>
-                        ) : (
-                            // Map View
-                            <div className="relative h-full">
+                            ) : (
+                                // Map view
                                 <MapView
                                     publications={results}
                                     selectedPublicationId={null}
@@ -551,26 +646,13 @@ export default function SearchLayout({
                                     loading={loading}
                                     className="bg-slate-800 rounded-xl overflow-hidden border border-slate-700 h-full"
                                 />
-                                
-                                {/* Desktop Map Toggle Button */}
-                                {!isMobile && (
-                                    <button
-                                        className="absolute top-4 right-4 z-10 flex items-center justify-center gap-1 px-3 py-1.5 rounded-lg bg-teal-500 text-white hover:bg-teal-600 transition-colors shadow-lg"
-                                        onClick={toggleMapVisibility}
-                                        aria-label="Ocultar mapa"
-                                        title="Ocultar mapa"
-                                    >
-                                        <MapIcon className="w-5 h-5" />
-                                        <span className="font-medium">Ocultar mapa</span>
-                                    </button>
-                                )}
-                            </div>
-                        )}
+                            )}
+                        </div>
                     </div>
                 )}
-
-                {/* Mobile-only floating map button */}
-                {isMobile && showMap && !isMapVisible && (
+                
+                {/* Mobile-only floating map button when map is hidden */}
+                {isMobile && showMap && (
                     <button
                         className="fixed bottom-4 right-4 bg-teal-500 text-white p-3 rounded-full shadow-lg z-10"
                         onClick={toggleMapVisibility}
