@@ -49,7 +49,7 @@ interface SearchLayoutProps {
     useEnhancedSearch?: boolean
 }
 
-type ViewMode = 'grid' | 'list' | 'map';
+type ViewMode = 'grid' | 'list';
 
 export default function SearchLayout({
     initialResults = [],
@@ -77,7 +77,7 @@ export default function SearchLayout({
     const [subcategory, setSubcategory] = useState(initialSubcategory || searchParams?.get('subcategory') || '')
     const [selectedSubSubcategory, setSelectedSubSubcategory] = useState(searchParams?.get('subsubcategory') || '')
     const [results, setResults] = useState<Publication[]>(initialResults)
-    const [currentView, setCurrentView] = useState<ViewMode>('grid')
+    const [listViewMode, setListViewMode] = useState<ViewMode>('grid')
     const [activeFilters, setActiveFilters] = useState<Record<string, unknown>>({})
     const [categories, setCategories] = useState<Array<{ 
       id: string, 
@@ -93,12 +93,14 @@ export default function SearchLayout({
     }>>([])
     // New state for the selected publication in map view
     const [selectedPublication, setSelectedPublication] = useState<Publication | null>(null)
+    // State to control map visibility
+    const [isMapVisible, setIsMapVisible] = useState(true)
 
     // Responsive - solo usamos isMobile
     const isMobile = useMediaQuery('(max-width: 640px)')
+    const isTablet = useMediaQuery('(max-width: 1024px)')
 
     // --- Hooks (useEffect para cargar categorías y actualizar resultados) ---
-    // (Sin cambios aquí, mantenemos la lógica existente)
     useEffect(() => {
         const loadCategories = async () => {
             try {
@@ -113,7 +115,6 @@ export default function SearchLayout({
 
     useEffect(() => {
         // Solo actualiza si initialResults es diferente de nulo/undefined
-        // Evita borrar resultados si initialResults viene vacío en renderizados posteriores
         if (initialResults) {
              setResults(initialResults);
         }
@@ -124,18 +125,16 @@ export default function SearchLayout({
         setSelectedPublication(publication);
     }
 
-    // Toggle map view function
-    const toggleMapView = () => {
-        if (currentView === 'map') {
-            setCurrentView('grid');
-            setSelectedPublication(null); // Clear selected publication when exiting map view
-        } else {
-            setCurrentView('map');
+    // Toggle map visibility
+    const toggleMapVisibility = () => {
+        setIsMapVisible(!isMapVisible);
+        if (selectedPublication && !isMapVisible) {
+            // If we're showing the map again and there's a selected publication, clear it
+            setSelectedPublication(null);
         }
     }
 
     // --- Manejadores de eventos (handleSearch, handleCategoryChange, etc.) ---
-    // (Sin cambios aquí, mantenemos la lógica existente para búsqueda y filtros)
     const handleSearch = (query: string, options?: Record<string, string>) => {
         setSearchQuery(query)
         const newParams = new URLSearchParams(searchParams?.toString());
@@ -259,18 +258,17 @@ export default function SearchLayout({
     }
 
     // --- Renderizadores de secciones (renderSearchHeader, renderCategorySelector) ---
-    // (Sin cambios aquí)
-     const renderSearchHeader = () => {
+    const renderSearchHeader = () => {
         return (
             <div className="mb-2">
-                <div className="flex flex-col gap-4">
+                <div className="flex flex-col gap-4 max-w-3xl">
                     {useEnhancedSearch ? (
                         <KeywordSearchBox
                             initialValue={searchQuery}
                             onSearch={handleSearch}
                             appearance="dark"
                             showLabel={false}
-                            autoFocus={false} // Cambiado a false para evitar autofocus indeseado en recargas/filtros
+                            autoFocus={false}
                             placeholder="¿Qué estás buscando hoy?"
                             showVoiceSearch={true}
                             showImageSearch={true}
@@ -297,7 +295,7 @@ export default function SearchLayout({
 
      const renderCategorySelector = () => {
         return (
-            <div className="mb-2">
+            <div className="mb-4">
                 <div className="flex flex-col">
                     <CategorySelector
                         activeCategory={category}
@@ -317,7 +315,7 @@ export default function SearchLayout({
         )
     }
 
-    // --- MODIFICADO: Renderizar barra de filtros con los nuevos botones de vista ---
+    // --- MODIFICADO: Renderizar barra de filtros con los botones de vista y mapa ---
     const renderFilterBar = () => {
         return (
             <div className="flex items-center justify-between mb-3">
@@ -339,139 +337,112 @@ export default function SearchLayout({
                     </p>
                 </div>
 
-                {/* Controles de vista - AHORA INDEPENDIENTES Y AGRUPADOS */}
-                <div className="inline-flex items-center gap-1 bg-slate-800 rounded-lg p-1 border border-slate-700">
-                     {/* Botón Vista Cuadrícula */}
-                     <button
-                         className={`p-2 rounded transition-colors duration-200 ${
-                             currentView === 'grid'
-                                 ? 'bg-teal-500 text-white'
-                                 : 'text-slate-400 hover:bg-slate-700 hover:text-white'
-                         }`}
-                         onClick={() => setCurrentView('grid')}
-                         aria-label="Ver en cuadrícula"
-                         title="Vista Cuadrícula"
-                     >
-                         <Squares2X2Icon className="w-5 h-5" />
-                     </button>
+                {/* Controles de vista */}
+                <div className="flex items-center gap-2">
+                    {/* Toggle de vista para los resultados */}
+                    <div className="inline-flex items-center gap-1 bg-slate-800 rounded-lg p-1 border border-slate-700">
+                        {/* Botón Vista Cuadrícula */}
+                        <button
+                            className={`p-2 rounded transition-colors duration-200 ${
+                                listViewMode === 'grid'
+                                    ? 'bg-teal-500 text-white'
+                                    : 'text-slate-400 hover:bg-slate-700 hover:text-white'
+                            }`}
+                            onClick={() => setListViewMode('grid')}
+                            aria-label="Ver en cuadrícula"
+                            title="Vista Cuadrícula"
+                        >
+                            <Squares2X2Icon className="w-5 h-5" />
+                        </button>
 
-                     {/* Botón Vista Lista */}
-                     <button
-                         className={`p-2 rounded transition-colors duration-200 ${
-                             currentView === 'list'
-                                 ? 'bg-teal-500 text-white'
-                                 : 'text-slate-400 hover:bg-slate-700 hover:text-white'
-                         }`}
-                         onClick={() => setCurrentView('list')}
-                         aria-label="Ver en lista"
-                         title="Vista Lista"
-                     >
-                         <ListBulletIcon className="w-5 h-5" />
-                     </button>
+                        {/* Botón Vista Lista */}
+                        <button
+                            className={`p-2 rounded transition-colors duration-200 ${
+                                listViewMode === 'list'
+                                    ? 'bg-teal-500 text-white'
+                                    : 'text-slate-400 hover:bg-slate-700 hover:text-white'
+                            }`}
+                            onClick={() => setListViewMode('list')}
+                            aria-label="Ver en lista"
+                            title="Vista Lista"
+                        >
+                            <ListBulletIcon className="w-5 h-5" />
+                        </button>
+                    </div>
 
-                     {/* Botón Vista Mapa (condicional) */}
-                     {showMap && (
-                         <button
-                             className={`p-2 rounded transition-colors duration-200 ${
-                                 currentView === 'map'
-                                     ? 'bg-teal-500 text-white'
-                                     : 'text-slate-400 hover:bg-slate-700 hover:text-white'
-                             }`}
-                             onClick={toggleMapView}
-                             aria-label="Ver en mapa"
-                             title="Vista Mapa"
-                         >
-                             <MapIcon className="w-5 h-5" />
-                         </button>
-                     )}
-                 </div>
+                    {/* Botón para mostrar/ocultar el mapa */}
+                    {showMap && !isMobile && (
+                        <button
+                            className={`flex items-center justify-center gap-1 px-3 py-1.5 rounded-lg transition-colors ${
+                                isMapVisible
+                                    ? 'bg-teal-500 text-white'
+                                    : 'bg-slate-700 text-slate-200 hover:bg-slate-600'
+                            }`}
+                            onClick={toggleMapVisibility}
+                            aria-label={isMapVisible ? 'Ocultar mapa' : 'Mostrar mapa'}
+                        >
+                            <MapIcon className="w-5 h-5" />
+                            <span className="font-medium">{isMapVisible ? 'Ocultar mapa' : 'Mostrar mapa'}</span>
+                        </button>
+                    )}
+                </div>
             </div>
         )
     }
 
-    // --- Renderizado Principal ---
+    // --- Renderizado Principal (reestructurado completamente) ---
     return (
         <div className={`w-full ${className}`}>
-            {/* Selector de Categorías */}
-            {renderCategorySelector()}
+            {/* Top content section with increased spacing */}
+            <div className="mb-6">
+                {/* Selector de Categorías */}
+                {renderCategorySelector()}
 
-            {/* Cabecera de búsqueda */}
-            {renderSearchHeader()}
+                {/* Cabecera de búsqueda with increased spacing */}
+                <div className="mb-4">
+                    {renderSearchHeader()}
+                </div>
 
-             {/* Barra de Filtros Horizontales y Chips (puedes ajustar su posición) */}
-            {category && ( // Mostrar solo si hay una categoría seleccionada
-                 <div className="mb-2 flex flex-col sm:flex-row sm:items-center gap-2">
-                      {/* Ejemplo: Botón para abrir filtros avanzados (si usas AdvancedFilterDrawer) */}
-                      {/*
-                      <AdvancedFilterDrawer
-                           activeFilters={activeFilters}
-                           onApplyFilters={handleFilterChange}
-                           category={category} // Pasa la categoría para filtros específicos
-                      >
-                           <button className="flex items-center gap-1 px-3 py-1.5 bg-slate-700 hover:bg-slate-600 text-white rounded-md text-sm">
-                                <AdjustmentsHorizontalIcon className="w-4 h-4" />
-                                <span>Filtros ({filterCount})</span>
-                           </button>
-                      </AdvancedFilterDrawer>
-                      */}
+                {/* Filtros */}
+                {category && (
+                    <div className="mb-4 flex flex-col sm:flex-row sm:items-center gap-2">
+                        <div className="mb-2 relative z-20 overflow-visible">
+                            <FilterChips
+                                category={category}
+                                activeFilters={activeFilters}
+                                onFilterChange={handleFilterChange}
+                                className="pt-1 pb-0"
+                            />
+                        </div>
+                    </div>
+                )}
 
-                      {/* Barra de filtros horizontales (ejemplo) */}
-                      {/* <HorizontalFilterBar filters={definicionDeFiltros} onChange={handleFilterChange} /> */}
+                {/* Barra de filtro y controles */}
+                {renderFilterBar()}
+            </div>
 
-                      {/* Chips de filtros - Nuevo diseño */}
-                      <div className="mb-2 relative z-20 overflow-visible">
-                        <FilterChips
-                          category={category}
-                          activeFilters={activeFilters}
-                          onFilterChange={handleFilterChange}
-                          className="pt-1 pb-0"
-                        />
-                      </div>
-                 </div>
-             )}
-
-            {/* Barra de filtro con total y controles de vista */}
-            {renderFilterBar()}
-
-            {/* UPDATED: Use SplitLayout for Map View and standard view for others */}
-            {currentView === 'map' && showMap ? (
-                <SplitLayout
-                    publications={results}
-                    selectedPublication={selectedPublication}
-                    onSelectPublication={handleSelectPublication}
-                    loading={loading}
-                    isMapView={true}
-                    toggleMapView={toggleMapView}
-                    className="min-h-[600px] bg-slate-800 rounded-xl overflow-hidden border border-slate-700"
-                >
-                    <SearchResults
-                        results={results}
-                        loading={loading}
-                        activeCategory={category}
-                        showInteractionButtons={true}
-                        onPublicationClick={(pub, e) => {
-                            e.preventDefault();
-                            handleSelectPublication(pub);
-                            if (onPublicationClick) onPublicationClick(pub, e);
-                        }}
-                        viewType="grid"
-                    />
-                </SplitLayout>
-            ) : (
-                <div className="flex flex-col lg:flex-row gap-3">
-                    <div className="flex-grow w-full">
+            {/* Contenido principal - Layout dividido o completo */}
+            {!isMobile && isMapVisible ? (
+                // Desktop view with map - adjust the proportions (60/40 split)
+                <div className="flex h-[calc(100vh-280px)] min-h-[500px]">
+                    {/* Left panel - publications list - make wider (60%) */}
+                    <div className="w-3/5 pr-3 overflow-auto">
                         <SearchResults
                             results={results}
                             loading={loading}
                             activeCategory={category}
                             showInteractionButtons={true}
-                            onPublicationClick={onPublicationClick}
-                            viewType={currentView}
+                            onPublicationClick={(pub, e) => {
+                                e.preventDefault();
+                                handleSelectPublication(pub);
+                                if (onPublicationClick) onPublicationClick(pub, e);
+                            }}
+                            viewType={listViewMode}
                         />
                         
-                        {/* Botón Cargar Más */}
+                        {/* Load more button */}
                         {hasMore && onLoadMore && (
-                            <div className="mt-6 text-center">
+                            <div className="mt-6 mb-4 text-center">
                                 <button
                                     onClick={onLoadMore}
                                     disabled={loading}
@@ -482,6 +453,135 @@ export default function SearchLayout({
                             </div>
                         )}
                     </div>
+
+                    {/* Right panel - map or publication details - make narrower (40%) */}
+                    <div className="w-2/5 pl-2">
+                        {selectedPublication ? (
+                            // Publication details
+                            <div className="bg-slate-800 rounded-xl overflow-hidden border border-slate-700 h-full p-4">
+                                <div className="flex justify-between items-start mb-4">
+                                    <h2 className="text-xl font-bold text-white">{selectedPublication.title}</h2>
+                                    <button
+                                        onClick={() => setSelectedPublication(null)}
+                                        className="p-1 rounded-full bg-slate-700 hover:bg-slate-600 text-slate-300"
+                                        aria-label="Cerrar detalles"
+                                        title="Cerrar"
+                                    >
+                                        <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                                        </svg>
+                                    </button>
+                                </div>
+                                
+                                {selectedPublication.images && selectedPublication.images.length > 0 && (
+                                    <div className="relative h-64 mb-4 rounded-lg overflow-hidden">
+                                        <img
+                                            src={selectedPublication.images[0]}
+                                            alt={selectedPublication.title}
+                                            className="w-full h-full object-cover"
+                                        />
+                                    </div>
+                                )}
+                                
+                                {selectedPublication.price && (
+                                    <p className="text-2xl font-bold text-teal-400 mb-2">
+                                        {new Intl.NumberFormat('es-PE', {
+                                            style: 'currency',
+                                            currency: selectedPublication.currency || 'PEN',
+                                            maximumFractionDigits: 0
+                                        }).format(selectedPublication.price)}
+                                    </p>
+                                )}
+                                
+                                <p className="text-slate-300 mb-4">{selectedPublication.description}</p>
+                                
+                                {selectedPublication.location && typeof selectedPublication.location !== 'string' && (
+                                    <div className="mb-4">
+                                        <h3 className="text-lg font-semibold text-white mb-2">Ubicación</h3>
+                                        <div className="flex items-center text-slate-400 mb-1">
+                                            <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2 text-teal-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                                            </svg>
+                                            <span>
+                                                {[
+                                                    selectedPublication.location.address, 
+                                                    selectedPublication.location.district, 
+                                                    selectedPublication.location.province
+                                                ].filter(Boolean).join(', ')}
+                                            </span>
+                                        </div>
+                                    </div>
+                                )}
+                                
+                                <div className="flex gap-2 mt-4">
+                                    <button 
+                                        className="px-3 py-2 bg-slate-700 hover:bg-slate-600 text-white rounded-lg"
+                                        aria-label="Me gusta"
+                                        title="Me gusta"
+                                    >
+                                        <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
+                                        </svg>
+                                    </button>
+                                    <button 
+                                        className="px-3 py-2 bg-slate-700 hover:bg-slate-600 text-white rounded-lg"
+                                        aria-label="Guardar"
+                                        title="Guardar"
+                                    >
+                                        <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z" />
+                                        </svg>
+                                    </button>
+                                </div>
+                            </div>
+                        ) : (
+                            // Map view
+                            <MapView
+                                publications={results}
+                                selectedPublicationId={null}
+                                onSelectPublication={handleSelectPublication}
+                                loading={loading}
+                                className="bg-slate-800 rounded-xl overflow-hidden border border-slate-700 h-full"
+                            />
+                        )}
+                    </div>
+                </div>
+            ) : (
+                // Vista móvil o mapa oculto - vista completa
+                <div>
+                    <SearchResults
+                        results={results}
+                        loading={loading}
+                        activeCategory={category}
+                        showInteractionButtons={true}
+                        onPublicationClick={onPublicationClick}
+                        viewType={listViewMode}
+                    />
+                    
+                    {/* Botón Cargar Más */}
+                    {hasMore && onLoadMore && (
+                        <div className="mt-6 text-center">
+                            <button
+                                onClick={onLoadMore}
+                                disabled={loading}
+                                className={`px-6 py-2 bg-teal-500 hover:bg-teal-600 text-white rounded-lg transition-colors ${loading ? 'opacity-50 cursor-not-allowed' : ''}`}
+                            >
+                                {loading ? 'Cargando...' : 'Cargar más resultados'}
+                            </button>
+                        </div>
+                    )}
+
+                    {/* Para móviles, mostrar un botón flotante para abrir el mapa */}
+                    {isMobile && showMap && (
+                        <button
+                            className="fixed bottom-4 right-4 bg-teal-500 text-white p-3 rounded-full shadow-lg z-10"
+                            onClick={toggleMapVisibility}
+                            aria-label="Ver mapa"
+                        >
+                            <MapIcon className="w-6 h-6" />
+                        </button>
+                    )}
                 </div>
             )}
         </div>

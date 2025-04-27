@@ -3,8 +3,6 @@
 import React, { useEffect, useState } from 'react'
 import { motion, AnimatePresence, LayoutGroup } from 'framer-motion'
 import { 
-  Squares2X2Icon, 
-  ListBulletIcon, 
   FireIcon,
   MapPinIcon,
   MagnifyingGlassIcon as SearchIcon
@@ -165,9 +163,9 @@ export default function SearchResults({
   
   // Calcular cuántos ítems mostrar en cada fila según el tamaño de pantalla
   const getGridCols = () => {
-    if (isLg) return 5  // lg:grid-cols-3
-    if (isMd) return 4  // md:grid-cols-2
-    return 2            // mobile: grid-cols-2
+    if (isLg) return 3  // Reduced from 5 to 3 for lg screens
+    if (isMd) return 2  // Reduced from 4 to 2 for md screens
+    return 1            // Changed from 2 to 1 for mobile (full width items)
   }
   
   // Actualizar resultados cuando cambian los resultados iniciales
@@ -353,7 +351,7 @@ export default function SearchResults({
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.3, delay: index * 0.05 }}
-        className="relative w-full h-auto rounded-xl overflow-hidden shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1 publication-card"
+        className="relative w-full h-auto rounded-xl overflow-hidden shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1 publication-card bg-slate-800 border border-slate-700"
       >
         <a 
           href={seoUrl} 
@@ -373,9 +371,9 @@ export default function SearchResults({
             <Image
               src={imageUrl}
               alt={`Imagen de ${publication.title || 'publicación'}`}
-              fill
-              sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw"
-              className="object-cover transition-transform duration-500 hover:scale-105"
+              width={500}
+              height={300}
+              className="w-full h-56 object-cover transition-transform duration-500 hover:scale-105"
               onError={(e) => { 
                 console.log(`Image load error for publication ${publication.id}:`, e);
                 e.currentTarget.src = '/images/placeholder-buscadis.jpg'; 
@@ -490,21 +488,21 @@ export default function SearchResults({
           </div>
           
           {/* Content */}
-          <div className="content">
-            <div>
-              <h3>{publication.title}</h3>
-              <p className="description">{publication.description}</p>
+          <div className="content p-4">
+            <div className="mb-2">
+              <h3 className="text-lg font-semibold text-white mb-1">{publication.title}</h3>
+              <p className="description text-sm text-gray-300 line-clamp-2">{publication.description}</p>
             </div>
             
-            <div className="footer">
-              <div className="location">
+            <div className="footer flex justify-between items-center mt-3 text-xs text-gray-400">
+              <div className="location flex items-center max-w-[70%]">
                 <MapPinIcon className="w-3 h-3 mr-1 flex-shrink-0" />
-                <span title={formatFullLocation(publication.location)}>
+                <span className="truncate" title={formatFullLocation(publication.location)}>
                   {formatFullLocation(publication.location)}
                 </span>
               </div>
               
-              <span className="date">
+              <span className="date whitespace-nowrap">
                 {formatRelativeTime(publication.createdAt)}
               </span>
             </div>
@@ -864,7 +862,7 @@ export default function SearchResults({
               <motion.div
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
-                className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4"
+                className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-3 gap-6"
               >
                 {allResults.map((publication, index) => renderGridItem(publication, index))}
               </motion.div>
