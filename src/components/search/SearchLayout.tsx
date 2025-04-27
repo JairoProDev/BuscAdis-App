@@ -15,7 +15,6 @@ import CategorySelector from './CategorySelector'
 import FilterChips from '@/components/search/FilterChips'
 import { CategoriesService } from '@/services/categories.service'
 import { MapView } from './MapView'
-import { SplitLayout } from './SplitLayout'
 
 // Remove this placeholder component since we have the real MapView component
 // const MapComponent = ({ 
@@ -260,8 +259,8 @@ export default function SearchLayout({
     // --- Renderizadores de secciones (renderSearchHeader, renderCategorySelector) ---
     const renderSearchHeader = () => {
         return (
-            <div className="mb-2">
-                <div className="flex flex-col gap-4 max-w-3xl">
+            <div className="mb-4">
+                <div className="flex flex-col gap-4 w-full">
                     {useEnhancedSearch ? (
                         <KeywordSearchBox
                             initialValue={searchQuery}
@@ -318,7 +317,7 @@ export default function SearchLayout({
     // --- MODIFICADO: Renderizar barra de filtros con los botones de vista y mapa ---
     const renderFilterBar = () => {
         return (
-            <div className="flex items-center justify-between mb-3">
+            <div className="flex items-center justify-between mb-4">
                 {/* Información de resultados */}
                 <div>
                      {/* Título dinámico */}
@@ -370,8 +369,8 @@ export default function SearchLayout({
                         </button>
                     </div>
 
-                    {/* Botón para mostrar/ocultar el mapa */}
-                    {showMap && !isMobile && (
+                    {/* Mobile Map Toggle Button */}
+                    {isMobile && showMap && (
                         <button
                             className={`flex items-center justify-center gap-1 px-3 py-1.5 rounded-lg transition-colors ${
                                 isMapVisible
@@ -380,6 +379,7 @@ export default function SearchLayout({
                             }`}
                             onClick={toggleMapVisibility}
                             aria-label={isMapVisible ? 'Ocultar mapa' : 'Mostrar mapa'}
+                            title={isMapVisible ? 'Ocultar mapa' : 'Mostrar mapa'}
                         >
                             <MapIcon className="w-5 h-5" />
                             <span className="font-medium">{isMapVisible ? 'Ocultar mapa' : 'Mostrar mapa'}</span>
@@ -390,43 +390,41 @@ export default function SearchLayout({
         )
     }
 
-    // --- Renderizado Principal (reestructurado completamente) ---
+    // --- Renderizado Principal - COMPLETAMENTE RESTRUCTURADO
     return (
         <div className={`w-full ${className}`}>
-            {/* Top content section with increased spacing */}
-            <div className="mb-6">
-                {/* Selector de Categorías */}
-                {renderCategorySelector()}
-
-                {/* Cabecera de búsqueda with increased spacing */}
-                <div className="mb-4">
-                    {renderSearchHeader()}
-                </div>
-
-                {/* Filtros */}
-                {category && (
-                    <div className="mb-4 flex flex-col sm:flex-row sm:items-center gap-2">
-                        <div className="mb-2 relative z-20 overflow-visible">
-                            <FilterChips
-                                category={category}
-                                activeFilters={activeFilters}
-                                onFilterChange={handleFilterChange}
-                                className="pt-1 pb-0"
-                            />
-                        </div>
+            {/* Main container - split into left (search UI) and right (map) */}
+            <div className="flex flex-col lg:flex-row h-[calc(100vh-120px)] min-h-[600px]">
+                {/* Left side - Search UI and Results (constrained width) */}
+                <div className={`${!isMobile && isMapVisible ? 'lg:w-[55%] xl:w-[50%] pr-4' : 'w-full'} flex flex-col overflow-hidden`}>
+                    {/* Search UI Elements */}
+                    <div className="flex-none mb-4">
+                        {/* Category selector */}
+                        {renderCategorySelector()}
+                        
+                        {/* Search bar */}
+                        {renderSearchHeader()}
+                        
+                        {/* Filters */}
+                        {category && (
+                            <div className="mb-4">
+                                <div className="relative z-20 overflow-visible">
+                                    <FilterChips
+                                        category={category}
+                                        activeFilters={activeFilters}
+                                        onFilterChange={handleFilterChange}
+                                        className="pt-1 pb-0"
+                                    />
+                                </div>
+                            </div>
+                        )}
+                        
+                        {/* Result counts and view controls */}
+                        {renderFilterBar()}
                     </div>
-                )}
-
-                {/* Barra de filtro y controles */}
-                {renderFilterBar()}
-            </div>
-
-            {/* Contenido principal - Layout dividido o completo */}
-            {!isMobile && isMapVisible ? (
-                // Desktop view with map - adjust the proportions (60/40 split)
-                <div className="flex h-[calc(100vh-280px)] min-h-[500px]">
-                    {/* Left panel - publications list - make wider (60%) */}
-                    <div className="w-3/5 pr-3 overflow-auto">
+                    
+                    {/* Search Results - scrollable */}
+                    <div className="flex-grow overflow-y-auto pr-2">
                         <SearchResults
                             results={results}
                             loading={loading}
@@ -453,9 +451,11 @@ export default function SearchLayout({
                             </div>
                         )}
                     </div>
-
-                    {/* Right panel - map or publication details - make narrower (40%) */}
-                    <div className="w-2/5 pl-2">
+                </div>
+                
+                {/* Right side - Map or Publication Details */}
+                {(!isMobile || (isMobile && isMapVisible)) && showMap && (
+                    <div className="lg:w-[45%] xl:w-[50%] lg:pl-2 h-full flex-shrink-0 mt-4 lg:mt-0">
                         {selectedPublication ? (
                             // Publication details
                             <div className="bg-slate-800 rounded-xl overflow-hidden border border-slate-700 h-full p-4">
@@ -516,6 +516,12 @@ export default function SearchLayout({
                                 
                                 <div className="flex gap-2 mt-4">
                                     <button 
+                                        className="flex-1 py-2 bg-teal-500 hover:bg-teal-600 text-white font-medium rounded-lg"
+                                        aria-label="Contactar"
+                                    >
+                                        Contactar
+                                    </button>
+                                    <button 
                                         className="px-3 py-2 bg-slate-700 hover:bg-slate-600 text-white rounded-lg"
                                         aria-label="Me gusta"
                                         title="Me gusta"
@@ -536,54 +542,45 @@ export default function SearchLayout({
                                 </div>
                             </div>
                         ) : (
-                            // Map view
-                            <MapView
-                                publications={results}
-                                selectedPublicationId={null}
-                                onSelectPublication={handleSelectPublication}
-                                loading={loading}
-                                className="bg-slate-800 rounded-xl overflow-hidden border border-slate-700 h-full"
-                            />
+                            // Map View
+                            <div className="relative h-full">
+                                <MapView
+                                    publications={results}
+                                    selectedPublicationId={null}
+                                    onSelectPublication={handleSelectPublication}
+                                    loading={loading}
+                                    className="bg-slate-800 rounded-xl overflow-hidden border border-slate-700 h-full"
+                                />
+                                
+                                {/* Desktop Map Toggle Button */}
+                                {!isMobile && (
+                                    <button
+                                        className="absolute top-4 right-4 z-10 flex items-center justify-center gap-1 px-3 py-1.5 rounded-lg bg-teal-500 text-white hover:bg-teal-600 transition-colors shadow-lg"
+                                        onClick={toggleMapVisibility}
+                                        aria-label="Ocultar mapa"
+                                        title="Ocultar mapa"
+                                    >
+                                        <MapIcon className="w-5 h-5" />
+                                        <span className="font-medium">Ocultar mapa</span>
+                                    </button>
+                                )}
+                            </div>
                         )}
                     </div>
-                </div>
-            ) : (
-                // Vista móvil o mapa oculto - vista completa
-                <div>
-                    <SearchResults
-                        results={results}
-                        loading={loading}
-                        activeCategory={category}
-                        showInteractionButtons={true}
-                        onPublicationClick={onPublicationClick}
-                        viewType={listViewMode}
-                    />
-                    
-                    {/* Botón Cargar Más */}
-                    {hasMore && onLoadMore && (
-                        <div className="mt-6 text-center">
-                            <button
-                                onClick={onLoadMore}
-                                disabled={loading}
-                                className={`px-6 py-2 bg-teal-500 hover:bg-teal-600 text-white rounded-lg transition-colors ${loading ? 'opacity-50 cursor-not-allowed' : ''}`}
-                            >
-                                {loading ? 'Cargando...' : 'Cargar más resultados'}
-                            </button>
-                        </div>
-                    )}
+                )}
 
-                    {/* Para móviles, mostrar un botón flotante para abrir el mapa */}
-                    {isMobile && showMap && (
-                        <button
-                            className="fixed bottom-4 right-4 bg-teal-500 text-white p-3 rounded-full shadow-lg z-10"
-                            onClick={toggleMapVisibility}
-                            aria-label="Ver mapa"
-                        >
-                            <MapIcon className="w-6 h-6" />
-                        </button>
-                    )}
-                </div>
-            )}
+                {/* Mobile-only floating map button */}
+                {isMobile && showMap && !isMapVisible && (
+                    <button
+                        className="fixed bottom-4 right-4 bg-teal-500 text-white p-3 rounded-full shadow-lg z-10"
+                        onClick={toggleMapVisibility}
+                        aria-label="Ver mapa"
+                        title="Ver mapa"
+                    >
+                        <MapIcon className="w-6 h-6" />
+                    </button>
+                )}
+            </div>
         </div>
     )
 }
