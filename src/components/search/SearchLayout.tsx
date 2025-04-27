@@ -14,20 +14,22 @@ import KeywordSearchBox from './KeywordSearchBox'
 import CategorySelector from './CategorySelector'
 import FilterChips from '@/components/search/FilterChips'
 import { CategoriesService } from '@/services/categories.service'
+import { MapView } from './MapView'
+import { SplitLayout } from './SplitLayout'
 
-// Componente simple de mapa (placeholder)
-const MapComponent = ({ 
-  className = '' 
-}: { 
-  publications?: Publication[],
-  loading?: boolean,
-  onMarkerClick?: (publication: Publication, e: React.MouseEvent<Element>) => void,
-  className?: string
-}) => (
-  <div className={`${className} flex items-center justify-center`}>
-    <p className="text-slate-400">Vista de mapa en desarrollo</p>
-  </div>
-);
+// Remove this placeholder component since we have the real MapView component
+// const MapComponent = ({ 
+//   className = '' 
+// }: { 
+//   publications?: Publication[],
+//   loading?: boolean,
+//   onMarkerClick?: (publication: Publication, e: React.MouseEvent<Element>) => void,
+//   className?: string
+// }) => (
+//   <div className={`${className} flex items-center justify-center`}>
+//     <p className="text-slate-400">Vista de mapa en desarrollo</p>
+//   </div>
+// );
 
 interface SearchLayoutProps {
     initialResults?: Publication[]
@@ -89,6 +91,8 @@ export default function SearchLayout({
         }>
       }>
     }>>([])
+    // New state for the selected publication in map view
+    const [selectedPublication, setSelectedPublication] = useState<Publication | null>(null)
 
     // Responsive - solo usamos isMobile
     const isMobile = useMediaQuery('(max-width: 640px)')
@@ -114,6 +118,21 @@ export default function SearchLayout({
              setResults(initialResults);
         }
     }, [initialResults]);
+
+    // Add a function to handle publication selection in the map
+    const handleSelectPublication = (publication: Publication | null) => {
+        setSelectedPublication(publication);
+    }
+
+    // Toggle map view function
+    const toggleMapView = () => {
+        if (currentView === 'map') {
+            setCurrentView('grid');
+            setSelectedPublication(null); // Clear selected publication when exiting map view
+        } else {
+            setCurrentView('map');
+        }
+    }
 
     // --- Manejadores de eventos (handleSearch, handleCategoryChange, etc.) ---
     // (Sin cambios aquí, mantenemos la lógica existente para búsqueda y filtros)
@@ -239,9 +258,6 @@ export default function SearchLayout({
         }
     }
 
-    // REMOVED: toggleMapView ya no es necesaria, usamos setCurrentView directamente
-
-
     // --- Renderizadores de secciones (renderSearchHeader, renderCategorySelector) ---
     // (Sin cambios aquí)
      const renderSearchHeader = () => {
@@ -361,7 +377,7 @@ export default function SearchLayout({
                                      ? 'bg-teal-500 text-white'
                                      : 'text-slate-400 hover:bg-slate-700 hover:text-white'
                              }`}
-                             onClick={() => setCurrentView('map')}
+                             onClick={toggleMapView}
                              aria-label="Ver en mapa"
                              title="Vista Mapa"
                          >
@@ -417,44 +433,57 @@ export default function SearchLayout({
             {/* Barra de filtro con total y controles de vista */}
             {renderFilterBar()}
 
-            {/* Contenido principal (Resultados o Mapa) */}
-            <div className="flex flex-col lg:flex-row gap-3">
-                {/* Resultados/Mapa */}
-                <div className="flex-grow w-full">
-                    {currentView === 'map' && showMap ? ( // Mostrar mapa solo si está habilitado y seleccionado
-                        <MapComponent
-                            publications={results}
-                            loading={loading}
-                            onMarkerClick={onPublicationClick} // O un manejador específico para el mapa
-                            className="bg-slate-800 rounded-xl overflow-hidden border border-slate-700 min-h-[400px] lg:min-h-[600px]" // Estilo ejemplo
-                        />
-                    ) : (
-                        // Vista de resultados (Grid o Lista)
+            {/* UPDATED: Use SplitLayout for Map View and standard view for others */}
+            {currentView === 'map' && showMap ? (
+                <SplitLayout
+                    publications={results}
+                    selectedPublication={selectedPublication}
+                    onSelectPublication={handleSelectPublication}
+                    loading={loading}
+                    isMapView={true}
+                    toggleMapView={toggleMapView}
+                    className="min-h-[600px] bg-slate-800 rounded-xl overflow-hidden border border-slate-700"
+                >
+                    <SearchResults
+                        results={results}
+                        loading={loading}
+                        activeCategory={category}
+                        showInteractionButtons={true}
+                        onPublicationClick={(pub, e) => {
+                            e.preventDefault();
+                            handleSelectPublication(pub);
+                            if (onPublicationClick) onPublicationClick(pub, e);
+                        }}
+                        viewType="grid"
+                    />
+                </SplitLayout>
+            ) : (
+                <div className="flex flex-col lg:flex-row gap-3">
+                    <div className="flex-grow w-full">
                         <SearchResults
                             results={results}
                             loading={loading}
-                            // hasMore={hasMore} // Ya no se pasa hasMore, el botón está abajo
                             activeCategory={category}
                             showInteractionButtons={true}
                             onPublicationClick={onPublicationClick}
-                            viewType={currentView === 'map' ? 'grid' : currentView} // Pasa grid/list. Si está en map, muestra grid por defecto al volver.
+                            viewType={currentView}
                         />
-                    )}
-
-                    {/* Botón Cargar Más (solo si no estamos en vista de mapa) */}
-                    {currentView !== 'map' && hasMore && onLoadMore && (
-                        <div className="mt-6 text-center"> {/* Aumentado margen superior */}
-                            <button
-                                onClick={onLoadMore}
-                                disabled={loading} // Deshabilitar mientras carga
-                                className={`px-6 py-2 bg-teal-500 hover:bg-teal-600 text-white rounded-lg transition-colors ${loading ? 'opacity-50 cursor-not-allowed' : ''}`}
-                            >
-                                {loading ? 'Cargando...' : 'Cargar más resultados'}
-                            </button>
-                        </div>
-                    )}
+                        
+                        {/* Botón Cargar Más */}
+                        {hasMore && onLoadMore && (
+                            <div className="mt-6 text-center">
+                                <button
+                                    onClick={onLoadMore}
+                                    disabled={loading}
+                                    className={`px-6 py-2 bg-teal-500 hover:bg-teal-600 text-white rounded-lg transition-colors ${loading ? 'opacity-50 cursor-not-allowed' : ''}`}
+                                >
+                                    {loading ? 'Cargando...' : 'Cargar más resultados'}
+                                </button>
+                            </div>
+                        )}
+                    </div>
                 </div>
-            </div>
+            )}
         </div>
     )
 }
