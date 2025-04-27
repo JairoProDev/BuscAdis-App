@@ -167,6 +167,7 @@ export default function PublicationCard({ publication, id }: PublicationCardProp
           </div>
 
           {/* Logo de Buscadis */}
+          {/*
           <div className="absolute top-2 left-2 z-20">
             <div className="bg-white/90 backdrop-blur-sm rounded-full p-1 shadow-md">
               <Image
@@ -178,6 +179,7 @@ export default function PublicationCard({ publication, id }: PublicationCardProp
               />
             </div>
           </div>
+          */}
         </div>
       </Link>
 

@@ -165,8 +165,8 @@ export default function SearchResults({
   
   // Calcular cuántos ítems mostrar en cada fila según el tamaño de pantalla
   const getGridCols = () => {
-    if (isLg) return 3  // lg:grid-cols-3
-    if (isMd) return 2  // md:grid-cols-2
+    if (isLg) return 5  // lg:grid-cols-3
+    if (isMd) return 4  // md:grid-cols-2
     return 2            // mobile: grid-cols-2
   }
   
@@ -864,7 +864,7 @@ export default function SearchResults({
               <motion.div
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
-                className={`grid grid-cols-2 md:grid-cols-${getGridCols()} gap-4`}
+                className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4"
               >
                 {allResults.map((publication, index) => renderGridItem(publication, index))}
               </motion.div>
