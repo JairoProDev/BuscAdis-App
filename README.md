@@ -35,6 +35,9 @@ AWS_ACCESS_KEY_ID=
 AWS_SECRET_ACCESS_KEY=
 AWS_REGION=
 S3_BUCKET_NAME=
+
+# Google Maps Integration
+NEXT_PUBLIC_GOOGLE_MAPS_API_KEY=your_api_key_here
 ```
 
 ## Installation
@@ -223,3 +226,34 @@ A continuación se detalla la estructura estándar para el modelo de datos de pu
   // Estado y fechas
   "status": "string", // Estado: "active", "paused", "sold", "expired", "deleted"
   "created_at": "string", // Fecha de creación (ISO format)
+}
+```
+
+## Google Maps Integration
+
+This application uses Google Maps Platform for displaying locations of publications. To set up the map functionality:
+
+1. Create a Google Cloud Platform account at https://console.cloud.google.com/
+2. Create a new project
+3. Enable the following APIs in your project:
+   - Maps JavaScript API
+   - Geocoding API
+   - Places API
+
+4. Create an API key:
+   - Go to "Credentials" in the Google Cloud Console
+   - Click "Create credentials" > "API key"
+   - Restrict the API key to the above APIs and your domain for security
+   
+5. Add your API key to `.env.local`:
+   ```
+   NEXT_PUBLIC_GOOGLE_MAPS_API_KEY=your_api_key_here
+   ```
+
+6. Restart your development server
+
+Note: The free tier of Google Maps Platform includes:
+- 10,000 free map loads per month
+- 10,000 free calls for other Essentials SKUs
+
+For more information, see [Google Maps Platform Pricing](https://mapsplatform.google.com/pricing/).
