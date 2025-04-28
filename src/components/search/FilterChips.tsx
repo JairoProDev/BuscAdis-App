@@ -9,6 +9,7 @@ import { getFiltersForCategory, findFilterById, isFilterActive } from '@/utils/f
 import { X, ChevronDown } from 'lucide-react'
 import { Switch } from '@/components/ui/switch'
 import { Badge } from '@/components/ui/Badge'
+import { createPortal } from 'react-dom'
 
 // Importaciones de tipos
 import { FilterOption } from '@/types/filters'
@@ -31,6 +32,7 @@ export default function FilterChips({
   const filterContainerRef = useRef<HTMLDivElement>(null)
   const buttonRefs = useRef<Record<string, HTMLButtonElement | null>>({})
   const dropdownRefs = useRef<Record<string, HTMLDivElement | null>>({})
+  const [dropdownPosition, setDropdownPosition] = useState<{ top: number; left: number; width: number } | null>(null)
 
   // Reset temporary filters when active filters change
   useEffect(() => {
@@ -65,7 +67,22 @@ export default function FilterChips({
   }, [openFilter])
 
   const toggleDropdown = (filterId: string) => {
-    setOpenFilter(openFilter === filterId ? null : filterId)
+    if (openFilter === filterId) {
+      setOpenFilter(null)
+      setDropdownPosition(null)
+    } else {
+      setOpenFilter(filterId)
+      // Calcular posición del botón
+      const btn = buttonRefs.current[filterId]
+      if (btn) {
+        const rect = btn.getBoundingClientRect()
+        setDropdownPosition({
+          top: rect.bottom + window.scrollY,
+          left: rect.left + window.scrollX,
+          width: rect.width
+        })
+      }
+    }
   }
 
   const handleTempFilterChange = (key: string, value: FilterValue) => {
@@ -305,19 +322,23 @@ export default function FilterChips({
             )}
           </Button>
           
-          {openFilter === filter.id && (
+          {openFilter === filter.id && dropdownPosition && typeof window !== 'undefined' && createPortal(
             <div
               ref={(el) => {
                 dropdownRefs.current[filter.id] = el
               }}
-              className="absolute top-full left-0 mt-1 z-[200] bg-slate-800 rounded-lg border border-slate-700 shadow-2xl min-w-[220px] max-h-[80vh] overflow-y-auto"
-              style={{ 
-                position: 'absolute',
-                width: 'max-content'
+              className="z-[200] bg-slate-800 rounded-lg border border-slate-700 shadow-2xl"
+              style={{
+                position: 'fixed',
+                top: dropdownPosition.top,
+                left: dropdownPosition.left,
+                minWidth: dropdownPosition.width,
+                maxWidth: 320
               }}
             >
               {renderFilterContent(filter)}
-            </div>
+            </div>,
+            document.body
           )}
         </div>
       ))}
