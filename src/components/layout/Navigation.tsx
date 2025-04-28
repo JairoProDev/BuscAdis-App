@@ -229,8 +229,8 @@ export default function Navigation() {
                         <Link href="/inicio" className={`block px-4 py-2 rounded-md font-medium ${textColor} hover:${hoverTextColor} hover:${mobileMenuHoverBg}`}>
                             <HomeIcon className="w-5 h-5 mr-1 inline-block" /> Inicio
                         </Link>
-                        <Link href="/blog" className={`block px-4 py-2 rounded-md font-medium ${textColor} hover:${hoverTextColor} hover:${mobileMenuHoverBg}`}>
-                            <NewspaperIcon className="w-5 h-5 mr-1 inline-block" /> Blog
+                        <Link href="/revista" className={`block px-4 py-2 rounded-md font-medium ${textColor} hover:${hoverTextColor} hover:${mobileMenuHoverBg}`}>
+                            <NewspaperIcon className="w-5 h-5 mr-1 inline-block" /> Revista
                         </Link>
                         <Link href="/" className={`block px-4 py-2 rounded-md font-medium ${textColor} hover:${hoverTextColor} hover:${mobileMenuHoverBg}`}>
                             <MagnifyingGlassIcon className="w-5 h-5 mr-1 inline-block" /> Buscar

@@ -706,19 +706,6 @@ export default function SearchResults({
                 )}
               </div>
               
-              {/* Logo de Buscadis */}
-              <div className="absolute top-2 right-2 z-20">
-                <div className="bg-white/90 backdrop-blur-sm rounded-full p-1 shadow-md">
-                  <Image
-                    src="/logo.png"
-                    alt="Buscadis"
-                    width={24}
-                    height={24}
-                    className="rounded-full"
-                  />
-                </div>
-              </div>
-              
               {/* Botones de interacción en vista de lista */}
               {showInteractionButtons && (
                 <div className="absolute top-2 right-2 flex gap-1 z-20">
@@ -862,7 +849,7 @@ export default function SearchResults({
               <motion.div
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
-                className={`grid grid-cols-2 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-3 gap-6 pb-24`}
+                className={`grid grid-cols-2 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-3 gap-6 pb-0`}
               >
                 {allResults.map((publication, index) => renderGridItem(publication, index))}
               </motion.div>

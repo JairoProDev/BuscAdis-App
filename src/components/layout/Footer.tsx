@@ -14,7 +14,7 @@ export default function Footer() {
   const copyrightTextColor = 'text-gray-400';
 
   return (
-      <footer className={`${backgroundColor} ${textColor} py-12`}>
+      <footer className={`${backgroundColor} ${textColor} py-2`}>
           <div className="container mx-auto px-4">
               <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
                   <div>
