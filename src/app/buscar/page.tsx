@@ -454,75 +454,71 @@ export default function BuscadorPage() {
   if (isInitialLoad && loading) {
     return (
       <div className="min-h-screen bg-slate-900">
-        <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-0 sm:py-8 lg:py-4">
-          {/* Skeleton para barra de búsqueda */}
-          <div className="mb-6 w-full bg-slate-800/40 rounded-xl p-4 animate-pulse">
-            <div className="h-12 bg-slate-700 rounded-xl w-full"></div>
+        <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-4">
+          {/* Search bar skeleton */}
+          <div className="mb-6 max-w-3xl mx-auto">
+            <div className="h-12 bg-slate-800/60 rounded-xl animate-pulse"></div>
           </div>
           
-          {/* Skeleton para título y controles */}
-          <div className="flex justify-between items-center mb-8">
-            <div>
-              <div className="h-8 bg-slate-700 rounded w-64 mb-2"></div>
-              <div className="h-5 bg-slate-700 rounded w-40"></div>
-            </div>
-            <div className="flex gap-2">
-              <div className="h-10 w-10 bg-slate-700 rounded"></div>
-              <div className="h-10 w-10 bg-slate-700 rounded"></div>
-            </div>
-          </div>
-          
-          {/* Layout principal con sidebar */}
-          <div className="flex flex-col lg:flex-row gap-6">
-            {/* Skeleton del sidebar de filtros */}
-            <div className="hidden lg:block w-72 flex-shrink-0">
-              <div className="bg-slate-800 rounded-xl p-6 border border-slate-700">
-                <div className="h-7 bg-slate-700 rounded w-32 mb-6"></div>
-                <div className="space-y-6">
-                  <div>
-                    <div className="h-5 bg-slate-700 rounded w-24 mb-3"></div>
-                    <div className="space-y-2">
-                      <div className="h-10 bg-slate-700 rounded w-full"></div>
-                      <div className="h-10 bg-slate-700 rounded w-full"></div>
-                    </div>
-                  </div>
-                  <div>
-                    <div className="h-5 bg-slate-700 rounded w-28 mb-3"></div>
-                    <div className="h-10 bg-slate-700 rounded w-full"></div>
-                  </div>
-                  <div>
-                    <div className="h-5 bg-slate-700 rounded w-40 mb-3"></div>
-                    <div className="space-y-2">
-                      <div className="h-6 bg-slate-700 rounded w-full"></div>
-                      <div className="h-6 bg-slate-700 rounded w-full"></div>
-                      <div className="h-6 bg-slate-700 rounded w-full"></div>
-                    </div>
-                  </div>
+          {/* Category selector skeleton */}
+          <div className="mb-4 overflow-x-auto">
+            <div className="inline-flex space-x-2 pb-2">
+              {Array.from({ length: 8 }).map((_, index) => (
+                <div key={`cat-${index}`} className="flex flex-col items-center min-w-[80px] max-w-[80px] animate-pulse">
+                  <div className="w-10 h-10 bg-slate-800/60 rounded-lg mb-2"></div>
+                  <div className="h-3 w-16 bg-slate-800/60 rounded-md"></div>
+                  <div className="h-2 w-8 bg-slate-800/40 rounded-md mt-1"></div>
                 </div>
-              </div>
+              ))}
             </div>
-            
-            {/* Skeleton de resultados */}
-            <div className="flex-grow">
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+          </div>
+          
+          {/* Filter chips skeleton */}
+          <div className="mb-4 overflow-x-auto">
+            <div className="inline-flex space-x-2 pb-2">
+              {Array.from({ length: 4 }).map((_, index) => (
+                <div key={`filter-${index}`} className="h-8 w-24 bg-slate-800/60 rounded-full animate-pulse"></div>
+              ))}
+            </div>
+          </div>
+          
+          {/* Sort and result count skeleton */}
+          <div className="flex justify-between items-center mb-4">
+            <div className="h-5 w-32 bg-slate-800/60 rounded-md animate-pulse"></div>
+            <div className="h-8 w-24 bg-slate-800/60 rounded-md animate-pulse"></div>
+          </div>
+          
+          {/* Two column layout for desktop */}
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+            {/* Left column - Results grid */}
+            <div className="w-full">
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 pb-32">
                 {Array.from({ length: 6 }).map((_, index) => (
-                  <div key={index} className="bg-slate-800 rounded-xl overflow-hidden shadow-lg h-auto animate-pulse">
-                    <div className="h-48 bg-slate-700 relative">
-                      {/* Efecto shimmer */}
-                      <div className="absolute inset-0 bg-gradient-to-r from-transparent via-slate-600/20 to-transparent shimmer"></div>
+                  <div key={`result-${index}`} className="bg-slate-800 border border-slate-700 rounded-xl overflow-hidden shadow-lg animate-pulse">
+                    <div className="h-56 bg-slate-700/50 relative">
+                      {/* Shimmer effect */}
+                      <div className="absolute inset-0 bg-gradient-to-r from-transparent via-slate-600/10 to-transparent"></div>
                     </div>
-                    <div className="p-4 space-y-3">
-                      <div className="h-5 bg-slate-700 rounded w-3/4"></div>
-                      <div className="h-4 bg-slate-700 rounded w-1/2"></div>
-                      <div className="h-3 bg-slate-700 rounded w-1/3"></div>
-                      <div className="h-4 bg-slate-700 rounded w-full"></div>
+                    <div className="p-4 space-y-2">
+                      <div className="h-5 bg-slate-700/50 rounded w-3/4"></div>
+                      <div className="h-4 bg-slate-700/50 rounded w-1/2"></div>
                       <div className="flex justify-between items-center pt-2">
-                        <div className="h-3 bg-slate-700 rounded w-1/4"></div>
-                        <div className="h-6 bg-slate-700 rounded-full w-20"></div>
+                        <div className="h-3 bg-slate-700/50 rounded w-1/3"></div>
+                        <div className="h-4 bg-slate-700/50 rounded w-1/4"></div>
                       </div>
                     </div>
                   </div>
                 ))}
+              </div>
+            </div>
+            
+            {/* Right column - Map */}
+            <div className="hidden lg:block h-[calc(100vh-4rem)] sticky top-16">
+              <div className="bg-slate-800 border border-slate-700 rounded-xl h-full animate-pulse overflow-hidden">
+                <div className="absolute inset-0 bg-gradient-to-r from-transparent via-slate-600/10 to-transparent"></div>
+                <div className="flex items-center justify-center h-full">
+                  <div className="h-10 w-10 rounded-full bg-slate-700/50"></div>
+                </div>
               </div>
             </div>
           </div>

@@ -554,10 +554,28 @@ export default function CategorySelector({
   
   if (loading) {
     return (
-      <div className={`${className} ${variant === 'horizontal' ? 'space-y-2' : 'flex space-x-4'}`}>
-        {Array.from({ length: 6 }).map((_, i) => (
-          <Skeleton key={i} className="h-10 w-full rounded-lg" />
-        ))}
+      <div className={`${className} w-full`}>
+        <div className="overflow-x-auto">
+          <div className="inline-flex space-x-2 pb-2">
+            {Array.from({ length: 8 }).map((_, i) => (
+              <div key={i} className="flex flex-col items-center min-w-[80px] max-w-[80px] animate-pulse">
+                <div className="w-10 h-10 bg-slate-800/60 rounded-lg mb-2"></div>
+                <div className="h-3 w-16 bg-slate-800/60 rounded-md"></div>
+                <div className="h-2 w-8 bg-slate-800/40 rounded-md mt-1"></div>
+              </div>
+            ))}
+          </div>
+        </div>
+        
+        {/* Subcategory skeleton */}
+        <div className="mt-2 animate-pulse">
+          <div className="h-3 w-24 bg-slate-800/60 rounded-md mb-2"></div>
+          <div className="inline-flex gap-2 py-1">
+            {Array.from({ length: 5 }).map((_, i) => (
+              <div key={`sub-${i}`} className="h-7 w-24 bg-slate-800/60 rounded-md"></div>
+            ))}
+          </div>
+        </div>
       </div>
     )
   }

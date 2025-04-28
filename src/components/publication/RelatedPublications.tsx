@@ -130,20 +130,21 @@ function RelatedPublicationCard({ publication, category }: { publication: Public
 
 function RelatedPublicationsSkeleton() {
   return (
-    <div className="bg-white rounded-lg shadow-sm p-6 border border-gray-100">
-      <Skeleton className="h-7 w-48 mb-4" />
+    <div className="bg-slate-800 border border-slate-700 rounded-lg p-6">
+      <div className="h-7 w-56 bg-slate-700/50 rounded mb-6 animate-pulse"></div>
       
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-        {[...Array(3)].map((_, i) => (
-          <div key={i} className="border border-gray-200 rounded-lg overflow-hidden">
-            <Skeleton className="h-36 w-full" />
-            <div className="p-3">
-              <Skeleton className="h-4 w-full mb-2" />
-              <Skeleton className="h-4 w-2/3 mb-2" />
+        {Array.from({ length: 6 }).map((_, i) => (
+          <div key={i} className="border border-slate-700 bg-slate-800/60 rounded-lg overflow-hidden animate-pulse">
+            <div className="h-36 w-full bg-slate-700/50"></div>
+            <div className="p-3 space-y-2">
+              <div className="h-4 w-full bg-slate-700/50 rounded"></div>
+              <div className="h-4 w-2/3 bg-slate-700/50 rounded"></div>
               <div className="mt-2 flex items-center justify-between">
-                <Skeleton className="h-4 w-16" />
-                <Skeleton className="h-4 w-16" />
+                <div className="h-4 w-16 bg-slate-700/50 rounded"></div>
+                <div className="h-3 w-16 bg-slate-700/50 rounded"></div>
               </div>
+              <div className="h-3 w-24 bg-slate-700/50 rounded"></div>
             </div>
           </div>
         ))}
