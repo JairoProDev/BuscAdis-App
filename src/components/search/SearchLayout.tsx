@@ -432,18 +432,16 @@ export default function SearchLayout({
                 {!isMobile && showMap && (
                     <div className="hidden lg:block lg:w-2/5 lg:pl-0">
                         <div className="sticky top-0 h-screen overflow-y-auto">
+                            <button
+                                className="absolute top-4 right-4 z-50 flex items-center justify-center gap-1 px-3 py-1.5 rounded-lg bg-teal-500 text-white hover:bg-teal-600 transition-colors shadow-lg"
+                                onClick={toggleMapVisibility}
+                                aria-label={isMapVisible ? 'Ocultar mapa' : 'Mostrar mapa'}
+                                title={isMapVisible ? 'Ocultar mapa' : 'Mostrar mapa'}
+                            >
+                                <MapIcon className="w-5 h-5" />
+                                <span className="font-medium">{isMapVisible ? 'Ocultar mapa' : 'Mostrar mapa'}</span>
+                            </button>
                             <div className="relative h-full">
-                                {/* Toggle button for map visibility */}
-                                <button
-                                    className="absolute top-4 right-4 z-10 flex items-center justify-center gap-1 px-3 py-1.5 rounded-lg bg-teal-500 text-white hover:bg-teal-600 transition-colors shadow-lg"
-                                    onClick={toggleMapVisibility}
-                                    aria-label={isMapVisible ? 'Ocultar mapa' : 'Mostrar mapa'}
-                                    title={isMapVisible ? 'Ocultar mapa' : 'Mostrar mapa'}
-                                >
-                                    <MapIcon className="w-5 h-5" />
-                                    <span className="font-medium">{isMapVisible ? 'Ocultar mapa' : 'Mostrar mapa'}</span>
-                                </button>
-                                
                                 {/* Either show the map or publication details */}
                                 {selectedPublication ? (
                                     // Diseño mejorado para los detalles de la publicación
