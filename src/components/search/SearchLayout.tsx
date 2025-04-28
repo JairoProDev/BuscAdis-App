@@ -271,7 +271,7 @@ export default function SearchLayout({
     return (
         <div className={`w-full ${className}`}>
             {/* COMPLETELY RESTRUCTURED: Fixed two-column layout */}
-            <div className="flex flex-col lg:flex-row h-[calc(100vh-120px)] min-h-[600px]">
+            <div className="flex flex-col lg:flex-row w-full">
                 {/* LEFT COLUMN - Search interface and results */}
                 <div className="w-full lg:w-1/2 lg:pr-4">
                     {/* Category selector - constrained to left column */}
@@ -389,7 +389,7 @@ export default function SearchLayout({
                     </div>
                     
                     {/* Search results - scrollable area in left column */}
-                    <div className="h-[calc(100vh-300px)] overflow-y-auto pr-2 pb-24">
+                    <div className="pr-2 pb-32">
                         <SearchResults
                             results={results}
                             loading={loading}
@@ -398,7 +398,6 @@ export default function SearchLayout({
                             onPublicationClick={(pub, e) => {
                                 e.preventDefault();
                                 handleSelectPublication(pub);
-                                
                                 // Actualizar URL con datos de la publicación seleccionada
                                 const newParams = new URLSearchParams(searchParams?.toString());
                                 if (pub.id) newParams.set('publicationId', pub.id);
@@ -409,7 +408,6 @@ export default function SearchLayout({
                                     newParams.set('title', titleSlug);
                                 }
                                 router.push(`${pathname}?${newParams.toString()}`, { scroll: false });
-                                
                                 if (onPublicationClick) onPublicationClick(pub, e);
                             }}
                             viewType={listViewMode}
