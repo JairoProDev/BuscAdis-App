@@ -16,6 +16,7 @@ interface KeywordSearchBoxProps {
   showImageSearch?: boolean;
   showAiAssist?: boolean;
   placeholder?: string;
+  isMobile?: boolean;
 }
 
 export default function KeywordSearchBox({
@@ -30,6 +31,7 @@ export default function KeywordSearchBox({
   showImageSearch = true,
   showAiAssist = true,
   placeholder = '¿Qué estás buscando?',
+  isMobile = false,
 }: KeywordSearchBoxProps) {
   const router = useRouter();
   const [searchValue, setSearchValue] = useState(initialValue);
@@ -66,6 +68,7 @@ export default function KeywordSearchBox({
         showVoiceSearch={showVoiceSearch}
         showImageSearch={showImageSearch}
         showAiAssist={showAiAssist}
+        isMobile={isMobile}
       />
     </div>
   );

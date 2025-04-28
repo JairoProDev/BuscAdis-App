@@ -454,7 +454,7 @@ export default function BuscadorPage() {
   if (isInitialLoad && loading) {
     return (
       <div className="min-h-screen bg-slate-900">
-        <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8 lg:py-12">
+        <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-0 sm:py-8 lg:py-4">
           {/* Skeleton para barra de búsqueda */}
           <div className="mb-6 w-full bg-slate-800/40 rounded-xl p-4 animate-pulse">
             <div className="h-12 bg-slate-700 rounded-xl w-full"></div>

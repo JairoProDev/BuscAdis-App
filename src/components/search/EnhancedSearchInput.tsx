@@ -21,6 +21,7 @@ interface EnhancedSearchInputProps {
   showAiAssist?: boolean;
   onFocusChange?: (isFocused: boolean) => void;
   compactSuggestions?: boolean;
+  isMobile?: boolean;
 }
 
 export default function EnhancedSearchInput({
@@ -37,6 +38,7 @@ export default function EnhancedSearchInput({
   showAiAssist = true,
   onFocusChange,
   compactSuggestions = true,
+  isMobile = false,
 }: EnhancedSearchInputProps) {
   const [searchTerm, setSearchTerm] = useState(initialValue);
   const [showSuggestionsPanel, setShowSuggestionsPanel] = useState(false);
@@ -503,18 +505,17 @@ export default function EnhancedSearchInput({
           </div>
         )}
         
-        <Button
+        <button
           type="submit"
-          size="sm"
           className={cn(
-            'px-4 py-2 h-full rounded-l-none',
-            appearance === 'dark' ? 'bg-slate-700 hover:bg-slate-600 text-white' : ''
+            'flex items-center px-4 py-2 h-full bg-teal-500 hover:bg-teal-600 text-white font-semibold rounded-r-lg transition-colors',
+            isMobile ? 'px-2' : 'px-4'
           )}
-          variant={appearance === 'dark' ? 'default' : 'default'}
+          aria-label="Buscar"
         >
-          <Search className="h-4 w-4 mr-2" />
-          Buscar
-        </Button>
+          <Search className="h-5 w-5" />
+          {!isMobile && <span className="ml-2">Buscar</span>}
+        </button>
       </form>
       
       {/* Search suggestions */}

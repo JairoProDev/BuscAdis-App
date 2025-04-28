@@ -305,6 +305,7 @@ export default function SearchLayout({
                                 showImageSearch={true}
                                 showAiAssist={true}
                                 className="w-full"
+                                isMobile={isMobile}
                             />
                         ) : (
                             <AdvancedSearchBar
@@ -388,7 +389,7 @@ export default function SearchLayout({
                     </div>
                     
                     {/* Search results - scrollable area in left column */}
-                    <div className="h-[calc(100vh-300px)] overflow-y-auto pr-2">
+                    <div className="h-[calc(100vh-300px)] overflow-y-auto pr-2 pb-24">
                         <SearchResults
                             results={results}
                             loading={loading}

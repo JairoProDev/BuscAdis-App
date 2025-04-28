@@ -268,18 +268,21 @@ export default function FilterChips({
   return (
     <div 
       ref={filterContainerRef} 
-      className={cn("flex flex-wrap gap-2 relative", className)}
+      className={cn("flex flex-nowrap gap-2 overflow-x-auto scrollbar-thin scrollbar-thumb-slate-600 scrollbar-track-transparent relative", className)}
     >
       {filters.map((filter) => (
         <div key={filter.id} className="relative">
           <Button
-            variant={isFilterActiveCheck(filter.id) ? "secondary" : "outline"}
+            variant="ghost"
             size="sm"
-            onClick={() => toggleDropdown(filter.id)}
             className={cn(
-              "flex items-center gap-1 h-8",
+              "flex items-center gap-1 h-8 px-4 rounded-lg text-sm font-medium transition-colors",
+              isFilterActiveCheck(filter.id)
+                ? "bg-teal-600 text-white hover:bg-teal-700"
+                : "bg-slate-700 text-white hover:bg-teal-600 hover:text-white",
               isFilterActiveCheck(filter.id) && "font-medium"
             )}
+            onClick={() => toggleDropdown(filter.id)}
             ref={(el) => {
               buttonRefs.current[filter.id] = el
             }}
@@ -307,7 +310,7 @@ export default function FilterChips({
               ref={(el) => {
                 dropdownRefs.current[filter.id] = el
               }}
-              className="absolute top-full left-0 mt-1 z-[100] bg-slate-800 rounded-lg border border-slate-700 shadow-lg min-w-[200px] max-h-[80vh] overflow-y-auto"
+              className="absolute top-full left-0 mt-1 z-[200] bg-slate-800 rounded-lg border border-slate-700 shadow-2xl min-w-[220px] max-h-[80vh] overflow-y-auto"
               style={{ 
                 position: 'absolute',
                 width: 'max-content'
