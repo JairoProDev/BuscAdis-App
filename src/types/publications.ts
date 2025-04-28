@@ -1,4 +1,4 @@
-// ----- src/types/publication.ts -----
+// ----- src/types/publication.ts (Revisado y Finalizado) -----
 
 /**
  * Define la estructura para coordenadas geográficas usando GeoJSON Point.
@@ -10,67 +10,64 @@ interface GeoJsonPoint {
 }
 
 /**
- * Interfaz principal para una Publicación (Anuncio Clasificado) en Buscadis.
- * Define todos los campos POTENCIALES. En la práctica (DB, JSON),
- * solo se incluirán los campos con valor, especialmente dentro de 'attributes'.
+ * Interfaz principal y UNIFICADA para una Publicación (Anuncio Clasificado) en Buscadis.
+ * Define todos los campos POTENCIALES.
+ * REGLA CLAVE: En la instancia real del JSON/documento, solo incluir
+ * las claves que tengan un valor. No incluir "key: null" (especialmente en attributes).
  */
 export interface Publication {
-  // --- Identificadores y Metadatos ---
-  _id?: string; // Opcional: ObjectId de MongoDB
-  publicationId?: string; // Opcional: ID legible/secuencial
+  // --- Identificadores y Metadatos Esenciales ---
+  _id?: string; // Opcional: ObjectId de MongoDB (Automático)
   createdAt?: Date; // Fecha de creación (Automático por DB/Backend)
   updatedAt?: Date; // Fecha de actualización (Automático por DB/Backend)
   userId?: string | null; // ID del usuario creador (si aplica)
-  status: 'active' | 'inactive' | 'pending' | 'expired' | 'sold' | 'rented'; // Estado actual
-  premium: boolean; // ¿Anuncio destacado?
-  publicationDate?: Date | null; // Fecha de la publicación original (ej: fecha revista)
-  expiryDate?: Date | null; // Fecha de expiración del anuncio (opcional)
-  source?: string | null; // Origen ('pdf_import', 'web_user', 'app_user', 'admin_panel')
-  viewCount?: number; // Contador de vistas (opcional)
 
   // --- Contenido Principal ---
   title: string; // Título (Obligatorio)
   description: string; // Descripción (Obligatorio)
   images: string[]; // Array de URLs de imágenes (Obligatorio, puede ser [])
-  coverImage?: string | null; // URL imagen principal (opcional, podría ser images[0])
 
-  // --- Clasificación ---
-  categorySlug: string; // Slug categoría (Obligatorio)
-  subcategorySlug: string; // Slug subcategoría (Obligatorio)
-  subSubcategorySlug?: string | null; // Slug sub-subcategoría (Opcional)
+  // --- Clasificación Jerárquica ---
+  categorySlug: string; // Slug categoría (Obligatorio, ej: 'inmuebles')
+  subcategorySlug: string; // Slug subcategoría (Obligatorio, ej: 'departamentos')
+  subSubcategorySlug?: string | null; // Slug sub-subcategoría (Opcional, ej: 'duplex')
 
-  // --- Transacción y Precio ---
-  transactionType: string; // 'venta', 'alquiler', 'oferta_empleo', etc. (Obligatorio)
-  amount?: number | null; // Monto principal. Null si no aplica/consulta. 0 si es Gratis.
-  currency?: 'PEN' | 'USD' | null; // Moneda. Null si amount es null.
-  negotiable?: boolean | null; // ¿Precio es negociable?
+  // --- Precio / Valor ---
+  /** Monto principal (precio, salario). Null si no especificado/consulta. 0 si es Gratis. */
+  amount?: number | null;
+  /** Moneda ('PEN', 'USD'). Null si amount es null. */
+  currency?: 'PEN' | 'USD' | null;
+  /** Indica explícitamente si el monto es negociable. */
+  negotiable?: boolean | null; // Útil para mostrar "(Negociable)"
 
   // --- Ubicación (Enfocado en Cusco MVP) ---
   location: {
-    province: 'Cusco'; // Fijo por ahora
-    district?: string | null; // Distrito ('Wanchaq', 'Santiago', etc.)
-    address?: string | null; // Dirección específica
-    referencePoint?: string | null; // Referencia adicional ("Frente a...")
-    coordinates?: GeoJsonPoint | null; // Coordenadas [lon, lat] (Ideal para futuro)
+    /** Provincia (Fijo 'Cusco' para MVP). */
+    province: 'Cusco';
+    /** Distrito (ej: 'Wanchaq', 'San Sebastián'). */
+    district?: string | null;
+    /** Dirección específica (Calle, Av, Urb.). */
+    address?: string | null;
+    /** Punto de referencia textual adicional (ej: 'Frente al colegio X'). */
+    referencePoint?: string | null;
+    /** Coordenadas geográficas [lon, lat]. Null si no se pueden determinar. */
+    coordinates?: GeoJsonPoint | null;
   };
 
   // --- Contacto ---
   contact: {
-    phones: string[]; // Array simple de números (Obligatorio al menos uno)
-    email?: string | null; // Correo (Opcional)
-    name?: string | null; // Nombre de contacto (Opcional)
-    website?: string | null; // Web/Red social (Opcional)
+    /** Array simple de números de teléfono/WhatsApp. Obligatorio al menos uno. */
+    phones: string[];
+    /** Correo electrónico de contacto (Opcional). */
+    email?: string | null;
+    /** Nombre de la persona o empresa de contacto (Opcional). */
+    name?: string | null;
+    // website?: string | null; // Eliminado por ahora
   };
 
-  // --- Tamaño Estimado y Precio Original (Metadata del PDF) ---
-  /** Estimación del tamaño del anuncio en la fuente original (0-4, baja fiabilidad). */
-  sizeEstimation?: number | null;
-  /** Información del precio/formato del anuncio en la revista original. */
-  sourceAdInfo?: {
-      sizeName: 'Miniatura' | 'Pequeño' | 'Largo Horizontal' | 'Normal' | 'Grande' | 'Otro' | 'Desconocido';
-      pricePEN?: number | null; // Precio base en Soles según la lista de precios
-      includesRadio?: boolean; // Si el precio incluye la mención en radio
-  } | null;
+  // --- Metadata del Anuncio Original (PDF) ---
+  /** Costo estimado en Soles que pagó el anunciante en la revista original (incluye radio). Null si no se puede estimar. */
+  sourceAdCostPEN?: number | null;
 
   // --- Atributos Específicos (Objeto Flexible) ---
   /**
