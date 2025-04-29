@@ -8,7 +8,7 @@ import { AdjustmentsHorizontalIcon, XMarkIcon } from '@heroicons/react/24/outlin
 import { Badge } from '@/components/ui/Badge'
 import { filtersByCategory } from '@/data/filterConfig'
 import { Filter, FilterValue } from '@/types/filters'
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/Tabs-adapter'
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion'
 import CategoryFilters from './CategoryFilters'
 import FilterSection from './FilterSection'

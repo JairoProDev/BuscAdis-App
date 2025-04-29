@@ -37,8 +37,8 @@ export const MONGODB_ERRORS = {
  */
 
 // Import the server and browser clients
-import getServerMongoClient from './mongodb-server';
-import getBrowserMongoClient, { mongoFetch } from './mongodb-browser';
+import { getServerMongoClient } from './mongodb-server';
+import { getBrowserMongoClient, mongoFetch } from './mongodb-browser';
 
 // Check if we're in a browser environment
 const isBrowser = typeof window !== 'undefined';
@@ -47,5 +47,4 @@ const isBrowser = typeof window !== 'undefined';
 const getMongoClient = isBrowser ? getBrowserMongoClient : getServerMongoClient;
 
 // Also export mongoFetch for direct API calls from browser
-export { mongoFetch };
-export default getMongoClient; 
+export { mongoFetch, getMongoClient }; 

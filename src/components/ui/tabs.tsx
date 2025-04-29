@@ -1,5 +1,9 @@
 "use client"
 
+// Este archivo existe solo para compatibilidad con importaciones que usan 'Tabs' con T mayúscula
+// Reexporta todos los componentes del archivo 'tabs.tsx' (con t minúscula)
+export * from './tabs';
+
 import * as React from "react"
 import * as TabsPrimitive from "@radix-ui/react-tabs"
 

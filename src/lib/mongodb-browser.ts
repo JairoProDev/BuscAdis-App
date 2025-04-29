@@ -155,7 +155,7 @@ export const mongoFetch = async (endpoint: string, options: MongoFetchOptions = 
 /**
  * Get a MongoDB client configured for browser use
  */
-export function getBrowserMongoClient() {
+export const getBrowserMongoClient = () => {
   return {
     // Find documents in a collection
     find: async (collection: string, query: any = {}, options: any = {}) => {
