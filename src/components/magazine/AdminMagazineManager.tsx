@@ -1,18 +1,18 @@
+"use client";
+
 import React, { useState, useEffect } from 'react';
-import { format } from 'date-fns';
 import { Button } from '@/components/ui/button';
 import { RefreshCw, Download, Trash2 } from 'lucide-react';
-import { getMagazineHistory, generateMagazine } from '@/features/magazine/services/magazine.service';
-
-interface MagazineItem {
-  url: string;
-  lastUpdated: string;
-  totalPublications: number;
-  createdAt: Date;
-}
+import { 
+  getMagazineHistory, 
+  generateMagazine, 
+  deleteMagazine,
+  MagazineMetadata 
+} from '@/features/magazine/services/magazine.service';
+import { format } from 'date-fns';
 
 export default function AdminMagazineManager() {
-  const [magazines, setMagazines] = useState<MagazineItem[]>([]);
+  const [magazines, setMagazines] = useState<MagazineMetadata[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isGenerating, setIsGenerating] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -25,7 +25,7 @@ export default function AdminMagazineManager() {
     try {
       setIsLoading(true);
       setError(null);
-      const magazineData = await getMagazineHistory(20);
+      const magazineData = await getMagazineHistory();
       setMagazines(magazineData);
     } catch (err) {
       console.error('Error loading magazines:', err);
@@ -41,9 +41,12 @@ export default function AdminMagazineManager() {
       setError(null);
       const newMagazine = await generateMagazine();
       
-      // Add the new magazine to the list
-      setMagazines(prevMagazines => [newMagazine, ...prevMagazines]);
-      
+      if (newMagazine) {
+        // Add the new magazine to the list
+        setMagazines(prevMagazines => [newMagazine, ...prevMagazines]);
+      } else {
+        setError('No se pudo generar la revista. Por favor, inténtalo más tarde.');
+      }
     } catch (err) {
       console.error('Error generating magazine:', err);
       setError('No se pudo generar la revista. Por favor, inténtalo más tarde.');
@@ -52,25 +55,26 @@ export default function AdminMagazineManager() {
     }
   };
 
-  const handleDeleteMagazine = async (url: string) => {
-    // Implement magazine deletion if needed
+  const handleDeleteMagazine = async (magazine: MagazineMetadata) => {
     try {
-      await fetch('/api/magazine/delete', {
-        method: 'DELETE',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ url }),
-      });
+      const success = await deleteMagazine(magazine._id, magazine.fileId);
       
-      // Remove from the list
-      setMagazines(prevMagazines => 
-        prevMagazines.filter(magazine => magazine.url !== url)
-      );
+      if (success) {
+        // Remove from the list
+        setMagazines(prevMagazines => 
+          prevMagazines.filter(m => m._id !== magazine._id)
+        );
+      } else {
+        setError('No se pudo eliminar la revista.');
+      }
     } catch (error) {
       console.error('Error deleting magazine:', error);
       setError('No se pudo eliminar la revista.');
     }
+  };
+
+  const formatDate = (date: Date) => {
+    return format(new Date(date), 'dd/MM/yyyy HH:mm');
   };
 
   return (
@@ -123,13 +127,13 @@ export default function AdminMagazineManager() {
                 </td>
               </tr>
             ) : (
-              magazines.map((magazine, index) => (
-                <tr key={index}>
+              magazines.map((magazine) => (
+                <tr key={magazine._id}>
                   <td className="px-6 py-4 whitespace-nowrap">
-                    <div className="text-sm text-gray-900">{magazine.lastUpdated}</div>
+                    <div className="text-sm text-gray-900">{formatDate(magazine.createdAt)}</div>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
-                    <div className="text-sm text-gray-900">{magazine.totalPublications} anuncios</div>
+                    <div className="text-sm text-gray-900">{magazine.publicationCount} anuncios</div>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
                     <div className="flex space-x-2">
@@ -137,7 +141,7 @@ export default function AdminMagazineManager() {
                         variant="outline" 
                         size="sm" 
                         className="flex items-center"
-                        onClick={() => window.open(magazine.url, '_blank')}
+                        onClick={() => window.open(magazine.pdfUrl, '_blank')}
                       >
                         <Download className="h-4 w-4 mr-1" />
                         Ver
@@ -146,7 +150,7 @@ export default function AdminMagazineManager() {
                         variant="destructive" 
                         size="sm" 
                         className="flex items-center"
-                        onClick={() => handleDeleteMagazine(magazine.url)}
+                        onClick={() => handleDeleteMagazine(magazine)}
                       >
                         <Trash2 className="h-4 w-4" />
                       </Button>

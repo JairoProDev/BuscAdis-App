@@ -20,78 +20,95 @@ Las siguientes dependencias son necesarias para el funcionamiento de la revista 
 npm install jspdf jspdf-autotable
 ```
 
-### 2. Configuración de Supabase
+### 2. Configuración de MongoDB
 
-1. Crear una nueva tabla `magazines` en la base de datos Supabase:
+1. La funcionalidad utiliza MongoDB Atlas para almacenar tanto los metadatos de las revistas como los archivos PDF generados. Se crean las siguientes colecciones:
 
-```sql
-CREATE TABLE IF NOT EXISTS magazines (
-  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
-  pdf_url TEXT NOT NULL,
-  filename TEXT NOT NULL,
-  publication_count INTEGER NOT NULL,
-  created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
-  created_by UUID REFERENCES users(id)
-);
+```javascript
+// Colección 'magazines' para almacenar los metadatos de las revistas
+{
+  _id: ObjectId, // ID único generado automáticamente
+  pdfUrl: String, // URL para descargar el PDF
+  filename: String, // Nombre del archivo
+  fileId: ObjectId, // ID del archivo en GridFS
+  publicationCount: Number, // Número de publicaciones en la revista
+  createdAt: Date // Fecha de creación
+}
 
-CREATE INDEX IF NOT EXISTS idx_magazines_created_at ON magazines(created_at);
+// GridFS para almacenar los archivos PDF
+// MongoDB creará automáticamente dos colecciones:
+// - magazines.files: metadatos de los archivos
+// - magazines.chunks: contenido binario de los archivos
 ```
 
-2. Crear un nuevo bucket de almacenamiento llamado `magazines` en Supabase Storage para almacenar los archivos PDF.
-
-3. Configurar las políticas de acceso adecuadas:
-
-```sql
--- Permitir a usuarios autenticados crear revistas
-CREATE POLICY "Allow authenticated users to create magazines" 
-ON magazines FOR INSERT 
-TO authenticated 
-WITH CHECK (true);
-
--- Permitir acceso público para leer revistas
-CREATE POLICY "Allow public to read magazines" 
-ON magazines FOR SELECT 
-TO anon 
-USING (true);
-
--- Permitir a los creadores actualizar sus revistas
-CREATE POLICY "Allow creators to update their magazines" 
-ON magazines FOR UPDATE 
-TO authenticated 
-USING (auth.uid() = created_by);
-
--- Permitir a los creadores eliminar sus revistas
-CREATE POLICY "Allow creators to delete their magazines" 
-ON magazines FOR DELETE 
-TO authenticated 
-USING (auth.uid() = created_by);
-```
+2. No se requiere configuración adicional ya que se está utilizando el mismo MongoDB Atlas que ya está configurado para las publicaciones.
 
 ### 3. APIs disponibles
+
+#### Obtener revista(s)
+- Endpoint: `/api/magazine`
+- Método: GET
+- Parámetros: `limit` (opcional, por defecto 1)
+- Descripción: Obtiene la revista más reciente o varias revistas según el límite
+- Respuesta (una revista): 
+  ```json
+  {
+    "magazine": {
+      "_id": "655e789...",
+      "pdfUrl": "/api/magazine/download/655e789...",
+      "filename": "buscadis-revista-20231122-123456.pdf",
+      "fileId": "655e789...",
+      "publicationCount": 120,
+      "createdAt": "2023-11-22T12:34:56.789Z"
+    }
+  }
+  ```
+- Respuesta (múltiples revistas):
+  ```json
+  {
+    "magazines": [
+      {
+        "_id": "655e789...",
+        "pdfUrl": "/api/magazine/download/655e789...",
+        "filename": "buscadis-revista-20231122-123456.pdf",
+        "fileId": "655e789...",
+        "publicationCount": 120,
+        "createdAt": "2023-11-22T12:34:56.789Z"
+      },
+      // ...más revistas
+    ]
+  }
+  ```
 
 #### Generación de revista
 - Endpoint: `/api/magazine/generate`
 - Método: POST
-- Descripción: Genera una nueva revista digital
-- Cuerpo de la solicitud: No requiere cuerpo
+- Descripción: Genera una nueva revista digital a partir de todas las publicaciones activas
 - Respuesta: 
   ```json
   {
     "success": true,
-    "pdfUrl": "https://[URL_TO_PDF]",
+    "pdfUrl": "/api/magazine/download/655e789...",
     "publicationCount": 120,
-    "magazineId": "123e4567-e89b-12d3-a456-426614174000"
+    "createdAt": "2023-11-22T12:34:56.789Z",
+    "magazineId": "655e789..."
   }
   ```
+
+#### Descarga de revista
+- Endpoint: `/api/magazine/download/[fileId]`
+- Método: GET
+- Descripción: Descarga la revista en formato PDF
+- Respuesta: Archivo PDF
 
 #### Eliminación de revista
 - Endpoint: `/api/magazine/delete`
 - Método: DELETE
-- Descripción: Elimina una revista existente
 - Cuerpo de la solicitud: 
   ```json
   {
-    "url": "https://[URL_TO_PDF]"
+    "fileId": "655e789...",
+    "magazineId": "655e789..."
   }
   ```
 - Respuesta: 
@@ -132,11 +149,11 @@ El diseño de la revista se puede personalizar modificando las funciones en el a
 ## Funcionamiento Interno
 
 1. Cuando se solicita una generación de revista:
-   - Se obtienen todas las publicaciones activas de la base de datos
+   - Se obtienen todas las publicaciones activas de las colecciones de MongoDB
    - Se agrupan por categoría para mejor organización
    - Se genera un PDF con portada, índice y secciones por categoría
-   - El PDF se sube al almacenamiento de Supabase
-   - Se guarda un registro de la revista en la tabla `magazines`
+   - El PDF se sube a MongoDB GridFS
+   - Se guarda un registro de la revista en la colección `magazines`
 
 2. La revista se actualiza bajo demanda o cuando un administrador la genera manualmente.
 
@@ -145,6 +162,6 @@ El diseño de la revista se puede personalizar modificando las funciones en el a
 Si la generación de la revista falla, verificar:
 
 1. Que existen publicaciones activas en la base de datos
-2. Que las permisos de Supabase estén correctamente configurados
+2. Que las permisos de MongoDB estén correctamente configurados
 3. Que las dependencias estén instaladas (jspdf, jspdf-autotable)
 4. Revisar los logs del servidor para identificar errores específicos 

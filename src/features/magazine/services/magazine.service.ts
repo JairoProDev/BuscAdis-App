@@ -1,134 +1,178 @@
 import { Publication } from '@/types/publications';
-import { supabase } from '@/lib/supabase';
 import { format } from 'date-fns';
+import { getServerMongoClient } from '@/lib/mongodb-server';
+import { ObjectId } from 'mongodb';
 
 // Type for the Magazine metadata
-interface MagazineMetadata {
-  url: string;
-  lastUpdated: string;
-  totalPublications: number;
+export interface MagazineMetadata {
+  _id: string;
+  pdfUrl: string;
+  fileId: string;
+  publicationCount: number;
   createdAt: Date;
+  filename?: string;
+}
+
+export interface CategoryGroup {
+  categoryName: string;
+  publications: Publication[];
 }
 
 /**
- * Fetch the latest magazine from storage
+ * Fetch the latest magazine from MongoDB
  */
 export async function fetchLatestMagazine(): Promise<MagazineMetadata | null> {
+  console.log('[Magazine Service] Fetching latest magazine');
+  
   try {
-    // Get the most recent magazine
-    const { data: magazines, error } = await supabase
-      .from('magazines')
-      .select('*')
-      .order('created_at', { ascending: false })
-      .limit(1);
-
-    if (error) throw error;
-
-    if (!magazines || magazines.length === 0) {
+    const { client, db } = await getServerMongoClient();
+    
+    // Find the latest magazine by creation date
+    const magazinesCollection = db.collection('magazines');
+    const latestMagazine = await magazinesCollection
+      .find({})
+      .sort({ createdAt: -1 })
+      .limit(1)
+      .toArray();
+    
+    await client.close();
+    
+    if (latestMagazine.length === 0) {
+      console.log('[Magazine Service] No magazines found');
       return null;
     }
-
-    const latestMagazine = magazines[0];
+    
+    // Transform to the expected interface
+    const magazine = latestMagazine[0];
     return {
-      url: latestMagazine.pdf_url,
-      lastUpdated: format(new Date(latestMagazine.created_at), 'dd/MM/yyyy HH:mm'),
-      totalPublications: latestMagazine.publication_count,
-      createdAt: new Date(latestMagazine.created_at)
+      _id: magazine._id.toString(),
+      pdfUrl: magazine.pdfUrl,
+      fileId: magazine.fileId.toString(),
+      publicationCount: magazine.publicationCount,
+      createdAt: magazine.createdAt,
+      filename: magazine.filename
     };
   } catch (error) {
-    console.error('Error fetching latest magazine:', error);
-    throw error;
+    console.error('[Magazine Service] Error fetching latest magazine:', error);
+    return null;
   }
 }
 
 /**
  * Generate a new magazine and save it to storage
  */
-export async function generateMagazine(): Promise<MagazineMetadata> {
+export async function generateMagazine(): Promise<MagazineMetadata | null> {
+  console.log('[Magazine Service] Generating new magazine');
+  
   try {
-    // 1. Fetch all active publications
-    const { data: publications, error: publicationsError } = await supabase
-      .from('publications')
-      .select('*')
-      .eq('status', 'active')
-      .order('created_at', { ascending: false });
-
-    if (publicationsError) throw publicationsError;
-
-    if (!publications || publications.length === 0) {
-      throw new Error('No hay publicaciones activas para generar la revista');
-    }
-
-    // 2. Request magazine generation from the API endpoint
     const response = await fetch('/api/magazine/generate', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify({ publications }),
     });
-
+    
     if (!response.ok) {
       const errorData = await response.json();
-      throw new Error(errorData.message || 'Error al generar la revista');
+      console.error('[Magazine Service] Error generating magazine:', errorData);
+      return null;
     }
-
-    const magazineData = await response.json();
-
-    // 3. Return the metadata
+    
+    const data = await response.json();
+    
     return {
-      url: magazineData.pdfUrl,
-      lastUpdated: format(new Date(), 'dd/MM/yyyy HH:mm'),
-      totalPublications: publications.length,
-      createdAt: new Date()
+      _id: data.magazineId,
+      pdfUrl: data.pdfUrl,
+      fileId: data.fileId,
+      publicationCount: data.publicationCount,
+      createdAt: new Date(data.createdAt)
     };
   } catch (error) {
-    console.error('Error generating magazine:', error);
-    throw error;
+    console.error('[Magazine Service] Error generating magazine:', error);
+    return null;
   }
 }
 
 /**
  * Group publications by category for better organization in the magazine
  */
-export function groupPublicationsByCategory(publications: Publication[]): Record<string, Publication[]> {
-  return publications.reduce((grouped, publication) => {
+export function groupPublicationsByCategory(publications: Publication[]): CategoryGroup[] {
+  const groupedByCategory: Record<string, Publication[]> = {};
+  
+  // Group publications by category
+  publications.forEach(publication => {
     const category = publication.categorySlug || 'otros';
     
-    if (!grouped[category]) {
-      grouped[category] = [];
+    if (!groupedByCategory[category]) {
+      groupedByCategory[category] = [];
     }
     
-    grouped[category].push(publication);
-    return grouped;
-  }, {} as Record<string, Publication[]>);
+    groupedByCategory[category].push(publication);
+  });
+  
+  // Convert to array of category groups
+  return Object.entries(groupedByCategory).map(([categoryName, publications]) => ({
+    categoryName,
+    publications
+  }));
 }
 
 /**
  * Get magazine history (for admin purposes)
  */
-export async function getMagazineHistory(limit = 10): Promise<MagazineMetadata[]> {
+export async function getMagazineHistory(): Promise<MagazineMetadata[]> {
+  console.log('[Magazine Service] Getting magazine history');
+  
   try {
-    const { data: magazines, error } = await supabase
-      .from('magazines')
-      .select('*')
-      .order('created_at', { ascending: false })
-      .limit(limit);
-
-    if (error) throw error;
-
-    if (!magazines) {
-      return [];
-    }
-
+    const { client, db } = await getServerMongoClient();
+    
+    const magazinesCollection = db.collection('magazines');
+    const magazines = await magazinesCollection
+      .find({})
+      .sort({ createdAt: -1 })
+      .toArray();
+    
+    await client.close();
+    
+    // Transform to the expected interface
     return magazines.map(magazine => ({
-      url: magazine.pdf_url,
-      lastUpdated: format(new Date(magazine.created_at), 'dd/MM/yyyy HH:mm'),
-      totalPublications: magazine.publication_count,
-      createdAt: new Date(magazine.created_at)
+      _id: magazine._id.toString(),
+      pdfUrl: magazine.pdfUrl,
+      fileId: magazine.fileId.toString(),
+      publicationCount: magazine.publicationCount,
+      createdAt: magazine.createdAt,
+      filename: magazine.filename
     }));
   } catch (error) {
-    console.error('Error fetching magazine history:', error);
-    throw error;
+    console.error('[Magazine Service] Error getting magazine history:', error);
+    return [];
+  }
+}
+
+/**
+ * Deletes a magazine by its ID
+ */
+export async function deleteMagazine(magazineId: string, fileId: string): Promise<boolean> {
+  console.log(`[Magazine Service] Deleting magazine with ID: ${magazineId}`);
+  
+  try {
+    const response = await fetch('/api/magazine/delete', {
+      method: 'DELETE',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ magazineId, fileId }),
+    });
+    
+    if (!response.ok) {
+      const errorData = await response.json();
+      console.error('[Magazine Service] Error deleting magazine:', errorData);
+      return false;
+    }
+    
+    return true;
+  } catch (error) {
+    console.error('[Magazine Service] Error deleting magazine:', error);
+    return false;
   }
 } 

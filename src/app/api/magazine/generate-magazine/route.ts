@@ -1,21 +1,13 @@
 import { NextResponse } from 'next/server';
-import { Publication } from '@/types/publications';
-import { groupPublicationsByCategory } from '@/features/magazine/services/magazine.service';
+import { getServerMongoClient } from '@/lib/mongodb-server';
 import { generatePdfMagazine } from '@/features/magazine/services/pdf-generator.service';
 import { MongoClient, ObjectId, GridFSBucket } from 'mongodb';
 import { format } from 'date-fns';
 
-// MongoDB connection
-const MONGODB_URI = process.env.MONGODB_URI || 'mongodb://localhost:27017';
-const MONGODB_DB = process.env.MONGODB_DB || 'buscadis';
-
-// This is the handler function
 export async function POST(request: Request) {
   try {
     // Connect to MongoDB
-    const client = new MongoClient(MONGODB_URI);
-    await client.connect();
-    const db = client.db(MONGODB_DB);
+    const { client, db } = await getServerMongoClient();
     
     // Fetch active publications from all collections
     const collections = [
@@ -76,10 +68,21 @@ export async function POST(request: Request) {
     console.log(`[Magazine API] Generating magazine with ${allPublications.length} total publications`);
     
     // Group publications by category for better organization
-    const groupedPublications = groupPublicationsByCategory(allPublications);
+    const groupedPublications = allPublications.reduce((acc, pub) => {
+      const category = pub.categorySlug || 'otros';
+      if (!acc[category]) acc[category] = [];
+      acc[category].push(pub);
+      return acc;
+    }, {});
+    
+    // Convert to array format expected by pdf generator
+    const categoriesArray = Object.entries(groupedPublications).map(([categoryName, publications]) => ({
+      categoryName,
+      publications
+    }));
 
     // Generate PDF
-    const pdfBuffer = await generatePdfMagazine(groupedPublications);
+    const pdfBuffer = await generatePdfMagazine(categoriesArray);
     
     // Create a unique filename and timestamp
     const timestamp = format(new Date(), 'yyyyMMdd-HHmmss');

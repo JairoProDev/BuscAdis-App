@@ -1,52 +1,49 @@
 import { NextResponse } from 'next/server';
-import { supabase } from '@/lib/supabase';
+import { MongoClient, ObjectId, GridFSBucket } from 'mongodb';
+
+// MongoDB connection
+const MONGODB_URI = process.env.MONGODB_URI || 'mongodb://localhost:27017';
+const MONGODB_DB = process.env.MONGODB_DB || 'buscadis';
 
 export async function DELETE(request: Request) {
   try {
-    const { url } = await request.json();
+    const { fileId, magazineId } = await request.json();
 
-    if (!url) {
+    if (!fileId || !magazineId) {
       return NextResponse.json(
-        { message: 'URL es necesaria para eliminar la revista' },
+        { message: 'IDs son necesarios para eliminar la revista' },
         { status: 400 }
       );
     }
 
-    // Get filename from URL
-    const filename = url.split('/').pop();
+    // Connect to MongoDB
+    const client = new MongoClient(MONGODB_URI);
+    await client.connect();
+    const db = client.db(MONGODB_DB);
     
-    if (!filename) {
-      return NextResponse.json(
-        { message: 'No se pudo extraer el nombre del archivo de la URL' },
-        { status: 400 }
-      );
+    // Create GridFS bucket
+    const gridFSBucket = new GridFSBucket(db, { bucketName: 'magazines' });
+    
+    // Delete file from GridFS
+    try {
+      await gridFSBucket.delete(new ObjectId(fileId));
+      console.log(`[Magazine API] Deleted file ${fileId} from GridFS`);
+    } catch (error) {
+      console.error(`[Magazine API] Error deleting file ${fileId} from GridFS:`, error);
+      // Continue to delete the record even if file deletion fails
     }
-
-    // Delete from storage
-    const { error: storageError } = await supabase
-      .storage
-      .from('magazines')
-      .remove([filename]);
-
-    if (storageError) {
-      console.error('Error deleting file from storage:', storageError);
-      return NextResponse.json(
-        { message: 'Error al eliminar el archivo de almacenamiento' },
-        { status: 500 }
-      );
-    }
-
+    
     // Delete magazine record from database
-    const { error: dbError } = await supabase
-      .from('magazines')
-      .delete()
-      .eq('pdf_url', url);
-
-    if (dbError) {
-      console.error('Error deleting magazine record:', dbError);
+    const magazinesCollection = db.collection('magazines');
+    const result = await magazinesCollection.deleteOne({ _id: new ObjectId(magazineId) });
+    
+    // Close connection
+    await client.close();
+    
+    if (result.deletedCount === 0) {
       return NextResponse.json(
-        { message: 'Error al eliminar el registro de la revista de la base de datos' },
-        { status: 500 }
+        { message: 'No se encontró la revista para eliminar' },
+        { status: 404 }
       );
     }
 
@@ -55,7 +52,7 @@ export async function DELETE(request: Request) {
       message: 'Revista eliminada correctamente'
     });
   } catch (error) {
-    console.error('Error deleting magazine:', error);
+    console.error('[Magazine API] Error deleting magazine:', error);
     return NextResponse.json(
       { message: 'Error al eliminar la revista', error: (error as Error).message },
       { status: 500 }
