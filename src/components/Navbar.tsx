@@ -3,7 +3,7 @@
 import Link from 'next/link';
 import { useState, useEffect } from 'react';
 import { useAuth } from '@/features/auth/hooks/useAuth'; // Importar useAuth
-import { UserCircleIcon, BellIcon, MessageSquare } from 'lucide-react'; // Importar iconos
+import { UserCircleIcon, BellIcon, MessageSquare, BookOpenIcon } from 'lucide-react'; // Importar iconos
 import LoginForm from '@/features/auth/components/LoginForm';
 
 export default function Navbar() {
@@ -47,6 +47,10 @@ export default function Navbar() {
                             </Link>
                             <Link href="/categorias" className="text-primary-700 hover:text-primary-900">
                                 Categorías
+                            </Link>
+                            <Link href="/revista" className="text-primary-700 hover:text-primary-900 flex items-center">
+                                <BookOpenIcon className="w-4 h-4 mr-1" />
+                                Revista Digital
                             </Link>
                             {isAuthenticated ? (
                                 <>
@@ -99,6 +103,10 @@ export default function Navbar() {
                             </Link>
                             <Link href="/categorias" className="block py-2 text-primary-700">
                                 Categorías
+                            </Link>
+                            <Link href="/revista" className="block py-2 text-primary-700 flex items-center">
+                                <BookOpenIcon className="w-4 h-4 mr-1" />
+                                Revista Digital
                             </Link>
                             {isAuthenticated ? (
                                 <>

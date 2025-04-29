@@ -47,6 +47,8 @@
     "framer-motion": "^12.6.3",
     "html-to-image": "^1.11.13",
     "html2canvas": "^1.4.1",
+    "jspdf": "^2.5.1",
+    "jspdf-autotable": "^3.8.2",
     "lodash": "^4.17.21",
     "lucide-react": "^0.483.0",
     "mongodb": "^6.15.0",
