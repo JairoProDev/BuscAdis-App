@@ -1,3 +1,5 @@
+"use server";
+
 import { Publication } from '@/types/publications';
 import { format } from 'date-fns';
 import { getServerMongoClient } from '@/lib/mongodb-server';
@@ -96,7 +98,7 @@ export async function generateMagazine(): Promise<MagazineMetadata | null> {
 /**
  * Group publications by category for better organization in the magazine
  */
-export function groupPublicationsByCategory(publications: Publication[]): CategoryGroup[] {
+export async function groupPublicationsByCategory(publications: Publication[]): Promise<CategoryGroup[]> {
   const groupedByCategory: Record<string, Publication[]> = {};
   
   // Group publications by category

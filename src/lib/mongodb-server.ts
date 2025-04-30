@@ -1,3 +1,5 @@
+"use server";
+
 /**
  * Server-side MongoDB client implementation
  * This uses the real MongoDB driver and is only imported on the server

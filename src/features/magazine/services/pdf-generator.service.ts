@@ -1,5 +1,8 @@
+"use server";
+
 import { Publication } from '@/types/publications';
 import { Buffer } from 'buffer';
+import { CategoryGroup } from './magazine.service';
 
 /**
  * Generate a PDF magazine from grouped publications
