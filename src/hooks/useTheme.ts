@@ -5,8 +5,8 @@ import { useState, useEffect } from 'react'
 type Theme = 'light' | 'dark' | 'system'
 
 export function useTheme() {
-  // Initialize with a default theme, don't access localStorage here
-  const [theme, setTheme] = useState<Theme>('system')
+  // Initialize with light theme as the default
+  const [theme, setTheme] = useState<Theme>('light')
   const [mounted, setMounted] = useState(false)
 
   useEffect(() => {
@@ -15,7 +15,10 @@ export function useTheme() {
     const storedTheme = localStorage.getItem('theme') as Theme | null
     if (storedTheme && ['light', 'dark', 'system'].includes(storedTheme)) {
       setTheme(storedTheme)
-    } 
+    } else {
+      // If no theme is stored, use light theme
+      localStorage.setItem('theme', 'light')
+    }
   }, [])
 
   useEffect(() => {

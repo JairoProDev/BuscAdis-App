@@ -5,6 +5,7 @@ import { usePathname, useRouter } from 'next/navigation'
 import { motion, AnimatePresence, useScroll } from 'framer-motion'
 import { HomeIcon, ArticleIcon, SearchNavIcon, MegaphoneIcon, BotIcon } from '@/components/icons' // Usando ArticleIcon para el Blog
 import { useLongPress } from '@/hooks/useLongPress'
+import { ThemeToggle } from '@/components/theme'
 
 const navItems = [
     {
@@ -12,8 +13,8 @@ const navItems = [
         icon: HomeIcon,
         label: 'Inicio',
         path: '/',
-        gradient: 'from-teal-500 via-cyan-400 to-teal-600', // Nuevos gradientes
-        glow: 'rgba(20, 184, 166, 0.7)', // Nuevo color de glow
+        gradient: 'from-primary-500 via-primary-400 to-primary-600', // Updated gradient colors
+        glow: 'rgba(59, 130, 246, 0.7)', // Updated glow color 
         subOptions: [
             { id: 'featured', label: 'Destacados', path: '/destacados', icon: HomeIcon },
             { id: 'recent', label: 'Recientes', path: '/recientes', icon: HomeIcon }
@@ -24,8 +25,8 @@ const navItems = [
         icon: ArticleIcon, // Usando ArticleIcon para el Blog
         label: 'Blog',
         path: '/blog',
-        gradient: 'from-teal-500 via-cyan-400 to-teal-600',
-        glow: 'rgba(20, 184, 166, 0.7)',
+        gradient: 'from-primary-500 via-primary-400 to-primary-600',
+        glow: 'rgba(59, 130, 246, 0.7)',
         subOptions: [
             { id: 'news', label: 'Noticias', path: '/blog/noticias', icon: ArticleIcon },
             { id: 'guides', label: 'Guías', path: '/blog/guias', icon: ArticleIcon }
@@ -36,8 +37,8 @@ const navItems = [
         icon: SearchNavIcon,
         label: 'Buscar',
         path: '/buscar',
-        gradient: 'from-teal-500 via-cyan-400 to-teal-600',
-        glow: 'rgba(20, 184, 166, 0.7)',
+        gradient: 'from-primary-500 via-primary-400 to-primary-600',
+        glow: 'rgba(59, 130, 246, 0.7)',
         subOptions: [
             { id: 'categories', label: 'Categorías', path: '/categorias', icon: SearchNavIcon },
             { id: 'near', label: 'Cerca de mí', path: '/cerca', icon: SearchNavIcon }
@@ -48,8 +49,8 @@ const navItems = [
         icon: BotIcon,
         label: 'ADIS',
         path: '/chatbot',
-        gradient: 'from-teal-500 via-cyan-400 to-teal-600',
-        glow: 'rgba(20, 184, 166, 0.7)',
+        gradient: 'from-primary-500 via-primary-400 to-primary-600',
+        glow: 'rgba(59, 130, 246, 0.7)',
         subOptions: [
             { id: 'assistant', label: 'Asistente', path: '/chatbot', icon: BotIcon },
             { id: 'help', label: 'Ayuda', path: '/ayuda', icon: BotIcon }
@@ -60,10 +61,10 @@ const navItems = [
         icon: MegaphoneIcon, // Usando PlusCircleIcon como es más acorde a "Publicar"
         label: 'Publicar',
         path: '/publicar',
-        gradient: 'from-teal-500 via-cyan-400 to-teal-600',
-        glow: 'rgba(20, 184, 166, 0.7)',
+        gradient: 'from-primary-500 via-primary-400 to-primary-600',
+        glow: 'rgba(59, 130, 246, 0.7)',
         subOptions: [
-            { id: 'new', label: 'Nuevo Adiso', path: '/publicar/nuevo', icon: MegaphoneIcon },
+            { id: 'new', label: 'Nuevo Anuncio', path: '/publicar/nuevo', icon: MegaphoneIcon },
             { id: 'drafts', label: 'Borradores', path: '/publicar/borradores', icon: MegaphoneIcon }
         ]
     }
@@ -101,6 +102,17 @@ export default function MobileNavigation() {
 
     return (
         <>
+            {/* Floating Theme Toggle */}
+            <div className="fixed top-4 right-4 z-50 md:hidden">
+                <motion.div
+                    initial={{ opacity: 0, scale: 0.8 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    className="bg-slate-800 modal-overlay rounded-full p-1 shadow-lg"
+                >
+                    <ThemeToggle />
+                </motion.div>
+            </div>
+
             <motion.nav
                 className="fixed bottom-0 left-0 right-0 h-16 bg-slate-900 md:hidden z-50 border-t border-slate-800"
                 initial={false}
@@ -142,8 +154,8 @@ export default function MobileNavigation() {
                                         damping: 15
                                     }}
                                 >
-                                    <Icon className={`w-6 h-6 text-teal-300`} /> {/* Cambiamos el color de los iconos */}
-                                    <span className="text-sm font-medium mt-1.5 text-teal-300"> {/* Cambiamos el color del texto */}
+                                    <Icon className={`w-6 h-6 text-primary-300`} /> {/* Updated icon colors */}
+                                    <span className="text-sm font-medium mt-1.5 text-primary-300"> {/* Updated text colors */}
                                         {item.label}
                                     </span>
                                 </motion.div>
@@ -157,12 +169,12 @@ export default function MobileNavigation() {
                                     >
                                         <div className="relative h-8">
                                             {/* Sombra superior */}
-                                            <div className="absolute top-0 inset-x-0 h-4 bg-gradient-to-b from-slate-900 to-transparent" /> {/* Ajustamos la sombra */}
+                                            <div className="absolute top-0 inset-x-0 h-4 bg-gradient-to-b from-slate-900 to-transparent" />
                                             {/* Bordes laterales brillantes */}
-                                            <div className="absolute inset-y-0 left-0 w-px bg-gradient-to-b from-transparent via-teal-400/40 to-transparent" /> {/* Ajustamos el color del brillo */}
-                                            <div className="absolute inset-y-0 right-0 w-px bg-gradient-to-b from-transparent via-teal-400/40 to-transparent" /> {/* Ajustamos el color del brillo */}
+                                            <div className="absolute inset-y-0 left-0 w-px bg-gradient-to-b from-transparent via-primary-400/40 to-transparent" /> {/* Updated highlight color */}
+                                            <div className="absolute inset-y-0 right-0 w-px bg-gradient-to-b from-transparent via-primary-400/40 to-transparent" /> {/* Updated highlight color */}
                                             {/* Línea inferior brillante */}
-                                            <div className="absolute bottom-0 inset-x-0 h-px bg-gradient-to-r from-transparent via-teal-400/60 to-transparent" /> {/* Ajustamos el color del brillo */}
+                                            <div className="absolute bottom-0 inset-x-0 h-px bg-gradient-to-r from-transparent via-primary-400/60 to-transparent" /> {/* Updated highlight color */}
                                         </div>
                                     </motion.div>
                                 )}
@@ -200,7 +212,7 @@ export default function MobileNavigation() {
 
                                             {/* Hexágono principal con nuevo gradiente */}
                                             <div className={`w-full h-full bg-gradient-to-br ${item.gradient} rounded-xl transform rotate-45 shadow-lg`}>
-                                                <div className="absolute inset-0 bg-gradient-to-br from-white/10 to-transparent" /> {/* Ajustamos la transparencia */}
+                                                <div className="absolute inset-0 bg-gradient-to-br from-white/10 to-transparent" />
                                             </div>
 
                                             {/* Anillo giratorio con nuevo color */}
@@ -209,7 +221,7 @@ export default function MobileNavigation() {
                                                 animate={{ rotate: 360 }}
                                                 transition={{ duration: 12, repeat: Infinity, ease: "linear" }}
                                             >
-                                                <svg viewBox="0 0 100 100" className="w-full h-full opacity-70"> {/* Aumentamos la opacidad del anillo */}
+                                                <svg viewBox="0 0 100 100" className="w-full h-full opacity-70">
                                                     <circle
                                                         cx="50"
                                                         cy="50"
@@ -243,28 +255,36 @@ export default function MobileNavigation() {
                         initial={{ opacity: 0, y: 100 }}
                         animate={{ opacity: 1, y: 0 }}
                         exit={{ opacity: 0, y: 100 }}
-                        className="fixed bottom-16 left-0 right-0 bg-slate-800 md:hidden z-40 border-t border-slate-700"
+                        className="fixed bottom-16 left-0 right-0 bg-slate-800 md:hidden z-40 border-t border-slate-700 modal-overlay"
                     >
                         <div className="container mx-auto p-4">
                             <div className="grid grid-cols-2 gap-3">
                                 {navItems
                                     .find(item => item.id === activeSubMenu)
-                                    ?.subOptions?.map(option => (
+                                    ?.subOptions.map(option => (
                                         <motion.button
                                             key={option.id}
-                                            className="flex items-center p-4 rounded-xl bg-slate-700/80 hover:bg-slate-600 border border-slate-700"
+                                            className="flex items-center space-x-2 p-3 rounded-lg bg-slate-700 text-primary-300 hover:bg-slate-600 transition-colors"
+                                            whileHover={{ scale: 1.02 }}
+                                            whileTap={{ scale: 0.98 }}
                                             onClick={() => {
                                                 router.push(option.path)
                                                 setActiveSubMenu(null)
                                             }}
-                                            whileHover={{ scale: 1.02, y: -2 }}
-                                            whileTap={{ scale: 0.98 }}
                                         >
-                                            <option.icon className="w-5 h-5 mr-3 text-teal-300" />
-                                            <span className="text-sm font-medium text-teal-300">{option.label}</span>
+                                            {option.icon && <option.icon className="w-5 h-5" />}
+                                            <span>{option.label}</span>
                                         </motion.button>
                                     ))}
                             </div>
+                            <motion.button
+                                className="w-full mt-3 p-2 rounded-lg bg-slate-700 text-primary-300 hover:bg-slate-600 transition-colors"
+                                whileHover={{ scale: 1.02 }}
+                                whileTap={{ scale: 0.98 }}
+                                onClick={() => setActiveSubMenu(null)}
+                            >
+                                Cerrar
+                            </motion.button>
                         </div>
                     </motion.div>
                 )}

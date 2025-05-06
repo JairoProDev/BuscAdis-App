@@ -7,6 +7,7 @@ import Image from 'next/image'
 import { HomeIcon, NewspaperIcon, MagnifyingGlassIcon, MegaphoneIcon } from '@heroicons/react/24/outline'
 import { UserCircleIcon, BellIcon } from '@heroicons/react/24/solid'
 import { motion } from 'framer-motion'
+import { ThemeToggle } from '@/components/theme'
 // import { useAuth } from '@/features/auth/hooks/useAuth';
 
 export default function Navigation() {
@@ -25,15 +26,15 @@ export default function Navigation() {
     const isActive = (path: string) => pathname === path
 
     // Define tus colores personalizados basados en tu diseño
-    const backgroundColor = isScrolled ? 'bg-slate-900/90' : 'bg-slate-900';
+    const backgroundColor = 'bg-slate-900';
     const textColor = 'text-gray-300';
-    const primaryButtonBg = 'bg-teal-400';
-    const primaryButtonHoverBg = 'bg-teal-500';
+    const primaryButtonBg = 'bg-primary-600';
+    const primaryButtonHoverBg = 'hover:bg-primary-700';
     const primaryButtonTextColor = 'text-white';
     const hoverTextColor = 'text-white';
-    const activeLinkBg = 'bg-teal-900';
+    const activeLinkBg = 'bg-primary-800';
     const activeLinkTextColor = 'text-white';
-    const linkHoverBg = 'bg-teal-800/50';
+    const linkHoverBg = 'hover:bg-primary-800/50';
     const logoTextColor = 'text-white';
 
     // Simula un estado de autenticación para desarrollo
@@ -45,7 +46,7 @@ export default function Navigation() {
     // const { user, isAuthenticated, logout } = useAuth();
 
     return (
-        <header className={`${backgroundColor} inherit top-0 left-0 right-0 h-16 z-50 transition-all duration-300`}>
+        <header className={`${backgroundColor} ${isScrolled ? 'scrolled' : ''} inherit top-0 left-0 right-0 h-16 z-50 transition-all duration-300`}>
             <div className="container mx-2 px-0 h-full">
                 <div className="flex items-center justify-between h-full">
                     {/* Logo y Navegación Izquierda (Desktop y Mobile) */}
@@ -71,7 +72,7 @@ export default function Navigation() {
                                 className={`px-3 py-2 rounded-md font-medium transition-colors ${
                                     isActive('/inicio')
                                         ? `${activeLinkTextColor} ${activeLinkBg}`
-                                        : `${textColor} hover:${hoverTextColor} hover:${linkHoverBg}`
+                                        : `${textColor} ${linkHoverBg} hover:${hoverTextColor}`
                                 }`}
                             >
                                 <HomeIcon className="w-5 h-5 mr-1 inline-block" /> Inicio
@@ -81,7 +82,7 @@ export default function Navigation() {
                                 className={`px-3 py-2 rounded-md font-medium transition-colors ${
                                     isActive('/revista')
                                         ? `${activeLinkTextColor} ${activeLinkBg}`
-                                        : `${textColor} hover:${hoverTextColor} hover:${linkHoverBg}`
+                                        : `${textColor} ${linkHoverBg} hover:${hoverTextColor}`
                                 }`}
                             >
                                 <NewspaperIcon className="w-5 h-5 mr-1 inline-block" /> Revista Digital
@@ -91,18 +92,21 @@ export default function Navigation() {
                                 className={`px-3 py-2 rounded-md font-medium transition-colors ${
                                     isActive('/')
                                         ? `${activeLinkTextColor} ${activeLinkBg}`
-                                        : `${textColor} hover:${hoverTextColor} hover:${linkHoverBg}`
+                                        : `${textColor} ${linkHoverBg} hover:${hoverTextColor}`
                                 }`}
                             >
                                 <MagnifyingGlassIcon className="w-5 h-5 mr-1 inline-block" /> Buscar
                             </Link>
                             <Link
                                 href="/publicar"
-                                className={`${primaryButtonBg} ${primaryButtonTextColor} px-4 py-2 rounded-md font-semibold hover:${primaryButtonHoverBg} transition-colors`}
+                                className={`${primaryButtonBg} ${primaryButtonTextColor} px-4 py-2 rounded-md font-semibold ${primaryButtonHoverBg} transition-colors`}
                             >
                                 <MegaphoneIcon className="w-5 h-5 mr-1 inline-block" /> Publicar
                             </Link>
                         </nav>
+
+                        {/* Theme Toggle */}
+                        <ThemeToggle />
 
                         {isAuthenticated ? (
                             <div className="relative">
@@ -160,7 +164,7 @@ export default function Navigation() {
                                 </Link>
                                 <Link
                                     href="/register"
-                                    className={`${primaryButtonBg} ${primaryButtonTextColor} px-3 py-2 rounded-md text-sm hover:${primaryButtonHoverBg} transition-colors`}
+                                    className={`${primaryButtonBg} ${primaryButtonTextColor} px-3 py-2 rounded-md text-sm ${primaryButtonHoverBg} transition-colors`}
                                 >
                                     Regístrate
                                 </Link>
@@ -170,7 +174,7 @@ export default function Navigation() {
                         {/* Icono de Notificaciones (Opcional) */}
                         {isAuthenticated && (
                             <button 
-                                className={`${textColor} hover:${hoverTextColor} relative focus:outline-none focus:ring-2 focus:ring-teal-500`}
+                                className={`${textColor} hover:${hoverTextColor} relative focus:outline-none focus:ring-2 focus:ring-primary-500`}
                                 aria-label="Notifications"
                             >
                                 <BellIcon className="w-6 h-6" />

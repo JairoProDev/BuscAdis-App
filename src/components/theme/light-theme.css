@@ -1,0 +1,375 @@
+/* Light Theme Enhancements */
+
+/* Soften shadows in light mode */
+.light .shadow-md {
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05),
+    0 2px 4px -1px rgba(0, 0, 0, 0.03);
+}
+
+.light .shadow-lg {
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.05),
+    0 4px 6px -2px rgba(0, 0, 0, 0.03);
+}
+
+/* Card styles for light mode */
+.light .publication-card {
+  background: white;
+  border: 1px solid rgba(0, 0, 0, 0.05);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  border-radius: 12px;
+  overflow: hidden;
+}
+
+.light .publication-card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 12px 20px -10px rgba(0, 0, 0, 0.1);
+  border-color: rgba(59, 130, 246, 0.2);
+}
+
+.light .publication-card .content {
+  padding: 1rem;
+}
+
+.light .publication-card h3 {
+  color: hsl(222, 47%, 15%);
+  font-weight: 600;
+}
+
+.light .publication-card .description {
+  color: hsl(215, 16%, 47%);
+}
+
+.light .publication-card .price {
+  color: hsl(221, 83%, 53%);
+  font-weight: 600;
+}
+
+.light .publication-card .location,
+.light .publication-card .date {
+  color: hsl(215, 16%, 60%);
+  font-size: 0.75rem;
+}
+
+.light .publication-card .image-container {
+  position: relative;
+  height: 180px;
+  overflow: hidden;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+}
+
+.light .publication-card .image-container img {
+  object-fit: cover;
+  transition: transform 0.5s ease;
+}
+
+.light .publication-card:hover .image-container img {
+  transform: scale(1.05);
+}
+
+.light .publication-card .badge {
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  background-color: hsl(221, 83%, 53%);
+  color: white;
+  padding: 0.25rem 0.5rem;
+  border-radius: 4px;
+  font-size: 0.75rem;
+  font-weight: 500;
+  z-index: 1;
+}
+
+/* Background overlays */
+.light .bg-slate-900 {
+  background-color: white;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+}
+
+/* Navigation and header styles */
+.light header {
+  background-color: white;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+}
+
+.light header.scrolled {
+  background-color: rgba(255, 255, 255, 0.85);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+}
+
+/* Text colors in light mode */
+.light .text-gray-300 {
+  color: hsl(222, 47%, 30%);
+}
+
+.light header a:hover {
+  color: hsl(221, 83%, 53%) !important;
+}
+
+/* Buttons in light mode */
+.light .bg-primary-600 {
+  background-color: hsl(221, 83%, 53%);
+}
+
+.light .bg-primary-600:hover {
+  background-color: hsl(224, 76%, 48%);
+}
+
+/* Fancy buttons for light mode */
+.light .btn-primary {
+  background-color: hsl(221, 83%, 53%);
+  color: white;
+  border-radius: 8px;
+  padding: 0.5rem 1rem;
+  font-weight: 500;
+  transition: all 0.2s ease;
+  border: none;
+  box-shadow: 0 2px 10px -2px rgba(59, 130, 246, 0.5);
+}
+
+.light .btn-primary:hover {
+  background-color: hsl(224, 76%, 48%);
+  box-shadow: 0 4px 12px -2px rgba(59, 130, 246, 0.6);
+  transform: translateY(-1px);
+}
+
+.light .btn-secondary {
+  background-color: hsl(210, 40%, 96.1%);
+  color: hsl(222, 47%, 30%);
+  border-radius: 8px;
+  padding: 0.5rem 1rem;
+  font-weight: 500;
+  transition: all 0.2s ease;
+  border: 1px solid rgba(0, 0, 0, 0.05);
+}
+
+.light .btn-secondary:hover {
+  background-color: hsl(210, 40%, 92%);
+  box-shadow: 0 2px 6px -2px rgba(0, 0, 0, 0.1);
+}
+
+/* Mobile navigation in light mode */
+.light nav.fixed.bottom-0 {
+  background-color: white;
+  border-top: 1px solid rgba(0, 0, 0, 0.1);
+}
+
+.light .text-teal-300 {
+  color: hsl(221, 83%, 53%);
+}
+
+/* Search input in light mode */
+.light input.bg-slate-800 {
+  background-color: white;
+  border: 1px solid rgba(0, 0, 0, 0.1);
+  color: hsl(222, 47%, 11%);
+  border-radius: 8px;
+  padding: 0.75rem 1rem;
+  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+}
+
+.light input.bg-slate-800:focus {
+  border-color: hsl(221, 83%, 70%);
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2);
+  outline: none;
+}
+
+.light input.bg-slate-800::placeholder {
+  color: hsl(215, 16%, 60%);
+}
+
+/* Select inputs in light mode */
+.light select.bg-slate-800 {
+  background-color: white;
+  border: 1px solid rgba(0, 0, 0, 0.1);
+  color: hsl(222, 47%, 11%);
+  border-radius: 8px;
+  padding: 0.5rem 1rem;
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 20 20'%3e%3cpath stroke='%236b7280' stroke-linecap='round' stroke-linejoin='round' stroke-width='1.5' d='M6 8l4 4 4-4'/%3e%3c/svg%3e");
+  background-position: right 0.5rem center;
+  background-repeat: no-repeat;
+  background-size: 1.5em 1.5em;
+}
+
+/* Footer in light mode */
+.light footer.bg-slate-900 {
+  background-color: hsl(210, 38%, 95%);
+  color: hsl(222, 47%, 30%);
+}
+
+.light footer a {
+  color: hsl(222, 47%, 40%);
+}
+
+.light footer a:hover {
+  color: hsl(221, 83%, 53%);
+}
+
+/* Form elements in light mode */
+.light select,
+.light textarea {
+  background-color: white;
+  border: 1px solid rgba(0, 0, 0, 0.1);
+  color: hsl(222, 47%, 11%);
+}
+
+/* Dialog/Modal in light mode */
+.light [role="dialog"] {
+  background-color: white;
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1),
+    0 10px 10px -5px rgba(0, 0, 0, 0.04);
+  border-radius: 12px;
+  border: 1px solid rgba(0, 0, 0, 0.05);
+  overflow: hidden;
+}
+
+.light [role="dialog"] h2 {
+  color: hsl(222, 47%, 15%);
+}
+
+.light [role="dialog"] p {
+  color: hsl(215, 16%, 47%);
+}
+
+/* Modal overlays */
+.light .modal-overlay {
+  background-color: rgba(0, 0, 0, 0.05);
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+}
+
+/* Add this class to the modal overlays in the site */
+.modal-overlay {
+  /* Empty class to be targeted by the light mode styles */
+}
+
+/* Mobile menu */
+.light .bg-slate-800 {
+  background-color: white;
+  border-top: 1px solid rgba(0, 0, 0, 0.1);
+}
+
+.light .bg-slate-700 {
+  background-color: hsl(210, 40%, 96.1%);
+  border: 1px solid rgba(0, 0, 0, 0.05);
+}
+
+.light .bg-slate-700:hover {
+  background-color: hsl(210, 40%, 92%);
+}
+
+.light .bg-slate-700 .text-teal-300 {
+  color: hsl(222, 47%, 30%);
+}
+
+/* Tables in light mode */
+.light table {
+  border-collapse: separate;
+  border-spacing: 0;
+  width: 100%;
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+}
+
+.light th {
+  background-color: hsl(210, 40%, 96.1%);
+  color: hsl(222, 47%, 30%);
+  font-weight: 600;
+  text-align: left;
+  padding: 0.75rem 1rem;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+}
+
+.light td {
+  padding: 0.75rem 1rem;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+  color: hsl(222, 47%, 20%);
+}
+
+.light tr:last-child td {
+  border-bottom: none;
+}
+
+.light tbody tr:hover {
+  background-color: hsl(210, 40%, 98%);
+}
+
+/* Pagination in light mode */
+.light .pagination {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-top: 2rem;
+}
+
+.light .pagination button {
+  background-color: white;
+  border: 1px solid rgba(0, 0, 0, 0.1);
+  color: hsl(222, 47%, 30%);
+  padding: 0.5rem 0.75rem;
+  margin: 0 0.25rem;
+  border-radius: 4px;
+  transition: all 0.2s ease;
+}
+
+.light .pagination button:hover {
+  background-color: hsl(210, 40%, 96.1%);
+  border-color: rgba(0, 0, 0, 0.2);
+}
+
+.light .pagination button.active {
+  background-color: hsl(221, 83%, 53%);
+  color: white;
+  border-color: hsl(221, 83%, 53%);
+}
+
+/* Tabs in light mode */
+.light .tabs {
+  display: flex;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+  margin-bottom: 1rem;
+}
+
+.light .tabs button {
+  padding: 0.75rem 1rem;
+  border-bottom: 2px solid transparent;
+  color: hsl(215, 16%, 47%);
+  font-weight: 500;
+  transition: all 0.2s ease;
+}
+
+.light .tabs button:hover {
+  color: hsl(221, 83%, 53%);
+}
+
+.light .tabs button.active {
+  color: hsl(221, 83%, 53%);
+  border-bottom-color: hsl(221, 83%, 53%);
+}
+
+/* Tooltips in light mode */
+.light [role="tooltip"] {
+  background-color: white;
+  color: hsl(222, 47%, 20%);
+  border: 1px solid rgba(0, 0, 0, 0.1);
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1),
+    0 2px 4px -1px rgba(0, 0, 0, 0.06);
+  border-radius: 4px;
+  padding: 0.5rem 0.75rem;
+  font-size: 0.875rem;
+}
+
+/* Filter buttons in light mode */
+.light .filter-transition {
+  background-color: white;
+  border: 1px solid rgba(0, 0, 0, 0.1);
+  color: hsl(222, 47%, 30%);
+}
+
+.light .filter-active {
+  background-color: hsl(221, 83%, 53%);
+  color: white;
+  border-color: hsl(221, 83%, 53%);
+}
