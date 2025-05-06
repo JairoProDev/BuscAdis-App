@@ -3,13 +3,17 @@
 import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { RefreshCw, Download, Trash2 } from 'lucide-react';
-import { 
-  getMagazineHistory, 
-  generateMagazine, 
-  deleteMagazine,
-  MagazineMetadata 
-} from '@/features/magazine/services/magazine.service';
 import { format } from 'date-fns';
+
+// Define the MagazineMetadata interface locally instead of importing from server-side service
+interface MagazineMetadata {
+  _id: string;
+  pdfUrl: string;
+  fileId: string;
+  publicationCount: number;
+  createdAt: Date;
+  filename?: string;
+}
 
 export default function AdminMagazineManager() {
   const [magazines, setMagazines] = useState<MagazineMetadata[]>([]);
@@ -25,8 +29,15 @@ export default function AdminMagazineManager() {
     try {
       setIsLoading(true);
       setError(null);
-      const magazineData = await getMagazineHistory();
-      setMagazines(magazineData);
+      
+      // Use fetch to call the API instead of direct server function
+      const response = await fetch('/api/magazine/get-latest');
+      if (!response.ok) {
+        throw new Error('Failed to load magazines');
+      }
+      
+      const data = await response.json();
+      setMagazines(data.magazines || []);
     } catch (err) {
       console.error('Error loading magazines:', err);
       setError('No se pudieron cargar las revistas.');
@@ -39,7 +50,20 @@ export default function AdminMagazineManager() {
     try {
       setIsGenerating(true);
       setError(null);
-      const newMagazine = await generateMagazine();
+      
+      // Use fetch to call the API
+      const response = await fetch('/api/magazine/generate-magazine', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        }
+      });
+      
+      if (!response.ok) {
+        throw new Error('Failed to generate magazine');
+      }
+      
+      const newMagazine = await response.json();
       
       if (newMagazine) {
         // Add the new magazine to the list
@@ -57,9 +81,25 @@ export default function AdminMagazineManager() {
 
   const handleDeleteMagazine = async (magazine: MagazineMetadata) => {
     try {
-      const success = await deleteMagazine(magazine._id, magazine.fileId);
+      // Use fetch to call the API
+      const response = await fetch('/api/magazine/delete', {
+        method: 'DELETE',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          magazineId: magazine._id,
+          fileId: magazine.fileId
+        }),
+      });
       
-      if (success) {
+      if (!response.ok) {
+        throw new Error('Failed to delete magazine');
+      }
+      
+      const result = await response.json();
+      
+      if (result.success) {
         // Remove from the list
         setMagazines(prevMagazines => 
           prevMagazines.filter(m => m._id !== magazine._id)

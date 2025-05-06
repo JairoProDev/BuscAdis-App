@@ -1,9 +1,7 @@
 "use server";
 
 import { Publication } from '@/types/publications';
-import { format } from 'date-fns';
 import { getServerMongoClient } from '@/lib/mongodb-server';
-import { ObjectId } from 'mongodb';
 
 // Type for the Magazine metadata
 export interface MagazineMetadata {
@@ -58,65 +56,6 @@ export async function fetchLatestMagazine(): Promise<MagazineMetadata | null> {
     console.error('[Magazine Service] Error fetching latest magazine:', error);
     return null;
   }
-}
-
-/**
- * Generate a new magazine and save it to storage
- */
-export async function generateMagazine(): Promise<MagazineMetadata | null> {
-  console.log('[Magazine Service] Generating new magazine');
-  
-  try {
-    const response = await fetch('/api/magazine/generate', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-    });
-    
-    if (!response.ok) {
-      const errorData = await response.json();
-      console.error('[Magazine Service] Error generating magazine:', errorData);
-      return null;
-    }
-    
-    const data = await response.json();
-    
-    return {
-      _id: data.magazineId,
-      pdfUrl: data.pdfUrl,
-      fileId: data.fileId,
-      publicationCount: data.publicationCount,
-      createdAt: new Date(data.createdAt)
-    };
-  } catch (error) {
-    console.error('[Magazine Service] Error generating magazine:', error);
-    return null;
-  }
-}
-
-/**
- * Group publications by category for better organization in the magazine
- */
-export async function groupPublicationsByCategory(publications: Publication[]): Promise<CategoryGroup[]> {
-  const groupedByCategory: Record<string, Publication[]> = {};
-  
-  // Group publications by category
-  publications.forEach(publication => {
-    const category = publication.categorySlug || 'otros';
-    
-    if (!groupedByCategory[category]) {
-      groupedByCategory[category] = [];
-    }
-    
-    groupedByCategory[category].push(publication);
-  });
-  
-  // Convert to array of category groups
-  return Object.entries(groupedByCategory).map(([categoryName, publications]) => ({
-    categoryName,
-    publications
-  }));
 }
 
 /**

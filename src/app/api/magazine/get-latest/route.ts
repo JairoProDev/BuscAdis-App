@@ -5,35 +5,34 @@ export async function GET() {
   try {
     const { client, db } = await getServerMongoClient();
     
-    // Find the latest magazine by creation date
+    // Find all magazines ordered by creation date (newest first)
     const magazinesCollection = db.collection('magazines');
-    const latestMagazine = await magazinesCollection
+    const magazines = await magazinesCollection
       .find({})
       .sort({ createdAt: -1 })
-      .limit(1)
       .toArray();
     
     await client.close();
     
-    if (latestMagazine.length === 0) {
-      return NextResponse.json({ magazine: null });
+    if (magazines.length === 0) {
+      return NextResponse.json({ magazines: [] });
     }
     
-    const magazine = latestMagazine[0];
-    return NextResponse.json({ 
-      magazine: {
-        _id: magazine._id.toString(),
-        pdfUrl: magazine.pdfUrl,
-        fileId: magazine.fileId.toString(),
-        publicationCount: magazine.publicationCount,
-        createdAt: magazine.createdAt,
-        filename: magazine.filename
-      }
-    });
+    // Transform to the expected interface
+    const formattedMagazines = magazines.map(magazine => ({
+      _id: magazine._id.toString(),
+      pdfUrl: magazine.pdfUrl,
+      fileId: magazine.fileId.toString(),
+      publicationCount: magazine.publicationCount,
+      createdAt: magazine.createdAt,
+      filename: magazine.filename
+    }));
+    
+    return NextResponse.json({ magazines: formattedMagazines });
   } catch (error) {
-    console.error('[Magazine API] Error fetching latest magazine:', error);
+    console.error('[Magazine API] Error fetching magazines:', error);
     return NextResponse.json(
-      { message: 'Error fetching magazine', error: (error as Error).message },
+      { message: 'Error fetching magazines', error: (error as Error).message },
       { status: 500 }
     );
   }

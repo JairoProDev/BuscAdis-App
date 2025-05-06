@@ -10,12 +10,13 @@ const nextConfig: NextConfig = {
     pagesBufferLength: 2,
   },
 
-  // Mark certain packages as external to prevent them from being bundled
+  // Specify which packages should only be loaded on the server-side
   serverExternalPackages: [
     "mongodb",
     "mongodb-client-encryption",
     "kerberos",
     "@mongodb-js/zstd",
+    "@napi-rs/snappy-win32-x64-msvc",
     "snappy",
     "aws4",
     "gcp-metadata",
@@ -40,6 +41,7 @@ const nextConfig: NextConfig = {
         "socks": "next/dist/compiled/noop",
       },
     },
+    serverMinification: false,
   },
 
   // Configure image remote patterns (replaces deprecated domains)
@@ -84,6 +86,18 @@ const nextConfig: NextConfig = {
         stream: false,
         crypto: false,
         "util/types": false,
+      };
+
+      // Add specific MongoDB modules to noparse
+      config.module = {
+        ...config.module,
+        noParse: [
+          /mongodb-client-encryption/,
+          /kerberos/,
+          /@mongodb-js\/zstd/,
+          /@napi-rs\/snappy-win32-x64-msvc/,
+          /snappy/,
+        ],
       };
     }
 

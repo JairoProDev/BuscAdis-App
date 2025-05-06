@@ -123,6 +123,9 @@ const config: Config = {
   			'ping-slow': 'ping 3s cubic-bezier(0, 0, 0.2, 1) infinite',
         "accordion-down": "accordion-down 0.2s ease-out",
         "accordion-up": "accordion-up 0.2s ease-out",
+        "blob": "blob 7s infinite",
+        "blob-spin": "blob-spin 20s infinite linear",
+        "glow": "glow 2s ease-in-out infinite alternate",
       },
   		keyframes: {
   			float: {
@@ -141,6 +144,36 @@ const config: Config = {
           from: { height: "var(--radix-accordion-content-height)" },
           to: { height: "0" },
         },
+        "blob": {
+          "0%": {
+            transform: "translate(0px, 0px) scale(1)"
+          },
+          "33%": {
+            transform: "translate(30px, -50px) scale(1.1)"
+          },
+          "66%": {
+            transform: "translate(-20px, 20px) scale(0.9)"
+          },
+          "100%": {
+            transform: "translate(0px, 0px) scale(1)"
+          }
+        },
+        "blob-spin": {
+          from: {
+            transform: "rotate(0deg)"
+          },
+          to: {
+            transform: "rotate(360deg)"
+          }
+        },
+        "glow": {
+          from: {
+            textShadow: "0 0 10px rgba(20, 184, 166, 0.3), 0 0 20px rgba(20, 184, 166, 0.3)"
+          },
+          to: {
+            textShadow: "0 0 20px rgba(20, 184, 166, 0.6), 0 0 30px rgba(20, 184, 166, 0.6)"
+          }
+        }
   		},
   		borderRadius: {
   			lg: 'var(--radius)',
@@ -150,10 +183,43 @@ const config: Config = {
   		fontFamily: {
   			sans: ['var(--font-sans)', ...fontFamily.sans],
   		},
+      typography: (theme) => ({
+        DEFAULT: {
+          css: {
+            'code::before': {
+              content: '""'
+            },
+            'code::after': {
+              content: '""'
+            }
+          }
+        },
+        invert: {
+          css: {
+            '--tw-prose-body': theme('colors.slate[300]'),
+            '--tw-prose-headings': theme('colors.white'),
+            '--tw-prose-lead': theme('colors.slate[400]'),
+            '--tw-prose-links': theme('colors.teal[400]'),
+            '--tw-prose-bold': theme('colors.white'),
+            '--tw-prose-counters': theme('colors.slate[400]'),
+            '--tw-prose-bullets': theme('colors.slate[500]'),
+            '--tw-prose-hr': theme('colors.slate[700]'),
+            '--tw-prose-quotes': theme('colors.slate[300]'),
+            '--tw-prose-quote-borders': theme('colors.teal[500]'),
+            '--tw-prose-captions': theme('colors.slate[400]'),
+            '--tw-prose-code': theme('colors.teal[300]'),
+            '--tw-prose-pre-code': theme('colors.slate[300]'),
+            '--tw-prose-pre-bg': theme('colors.slate[800]'),
+            '--tw-prose-th-borders': theme('colors.slate[600]'),
+            '--tw-prose-td-borders': theme('colors.slate[700]'),
+          },
+        },
+      }),
   	}
   },
   plugins: [
     require('@tailwindcss/forms'),
+    require('@tailwindcss/typography'),
     require('@tailwindcss/aspect-ratio'),
     require("tailwindcss-animate"),
     require('tailwind-scrollbar')(),
