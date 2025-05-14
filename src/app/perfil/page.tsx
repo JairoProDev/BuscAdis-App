@@ -4,6 +4,7 @@ import React, { useState, useEffect, useCallback, useRef, FormEvent, ChangeEvent
 import Link from 'next/link';
 import { useAuth } from '@/features/auth/hooks/useAuth';
 import { ProfileService } from '@/services/profile.service';
+import { BuscadisAvatarIcon } from '@/components/icons/BuscadisAvatarIcon';
 
 // Íconos de Heroicons
 import {
@@ -337,12 +338,16 @@ export default function PerfilPage() {
       {/* Encabezado de la Página de Perfil */}
       <div className="flex flex-col md:flex-row items-center gap-6 md:gap-8 mb-10 md:mb-16">
         <div className="relative group">
-          <img
-            src={formData.avatarUrl || '/default-avatar.png'} // Usa un avatar por defecto si no hay
-            alt="Avatar"
-            className="w-32 h-32 md:w-40 md:h-40 rounded-full object-cover ring-4 ring-slate-200 dark:ring-slate-700 shadow-lg"
-            onError={(e) => (e.currentTarget.src = '/default-avatar.png')} // Fallback si la URL es inválida
-          />
+          {formData.avatarUrl ? (
+            <img
+              src={formData.avatarUrl}
+              alt="Avatar"
+              className="w-32 h-32 md:w-40 md:h-40 rounded-full object-cover ring-4 ring-slate-200 dark:ring-slate-700 shadow-lg"
+              onError={(e) => { e.currentTarget.onerror = null; e.currentTarget.src = ''; }}
+            />
+          ) : (
+            <BuscadisAvatarIcon className="w-32 h-32 md:w-40 md:h-40 rounded-full ring-4 ring-slate-200 dark:ring-slate-700 shadow-lg bg-white" />
+          )}
           {isEditing && (
             <>
               <input
