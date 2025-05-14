@@ -4,14 +4,16 @@ import Image from 'next/image';
 import { useState, useEffect } from 'react';
 import { HomeIcon, NewspaperIcon, MagnifyingGlassIcon, MegaphoneIcon, UserCircleIcon } from '@heroicons/react/24/outline';
 import { ThemeToggle } from '@/components/theme';
+import { useRouter } from 'next/navigation';
 
 export default function Header() {
   const [showUserMenu, setShowUserMenu] = useState(false);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [user, setUser] = useState<{ full_name?: string; firstName?: string; lastName?: string } | null>(null);
+  const router = useRouter();
 
   useEffect(() => {
-    if (typeof window !== 'undefined') {
+    function syncAuth() {
       const userData = localStorage.getItem('userData');
       if (userData) {
         setUser(JSON.parse(userData));
@@ -21,7 +23,21 @@ export default function Header() {
         setIsAuthenticated(false);
       }
     }
+    syncAuth();
+    window.addEventListener('storage', syncAuth);
+    return () => window.removeEventListener('storage', syncAuth);
   }, []);
+
+  // Feedback visual tras login
+  useEffect(() => {
+    if (isAuthenticated) {
+      const toast = document.createElement('div');
+      toast.textContent = '¡Inicio de sesión exitoso!';
+      toast.className = 'fixed top-4 right-4 z-[9999] bg-green-600 text-white px-6 py-3 rounded-lg shadow-lg animate-fade-in-up';
+      document.body.appendChild(toast);
+      setTimeout(() => toast.remove(), 2000);
+    }
+  }, [isAuthenticated]);
 
   const handleLogout = () => {
     localStorage.removeItem('userData');
