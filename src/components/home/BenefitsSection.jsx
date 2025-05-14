@@ -73,7 +73,7 @@ const BenefitsSection = () => {
                             }}
                             animate={{
                                 y: ['0%', '100%'],
-                                opacity: [0.3, 0.8, 0.3]
+                                opacity: [0.3, 0.8]
                             }}
                             transition={{
                                 repeat: Infinity,

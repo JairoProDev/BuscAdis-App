@@ -142,7 +142,7 @@ export default function Testimonials() {
               }}
               animate={{ 
                 y: ['0%', '100%'],
-                opacity: [0.3, 0.7, 0.3]
+                opacity: [0.3, 0.7]
               }}
               transition={{ 
                 repeat: Infinity, 
