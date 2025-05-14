@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect, useCallback, useRef, FormEvent, ChangeEvent } from 'react';
+import React, { useState, useEffect, useRef, ChangeEvent } from 'react';
 import Link from 'next/link';
 import { useAuth } from '@/features/auth/hooks/useAuth';
 import { ProfileService } from '@/services/profile.service';
@@ -15,10 +15,20 @@ import {
   ArrowPathIcon, // Para indicar guardado/carga
   CameraIcon, // Para cambiar avatar
   IdentificationIcon, // Para Nombre
-  DevicePhoneMobileIcon, // Para Teléfono
   EnvelopeIcon, // Para Email
   DocumentTextIcon, // Para Biografía (ejemplo)
+  UserIcon,
+  BriefcaseIcon,
+  CalendarIcon,
+  GlobeAltIcon,
+  PlusIcon,
+  TrashIcon,
+  PaperClipIcon,
+  HomeIcon,
+  ShoppingBagIcon,
 } from '@heroicons/react/24/outline';
+
+import WhatsAppIcon from '@/components/icons/WhatsAppIcon';
 
 // Componente LoadingSpinner (asumiendo que tienes uno similar al del Header)
 const LoadingSpinner = ({ size = 'md', className = '' }: { size?: 'sm' | 'md' | 'lg' | 'xl'; className?: string }) => {
@@ -58,78 +68,57 @@ interface ProfileFormData {
   fullName: string;
   phone: string;
   email: string;
-  bio?: string; // Nuevo campo de ejemplo
-  avatarUrl?: string; // Podría ser un File para subida o string para URL
+  bio?: string;
+  avatarUrl?: string;
+  occupation?: string;
+  gender?: string;
+  birthdate?: string;
 }
 
-// Componente Toast de Notificación (similar al del Header, podrías centralizarlo)
-const ToastNotification = ({
-  id,
-  message,
-  type,
-  onDismiss,
-}: {
-  id: string;
-  message: string;
-  type: 'success' | 'error' | 'info';
-  onDismiss: (id: string) => void;
-}) => {
-  useEffect(() => {
-    const timer = setTimeout(() => onDismiss(id), 5000); // Aumentado tiempo y dismissal por ID
-    return () => clearTimeout(timer);
-  }, [id, onDismiss]);
-
-  const baseClasses = "fixed top-20 right-5 z-[10000] w-auto max-w-sm px-5 py-3.5 rounded-xl shadow-2xl transform transition-all duration-300 ease-out";
-  const typeStyles = {
-    success: "bg-green-600 text-white",
-    error: "bg-red-600 text-white",
-    info: "bg-blue-600 text-white",
-  };
-  // Iconos para el Toast
-  const TypeIcon = type === 'success' ? CheckCircleIcon : type === 'error' ? ExclamationTriangleIcon : null;
-
-  // Animación de entrada desde la derecha y salida
-  const [isVisible, setIsVisible] = useState(false);
-  useEffect(() => {
-    setIsVisible(true); // Inicia animación de entrada
-  }, []);
-  
-  const handleDismiss = () => {
-    setIsVisible(false);
-    setTimeout(() => onDismiss(id), 300); // Espera a que la animación de salida termine
-  };
-
-  return (
-    <div 
-      className={`${baseClasses} ${typeStyles[type]} ${isVisible ? 'translate-x-0 opacity-100 animate-slide-in-from-right' : 'translate-x-full opacity-0'}`}
-      role="alert"
-      aria-live="assertive"
-    >
-      <div className="flex items-center">
-        {TypeIcon && <TypeIcon className="w-6 h-6 mr-3 flex-shrink-0" />}
-        <p className="text-sm font-medium">{message}</p>
-        <button 
-            onClick={handleDismiss} 
-            className="ml-auto -mr-1 p-1.5 rounded-md hover:bg-white/20 focus:outline-none focus:ring-2 focus:ring-white/50 transition-colors"
-            aria-label="Cerrar notificación"
-        >
-          <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20"><path d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clipRule="evenodd" fillRule="evenodd"></path></svg>
-        </button>
-      </div>
+// 2. Barra de progreso de perfil y badges
+const ProfileProgress = ({ percent }: { percent: number }) => (
+  <div className="w-full flex flex-col items-center mb-6">
+    <div className="relative w-32 h-32 flex items-center justify-center">
+      <svg className="absolute top-0 left-0" width="128" height="128">
+        <circle cx="64" cy="64" r="56" stroke="#e0e7ef" strokeWidth="12" fill="none" />
+        <circle cx="64" cy="64" r="56" stroke="url(#buscadis-avatar-gradient)" strokeWidth="12" fill="none" strokeDasharray={2 * Math.PI * 56} strokeDashoffset={2 * Math.PI * 56 * (1 - percent / 100)} strokeLinecap="round" />
+        <defs>
+          <linearGradient id="buscadis-avatar-gradient" x1="0" y1="0" x2="128" y2="128" gradientUnits="userSpaceOnUse">
+            <stop stopColor="#14b8a6" />
+            <stop offset="1" stopColor="#06b6d4" />
+          </linearGradient>
+        </defs>
+      </svg>
+      <span className="relative z-10 text-3xl font-bold text-teal-500">{percent}%</span>
     </div>
-  );
-};
+    <span className="mt-2 text-sm text-slate-500 dark:text-slate-400">Progreso de tu cartilla BuscAdis</span>
+  </div>
+);
 
+// 3. Chips de intereses y categorías
+const INTERESTS = [
+  { label: 'Empleo', value: 'empleo', icon: BriefcaseIcon },
+  { label: 'Vivienda', value: 'vivienda', icon: HomeIcon },
+  { label: 'Servicios', value: 'servicios', icon: GlobeAltIcon },
+  { label: 'Productos', value: 'productos', icon: ShoppingBagIcon },
+  { label: 'Otro', value: 'otro', icon: PlusIcon },
+];
+
+// 4. Redes sociales disponibles
+const SOCIALS = [
+  { label: 'WhatsApp', value: 'whatsapp', icon: WhatsAppIcon },
+  { label: 'Facebook', value: 'facebook', icon: GlobeAltIcon },
+  { label: 'LinkedIn', value: 'linkedin', icon: GlobeAltIcon },
+  { label: 'Instagram', value: 'instagram', icon: GlobeAltIcon },
+];
 
 export default function PerfilPage() {
   const { user, isAuthenticated, loading: authIsLoading } = useAuth();
   
   const [isEditing, setIsEditing] = useState(false);
   const [pageLoading, setPageLoading] = useState(true);
-  const [isSaving, setIsSaving] = useState(false);
+  const [isSaving] = useState(false);
   
-  const [notifications, setNotifications] = useState<{id: string; message: string; type: 'success' | 'error' | 'info'}[]>([]);
-
   const [formData, setFormData] = useState<ProfileFormData>({
     fullName: '',
     phone: '',
@@ -141,27 +130,10 @@ export default function PerfilPage() {
   const initialFormDataRef = useRef<ProfileFormData | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null); // Para la subida de avatar
 
-  // Función para añadir notificaciones (toasts)
-  const addNotification = useCallback((message: string, type: 'success' | 'error' | 'info') => {
-    const id = Date.now().toString(); // ID simple basado en timestamp
-    setNotifications(prev => [...prev, { id, message, type }]);
-  }, []);
-
-  const dismissNotification = useCallback((id: string) => {
-    setNotifications(prev => prev.filter(n => n.id !== id));
-  }, []);
-  
-  // Normalizar datos del AuthUser a ProfileFormData
-  const normalizeAuthUserToProfile = useCallback((authUser: AuthUser | null): ProfileFormData => {
-    if (!authUser) return { fullName: '', phone: '', email: '', bio: '', avatarUrl: '' };
-    return {
-      fullName: authUser.fullName || `${authUser.firstName || ''} ${authUser.lastName || ''}`.trim(),
-      phone: authUser.phone || '',
-      email: authUser.email || '',
-      bio: '', // Asumimos que bio no viene de AuthUser, sino del perfil específico
-      avatarUrl: authUser.avatarUrl || '',
-    };
-  }, []);
+  const [phones, setPhones] = useState([{ value: '', type: 'main' }]);
+  const [interests, setInterests] = useState<string[]>([]);
+  const [socialLinks, setSocialLinks] = useState<{ type: string; url: string }[]>([]);
+  const [profileProgress] = useState(40); // Calcular dinámicamente luego
 
   // Efecto para cargar datos del perfil
   useEffect(() => {
@@ -173,7 +145,6 @@ export default function PerfilPage() {
 
     if (!isAuthenticated || !user?.id) {
       setPageLoading(false);
-      addNotification('Debes iniciar sesión para ver tu perfil.', 'error');
       setFormData(normalizeAuthUserToProfile(null)); // Limpiar formulario
       return;
     }
@@ -197,13 +168,11 @@ export default function PerfilPage() {
         } else {
           // Si no hay perfil en el servicio, usar datos de autenticación como base
           dataToSet = baseAuthData;
-          addNotification('No se encontró un perfil detallado, puedes crear uno ahora.', 'info');
         }
         setFormData(dataToSet);
         initialFormDataRef.current = { ...dataToSet }; // Guardar estado inicial profundo
       } catch (err) {
         console.error('Error fetching profile:', err);
-        addNotification('No se pudo cargar tu perfil. Se usarán datos básicos.', 'error');
         // Fallback a datos del hook de autenticación si falla la carga del perfil detallado
         const fallbackData = normalizeAuthUserToProfile(user);
         setFormData(fallbackData);
@@ -215,63 +184,16 @@ export default function PerfilPage() {
 
     fetchProfile();
 
-  }, [isAuthenticated, user, authIsLoading, addNotification, normalizeAuthUserToProfile]);
+  }, [isAuthenticated, user, authIsLoading, normalizeAuthUserToProfile]);
+
+  // Sincronizar phones con formData.phone al cargar el perfil
+  useEffect(() => {
+    setPhones([{ value: formData.phone, type: 'main' }]);
+  }, [formData.phone]);
 
   const handleInputChange = (e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
     setFormData(prev => ({ ...prev, [name]: value }));
-  };
-
-  const handleAvatarChange = (e: ChangeEvent<HTMLInputElement>) => {
-    if (e.target.files && e.target.files[0]) {
-      const file = e.target.files[0];
-      // Aquí manejarías la subida del archivo (ej. a un estado o directamente a un servicio)
-      // Por ahora, solo mostramos un placeholder o la URL local para previsualización
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        setFormData(prev => ({ ...prev, avatarUrl: reader.result as string }));
-      };
-      reader.readAsDataURL(file);
-      addNotification('Avatar seleccionado. Guarda los cambios para aplicarlo.', 'info');
-    }
-  };
-
-  const handleSubmit = async (e: FormEvent) => {
-    e.preventDefault();
-    if (!isEditing) return;
-
-    if (!formData.fullName.trim()) {
-      addNotification("El nombre completo es requerido.", 'error');
-      return;
-    }
-    // Añadir más validaciones si es necesario
-
-    if (JSON.stringify(formData) === JSON.stringify(initialFormDataRef.current)) {
-      addNotification("No se detectaron cambios para guardar.", 'info');
-      setIsEditing(false);
-      return;
-    }
-
-    setIsSaving(true);
-    try {
-      // Aquí, si avatarUrl es un DataURL (de la subida local), necesitarías procesarlo
-      // para subir el archivo y obtener la URL final antes de enviar a `createOrUpdateProfile`.
-      // Por simplicidad, asumimos que ProfileService.createOrUpdateProfile puede manejarlo
-      // o que ya tienes la URL si no se cambió el avatar.
-      const updatedProfile = await ProfileService.createOrUpdateProfile(formData); // formData puede incluir el nuevo avatarUrl (string o File)
-
-      setFormData(current => ({...current, ...updatedProfile})); // Actualiza con lo que devuelve el backend (ej. URL de avatar finalizada)
-      initialFormDataRef.current = { ...formData, ...updatedProfile };
-      addNotification('¡Perfil actualizado con éxito!', 'success');
-      setIsEditing(false);
-
-      // Si necesitas sincronizar el usuario global, usa la clave 'user' en localStorage.
-    } catch (err: unknown) {
-      console.error('Error updating profile:', err);
-      addNotification((err as { response?: { data?: { message?: string } } })?.response?.data?.message || 'No se pudo actualizar el perfil.', 'error');
-    } finally {
-      setIsSaving(false);
-    }
   };
 
   const handleCancelEdit = () => {
@@ -310,178 +232,111 @@ export default function PerfilPage() {
     );
   }
 
-  // Estilos comunes para los inputs del formulario
-  const inputBaseClasses = "block w-full text-base rounded-lg border transition-colors duration-150 focus:ring-2 focus:outline-none dark:text-slate-100 placeholder-slate-400 dark:placeholder-slate-500";
-  const inputEnabledClasses = "bg-white dark:bg-slate-800/70 border-slate-300 dark:border-slate-600 focus:border-teal-500 dark:focus:border-teal-500 focus:ring-teal-500/40";
-  const inputDisabledClasses = "bg-slate-100 dark:bg-slate-700/60 border-slate-200 dark:border-slate-700 cursor-not-allowed text-slate-500 dark:text-slate-400";
-  const inputIconWrapperClasses = "relative";
-  const inputIconClasses = "absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400 dark:text-slate-500";
-  const inputWithIconPadding = "pl-10 pr-3.5 py-2.5"; // Ajustado para el ícono
-  // const inputWithoutIconPadding = "px-3.5 py-2.5";
-
-
   return (
-    <div className="container max-w-4xl mx-auto py-12 md:py-20 px-4 animate-fade-in">
-      {/* Contenedor de Notificaciones */}
-      <div className="fixed top-5 right-5 z-[10000] space-y-3 w-full max-w-sm">
-        {notifications.map(notif => (
-          <ToastNotification
-            key={notif.id}
-            id={notif.id}
-            message={notif.message}
-            type={notif.type}
-            onDismiss={dismissNotification}
-          />
-        ))}
-      </div>
-
-      {/* Encabezado de la Página de Perfil */}
-      <div className="flex flex-col md:flex-row items-center gap-6 md:gap-8 mb-10 md:mb-16">
-        <div className="relative group">
+    <div className="container max-w-3xl mx-auto py-10 px-4 animate-fade-in">
+      {/* Barra de progreso y avatar */}
+      <div className="flex flex-col items-center mb-8">
+        <ProfileProgress percent={profileProgress} />
+        <div className="relative group mb-2">
           {formData.avatarUrl ? (
-            <img
-              src={formData.avatarUrl}
-              alt="Avatar"
-              className="w-32 h-32 md:w-40 md:h-40 rounded-full object-cover ring-4 ring-slate-200 dark:ring-slate-700 shadow-lg"
-              onError={(e) => { e.currentTarget.onerror = null; e.currentTarget.src = ''; }}
-            />
+            <img src={formData.avatarUrl} alt="Avatar" className="w-32 h-32 rounded-full object-cover ring-4 ring-teal-300 shadow-lg" />
           ) : (
-            <BuscadisAvatarIcon className="w-32 h-32 md:w-40 md:h-40 rounded-full ring-4 ring-slate-200 dark:ring-slate-700 shadow-lg bg-white" />
+            <BuscadisAvatarIcon className="w-32 h-32 rounded-full ring-4 ring-teal-300 shadow-lg bg-white" />
           )}
           {isEditing && (
-            <>
-              <input
-                type="file"
-                ref={fileInputRef}
-                onChange={handleAvatarChange}
-                accept="image/png, image/jpeg, image/webp"
-                className="hidden"
-                aria-label="Seleccionar nuevo avatar"
-              />
-              <button
-                type="button"
-                onClick={() => fileInputRef.current?.click()}
-                className="absolute bottom-1 right-1 p-2.5 bg-teal-500 hover:bg-teal-600 rounded-full shadow-md transition-all duration-150 transform hover:scale-110 focus:outline-none focus:ring-2 focus:ring-teal-400 focus:ring-offset-2 dark:focus:ring-offset-slate-800"
-                aria-label="Cambiar avatar"
-                title="Cambiar avatar"
-              >
-                <CameraIcon className="w-5 h-5 text-white" />
-              </button>
-            </>
+            <button type="button" title="Cambiar avatar" onClick={() => fileInputRef.current?.click()} className="absolute bottom-2 right-2 p-2 bg-teal-500 hover:bg-teal-600 rounded-full shadow-md">
+              <CameraIcon className="w-5 h-5 text-white" />
+            </button>
           )}
         </div>
-        <div className="text-center md:text-left">
-          <h1 className="text-3xl sm:text-4xl md:text-5xl font-bold text-slate-800 dark:text-slate-50 tracking-tight">
-            {isEditing ? "Actualiza tu Perfil" : (formData.fullName || "Mi Espacio Personal")}
-          </h1>
-          <p className="text-slate-600 dark:text-slate-400 mt-2 text-base md:text-lg max-w-md">
-            Mantén tu información al día para una mejor experiencia en BuscAdis.
-          </p>
-        </div>
+        <h1 className="text-3xl font-bold text-slate-50 mb-1">{formData.fullName || 'Tu Nombre'}</h1>
+        <p className="text-slate-400 text-base mb-2">¡Estás creando tu cartilla BuscAdis! Entre más completo tu perfil, mejores resultados tendrás.</p>
       </div>
-
-      {/* Formulario de Perfil */}
-      <form 
-        onSubmit={handleSubmit} 
-        className="bg-white dark:bg-slate-800/60 rounded-xl shadow-2xl p-6 sm:p-8 md:p-10 space-y-6 ring-1 ring-slate-900/5 dark:ring-white/10"
-      >
-        <FormField
-          label="Nombre Completo"
-          id="fullName"
-          name="fullName"
-          type="text"
-          value={formData.fullName}
-          onChange={handleInputChange}
-          placeholder="Ej: Jairo S. Quiñones"
-          disabled={!isEditing || isSaving}
-          icon={IdentificationIcon}
-        />
-        
-        <FormField
-          label="Teléfono de Contacto"
-          id="phone"
-          name="phone"
-          type="tel"
-          value={formData.phone}
-          onChange={handleInputChange}
-          placeholder="Ej: +51 987 654 321"
-          disabled={!isEditing || isSaving}
-          icon={DevicePhoneMobileIcon}
-        />
-
-        <FormField
-          label="Correo Electrónico"
-          id="email"
-          name="email"
-          type="email"
-          value={formData.email}
-          onChange={handleInputChange}
-          placeholder="tu@correo.com"
-          // El email usualmente no se edita o requiere un proceso de verificación aparte.
-          // Aquí lo dejamos editable, pero considera la política de tu app.
-          disabled={!isEditing || isSaving} 
-          icon={EnvelopeIcon}
-        />
-
-        {/* Campo de Biografía (TextArea) */}
-        <div>
-          <label htmlFor="bio" className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1.5">
-            Sobre mí (Biografía breve)
-          </label>
-          <div className={inputIconWrapperClasses}>
-            <DocumentTextIcon className={`${inputIconClasses} !top-3.5`} /> {/* Ajuste para textarea */}
-            <textarea
-              name="bio"
-              id="bio"
-              rows={4}
-              value={formData.bio || ''}
-              onChange={handleInputChange}
-              disabled={!isEditing || isSaving}
-              className={`${inputBaseClasses} ${!isEditing || isSaving ? inputDisabledClasses : inputEnabledClasses} ${inputWithIconPadding} resize-y min-h-[100px]`}
-              placeholder="Cuéntanos un poco sobre ti, tus intereses o lo que ofreces..."
-            />
+      {/* Sección de intereses */}
+      <section className="mb-8 bg-white/5 rounded-xl p-6 shadow-lg">
+        <h2 className="text-lg font-semibold text-teal-400 mb-3 flex items-center gap-2"><UserIcon className="w-5 h-5" /> ¿Qué estás buscando?</h2>
+        <div className="flex flex-wrap gap-3 mb-2">
+          {INTERESTS.map((interest) => (
+            <button
+              key={interest.value}
+              type="button"
+              className={`flex items-center gap-2 px-4 py-2 rounded-full border-2 transition-colors font-medium text-sm ${interests.includes(interest.value) ? 'bg-gradient-to-r from-teal-500 to-cyan-500 text-white border-teal-500' : 'border-slate-300 dark:border-slate-600 text-slate-700 dark:text-slate-200 bg-white/10 hover:bg-teal-500/10'}`}
+              onClick={() => setInterests((prev) => prev.includes(interest.value) ? prev.filter(i => i !== interest.value) : [...prev, interest.value])}
+            >
+              <interest.icon className="w-5 h-5" /> {interest.label}
+            </button>
+          ))}
+        </div>
+        <p className="text-xs text-slate-400">Selecciona una o varias opciones para personalizar tu experiencia.</p>
+      </section>
+      {/* Sección de datos personales y contacto */}
+      <section className="mb-8 bg-white/5 rounded-xl p-6 shadow-lg">
+        <h2 className="text-lg font-semibold text-teal-400 mb-3 flex items-center gap-2"><IdentificationIcon className="w-5 h-5" /> Datos personales</h2>
+        {/* Nombre, sexo, fecha de nacimiento, ocupación */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
+          <FormField label="Nombre Completo" id="fullName" name="fullName" type="text" value={formData.fullName} onChange={handleInputChange} placeholder="Ej: Jairo S. Quiñones" disabled={!isEditing || isSaving} icon={IdentificationIcon} />
+          <FormField label="Ocupación" id="occupation" name="occupation" type="text" value={formData.occupation || ''} onChange={handleInputChange} placeholder="Ej: Desarrollador, Estudiante..." disabled={!isEditing || isSaving} icon={BriefcaseIcon} />
+          <FormField label="Sexo" id="gender" name="gender" type="text" value={formData.gender || ''} onChange={handleInputChange} placeholder="Ej: Masculino, Femenino, Otro..." disabled={!isEditing || isSaving} icon={UserIcon} />
+          <FormField label="Fecha de Nacimiento" id="birthdate" name="birthdate" type="date" value={formData.birthdate || ''} onChange={handleInputChange} placeholder="" disabled={!isEditing || isSaving} icon={CalendarIcon} />
+        </div>
+        {/* Teléfonos/WhatsApp */}
+        <div className="mb-4">
+          <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1.5">Teléfonos / WhatsApp</label>
+          <div className="flex flex-col gap-2">
+            {phones.map((phone, idx) => (
+              <div key={idx} className="flex items-center gap-2">
+                <input type="tel" value={phone.value} onChange={e => setPhones(phones.map((p, i) => i === idx ? { ...p, value: e.target.value } : p))} className="flex-1 px-3 py-2 rounded-lg border border-slate-300 dark:border-slate-600 bg-white/80 dark:bg-slate-800/70" placeholder="Ej: +51 987 654 321" disabled={!isEditing || isSaving} />
+                {phones.length > 1 && isEditing && <button type="button" title="Eliminar número" onClick={() => setPhones(phones.filter((_, i) => i !== idx))} className="p-1.5 rounded-full bg-red-100 hover:bg-red-200"><TrashIcon className="w-4 h-4 text-red-500" /></button>}
+              </div>
+            ))}
+            {isEditing && <button type="button" title="Agregar otro número" onClick={() => setPhones([...phones, { value: '', type: 'other' }])} className="flex items-center gap-1 text-teal-500 hover:underline text-sm mt-1"><PlusIcon className="w-4 h-4" /> Agregar otro número</button>}
           </div>
         </div>
-        
-        {/* Botones de Acción */}
-        <div className="border-t border-slate-200 dark:border-slate-700/50 pt-8 mt-8 flex flex-col-reverse sm:flex-row justify-end gap-3 sm:gap-4">
-          {!isEditing ? (
-            <button 
-              type="button" 
-              onClick={() => setIsEditing(true)} 
-              className="w-full sm:w-auto flex items-center justify-center gap-2.5 px-6 py-3 rounded-lg bg-gradient-to-r from-slate-700 to-slate-800 dark:from-slate-600 dark:to-slate-700 text-white text-sm font-semibold shadow-md hover:shadow-lg hover:from-slate-800 hover:to-slate-900 dark:hover:from-slate-700 dark:hover:to-slate-800 transition-all duration-150"
-            >
-               <PencilSquareIcon className="w-5 h-5" /> Editar Perfil
-            </button>
-          ) : (
-            <>
-              <button 
-                type="button" 
-                onClick={handleCancelEdit}
-                disabled={isSaving}
-                className="w-full sm:w-auto px-6 py-3 rounded-lg border border-slate-300 dark:border-slate-600 text-sm font-semibold text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-700/70 transition-colors duration-150 disabled:opacity-60"
-              >
-                Cancelar
-              </button>
-              <button 
-                type="submit" 
-                disabled={isSaving}
-                className="w-full sm:w-auto flex items-center justify-center gap-2.5 px-6 py-3 rounded-lg bg-gradient-to-r from-teal-500 to-cyan-500 text-white text-sm font-semibold shadow-md hover:shadow-lg hover:from-teal-600 hover:to-cyan-600 transition-all duration-150 disabled:opacity-70"
-              >
-                {isSaving ? (
-                  <>
-                    <ArrowPathIcon className="w-5 h-5 animate-spin" /> Guardando...
-                  </>
-                ) : (
-                  <>
-                    <CheckCircleIcon className="w-5 h-5" /> Guardar Cambios
-                  </>
-                )}
-              </button>
-            </>
-          )}
+        {/* Correo electrónico */}
+        <FormField label="Correo Electrónico" id="email" name="email" type="email" value={formData.email} onChange={handleInputChange} placeholder="tu@correo.com" disabled={!isEditing || isSaving} icon={EnvelopeIcon} />
+      </section>
+      {/* Sección de redes sociales */}
+      <section className="mb-8 bg-white/5 rounded-xl p-6 shadow-lg">
+        <h2 className="text-lg font-semibold text-teal-400 mb-3 flex items-center gap-2"><GlobeAltIcon className="w-5 h-5" /> Redes sociales</h2>
+        <div className="flex flex-col gap-2 mb-2">
+          {socialLinks.map((link, idx) => (
+            <div key={idx} className="flex items-center gap-2">
+              <select value={link.type} title="Tipo de red social" onChange={e => setSocialLinks(socialLinks.map((l, i) => i === idx ? { ...l, type: e.target.value } : l))} className="px-2 py-1 rounded-lg border border-slate-300 dark:border-slate-600 bg-white/80 dark:bg-slate-800/70" disabled={!isEditing || isSaving}>
+                {SOCIALS.map(s => <option key={s.value} value={s.value}>{s.label}</option>)}
+              </select>
+              <input type="url" value={link.url} onChange={e => setSocialLinks(socialLinks.map((l, i) => i === idx ? { ...l, url: e.target.value } : l))} className="flex-1 px-3 py-2 rounded-lg border border-slate-300 dark:border-slate-600 bg-white/80 dark:bg-slate-800/70" placeholder="URL de tu perfil" disabled={!isEditing || isSaving} />
+              {isEditing && <button type="button" title="Eliminar red social" onClick={() => setSocialLinks(socialLinks.filter((_, i) => i !== idx))} className="p-1.5 rounded-full bg-red-100 hover:bg-red-200"><TrashIcon className="w-4 h-4 text-red-500" /></button>}
+            </div>
+          ))}
+          {isEditing && <button type="button" title="Agregar red social" onClick={() => setSocialLinks([...socialLinks, { type: 'whatsapp', url: '' }])} className="flex items-center gap-1 text-teal-500 hover:underline text-sm mt-1"><PlusIcon className="w-4 h-4" /> Agregar red social</button>}
         </div>
-      </form>
+      </section>
+      {/* Sección de CV y biografía */}
+      <section className="mb-8 bg-white/5 rounded-xl p-6 shadow-lg">
+        <h2 className="text-lg font-semibold text-teal-400 mb-3 flex items-center gap-2"><PaperClipIcon className="w-5 h-5" /> CV y presentación</h2>
+        <div className="mb-4">
+          <label htmlFor="cv" className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1.5">Sube tu CV (PDF, opcional)</label>
+          <input type="file" id="cv" name="cv" accept="application/pdf" className="block w-full text-sm text-slate-700 dark:text-slate-200 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-teal-50 file:text-teal-700 hover:file:bg-teal-100" disabled={!isEditing || isSaving} />
+        </div>
+        <FormField label="Sobre mí (Biografía breve)" id="bio" name="bio" type="text" value={formData.bio || ''} onChange={handleInputChange} placeholder="Cuéntanos un poco sobre ti, tus intereses o lo que ofreces..." disabled={!isEditing || isSaving} icon={DocumentTextIcon} />
+      </section>
+      {/* Mensaje de seguridad y motivación */}
+      <div className="mb-8 text-center text-slate-400 text-sm">
+        <CheckCircleIcon className="w-6 h-6 inline-block text-teal-400 mr-2" /> Tu información está segura. Solo la usaremos para mejorar tu experiencia en BuscAdis.
+      </div>
+      {/* Botones de acción */}
+      <div className="flex flex-col-reverse sm:flex-row justify-end gap-3 sm:gap-4">
+        {!isEditing ? (
+          <button type="button" onClick={() => setIsEditing(true)} className="w-full sm:w-auto flex items-center justify-center gap-2.5 px-6 py-3 rounded-lg bg-gradient-to-r from-slate-700 to-slate-800 dark:from-slate-600 dark:to-slate-700 text-white text-sm font-semibold shadow-md hover:shadow-lg hover:from-slate-800 hover:to-slate-900 dark:hover:from-slate-700 dark:hover:to-slate-800 transition-all duration-150">
+            <PencilSquareIcon className="w-5 h-5" /> Editar Perfil
+          </button>
+        ) : (
+          <>
+            <button type="button" onClick={handleCancelEdit} disabled={isSaving} className="w-full sm:w-auto px-6 py-3 rounded-lg border border-slate-300 dark:border-slate-600 text-sm font-semibold text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-700/70 transition-colors duration-150 disabled:opacity-60">Cancelar</button>
+            <button type="submit" disabled={isSaving} className="w-full sm:w-auto flex items-center justify-center gap-2.5 px-6 py-3 rounded-lg bg-gradient-to-r from-teal-500 to-cyan-500 text-white text-sm font-semibold shadow-md hover:shadow-lg hover:from-teal-600 hover:to-cyan-600 transition-all duration-150 disabled:opacity-70">{isSaving ? (<><ArrowPathIcon className="w-5 h-5 animate-spin" /> Guardando...</>) : (<><CheckCircleIcon className="w-5 h-5" /> Guardar Cambios</>)}</button>
+          </>
+        )}
+      </div>
     </div>
   );
 }
@@ -526,7 +381,7 @@ const FormField: React.FC<FormFieldProps> = ({ label, id, name, type, value, onC
           disabled={disabled}
           className={`${inputBaseClasses} ${disabled ? inputDisabledClasses : (error ? inputErrorClasses : inputEnabledClasses)} ${inputPadding}`}
           placeholder={placeholder}
-          aria-invalid={error ? 'true' : 'false'}
+          aria-invalid={error ? "true" : "false"}
           aria-describedby={error ? `${id}-error` : undefined}
         />
       </div>
@@ -537,4 +392,16 @@ const FormField: React.FC<FormFieldProps> = ({ label, id, name, type, value, onC
       )}
     </div>
   );
+};
+
+// Normalizar datos del AuthUser a ProfileFormData
+const normalizeAuthUserToProfile = (authUser: AuthUser | null): ProfileFormData => {
+  if (!authUser) return { fullName: '', phone: '', email: '', bio: '', avatarUrl: '' };
+  return {
+    fullName: authUser.fullName || `${authUser.firstName || ''} ${authUser.lastName || ''}`.trim(),
+    phone: authUser.phone || '',
+    email: authUser.email || '',
+    bio: '', // Asumimos que bio no viene de AuthUser, sino del perfil específico
+    avatarUrl: authUser.avatarUrl || '',
+  };
 };
