@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import clientPromise from '@/lib/mongodb';
+import { getMongoClient } from '@/lib/mongodb.server';
 
 export async function POST(request: NextRequest) {
   try {
@@ -12,28 +12,30 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const client = await clientPromise;
-    const db = client.db('test');
+    const client = await getMongoClient();
+    const db = client.db(process.env.MONGODB_DB || 'buscadis');
     const users = db.collection('users');
 
     const user = await users.findOne({ phone, dni });
 
     if (!user) {
+      console.log(`[LOGIN] Fallo de login para teléfono: ${phone}, dni: ${dni}`);
       return NextResponse.json(
         { success: false, message: 'Teléfono o DNI incorrectos' },
         { status: 401 }
       );
     }
 
-    // Don't include sensitive data in the response
+    console.log(`[LOGIN] Usuario autenticado: ${user.firstName || ''} ${user.lastName || ''} (${user.phone})`);
     return NextResponse.json({ 
       success: true, 
       user: {
-        id: user.id,
+        id: user._id,
         phone: user.phone,
         dni: user.dni,
+        firstName: user.firstName,
+        lastName: user.lastName,
         createdAt: user.createdAt,
-        // Include any other fields needed by the client
       } 
     });
   } catch (error) {

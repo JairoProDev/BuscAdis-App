@@ -40,14 +40,10 @@ export class AuthService {
     static async register({ firstName, lastName, phone, dni }) {
         try {
             if (isBrowser) {
-                return this.fetchFromAPI('register', 'POST', { firstName, lastName, phone, dni });
+                const res = await this.fetchFromAPI('register', 'POST', { firstName, lastName, phone, dni });
+                return res;
             }
-            
-            // Server-side implementation would be here
-            // This would use the actual MongoDB client directly
-            Logger.info('User registration initiated', { phone });
-            
-            // Mock success response for now
+            // Server-side (no usado en Next.js app router)
             return { data: { message: 'Usuario registrado correctamente' }, error: null };
         } catch (error) {
             Logger.error('Error en registro:', { error });
@@ -58,23 +54,14 @@ export class AuthService {
     static async login({ phone, dni }) {
         try {
             if (isBrowser) {
-                return this.fetchFromAPI('login', 'POST', { phone, dni });
+                const res = await this.fetchFromAPI('login', 'POST', { phone, dni });
+                if (res.success && res.user) {
+                    localStorage.setItem('userData', JSON.stringify(res.user));
+                }
+                return res;
             }
-            
-            // Server-side implementation would be here
-            Logger.info('User login attempt', { phone });
-            
-            // Mock successful login for now
-            return { 
-                data: {
-                    id: 'user123',
-                    firstName: 'Usuario',
-                    lastName: 'De Prueba',
-                    phone,
-                    dni
-                }, 
-                error: null 
-            };
+            // Server-side (no usado en Next.js app router)
+            return { data: { id: 'user123', firstName: 'Usuario', lastName: 'De Prueba', phone, dni }, error: null };
         } catch (error) {
             Logger.error('Error en login:', { error });
             return { data: null, error };
