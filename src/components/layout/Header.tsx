@@ -4,13 +4,11 @@ import Image from 'next/image';
 import { useState, useEffect } from 'react';
 import { HomeIcon, NewspaperIcon, MagnifyingGlassIcon, MegaphoneIcon, UserCircleIcon } from '@heroicons/react/24/outline';
 import { ThemeToggle } from '@/components/theme';
-import { useRouter } from 'next/navigation';
 
 export default function Header() {
   const [showUserMenu, setShowUserMenu] = useState(false);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [user, setUser] = useState<{ full_name?: string; firstName?: string; lastName?: string } | null>(null);
-  const router = useRouter();
 
   useEffect(() => {
     function syncAuth() {
@@ -92,11 +90,26 @@ export default function Header() {
                   <span className="hidden lg:block font-medium">{user?.firstName || user?.full_name || 'Usuario'}</span>
                 </button>
                 {showUserMenu && (
-                  <div className="absolute right-0 mt-2 w-48 bg-white dark:bg-slate-800 rounded-lg shadow-lg py-2 z-50 border border-slate-200 dark:border-slate-700">
-                    <Link href="/perfil" className="block px-4 py-2 text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-700 rounded transition">Mi Perfil</Link>
-                    <Link href="/mis-anuncios" className="block px-4 py-2 text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-700 rounded transition">Mis Anuncios</Link>
-                    <Link href="/favoritos" className="block px-4 py-2 text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-700 rounded transition">Favoritos</Link>
-                    <button onClick={handleLogout} className="block w-full text-left px-4 py-2 text-red-600 hover:bg-slate-100 dark:hover:bg-slate-700 rounded transition">Cerrar Sesión</button>
+                  <div className="absolute right-0 mt-2 w-56 bg-white dark:bg-slate-800 rounded-lg shadow-lg py-2 z-50 border border-slate-200 dark:border-slate-700 animate-fade-in-up">
+                    <Link href="/perfil" className="block px-4 py-2 text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-700 rounded transition flex items-center gap-2">
+                      <span className="inline-block text-lg">👤</span> Mi Perfil
+                    </Link>
+                    <Link href="/mis-anuncios" className="block px-4 py-2 text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-700 rounded transition flex items-center gap-2">
+                      <span className="inline-block text-lg">📢</span> Mis Anuncios
+                    </Link>
+                    <Link href="/favoritos" className="block px-4 py-2 text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-700 rounded transition flex items-center gap-2">
+                      <span className="inline-block text-lg">💾</span> Guardados
+                    </Link>
+                    <Link href="/mensajes" className="block px-4 py-2 text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-700 rounded transition flex items-center gap-2">
+                      <span className="inline-block text-lg">💬</span> Mensajes
+                    </Link>
+                    <Link href="/notificaciones" className="block px-4 py-2 text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-700 rounded transition flex items-center gap-2">
+                      <span className="inline-block text-lg">🔔</span> Notificaciones
+                    </Link>
+                    <div className="border-t border-slate-200 dark:border-slate-700 my-2"></div>
+                    <button onClick={handleLogout} className="block w-full text-left px-4 py-2 text-red-600 hover:bg-slate-100 dark:hover:bg-slate-700 rounded transition flex items-center gap-2">
+                      <span className="inline-block text-lg">🚪</span> Cerrar Sesión
+                    </button>
                   </div>
                 )}
               </div>

@@ -17,7 +17,7 @@ interface Profile {
     email: string;
 }
 
-export default function ProfilePage() {
+export default function PerfilPage() {
     const { user, isAuthenticated } = useAuth();
     const [isEditing, setIsEditing] = useState(false);
     const [loading, setLoading] = useState(true);
@@ -101,84 +101,38 @@ export default function ProfilePage() {
     }
 
     return (
-        <div className="container py-8 md:py-12">
-            <div className="max-w-2xl mx-auto">
-                <h1 className="text-2xl md:text-3xl font-bold text-gray-900 mb-8">Mi perfil</h1>
-
-                {error && (
-                    <div className="bg-red-50 border border-red-100 rounded-xl p-4 mb-6">
-                        <p className="text-red-600">{error}</p>
+        <div className="container py-12 max-w-2xl mx-auto animate-fade-in">
+            <div className="flex flex-col items-center mb-8">
+                <div className="text-6xl mb-2 animate-bounce">👤</div>
+                <h1 className="text-3xl font-bold mb-2 text-teal-600">Mi Perfil</h1>
+                <p className="text-gray-600 text-center">Gestiona tu información personal, intereses y seguridad para personalizar tu experiencia en BuscAdis.</p>
+            </div>
+            {success && (
+                <div className="bg-green-100 text-green-700 rounded-lg p-3 mb-4 text-center animate-fade-in-up">¡Perfil actualizado con éxito!</div>
+            )}
+            <form onSubmit={handleSubmit} className="bg-white dark:bg-slate-800 rounded-lg shadow p-6 space-y-6">
+                <div className="flex flex-col md:flex-row gap-4">
+                    <div className="flex-1">
+                        <label className="block text-sm font-medium mb-1">Nombres</label>
+                        <input type="text" name="fullName" value={formData.fullName} onChange={(e) => setFormData({ ...formData, fullName: e.target.value })} disabled={!isEditing} className="w-full rounded border px-3 py-2" placeholder="Nombres" title="Nombres" />
                     </div>
-                )}
-
-                {success && (
-                    <div className="bg-green-50 border border-green-100 rounded-xl p-4 mb-6">
-                        <p className="text-green-600">{success}</p>
-                    </div>
-                )}
-
-                <div className="bg-white rounded-xl shadow-md overflow-hidden">
-                    <div className="p-6 md:p-8">
-                        {isEditing ? (
-                            <form onSubmit={handleSubmit} className="space-y-6">
-                                <div>
-                                    <label htmlFor="fullName" className="block text-sm font-medium text-gray-700 mb-1">
-                                        Nombre completo
-                                    </label>
-                                    <input
-                                        id="fullName"
-                                        type="text"
-                                        name="fullName"
-                                        required
-                                        className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500"
-                                        value={formData.fullName}
-                                        onChange={(e: React.ChangeEvent<HTMLInputElement>) => setFormData({ ...formData, fullName: e.target.value })}
-                                    />
-                                </div>
-
-                                <div>
-                                    <label htmlFor="phone" className="block text-sm font-medium text-gray-700 mb-1">
-                                        Teléfono
-                                    </label>
-                                    <input
-                                        id="phone"
-                                        type="tel"
-                                        name="phone"
-                                        className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500"
-                                        value={formData.phone}
-                                        onChange={(e: React.ChangeEvent<HTMLInputElement>) => setFormData({ ...formData, phone: e.target.value })}
-                                    />
-                                </div>
-
-                                <div>
-                                    <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-1">
-                                        Correo electrónico
-                                    </label>
-                                    <input
-                                        id="email"
-                                        type="email"
-                                        name="email"
-                                        className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary-500"
-                                        value={formData.email}
-                                        onChange={(e: React.ChangeEvent<HTMLInputElement>) => setFormData({ ...formData, email: e.target.value })}
-                                    />
-                                </div>
-
-                                <button
-                                    type="submit"
-                                    className="w-full bg-primary-600 text-white py-2 px-4 rounded-lg hover:bg-primary-700 transition duration-200"
-                                >
-                                    Guardar cambios
-                                </button>
-                            </form>
-                        ) : (
-                            <div>
-                                {/* Contenido cuando no está editando */}
-                            </div>
-                        )}
+                    <div className="flex-1">
+                        <label className="block text-sm font-medium mb-1">Teléfono</label>
+                        <input type="tel" name="phone" value={formData.phone} onChange={(e) => setFormData({ ...formData, phone: e.target.value })} disabled={!isEditing} className="w-full rounded border px-3 py-2" placeholder="Teléfono" title="Teléfono" />
                     </div>
                 </div>
-            </div>
+                <div>
+                    <label className="block text-sm font-medium mb-1">Email</label>
+                    <input type="email" name="email" value={formData.email} onChange={(e) => setFormData({ ...formData, email: e.target.value })} disabled={!isEditing} className="w-full rounded border px-3 py-2" placeholder="Correo electrónico" title="Correo electrónico" />
+                </div>
+                <div className="flex justify-end gap-2">
+                    {!isEditing ? (
+                        <button type="button" onClick={() => setIsEditing(true)} className="px-4 py-2 bg-gradient-to-r from-teal-500 to-cyan-500 text-white rounded-lg font-semibold shadow hover:from-teal-600 hover:to-cyan-600 transition-colors">Editar Perfil</button>
+                    ) : (
+                        <button type="submit" className="px-4 py-2 bg-green-500 text-white rounded-lg font-semibold shadow hover:bg-green-600 transition-colors">Guardar Cambios</button>
+                    )}
+                </div>
+            </form>
         </div>
     );
 }
