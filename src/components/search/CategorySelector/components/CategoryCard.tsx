@@ -107,7 +107,9 @@ export const CategoryCard: React.FC<CategoryCardProps> = ({
         <p className={cn(
           'font-medium overflow-hidden',
           variant === 'square' ? 'text-sm line-clamp-2' : 'text-base text-left',
-          'text-slate-800 dark:text-slate-200 group-hover:text-teal-700 dark:group-hover:text-teal-400 transition-colors duration-200'
+          'text-slate-800 dark:text-white',
+          'group-hover:text-teal-700 dark:group-hover:text-teal-300',
+          'transition-colors duration-200'
         )}>
           {category.name}
         </p>

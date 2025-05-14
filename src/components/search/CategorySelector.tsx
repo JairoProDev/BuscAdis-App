@@ -325,7 +325,7 @@ export default function CategorySelector({
                     }}
                   />
                 </div>
-                <span className="text-xs font-medium whitespace-nowrap text-center text-white">
+                <span className="text-xs font-medium whitespace-nowrap text-center text-slate-800 dark:text-white">
                   {category.name}
                 </span>
                 {showCounts && category.count && (
