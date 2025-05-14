@@ -41,6 +41,10 @@ export class AuthService {
         try {
             if (isBrowser) {
                 const res = await this.fetchFromAPI('register', 'POST', { firstName, lastName, phone, dni });
+                if (res.success && res.user) {
+                    localStorage.setItem('userData', JSON.stringify(res.user));
+                    window.dispatchEvent(new StorageEvent('storage', { key: 'userData', newValue: JSON.stringify(res.user), storageArea: localStorage }));
+                }
                 return res;
             }
             // Server-side (no usado en Next.js app router)

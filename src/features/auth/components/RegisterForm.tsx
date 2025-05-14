@@ -38,19 +38,21 @@ export default function RegisterForm() {
         e.preventDefault();
         setLoading(true);
         setError('');
+        setSuccessMessage('');
 
         try {
             const { phone, firstName, lastName, dni } = formData;
-            const { data, error } = await AuthService.register({ phone, firstName, lastName, dni });
-
-            if (error) throw error;
-
-            setSuccessMessage('Cuenta creada con éxito.'); // Mensaje de éxito
-            setTimeout(() => {
-                router.push('/login'); // Redirigir a la página de inicio de sesión
-            }, 2000); // Redirigir después de 2 segundos
+            const res = await AuthService.register({ phone, firstName, lastName, dni });
+            if (res.success) {
+                setSuccessMessage('¡Cuenta creada con éxito! Redirigiendo a tu perfil...');
+                setTimeout(() => {
+                    router.push('/perfil');
+                }, 1800);
+            } else {
+                setError(res.message || 'No se pudo registrar el usuario.');
+            }
         } catch (error) {
-            setError('Error al registrarse. Verifica tus datos.');
+            setError('Error inesperado. Intenta de nuevo.');
             console.error('Error en registro:', error);
         } finally {
             setLoading(false);

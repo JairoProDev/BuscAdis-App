@@ -18,34 +18,48 @@ export async function POST(request: NextRequest) {
     }
 
     const client = await getMongoClient();
-    const db = client.db(process.env.MONGODB_DB || 'test');
+    const db = client.db(process.env.MONGODB_DB || 'buscadis');
     const users = db.collection('users');
 
-    // Verifica si ya existe usuario con ese DNI o teléfono
+    // Verifica que no exista ya un usuario con ese DNI o teléfono
     const existing = await users.findOne({ $or: [ { dni }, { phone } ] });
     if (existing) {
       console.log(`[REGISTER] Usuario ya existe: ${phone}, ${dni}`);
       return NextResponse.json({ success: false, message: 'Ya existe un usuario con ese DNI o teléfono.' }, { status: 409 });
     }
 
-    const user = {
+    // Crea el nuevo usuario
+    const newUser = {
       firstName,
       lastName,
       phone,
       dni,
       createdAt: new Date(),
-      // Campos para expansión futura
+      avatarUrl: '/default-avatar.png',
       profile: {},
       interests: [],
       extraPhones: [],
       email: '',
-      password: '',
     };
-    await users.insertOne(user);
-    console.log(`[REGISTER] Usuario registrado: ${firstName} ${lastName} (${phone})`);
-    return NextResponse.json({ success: true, user: { firstName, lastName, phone, dni } });
+    const insertResult = await users.insertOne(newUser);
+    if (!insertResult.insertedId) {
+      return NextResponse.json({ success: false, message: 'Error al registrar usuario.' }, { status: 500 });
+    }
+    // Devuelve el usuario con su id
+    return NextResponse.json({
+      success: true,
+      user: {
+        id: insertResult.insertedId.toString(),
+        firstName,
+        lastName,
+        phone,
+        dni,
+        createdAt: newUser.createdAt,
+        avatarUrl: newUser.avatarUrl,
+      }
+    });
   } catch (error) {
-    console.error('Error en registro:', error);
+    console.error('[REGISTER] Error:', error);
     return NextResponse.json({ success: false, message: 'Error interno del servidor.' }, { status: 500 });
   }
 } 
