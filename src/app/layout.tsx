@@ -3,7 +3,7 @@
 import './globals.css';
 import { Inter } from 'next/font/google';
 import { ThemeProvider } from '@/components/theme/ThemeProvider'; // Asegúrate de que la ruta sea correcta
-import Navigation from '@/components/layout/Navigation';
+import Header from '@/components/layout/Header';
 import MobileNavigation from '@/components/layout/MobileNavigation';
 import { Loader } from '@/components/ui/Loader';
 import Footer from '@/components/layout/Footer';
@@ -28,7 +28,7 @@ export default function RootLayout({ children }: { children: ReactNode }) {
             <PublicationProvider>
               <div className="flex min-h-screen flex-col bg-background text-foreground">
                 <Suspense fallback={<Loader />}>
-                  <Navigation />
+                  <Header />
                   <main className="flex-grow">{children}</main>
                   <Footer />
                   <MobileNavigation />
