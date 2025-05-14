@@ -51,7 +51,7 @@ export default function Navigation() {
                 <div className="flex items-center justify-between h-full">
                     {/* Logo y Navegación Izquierda (Desktop y Mobile) */}
                     <div className="flex items-center justify-between w-full md:w-auto">
-                        <Link href="/" className={`text-2xl font-bold ${logoTextColor} flex items-center gap-2`}>
+                        <Link href="/" className="text-2xl font-bold flex items-center gap-2">
                             <Image 
                                 src="/favicon.ico" 
                                 alt="BuscAdis Logo" 
@@ -59,7 +59,9 @@ export default function Navigation() {
                                 height={32}
                                 className="w-8 h-8"
                             />
-                            BuscAdis
+                            <span className="text-slate-800 dark:text-white transition-colors duration-200">
+                                BuscAdis
+                            </span>
                         </Link>
                     </div>
 
