@@ -7,7 +7,7 @@ import { ProfileService } from '@/services/profile.service';
 
 // Íconos de Heroicons
 import {
-  UserCircleIcon as UserAvatarIcon, // Renombrado para claridad
+  // UserCircleIcon as UserAvatarIcon, // Renombrado para claridad
   PencilSquareIcon, // Para botón de editar
   CheckCircleIcon, // Para éxito
   ExclamationTriangleIcon, // Para errores o advertencias
@@ -121,7 +121,7 @@ const ToastNotification = ({
 
 
 export default function PerfilPage() {
-  const { user, isAuthenticated, isLoading: authIsLoading } = useAuth() as { user: AuthUser | null; isAuthenticated: boolean; isLoading: boolean };
+  const { user, isAuthenticated, loading: authIsLoading } = useAuth();
   
   const [isEditing, setIsEditing] = useState(false);
   const [pageLoading, setPageLoading] = useState(true);
@@ -164,6 +164,7 @@ export default function PerfilPage() {
 
   // Efecto para cargar datos del perfil
   useEffect(() => {
+    console.log('[PERFIL_PAGE_AUTH] authIsLoading:', authIsLoading, 'isAuthenticated:', isAuthenticated, 'user:', user);
     if (authIsLoading) {
       setPageLoading(true); // Mostrar spinner de página si la autenticación aún está cargando
       return;
@@ -258,19 +259,15 @@ export default function PerfilPage() {
       // o que ya tienes la URL si no se cambió el avatar.
       const updatedProfile = await ProfileService.createOrUpdateProfile(formData); // formData puede incluir el nuevo avatarUrl (string o File)
 
-      setFormData(prev => ({...prev, ...updatedProfile})); // Actualiza con lo que devuelve el backend (ej. URL de avatar finalizada)
-      initialFormDataRef.current = { ...prev, ...updatedProfile };
+      setFormData(current => ({...current, ...updatedProfile})); // Actualiza con lo que devuelve el backend (ej. URL de avatar finalizada)
+      initialFormDataRef.current = { ...formData, ...updatedProfile };
       addNotification('¡Perfil actualizado con éxito!', 'success');
       setIsEditing(false);
 
-      // Sincronizar con localStorage si es necesario y si el header u otros componentes lo leen
-      // const currentUserData = JSON.parse(localStorage.getItem('userData') || '{}');
-      // const newUserData = { ...currentUserData, ...updatedProfile }; // Asegúrate de que los campos coincidan con AuthUser
-      // localStorage.setItem('userData', JSON.stringify(newUserData));
-      // window.dispatchEvent(new Event('storage')); // Notifica a otros tabs/componentes
-    } catch (err: any) {
+      // Si necesitas sincronizar el usuario global, usa la clave 'user' en localStorage.
+    } catch (err: unknown) {
       console.error('Error updating profile:', err);
-      addNotification(err.response?.data?.message || 'No se pudo actualizar el perfil.', 'error');
+      addNotification((err as { response?: { data?: { message?: string } } })?.response?.data?.message || 'No se pudo actualizar el perfil.', 'error');
     } finally {
       setIsSaving(false);
     }
@@ -319,7 +316,7 @@ export default function PerfilPage() {
   const inputIconWrapperClasses = "relative";
   const inputIconClasses = "absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400 dark:text-slate-500";
   const inputWithIconPadding = "pl-10 pr-3.5 py-2.5"; // Ajustado para el ícono
-  const inputWithoutIconPadding = "px-3.5 py-2.5";
+  // const inputWithoutIconPadding = "px-3.5 py-2.5";
 
 
   return (
@@ -524,7 +521,7 @@ const FormField: React.FC<FormFieldProps> = ({ label, id, name, type, value, onC
           disabled={disabled}
           className={`${inputBaseClasses} ${disabled ? inputDisabledClasses : (error ? inputErrorClasses : inputEnabledClasses)} ${inputPadding}`}
           placeholder={placeholder}
-          aria-invalid={!!error}
+          aria-invalid={error ? 'true' : 'false'}
           aria-describedby={error ? `${id}-error` : undefined}
         />
       </div>

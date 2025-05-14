@@ -28,8 +28,8 @@ export function useAuth() {
             setLoading(true);
             const storedUser = localStorage.getItem('user');
             if (storedUser) {
-                const userData = JSON.parse(storedUser);
-                setUser(userData);
+                const user = JSON.parse(storedUser);
+                setUser(user);
             } else {
                 setUser(null);
             }
@@ -60,9 +60,10 @@ export function useAuth() {
             const data = await response.json();
 
             if (data.success) {
-                const userData = data.user as User;
-                setUser(userData);
-                localStorage.setItem('user', JSON.stringify(userData));
+                const user = data.user as User;
+                setUser(user);
+                localStorage.setItem('user', JSON.stringify(user));
+                window.dispatchEvent(new StorageEvent('storage', { key: 'user', newValue: JSON.stringify(user), storageArea: localStorage }));
                 return { success: true };
             } else {
                 return { 

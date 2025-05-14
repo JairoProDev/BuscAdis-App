@@ -57,14 +57,14 @@ export class AuthService {
         }
     }
 
-    static async register(userData: LoginCredentials): Promise<AuthResponse> {
+    static async register(user: LoginCredentials): Promise<AuthResponse> {
         try {
             const users = await this.getCollection();
             
             // Primero verificamos si el usuario ya existe
             const existingUser = await users.findOne({
-                phone: userData.phone,
-                dni: userData.dni
+                phone: user.phone,
+                dni: user.dni
             });
 
             if (existingUser) {
@@ -78,8 +78,8 @@ export class AuthService {
             const now = new Date().toISOString();
             const newUser: User = {
                 id: `user_${Date.now()}`,
-                phone: userData.phone,
-                dni: userData.dni,
+                phone: user.phone,
+                dni: user.dni,
                 createdAt: now,
                 updatedAt: now
             };

@@ -21,7 +21,7 @@ import {
 import { ThemeToggle } from '@/components/theme'; // Asumo que este componente ya gestiona sus íconos
 
 // Define una interfaz más específica para el usuario si es posible
-interface UserData {
+interface User {
   id: string; // O el tipo que sea tu user.id
   full_name?: string;
   firstName?: string;
@@ -33,7 +33,7 @@ interface UserData {
 export default function Header() {
   const [showUserMenu, setShowUserMenu] = useState(false);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
-  const [user, setUser] = useState<UserData | null>(null);
+  const [user, setUser] = useState<User | null>(null);
   const [isMounted, setIsMounted] = useState(false); // Para evitar hydration mismatch con localStorage
 
   const userMenuRef = useRef<HTMLDivElement>(null); // Ref para el contenedor del botón y el menú
@@ -41,9 +41,9 @@ export default function Header() {
   // Sincronización con localStorage y listener de storage
   const syncAuth = useCallback(() => {
     try {
-      const userDataString = localStorage.getItem('userData');
-      if (userDataString) {
-        const parsedUser = JSON.parse(userDataString) as UserData;
+      const userString = localStorage.getItem('user');
+      if (userString) {
+        const parsedUser = JSON.parse(userString) as User;
         setUser(parsedUser);
         setIsAuthenticated(true);
       } else {
@@ -55,7 +55,7 @@ export default function Header() {
       setUser(null);
       setIsAuthenticated(false);
       // Opcional: limpiar localStorage si está corrupto
-      // localStorage.removeItem('userData');
+      // localStorage.removeItem('user');
     }
   }, []);
 
@@ -110,7 +110,7 @@ export default function Header() {
   }, [isAuthenticated, user, isMounted]); // Dependencias
 
   const handleLogout = () => {
-    localStorage.removeItem('userData');
+    localStorage.removeItem('user');
     setIsAuthenticated(false);
     setUser(null);
     setShowUserMenu(false); // Cierra el menú

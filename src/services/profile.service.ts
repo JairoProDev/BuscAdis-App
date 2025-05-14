@@ -41,7 +41,7 @@ export class ProfileService {
     }
   }
 
-  static async createOrUpdateProfile(userData: ProfileData) {
+  static async createOrUpdateProfile(user: ProfileData) {
     try {
       const currentUser = await AuthService.getCurrentUser();
       if (!currentUser) {
@@ -55,9 +55,9 @@ export class ProfileService {
         },
         body: JSON.stringify({
           userId: currentUser.id,
-          fullName: userData.fullName || currentUser.name,
-          phone: userData.phone || currentUser.phone,
-          email: userData.email || currentUser.email,
+          fullName: user.fullName || currentUser.name,
+          phone: user.phone || currentUser.phone,
+          email: user.email || currentUser.email,
         }),
       });
       
@@ -72,9 +72,9 @@ export class ProfileService {
       // Use a safe approach that doesn't depend on currentUser which might be undefined in the catch block
       return {
         id: 'mock-id',
-        fullName: userData.fullName || 'User',
-        phone: userData.phone || '',
-        email: userData.email || '',
+        fullName: user.fullName || 'User',
+        phone: user.phone || '',
+        email: user.email || '',
         createdAt: new Date().toISOString(),
         updatedAt: new Date().toISOString()
       };

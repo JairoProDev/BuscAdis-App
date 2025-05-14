@@ -16,7 +16,7 @@ export interface User {
 
 export class AuthService {
     // Client-side version with API calls
-    private static async fetchFromAPI(endpoint: string, method: string = 'GET', body: any = null) {
+    private static async fetchFromAPI(endpoint: string, method: string = 'GET', body: Record<string, unknown> | null = null) {
         try {
             const options: RequestInit = {
                 method,
@@ -37,13 +37,13 @@ export class AuthService {
         }
     }
 
-    static async register({ firstName, lastName, phone, dni }) {
+    static async register({ firstName, lastName, phone, dni }: { firstName: string; lastName: string; phone: string; dni: string }) {
         try {
             if (isBrowser) {
                 const res = await this.fetchFromAPI('register', 'POST', { firstName, lastName, phone, dni });
                 if (res.success && res.user) {
-                    localStorage.setItem('userData', JSON.stringify(res.user));
-                    window.dispatchEvent(new StorageEvent('storage', { key: 'userData', newValue: JSON.stringify(res.user), storageArea: localStorage }));
+                    localStorage.setItem('user', JSON.stringify(res.user));
+                    window.dispatchEvent(new StorageEvent('storage', { key: 'user', newValue: JSON.stringify(res.user), storageArea: localStorage }));
                 }
                 return res;
             }
@@ -55,12 +55,13 @@ export class AuthService {
         }
     }
 
-    static async login({ phone, dni }) {
+    static async login({ phone, dni }: { phone: string; dni: string }) {
         try {
             if (isBrowser) {
                 const res = await this.fetchFromAPI('login', 'POST', { phone, dni });
                 if (res.success && res.user) {
-                    localStorage.setItem('userData', JSON.stringify(res.user));
+                    localStorage.setItem('user', JSON.stringify(res.user));
+                    window.dispatchEvent(new StorageEvent('storage', { key: 'user', newValue: JSON.stringify(res.user), storageArea: localStorage }));
                 }
                 return res;
             }
@@ -76,9 +77,9 @@ export class AuthService {
         try {
             if (isBrowser) {
                 // In browser, check local storage or cookie for user data
-                const userData = localStorage.getItem('userData');
-                if (userData) {
-                    return JSON.parse(userData);
+                const user = localStorage.getItem('user');
+                if (user) {
+                    return JSON.parse(user);
                 }
                 
                 // If no local data, make an API call to check session

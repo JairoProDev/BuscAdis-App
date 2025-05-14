@@ -44,6 +44,8 @@ export default function RegisterForm() {
             const { phone, firstName, lastName, dni } = formData;
             const res = await AuthService.register({ phone, firstName, lastName, dni });
             if (res.success) {
+                localStorage.setItem('user', JSON.stringify(res.user));
+                window.dispatchEvent(new StorageEvent('storage', { key: 'user', newValue: JSON.stringify(res.user), storageArea: localStorage }));
                 setSuccessMessage('¡Cuenta creada con éxito! Redirigiendo a tu perfil...');
                 setTimeout(() => {
                     router.push('/perfil');
