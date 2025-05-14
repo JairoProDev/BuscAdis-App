@@ -12,7 +12,7 @@ export default function CallToAction() {
       {/* Background elements */}
       <div className="absolute inset-0 z-0">
         {/* Tech pattern background */}
-        <div className="absolute inset-0 opacity-5 bg-[url('/patterns/circuit.svg')]"></div>
+        <div className="absolute inset-0 opacity-5 bg-[url('/patterns/grid.svg')]"></div>
         
         {/* Background image with overlay */}
         <div className="absolute inset-0 opacity-15">
@@ -51,24 +51,24 @@ export default function CallToAction() {
           }}
         />
         
-        {/* Animated data points */}
+        {/* Floating particles */}
         <div className="absolute inset-0">
-          {Array.from({ length: 50 }).map((_, i) => (
+          {Array.from({ length: 20 }).map((_, i) => (
             <motion.div
               key={i}
-              className="absolute w-1 h-1 bg-teal-400/30 rounded-full"
-              initial={{ 
-                x: `${Math.random() * 100}%`, 
+              className="absolute w-1 h-1 bg-teal-400/40 rounded-full"
+              initial={{
+                x: `${Math.random() * 100}%`,
                 y: `${Math.random() * 100}%`,
                 opacity: Math.random() * 0.5 + 0.3
               }}
-              animate={{ 
+              animate={{
                 y: ['0%', '100%'],
-                opacity: [0.3, 0.8, 0.3]
+                opacity: [0.3, 0.8]
               }}
-              transition={{ 
-                repeat: Infinity, 
-                duration: Math.random() * 10 + 20,
+              transition={{
+                repeat: Infinity,
+                duration: Math.random() * 10 + 15,
                 ease: 'linear',
                 delay: Math.random() * 5
               }}
@@ -85,14 +85,15 @@ export default function CallToAction() {
             transition={{ duration: 0.6 }}
             className="text-center relative"
           >
-            {/* Premium badge effect at the top */}
+            {/* Premium badge effect */}
             <motion.div
               className="absolute top-0 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-48 h-12 bg-gradient-to-r from-teal-400/30 via-cyan-400/30 to-teal-400/30 blur-xl rounded-full"
               animate={{
-                opacity: [0.4, 0.6, 0.4],
+                opacity: [0.4, 0.6],
               }}
               transition={{
                 repeat: Infinity,
+                repeatType: "reverse",
                 duration: 3
               }}
             />

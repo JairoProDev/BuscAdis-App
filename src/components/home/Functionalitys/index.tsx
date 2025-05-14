@@ -80,7 +80,7 @@ export default function Functionalitys() {
             {/* Decorative elements */}
             <div className="absolute inset-0">
                 {/* Patrones de circuito tecnológico - Puedes mantenerlo o removerlo */}
-                {/* <div className="absolute inset-0 bg-[url('/patterns/circuit.svg')] opacity-10" /> */}
+                {/* <div className="absolute inset-0 bg-[url('/patterns/grid.svg')] opacity-10" /> */}
 
                 {/* Animated orbs */}
                 <div className="absolute top-40 left-20 w-72 h-72 bg-gradient-to-br from-teal-400/10 via-teal-300/5 to-emerald-400/10 rounded-full filter blur-xl opacity-30 animate-blob" />
@@ -144,10 +144,11 @@ export default function Functionalitys() {
                     <motion.div
                         className="absolute top-0 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-48 h-12 bg-gradient-to-r from-teal-400/30 via-cyan-400/30 to-teal-400/30 blur-xl rounded-full"
                         animate={{
-                            opacity: [0.4, 0.6, 0.4],
+                            opacity: [0.4, 0.6],
                         }}
                         transition={{
                             repeat: Infinity,
+                            repeatType: "reverse",
                             duration: 3
                         }}
                     />

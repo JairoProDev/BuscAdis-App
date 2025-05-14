@@ -9,12 +9,11 @@ export function Loader() {
         <motion.div
           className="w-20 h-20 border-4 border-primary-200 rounded-full"
           animate={{
-            scale: [1, 1.2, 1],
-            rotate: [0, 180, 360],
+            scale: [1, 1.2],
+            rotate: [0, 360],
             borderColor: [
               'rgb(14, 165, 233)',
-              'rgb(16, 185, 129)',
-              'rgb(14, 165, 233)'
+              'rgb(16, 185, 129)'
             ]
           }}
           transition={{

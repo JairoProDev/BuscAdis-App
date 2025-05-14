@@ -52,7 +52,7 @@ export default function MagazineForm() {
 
   return (
     <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-slate-800/90 via-slate-900/90 to-slate-800/90 backdrop-blur-md p-8 md:p-10 shadow-xl border border-teal-500/20">
-      <div className="absolute inset-0 bg-[url('/patterns/circuit.svg')] opacity-[0.03]" />
+      <div className="absolute inset-0 bg-[url('/patterns/grid.svg')] opacity-[0.03]" />
       <div className="absolute top-0 right-0 w-64 h-64 bg-teal-400/10 rounded-full filter blur-3xl opacity-20" />
       <div className="absolute bottom-0 left-0 w-64 h-64 bg-cyan-400/10 rounded-full filter blur-3xl opacity-20" />
       

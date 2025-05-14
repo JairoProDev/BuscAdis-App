@@ -34,7 +34,7 @@ export function ThemeToggle() {
           <motion.div
             initial={{ scale: 0.5, opacity: 0, rotate: -30 }}
             animate={{ 
-              scale: isAnimating ? [0.5, 1.2, 1] : 1, 
+              scale: isAnimating ? [0.5, 1] : 1, 
               opacity: 1, 
               rotate: isAnimating ? [-30, 0] : 0 
             }}
@@ -46,7 +46,7 @@ export function ThemeToggle() {
           <motion.div
             initial={{ scale: 0.5, opacity: 0, rotate: 30 }}
             animate={{ 
-              scale: isAnimating ? [0.5, 1.2, 1] : 1, 
+              scale: isAnimating ? [0.5, 1] : 1, 
               opacity: 1, 
               rotate: isAnimating ? [30, 0] : 0 
             }}

@@ -115,18 +115,18 @@ export default function Testimonials() {
         <motion.div 
           className="absolute h-full w-[1px] left-1/4 bg-gradient-to-b from-transparent via-teal-400/10 to-transparent opacity-50"
           animate={{ 
-            opacity: [0.2, 0.5, 0.2],
-            height: ['70%', '90%', '70%']
+            opacity: [0.2, 0.5],
+            height: ['70%', '90%']
           }}
-          transition={{ duration: 8, repeat: Infinity }}
+          transition={{ duration: 8, repeat: Infinity, repeatType: "reverse" }}
         />
         <motion.div 
           className="absolute h-full w-[1px] left-3/4 bg-gradient-to-b from-transparent via-cyan-400/10 to-transparent opacity-50"
           animate={{ 
-            opacity: [0.2, 0.5, 0.2],
-            height: ['80%', '100%', '80%']
+            opacity: [0.2, 0.5],
+            height: ['80%', '100%']
           }}
-          transition={{ duration: 8, repeat: Infinity, delay: 2 }}
+          transition={{ duration: 8, repeat: Infinity, repeatType: "reverse", delay: 2 }}
         />
         
         {/* Floating particles */}

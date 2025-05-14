@@ -33,9 +33,6 @@ export const CategoryCard: React.FC<CategoryCardProps> = ({
   // Determinar si es una subsubcategoría (con emoji)
   const isSubSubcategory = 'emoji' in category && category.emoji;
 
-  // Obtener el color para la categoría (aplica a todos los tipos)
-  const color = getCategoryColor(category.slug);
-
   return (
     <motion.button
       onClick={onClick}
@@ -43,13 +40,13 @@ export const CategoryCard: React.FC<CategoryCardProps> = ({
       whileTap={{ scale: 0.98 }}
       transition={{ duration: 0.2 }}
       className={cn(
-        'group relative rounded-md overflow-hidden transition-all duration-300',
+        'group relative rounded-lg overflow-hidden transition-all duration-300',
         variant === 'square' 
           ? 'w-full h-36 flex flex-col items-center justify-center text-center'
-          : 'w-full py-2 px-3 flex items-center gap-3',
+          : 'w-full py-3 px-4 flex items-center gap-3',
         isActive 
-          ? `bg-gradient-to-br from-white to-${color}-50 shadow-md border border-${color}-300` 
-          : `bg-white hover:bg-gradient-to-br hover:from-white hover:to-${color}-50 border border-gray-100 hover:border-${color}-200 hover:shadow-lg`
+          ? 'bg-gradient-to-br from-white/80 to-teal-50 dark:from-slate-800 dark:to-teal-900/30 shadow-md border border-teal-300 dark:border-teal-800' 
+          : 'bg-white dark:bg-slate-800/80 hover:bg-gradient-to-br hover:from-white hover:to-teal-50 dark:hover:from-slate-800 dark:hover:to-teal-900/30 border border-slate-200 dark:border-slate-700 hover:border-teal-300 dark:hover:border-teal-800 hover:shadow-lg'
       )}
     >
       {/* Círculo decorativo de fondo */}
@@ -61,7 +58,7 @@ export const CategoryCard: React.FC<CategoryCardProps> = ({
         style={{
           width: variant === 'square' ? '100px' : '70px',
           height: variant === 'square' ? '100px' : '70px',
-          background: `radial-gradient(circle, rgba(var(--${color}-200-rgb), 0.4) 0%, rgba(var(--${color}-200-rgb), 0) 70%)`,
+          background: 'radial-gradient(circle, rgba(20, 184, 166, 0.2) 0%, rgba(20, 184, 166, 0) 70%)',
           borderRadius: '50%',
         }}
       />
@@ -86,7 +83,7 @@ export const CategoryCard: React.FC<CategoryCardProps> = ({
       {isSubcategory && !isMainCategory && (
         <div className={cn(
           variant === 'square' ? 'w-14 h-14 mb-2 mx-auto' : 'w-10 h-10',
-          `bg-${color}-100 rounded-md text-${color}-500 p-1`
+          'bg-teal-100 dark:bg-teal-900/50 rounded-md text-teal-600 dark:text-teal-400 p-1'
         )}>
           {React.createElement(category.icon as React.ElementType, {
             className: 'w-full h-full'
@@ -110,14 +107,14 @@ export const CategoryCard: React.FC<CategoryCardProps> = ({
         <p className={cn(
           'font-medium overflow-hidden',
           variant === 'square' ? 'text-sm line-clamp-2' : 'text-base text-left',
-          `group-hover:text-${color}-700 transition-colors duration-200`
+          'text-slate-800 dark:text-slate-200 group-hover:text-teal-700 dark:group-hover:text-teal-400 transition-colors duration-200'
         )}>
           {category.name}
         </p>
         
         {showCount && category.count !== undefined && (
           <p className={cn(
-            `text-${color}-500 text-xs`,
+            'text-teal-600 dark:text-teal-400 text-xs',
             variant === 'horizontal' ? 'text-left mt-0.5' : 'mt-1'
           )}>
             {category.count.toLocaleString()} {category.count === 1 ? 'anuncio' : 'anuncios'}

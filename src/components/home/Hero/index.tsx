@@ -42,7 +42,7 @@ export default function Hero() {
                 <div className="absolute h-full w-[1px] left-[80%] bg-gradient-to-b from-transparent via-cyan-400/10 to-transparent opacity-70"></div>
 
                 {/* Circuit board pattern overlay for high-tech look */}
-                <div className="absolute inset-0 bg-[url('/patterns/circuit.svg')] bg-repeat opacity-5"></div>
+                <div className="absolute inset-0 bg-[url('/patterns/grid.svg')] bg-repeat opacity-5"></div>
             </div>
 
             <div className="relative h-full flex flex-col justify-center pt-16 md:pt-4 overflow-hidden">

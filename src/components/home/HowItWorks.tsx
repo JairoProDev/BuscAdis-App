@@ -35,7 +35,7 @@ export default function HowItWorks() {
             {/* Decorative elements */}
             <div className="absolute inset-0 z-0">
                 {/* Tech pattern background - Puedes mantenerlo o removerlo */}
-                {/* <div className="absolute inset-0 bg-[url('/patterns/circuit.svg')] opacity-10" /> */}
+                {/* <div className="absolute inset-0 bg-[url('/patterns/grid.svg')] opacity-10" /> */}
 
                 {/* Animated orbs */}
                 <div className="absolute top-40 left-20 w-72 h-72 bg-gradient-to-br from-teal-400/10 via-teal-300/5 to-emerald-400/10 rounded-full filter blur-xl opacity-30 animate-blob" />

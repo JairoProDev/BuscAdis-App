@@ -62,7 +62,7 @@ const CategoriesSection = () => {
             {/* Background elements */}
             <div className="absolute inset-0 z-0">
                 {/* Tech pattern background - You can keep this or remove it */}
-                {/* <div className="absolute inset-0 opacity-5 bg-[url('/patterns/circuit.svg')]"></div> */}
+                {/* <div className="absolute inset-0 opacity-5 bg-[url('/patterns/grid.svg')]"></div> */}
 
                 {/* Animated orbs */}
                 <div className="absolute top-40 left-20 w-80 h-80 bg-gradient-to-br from-teal-400/10 via-teal-300/5 to-emerald-400/10 rounded-full filter blur-xl opacity-30 animate-blob" />

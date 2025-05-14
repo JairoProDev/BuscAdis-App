@@ -232,7 +232,7 @@ export default function Tools() {
             {/* Decorative elements */}
             <div className="absolute inset-0">
                 {/* Tech pattern background - Puedes mantenerlo o removerlo */}
-                {/* <div className="absolute inset-0 bg-[url('/patterns/circuit.svg')] opacity-10"></div> */}
+                {/* <div className="absolute inset-0 bg-[url('/patterns/grid.svg')] opacity-10"></div> */}
 
                 {/* Animated orbs */}
                 <div className="absolute top-20 left-20 w-72 h-72 bg-gradient-to-br from-teal-400/10 via-teal-300/5 to-emerald-400/10 rounded-full filter blur-xl opacity-30 animate-blob" />
@@ -261,7 +261,7 @@ export default function Tools() {
 
                 {/* Floating data points */}
                 <div className="absolute inset-0">
-                    {Array.from({ length: 15 }).map((_, i) => (
+                    {Array.from({ length: 12 }).map((_, i) => (
                         <motion.div
                             key={i}
                             className="absolute w-1 h-1 bg-teal-400/40 rounded-full"
@@ -272,7 +272,7 @@ export default function Tools() {
                             }}
                             animate={{
                                 y: ['0%', '100%'],
-                                opacity: [0.3, 0.8, 0.3]
+                                opacity: [0.3, 0.8]
                             }}
                             transition={{
                                 repeat: Infinity,
@@ -296,10 +296,11 @@ export default function Tools() {
                     <motion.div
                         className="absolute top-0 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-48 h-12 bg-gradient-to-r from-teal-400/30 via-cyan-400/30 to-teal-400/30 blur-xl rounded-full"
                         animate={{
-                            opacity: [0.4, 0.6, 0.4],
+                            opacity: [0.4, 0.6],
                         }}
                         transition={{
                             repeat: Infinity,
+                            repeatType: "reverse",
                             duration: 3
                         }}
                     />

@@ -60,7 +60,7 @@ export default function BlogPage() {
         <div className="min-h-screen bg-gradient-to-b from-slate-900 via-teal-900/40 to-slate-900 relative overflow-hidden">
             {/* Background decorative elements */}
             <div className="absolute inset-0 z-0 pointer-events-none">
-                <div className="absolute inset-0 bg-[url('/patterns/circuit.svg')] opacity-5" />
+                <div className="absolute inset-0 bg-[url('/patterns/grid.svg')] opacity-5" />
                 <div className="absolute top-20 left-20 w-72 h-72 bg-gradient-to-br from-teal-400/10 via-teal-300/5 to-emerald-400/10 rounded-full filter blur-xl opacity-30 animate-pulse-slow" />
                 <div className="absolute bottom-20 right-20 w-72 h-72 bg-gradient-to-br from-cyan-400/10 via-white/5 to-teal-500/10 rounded-full filter blur-xl opacity-30 animate-pulse-slow animation-delay-2000" />
                 <motion.div

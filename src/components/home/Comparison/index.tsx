@@ -139,7 +139,7 @@ export default function Comparison() {
         <div className="absolute -bottom-8 left-20 w-72 h-72 bg-emerald-500 rounded-full mix-blend-multiply filter blur-xl opacity-20 animate-blob animation-delay-4000" />
         
         {/* Additional tech elements */}
-        <div className="absolute inset-0 bg-[url('/patterns/circuit.svg')] opacity-5"></div>
+        <div className="absolute inset-0 bg-[url('/patterns/grid.svg')] opacity-5"></div>
         
         {/* Laser light effects */}
         <div className="absolute h-full w-[1px] left-[15%] bg-gradient-to-b from-transparent via-teal-400/10 to-transparent opacity-70"></div>
@@ -175,10 +175,11 @@ export default function Comparison() {
           <motion.div
             className="absolute top-0 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-48 h-12 bg-gradient-to-r from-teal-400/30 via-cyan-400/30 to-teal-400/30 blur-xl rounded-full"
             animate={{
-              opacity: [0.4, 0.6, 0.4],
+              opacity: [0.4, 0.6],
             }}
             transition={{
               repeat: Infinity,
+              repeatType: "reverse",
               duration: 3
             }}
           />
@@ -231,7 +232,7 @@ export default function Comparison() {
               <motion.span 
                 className="text-xl"
                 animate={activeCategory === feature.category ? {
-                  scale: [1, 1.2, 1],
+                  scale: [1, 1.2],
                   rotate: [0, 10, 0, -10, 0],
                 } : {}}
                 transition={{

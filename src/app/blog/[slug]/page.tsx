@@ -147,7 +147,7 @@ export default function PostPage({ params }: PostPageProps) {
     <div className="min-h-screen bg-gradient-to-b from-slate-900 to-slate-800">
       {/* Hero Section */}
       <section className="relative pt-20 pb-32 overflow-hidden">
-        <div className="absolute inset-0 bg-[url('/patterns/circuit.svg')] opacity-5" />
+        <div className="absolute inset-0 bg-[url('/patterns/grid.svg')] opacity-5" />
         <div className="absolute inset-0 bg-gradient-to-b from-teal-900/30 via-slate-900/20 to-transparent pointer-events-none" />
         
         <Container>
@@ -280,7 +280,7 @@ export default function PostPage({ params }: PostPageProps) {
 
       {/* Content Section */}
       <section className="py-16 relative">
-        <div className="absolute inset-0 bg-[url('/patterns/circuit.svg')] opacity-5" />
+        <div className="absolute inset-0 bg-[url('/patterns/grid.svg')] opacity-5" />
         
         <Container>
           <div className="max-w-4xl mx-auto">
@@ -368,7 +368,7 @@ export default function PostPage({ params }: PostPageProps) {
 
       {/* Related Posts */}
       <section className="py-16 bg-slate-900/40 relative">
-        <div className="absolute inset-0 bg-[url('/patterns/circuit.svg')] opacity-5" />
+        <div className="absolute inset-0 bg-[url('/patterns/grid.svg')] opacity-5" />
         
         <Container>
           <div className="max-w-7xl mx-auto">

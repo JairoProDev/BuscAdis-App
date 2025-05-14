@@ -39,7 +39,7 @@ export default function Features() {
       {/* Decorative elements */}
       <div className="absolute inset-0 z-0">
         {/* Tech pattern background */}
-        <div className="absolute inset-0 opacity-5 bg-[url('/patterns/circuit.svg')]"></div>
+        <div className="absolute inset-0 opacity-5 bg-[url('/patterns/grid.svg')]"></div>
         
         {/* Background image with overlay */}
         <div className="absolute inset-0 opacity-20">
@@ -73,10 +73,11 @@ export default function Features() {
           <motion.div
             className="absolute top-0 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-48 h-12 bg-gradient-to-r from-teal-400/30 via-cyan-400/30 to-teal-400/30 blur-xl rounded-full"
             animate={{
-              opacity: [0.4, 0.6, 0.4],
+              opacity: [0.4, 0.6],
             }}
             transition={{
               repeat: Infinity,
+              repeatType: "reverse",
               duration: 3
             }}
           />

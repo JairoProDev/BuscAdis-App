@@ -341,7 +341,7 @@ export default function SearchLayout({
                     {/* Result header and view toggles - constrained to left column */}
                     <div className="flex items-center justify-between mb-4">
                         <div>
-                            <h1 className="text-xl font-bold text-white">
+                            <h1 className="text-xl font-bold text-white dark:text-white">
                                 {searchQuery ? `Resultados para "${searchQuery}"` :
                                  selectedSubSubcategory && subcategory && category ? 
                                    categories.find(c => c.id === category)?.subcategories?.find(sc => sc.id === subcategory)?.subsubcategories?.find(ssc => ssc.id === selectedSubSubcategory)?.name :
@@ -351,19 +351,19 @@ export default function SearchLayout({
                                    categories.find(c => c.id === category)?.name :
                                  'Todos los anuncios'}
                             </h1>
-                            <p className="text-sm text-slate-400">
+                            <p className="text-sm text-slate-400 dark:text-slate-400">
                                 {loading ? 'Buscando...' : `${totalResults || results.length} anuncios encontrados`}
                             </p>
                         </div>
 
                         {/* View toggle buttons - ONLY IN LEFT COLUMN */}
-                        <div className="inline-flex items-center gap-1 bg-slate-800 rounded-lg p-1 border border-slate-700">
+                        <div className="inline-flex items-center gap-1 bg-white dark:bg-slate-800 rounded-lg p-1 border border-slate-200 dark:border-slate-700 shadow-sm">
                             {/* Grid view button */}
                             <button
                                 className={`p-2 rounded transition-colors duration-200 ${
                                     listViewMode === 'grid'
-                                        ? 'bg-teal-500 text-white'
-                                        : 'text-slate-400 hover:bg-slate-700 hover:text-white'
+                                        ? 'bg-gradient-to-r from-teal-500 to-cyan-500 text-white'
+                                        : 'text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-700 hover:text-slate-900 dark:hover:text-white'
                                 }`}
                                 onClick={() => setListViewMode('grid')}
                                 aria-label="Ver en cuadrícula"
@@ -376,8 +376,8 @@ export default function SearchLayout({
                             <button
                                 className={`p-2 rounded transition-colors duration-200 ${
                                     listViewMode === 'list'
-                                        ? 'bg-teal-500 text-white'
-                                        : 'text-slate-400 hover:bg-slate-700 hover:text-white'
+                                        ? 'bg-gradient-to-r from-teal-500 to-cyan-500 text-white'
+                                        : 'text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-700 hover:text-slate-900 dark:hover:text-white'
                                 }`}
                                 onClick={() => setListViewMode('list')}
                                 aria-label="Ver en lista"
@@ -419,7 +419,7 @@ export default function SearchLayout({
                                 <button
                                     onClick={onLoadMore}
                                     disabled={loading}
-                                    className={`px-6 py-2 bg-teal-500 hover:bg-teal-600 text-white rounded-lg transition-colors ${loading ? 'opacity-50 cursor-not-allowed' : ''}`}
+                                    className={`px-6 py-2 bg-gradient-to-r from-teal-500 to-cyan-500 hover:from-teal-600 hover:to-cyan-600 text-white rounded-lg shadow-md transition-colors ${loading ? 'opacity-50 cursor-not-allowed' : ''}`}
                                 >
                                     {loading ? 'Cargando...' : 'Cargar más resultados'}
                                 </button>
@@ -433,7 +433,7 @@ export default function SearchLayout({
                     <div className="hidden lg:block lg:w-2/5 lg:pl-0">
                         <div className="sticky top-0 h-screen overflow-y-auto">
                             <button
-                                className="absolute top-4 right-4 z-50 flex items-center justify-center gap-1 px-3 py-1.5 rounded-lg bg-teal-500 text-white hover:bg-teal-600 transition-colors shadow-lg"
+                                className="absolute top-4 right-4 z-50 flex items-center justify-center gap-1 px-3 py-1.5 rounded-lg bg-gradient-to-r from-teal-500 to-cyan-500 text-white hover:from-teal-600 hover:to-cyan-600 transition-colors shadow-lg"
                                 onClick={toggleMapVisibility}
                                 aria-label={isMapVisible ? 'Ocultar mapa' : 'Mostrar mapa'}
                                 title={isMapVisible ? 'Ocultar mapa' : 'Mostrar mapa'}
@@ -445,13 +445,13 @@ export default function SearchLayout({
                                 {/* Either show the map or publication details */}
                                 {selectedPublication ? (
                                     // Diseño mejorado para los detalles de la publicación
-                                    <div className="bg-slate-800 rounded-xl overflow-hidden border border-slate-700 h-full flex flex-col">
+                                    <div className="bg-white dark:bg-slate-800 rounded-xl overflow-hidden border border-slate-200 dark:border-slate-700 shadow-md h-full flex flex-col">
                                         {/* Cabecera con título y botones de acción */}
-                                        <div className="flex justify-between items-start p-4 border-b border-slate-700">
-                                            <h2 className="text-2xl font-bold text-white leading-tight">{selectedPublication.title}</h2>
+                                        <div className="flex justify-between items-start p-4 border-b border-slate-200 dark:border-slate-700">
+                                            <h2 className="text-2xl font-bold text-slate-900 dark:text-white leading-tight">{selectedPublication.title}</h2>
                                             <div className="flex items-center gap-2">
                                                 <button
-                                                    className="p-2 rounded-full bg-slate-700 hover:bg-slate-600 text-slate-300 transition-colors"
+                                                    className="p-2 rounded-full bg-slate-100 hover:bg-slate-200 dark:bg-slate-700 dark:hover:bg-slate-600 text-slate-600 dark:text-slate-300 transition-colors"
                                                     aria-label="Compartir"
                                                     title="Compartir"
                                                 >
@@ -461,7 +461,7 @@ export default function SearchLayout({
                                                 </button>
                                                 <button
                                                     onClick={() => setSelectedPublication(null)}
-                                                    className="p-2 rounded-full bg-slate-700 hover:bg-slate-600 text-slate-300 transition-colors"
+                                                    className="p-2 rounded-full bg-slate-100 hover:bg-slate-200 dark:bg-slate-700 dark:hover:bg-slate-600 text-slate-600 dark:text-slate-300 transition-colors"
                                                     aria-label="Cerrar detalles"
                                                     title="Cerrar"
                                                 >
@@ -492,7 +492,7 @@ export default function SearchLayout({
                                                     
                                                     {/* Miniaturas si hay más de una imagen */}
                                                     {selectedPublication.images.length > 1 && (
-                                                        <div className="flex overflow-x-auto p-2 gap-2 bg-slate-900">
+                                                        <div className="flex overflow-x-auto p-2 gap-2 bg-slate-100 dark:bg-slate-900">
                                                             {selectedPublication.images.map((img, idx) => (
                                                                 <div 
                                                                     key={idx} 
@@ -505,8 +505,8 @@ export default function SearchLayout({
                                                     )}
                                                 </div>
                                             ) : (
-                                                <div className="flex items-center justify-center h-72">
-                                                    <p className="text-slate-400">No hay imágenes disponibles</p>
+                                                <div className="flex items-center justify-center h-72 bg-slate-100 dark:bg-slate-900">
+                                                    <p className="text-slate-500 dark:text-slate-400">No hay imágenes disponibles</p>
                                                 </div>
                                             )}
                                             
@@ -515,20 +515,20 @@ export default function SearchLayout({
                                                 <div className="flex flex-wrap justify-between items-start mb-4">
                                                     <div>
                                                         {selectedPublication.price && (
-                                                            <p className="text-3xl font-bold text-teal-400 mb-1">
+                                                            <p className="text-3xl font-bold text-teal-600 dark:text-teal-400 mb-1">
                                                                 {new Intl.NumberFormat('es-PE', {
                                                                     style: 'currency',
                                                                     currency: selectedPublication.currency || 'PEN',
                                                                     maximumFractionDigits: 0
                                                                 }).format(selectedPublication.price)}
                                                                 {selectedPublication.negotiable && 
-                                                                    <span className="text-sm font-normal text-teal-300 ml-2">Negociable</span>
+                                                                    <span className="text-sm font-normal text-teal-500 dark:text-teal-300 ml-2">Negociable</span>
                                                                 }
                                                             </p>
                                                         )}
                                                         
                                                         {/* Fecha de publicación */}
-                                                        <div className="flex items-center text-slate-400 text-sm">
+                                                        <div className="flex items-center text-slate-500 dark:text-slate-400 text-sm">
                                                             <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
                                                             </svg>
@@ -539,7 +539,7 @@ export default function SearchLayout({
                                                     {/* Botones de acción (favorito, compartir) */}
                                                     <div className="flex items-center gap-2 mt-2">
                                                         <button 
-                                                            className="flex items-center gap-1 py-1 px-3 bg-slate-700 hover:bg-slate-600 text-white rounded-lg transition-colors"
+                                                            className="flex items-center gap-1 py-1 px-3 bg-slate-100 hover:bg-slate-200 dark:bg-slate-700 dark:hover:bg-slate-600 text-slate-600 dark:text-white rounded-lg transition-colors"
                                                             aria-label="Me gusta"
                                                             title="Me gusta"
                                                         >
@@ -549,7 +549,7 @@ export default function SearchLayout({
                                                             <span className="text-sm font-medium">Favorito</span>
                                                         </button>
                                                         <button 
-                                                            className="flex items-center gap-1 py-1 px-3 bg-slate-700 hover:bg-slate-600 text-white rounded-lg transition-colors"
+                                                            className="flex items-center gap-1 py-1 px-3 bg-slate-100 hover:bg-slate-200 dark:bg-slate-700 dark:hover:bg-slate-600 text-slate-600 dark:text-white rounded-lg transition-colors"
                                                             aria-label="Guardar"
                                                             title="Guardar"
                                                         >
