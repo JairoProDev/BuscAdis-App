@@ -8,6 +8,16 @@ interface ProfileData {
   fullName?: string;
   phone?: string;
   email?: string;
+  bio?: string;
+  avatarUrl?: string;
+  occupation?: string;
+  gender?: string;
+  birthdate?: string;
+  interests?: string[];
+  socialLinks?: string[];
+  badges?: string[];
+  points?: number;
+  progress?: number;
 }
 
 export class ProfileService {
@@ -41,7 +51,7 @@ export class ProfileService {
     }
   }
 
-  static async createOrUpdateProfile(user: ProfileData) {
+  static async createOrUpdateProfile(user: any) {
     try {
       const currentUser = await AuthService.getCurrentUser();
       if (!currentUser) {
@@ -58,6 +68,16 @@ export class ProfileService {
           fullName: user.fullName || currentUser.name,
           phone: user.phone || currentUser.phone,
           email: user.email || currentUser.email,
+          bio: user.bio || '',
+          avatarUrl: user.avatarUrl || '',
+          occupation: user.occupation || '',
+          gender: user.gender || '',
+          birthdate: user.birthdate || '',
+          interests: user.interests || [],
+          socialLinks: user.socialLinks || [],
+          badges: user.badges || [],
+          points: user.points || 0,
+          progress: user.progress || 0,
         }),
       });
       

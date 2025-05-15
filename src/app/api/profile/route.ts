@@ -21,21 +21,25 @@ export async function POST(request: Request) {
     const existingProfile = profiles.length > 0 ? profiles[0] : null
     
     if (existingProfile) {
-      // Update existing profile
+      // Update existing profile (merge all fields)
       const updateData = {
-        fullName: data.fullName || existingProfile.fullName,
-        phone: data.phone || existingProfile.phone,
-        email: data.email || existingProfile.email,
+        fullName: data.fullName ?? existingProfile.fullName,
+        phone: data.phone ?? existingProfile.phone,
+        email: data.email ?? existingProfile.email,
+        bio: data.bio ?? existingProfile.bio,
+        avatarUrl: data.avatarUrl ?? existingProfile.avatarUrl,
+        occupation: data.occupation ?? existingProfile.occupation,
+        gender: data.gender ?? existingProfile.gender,
+        birthdate: data.birthdate ?? existingProfile.birthdate,
+        interests: data.interests ?? existingProfile.interests,
+        socialLinks: data.socialLinks ?? existingProfile.socialLinks,
+        badges: data.badges ?? existingProfile.badges,
+        points: data.points ?? existingProfile.points,
+        progress: data.progress ?? existingProfile.progress,
         updatedAt: new Date().toISOString()
-      }
-      
-      // Update directly with MongoDB
-      await mongoDbUpdate('profiles', data.userId, updateData)
-      
-      return NextResponse.json({
-        ...existingProfile,
-        ...updateData
-      })
+      };
+      await mongoDbUpdate('profiles', data.userId, updateData);
+      return NextResponse.json({ ...existingProfile, ...updateData });
     } else {
       // Create new profile
       const newProfile = {
@@ -43,14 +47,21 @@ export async function POST(request: Request) {
         fullName: data.fullName || '',
         phone: data.phone || '',
         email: data.email || '',
+        bio: data.bio || '',
+        avatarUrl: data.avatarUrl || '',
+        occupation: data.occupation || '',
+        gender: data.gender || '',
+        birthdate: data.birthdate || '',
+        interests: data.interests || [],
+        socialLinks: data.socialLinks || [],
+        badges: data.badges || [],
+        points: data.points || 0,
+        progress: data.progress || 0,
         createdAt: new Date().toISOString(),
         updatedAt: new Date().toISOString()
-      }
-      
-      // Insert directly with MongoDB
-      await mongoDbInsert('profiles', newProfile)
-      
-      return NextResponse.json(newProfile)
+      };
+      await mongoDbInsert('profiles', newProfile);
+      return NextResponse.json(newProfile);
     }
   } catch (error: any) {
     console.error('Error in profile API:', error)

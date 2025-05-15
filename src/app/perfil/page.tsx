@@ -203,6 +203,26 @@ export default function PerfilPage() {
     }
   };
 
+  // Guardar perfil
+  const handleSaveProfile = async () => {
+    try {
+      const updatedProfile = await ProfileService.createOrUpdateProfile({
+        ...formData,
+        interests,
+        socialLinks,
+        points: 100, // Ejemplo: calcular puntos reales
+        badges: [], // Ejemplo: calcular badges reales
+        progress: profileProgress, // Ejemplo: calcular progreso real
+      });
+      setFormData(updatedProfile);
+      setIsEditing(false);
+      // Feedback visual aquí (toast, animación, etc.)
+    } catch (err) {
+      // Mostrar error visual
+      alert('Error al guardar el perfil. Intenta de nuevo.');
+    }
+  };
+
   if (authIsLoading || pageLoading) {
     return (
       <div className="flex flex-col items-center justify-center min-h-[calc(100vh-12rem)] text-center px-4">
@@ -234,10 +254,23 @@ export default function PerfilPage() {
 
   return (
     <div className="container max-w-3xl mx-auto py-10 px-4 animate-fade-in">
-      {/* Barra de progreso y avatar */}
-      <div className="flex flex-col items-center mb-8">
-        <ProfileProgress percent={profileProgress} />
-        <div className="relative group mb-2">
+      {/* Barra de progreso arriba */}
+      <div className="w-full flex items-center mb-6">
+        <div className="flex-1">
+          <div className="h-3 rounded-full bg-slate-700/40 overflow-hidden">
+            <div className="h-3 rounded-full bg-gradient-to-r from-teal-500 to-cyan-500 transition-all duration-500" style={{ width: `${profileProgress}%` }} />
+          </div>
+          <div className="text-xs text-slate-400 mt-1">Progreso de tu cartilla BuscAdis: {profileProgress}%</div>
+        </div>
+        {/* Puntos acumulados */}
+        <div className="ml-6 flex items-center gap-2">
+          <span className="text-lg font-bold text-teal-400">{formData.points || 0} pts</span>
+          <span className="text-xs text-slate-400">Puntos</span>
+        </div>
+      </div>
+      {/* Cabecera: avatar a la izquierda, nombre y badges a la derecha */}
+      <div className="flex items-center gap-8 mb-8">
+        <div className="relative group">
           {formData.avatarUrl ? (
             <img src={formData.avatarUrl} alt="Avatar" className="w-32 h-32 rounded-full object-cover ring-4 ring-teal-300 shadow-lg" />
           ) : (
@@ -249,8 +282,14 @@ export default function PerfilPage() {
             </button>
           )}
         </div>
-        <h1 className="text-3xl font-bold text-slate-50 mb-1">{formData.fullName || 'Tu Nombre'}</h1>
-        <p className="text-slate-400 text-base mb-2">¡Estás creando tu cartilla BuscAdis! Entre más completo tu perfil, mejores resultados tendrás.</p>
+        <div className="flex-1">
+          <h1 className="text-3xl font-bold text-slate-50 mb-1">{formData.fullName || 'Tu Nombre'}</h1>
+          <div className="flex items-center gap-2 mb-2">
+            {/* Aquí puedes mapear badges/logros */}
+            {/* <BadgeIcon /> */}
+          </div>
+          <p className="text-slate-400 text-base">¡Estás creando tu cartilla BuscAdis! Entre más completo tu perfil, mejores resultados tendrás.</p>
+        </div>
       </div>
       {/* Sección de intereses */}
       <section className="mb-8 bg-white/5 rounded-xl p-6 shadow-lg">
@@ -272,11 +311,30 @@ export default function PerfilPage() {
       {/* Sección de datos personales y contacto */}
       <section className="mb-8 bg-white/5 rounded-xl p-6 shadow-lg">
         <h2 className="text-lg font-semibold text-teal-400 mb-3 flex items-center gap-2"><IdentificationIcon className="w-5 h-5" /> Datos personales</h2>
-        {/* Nombre, sexo, fecha de nacimiento, ocupación */}
+        {/* Nombre, sexo (select), fecha de nacimiento, ocupación */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
           <FormField label="Nombre Completo" id="fullName" name="fullName" type="text" value={formData.fullName} onChange={handleInputChange} placeholder="Ej: Jairo S. Quiñones" disabled={!isEditing || isSaving} icon={IdentificationIcon} />
           <FormField label="Ocupación" id="occupation" name="occupation" type="text" value={formData.occupation || ''} onChange={handleInputChange} placeholder="Ej: Desarrollador, Estudiante..." disabled={!isEditing || isSaving} icon={BriefcaseIcon} />
-          <FormField label="Sexo" id="gender" name="gender" type="text" value={formData.gender || ''} onChange={handleInputChange} placeholder="Ej: Masculino, Femenino, Otro..." disabled={!isEditing || isSaving} icon={UserIcon} />
+          {/* Sexo como select */}
+          <div>
+            <label htmlFor="gender" className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1.5">Sexo</label>
+            <div className="relative">
+              <select
+                id="gender"
+                name="gender"
+                value={formData.gender || ''}
+                onChange={handleInputChange}
+                disabled={!isEditing || isSaving}
+                className="block w-full text-base rounded-lg border bg-white dark:bg-slate-800/70 border-slate-300 dark:border-slate-600 focus:border-teal-500 dark:focus:border-teal-500 focus:ring-2 focus:ring-teal-500/40 transition-colors duration-150"
+              >
+                <option value="">Selecciona...</option>
+                <option value="masculino">Masculino</option>
+                <option value="femenino">Femenino</option>
+                <option value="otro">Otro</option>
+                <option value="no-decir">Prefiero no decirlo</option>
+              </select>
+            </div>
+          </div>
           <FormField label="Fecha de Nacimiento" id="birthdate" name="birthdate" type="date" value={formData.birthdate || ''} onChange={handleInputChange} placeholder="" disabled={!isEditing || isSaving} icon={CalendarIcon} />
         </div>
         {/* Teléfonos/WhatsApp */}
@@ -333,7 +391,7 @@ export default function PerfilPage() {
         ) : (
           <>
             <button type="button" onClick={handleCancelEdit} disabled={isSaving} className="w-full sm:w-auto px-6 py-3 rounded-lg border border-slate-300 dark:border-slate-600 text-sm font-semibold text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-700/70 transition-colors duration-150 disabled:opacity-60">Cancelar</button>
-            <button type="submit" disabled={isSaving} className="w-full sm:w-auto flex items-center justify-center gap-2.5 px-6 py-3 rounded-lg bg-gradient-to-r from-teal-500 to-cyan-500 text-white text-sm font-semibold shadow-md hover:shadow-lg hover:from-teal-600 hover:to-cyan-600 transition-all duration-150 disabled:opacity-70">{isSaving ? (<><ArrowPathIcon className="w-5 h-5 animate-spin" /> Guardando...</>) : (<><CheckCircleIcon className="w-5 h-5" /> Guardar Cambios</>)}</button>
+            <button type="button" onClick={handleSaveProfile} disabled={isSaving} className="w-full sm:w-auto flex items-center justify-center gap-2.5 px-6 py-3 rounded-lg bg-gradient-to-r from-teal-500 to-cyan-500 text-white text-sm font-semibold shadow-md hover:shadow-lg hover:from-teal-600 hover:to-cyan-600 transition-all duration-150 disabled:opacity-70">{isSaving ? (<><ArrowPathIcon className="w-5 h-5 animate-spin" /> Guardando...</>) : (<><CheckCircleIcon className="w-5 h-5" /> Guardar Cambios</>)}</button>
           </>
         )}
       </div>
