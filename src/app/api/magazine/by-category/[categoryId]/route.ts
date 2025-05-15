@@ -14,10 +14,14 @@ const CATEGORY_TO_COLLECTION = {
   'comunidad': 'publications_comunidad'
 };
 
-export async function GET(
-  request: Request,
-  { params }: { params: { categoryId: string } }
-) {
+// Tipo correcto para los parámetros de ruta en Next.js App Router
+type Props = {
+  params: {
+    categoryId: string;
+  };
+};
+
+export async function GET(request: Request, { params }: Props) {
   try {
     const categoryId = params.categoryId;
     
