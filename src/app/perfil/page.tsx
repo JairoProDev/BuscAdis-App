@@ -5,6 +5,8 @@ import Link from 'next/link';
 import { useAuth } from '@/features/auth/hooks/useAuth';
 import { ProfileService } from '@/services/profile.service';
 import { BuscadisAvatarIcon } from '@/components/icons/BuscadisAvatarIcon';
+import { useAchievements } from '@/services/achievements.service';
+import { safeLocalStorageSet } from '@/utils/safeJSON';
 
 // Íconos de Heroicons
 import {
@@ -73,27 +75,13 @@ interface ProfileFormData {
   occupation?: string;
   gender?: string;
   birthdate?: string;
+  points?: number;
+  badges?: string[];
+  progress?: number;
+  verified?: boolean;
+  activity?: unknown[];
+  privacySettings?: Record<string, 'public' | 'private' | 'admin'>;
 }
-
-// 2. Barra de progreso de perfil y badges
-const ProfileProgress = ({ percent }: { percent: number }) => (
-  <div className="w-full flex flex-col items-center mb-6">
-    <div className="relative w-32 h-32 flex items-center justify-center">
-      <svg className="absolute top-0 left-0" width="128" height="128">
-        <circle cx="64" cy="64" r="56" stroke="#e0e7ef" strokeWidth="12" fill="none" />
-        <circle cx="64" cy="64" r="56" stroke="url(#buscadis-avatar-gradient)" strokeWidth="12" fill="none" strokeDasharray={2 * Math.PI * 56} strokeDashoffset={2 * Math.PI * 56 * (1 - percent / 100)} strokeLinecap="round" />
-        <defs>
-          <linearGradient id="buscadis-avatar-gradient" x1="0" y1="0" x2="128" y2="128" gradientUnits="userSpaceOnUse">
-            <stop stopColor="#14b8a6" />
-            <stop offset="1" stopColor="#06b6d4" />
-          </linearGradient>
-        </defs>
-      </svg>
-      <span className="relative z-10 text-3xl font-bold text-teal-500">{percent}%</span>
-    </div>
-    <span className="mt-2 text-sm text-slate-500 dark:text-slate-400">Progreso de tu cartilla BuscAdis</span>
-  </div>
-);
 
 // 3. Chips de intereses y categorías
 const INTERESTS = [
@@ -139,6 +127,9 @@ export default function PerfilPage() {
   const [saveStatus, setSaveStatus] = useState<'idle' | 'saving' | 'success' | 'error'>('idle');
   const [saveMessage, setSaveMessage] = useState('');
 
+  // 4. Add useAchievements hook for gamification
+  const achievementsStore = useAchievements();
+
   // Efecto para cargar datos del perfil
   useEffect(() => {
     if (authIsLoading) {
@@ -163,7 +154,7 @@ export default function PerfilPage() {
           setFormData(baseAuthData);
           initialFormDataRef.current = { ...baseAuthData };
         }
-      } catch (err) {
+      } catch {
         const fallbackData = normalizeAuthUserToProfile(user);
         setFormData(fallbackData);
         initialFormDataRef.current = { ...fallbackData };
@@ -209,12 +200,52 @@ export default function PerfilPage() {
       setSaveStatus('success');
       setSaveMessage('¡Perfil guardado exitosamente!');
       setTimeout(() => setSaveStatus('idle'), 2500);
-    } catch (err) {
+    } catch {
       setSaveStatus('error');
       setSaveMessage('Error al guardar el perfil. Intenta de nuevo.');
       setTimeout(() => setSaveStatus('idle'), 3500);
     }
   };
+
+  // Fix useEffect for progress calculation to avoid infinite loop
+  useEffect(() => {
+    let filled = 0;
+    const total = 8; // fullName, phone, email, bio, avatar, occupation, gender, birthdate
+    if (formData.fullName) filled++;
+    if (formData.phone) filled++;
+    if (formData.email) filled++;
+    if (formData.bio) filled++;
+    if (formData.avatarUrl) filled++;
+    if (formData.occupation) filled++;
+    if (formData.gender) filled++;
+    if (formData.birthdate) filled++;
+    if (interests.length) filled++;
+    if (socialLinks.length) filled++;
+    if (formData.verified) filled++;
+    if (formData.badges && formData.badges.length) filled++;
+    const progress = Math.min(Math.round((filled / (total + 4)) * 100), 100);
+    // Only update if progress actually changed
+    if (formData.progress !== progress) {
+      setFormData(prev => ({ ...prev, progress }));
+    }
+    // Only update badges if needed
+    if (
+      progress === 100 &&
+      (!formData.badges || !formData.badges.includes('perfil_100'))
+    ) {
+      achievementsStore.unlockAchievement('all_fields');
+      setFormData(prev => ({ ...prev, badges: [...(prev.badges || []), 'perfil_100'] }));
+      setTimeout(() => setSaveStatus('success'), 4000);
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [formData.fullName, formData.phone, formData.email, formData.bio, formData.avatarUrl, formData.occupation, formData.gender, formData.birthdate, interests, socialLinks, formData.verified, formData.badges, achievementsStore]);
+
+  // 6. Points system: update points on actions, sync to localStorage, and backend on logout
+  useEffect(() => {
+    const points = achievementsStore.totalPoints + (formData.progress || 0);
+    setFormData(prev => ({ ...prev, points }));
+    safeLocalStorageSet('profile_points', points);
+  }, [achievementsStore.totalPoints, formData.progress]);
 
   if (authIsLoading || pageLoading) {
     return (
@@ -316,7 +347,7 @@ export default function PerfilPage() {
                 id="gender"
                 name="gender"
                 value={formData.gender || ''}
-                onChange={handleInputChange}
+                onChange={e => setFormData(prev => ({ ...prev, gender: e.target.value }))}
                 disabled={!isEditing || isSaving}
                 className="block w-full text-base rounded-lg border bg-white dark:bg-slate-800/70 border-slate-300 dark:border-slate-600 focus:border-teal-500 dark:focus:border-teal-500 focus:ring-2 focus:ring-teal-500/40 transition-colors duration-150"
               >
@@ -445,7 +476,7 @@ const FormField: React.FC<FormFieldProps> = ({ label, id, name, type, value, onC
           disabled={disabled}
           className={`${inputBaseClasses} ${disabled ? inputDisabledClasses : (error ? inputErrorClasses : inputEnabledClasses)} ${inputPadding}`}
           placeholder={placeholder}
-          aria-invalid={error ? "true" : "false"}
+          aria-invalid={error ? 'true' : 'false'}
           aria-describedby={error ? `${id}-error` : undefined}
         />
       </div>
