@@ -113,6 +113,9 @@ const SOCIALS = [
   { label: 'Instagram', value: 'instagram', icon: GlobeAltIcon },
 ];
 
+type WizardSublevels = Record<string, Record<number, string>>;
+type WizardSummary = { interests: string[]; sublevels: WizardSublevels };
+
 export default function PerfilPage() {
   const { user, isAuthenticated, loading: authIsLoading } = useAuth();
   
@@ -176,6 +179,31 @@ export default function PerfilPage() {
     favorites: 5,
     posts: 3,
     recommendations: endorsements.length,
+  };
+
+  // 1. Interest Wizard: Multi-step with sublevels and guided questions
+  // Add wizardStep state and sublevel/question state
+  const [wizardStep, setWizardStep] = useState(0);
+  const [wizardInterests, setWizardInterests] = useState<string[]>(interests);
+  const [wizardSublevels, setWizardSublevels] = useState<WizardSublevels>({});
+  const [wizardSummary, setWizardSummary] = useState<WizardSummary | null>(null);
+  const INTEREST_QUESTIONS: Record<string, { label: string; options: string[] }[]> = {
+    empleo: [
+      { label: 'Sector', options: ['Tecnología', 'Salud', 'Educación', 'Ventas', 'Administración', 'Otro'] },
+      { label: 'Modalidad', options: ['Presencial', 'Remoto', 'Híbrido'] },
+      { label: 'Salario deseado', options: ['< $500', '$500-$1000', '$1000-$2000', '> $2000'] },
+    ],
+    vivienda: [
+      { label: 'Tipo', options: ['Casa', 'Departamento', 'Habitación', 'Otro'] },
+      { label: 'Modalidad', options: ['Alquiler', 'Compra', 'Anticresis'] },
+      { label: 'Ubicación preferida', options: ['Centro', 'Periferia', 'Cualquier zona'] },
+    ],
+    servicios: [
+      { label: 'Tipo de servicio', options: ['Profesional', 'Hogar', 'Transporte', 'Educación', 'Otro'] },
+    ],
+    productos: [
+      { label: 'Categoría', options: ['Tecnología', 'Moda', 'Hogar', 'Deportes', 'Otro'] },
+    ],
   };
 
   // Efecto para cargar datos del perfil
@@ -396,29 +424,97 @@ export default function PerfilPage() {
             <DialogHeader>
               <DialogTitle>Personaliza tu experiencia</DialogTitle>
               <DialogDescription>
-                Selecciona tus intereses principales. Puedes elegir más de uno. (Próximamente: subniveles y preguntas guiadas)
+                {wizardStep === 0 && 'Selecciona tus intereses principales. Puedes elegir más de uno.'}
+                {wizardStep === 1 && 'Responde algunas preguntas para personalizar aún más tu experiencia.'}
+                {wizardStep === 2 && 'Resumen de tus preferencias. Puedes editarlas antes de guardar.'}
               </DialogDescription>
             </DialogHeader>
-            <div className="flex flex-wrap gap-3 my-4">
-              {INTERESTS.map((interest) => (
-                <button
-                  key={interest.value}
-                  type="button"
-                  className={`flex items-center gap-2 px-4 py-2 rounded-full border-2 transition-colors font-medium text-sm ${interests.includes(interest.value) ? 'bg-gradient-to-r from-teal-500 to-cyan-500 text-white border-teal-500' : 'border-slate-300 dark:border-slate-600 text-slate-700 dark:text-slate-200 bg-white/10 hover:bg-teal-500/10'}`}
-                  onClick={() => setInterests((prev) => prev.includes(interest.value) ? prev.filter(i => i !== interest.value) : [...prev, interest.value])}
-                >
-                  <interest.icon className="w-5 h-5" /> {interest.label}
-                </button>
+            {/* Stepper Progress Bar */}
+            <div className="flex items-center gap-2 mb-4">
+              {[0, 1, 2].map((step) => (
+                <div key={step} className={`flex-1 h-2 rounded-full ${wizardStep >= step ? 'bg-gradient-to-r from-teal-500 to-cyan-500' : 'bg-slate-700/40'}`}></div>
               ))}
             </div>
+            {/* Step 1: Interests */}
+            {wizardStep === 0 && (
+              <div className="flex flex-wrap gap-3 my-4">
+                {INTERESTS.map((interest) => (
+                  <button
+                    key={interest.value}
+                    type="button"
+                    className={`flex items-center gap-2 px-4 py-2 rounded-full border-2 transition-colors font-medium text-sm ${wizardInterests.includes(interest.value) ? 'bg-gradient-to-r from-teal-500 to-cyan-500 text-white border-teal-500' : 'border-slate-300 dark:border-slate-600 text-slate-700 dark:text-slate-200 bg-white/10 hover:bg-teal-500/10'}`}
+                    onClick={() => setWizardInterests((prev) => prev.includes(interest.value) ? prev.filter(i => i !== interest.value) : [...prev, interest.value])}
+                    aria-label={interest.label}
+                  >
+                    <interest.icon className="w-5 h-5" /> {interest.label}
+                  </button>
+                ))}
+              </div>
+            )}
+            {/* Step 2: Sublevels/Questions */}
+            {wizardStep === 1 && (
+              <div className="space-y-6 my-4">
+                {wizardInterests.map((interest) => (
+                  <div key={interest} className="bg-slate-800/60 rounded-lg p-4">
+                    <div className="font-semibold text-teal-300 mb-2">{INTERESTS.find(i => i.value === interest)?.label}</div>
+                    {INTEREST_QUESTIONS[interest]?.map((q, idx) => (
+                      <div key={q.label} className="mb-2">
+                        <label className="block text-sm font-medium text-slate-200 mb-1">{q.label}</label>
+                        <select
+                          className="w-full px-3 py-2 rounded-lg border border-slate-300 bg-white/80"
+                          value={wizardSublevels[interest]?.[idx] || ''}
+                          onChange={e => setWizardSublevels((prev: any) => ({
+                            ...prev,
+                            [interest]: { ...prev[interest], [idx]: e.target.value },
+                          }))}
+                          aria-label={q.label}
+                        >
+                          <option value="">Selecciona...</option>
+                          {q.options.map(opt => <option key={opt} value={opt}>{opt}</option>)}
+                        </select>
+                      </div>
+                    ))}
+                  </div>
+                ))}
+              </div>
+            )}
+            {/* Step 3: Summary */}
+            {wizardStep === 2 && (
+              <div className="my-4 space-y-4">
+                <div className="font-semibold text-teal-300">Tus intereses seleccionados:</div>
+                <ul className="list-disc ml-6 text-slate-200">
+                  {wizardInterests.map(interest => (
+                    <li key={interest}>
+                      {INTERESTS.find(i => i.value === interest)?.label}
+                      {INTEREST_QUESTIONS[interest] && (
+                        <ul className="list-disc ml-6 text-slate-400">
+                          {INTEREST_QUESTIONS[interest].map((q, idx) => (
+                            <li key={q.label}>{q.label}: {wizardSublevels[interest]?.[idx] || 'No especificado'}</li>
+                          ))}
+                        </ul>
+                      )}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            )}
             <DialogFooter>
-              <button
-                type="button"
-                className="w-full px-6 py-2 rounded-lg bg-gradient-to-r from-teal-500 to-cyan-500 text-white font-semibold shadow hover:from-teal-600 hover:to-cyan-600 transition-all"
-                onClick={() => setWizardOpen(false)}
-              >
-                Guardar intereses
-              </button>
+              {wizardStep > 0 && (
+                <button type="button" className="px-4 py-2 rounded-lg border border-slate-300 text-slate-200 hover:bg-slate-700/60" onClick={() => setWizardStep(wizardStep - 1)}>Atrás</button>
+              )}
+              {wizardStep < 2 && (
+                <button type="button" className="px-4 py-2 rounded-lg bg-gradient-to-r from-teal-500 to-cyan-500 text-white font-semibold shadow hover:from-teal-600 hover:to-cyan-600 transition-all" onClick={() => setWizardStep(wizardStep + 1)} disabled={wizardStep === 0 && wizardInterests.length === 0}>Siguiente</button>
+              )}
+              {wizardStep === 2 && (
+                <button type="button" className="px-4 py-2 rounded-lg bg-gradient-to-r from-teal-500 to-cyan-500 text-white font-semibold shadow hover:from-teal-600 hover:to-cyan-600 transition-all" onClick={() => {
+                  setInterests(wizardInterests);
+                  setWizardOpen(false);
+                  setWizardStep(0);
+                  setWizardSublevels({});
+                  setWizardSummary({ interests: wizardInterests, sublevels: wizardSublevels });
+                  // Show toast/feedback
+                }}>Guardar intereses</button>
+              )}
             </DialogFooter>
           </DialogContent>
         </Dialog>
