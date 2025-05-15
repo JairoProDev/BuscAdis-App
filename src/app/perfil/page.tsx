@@ -166,7 +166,7 @@ export default function PerfilPage() {
     const imgData = canvas.toDataURL('image/png');
     const pdf = new jsPDF();
     pdf.addImage(imgData, 'PNG', 10, 10, 180, 120);
-    pdf.save('cartilla-buscadis.pdf');
+    pdf.save('ID-buscadis.pdf');
   };
   const profileUrl = typeof window !== 'undefined' ? window.location.href : '';
 
@@ -332,7 +332,7 @@ export default function PerfilPage() {
           <div className="h-3 rounded-full bg-slate-700/40 overflow-hidden">
             <div className="h-3 rounded-full bg-gradient-to-r from-teal-500 to-cyan-500 transition-all duration-500" style={{ width: `${profileProgress}%` }} />
           </div>
-          <div className="text-xs text-slate-400 mt-1">Progreso de tu cartilla BuscAdis: {profileProgress}%</div>
+          <div className="text-xs text-slate-400 mt-1">Progreso de tu ID BuscAdis: {profileProgress}%</div>
         </div>
         {/* Puntos acumulados */}
         <div className="ml-6 flex items-center gap-2">
@@ -360,7 +360,7 @@ export default function PerfilPage() {
             {/* Aquí puedes mapear badges/logros */}
             {/* <BadgeIcon /> */}
           </div>
-          <p className="text-slate-400 text-base">¡Estás creando tu cartilla BuscAdis! Entre más completo tu perfil, mejores resultados tendrás.</p>
+          <p className="text-slate-400 text-base">¡Estás creando tu ID BuscAdis! Entre más completo tu perfil, mejores resultados tendrás.</p>
         </div>
       </div>
       {/* Sección de intereses */}
@@ -575,12 +575,12 @@ export default function PerfilPage() {
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <div>
             <label className="block text-sm font-medium text-slate-300 mb-1.5">Sube tu portafolio (PDF, imágenes, etc.)</label>
-            <input type="file" multiple accept=".pdf,image/*" onChange={e => setPortfolioFiles(Array.from(e.target.files || []))} className="block w-full text-sm text-slate-700 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-teal-50 file:text-teal-700 hover:file:bg-teal-100" />
+            <input type="file" multiple accept=".pdf,image/*" onChange={e => setPortfolioFiles(Array.from(e.target.files || []))} className="block w-full text-sm text-slate-700 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-teal-50 file:text-teal-700 hover:file:bg-teal-100" title="Sube tu portafolio" placeholder="Selecciona archivos de portafolio" />
             {portfolioFiles.length > 0 && <div className="mt-2 text-xs text-slate-400">{portfolioFiles.length} archivo(s) seleccionado(s)</div>}
           </div>
           <div>
             <label className="block text-sm font-medium text-slate-300 mb-1.5">Documentos de verificación (DNI, certificados, etc.)</label>
-            <input type="file" multiple accept=".pdf,image/*" onChange={e => setVerificationFiles(Array.from(e.target.files || []))} className="block w-full text-sm text-slate-700 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-teal-50 file:text-teal-700 hover:file:bg-teal-100" />
+            <input type="file" multiple accept=".pdf,image/*" onChange={e => setVerificationFiles(Array.from(e.target.files || []))} className="block w-full text-sm text-slate-700 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-teal-50 file:text-teal-700 hover:file:bg-teal-100" title="Sube documentos de verificación" placeholder="Selecciona archivos de verificación" />
             {verificationFiles.length > 0 && <div className="mt-2 text-xs text-slate-400">{verificationFiles.length} archivo(s) seleccionado(s)</div>}
           </div>
         </div>
@@ -625,7 +625,7 @@ export default function PerfilPage() {
         <div className="flex-1 flex flex-col items-center gap-3">
           <h2 className="text-lg font-semibold text-teal-400 mb-1 flex items-center gap-2">
             <span className="inline-block w-5 h-5 bg-gradient-to-r from-teal-500 to-cyan-500 rounded-full mr-2" />
-            Comparte tu Cartilla
+            Comparte tu ID
           </h2>
           {/* TODO: Instalar e importar un componente QRCode, por ahora placeholder */}
           <div className="bg-white p-2 rounded-lg shadow text-center text-slate-500">[QR Code aquí]</div>
