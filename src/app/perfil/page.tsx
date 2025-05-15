@@ -44,6 +44,7 @@ import {
 // NOTE: For PDF/QR functionality, ensure 'html2canvas' and 'jspdf' are installed.
 import html2canvas from 'html2canvas';
 import jsPDF from 'jspdf';
+import QRCode from 'react-qr-code';
 
 // Componente LoadingSpinner (asumiendo que tienes uno similar al del Header)
 const LoadingSpinner = ({ size = 'md', className = '' }: { size?: 'sm' | 'md' | 'lg' | 'xl'; className?: string }) => {
@@ -105,6 +106,57 @@ const INTERESTS = [
   { label: 'Otro', value: 'otro', icon: PlusIcon },
 ];
 
+// Definición de preguntas para el asistente de intereses
+interface InterestQuestion {
+  label: string;
+  options: string[];
+}
+
+const INTEREST_QUESTIONS: Record<string, InterestQuestion[]> = {
+  empleo: [
+    {
+      label: '¿Qué tipo de empleo buscas?',
+      options: ['Tiempo completo', 'Medio tiempo', 'Temporal', 'Freelance', 'Prácticas']
+    },
+    {
+      label: '¿En qué sector prefieres trabajar?',
+      options: ['Tecnología', 'Salud', 'Educación', 'Comercio', 'Servicios', 'Otro']
+    }
+  ],
+  vivienda: [
+    {
+      label: '¿Buscas para comprar o alquilar?',
+      options: ['Comprar', 'Alquilar', 'Alquiler con opción a compra']
+    },
+    {
+      label: '¿Qué tipo de vivienda prefieres?',
+      options: ['Casa', 'Departamento', 'Estudio', 'Habitación', 'Casa de campo']
+    }
+  ],
+  servicios: [
+    {
+      label: '¿Qué tipo de servicios buscas?',
+      options: ['Profesionales', 'Domésticos', 'Educativos', 'Salud', 'Tecnológicos', 'Otros']
+    }
+  ],
+  productos: [
+    {
+      label: '¿Qué tipo de productos buscas?',
+      options: ['Electrónicos', 'Hogar', 'Ropa y Accesorios', 'Muebles', 'Vehículos', 'Otros']
+    },
+    {
+      label: '¿Prefieres productos nuevos o usados?',
+      options: ['Nuevos', 'Usados', 'Ambos']
+    }
+  ],
+  otro: [
+    {
+      label: '¿Qué estás buscando específicamente?',
+      options: ['Eventos', 'Comunidades', 'Cursos', 'Voluntariado', 'Otros']
+    }
+  ]
+};
+
 // 4. Redes sociales disponibles
 const SOCIALS = [
   { label: 'WhatsApp', value: 'whatsapp', icon: WhatsAppIcon },
@@ -114,7 +166,6 @@ const SOCIALS = [
 ];
 
 type WizardSublevels = Record<string, Record<number, string>>;
-type WizardSummary = { interests: string[]; sublevels: WizardSublevels };
 
 export default function PerfilPage() {
   const { user, isAuthenticated, loading: authIsLoading } = useAuth();
@@ -137,7 +188,6 @@ export default function PerfilPage() {
   const [phones, setPhones] = useState([{ value: '', type: 'main' }]);
   const [interests, setInterests] = useState<string[]>([]);
   const [socialLinks, setSocialLinks] = useState<{ type: string; url: string }[]>([]);
-  const [profileProgress] = useState(40); // Calcular dinámicamente luego
 
   // Estado para feedback visual
   const [saveStatus, setSaveStatus] = useState<'idle' | 'saving' | 'success' | 'error'>('idle');
@@ -154,8 +204,8 @@ export default function PerfilPage() {
   const [newEndorsement, setNewEndorsement] = useState({ name: '', message: '' });
 
   // --- Portfolio & Verification Upload State ---
-  const [portfolioFiles, setPortfolioFiles] = useState<File[]>([]);
-  const [verificationFiles, setVerificationFiles] = useState<File[]>([]);
+  const [portfolioPreviews, setPortfolioPreviews] = useState<{ file: File; preview: string }[]>([]);
+  const [verificationPreviews, setVerificationPreviews] = useState<{ file: File; preview: string }[]>([]);
 
   // --- Contact Preferences & Privacy State ---
   const [contactPrefs, setContactPrefs] = useState({ whatsapp: true, email: true, phone: false });
@@ -165,11 +215,50 @@ export default function PerfilPage() {
   const handleDownloadProfile = async () => {
     const card = document.getElementById('profile-card');
     if (!card) return;
-    const canvas = await html2canvas(card);
-    const imgData = canvas.toDataURL('image/png');
-    const pdf = new jsPDF();
-    pdf.addImage(imgData, 'PNG', 10, 10, 180, 120);
-    pdf.save('ID-buscadis.pdf');
+    
+    try {
+      // Set temporary styles for better PDF capture
+      const originalStyles = card.style.cssText;
+      card.style.background = "#1e293b";
+      card.style.padding = "20px";
+      card.style.borderRadius = "12px";
+      card.style.maxWidth = "800px";
+      card.style.margin = "0 auto";
+      
+      const canvas = await html2canvas(card, {
+        scale: 2, // Higher quality
+        useCORS: true, // Allow images from other domains
+        logging: false,
+        backgroundColor: "#1e293b"
+      });
+      
+      // Reset to original styles
+      card.style.cssText = originalStyles;
+      
+      const imgData = canvas.toDataURL('image/png');
+      const pdf = new jsPDF({
+        orientation: 'landscape',
+        unit: 'mm',
+        format: 'a4'
+      });
+      
+      // Calculate aspect ratio to maintain proportions
+      const imgWidth = 277; // A4 landscape width (210mm) with margins
+      const imgHeight = canvas.height * imgWidth / canvas.width;
+      
+      pdf.addImage(imgData, 'PNG', 10, 10, imgWidth, imgHeight);
+      pdf.save(`ID-BuscAdis-${formData.fullName.replace(/\s+/g, '-')}.pdf`);
+      
+      // Show success toast
+      setSaveStatus('success');
+      setSaveMessage('¡Tu ID BuscAdis ha sido descargado exitosamente!');
+      setTimeout(() => setSaveStatus('idle'), 2500);
+    } catch (error) {
+      console.error('Error generando PDF:', error);
+      setSaveStatus('error');
+      setSaveMessage('Hubo un problema al generar tu ID. Inténtalo de nuevo.');
+      setTimeout(() => setSaveStatus('idle'), 3500);
+    }
   };
   const profileUrl = typeof window !== 'undefined' ? window.location.href : '';
 
@@ -250,7 +339,7 @@ export default function PerfilPage() {
         socialLinks,
         points: 100, // Ejemplo: calcular puntos reales
         badges: [], // Ejemplo: calcular badges reales
-        progress: profileProgress, // Ejemplo: calcular progreso real
+        progress: formData.progress || 0, // Ejemplo: calcular progreso real
       });
       setFormData(updatedProfile);
       setIsEditing(false);
@@ -264,38 +353,106 @@ export default function PerfilPage() {
     }
   };
 
+  // Handle avatar file upload
+  const handleAvatarUpload = (e: ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    // Check file type
+    if (!file.type.match('image.*')) {
+      setSaveStatus('error');
+      setSaveMessage('Por favor sube solo archivos de imagen (JPG, PNG, etc.)');
+      setTimeout(() => setSaveStatus('idle'), 3000);
+      return;
+    }
+
+    // Check file size (max 5MB)
+    if (file.size > 5 * 1024 * 1024) {
+      setSaveStatus('error');
+      setSaveMessage('La imagen es demasiado grande. El tamaño máximo es 5MB');
+      setTimeout(() => setSaveStatus('idle'), 3000);
+      return;
+    }
+
+    // Create a preview URL
+    const reader = new FileReader();
+    reader.onload = (event) => {
+      if (event.target?.result) {
+        // In a real app, you'd upload to a server and get a URL back
+        // For now, we'll use the data URL directly (not recommended for production)
+        setFormData(prev => ({ ...prev, avatarUrl: event.target!.result as string }));
+        
+        // Show success message
+        setSaveStatus('success');
+        setSaveMessage('Imagen subida correctamente');
+        setTimeout(() => setSaveStatus('idle'), 2000);
+      }
+    };
+    reader.readAsDataURL(file);
+  };
+
   // Fix useEffect for progress calculation to avoid infinite loop
   useEffect(() => {
-    let filled = 0;
-    const total = 8; // fullName, phone, email, bio, avatar, occupation, gender, birthdate
-    if (formData.fullName) filled++;
-    if (formData.phone) filled++;
-    if (formData.email) filled++;
-    if (formData.bio) filled++;
-    if (formData.avatarUrl) filled++;
-    if (formData.occupation) filled++;
-    if (formData.gender) filled++;
-    if (formData.birthdate) filled++;
-    if (interests.length) filled++;
-    if (socialLinks.length) filled++;
-    if (formData.verified) filled++;
-    if (formData.badges && formData.badges.length) filled++;
-    const progress = Math.min(Math.round((filled / (total + 4)) * 100), 100);
+    const calculateProgress = () => {
+      let filled = 0;
+      const total = 10; // Including portfolio and verification files
+      
+      // Basic profile fields
+      if (formData.fullName) filled++;
+      if (formData.phone) filled++;
+      if (formData.email) filled++;
+      if (formData.bio) filled++;
+      if (formData.avatarUrl) filled++;
+      if (formData.occupation) filled++;
+      if (formData.gender) filled++;
+      if (formData.birthdate) filled++;
+      
+      // Additional profile elements
+      if (interests.length) filled++;
+      if (socialLinks.length) filled++;
+      if (portfolioPreviews.length) filled++;
+      if (verificationPreviews.length) filled++;
+      if (formData.verified) filled++;
+      if (formData.badges && formData.badges.length) filled++;
+      
+      return Math.min(Math.round((filled / (total + 4)) * 100), 100);
+    };
+
+    const newProgress = calculateProgress();
+    
     // Only update if progress actually changed
-    if (formData.progress !== progress) {
-      setFormData(prev => ({ ...prev, progress }));
+    if (formData.progress !== newProgress) {
+      setFormData(prev => ({ ...prev, progress: newProgress }));
+      
+      // Unlock achievement if profile is 100% complete
+      if (
+        newProgress === 100 &&
+        (!formData.badges || !formData.badges.includes('perfil_100'))
+      ) {
+        achievementsStore.unlockAchievement('all_fields');
+        setFormData(prev => ({ 
+          ...prev, 
+          badges: [...(prev.badges || []), 'perfil_100'] 
+        }));
+      }
     }
-    // Only update badges if needed
-    if (
-      progress === 100 &&
-      (!formData.badges || !formData.badges.includes('perfil_100'))
-    ) {
-      achievementsStore.unlockAchievement('all_fields');
-      setFormData(prev => ({ ...prev, badges: [...(prev.badges || []), 'perfil_100'] }));
-      setTimeout(() => setSaveStatus('success'), 4000);
-    }
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [formData.fullName, formData.phone, formData.email, formData.bio, formData.avatarUrl, formData.occupation, formData.gender, formData.birthdate, interests, socialLinks, formData.verified, formData.badges, achievementsStore]);
+  }, [
+    formData.fullName, 
+    formData.phone, 
+    formData.email, 
+    formData.bio, 
+    formData.avatarUrl, 
+    formData.occupation, 
+    formData.gender, 
+    formData.birthdate, 
+    interests.length, 
+    socialLinks.length, 
+    portfolioPreviews.length,
+    verificationPreviews.length,
+    formData.verified, 
+    formData.badges, 
+    achievementsStore
+  ]);
 
   // 6. Points system: update points on actions, sync to localStorage, and backend on logout
   useEffect(() => {
@@ -303,6 +460,90 @@ export default function PerfilPage() {
     setFormData(prev => ({ ...prev, points }));
     safeLocalStorageSet('profile_points', points);
   }, [achievementsStore.totalPoints, formData.progress]);
+
+  // Handle portfolio file upload
+  const handlePortfolioUpload = (e: ChangeEvent<HTMLInputElement>) => {
+    const files = e.target.files;
+    if (!files || files.length === 0) return;
+
+    // Convert FileList to array and add to state
+    const newFiles = Array.from(files);
+    
+    // Generate previews for each file
+    newFiles.forEach(file => {
+      // Only generate previews for images
+      if (file.type.match('image.*')) {
+        const reader = new FileReader();
+        reader.onload = (event) => {
+          if (event.target?.result) {
+            setPortfolioPreviews(prev => [
+              ...prev,
+              { file, preview: event.target!.result as string }
+            ]);
+          }
+        };
+        reader.readAsDataURL(file);
+      } else {
+        // For non-image files (PDFs, etc.), use a generic icon
+        setPortfolioPreviews(prev => [
+          ...prev,
+          { file, preview: 'generic' }
+        ]);
+      }
+    });
+    
+    // Show success message
+    setSaveStatus('success');
+    setSaveMessage(`${newFiles.length} archivo(s) agregado(s) a tu portafolio`);
+    setTimeout(() => setSaveStatus('idle'), 2000);
+  };
+
+  // Handle verification file upload
+  const handleVerificationUpload = (e: ChangeEvent<HTMLInputElement>) => {
+    const files = e.target.files;
+    if (!files || files.length === 0) return;
+
+    // Convert FileList to array and add to state
+    const newFiles = Array.from(files);
+    
+    // Generate previews for each file
+    newFiles.forEach(file => {
+      // Only generate previews for images
+      if (file.type.match('image.*')) {
+        const reader = new FileReader();
+        reader.onload = (event) => {
+          if (event.target?.result) {
+            setVerificationPreviews(prev => [
+              ...prev,
+              { file, preview: event.target!.result as string }
+            ]);
+          }
+        };
+        reader.readAsDataURL(file);
+      } else {
+        // For non-image files (PDFs, etc.), use a generic icon
+        setVerificationPreviews(prev => [
+          ...prev,
+          { file, preview: 'generic' }
+        ]);
+      }
+    });
+    
+    // Show success message
+    setSaveStatus('success');
+    setSaveMessage(`${newFiles.length} archivo(s) agregado(s) para verificación`);
+    setTimeout(() => setSaveStatus('idle'), 2000);
+  };
+
+  // Remove portfolio file
+  const removePortfolioFile = (fileToRemove: File) => {
+    setPortfolioPreviews(prev => prev.filter(item => item.file !== fileToRemove));
+  };
+
+  // Remove verification file
+  const removeVerificationFile = (fileToRemove: File) => {
+    setVerificationPreviews(prev => prev.filter(item => item.file !== fileToRemove));
+  };
 
   if (authIsLoading || pageLoading) {
     return (
@@ -339,9 +580,9 @@ export default function PerfilPage() {
       <div className="w-full flex items-center mb-6">
         <div className="flex-1">
           <div className="h-3 rounded-full bg-slate-700/40 overflow-hidden">
-            <div className="h-3 rounded-full bg-gradient-to-r from-teal-500 to-cyan-500 transition-all duration-500" style={{ width: `${profileProgress}%` }} />
+            <div className="h-3 rounded-full bg-gradient-to-r from-teal-500 to-cyan-500 transition-all duration-500" style={{ width: `${formData.progress || 0}%` }} />
           </div>
-          <div className="text-xs text-slate-400 mt-1">Progreso de tu ID BuscAdis: {profileProgress}%</div>
+          <div className="text-xs text-slate-400 mt-1">Progreso de tu ID BuscAdis: {formData.progress || 0}%</div>
         </div>
         {/* Puntos acumulados */}
         <div className="ml-6 flex items-center gap-2">
@@ -350,7 +591,7 @@ export default function PerfilPage() {
         </div>
       </div>
       {/* Cabecera: avatar a la izquierda, nombre y badges a la derecha */}
-      <div className="flex items-center gap-8 mb-8">
+      <div id="profile-card" className="flex items-center gap-8 mb-8">
         <div className="relative group">
           {formData.avatarUrl ? (
             <img src={formData.avatarUrl} alt="Avatar" className="w-32 h-32 rounded-full object-cover ring-4 ring-teal-300 shadow-lg" />
@@ -372,6 +613,15 @@ export default function PerfilPage() {
           <p className="text-slate-400 text-base">¡Estás creando tu ID BuscAdis! Entre más completo tu perfil, mejores resultados tendrás.</p>
         </div>
       </div>
+      {/* Hidden file input for avatar upload */}
+      <input 
+        type="file" 
+        ref={fileInputRef} 
+        className="hidden" 
+        accept="image/*"
+        onChange={handleAvatarUpload} 
+        aria-label="Subir avatar" 
+      />
       {/* Sección de intereses */}
       <section className="mb-8 bg-white/5 rounded-xl p-6 shadow-lg">
         <div className="flex items-center justify-between mb-3">
@@ -444,14 +694,18 @@ export default function PerfilPage() {
                         <select
                           className="w-full px-3 py-2 rounded-lg border border-slate-300 bg-white/80"
                           value={wizardSublevels[interest]?.[idx] || ''}
-                          onChange={e => setWizardSublevels((prev: any) => ({
-                            ...prev,
-                            [interest]: { ...prev[interest], [idx]: e.target.value },
-                          }))}
+                          onChange={(e) => {
+                            setWizardSublevels((prev) => ({
+                              ...prev,
+                              [interest]: { ...(prev[interest] || {}), [idx]: e.target.value },
+                            }));
+                          }}
                           aria-label={q.label}
                         >
                           <option value="">Selecciona...</option>
-                          {q.options.map(opt => <option key={opt} value={opt}>{opt}</option>)}
+                          {q.options.map((option) => (
+                            <option key={option} value={option}>{option}</option>
+                          ))}
                         </select>
                       </div>
                     ))}
@@ -464,7 +718,7 @@ export default function PerfilPage() {
               <div className="my-4 space-y-4">
                 <div className="font-semibold text-teal-300">Tus intereses seleccionados:</div>
                 <ul className="list-disc ml-6 text-slate-200">
-                  {wizardInterests.map(interest => (
+                  {wizardInterests.map((interest) => (
                     <li key={interest}>
                       {INTERESTS.find(i => i.value === interest)?.label}
                       {INTEREST_QUESTIONS[interest] && (
@@ -650,13 +904,73 @@ export default function PerfilPage() {
         <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
           <div>
             <label className="block text-sm font-medium text-slate-300 mb-1.5">Sube tu portafolio (PDF, imágenes, etc.)</label>
-            <input type="file" multiple accept=".pdf,image/*" onChange={e => setPortfolioFiles(Array.from(e.target.files || []))} className="block w-full text-sm text-slate-700 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-teal-50 file:text-teal-700 hover:file:bg-teal-100" title="Sube tu portafolio" placeholder="Selecciona archivos de portafolio" />
-            {portfolioFiles.length > 0 && <div className="mt-2 text-xs text-slate-400">{portfolioFiles.length} archivo(s) seleccionado(s)</div>}
+            <input 
+              type="file" 
+              multiple 
+              accept=".pdf,image/*" 
+              onChange={handlePortfolioUpload} 
+              className="block w-full text-sm text-slate-700 dark:text-slate-200 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-teal-50 file:text-teal-700 hover:file:bg-teal-100" 
+              aria-label="Sube tu portafolio" 
+            />
+            
+            {/* Portfolio file previews */}
+            {portfolioPreviews.length > 0 && (
+              <div className="mt-3 grid grid-cols-2 sm:grid-cols-3 gap-2">
+                {portfolioPreviews.map((item, index) => (
+                  <div key={index} className="relative group bg-slate-800/60 rounded-lg p-2 flex flex-col items-center">
+                    {item.preview === 'generic' ? (
+                      <DocumentTextIcon className="w-12 h-12 text-slate-400" />
+                    ) : (
+                      <img src={item.preview} alt="Preview" className="w-full h-20 object-cover rounded" />
+                    )}
+                    <span className="text-xs text-slate-300 mt-1 truncate w-full text-center">{item.file.name}</span>
+                    <button 
+                      type="button" 
+                      className="absolute top-1 right-1 bg-red-500/80 text-white rounded-full p-1 opacity-0 group-hover:opacity-100 transition-opacity"
+                      onClick={() => removePortfolioFile(item.file)}
+                      aria-label="Eliminar archivo"
+                    >
+                      <TrashIcon className="w-3 h-3" />
+                    </button>
+                  </div>
+                ))}
+              </div>
+            )}
           </div>
           <div>
             <label className="block text-sm font-medium text-slate-300 mb-1.5">Documentos de verificación (DNI, certificados, etc.)</label>
-            <input type="file" multiple accept=".pdf,image/*" onChange={e => setVerificationFiles(Array.from(e.target.files || []))} className="block w-full text-sm text-slate-700 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-teal-50 file:text-teal-700 hover:file:bg-teal-100" title="Sube documentos de verificación" placeholder="Selecciona archivos de verificación" />
-            {verificationFiles.length > 0 && <div className="mt-2 text-xs text-slate-400">{verificationFiles.length} archivo(s) seleccionado(s)</div>}
+            <input 
+              type="file" 
+              multiple 
+              accept=".pdf,image/*" 
+              onChange={handleVerificationUpload} 
+              className="block w-full text-sm text-slate-700 dark:text-slate-200 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-teal-50 file:text-teal-700 hover:file:bg-teal-100" 
+              aria-label="Sube documentos de verificación"
+            />
+            
+            {/* Verification file previews */}
+            {verificationPreviews.length > 0 && (
+              <div className="mt-3 grid grid-cols-2 sm:grid-cols-3 gap-2">
+                {verificationPreviews.map((item, index) => (
+                  <div key={index} className="relative group bg-slate-800/60 rounded-lg p-2 flex flex-col items-center">
+                    {item.preview === 'generic' ? (
+                      <DocumentTextIcon className="w-12 h-12 text-slate-400" />
+                    ) : (
+                      <img src={item.preview} alt="Preview" className="w-full h-20 object-cover rounded" />
+                    )}
+                    <span className="text-xs text-slate-300 mt-1 truncate w-full text-center">{item.file.name}</span>
+                    <button 
+                      type="button" 
+                      className="absolute top-1 right-1 bg-red-500/80 text-white rounded-full p-1 opacity-0 group-hover:opacity-100 transition-opacity"
+                      onClick={() => removeVerificationFile(item.file)}
+                      aria-label="Eliminar archivo"
+                    >
+                      <TrashIcon className="w-3 h-3" />
+                    </button>
+                  </div>
+                ))}
+              </div>
+            )}
           </div>
         </div>
       </section>
@@ -702,13 +1016,45 @@ export default function PerfilPage() {
             <span className="inline-block w-5 h-5 bg-gradient-to-r from-teal-500 to-cyan-500 rounded-full mr-2" />
             Comparte tu ID
           </h2>
-          {/* TODO: Instalar e importar un componente QRCode, por ahora placeholder */}
-          <div className="bg-white p-2 rounded-lg shadow text-center text-slate-500">[QR Code aquí]</div>
+          <div className="bg-white p-3 rounded-lg shadow text-center">
+            <QRCode
+              value={profileUrl}
+              size={150}
+              style={{ height: "auto", maxWidth: "100%", width: "100%" }}
+              viewBox={`0 0 256 256`}
+            />
+          </div>
           <div className="flex gap-2 mt-2">
-            <button onClick={handleDownloadProfile} className="px-4 py-2 rounded-lg bg-gradient-to-r from-teal-500 to-cyan-500 text-white font-semibold shadow hover:from-teal-600 hover:to-cyan-600 transition-all">Descargar PDF</button>
-            <a href={`https://wa.me/?text=Mira%20mi%20perfil%20en%20BuscAdis:%20${encodeURIComponent(profileUrl)}`} target="_blank" rel="noopener noreferrer" className="px-4 py-2 rounded-lg bg-green-500 text-white font-semibold shadow hover:bg-green-600 transition-all">WhatsApp</a>
-            <a href={`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(profileUrl)}`} target="_blank" rel="noopener noreferrer" className="px-4 py-2 rounded-lg bg-blue-600 text-white font-semibold shadow hover:bg-blue-700 transition-all">Facebook</a>
-            <a href={`https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(profileUrl)}`} target="_blank" rel="noopener noreferrer" className="px-4 py-2 rounded-lg bg-blue-500 text-white font-semibold shadow hover:bg-blue-600 transition-all">LinkedIn</a>
+            <button 
+              onClick={handleDownloadProfile} 
+              className="px-4 py-2 rounded-lg bg-gradient-to-r from-teal-500 to-cyan-500 text-white font-semibold shadow hover:from-teal-600 hover:to-cyan-600 transition-all"
+            >
+              Descargar PDF
+            </button>
+            <a 
+              href={`https://wa.me/?text=Mira%20mi%20perfil%20en%20BuscAdis:%20${encodeURIComponent(profileUrl)}`} 
+              target="_blank" 
+              rel="noopener noreferrer" 
+              className="px-4 py-2 rounded-lg bg-green-500 text-white font-semibold shadow hover:bg-green-600 transition-all"
+            >
+              WhatsApp
+            </a>
+            <a 
+              href={`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(profileUrl)}`} 
+              target="_blank" 
+              rel="noopener noreferrer" 
+              className="px-4 py-2 rounded-lg bg-blue-600 text-white font-semibold shadow hover:bg-blue-700 transition-all"
+            >
+              Facebook
+            </a>
+            <a 
+              href={`https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(profileUrl)}`}
+              target="_blank" 
+              rel="noopener noreferrer" 
+              className="px-4 py-2 rounded-lg bg-blue-500 text-white font-semibold shadow hover:bg-blue-600 transition-all"
+            >
+              LinkedIn
+            </a>
           </div>
         </div>
       </section>
@@ -749,7 +1095,7 @@ interface FormFieldProps {
   name: string;
   type: string;
   value: string;
-  onChange: (e: ChangeEvent<HTMLInputElement>) => void;
+  onChange: (e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => void;
   placeholder: string;
   disabled: boolean;
   icon?: React.ElementType; // Componente de ícono (ej. IdentificationIcon)
@@ -782,7 +1128,7 @@ const FormField: React.FC<FormFieldProps> = ({ label, id, name, type, value, onC
           disabled={disabled}
           className={`${inputBaseClasses} ${disabled ? inputDisabledClasses : (error ? inputErrorClasses : inputEnabledClasses)} ${inputPadding}`}
           placeholder={placeholder}
-          aria-invalid={error ? 'true' : 'false'}
+          aria-invalid={error ? true : false}
           aria-describedby={error ? `${id}-error` : undefined}
         />
       </div>
