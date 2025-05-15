@@ -141,43 +141,29 @@ export default function PerfilPage() {
 
   // Efecto para cargar datos del perfil
   useEffect(() => {
-    console.log('[PERFIL_PAGE_AUTH] authIsLoading:', authIsLoading, 'isAuthenticated:', isAuthenticated, 'user:', user);
     if (authIsLoading) {
-      setPageLoading(true); // Mostrar spinner de página si la autenticación aún está cargando
+      setPageLoading(true);
       return;
     }
-
     if (!isAuthenticated || !user?.id) {
       setPageLoading(false);
-      setFormData(normalizeAuthUserToProfile(null)); // Limpiar formulario
+      setFormData(normalizeAuthUserToProfile(null));
       return;
     }
-
     const fetchProfile = async () => {
       setPageLoading(true);
       try {
-        const profileDataFromService = await ProfileService.getProfile(); // Devuelve ProfileFormData o similar
-
-        let dataToSet: ProfileFormData;
-        const baseAuthData = normalizeAuthUserToProfile(user); // Datos base del hook de autenticación
-
+        const profileDataFromService = await ProfileService.getProfile();
         if (profileDataFromService && Object.keys(profileDataFromService).length > 0) {
-          dataToSet = {
-            fullName: profileDataFromService.fullName || baseAuthData.fullName,
-            phone: profileDataFromService.phone || baseAuthData.phone,
-            email: profileDataFromService.email || baseAuthData.email, // El email podría ser no editable o venir de auth
-            bio: profileDataFromService.bio || '',
-            avatarUrl: profileDataFromService.avatarUrl || baseAuthData.avatarUrl,
-          };
+          setFormData(profileDataFromService);
+          initialFormDataRef.current = { ...profileDataFromService };
         } else {
-          // Si no hay perfil en el servicio, usar datos de autenticación como base
-          dataToSet = baseAuthData;
+          // Si no hay perfil, inicializa con datos mínimos del usuario
+          const baseAuthData = normalizeAuthUserToProfile(user);
+          setFormData(baseAuthData);
+          initialFormDataRef.current = { ...baseAuthData };
         }
-        setFormData(dataToSet);
-        initialFormDataRef.current = { ...dataToSet }; // Guardar estado inicial profundo
       } catch (err) {
-        console.error('Error fetching profile:', err);
-        // Fallback a datos del hook de autenticación si falla la carga del perfil detallado
         const fallbackData = normalizeAuthUserToProfile(user);
         setFormData(fallbackData);
         initialFormDataRef.current = { ...fallbackData };
@@ -185,10 +171,8 @@ export default function PerfilPage() {
         setPageLoading(false);
       }
     };
-
     fetchProfile();
-
-  }, [isAuthenticated, user, authIsLoading, normalizeAuthUserToProfile]);
+  }, [authIsLoading, isAuthenticated, user]);
 
   // Sincronizar phones con formData.phone al cargar el perfil
   useEffect(() => {
