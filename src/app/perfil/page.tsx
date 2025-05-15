@@ -32,6 +32,15 @@ import {
 
 import WhatsAppIcon from '@/components/icons/WhatsAppIcon';
 
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogFooter,
+  DialogTitle,
+  DialogDescription,
+} from '@/components/ui/dialog';
+
 // Componente LoadingSpinner (asumiendo que tienes uno similar al del Header)
 const LoadingSpinner = ({ size = 'md', className = '' }: { size?: 'sm' | 'md' | 'lg' | 'xl'; className?: string }) => {
   const sizeClasses = {
@@ -129,6 +138,9 @@ export default function PerfilPage() {
 
   // 4. Add useAchievements hook for gamification
   const achievementsStore = useAchievements();
+
+  // Add state for wizard modal
+  const [wizardOpen, setWizardOpen] = useState(false);
 
   // Efecto para cargar datos del perfil
   useEffect(() => {
@@ -317,7 +329,18 @@ export default function PerfilPage() {
       </div>
       {/* Sección de intereses */}
       <section className="mb-8 bg-white/5 rounded-xl p-6 shadow-lg">
-        <h2 className="text-lg font-semibold text-teal-400 mb-3 flex items-center gap-2"><UserIcon className="w-5 h-5" /> ¿Qué estás buscando?</h2>
+        <div className="flex items-center justify-between mb-3">
+          <h2 className="text-lg font-semibold text-teal-400 flex items-center gap-2">
+            <UserIcon className="w-5 h-5" /> ¿Qué estás buscando?
+          </h2>
+          <button
+            type="button"
+            className="px-3 py-1.5 rounded-lg bg-gradient-to-r from-teal-500 to-cyan-500 text-white text-xs font-semibold shadow hover:from-teal-600 hover:to-cyan-600 transition-all"
+            onClick={() => setWizardOpen(true)}
+          >
+            Asistente
+          </button>
+        </div>
         <div className="flex flex-wrap gap-3 mb-2">
           {INTERESTS.map((interest) => (
             <button
@@ -331,6 +354,38 @@ export default function PerfilPage() {
           ))}
         </div>
         <p className="text-xs text-slate-400">Selecciona una o varias opciones para personalizar tu experiencia.</p>
+        {/* Interest Wizard Modal */}
+        <Dialog open={wizardOpen} onOpenChange={setWizardOpen}>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Personaliza tu experiencia</DialogTitle>
+              <DialogDescription>
+                Selecciona tus intereses principales. Puedes elegir más de uno. (Próximamente: subniveles y preguntas guiadas)
+              </DialogDescription>
+            </DialogHeader>
+            <div className="flex flex-wrap gap-3 my-4">
+              {INTERESTS.map((interest) => (
+                <button
+                  key={interest.value}
+                  type="button"
+                  className={`flex items-center gap-2 px-4 py-2 rounded-full border-2 transition-colors font-medium text-sm ${interests.includes(interest.value) ? 'bg-gradient-to-r from-teal-500 to-cyan-500 text-white border-teal-500' : 'border-slate-300 dark:border-slate-600 text-slate-700 dark:text-slate-200 bg-white/10 hover:bg-teal-500/10'}`}
+                  onClick={() => setInterests((prev) => prev.includes(interest.value) ? prev.filter(i => i !== interest.value) : [...prev, interest.value])}
+                >
+                  <interest.icon className="w-5 h-5" /> {interest.label}
+                </button>
+              ))}
+            </div>
+            <DialogFooter>
+              <button
+                type="button"
+                className="w-full px-6 py-2 rounded-lg bg-gradient-to-r from-teal-500 to-cyan-500 text-white font-semibold shadow hover:from-teal-600 hover:to-cyan-600 transition-all"
+                onClick={() => setWizardOpen(false)}
+              >
+                Guardar intereses
+              </button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
       </section>
       {/* Sección de datos personales y contacto */}
       <section className="mb-8 bg-white/5 rounded-xl p-6 shadow-lg">
