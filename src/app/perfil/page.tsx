@@ -135,6 +135,10 @@ export default function PerfilPage() {
   const [socialLinks, setSocialLinks] = useState<{ type: string; url: string }[]>([]);
   const [profileProgress] = useState(40); // Calcular dinámicamente luego
 
+  // Estado para feedback visual
+  const [saveStatus, setSaveStatus] = useState<'idle' | 'saving' | 'success' | 'error'>('idle');
+  const [saveMessage, setSaveMessage] = useState('');
+
   // Efecto para cargar datos del perfil
   useEffect(() => {
     console.log('[PERFIL_PAGE_AUTH] authIsLoading:', authIsLoading, 'isAuthenticated:', isAuthenticated, 'user:', user);
@@ -205,6 +209,8 @@ export default function PerfilPage() {
 
   // Guardar perfil
   const handleSaveProfile = async () => {
+    setSaveStatus('saving');
+    setSaveMessage('');
     try {
       const updatedProfile = await ProfileService.createOrUpdateProfile({
         ...formData,
@@ -216,10 +222,13 @@ export default function PerfilPage() {
       });
       setFormData(updatedProfile);
       setIsEditing(false);
-      // Feedback visual aquí (toast, animación, etc.)
+      setSaveStatus('success');
+      setSaveMessage('¡Perfil guardado exitosamente!');
+      setTimeout(() => setSaveStatus('idle'), 2500);
     } catch (err) {
-      // Mostrar error visual
-      alert('Error al guardar el perfil. Intenta de nuevo.');
+      setSaveStatus('error');
+      setSaveMessage('Error al guardar el perfil. Intenta de nuevo.');
+      setTimeout(() => setSaveStatus('idle'), 3500);
     }
   };
 
@@ -391,10 +400,23 @@ export default function PerfilPage() {
         ) : (
           <>
             <button type="button" onClick={handleCancelEdit} disabled={isSaving} className="w-full sm:w-auto px-6 py-3 rounded-lg border border-slate-300 dark:border-slate-600 text-sm font-semibold text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-700/70 transition-colors duration-150 disabled:opacity-60">Cancelar</button>
-            <button type="button" onClick={handleSaveProfile} disabled={isSaving} className="w-full sm:w-auto flex items-center justify-center gap-2.5 px-6 py-3 rounded-lg bg-gradient-to-r from-teal-500 to-cyan-500 text-white text-sm font-semibold shadow-md hover:shadow-lg hover:from-teal-600 hover:to-cyan-600 transition-all duration-150 disabled:opacity-70">{isSaving ? (<><ArrowPathIcon className="w-5 h-5 animate-spin" /> Guardando...</>) : (<><CheckCircleIcon className="w-5 h-5" /> Guardar Cambios</>)}</button>
+            <button type="button" onClick={handleSaveProfile} disabled={saveStatus === 'saving'} className="w-full sm:w-auto flex items-center justify-center gap-2.5 px-6 py-3 rounded-lg bg-gradient-to-r from-teal-500 to-cyan-500 text-white text-sm font-semibold shadow-md hover:shadow-lg hover:from-teal-600 hover:to-cyan-600 transition-all duration-150 disabled:opacity-70">
+              {saveStatus === 'saving' ? (<><ArrowPathIcon className="w-5 h-5 animate-spin" /> Guardando...</>) : (<><CheckCircleIcon className="w-5 h-5" /> Guardar Cambios</>)}
+            </button>
           </>
         )}
       </div>
+      {/* Toast de feedback visual */}
+      {saveStatus === 'success' && (
+        <div className="fixed top-20 right-5 z-[10000] bg-green-600 text-white px-6 py-3 rounded-xl shadow-2xl animate-slide-in-from-right">
+          {saveMessage}
+        </div>
+      )}
+      {saveStatus === 'error' && (
+        <div className="fixed top-20 right-5 z-[10000] bg-red-600 text-white px-6 py-3 rounded-xl shadow-2xl animate-slide-in-from-right">
+          {saveMessage}
+        </div>
+      )}
     </div>
   );
 }
