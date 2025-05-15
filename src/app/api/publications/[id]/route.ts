@@ -53,10 +53,8 @@ const FALLBACK_PUBLICATION: Publication = {
 
 export async function GET(
   request: Request,
-  context: { params: { id: string } }
+  { params }: { params: { id: string } }
 ) {
-  // Explicitly await the params object before accessing its properties
-  const params = await context.params; 
   const id = params.id;
 
   // Log the ID early for debugging
@@ -66,7 +64,7 @@ export async function GET(
   const originalIdForErrorLogging = id; 
   
   try {
-    // 'id' is now available from the awaited params
+    // 'id' is now available from the params
     console.log(`Buscando publicación con ID: ${id}`);
     
     let publication: Publication | null = null;

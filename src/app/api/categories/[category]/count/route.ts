@@ -4,14 +4,10 @@ import { getPublicationModel } from '@/lib/models/Publication';
 
 export const dynamic = 'force-dynamic'; // Disable caching
 
-// Este es el tipo correcto para las rutas dinámicas en Next.js App Router
-type Props = {
-  params: {
-    category: string;
-  };
-};
-
-export async function GET(request: Request, { params }: Props) {
+export async function GET(
+  request: Request,
+  { params }: { params: { category: string } }
+) {
   try {
     const categorySlug = params.category.toLowerCase();
     
