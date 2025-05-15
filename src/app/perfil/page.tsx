@@ -186,25 +186,6 @@ export default function PerfilPage() {
   const [wizardStep, setWizardStep] = useState(0);
   const [wizardInterests, setWizardInterests] = useState<string[]>(interests);
   const [wizardSublevels, setWizardSublevels] = useState<WizardSublevels>({});
-  const [wizardSummary, setWizardSummary] = useState<WizardSummary | null>(null);
-  const INTEREST_QUESTIONS: Record<string, { label: string; options: string[] }[]> = {
-    empleo: [
-      { label: 'Sector', options: ['Tecnología', 'Salud', 'Educación', 'Ventas', 'Administración', 'Otro'] },
-      { label: 'Modalidad', options: ['Presencial', 'Remoto', 'Híbrido'] },
-      { label: 'Salario deseado', options: ['< $500', '$500-$1000', '$1000-$2000', '> $2000'] },
-    ],
-    vivienda: [
-      { label: 'Tipo', options: ['Casa', 'Departamento', 'Habitación', 'Otro'] },
-      { label: 'Modalidad', options: ['Alquiler', 'Compra', 'Anticresis'] },
-      { label: 'Ubicación preferida', options: ['Centro', 'Periferia', 'Cualquier zona'] },
-    ],
-    servicios: [
-      { label: 'Tipo de servicio', options: ['Profesional', 'Hogar', 'Transporte', 'Educación', 'Otro'] },
-    ],
-    productos: [
-      { label: 'Categoría', options: ['Tecnología', 'Moda', 'Hogar', 'Deportes', 'Otro'] },
-    ],
-  };
 
   // Efecto para cargar datos del perfil
   useEffect(() => {
@@ -511,8 +492,6 @@ export default function PerfilPage() {
                   setWizardOpen(false);
                   setWizardStep(0);
                   setWizardSublevels({});
-                  setWizardSummary({ interests: wizardInterests, sublevels: wizardSublevels });
-                  // Show toast/feedback
                 }}>Guardar intereses</button>
               )}
             </DialogFooter>
