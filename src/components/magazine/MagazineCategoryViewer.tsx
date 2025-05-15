@@ -7,13 +7,21 @@ import { es } from 'date-fns/locale';
 import { 
   Download, RefreshCw, Search, Calendar, MapPin, 
   DollarSign, Clock, Info, ChevronLeft, ChevronRight, 
-  Filter, Eye, Grid3X3, List
+  Eye, Grid3X3, List
 } from 'lucide-react';
 import { Button } from '@/components/ui/Button';
 import { Skeleton } from '@/components/ui/Skeleton';
 import { Input } from '@/components/ui/Input';
 import { Badge } from '@/components/ui/Badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/Tabs-adapter';
+
+interface LocationData {
+  district?: string;
+  city?: string;
+  state?: string;
+  country?: string;
+  coordinates?: [number, number];
+}
 
 interface Publication {
   id: string;
@@ -22,18 +30,54 @@ interface Publication {
   price?: number;
   currency?: string;
   images: string[];
-  location?: any;
+  location?: LocationData;
   createdAt: string;
-  attributes?: Record<string, any>;
+  attributes?: Record<string, unknown>;
+}
+
+interface Magazine {
+  _id: string;
+  categoryId: string;
+  pdfUrl: string;
+  fileId: string;
+  publicationCount: number;
+  createdAt: string;
+  lastUpdated: string;
 }
 
 interface CategoryViewerProps {
   categoryId: string;
 }
 
+interface MagazineHeaderProps {
+  magazine: Magazine | null;
+  isGenerating: boolean;
+  onGenerate: () => void;
+}
+
+interface PublicationsGridProps {
+  publications: Publication[];
+  onSelect: (publication: Publication) => void;
+}
+
+interface PublicationsListProps {
+  publications: Publication[];
+  onSelect: (publication: Publication) => void;
+}
+
+interface PublicationDetailProps {
+  publication: Publication;
+  onBack: () => void;
+}
+
+interface ErrorStateProps {
+  error: string;
+  onRetry: () => void;
+}
+
 export default function MagazineCategoryViewer({ categoryId }: CategoryViewerProps) {
   // Estados
-  const [magazine, setMagazine] = useState<any>(null);
+  const [magazine, setMagazine] = useState<Magazine | null>(null);
   const [publications, setPublications] = useState<Publication[]>([]);
   const [filteredPublications, setFilteredPublications] = useState<Publication[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -298,7 +342,7 @@ export default function MagazineCategoryViewer({ categoryId }: CategoryViewerPro
 }
 
 // Componentes auxiliares
-function MagazineHeader({ magazine, isGenerating, onGenerate }: any) {
+function MagazineHeader({ magazine, isGenerating, onGenerate }: MagazineHeaderProps) {
   const formatDate = (dateString: string) => {
     if (!dateString) return 'No disponible';
     try {
@@ -357,7 +401,7 @@ function MagazineHeader({ magazine, isGenerating, onGenerate }: any) {
   );
 }
 
-function PublicationsGrid({ publications, onSelect }: any) {
+function PublicationsGrid({ publications, onSelect }: PublicationsGridProps) {
   return (
     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
       {publications.map((pub: Publication) => (
@@ -406,7 +450,7 @@ function PublicationsGrid({ publications, onSelect }: any) {
   );
 }
 
-function PublicationsList({ publications, onSelect }: any) {
+function PublicationsList({ publications, onSelect }: PublicationsListProps) {
   return (
     <div className="divide-y divide-gray-200">
       {publications.map((pub: Publication) => (
@@ -465,7 +509,7 @@ function PublicationsList({ publications, onSelect }: any) {
   );
 }
 
-function PublicationDetail({ publication, onBack }: any) {
+function PublicationDetail({ publication, onBack }: PublicationDetailProps) {
   const formatDate = (dateString: string) => {
     if (!dateString) return '';
     try {
@@ -663,7 +707,7 @@ function LoadingState() {
   );
 }
 
-function ErrorState({ error, onRetry }: any) {
+function ErrorState({ error, onRetry }: ErrorStateProps) {
   return (
     <div className="rounded-xl overflow-hidden bg-white shadow-md p-8 text-center">
       <div className="max-w-md mx-auto">

@@ -26,9 +26,15 @@ interface Suggestion {
   isAI?: boolean
 }
 
+interface SearchOptions {
+  category?: string;
+  location?: string;
+  filters?: Record<string, unknown>;
+}
+
 interface SearchBarProps {
   initialValue?: string
-  onSearch: (query: string, options?: any) => void
+  onSearch: (query: string, options?: SearchOptions) => void
   selectedCategory?: string
   onSelectCategory?: (category: string) => void
   placeholder?: string
@@ -327,7 +333,7 @@ export default function SearchBar({
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
             >
-              Escuchando... {recognizedText && <span className="font-medium">"{recognizedText}"</span>}
+              Escuchando... {recognizedText && <span className="font-medium">&quot;{recognizedText}&quot;</span>}
             </motion.div>
           )}
         </div>
@@ -421,7 +427,7 @@ export default function SearchBar({
                     {searchTerm ? (
                       <>
                         <MagnifyingGlassIcon className="h-4 w-4 mr-1" />
-                        Resultados para "{searchTerm}"
+                        Resultados para &quot;{searchTerm}&quot;
                       </>
                     ) : (
                       <>
@@ -477,7 +483,7 @@ export default function SearchBar({
                   <div className="inline-flex items-center justify-center p-4 bg-slate-100 dark:bg-slate-700 rounded-full mb-4">
                     <MagnifyingGlassIcon className="h-6 w-6 text-slate-400" />
                   </div>
-                  <p className="text-sm text-slate-500 dark:text-slate-400 mb-2">No encontramos resultados para "{searchTerm}"</p>
+                  <p className="text-sm text-slate-500 dark:text-slate-400 mb-2">No encontramos resultados para &quot;{searchTerm}&quot;</p>
                   <p className="text-xs text-slate-400 dark:text-slate-500">Intenta con otro término de búsqueda</p>
                 </div>
               )}

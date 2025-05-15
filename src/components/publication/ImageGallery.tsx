@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import Image from 'next/image';
 import { Dialog, DialogContent } from '@/components/ui/dialog';
 import { ChevronLeftIcon, ChevronRightIcon, XMarkIcon } from '@heroicons/react/24/outline';
 import { PublicationImage } from '@/types/publication';
@@ -49,11 +50,13 @@ export function ImageGallery({ images, className = '' }: ImageGalleryProps) {
           className="w-full aspect-video bg-gray-100 rounded-lg overflow-hidden cursor-pointer relative"
           onClick={() => openLightbox(0)}
         >
-          <img
+          <Image
             src={getOptimizedImageUrl(mainImageUrl)}
             alt="Imagen principal"
-            className="w-full h-full object-cover"
-            loading="lazy"
+            className="object-cover"
+            fill
+            sizes="(max-width: 768px) 100vw, 50vw"
+            priority
           />
           
           {/* Indicador de cantidad de imágenes */}
@@ -72,16 +75,17 @@ export function ImageGallery({ images, className = '' }: ImageGalleryProps) {
                 key={idx}
                 onClick={() => openLightbox(idx)}
                 className={`
-                  aspect-square rounded-md overflow-hidden cursor-pointer
+                  aspect-square rounded-md overflow-hidden cursor-pointer relative
                   ${currentIndex === idx ? 'ring-2 ring-primary-500' : ''}
                   ${idx >= 3 && images.length > 4 ? 'relative' : ''}
                 `}
               >
-                <img
+                <Image
                   src={image.secureUrl || image.url}
                   alt={`Miniatura ${idx + 1}`}
-                  className="w-full h-full object-cover"
-                  loading="lazy"
+                  className="object-cover"
+                  fill
+                  sizes="(max-width: 768px) 25vw, 10vw"
                 />
                 
                 {/* Mostrar "Ver más" en la última miniatura */}
@@ -100,7 +104,7 @@ export function ImageGallery({ images, className = '' }: ImageGalleryProps) {
       <Dialog open={isLightboxOpen} onOpenChange={setIsLightboxOpen}>
         <DialogContent className="max-w-4xl p-0 bg-black/95 border-none">
           <div className="relative h-[80vh] flex items-center justify-center">
-            {/* Imagen actual */}
+            {/* Imagen actual - for lightbox, we'll keep using img to allow for zooming and better modal handling */}
             <img
               src={images[currentIndex]?.secureUrl || images[currentIndex]?.url}
               alt={`Imagen ${currentIndex + 1}`}

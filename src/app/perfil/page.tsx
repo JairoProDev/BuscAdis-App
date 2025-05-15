@@ -1128,7 +1128,7 @@ const FormField: React.FC<FormFieldProps> = ({ label, id, name, type, value, onC
           disabled={disabled}
           className={`${inputBaseClasses} ${disabled ? inputDisabledClasses : (error ? inputErrorClasses : inputEnabledClasses)} ${inputPadding}`}
           placeholder={placeholder}
-          aria-invalid={error ? true : false}
+          aria-invalid={error ? "true" : "false"}
           aria-describedby={error ? `${id}-error` : undefined}
         />
       </div>

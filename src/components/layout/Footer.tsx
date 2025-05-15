@@ -1,3 +1,5 @@
+import Link from 'next/link';
+
 export default function Footer() {
   // Define tus colores personalizados basados en tu diseño
   const backgroundColor = 'bg-slate-900'; // Un tono oscuro similar al de tu app
@@ -66,18 +68,18 @@ export default function Footer() {
                       <h4 className="text-lg font-bold mb-4">{primaryColor === 'text-teal-400' ? <span className={primaryColor}>Categorías</span> : 'Categorías'}</h4>
                       <div className="grid grid-cols-2 gap-x-4">
                           <ul className="space-y-2">
-                              <li><a href="/empleos" className={`${textColor}/80 hover:${primaryColor} flex items-center`}>💼 Empleos</a></li>
-                              <li><a href="/inmuebles" className={`${textColor}/80 hover:${primaryColor} flex items-center`}>🏠 Inmuebles</a></li>
-                              <li><a href="/vehiculos" className={`${textColor}/80 hover:${primaryColor} flex items-center`}>🚗 Vehículos</a></li>
-                              <li><a href="/servicios" className={`${textColor}/80 hover:${primaryColor} flex items-center`}>🛠️ Servicios</a></li>
-                              <li><a href="/productos" className={`${textColor}/80 hover:${primaryColor} flex items-center`}>📦 Productos</a></li>
+                              <li><Link href="/empleos" className={`${textColor}/80 hover:${primaryColor} flex items-center`}>💼 Empleos</Link></li>
+                              <li><Link href="/inmuebles" className={`${textColor}/80 hover:${primaryColor} flex items-center`}>🏠 Inmuebles</Link></li>
+                              <li><Link href="/vehiculos" className={`${textColor}/80 hover:${primaryColor} flex items-center`}>🚗 Vehículos</Link></li>
+                              <li><Link href="/servicios" className={`${textColor}/80 hover:${primaryColor} flex items-center`}>🛠️ Servicios</Link></li>
+                              <li><Link href="/productos" className={`${textColor}/80 hover:${primaryColor} flex items-center`}>📦 Productos</Link></li>
                           </ul>
                           <ul className="space-y-2">
-                              <li><a href="/eventos" className={`${textColor}/80 hover:${primaryColor} flex items-center`}>🎉 Eventos</a></li>
-                              <li><a href="/educacion" className={`${textColor}/80 hover:${primaryColor} flex items-center`}>📚 Educación</a></li>
-                              <li><a href="/turismo" className={`${textColor}/80 hover:${primaryColor} flex items-center`}>✈️ Turismo</a></li>
-                              <li><a href="/mascotas" className={`${textColor}/80 hover:${primaryColor} flex items-center`}>🐾 Mascotas</a></li>
-                              <li><a href="/negocios" className={`${textColor}/80 hover:${primaryColor} flex items-center`}>💰 Negocios</a></li>
+                              <li><Link href="/eventos" className={`${textColor}/80 hover:${primaryColor} flex items-center`}>🎉 Eventos</Link></li>
+                              <li><Link href="/educacion" className={`${textColor}/80 hover:${primaryColor} flex items-center`}>📚 Educación</Link></li>
+                              <li><Link href="/turismo" className={`${textColor}/80 hover:${primaryColor} flex items-center`}>✈️ Turismo</Link></li>
+                              <li><Link href="/mascotas" className={`${textColor}/80 hover:${primaryColor} flex items-center`}>🐾 Mascotas</Link></li>
+                              <li><Link href="/negocios" className={`${textColor}/80 hover:${primaryColor} flex items-center`}>💰 Negocios</Link></li>
                           </ul>
                       </div>
                   </div>
@@ -85,27 +87,27 @@ export default function Footer() {
                   <div>
                       <h4 className="text-lg font-bold mb-4">{primaryColor === 'text-teal-400' ? <span className={primaryColor}>Soporte</span> : 'Soporte'}</h4>
                       <ul className="space-y-2">
-                          <li><a href="/ayuda" className={`${textColor}/80 hover:${primaryColor}`}>Centro de Ayuda</a></li>
-                          <li><a href="/contacto" className={`${textColor}/80 hover:${primaryColor}`}>Contacto</a></li>
-                          <li><a href="/funcionamiento" className={`${textColor}/80 hover:${primaryColor}`}>Preguntas Frecuentes</a></li>
-                          <li><a href="/blog" className={`${textColor}/80 hover:${primaryColor}`}>Blog</a></li>
+                          <li><Link href="/ayuda" className={`${textColor}/80 hover:${primaryColor}`}>Centro de Ayuda</Link></li>
+                          <li><Link href="/contacto" className={`${textColor}/80 hover:${primaryColor}`}>Contacto</Link></li>
+                          <li><Link href="/funcionamiento" className={`${textColor}/80 hover:${primaryColor}`}>Preguntas Frecuentes</Link></li>
+                          <li><Link href="/blog" className={`${textColor}/80 hover:${primaryColor}`}>Blog</Link></li>
                       </ul>
                   </div>
 
                   <div>
                       <h4 className="text-lg font-bold mb-4">{primaryColor === 'text-teal-400' ? <span className={primaryColor}>Legal</span> : 'Legal'}</h4>
                       <ul className="space-y-2">
-                          <li><a href="/terminos" className={`${textColor}/80 hover:${primaryColor}`}>Términos y Condiciones</a></li>
-                          <li><a href="/privacidad" className={`${textColor}/80 hover:${primaryColor}`}>Política de Privacidad</a></li>
-                          <li><a href="/cookies" className={`${textColor}/80 hover:${primaryColor}`}>Política de Cookies</a></li>
-                          <li><a href="/aviso-legal" className={`${textColor}/80 hover:${primaryColor}`}>Aviso Legal</a></li>
+                          <li><Link href="/terminos" className={`${textColor}/80 hover:${primaryColor}`}>Términos y Condiciones</Link></li>
+                          <li><Link href="/privacidad" className={`${textColor}/80 hover:${primaryColor}`}>Política de Privacidad</Link></li>
+                          <li><Link href="/cookies" className={`${textColor}/80 hover:${primaryColor}`}>Política de Cookies</Link></li>
+                          <li><Link href="/aviso-legal" className={`${textColor}/80 hover:${primaryColor}`}>Aviso Legal</Link></li>
                       </ul>
                   </div>
               </div>
 
               <div className={`${dividerColor} mt-8 pt-8 text-center ${copyrightTextColor}`}>
                   <p>&copy; {new Date().getFullYear()} BuscAdis. Todos los derechos reservados.</p>
-                  <p>Desarrollado por <a href="https://www.linkedin.com/in/JairoProDev/" className={`${copyrightTextColor} hover:${primaryColor}`}>Jairo Saul Salas Quiñones</a></p>
+                  <p>Desarrollado por <a href="https://www.linkedin.com/in/JairoProDev/" target="_blank" rel="noopener noreferrer" className={`${copyrightTextColor} hover:${primaryColor}`}>Jairo Saul Salas Quiñones</a></p>
               </div>
           </div>
       </footer>

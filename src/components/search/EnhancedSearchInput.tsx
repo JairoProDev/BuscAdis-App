@@ -89,16 +89,18 @@ export default function EnhancedSearchInput({
   // Initialize Web Speech API if available
   useEffect(() => {
     if ('webkitSpeechRecognition' in window || 'SpeechRecognition' in window) {
-      const SpeechRecognition = (window as any).webkitSpeechRecognition || (window as any).SpeechRecognition;
+      const SpeechRecognition = window.webkitSpeechRecognition || window.SpeechRecognition;
+      if (!SpeechRecognition) return;
+      
       const recognitionInstance = new SpeechRecognition();
       recognitionInstance.continuous = false;
       recognitionInstance.interimResults = true;
       recognitionInstance.lang = 'es-ES';
       
       // Handle recognition results
-      recognitionInstance.onresult = (event: any) => {
-        const transcript = Array.from(event.results as any)
-          .map((result: any) => result[0].transcript)
+      recognitionInstance.onresult = (event: SpeechRecognitionEvent) => {
+        const transcript = Array.from(Array.from({ length: event.results.length }, (_, i) => event.results[i]))
+          .map(result => result[0].transcript)
           .join('');
         
         setSearchTerm(transcript);
@@ -110,7 +112,7 @@ export default function EnhancedSearchInput({
       };
       
       // Handle errors
-      recognitionInstance.onerror = (event: any) => {
+      recognitionInstance.onerror = (event: SpeechRecognitionError) => {
         console.error('Error with speech recognition:', event.error);
         setIsRecording(false);
       };
@@ -534,15 +536,7 @@ export default function EnhancedSearchInput({
   );
 }
 
-// Add type declaration for Web Speech API
-declare global {
-  interface Window {
-    SpeechRecognition: SpeechRecognitionConstructor;
-    webkitSpeechRecognition: SpeechRecognitionConstructor;
-  }
-}
-
-// Define types for Speech Recognition
+// Speech Recognition interfaces
 interface SpeechRecognitionConstructor {
   new (): SpeechRecognitionType;
 }
@@ -570,4 +564,11 @@ interface SpeechRecognitionEvent {
 
 interface SpeechRecognitionError {
   error: string;
+}
+
+declare global {
+  interface Window {
+    SpeechRecognition?: SpeechRecognitionConstructor;
+    webkitSpeechRecognition?: SpeechRecognitionConstructor;
+  }
 } 

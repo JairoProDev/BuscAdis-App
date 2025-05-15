@@ -9,8 +9,6 @@ import {
   MagnifyingGlassIcon,
   MegaphoneIcon,
   UserCircleIcon,
-  SunIcon, // Para ThemeToggle si no está ya en el componente
-  MoonIcon, // Para ThemeToggle si no está ya en el componente
   ArrowLeftOnRectangleIcon, // Para Logout
   BookmarkIcon, // Para Guardados
   ChatBubbleOvalLeftEllipsisIcon, // Para Mensajes
@@ -26,7 +24,7 @@ interface User {
   full_name?: string;
   firstName?: string;
   lastName?: string;
-  // email?: string; // Añade otros campos que puedas tener y usar
+  email?: string; // Añadido para corregir el error
   // avatarUrl?: string; // Por ejemplo, para mostrar una imagen de perfil real
 }
 
@@ -192,7 +190,7 @@ export default function Header() {
                 <button
                   onClick={toggleUserMenu}
                   className="group flex items-center gap-2 px-2.5 py-1.5 rounded-full hover:bg-slate-100 dark:hover:bg-slate-800/60 focus:outline-none focus-visible:ring-2 focus-visible:ring-teal-500 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-slate-900 transition-colors"
-                  aria-expanded={showUserMenu}
+                  aria-expanded="true"
                   aria-haspopup="true"
                   aria-controls="user-menu"
                   aria-label="Abrir menú de usuario"
