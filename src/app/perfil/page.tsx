@@ -41,6 +41,10 @@ import {
   DialogDescription,
 } from '@/components/ui/dialog';
 
+// NOTE: For PDF/QR functionality, ensure 'html2canvas' and 'jspdf' are installed.
+import html2canvas from 'html2canvas';
+import jsPDF from 'jspdf';
+
 // Componente LoadingSpinner (asumiendo que tienes uno similar al del Header)
 const LoadingSpinner = ({ size = 'md', className = '' }: { size?: 'sm' | 'md' | 'lg' | 'xl'; className?: string }) => {
   const sizeClasses = {
@@ -141,6 +145,38 @@ export default function PerfilPage() {
 
   // Add state for wizard modal
   const [wizardOpen, setWizardOpen] = useState(false);
+
+  // --- Recommendations Wall State ---
+  const [endorsements, setEndorsements] = useState<{ name: string; message: string }[]>([]);
+  const [newEndorsement, setNewEndorsement] = useState({ name: '', message: '' });
+
+  // --- Portfolio & Verification Upload State ---
+  const [portfolioFiles, setPortfolioFiles] = useState<File[]>([]);
+  const [verificationFiles, setVerificationFiles] = useState<File[]>([]);
+
+  // --- Contact Preferences & Privacy State ---
+  const [contactPrefs, setContactPrefs] = useState({ whatsapp: true, email: true, phone: false });
+  const [privacy, setPrivacy] = useState<'public' | 'private' | 'admin'>('public');
+
+  // --- Profile Sharing (QR, PDF, Social) ---
+  const handleDownloadProfile = async () => {
+    const card = document.getElementById('profile-card');
+    if (!card) return;
+    const canvas = await html2canvas(card);
+    const imgData = canvas.toDataURL('image/png');
+    const pdf = new jsPDF();
+    pdf.addImage(imgData, 'PNG', 10, 10, 180, 120);
+    pdf.save('cartilla-buscadis.pdf');
+  };
+  const profileUrl = typeof window !== 'undefined' ? window.location.href : '';
+
+  // --- Dashboard Stats Placeholder ---
+  const dashboardStats = {
+    searches: 12,
+    favorites: 5,
+    posts: 3,
+    recommendations: endorsements.length,
+  };
 
   // Efecto para cargar datos del perfil
   useEffect(() => {
@@ -461,6 +497,146 @@ export default function PerfilPage() {
       <div className="mb-8 text-center text-slate-400 text-sm">
         <CheckCircleIcon className="w-6 h-6 inline-block text-teal-400 mr-2" /> Tu información está segura. Solo la usaremos para mejorar tu experiencia en BuscAdis.
       </div>
+      {/* Dashboard & Stats */}
+      <section className="mb-8 bg-white/5 rounded-xl p-6 shadow-lg">
+        <h2 className="text-lg font-semibold text-teal-400 mb-3 flex items-center gap-2">
+          <span className="inline-block w-5 h-5 bg-gradient-to-r from-teal-500 to-cyan-500 rounded-full mr-2" />
+          Tu Actividad y Estadísticas
+        </h2>
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-center">
+          <div>
+            <div className="text-2xl font-bold text-teal-400">{dashboardStats.searches}</div>
+            <div className="text-xs text-slate-400">Búsquedas</div>
+          </div>
+          <div>
+            <div className="text-2xl font-bold text-teal-400">{dashboardStats.favorites}</div>
+            <div className="text-xs text-slate-400">Favoritos</div>
+          </div>
+          <div>
+            <div className="text-2xl font-bold text-teal-400">{dashboardStats.posts}</div>
+            <div className="text-xs text-slate-400">Publicaciones</div>
+          </div>
+          <div>
+            <div className="text-2xl font-bold text-teal-400">{dashboardStats.recommendations}</div>
+            <div className="text-xs text-slate-400">Recomendaciones</div>
+          </div>
+        </div>
+      </section>
+      {/* Recommendations Wall */}
+      <section className="mb-8 bg-white/5 rounded-xl p-6 shadow-lg">
+        <h2 className="text-lg font-semibold text-teal-400 mb-3 flex items-center gap-2">
+          <span className="inline-block w-5 h-5 bg-gradient-to-r from-teal-500 to-cyan-500 rounded-full mr-2" />
+          Muro de Recomendaciones
+        </h2>
+        <div className="space-y-3 mb-4">
+          {endorsements.length === 0 && <div className="text-slate-400 text-sm">Aún no tienes recomendaciones. ¡Pide a tus contactos que te recomienden!</div>}
+          {endorsements.map((e, i) => (
+            <div key={i} className="bg-slate-800/60 rounded-lg p-3 shadow flex flex-col">
+              <span className="font-semibold text-teal-300">{e.name}</span>
+              <span className="text-slate-200 text-sm mt-1">{e.message}</span>
+            </div>
+          ))}
+        </div>
+        <form
+          className="flex flex-col gap-2 md:flex-row md:items-end"
+          onSubmit={e => {
+            e.preventDefault();
+            if (newEndorsement.name && newEndorsement.message) {
+              setEndorsements(prev => [...prev, newEndorsement]);
+              setNewEndorsement({ name: '', message: '' });
+            }
+          }}
+        >
+          <input
+            type="text"
+            placeholder="Tu nombre"
+            className="flex-1 px-3 py-2 rounded-lg border border-slate-300 bg-white/80"
+            value={newEndorsement.name}
+            onChange={e => setNewEndorsement(prev => ({ ...prev, name: e.target.value }))}
+            required
+          />
+          <input
+            type="text"
+            placeholder="Tu recomendación o mensaje"
+            className="flex-1 px-3 py-2 rounded-lg border border-slate-300 bg-white/80"
+            value={newEndorsement.message}
+            onChange={e => setNewEndorsement(prev => ({ ...prev, message: e.target.value }))}
+            required
+          />
+          <button type="submit" className="px-4 py-2 rounded-lg bg-gradient-to-r from-teal-500 to-cyan-500 text-white font-semibold shadow hover:from-teal-600 hover:to-cyan-600 transition-all">Agregar</button>
+        </form>
+      </section>
+      {/* Portfolio & Verification Uploaders */}
+      <section className="mb-8 bg-white/5 rounded-xl p-6 shadow-lg">
+        <h2 className="text-lg font-semibold text-teal-400 mb-3 flex items-center gap-2">
+          <span className="inline-block w-5 h-5 bg-gradient-to-r from-teal-500 to-cyan-500 rounded-full mr-2" />
+          Portafolio y Verificación
+        </h2>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div>
+            <label className="block text-sm font-medium text-slate-300 mb-1.5">Sube tu portafolio (PDF, imágenes, etc.)</label>
+            <input type="file" multiple accept=".pdf,image/*" onChange={e => setPortfolioFiles(Array.from(e.target.files || []))} className="block w-full text-sm text-slate-700 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-teal-50 file:text-teal-700 hover:file:bg-teal-100" />
+            {portfolioFiles.length > 0 && <div className="mt-2 text-xs text-slate-400">{portfolioFiles.length} archivo(s) seleccionado(s)</div>}
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-slate-300 mb-1.5">Documentos de verificación (DNI, certificados, etc.)</label>
+            <input type="file" multiple accept=".pdf,image/*" onChange={e => setVerificationFiles(Array.from(e.target.files || []))} className="block w-full text-sm text-slate-700 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-teal-50 file:text-teal-700 hover:file:bg-teal-100" />
+            {verificationFiles.length > 0 && <div className="mt-2 text-xs text-slate-400">{verificationFiles.length} archivo(s) seleccionado(s)</div>}
+          </div>
+        </div>
+      </section>
+      {/* Contact Preferences & Privacy Controls */}
+      <section className="mb-8 bg-white/5 rounded-xl p-6 shadow-lg">
+        <h2 className="text-lg font-semibold text-teal-400 mb-3 flex items-center gap-2">
+          <span className="inline-block w-5 h-5 bg-gradient-to-r from-teal-500 to-cyan-500 rounded-full mr-2" />
+          Preferencias de Contacto y Privacidad
+        </h2>
+        <div className="flex flex-col md:flex-row gap-6">
+          <div className="flex-1">
+            <div className="mb-2 text-slate-300 font-medium">¿Cómo prefieres ser contactado?</div>
+            <label className="flex items-center gap-2 mb-1">
+              <input type="checkbox" checked={contactPrefs.whatsapp} onChange={e => setContactPrefs(p => ({ ...p, whatsapp: e.target.checked }))} title="Permitir contacto por WhatsApp" placeholder="WhatsApp" /> WhatsApp
+            </label>
+            <label className="flex items-center gap-2 mb-1">
+              <input type="checkbox" checked={contactPrefs.email} onChange={e => setContactPrefs(p => ({ ...p, email: e.target.checked }))} title="Permitir contacto por Email" placeholder="Email" /> Email
+            </label>
+            <label className="flex items-center gap-2 mb-1">
+              <input type="checkbox" checked={contactPrefs.phone} onChange={e => setContactPrefs(p => ({ ...p, phone: e.target.checked }))} title="Permitir contacto por Teléfono" placeholder="Teléfono" /> Teléfono
+            </label>
+          </div>
+          <div className="flex-1">
+            <div className="mb-2 text-slate-300 font-medium">Privacidad de tu perfil</div>
+            <select
+              value={privacy}
+              onChange={e => setPrivacy(e.target.value as 'public' | 'private' | 'admin')}
+              className="w-full px-3 py-2 rounded-lg border border-slate-300 bg-white/80"
+              aria-label="Privacidad de tu perfil"
+              title="Privacidad de tu perfil"
+            >
+              <option value="public">Público (visible para todos)</option>
+              <option value="private">Privado (solo tú)</option>
+              <option value="admin">Solo administradores</option>
+            </select>
+          </div>
+        </div>
+      </section>
+      {/* Profile Sharing (QR, PDF, Social) */}
+      <section className="mb-8 bg-white/5 rounded-xl p-6 shadow-lg flex flex-col md:flex-row gap-8 items-center justify-between">
+        <div className="flex-1 flex flex-col items-center gap-3">
+          <h2 className="text-lg font-semibold text-teal-400 mb-1 flex items-center gap-2">
+            <span className="inline-block w-5 h-5 bg-gradient-to-r from-teal-500 to-cyan-500 rounded-full mr-2" />
+            Comparte tu Cartilla
+          </h2>
+          {/* TODO: Instalar e importar un componente QRCode, por ahora placeholder */}
+          <div className="bg-white p-2 rounded-lg shadow text-center text-slate-500">[QR Code aquí]</div>
+          <div className="flex gap-2 mt-2">
+            <button onClick={handleDownloadProfile} className="px-4 py-2 rounded-lg bg-gradient-to-r from-teal-500 to-cyan-500 text-white font-semibold shadow hover:from-teal-600 hover:to-cyan-600 transition-all">Descargar PDF</button>
+            <a href={`https://wa.me/?text=Mira%20mi%20perfil%20en%20BuscAdis:%20${encodeURIComponent(profileUrl)}`} target="_blank" rel="noopener noreferrer" className="px-4 py-2 rounded-lg bg-green-500 text-white font-semibold shadow hover:bg-green-600 transition-all">WhatsApp</a>
+            <a href={`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(profileUrl)}`} target="_blank" rel="noopener noreferrer" className="px-4 py-2 rounded-lg bg-blue-600 text-white font-semibold shadow hover:bg-blue-700 transition-all">Facebook</a>
+            <a href={`https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(profileUrl)}`} target="_blank" rel="noopener noreferrer" className="px-4 py-2 rounded-lg bg-blue-500 text-white font-semibold shadow hover:bg-blue-600 transition-all">LinkedIn</a>
+          </div>
+        </div>
+      </section>
       {/* Botones de acción */}
       <div className="flex flex-col-reverse sm:flex-row justify-end gap-3 sm:gap-4">
         {!isEditing ? (
