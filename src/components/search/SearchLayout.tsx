@@ -15,6 +15,7 @@ import CategorySelector from './CategorySelector'
 import FilterChips from '@/components/search/FilterChips'
 import { CategoriesService } from '@/services/categories.service'
 import { MapView } from './MapView'
+import type { Publication as PublicationType } from '@/types/publications'
 
 // Remove this placeholder component since we have the real MapView component
 // const MapComponent = ({ 
@@ -34,7 +35,7 @@ import { MapView } from './MapView'
 type FilterValue = string | number | boolean | null;
 
 interface SearchLayoutProps {
-    initialResults?: Publication[]
+    initialResults?: PublicationType[]
     initialCategory?: string
     initialSubcategory?: string
     initialQuery?: string
@@ -45,7 +46,7 @@ interface SearchLayoutProps {
     hasMore?: boolean
     totalResults?: number
     showMap?: boolean
-    onPublicationClick?: (publication: Publication, e: React.MouseEvent<HTMLAnchorElement>) => void
+    onPublicationClick?: (publication: PublicationType, e: React.MouseEvent<HTMLAnchorElement>) => void
     children?: ReactNode
     className?: string
     useEnhancedSearch?: boolean
@@ -78,7 +79,7 @@ export default function SearchLayout({
     const [category, setCategory] = useState(initialCategory || searchParams?.get('category') || '')
     const [subcategory, setSubcategory] = useState(initialSubcategory || searchParams?.get('subcategory') || '')
     const [selectedSubSubcategory, setSelectedSubSubcategory] = useState(searchParams?.get('subsubcategory') || '')
-    const [results, setResults] = useState<Publication[]>(initialResults)
+    const [results, setResults] = useState<PublicationType[]>(initialResults)
     const [listViewMode, setListViewMode] = useState<ViewMode>('grid')
     const [activeFilters, setActiveFilters] = useState<Record<string, FilterValue>>({})
     const [categories, setCategories] = useState<Array<{ 
@@ -94,7 +95,7 @@ export default function SearchLayout({
       }>
     }>>([])
     // New state for the selected publication in map view
-    const [selectedPublication, setSelectedPublication] = useState<Publication | null>(null)
+    const [selectedPublication, setSelectedPublication] = useState<PublicationType | null>(null)
     // State to control map visibility
     const [isMapVisible, setIsMapVisible] = useState(true)
 
@@ -122,7 +123,7 @@ export default function SearchLayout({
     }, [initialResults]);
 
     // Add a function to handle publication selection in the map
-    const handleSelectPublication = (publication: Publication | null) => {
+    const handleSelectPublication = (publication: PublicationType | null) => {
         setSelectedPublication(publication);
     }
 
@@ -216,48 +217,6 @@ export default function SearchLayout({
         }
     }
 
-
-    const handleFilterChange = (newFilters: Record<string, FilterValue>) => {
-        // Combina filtros anteriores y nuevos si es necesario, o reemplaza
-        const updatedFilters = { ...activeFilters, ...newFilters };
-        // Eliminar filtros con valor undefined, null o ''
-        Object.keys(updatedFilters).forEach(key => {
-             if (updatedFilters[key] === undefined || updatedFilters[key] === null || updatedFilters[key] === '') {
-                  delete updatedFilters[key];
-             }
-        });
-
-        setActiveFilters(updatedFilters);
-
-         // Actualizar URL con los filtros
-        const params = new URLSearchParams(searchParams?.toString());
-        Object.entries(updatedFilters).forEach(([key, value]) => {
-             if (value !== undefined && value !== null && value !== '') {
-                  params.set(key, String(value));
-             } else {
-                  params.delete(key);
-             }
-        });
-         // Asegurarse de que las categorías y query estén presentes si existen
-         if (category) params.set('category', category);
-         if (subcategory) params.set('subcategory', subcategory);
-         if (selectedSubSubcategory) params.set('subsubcategory', selectedSubSubcategory);
-         if (searchQuery) params.set('q', searchQuery);
-
-         router.push(`${pathname}?${params.toString()}`, { scroll: false });
-
-
-        if (onFilterChange) {
-            onFilterChange({
-                ...updatedFilters,
-                category,
-                subcategory,
-                subsubcategory: selectedSubSubcategory,
-                q: searchQuery || '' // Incluir query actual
-            });
-        }
-    }
-
     // Agregar estos estilos CSS personalizados
     // En algún lugar cerca del final del archivo, antes del return final
     const customStyles = {
@@ -266,6 +225,14 @@ export default function SearchLayout({
         glassEffect: "backdrop-filter backdrop-blur-sm bg-opacity-80",
         slateGradient: "bg-gradient-to-b from-slate-800 to-slate-900"
     };
+
+    // 5. Modulariza la vista de detalles de publicación
+    function PublicationDetailsPanel({ publication, onClose }: { publication: PublicationType, onClose: () => void }) {
+        // Aquí va la lógica y el renderizado de los detalles, usando publication.contact, publication.amount, publication.currency, etc.
+        // Mejora visual, accesibilidad, tooltips, feedback visual, etc.
+        // Deja comentarios y hooks preparados para el futuro bottom sheet en mobile.
+        // ...
+    }
 
     // --- Renderizado Principal - COMPLETAMENTE RESTRUCTURADO
     return (
@@ -330,7 +297,40 @@ export default function SearchLayout({
                                     <FilterChips
                                         category={category}
                                         activeFilters={activeFilters}
-                                        onFilterChange={handleFilterChange}
+                                        onFilterChange={(key, value) => {
+                                            // Solo actualiza el filtro individual
+                                            setActiveFilters((prev) => {
+                                                const updated = { ...prev, [key]: value };
+                                                // Elimina si el valor es null, undefined o vacío
+                                                if (value === undefined || value === null || value === '') {
+                                                    delete updated[key];
+                                                }
+                                                // Actualiza la URL y notifica
+                                                const params = new URLSearchParams(searchParams?.toString());
+                                                Object.entries(updated).forEach(([k, v]) => {
+                                                    if (v !== undefined && v !== null && v !== '') {
+                                                        params.set(k, String(v));
+                                                    } else {
+                                                        params.delete(k);
+                                                    }
+                                                });
+                                                if (category) params.set('category', category);
+                                                if (subcategory) params.set('subcategory', subcategory);
+                                                if (selectedSubSubcategory) params.set('subsubcategory', selectedSubSubcategory);
+                                                if (searchQuery) params.set('q', searchQuery);
+                                                router.push(`${pathname}?${params.toString()}`, { scroll: false });
+                                                if (onFilterChange) {
+                                                    onFilterChange({
+                                                        ...updated,
+                                                        category,
+                                                        subcategory,
+                                                        subsubcategory: selectedSubSubcategory,
+                                                        q: searchQuery || ''
+                                                    });
+                                                }
+                                                return updated;
+                                            });
+                                        }}
                                         className="pt-1 pb-0"
                                     />
                                 </div>
@@ -676,39 +676,6 @@ export default function SearchLayout({
                                             </div>
                                         </div>
                                         
-                                        {/* Botones de contacto */}
-                                        <div className="p-4 border-t border-slate-700 bg-slate-850">
-                                            <div className="grid grid-cols-2 gap-2 mb-2">
-                                                <button 
-                                                    className="flex items-center justify-center gap-2 py-3 bg-teal-500 hover:bg-teal-600 text-white font-medium rounded-lg transition-colors"
-                                                    aria-label="Llamar"
-                                                >
-                                                    <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
-                                                    </svg>
-                                                    Llamar ahora
-                                                </button>
-                                                <button 
-                                                    className="flex items-center justify-center gap-2 py-3 bg-green-500 hover:bg-green-600 text-white font-medium rounded-lg transition-colors"
-                                                    aria-label="WhatsApp"
-                                                >
-                                                    <svg className="h-5 w-5" fill="currentColor" viewBox="0 0 24 24">
-                                                        <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/>
-                                                    </svg>
-                                                    WhatsApp
-                                                </button>
-                                            </div>
-                                            <button 
-                                                className="w-full flex items-center justify-center gap-2 py-2 bg-slate-700 hover:bg-slate-600 text-white font-medium rounded-lg transition-colors"
-                                                aria-label="Ver completo"
-                                            >
-                                                <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
-                                                </svg>
-                                                Ver anuncio completo
-                                            </button>
-                                        </div>
                                     </div>
                                 ) : (
                                     // Map view
