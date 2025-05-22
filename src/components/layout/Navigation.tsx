@@ -141,10 +141,10 @@ export default function Header() {
                                             Mis Anuncios
                                         </Link>
                                         <Link
-                                            href="/favoritos"
+                                            href="/guardados"
                                             className={`block px-4 py-2 text-sm ${textColor} hover:${hoverTextColor} hover:bg-slate-700`}
                                         >
-                                            Favoritos
+                                            Guardados
                                         </Link>
                                         <button
                                             onClick={logout}

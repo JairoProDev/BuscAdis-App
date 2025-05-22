@@ -228,7 +228,7 @@ export default function Header() {
                     <Link href="/mis-anuncios" role="menuitem" className={menuItemClasses} onClick={() => setShowUserMenu(false)}>
                       <MegaphoneIcon className={menuItemIconClasses} /> Mis Anuncios
                     </Link>
-                    <Link href="/favoritos" role="menuitem" className={menuItemClasses} onClick={() => setShowUserMenu(false)}>
+                    <Link href="/guardados" role="menuitem" className={menuItemClasses} onClick={() => setShowUserMenu(false)}>
                       <BookmarkIcon className={menuItemIconClasses} /> Guardados
                     </Link>
                     <Link href="/mensajes" role="menuitem" className={menuItemClasses} onClick={() => setShowUserMenu(false)}>

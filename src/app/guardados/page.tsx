@@ -61,9 +61,6 @@ const SavedPage = () => {
     loadSaved();
   }, []);
 
-  useEffect(() => {
-    router.replace('/guardados');
-  }, [router]);
 
   const removeSaved = (id: string) => {
     setSavedItems(prev => prev.filter(item => item.id !== id));
@@ -146,7 +143,7 @@ const SavedPage = () => {
   );
 };
 
-const DeprecatedFavoritesPage = () => {
+const RedirectToGuardados = () => {
   const router = useRouter();
   useEffect(() => {
     router.replace('/guardados');
@@ -154,4 +151,4 @@ const DeprecatedFavoritesPage = () => {
   return <div className="p-8 text-center text-gray-500">Redirigiendo a Guardados...</div>;
 };
 
-export default SavedPage;
+export default RedirectToGuardados;

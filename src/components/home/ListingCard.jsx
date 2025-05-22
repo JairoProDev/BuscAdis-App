@@ -3,22 +3,10 @@
 import Link from "next/link";
 import Image from "next/image";
 import { motion } from "framer-motion";
-import { HeartIcon, MapPinIcon, ClockIcon } from "@heroicons/react/24/outline";
+import { MapPinIcon, ClockIcon } from "@heroicons/react/24/outline";
 import { SparklesIcon } from "@heroicons/react/24/solid";
-import { useCallback, useState } from "react";
 
 const ListingCard = ({ listing, index }) => {
-  const [isFavorite, setIsFavorite] = useState(false);
-  
-  const toggleFavorite = useCallback((e) => {
-    e.preventDefault();
-    e.stopPropagation();
-    setIsFavorite((prev) => !prev);
-  }, []);
-
-  // Determinar la fecha relativa (simulada por ahora)
-  const getRelativeDate = () => "hace 1 semana";
-
   // Delay incrementales para animación de entrada
   const delay = 0.1 + index * 0.1;
 
@@ -86,7 +74,7 @@ const ListingCard = ({ listing, index }) => {
             </div>
           )}
 
-          {/* Área de imagen con botón de favorito */}
+          {/* Área de imagen */}
           <div className="relative aspect-[4/3] w-full overflow-hidden">
             <Image
               src={imageSrc}
@@ -101,27 +89,6 @@ const ListingCard = ({ listing, index }) => {
             
             {/* Reflective platinum highlighting */}
             <div className="absolute inset-0 bg-gradient-to-br from-teal-500/0 via-teal-500/0 to-teal-500/10 opacity-0 group-hover:opacity-100 transition-opacity duration-500"></div>
-            
-            {/* Botón de favorito con estilo premium */}
-            <button
-              onClick={toggleFavorite}
-              className="absolute top-3 right-3 rounded-full 
-                bg-gradient-to-br from-white/80 to-slate-100/80 
-                p-2 shadow-lg backdrop-blur-md 
-                transition-all duration-300 hover:scale-110 
-                hover:shadow-[0_4px_15px_rgba(20,184,166,0.25)]
-                border border-teal-500/10 hover:border-teal-500/20
-                focus:outline-none"
-              aria-label="Añadir a favoritos"
-            >
-              <HeartIcon
-                className={`h-5 w-5 transition-colors ${
-                  isFavorite
-                    ? "fill-teal-500 text-teal-500"
-                    : "text-slate-600"
-                }`}
-              />
-            </button>
           </div>
 
           {/* Contenido con estilo premium */}

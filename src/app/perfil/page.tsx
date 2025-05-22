@@ -265,7 +265,6 @@ export default function PerfilPage() {
   // --- Dashboard Stats Placeholder ---
   const dashboardStats = {
     searches: 12,
-    favorites: 5,
     posts: 3,
     recommendations: endorsements.length,
   };
@@ -836,10 +835,6 @@ export default function PerfilPage() {
           <div>
             <div className="text-2xl font-bold text-teal-400">{dashboardStats.searches}</div>
             <div className="text-xs text-slate-400">Búsquedas</div>
-          </div>
-          <div>
-            <div className="text-2xl font-bold text-teal-400">{dashboardStats.favorites}</div>
-            <div className="text-xs text-slate-400">Favoritos</div>
           </div>
           <div>
             <div className="text-2xl font-bold text-teal-400">{dashboardStats.posts}</div>
