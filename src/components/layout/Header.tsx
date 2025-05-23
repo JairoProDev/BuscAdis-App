@@ -3,7 +3,7 @@
 import Link from 'next/link';
 import Image from 'next/image';
 import { useState, useEffect, useRef, useCallback } from 'react';
-import { usePathname } from 'next/navigation';
+import { usePathname, useRouter } from 'next/navigation'; // useRouter importado
 import {
   HomeIcon,
   NewspaperIcon,
@@ -18,16 +18,15 @@ import {
   ChevronDownIcon, // Para indicar que es un desplegable
   SparklesIcon, // Para el botón de ADIS
 } from '@heroicons/react/24/outline';
-import { ThemeToggle } from '@/components/theme'; // Asumo que este componente ya gestiona sus íconos
+import { ThemeToggle } from '@/components/theme';
 
-// Define una interfaz más específica para el usuario si es posible
 interface User {
-  id: string; // O el tipo que sea tu user.id
+  id: string;
   full_name?: string;
   firstName?: string;
   lastName?: string;
-  email?: string; // Añadido para corregir el error
-  // avatarUrl?: string; // Por ejemplo, para mostrar una imagen de perfil real
+  email?: string;
+  avatarUrl?: string; // para usar avatares reales
 }
 
 export default function Header() {
@@ -37,8 +36,11 @@ export default function Header() {
   const [user, setUser] = useState<User | null>(null);
   const [isMounted, setIsMounted] = useState(false); // Para evitar hydration mismatch con localStorage
   const pathname = usePathname();
+  const router = useRouter(); // Hook de router
 
-  const userMenuRef = useRef<HTMLDivElement>(null); // Ref para el contenedor del botón y el menú
+  const userMenuRef = useRef<HTMLDivElement>(null);
+  const userMenuButtonRef = useRef<HTMLButtonElement>(null); // Ref para el botón que abre el menú
+  const firstMenuItemRef = useRef<HTMLAnchorElement>(null); // Ref para el primer item del menú
 
   // Sincronización con localStorage y listener de storage
   const syncAuth = useCallback(() => {
@@ -56,8 +58,7 @@ export default function Header() {
       console.error("Error parsing user data from localStorage:", error);
       setUser(null);
       setIsAuthenticated(false);
-      // Opcional: limpiar localStorage si está corrupto
-      // localStorage.removeItem('user');
+      // localStorage.removeItem('user'); // Opcional: limpiar si está corrupto
     }
   }, []);
 
@@ -193,10 +194,9 @@ export default function Header() {
               onClick={() => setShowAdisChat(!showAdisChat)}
               className={`${navButtonBaseClasses} ${showAdisChat ? navButtonActiveClasses : navButtonInactiveClasses}`}
               aria-label="Abrir chat con ADIS"
-              aria-expanded={showAdisChat ? "true" : "false"}
+              aria-expanded={!!showAdisChat}
               title="Chat con ADIS"
             >
-
               <SparklesIcon className="w-6 h-6 mb-1" aria-hidden="true" />
               <span className="text-xs">ADIS</span>
             </button>
@@ -227,10 +227,12 @@ export default function Header() {
             {isMounted && isAuthenticated && user ? (
               <div className="relative" ref={userMenuRef}>
                 <button
+                  id="user-menu-button"
                   onClick={toggleUserMenu}
-                  className="flex items-center gap-2 px-3 py-2 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800/60 transition-colors"
+                  className="flex items-center gap-2 px-3 py-2 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800/60 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-teal-500"
                   aria-label="Menú de usuario"
-                  aria-expanded={showUserMenu ? "true" : "false"}
+                  aria-expanded={!!showUserMenu}
+                  aria-controls="user-menu-dropdown"
                   title="Abrir menú de usuario"
                 >
                   <UserCircleIcon className="w-8 h-8 text-slate-600 dark:text-slate-300" aria-hidden="true" />
@@ -240,10 +242,12 @@ export default function Header() {
                 {/* User Menu Dropdown */}
                 {showUserMenu && (
                   <div 
-                    className="absolute right-0 mt-2 w-56 bg-white dark:bg-slate-800 rounded-xl shadow-lg border border-slate-200 dark:border-slate-700 overflow-hidden"
+                    id="user-menu-dropdown"
+                    className="absolute right-0 mt-2 w-56 bg-white dark:bg-slate-800 rounded-xl shadow-lg border border-slate-200 dark:border-slate-700 overflow-hidden focus:outline-none"
                     role="menu"
                     aria-orientation="vertical"
                     aria-labelledby="user-menu-button"
+                    tabIndex={-1}
                   >
                     <div className="px-1.5 py-1.5" role="none">
                       <div className="px-3.5 py-2.5 mb-1">
