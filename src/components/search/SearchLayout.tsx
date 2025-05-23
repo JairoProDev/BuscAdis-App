@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect, type ReactNode } from 'react'
+import { useState, useEffect, type ReactNode, useMemo, useCallback } from 'react'
 import { useRouter, usePathname, useSearchParams } from 'next/navigation'
 import {
     // MapIcon, // Eliminado porque la funcionalidad del mapa fue removida en la versión "después"
@@ -17,6 +17,7 @@ import { CategoriesService } from '@/services/categories.service'
 // import { MapView } from './MapView' // Eliminado porque la funcionalidad del mapa fue removida
 import type { Publication } from '@/types/publications'
 import type { Publication as SearchResultsPublication } from './SearchResults'
+import { isEqual } from 'lodash'
 
 
 type FilterValue = string | number | boolean | (string | number)[] | null;
@@ -124,145 +125,237 @@ export default function SearchLayout({
     totalResults = 0,
     onPublicationClick,
     className = '',
-    useEnhancedSearch = true, // Valor por defecto
+    useEnhancedSearch = true,
 }: SearchLayoutProps) {
     const router = useRouter()
     const pathname = usePathname()
     const searchParams = useSearchParams()
 
-    // Estados del componente
-    const [searchQuery, setSearchQuery] = useState(initialQuery || searchParams?.get('q') || '')
-    const [category, setCategory] = useState(initialCategory || searchParams?.get('category') || '')
-    const [subcategory, setSubcategory] = useState(initialSubcategory || searchParams?.get('subcategory') || '')
-    const [selectedSubSubcategory, setSelectedSubSubcategory] = useState(searchParams?.get('subsubcategory') || '')
+    // Memoize search params to prevent unnecessary re-renders
+    const memoizedSearchParams = useMemo(() => {
+        return {
+            q: searchParams?.get('q') || '',
+            category: searchParams?.get('category') || '',
+            subcategory: searchParams?.get('subcategory') || '',
+            subsubcategory: searchParams?.get('subsubcategory') || ''
+        }
+    }, [searchParams])
+
+    // Estados del componente - Optimizados
+    const [searchQuery, setSearchQuery] = useState(initialQuery || memoizedSearchParams.q)
+    const [category, setCategory] = useState(initialCategory || memoizedSearchParams.category)
+    const [subcategory, setSubcategory] = useState(initialSubcategory || memoizedSearchParams.subcategory)
+    const [selectedSubSubcategory, setSelectedSubSubcategory] = useState(memoizedSearchParams.subsubcategory)
     const [results, setResults] = useState<Publication[]>(initialResults)
     const [listViewMode, setListViewMode] = useState<ViewMode>('grid')
     const [activeFilters, setActiveFilters] = useState<Record<string, FilterValue>>({})
-    const [categoriesData, setCategoriesData] = useState<Array<{ // Renombrado para evitar conflicto con 'category' state
-      id: string,
-      name: string,
-      subcategories?: Array<{
-        id: string,
-        name: string,
-        subsubcategories?: Array<{
-          id: string,
-          name: string
-        }>
-      }>
-    }>>([])
-    // New state for the selected publication in map view
     const [selectedPublication, setSelectedPublication] = useState<Publication | null>(null)
 
-    // Responsive - solo usamos isMobile
+    // Memoize categoriesData to prevent unnecessary re-renders
+    const [categoriesData, setCategoriesData] = useState<Array<{
+        id: string,
+        name: string,
+        subcategories?: Array<{
+            id: string,
+            name: string,
+            subsubcategories?: Array<{
+                id: string,
+                name: string
+            }>
+        }>
+    }>>([])
+
+    // Responsive
     const isMobile = useMediaQuery('(max-width: 640px)')
 
-    // --- Hooks (useEffect para cargar categorías y actualizar resultados) ---
+    // Load categories only once
     useEffect(() => {
+        let mounted = true
         const loadCategories = async () => {
             try {
                 const response = await CategoriesService.getCategories()
-                setCategoriesData(response) // Usar el estado renombrado
+                if (mounted) {
+                    setCategoriesData(response)
+                }
             } catch (error) {
                 console.error('Failed to load categories:', error)
             }
         }
         loadCategories()
+        return () => { mounted = false }
     }, [])
 
+    // Update results only when initialResults changes
     useEffect(() => {
-        // Solo actualiza si initialResults es diferente de nulo/undefined
-        if (initialResults) {
-             setResults(initialResults);
+        if (!isEqual(results, initialResults)) {
+            setResults(initialResults)
         }
-    }, [initialResults]);
+    }, [initialResults])
 
-    // --- Manejadores de eventos (handleSearch, handleCategoryChange, etc.) ---
-    const handleSearch = (query: string, options?: Record<string, string>) => {
+    // Memoize handlers to prevent unnecessary re-renders
+    const handleSearch = useCallback((query: string, options?: Record<string, string>) => {
         setSearchQuery(query)
-        const newParams = new URLSearchParams(searchParams?.toString());
+        const newParams = new URLSearchParams(searchParams?.toString())
 
-        if (query) newParams.set('q', query); else newParams.delete('q');
-        if (options?.category) { setCategory(options.category); newParams.set('category', options.category); }
-        else if (options?.category === '') { setCategory(''); newParams.delete('category');} // Permitir limpiar categoría
+        // Update URL params
+        if (query) newParams.set('q', query); else newParams.delete('q')
+        if (options?.category) { 
+            setCategory(options.category)
+            newParams.set('category', options.category)
+        } else if (options?.category === '') {
+            setCategory('')
+            newParams.delete('category')
+        }
 
-        if (options?.subcategory) { setSubcategory(options.subcategory); newParams.set('subcategory', options.subcategory); }
-        else if (options?.subcategory === '') { setSubcategory(''); newParams.delete('subcategory');}
+        if (options?.subcategory) {
+            setSubcategory(options.subcategory)
+            newParams.set('subcategory', options.subcategory)
+        } else if (options?.subcategory === '') {
+            setSubcategory('')
+            newParams.delete('subcategory')
+        }
 
-
-        if (options?.subsubcategory) { setSelectedSubSubcategory(options.subsubcategory); newParams.set('subsubcategory', options.subsubcategory); }
-        else if (options?.subsubcategory === '') { setSelectedSubSubcategory(''); newParams.delete('subsubcategory');}
-
+        if (options?.subsubcategory) {
+            setSelectedSubSubcategory(options.subsubcategory)
+            newParams.set('subsubcategory', options.subsubcategory)
+        } else if (options?.subsubcategory === '') {
+            setSelectedSubSubcategory('')
+            newParams.delete('subsubcategory')
+        }
 
         const combinedOptions = {
             category: options?.category !== undefined ? options.category : category,
             subcategory: options?.subcategory !== undefined ? options.subcategory : subcategory,
             subsubcategory: options?.subsubcategory !== undefined ? options.subsubcategory : selectedSubSubcategory,
-            ...activeFilters // Incluir filtros activos si es necesario
-        };
+            ...activeFilters
+        }
 
-        router.push(`${pathname}?${newParams.toString()}`, { scroll: false });
+        // Batch URL update with state updates
+        router.push(`${pathname}?${newParams.toString()}`, { scroll: false })
 
         if (onSearch) {
-            onSearch(query, combinedOptions);
-        } else if (onFilterChange) { // Fallback to onFilterChange if onSearch not provided
-            onFilterChange({ ...combinedOptions, q: query });
+            onSearch(query, combinedOptions)
+        } else if (onFilterChange) {
+            onFilterChange({ ...combinedOptions, q: query })
         }
-    }
+    }, [searchParams, category, subcategory, selectedSubSubcategory, activeFilters, pathname, router, onSearch, onFilterChange])
 
-    const handleCategoryChange = (newCategory: string) => {
-        setCategory(newCategory);
-        setSubcategory('');
-        setSelectedSubSubcategory('');
-        setActiveFilters({});
-        const currentQuery = searchQuery || '';
-        const filtersToApply = { category: newCategory, subcategory: '', subsubcategory: '', q: currentQuery };
-
-        // Actualizar URL
-        const params = new URLSearchParams(searchParams?.toString());
-        if (newCategory) params.set('category', newCategory); else params.delete('category');
-        params.delete('subcategory');
-        params.delete('subsubcategory');
-        // Eliminar filtros específicos de atributos al cambiar categoría
-        Object.keys(activeFilters).forEach(key => params.delete(key));
-        router.push(`${pathname}?${params.toString()}`, { scroll: false });
-
-
+    const handleCategoryChange = useCallback((newCategory: string) => {
+        setCategory(newCategory)
+        setSubcategory('')
+        setSelectedSubSubcategory('')
+        setActiveFilters({})
+        
+        const params = new URLSearchParams(searchParams?.toString())
+        if (newCategory) params.set('category', newCategory); else params.delete('category')
+        params.delete('subcategory')
+        params.delete('subsubcategory')
+        
+        // Batch URL update with filter change
+        router.push(`${pathname}?${params.toString()}`, { scroll: false })
+        
         if (onFilterChange) {
-            onFilterChange(filtersToApply);
+            onFilterChange({ 
+                category: newCategory, 
+                subcategory: '', 
+                subsubcategory: '', 
+                q: searchQuery || '' 
+            })
         }
-    }
+    }, [searchParams, pathname, router, onFilterChange, searchQuery])
 
-     const handleSubcategoryChange = (newSubcategory: string) => {
-        setSubcategory(newSubcategory);
-        setSelectedSubSubcategory('');
-        const currentQuery = searchQuery || '';
-        const filtersToApply = { ...activeFilters, category, subcategory: newSubcategory, subsubcategory: '', q: currentQuery };
-
-        // Actualizar URL
-        const params = new URLSearchParams(searchParams?.toString());
-        if (newSubcategory) params.set('subcategory', newSubcategory); else params.delete('subcategory');
-        params.delete('subsubcategory');
-        router.push(`${pathname}?${params.toString()}`, { scroll: false });
-
+    const handleSubcategoryChange = useCallback((newSubcategory: string) => {
+        setSubcategory(newSubcategory)
+        setSelectedSubSubcategory('')
+        
+        const params = new URLSearchParams(searchParams?.toString())
+        if (newSubcategory) params.set('subcategory', newSubcategory); else params.delete('subcategory')
+        params.delete('subsubcategory')
+        
+        router.push(`${pathname}?${params.toString()}`, { scroll: false })
+        
         if (onFilterChange) {
-            onFilterChange(filtersToApply);
+            onFilterChange({ 
+                category, 
+                subcategory: newSubcategory, 
+                subsubcategory: '', 
+                q: searchQuery || '' 
+            })
         }
-    }
+    }, [searchParams, pathname, router, category, onFilterChange, searchQuery])
 
-    const handleSubSubcategoryChange = (newSubSubcategory: string) => {
-        setSelectedSubSubcategory(newSubSubcategory);
-        const currentQuery = searchQuery || '';
-        const filtersToApply = { ...activeFilters, category, subcategory, subsubcategory: newSubSubcategory, q: currentQuery };
-
-        // Actualizar URL
-        const params = new URLSearchParams(searchParams?.toString());
-        if (newSubSubcategory) params.set('subsubcategory', newSubSubcategory); else params.delete('subsubcategory');
-        router.push(`${pathname}?${params.toString()}`, { scroll: false });
-
+    const handleSubSubcategoryChange = useCallback((newSubSubcategory: string) => {
+        setSelectedSubSubcategory(newSubSubcategory)
+        
+        const params = new URLSearchParams(searchParams?.toString())
+        if (newSubSubcategory) params.set('subsubcategory', newSubSubcategory); else params.delete('subsubcategory')
+        
+        router.push(`${pathname}?${params.toString()}`, { scroll: false })
+        
         if (onFilterChange) {
-            onFilterChange(filtersToApply);
+            onFilterChange({ 
+                category, 
+                subcategory, 
+                subsubcategory: newSubSubcategory, 
+                q: searchQuery || '' 
+            })
         }
-    }
+    }, [searchParams, pathname, router, category, subcategory, onFilterChange, searchQuery])
+
+    // Memoize publication click handler
+    const handlePublicationClick = useCallback((pub: Publication, e: React.MouseEvent<HTMLAnchorElement>) => {
+        e.preventDefault()
+        const adapted = reverseAdaptPublication(pub)
+        setSelectedPublication(adapted)
+        
+        const newParams = new URLSearchParams(searchParams?.toString())
+        if (adapted.id) newParams.set('publicationId', adapted.id)
+        if (adapted.title) {
+            const titleSlug = adapted.title.toLowerCase()
+                .replace(/[^\w\s-]/g, '')
+                .replace(/\s+/g, '-')
+            newParams.set('title', titleSlug)
+        }
+        
+        router.push(`${pathname}?${newParams.toString()}`, { scroll: false })
+        
+        if (onPublicationClick) onPublicationClick(adapted, e)
+    }, [searchParams, pathname, router, onPublicationClick])
+
+    // Memoize filter change handler
+    const handleFilterChange = useCallback((key: string, value: FilterValue) => {
+        setActiveFilters(prev => {
+            const updated = { ...prev, [key]: value }
+            if (value === undefined || value === null || value === '' || (Array.isArray(value) && value.length === 0)) {
+                delete updated[key]
+            }
+            
+            const allSearchParams = {
+                ...updated,
+                category,
+                subcategory,
+                subsubcategory: selectedSubSubcategory,
+                q: searchQuery || ''
+            }
+
+            const params = new URLSearchParams()
+            Object.entries(allSearchParams).forEach(([k, v]) => {
+                if (v !== undefined && v !== null && v !== '') {
+                    if (Array.isArray(v)) {
+                        params.set(k, v.join(','))
+                    } else {
+                        params.set(k, String(v))
+                    }
+                }
+            })
+            
+            router.push(`${pathname}?${params.toString()}`, { scroll: false })
+            if (onFilterChange) {
+                onFilterChange(allSearchParams)
+            }
+            return updated
+        })
+    }, [category, subcategory, selectedSubSubcategory, searchQuery, pathname, router, onFilterChange])
 
     // Agregar estos estilos CSS personalizados
     const customStyles = {
@@ -541,39 +634,7 @@ export default function SearchLayout({
                             <FilterChips
                                 category={category}
                                 activeFilters={activeFilters}
-                                onFilterChange={(key, value) => {
-                                    setActiveFilters((prev) => {
-                                        const updated = { ...prev, [key]: value };
-                                        if (value === undefined || value === null || value === '' || (Array.isArray(value) && value.length === 0) ) {
-                                            delete updated[key];
-                                        }
-                                        
-                                        const allSearchParams = {
-                                            ...updated,
-                                            category,
-                                            subcategory,
-                                            subsubcategory: selectedSubSubcategory,
-                                            q: searchQuery || ''
-                                        };
-
-                                        const params = new URLSearchParams();
-                                        Object.entries(allSearchParams).forEach(([k, v]) => {
-                                            if (v !== undefined && v !== null && v !== '') {
-                                                if (Array.isArray(v)) {
-                                                    params.set(k, v.join(',')); // o manejar arrays de otra forma
-                                                } else {
-                                                    params.set(k, String(v));
-                                                }
-                                            }
-                                        });
-                                        
-                                        router.push(`${pathname}?${params.toString()}`, { scroll: false });
-                                        if (onFilterChange) {
-                                            onFilterChange(allSearchParams);
-                                        }
-                                        return updated;
-                                    });
-                                }}
+                                onFilterChange={handleFilterChange}
                                 className="pt-1 pb-0"
                             />
                         </div>
@@ -631,23 +692,7 @@ export default function SearchLayout({
                             loading={loading}
                             activeCategory={category}
                             showInteractionButtons={true}
-                            onPublicationClick={(pub, e) => {
-                                e.preventDefault();
-                                const adapted = reverseAdaptPublication(pub);
-                                setSelectedPublication(adapted);
-                                // Actualizar URL con datos de la publicación seleccionada
-                                const newParams = new URLSearchParams(searchParams?.toString());
-                                if (adapted.id) newParams.set('publicationId', adapted.id);
-                                if (adapted.title) {
-                                    const titleSlug = adapted.title.toLowerCase()
-                                        .replace(/[^\w\s-]/g, '') // remove non-alphanumeric
-                                        .replace(/\s+/g, '-');    // replace spaces with hyphens
-                                    newParams.set('title', titleSlug);
-                                }
-                                router.push(`${pathname}?${newParams.toString()}`, { scroll: false });
-
-                                if (onPublicationClick) onPublicationClick(adapted, e);
-                            }}
+                            onPublicationClick={handlePublicationClick}
                             viewType={listViewMode}
                         />
                     </div>
