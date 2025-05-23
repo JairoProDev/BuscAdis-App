@@ -284,13 +284,13 @@ export default function SearchResults({
         >
           {/* Image Container - Only show if has valid images */}
           {hasImages && publication.images && (
-            <div className="relative aspect-[3/4] overflow-hidden">
+            <div className="relative aspect-[4/5] overflow-hidden">
               <div className="absolute inset-0 bg-gradient-to-b from-black/0 via-black/0 to-black/80 z-10" />
               <Image
                 src={publication.images[0]}
                 alt={`Imagen de ${publication.title || 'publicación'}`}
                 fill
-                sizes="(max-width: 768px) 50vw, (max-width: 1200px) 33vw, 25vw"
+                sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw"
                 className="object-cover transition-transform duration-500 group-hover:scale-105"
                 priority={index < 4}
               />
@@ -629,14 +629,14 @@ export default function SearchResults({
   if (loading && allResults.length === 0) {
     return (
       <div className="w-full">
-        <div className="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-3 gap-3">
+        <div className="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-3 gap-4">
           {Array.from({ length: 6 }).map((_, index) => (
             <div
               key={index}
               className="relative rounded-xl overflow-hidden shadow-lg bg-slate-800/90 backdrop-blur-sm border border-slate-700/50 animate-pulse"
             >
               {/* Shimmer effect for image */}
-              <div className="relative aspect-[3/4] bg-slate-700">
+              <div className="relative aspect-[4/5] bg-slate-700">
                 <div className="absolute inset-0 bg-gradient-to-r from-transparent via-slate-600/20 to-transparent shimmer" />
               </div>
 
@@ -706,10 +706,11 @@ export default function SearchResults({
             <motion.div
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
-              className="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-3 gap-3 auto-rows-auto"
+              className="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-3 gap-4 auto-rows-auto"
               style={{
                 gridAutoFlow: 'dense',
-                gridTemplateRows: 'masonry'
+                gridTemplateRows: 'masonry',
+                maxWidth: '100%'
               }}
             >
               {allResults.map((publication, index) => renderGridItem(publication, index))}

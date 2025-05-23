@@ -481,10 +481,10 @@ export default function SearchLayout({
 
     // --- Renderizado Principal ---
     return (
-        <div className={`w-full max-w-[1600px] mx-auto ${className}`}>
+        <div className={`w-full max-w-screen-xl mx-auto ${className}`}>
             <div className="flex flex-col lg:flex-row w-full">
                 {/* LEFT COLUMN - Search interface and results */}
-                <div className="w-full lg:w-[calc(100%-320px)] lg:pr-4"> {/* Ajustado para dejar espacio fijo para el panel derecho */}
+                <div className="w-full lg:w-[calc(100%-360px)] lg:pr-6">
                     {/* Category selector */}
                     <div className="mb-4">
                         <CategorySelector
@@ -502,10 +502,9 @@ export default function SearchLayout({
                         />
                     </div>
 
-                    {/* Search bar and view controls */}
-                    <div className="flex flex-col sm:flex-row gap-4 items-center mb-4">
+                    {/* Search bar */}
+                    <div className="flex flex-col sm:flex-row gap-4 mb-4">
                         <div className="flex-1 w-full">
-                            {/* --- INICIO DE CORRECCIÓN --- */}
                             {useEnhancedSearch ? (
                                 <KeywordSearchBox
                                     initialValue={searchQuery}
@@ -519,7 +518,6 @@ export default function SearchLayout({
                                     showAiAssist={true}
                                     className="w-full"
                                     isMobile={isMobile}
-                                    loading={loading} // Prop añadida
                                 />
                             ) : (
                                 <AdvancedSearchBar
@@ -532,13 +530,71 @@ export default function SearchLayout({
                                     onSelectSubcategory={handleSubcategoryChange}
                                     onSelectSubSubcategory={handleSubSubcategoryChange}
                                     placeholder="¿Qué estás buscando en BuscAdis?"
-                                    loading={loading} // Prop añadida
                                 />
                             )}
-                            {/* --- FIN DE CORRECCIÓN --- */}
+                        </div>
+                    </div>
+
+                    {/* Filter chips */}
+                    {category && (
+                        <div className="mb-4">
+                            <FilterChips
+                                category={category}
+                                activeFilters={activeFilters}
+                                onFilterChange={(key, value) => {
+                                    setActiveFilters((prev) => {
+                                        const updated = { ...prev, [key]: value };
+                                        if (value === undefined || value === null || value === '' || (Array.isArray(value) && value.length === 0) ) {
+                                            delete updated[key];
+                                        }
+                                        
+                                        const allSearchParams = {
+                                            ...updated,
+                                            category,
+                                            subcategory,
+                                            subsubcategory: selectedSubSubcategory,
+                                            q: searchQuery || ''
+                                        };
+
+                                        const params = new URLSearchParams();
+                                        Object.entries(allSearchParams).forEach(([k, v]) => {
+                                            if (v !== undefined && v !== null && v !== '') {
+                                                if (Array.isArray(v)) {
+                                                    params.set(k, v.join(',')); // o manejar arrays de otra forma
+                                                } else {
+                                                    params.set(k, String(v));
+                                                }
+                                            }
+                                        });
+                                        
+                                        router.push(`${pathname}?${params.toString()}`, { scroll: false });
+                                        if (onFilterChange) {
+                                            onFilterChange(allSearchParams);
+                                        }
+                                        return updated;
+                                    });
+                                }}
+                                className="pt-1 pb-0"
+                            />
+                        </div>
+                    )}
+
+                    {/* Result header with view toggle */}
+                    <div className="flex items-center justify-between mb-4">
+                        <div>
+                            <h1 className="text-xl font-bold text-white dark:text-white">
+                                {searchQuery ? `Resultados para "${searchQuery}"` :
+                                 selectedSubSubcategory && subcategory && category ? `${categoriesData.find(c => c.id === category)?.name} > ${categoriesData.find(c => c.id === category)?.subcategories?.find(sc => sc.id === subcategory)?.name} > ${categoriesData.find(c => c.id === category)?.subcategories?.find(sc => sc.id === subcategory)?.subsubcategories?.find(ssc => ssc.id === selectedSubSubcategory)?.name}` :
+                                 subcategory && category ? `${categoriesData.find(c => c.id === category)?.name} > ${categoriesData.find(c => c.id === category)?.subcategories?.find(sc => sc.id === subcategory)?.name}` :
+                                 category ? categoriesData.find(c => c.id === category)?.name :
+                                'Todos los anuncios'}
+                            </h1>
+                            <p className="text-sm text-slate-400 dark:text-slate-400">
+                                {loading && results.length === 0 ? 'Buscando...' : `${totalResults || results.length} anuncios encontrados`}
+                            </p>
                         </div>
 
-                        {/* View mode toggle */}
+                        {/* View mode toggle - Moved here */}
                         <div className="inline-flex items-center gap-1 bg-white dark:bg-slate-800 rounded-lg p-1 border border-slate-200 dark:border-slate-700 shadow-sm">
                             <button
                                 className={`p-2 rounded transition-colors duration-200 ${
@@ -567,77 +623,13 @@ export default function SearchLayout({
                             </button>
                         </div>
                     </div>
-                     {/* Filter chips - constrained to left column */}
-                     {category && (
-                        <div className="mb-4">
-                            <div className={`overflow-x-auto pb-2 ${customStyles.scrollbarThin}`}>
-                                <div className="flex flex-nowrap w-full">
-                                    <FilterChips
-                                        category={category}
-                                        activeFilters={activeFilters}
-                                        onFilterChange={(key, value) => {
-                                            setActiveFilters((prev) => {
-                                                const updated = { ...prev, [key]: value };
-                                                if (value === undefined || value === null || value === '' || (Array.isArray(value) && value.length === 0) ) {
-                                                    delete updated[key];
-                                                }
-                                                
-                                                const allSearchParams = {
-                                                    ...updated,
-                                                    category,
-                                                    subcategory,
-                                                    subsubcategory: selectedSubSubcategory,
-                                                    q: searchQuery || ''
-                                                };
-
-                                                const params = new URLSearchParams();
-                                                Object.entries(allSearchParams).forEach(([k, v]) => {
-                                                    if (v !== undefined && v !== null && v !== '') {
-                                                        if (Array.isArray(v)) {
-                                                            params.set(k, v.join(',')); // o manejar arrays de otra forma
-                                                        } else {
-                                                            params.set(k, String(v));
-                                                        }
-                                                    }
-                                                });
-                                                
-                                                router.push(`${pathname}?${params.toString()}`, { scroll: false });
-                                                if (onFilterChange) {
-                                                    onFilterChange(allSearchParams);
-                                                }
-                                                return updated;
-                                            });
-                                        }}
-                                        className="pt-1 pb-0"
-                                    />
-                                </div>
-                            </div>
-                        </div>
-                    )}
-                    {/* Result header */}
-                    <div className="mb-4">
-                        <h1 className="text-xl font-bold text-white dark:text-white">
-                            {searchQuery ? `Resultados para "${searchQuery}"` :
-                             selectedSubSubcategory && subcategory && category && categoriesData.find(c => c.id === category)?.subcategories?.find(sc => sc.id === subcategory)?.subsubcategories?.find(ssc => ssc.id === selectedSubSubcategory)?.name ?
-                                `${categoriesData.find(c => c.id === category)?.name} > ${categoriesData.find(c => c.id === category)?.subcategories?.find(sc => sc.id === subcategory)?.name} > ${categoriesData.find(c => c.id === category)?.subcategories?.find(sc => sc.id === subcategory)?.subsubcategories?.find(ssc => ssc.id === selectedSubSubcategory)?.name}`:
-                             subcategory && category && categoriesData.find(c => c.id === category)?.subcategories?.find(sc => sc.id === subcategory)?.name ?
-                                `${categoriesData.find(c => c.id === category)?.name} > ${categoriesData.find(c => c.id === category)?.subcategories?.find(sc => sc.id === subcategory)?.name}` :
-                             category && categoriesData.find(c => c.id === category)?.name ?
-                                categoriesData.find(c => c.id === category)?.name :
-                            'Todos los anuncios'}
-                        </h1>
-                        <p className="text-sm text-slate-400 dark:text-slate-400">
-                            {loading && results.length === 0 ? 'Buscando...' : `${totalResults || results.length} anuncios encontrados`}
-                        </p>
-                    </div>
-
 
                     {/* Search results */}
-                    <div className="pr-2 pb-8"> {/* Podrías remover pr-2 si la columna derecha ya no tiene padding que compensar */}
+                    <div className="pr-2 pb-8">
                         <SearchResults
                             results={results.map(adaptPublicationForSearchResults)}
                             loading={loading}
-                            activeCategory={category} // Pasar la categoría activa
+                            activeCategory={category}
                             showInteractionButtons={true}
                             onPublicationClick={(pub, e) => {
                                 e.preventDefault();
@@ -658,26 +650,13 @@ export default function SearchLayout({
                             }}
                             viewType={listViewMode}
                         />
-
-                        {/* Load more button */}
-                        {hasMore && onLoadMore && ( // Asegurarse que onLoadMore exista
-                            <div className="mt-6 mb-4 text-center">
-                                <button
-                                    onClick={onLoadMore}
-                                    disabled={loading}
-                                    className={`px-6 py-2 bg-gradient-to-r from-teal-500 to-cyan-500 hover:from-teal-600 hover:to-cyan-600 text-white rounded-lg shadow-md transition-colors ${loading ? 'opacity-50 cursor-not-allowed' : ''}`}
-                                >
-                                    {loading ? 'Cargando...' : 'Cargar más resultados'}
-                                </button>
-                            </div>
-                        )}
                     </div>
                 </div>
 
                 {/* RIGHT COLUMN - Publication details */}
-                {selectedPublication && !isMobile && ( // No mostrar en mobile, se manejaría con un modal/bottom sheet
-                    <div className="hidden lg:block lg:w-1/4 lg:pl-4"> {/* Ajustado pl para menor espacio si es necesario */}
-                        <div className="sticky top-4 h-[calc(100vh-2rem)] overflow-y-auto custom-scrollbar"> {/* Ajuste de altura y scrollbar */}
+                <div className="hidden lg:block lg:w-[360px]">
+                    {selectedPublication && !isMobile && (
+                        <div className="sticky top-4 h-[calc(100vh-2rem)] overflow-y-auto custom-scrollbar">
                             <PublicationDetailsPanel
                                 publication={selectedPublication}
                                 onClose={() => {
@@ -689,25 +668,8 @@ export default function SearchLayout({
                                 }}
                             />
                         </div>
-                    </div>
-                )}
-                 {/* Mobile: Show selected publication as a modal or bottom sheet (example) */}
-                {selectedPublication && isMobile && (
-                    <div className="fixed inset-0 bg-black/50 z-40 flex items-end" onClick={() => setSelectedPublication(null)}>
-                        <div className="bg-slate-800 w-full max-h-[80vh] rounded-t-xl p-4 overflow-y-auto" onClick={e => e.stopPropagation()}>
-                             <PublicationDetailsPanel
-                                publication={selectedPublication}
-                                onClose={() => {
-                                    setSelectedPublication(null);
-                                    const newParams = new URLSearchParams(searchParams?.toString());
-                                    newParams.delete('publicationId');
-                                    newParams.delete('title');
-                                    router.push(`${pathname}?${newParams.toString()}`, { scroll: false });
-                                }}
-                            />
-                        </div>
-                    </div>
-                )}
+                    )}
+                </div>
             </div>
             <style jsx global>{`
                 .custom-scrollbar::-webkit-scrollbar {
