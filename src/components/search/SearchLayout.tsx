@@ -481,7 +481,7 @@ export default function SearchLayout({
 
     // --- Renderizado Principal ---
     return (
-        <div className={`w-full max-w-screen-xl mx-auto ${className}`}>
+        <div className={`w-full mx-auto ${className}`}>
             <div className="flex flex-col lg:flex-row w-full">
                 {/* LEFT COLUMN - Search interface and results */}
                 <div className="w-full lg:w-[calc(100%-360px)] lg:pr-6">

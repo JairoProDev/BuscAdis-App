@@ -454,7 +454,7 @@ export default function BuscadorPage() {
   if (isInitialLoad && loading) {
     return (
       <div className="min-h-screen bg-slate-900">
-        <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-4">
+        <div className="mx-auto px-4 sm:px-6 lg:px-2 py-1">
           {/* Search bar skeleton */}
           <div className="mb-6 max-w-3xl mx-auto">
             <div className="h-12 bg-slate-800/60 rounded-xl animate-pulse"></div>
@@ -529,7 +529,7 @@ export default function BuscadorPage() {
   
   return (
     <main className="w-full bg-slate-900 min-h-screen text-white">
-      <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8 lg:py-12">
+      <div className="px-1 sm:px-6 lg:px-2 py-6 sm:py-2 lg:py-3">
         <SearchLayout
           initialResults={results}
           initialCategory={searchState.category}

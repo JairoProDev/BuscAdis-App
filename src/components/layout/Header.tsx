@@ -147,7 +147,7 @@ export default function Header() {
 
   return (
     <header className="sticky top-0 z-[1000] w-full bg-white/80 dark:bg-slate-900/80 backdrop-blur-lg border-b border-slate-200 dark:border-slate-700/50 shadow-sm transition-colors duration-300">
-      <div className="max-w-screen-xl mx-auto px-4 sm:px-6 lg:px-8"> {/* Ajustado max-w y padding */}
+      <div className="mx-auto px-4 sm:px-6 lg:px-8"> {/* Ajustado max-w y padding */}
         <div className="flex items-center justify-between h-16 md:h-20"> {/* Altura adaptable */}
           {/* Logo */}
           <Link href="/" className="flex items-center gap-2.5 select-none group" aria-label="Página de inicio de BuscAdis">
