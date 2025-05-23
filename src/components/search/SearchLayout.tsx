@@ -3,36 +3,22 @@
 import { useState, useEffect, type ReactNode } from 'react'
 import { useRouter, usePathname, useSearchParams } from 'next/navigation'
 import {
-    MapIcon,
+    // MapIcon, // Eliminado porque la funcionalidad del mapa fue removida en la versión "después"
     Squares2X2Icon,
     ListBulletIcon
 } from '@heroicons/react/24/outline'
 import SearchResults from './SearchResults'
 import useMediaQuery from '@/hooks/useMediaQuery'
-import AdvancedSearchBar from './AdvancedSearchBar'
-import KeywordSearchBox from './KeywordSearchBox'
+import AdvancedSearchBar from './AdvancedSearchBar' // Asegúrate que la ruta sea correcta
+import KeywordSearchBox from './KeywordSearchBox'   // Asegúrate que la ruta sea correcta
 import CategorySelector from './CategorySelector'
 import FilterChips from '@/components/search/FilterChips'
 import { CategoriesService } from '@/services/categories.service'
-import { MapView } from './MapView'
+// import { MapView } from './MapView' // Eliminado porque la funcionalidad del mapa fue removida
 import type { Publication } from '@/types/publications'
 import type { Publication as SearchResultsPublication } from './SearchResults'
 
-// Remove this placeholder component since we have the real MapView component
-// const MapComponent = ({ 
-//   className = '' 
-// }: { 
-//   publications?: Publication[],
-//   loading?: boolean,
-//   onMarkerClick?: (publication: Publication, e: React.MouseEvent<Element>) => void,
-//   className?: string
-// }) => (
-//   <div className={`${className} flex items-center justify-center`}>
-//     <p className="text-slate-400">Vista de mapa en desarrollo</p>
-//   </div>
-// );
 
-// Agregar estas definiciones de tipos cerca del inicio del archivo, antes de las interfaces
 type FilterValue = string | number | boolean | (string | number)[] | null;
 
 interface SearchLayoutProps {
@@ -46,7 +32,6 @@ interface SearchLayoutProps {
     onLoadMore?: () => void
     hasMore?: boolean
     totalResults?: number
-    showMap?: boolean
     onPublicationClick?: (publication: Publication, e: React.MouseEvent<HTMLAnchorElement>) => void
     children?: ReactNode
     className?: string
@@ -62,11 +47,26 @@ function adaptPublicationForSearchResults(pub: Publication): SearchResultsPublic
     id: String(pub._id || pub.id || 'fallback-id'),
     price: pub.amount ?? 0,
     contactName: pub.contact?.name || '',
+    contactPhone: pub.contact?.phones?.[0] || '', // Agregado para SearchResults
     currency: pub.currency || 'PEN',
-    status: 'active',
-    location: pub.location && typeof pub.location === 'object' ? { ...pub.location, district: pub.location.district || undefined, address: pub.location.address || '' } : '',
+    status: 'active', // Asumiendo que todas las que llegan aquí están activas
+    location: pub.location && typeof pub.location === 'object'
+        ? {
+            city: pub.location.city || undefined,
+            region: pub.location.region || undefined,
+            district: pub.location.district || undefined,
+            province: pub.location.province || undefined,
+            address: pub.location.address || '',
+            neighborhood: pub.location.neighborhood || undefined,
+          }
+        : (typeof pub.location === 'string' ? pub.location : 'Ubicación no especificada'),
     createdAt: pub.createdAt ? new Date(pub.createdAt).toISOString() : new Date().toISOString(),
     attributes: pub.attributes || {},
+    images: pub.images || [],
+    premium: pub.premium || false,
+    slug: pub.slug || undefined,
+    categorySlug: pub.categorySlug || 'unknown',
+    subcategorySlug: pub.subcategorySlug || undefined,
     subSubcategorySlug: pub.subSubcategorySlug || undefined,
     // Otros campos según necesidad
   };
@@ -74,22 +74,40 @@ function adaptPublicationForSearchResults(pub: Publication): SearchResultsPublic
 
 // Función para adaptar de vuelta si es necesario (reverseAdapter)
 function reverseAdaptPublication(pub: SearchResultsPublication): Publication {
+  const originalLocation = typeof pub.location === 'object'
+    ? {
+        city: pub.location.city,
+        region: pub.location.region,
+        district: pub.location.district,
+        province: pub.location.province,
+        address: pub.location.address,
+        neighborhood: pub.location.neighborhood,
+        // Asegúrate de que `coordinates` se maneje si es necesario
+      }
+    : { province: 'Cusco', address: pub.location || '' }; // Fallback si es string
+
   return {
-    _id: String(pub.id || 'fallback-id'),
+    _id: String(pub.id || 'fallback-id'), // Asumiendo que quieres mantener _id
     id: String(pub.id || 'fallback-id'),
-    amount: pub.price ?? 0,
-    contact: { name: pub.contactName || '', phones: pub.contact?.phones || [] },
-    currency: pub.currency || 'PEN',
-    location: pub.location && typeof pub.location === 'object' ? { ...pub.location, district: pub.location.district || undefined, address: pub.location.address || '' } : { province: 'Cusco', address: '' },
-    createdAt: pub.createdAt ? new Date(pub.createdAt) : undefined,
     title: pub.title,
     description: pub.description,
-    images: pub.images,
+    amount: pub.price ?? 0,
+    currency: pub.currency || 'PEN',
     categorySlug: pub.categorySlug,
     subcategorySlug: pub.subcategorySlug,
-    subSubcategorySlug: pub.subSubcategorySlug || undefined,
+    subSubcategorySlug: pub.subSubcategorySlug,
+    location: originalLocation as any, // Puede requerir un tipado más específico
+    contact: {
+        name: pub.contactName || '',
+        phones: pub.contactPhone ? [pub.contactPhone] : [],
+        email: pub.contactEmail || undefined
+    },
+    images: pub.images,
+    premium: pub.premium,
     attributes: pub.attributes || {},
-    // ...otros campos obligatorios
+    createdAt: pub.createdAt ? new Date(pub.createdAt) : undefined,
+    slug: pub.slug,
+    // ...otros campos obligatorios de tu tipo Publication
   } as Publication;
 }
 
@@ -104,10 +122,9 @@ export default function SearchLayout({
     onLoadMore,
     hasMore = false,
     totalResults = 0,
-    showMap = true,
     onPublicationClick,
     className = '',
-    useEnhancedSearch = true,
+    useEnhancedSearch = true, // Valor por defecto
 }: SearchLayoutProps) {
     const router = useRouter()
     const pathname = usePathname()
@@ -121,8 +138,8 @@ export default function SearchLayout({
     const [results, setResults] = useState<Publication[]>(initialResults)
     const [listViewMode, setListViewMode] = useState<ViewMode>('grid')
     const [activeFilters, setActiveFilters] = useState<Record<string, FilterValue>>({})
-    const [categories, setCategories] = useState<Array<{ 
-      id: string, 
+    const [categoriesData, setCategoriesData] = useState<Array<{ // Renombrado para evitar conflicto con 'category' state
+      id: string,
       name: string,
       subcategories?: Array<{
         id: string,
@@ -135,8 +152,6 @@ export default function SearchLayout({
     }>>([])
     // New state for the selected publication in map view
     const [selectedPublication, setSelectedPublication] = useState<Publication | null>(null)
-    // State to control map visibility
-    const [isMapVisible, setIsMapVisible] = useState(true)
 
     // Responsive - solo usamos isMobile
     const isMobile = useMediaQuery('(max-width: 640px)')
@@ -146,7 +161,7 @@ export default function SearchLayout({
         const loadCategories = async () => {
             try {
                 const response = await CategoriesService.getCategories()
-                setCategories(response)
+                setCategoriesData(response) // Usar el estado renombrado
             } catch (error) {
                 console.error('Failed to load categories:', error)
             }
@@ -161,20 +176,6 @@ export default function SearchLayout({
         }
     }, [initialResults]);
 
-    // Add a function to handle publication selection in the map
-    const handleSelectPublication = (publication: Publication | null) => {
-        setSelectedPublication(publication);
-    }
-
-    // Toggle map visibility
-    const toggleMapVisibility = () => {
-        setIsMapVisible(!isMapVisible);
-        if (selectedPublication && !isMapVisible) {
-            // If we're showing the map again and there's a selected publication, clear it
-            setSelectedPublication(null);
-        }
-    }
-
     // --- Manejadores de eventos (handleSearch, handleCategoryChange, etc.) ---
     const handleSearch = (query: string, options?: Record<string, string>) => {
         setSearchQuery(query)
@@ -182,13 +183,20 @@ export default function SearchLayout({
 
         if (query) newParams.set('q', query); else newParams.delete('q');
         if (options?.category) { setCategory(options.category); newParams.set('category', options.category); }
+        else if (options?.category === '') { setCategory(''); newParams.delete('category');} // Permitir limpiar categoría
+
         if (options?.subcategory) { setSubcategory(options.subcategory); newParams.set('subcategory', options.subcategory); }
+        else if (options?.subcategory === '') { setSubcategory(''); newParams.delete('subcategory');}
+
+
         if (options?.subsubcategory) { setSelectedSubSubcategory(options.subsubcategory); newParams.set('subsubcategory', options.subsubcategory); }
+        else if (options?.subsubcategory === '') { setSelectedSubSubcategory(''); newParams.delete('subsubcategory');}
+
 
         const combinedOptions = {
-            category: options?.category || category,
-            subcategory: options?.subcategory || subcategory,
-            subsubcategory: options?.subsubcategory || selectedSubSubcategory,
+            category: options?.category !== undefined ? options.category : category,
+            subcategory: options?.subcategory !== undefined ? options.subcategory : subcategory,
+            subsubcategory: options?.subsubcategory !== undefined ? options.subsubcategory : selectedSubSubcategory,
             ...activeFilters // Incluir filtros activos si es necesario
         };
 
@@ -257,7 +265,6 @@ export default function SearchLayout({
     }
 
     // Agregar estos estilos CSS personalizados
-    // En algún lugar cerca del final del archivo, antes del return final
     const customStyles = {
         scrollbarThin: "scrollbar-thin scrollbar-thumb-slate-600 scrollbar-track-transparent hover:scrollbar-thumb-slate-500",
         cardHover: "transition-transform duration-200 hover:translate-y-[-4px] hover:shadow-lg",
@@ -265,10 +272,8 @@ export default function SearchLayout({
         slateGradient: "bg-gradient-to-b from-slate-800 to-slate-900"
     };
 
-    // 5. Modulariza la vista de detalles de publicación
+    // Modulariza la vista de detalles de publicación
     function PublicationDetailsPanel({ publication, onClose }: { publication: Publication, onClose: () => void }) {
-        // Preparado para el futuro bottom sheet en mobile
-        // TODO: Cuando se implemente el bottom sheet, envolver este panel en una animación y superposición
         return (
             <aside
                 className="bg-white dark:bg-slate-800 rounded-xl overflow-hidden border border-slate-200 dark:border-slate-700 shadow-md h-full flex flex-col"
@@ -335,7 +340,7 @@ export default function SearchLayout({
                                             currency: publication.currency || 'PEN',
                                             maximumFractionDigits: 0
                                         }).format(publication.amount)}
-                                        {publication.negotiable && (
+                                        {(publication as any).negotiable && ( // Type assertion if negotiable is not in Publication
                                             <span className="text-sm font-normal text-teal-500 dark:text-teal-300 ml-2">Negociable</span>
                                         )}
                                     </p>
@@ -348,7 +353,7 @@ export default function SearchLayout({
                                     <span>Publicado {publication.createdAt ? new Date(publication.createdAt).toLocaleDateString() : 'recientemente'}</span>
                                 </div>
                             </div>
-                            {/* Botones de acción (favorito, compartir) */}
+                            {/* Botones de acción (compartir) */}
                             <div className="flex items-center gap-2 mt-2">
                                 <button
                                     className="flex items-center gap-1 py-1 px-3 bg-slate-100 hover:bg-slate-200 dark:bg-slate-700 dark:hover:bg-slate-600 text-slate-600 dark:text-white rounded-lg transition-colors"
@@ -362,7 +367,7 @@ export default function SearchLayout({
                             </div>
                         </div>
                         {/* Ubicación */}
-                        {publication.location && (
+                        {publication.location && typeof publication.location === 'object' && (
                             <div className="mb-4 bg-slate-750 p-3 rounded-lg">
                                 <h3 className="text-lg font-semibold text-white mb-2 flex items-center">
                                     <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2 text-teal-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -372,9 +377,9 @@ export default function SearchLayout({
                                     Ubicación
                                 </h3>
                                 <p className="text-slate-300">
-                                    {[publication.location.address, publication.location.district, publication.location.province].filter(Boolean).join(', ')}
+                                    {[(publication.location as any).address, (publication.location as any).district, (publication.location as any).province].filter(Boolean).join(', ')}
                                 </p>
-                                {publication.location.coordinates && (
+                                {(publication.location as any).coordinates && (
                                     <div className="mt-2 h-24 bg-slate-700 rounded-lg flex items-center justify-center">
                                         <span className="text-sm text-slate-400">Ver ubicación en mapa</span>
                                     </div>
@@ -396,7 +401,7 @@ export default function SearchLayout({
                                     {Object.entries(publication.attributes).map(([key, value]) => (
                                         typeof value === 'string' || typeof value === 'number' || typeof value === 'boolean' ? (
                                             <div key={key} className="flex items-center p-2 bg-slate-750 rounded-lg">
-                                                <span className="text-teal-400 font-medium mr-2">{key}:</span>
+                                                <span className="text-teal-400 font-medium mr-2 capitalize">{key.replace(/_/g, ' ')}:</span>
                                                 <span className="text-slate-300">{String(value)}</span>
                                             </div>
                                         ) : null
@@ -409,12 +414,12 @@ export default function SearchLayout({
                             <h3 className="text-lg font-semibold text-white mb-2">Contacto</h3>
                             <div className="flex items-center mb-2">
                                 <div className="w-10 h-10 rounded-full bg-slate-600 flex items-center justify-center text-white font-bold mr-3">
-                                    {publication.contact?.name?.charAt(0) || 'U'}
+                                    {publication.contact?.name?.charAt(0).toUpperCase() || 'U'}
                                 </div>
                                 <div>
                                     <p className="font-medium text-white">{publication.contact?.name || 'Usuario de BuscAdis'}</p>
-                                    {publication.createdAt && (
-                                        <p className="text-sm text-slate-400">Miembro desde {new Date(publication.createdAt).getFullYear()}</p>
+                                    {(publication as any).userSince && ( // Assuming userSince might be a property
+                                        <p className="text-sm text-slate-400">Miembro desde {new Date((publication as any).userSince).getFullYear()}</p>
                                     )}
                                 </div>
                             </div>
@@ -453,6 +458,13 @@ export default function SearchLayout({
                                 className="w-full flex items-center justify-center gap-2 py-2 bg-slate-700 hover:bg-slate-600 text-white font-medium rounded-lg transition-colors"
                                 aria-label="Ver completo"
                                 title="Ver anuncio completo"
+                                onClick={() => {
+                                    if (selectedPublication?.slug) { // Asumiendo que quieres navegar al slug
+                                        router.push(`/anuncio/${selectedPublication.slug}/${selectedPublication.id}`);
+                                    } else if (selectedPublication?.id) {
+                                        router.push(`/anuncio/${selectedPublication.id}`);
+                                    }
+                                }}
                             >
                                 <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
@@ -467,14 +479,13 @@ export default function SearchLayout({
         );
     }
 
-    // --- Renderizado Principal - COMPLETAMENTE RESTRUCTURADO
+    // --- Renderizado Principal ---
     return (
-        <div className={`w-full ${className}`}>
-            {/* COMPLETELY RESTRUCTURED: Fixed two-column layout */}
+        <div className={`w-full max-w-[1600px] mx-auto ${className}`}>
             <div className="flex flex-col lg:flex-row w-full">
                 {/* LEFT COLUMN - Search interface and results */}
-                <div className="w-full lg:w-3/5 lg:pr-6">
-                    {/* Category selector - constrained to left column */}
+                <div className="w-full lg:w-[calc(100%-320px)] lg:pr-4"> {/* Ajustado para dejar espacio fijo para el panel derecho */}
+                    {/* Category selector */}
                     <div className="mb-4">
                         <CategorySelector
                             activeCategory={category}
@@ -490,108 +501,45 @@ export default function SearchLayout({
                             maxVisible={isMobile ? 4 : 8}
                         />
                     </div>
-                    
-                    {/* Search bar - constrained to left column */}
-                    <div className="mb-4">
-                        {useEnhancedSearch ? (
-                            <KeywordSearchBox
-                                initialValue={searchQuery}
-                                onSearch={handleSearch}
-                                appearance="dark"
-                                showLabel={false}
-                                autoFocus={false}
-                                placeholder="¿Qué estás buscando hoy?"
-                                showVoiceSearch={true}
-                                showImageSearch={true}
-                                showAiAssist={true}
-                                className="w-full"
-                                isMobile={isMobile}
-                            />
-                        ) : (
-                            <AdvancedSearchBar
-                                initialValue={searchQuery}
-                                onSearch={handleSearch}
-                                selectedCategory={category}
-                                selectedSubcategory={subcategory}
-                                selectedSubSubcategory={selectedSubSubcategory}
-                                onSelectCategory={handleCategoryChange}
-                                onSelectSubcategory={handleSubcategoryChange}
-                                onSelectSubSubcategory={handleSubSubcategoryChange}
-                                placeholder="¿Qué estás buscando en BuscAdis?"
-                            />
-                        )}
-                    </div>
-                    
-                    {/* Filter chips - constrained to left column */}
-                    {category && (
-                        <div className="mb-4">
-                            <div className={`overflow-x-auto pb-2 ${customStyles.scrollbarThin}`}>
-                                <div className="flex flex-nowrap w-full">
-                                    <FilterChips
-                                        category={category}
-                                        activeFilters={activeFilters}
-                                        onFilterChange={(key, value) => {
-                                            // Solo actualiza el filtro individual
-                                            setActiveFilters((prev) => {
-                                                const updated = { ...prev, [key]: value };
-                                                // Elimina si el valor es null, undefined o vacío
-                                                if (value === undefined || value === null || value === '') {
-                                                    delete updated[key];
-                                                }
-                                                // Actualiza la URL y notifica
-                                                const params = new URLSearchParams(searchParams?.toString());
-                                                Object.entries(updated).forEach(([k, v]) => {
-                                                    if (v !== undefined && v !== null && v !== '') {
-                                                        params.set(k, String(v));
-                                                    } else {
-                                                        params.delete(k);
-                                                    }
-                                                });
-                                                if (category) params.set('category', category);
-                                                if (subcategory) params.set('subcategory', subcategory);
-                                                if (selectedSubSubcategory) params.set('subsubcategory', selectedSubSubcategory);
-                                                if (searchQuery) params.set('q', searchQuery);
-                                                router.push(`${pathname}?${params.toString()}`, { scroll: false });
-                                                if (onFilterChange) {
-                                                    onFilterChange({
-                                                        ...updated,
-                                                        category,
-                                                        subcategory,
-                                                        subsubcategory: selectedSubSubcategory,
-                                                        q: searchQuery || ''
-                                                    });
-                                                }
-                                                return updated;
-                                            });
-                                        }}
-                                        className="pt-1 pb-0"
-                                    />
-                                </div>
-                            </div>
-                        </div>
-                    )}
-                    
-                    {/* Result header and view toggles - constrained to left column */}
-                    <div className="flex items-center justify-between mb-4">
-                        <div>
-                            <h1 className="text-xl font-bold text-white dark:text-white">
-                                {searchQuery ? `Resultados para "${searchQuery}"` :
-                                 selectedSubSubcategory && subcategory && category ? 
-                                   categories.find(c => c.id === category)?.subcategories?.find(sc => sc.id === subcategory)?.subsubcategories?.find(ssc => ssc.id === selectedSubSubcategory)?.name :
-                                 subcategory && category ?
-                                   categories.find(c => c.id === category)?.subcategories?.find(sc => sc.id === subcategory)?.name :
-                                 category ? 
-                                   categories.find(c => c.id === category)?.name :
-                                 'Todos los anuncios'}
-                            </h1>
-                            <p className="text-sm text-slate-400 dark:text-slate-400">
-                                {loading ? 'Buscando...' : `${totalResults || results.length} anuncios encontrados`}
-                            </p>
+
+                    {/* Search bar and view controls */}
+                    <div className="flex flex-col sm:flex-row gap-4 items-center mb-4">
+                        <div className="flex-1 w-full">
+                            {/* --- INICIO DE CORRECCIÓN --- */}
+                            {useEnhancedSearch ? (
+                                <KeywordSearchBox
+                                    initialValue={searchQuery}
+                                    onSearch={handleSearch}
+                                    appearance="dark"
+                                    showLabel={false}
+                                    autoFocus={false}
+                                    placeholder="¿Qué buscas?"
+                                    showVoiceSearch={true}
+                                    showImageSearch={true}
+                                    showAiAssist={true}
+                                    className="w-full"
+                                    isMobile={isMobile}
+                                    loading={loading} // Prop añadida
+                                />
+                            ) : (
+                                <AdvancedSearchBar
+                                    initialValue={searchQuery}
+                                    onSearch={handleSearch}
+                                    selectedCategory={category}
+                                    selectedSubcategory={subcategory}
+                                    selectedSubSubcategory={selectedSubSubcategory}
+                                    onSelectCategory={handleCategoryChange}
+                                    onSelectSubcategory={handleSubcategoryChange}
+                                    onSelectSubSubcategory={handleSubSubcategoryChange}
+                                    placeholder="¿Qué estás buscando en BuscAdis?"
+                                    loading={loading} // Prop añadida
+                                />
+                            )}
+                            {/* --- FIN DE CORRECCIÓN --- */}
                         </div>
 
-                        {/* View toggle buttons - ONLY IN LEFT COLUMN */}
+                        {/* View mode toggle */}
                         <div className="inline-flex items-center gap-1 bg-white dark:bg-slate-800 rounded-lg p-1 border border-slate-200 dark:border-slate-700 shadow-sm">
-                            {/* Grid view button */}
                             <button
                                 className={`p-2 rounded transition-colors duration-200 ${
                                     listViewMode === 'grid'
@@ -605,7 +553,6 @@ export default function SearchLayout({
                                 <Squares2X2Icon className="w-5 h-5" />
                             </button>
 
-                            {/* List view button */}
                             <button
                                 className={`p-2 rounded transition-colors duration-200 ${
                                     listViewMode === 'list'
@@ -620,35 +567,100 @@ export default function SearchLayout({
                             </button>
                         </div>
                     </div>
-                    
-                    {/* Search results - scrollable area in left column */}
-                    <div className="pr-2 pb-8">
+                     {/* Filter chips - constrained to left column */}
+                     {category && (
+                        <div className="mb-4">
+                            <div className={`overflow-x-auto pb-2 ${customStyles.scrollbarThin}`}>
+                                <div className="flex flex-nowrap w-full">
+                                    <FilterChips
+                                        category={category}
+                                        activeFilters={activeFilters}
+                                        onFilterChange={(key, value) => {
+                                            setActiveFilters((prev) => {
+                                                const updated = { ...prev, [key]: value };
+                                                if (value === undefined || value === null || value === '' || (Array.isArray(value) && value.length === 0) ) {
+                                                    delete updated[key];
+                                                }
+                                                
+                                                const allSearchParams = {
+                                                    ...updated,
+                                                    category,
+                                                    subcategory,
+                                                    subsubcategory: selectedSubSubcategory,
+                                                    q: searchQuery || ''
+                                                };
+
+                                                const params = new URLSearchParams();
+                                                Object.entries(allSearchParams).forEach(([k, v]) => {
+                                                    if (v !== undefined && v !== null && v !== '') {
+                                                        if (Array.isArray(v)) {
+                                                            params.set(k, v.join(',')); // o manejar arrays de otra forma
+                                                        } else {
+                                                            params.set(k, String(v));
+                                                        }
+                                                    }
+                                                });
+                                                
+                                                router.push(`${pathname}?${params.toString()}`, { scroll: false });
+                                                if (onFilterChange) {
+                                                    onFilterChange(allSearchParams);
+                                                }
+                                                return updated;
+                                            });
+                                        }}
+                                        className="pt-1 pb-0"
+                                    />
+                                </div>
+                            </div>
+                        </div>
+                    )}
+                    {/* Result header */}
+                    <div className="mb-4">
+                        <h1 className="text-xl font-bold text-white dark:text-white">
+                            {searchQuery ? `Resultados para "${searchQuery}"` :
+                             selectedSubSubcategory && subcategory && category && categoriesData.find(c => c.id === category)?.subcategories?.find(sc => sc.id === subcategory)?.subsubcategories?.find(ssc => ssc.id === selectedSubSubcategory)?.name ?
+                                `${categoriesData.find(c => c.id === category)?.name} > ${categoriesData.find(c => c.id === category)?.subcategories?.find(sc => sc.id === subcategory)?.name} > ${categoriesData.find(c => c.id === category)?.subcategories?.find(sc => sc.id === subcategory)?.subsubcategories?.find(ssc => ssc.id === selectedSubSubcategory)?.name}`:
+                             subcategory && category && categoriesData.find(c => c.id === category)?.subcategories?.find(sc => sc.id === subcategory)?.name ?
+                                `${categoriesData.find(c => c.id === category)?.name} > ${categoriesData.find(c => c.id === category)?.subcategories?.find(sc => sc.id === subcategory)?.name}` :
+                             category && categoriesData.find(c => c.id === category)?.name ?
+                                categoriesData.find(c => c.id === category)?.name :
+                            'Todos los anuncios'}
+                        </h1>
+                        <p className="text-sm text-slate-400 dark:text-slate-400">
+                            {loading && results.length === 0 ? 'Buscando...' : `${totalResults || results.length} anuncios encontrados`}
+                        </p>
+                    </div>
+
+
+                    {/* Search results */}
+                    <div className="pr-2 pb-8"> {/* Podrías remover pr-2 si la columna derecha ya no tiene padding que compensar */}
                         <SearchResults
                             results={results.map(adaptPublicationForSearchResults)}
                             loading={loading}
-                            activeCategory={category}
+                            activeCategory={category} // Pasar la categoría activa
                             showInteractionButtons={true}
                             onPublicationClick={(pub, e) => {
                                 e.preventDefault();
                                 const adapted = reverseAdaptPublication(pub);
-                                handleSelectPublication(adapted);
+                                setSelectedPublication(adapted);
                                 // Actualizar URL con datos de la publicación seleccionada
                                 const newParams = new URLSearchParams(searchParams?.toString());
                                 if (adapted.id) newParams.set('publicationId', adapted.id);
                                 if (adapted.title) {
                                     const titleSlug = adapted.title.toLowerCase()
-                                        .replace(/[^\w\s-]/g, '')
-                                        .replace(/\s+/g, '-');
+                                        .replace(/[^\w\s-]/g, '') // remove non-alphanumeric
+                                        .replace(/\s+/g, '-');    // replace spaces with hyphens
                                     newParams.set('title', titleSlug);
                                 }
                                 router.push(`${pathname}?${newParams.toString()}`, { scroll: false });
+
                                 if (onPublicationClick) onPublicationClick(adapted, e);
                             }}
                             viewType={listViewMode}
                         />
-                        
+
                         {/* Load more button */}
-                        {hasMore && onLoadMore && (
+                        {hasMore && onLoadMore && ( // Asegurarse que onLoadMore exista
                             <div className="mt-6 mb-4 text-center">
                                 <button
                                     onClick={onLoadMore}
@@ -661,58 +673,57 @@ export default function SearchLayout({
                         )}
                     </div>
                 </div>
-                
-                {/* RIGHT COLUMN - Map or Publication details */}
-                {!isMobile && showMap && (
-                    <div className="hidden lg:block lg:w-2/5 lg:pl-0">
-                        <div className="sticky top-0 h-screen overflow-y-auto">
-                            <button
-                                className="absolute top-4 right-4 z-50 flex items-center justify-center gap-1 px-3 py-1.5 rounded-lg bg-gradient-to-r from-teal-500 to-cyan-500 text-white hover:from-teal-600 hover:to-cyan-600 transition-colors shadow-lg"
-                                onClick={toggleMapVisibility}
-                                aria-label={isMapVisible ? 'Ocultar mapa' : 'Mostrar mapa'}
-                                title={isMapVisible ? 'Ocultar mapa' : 'Mostrar mapa'}
-                            >
-                                <MapIcon className="w-5 h-5" />
-                                <span className="font-medium">{isMapVisible ? 'Ocultar mapa' : 'Mostrar mapa'}</span>
-                            </button>
-                            <div className="relative h-full">
-                                {/* Either show the map or publication details */}
-                                {selectedPublication ? (
-                                    // Diseño mejorado para los detalles de la publicación
-                                    <PublicationDetailsPanel
-                                        publication={selectedPublication}
-                                        onClose={() => setSelectedPublication(null)}
-                                    />
-                                ) : (
-                                    // Map view
-                                    <MapView
-                                        publications={results.map(adaptPublicationForSearchResults)}
-                                        selectedPublicationId={null}
-                                        onSelectPublication={(pub) => {
-                                            const adapted = reverseAdaptPublication(pub);
-                                            handleSelectPublication(adapted);
-                                        }}
-                                        loading={loading}
-                                        className="bg-slate-800 rounded-xl overflow-hidden border border-slate-700 h-full"
-                                    />
-                                )}
-                            </div>
+
+                {/* RIGHT COLUMN - Publication details */}
+                {selectedPublication && !isMobile && ( // No mostrar en mobile, se manejaría con un modal/bottom sheet
+                    <div className="hidden lg:block lg:w-1/4 lg:pl-4"> {/* Ajustado pl para menor espacio si es necesario */}
+                        <div className="sticky top-4 h-[calc(100vh-2rem)] overflow-y-auto custom-scrollbar"> {/* Ajuste de altura y scrollbar */}
+                            <PublicationDetailsPanel
+                                publication={selectedPublication}
+                                onClose={() => {
+                                    setSelectedPublication(null);
+                                    const newParams = new URLSearchParams(searchParams?.toString());
+                                    newParams.delete('publicationId');
+                                    newParams.delete('title');
+                                    router.push(`${pathname}?${newParams.toString()}`, { scroll: false });
+                                }}
+                            />
                         </div>
                     </div>
                 )}
-                
-                {/* Mobile-only floating map button when map is hidden */}
-                {isMobile && showMap && (
-                    <button
-                        className="fixed bottom-4 right-4 bg-teal-500 text-white p-3 rounded-full shadow-lg z-10"
-                        onClick={toggleMapVisibility}
-                        aria-label="Ver mapa"
-                        title="Ver mapa"
-                    >
-                        <MapIcon className="w-6 h-6" />
-                    </button>
+                 {/* Mobile: Show selected publication as a modal or bottom sheet (example) */}
+                {selectedPublication && isMobile && (
+                    <div className="fixed inset-0 bg-black/50 z-40 flex items-end" onClick={() => setSelectedPublication(null)}>
+                        <div className="bg-slate-800 w-full max-h-[80vh] rounded-t-xl p-4 overflow-y-auto" onClick={e => e.stopPropagation()}>
+                             <PublicationDetailsPanel
+                                publication={selectedPublication}
+                                onClose={() => {
+                                    setSelectedPublication(null);
+                                    const newParams = new URLSearchParams(searchParams?.toString());
+                                    newParams.delete('publicationId');
+                                    newParams.delete('title');
+                                    router.push(`${pathname}?${newParams.toString()}`, { scroll: false });
+                                }}
+                            />
+                        </div>
+                    </div>
                 )}
             </div>
+            <style jsx global>{`
+                .custom-scrollbar::-webkit-scrollbar {
+                    width: 8px;
+                }
+                .custom-scrollbar::-webkit-scrollbar-track {
+                    background: transparent;
+                }
+                .custom-scrollbar::-webkit-scrollbar-thumb {
+                    background: #475569; // slate-600
+                    border-radius: 4px;
+                }
+                .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+                    background: #334155; // slate-700
+                }
+            `}</style>
         </div>
-    )
+    );
 }

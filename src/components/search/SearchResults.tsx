@@ -12,10 +12,8 @@ import {
 } from '@heroicons/react/24/solid'
 import { SparklesIcon } from '@heroicons/react/24/solid'
 import Image from 'next/image'
-import useMediaQuery from '@/hooks/useMediaQuery'
 import { generateSeoUrl } from '@/utils/url'
 import { toast } from 'react-hot-toast'
-// Se eliminó: import { HeartOutline } from '@/components/icons/Heart'
 import { BookmarkOutline } from '@/components/icons/Bookmark'
 
 export interface Publication {
@@ -173,17 +171,6 @@ export default function SearchResults({
   const [allResults, setAllResults] = useState<Publication[]>(initialResults || [])
   const [loading, setLoading] = useState(initialLoading)
 
-  // Media queries
-  const isMd = useMediaQuery('(min-width: 768px)')
-  const isLg = useMediaQuery('(min-width: 1024px)')
-
-  // Calcular cuántos ítems mostrar en cada fila según el tamaño de pantalla
-  const getGridCols = () => {
-    if (isLg) return 3  // Large screens
-    if (isMd) return 2  // Medium screens
-    return 2            // Mobile: ahora 2 columnas tipo Pinterest
-  }
-
   // Actualizar resultados cuando cambian los resultados iniciales
   useEffect(() => {
     console.log('SearchResults: Updating results from props, count:', initialResults ? initialResults.length : 0);
@@ -264,61 +251,16 @@ export default function SearchResults({
     const isSaved = savedItems.has(publication.id);
     const isNew = isPublicationNew(publication.createdAt);
 
-    // Robust image check
-    const images = publication.images;
-    const imageUrl = hasImages ? images[0] : getDefaultImageForCategory(publication.categorySlug);
-
-    // Log the publication object to inspect its structure
-    if (index === 0) { // Log only the first item
-        // console.log("--- Publication Data (Grid Item) ---", JSON.stringify(publication, null, 2));
-    }
-
-    // Ensure we have the correct category levels
-    const categorySlug = publication.categorySlug || '';
-    const subcategorySlug = publication.subcategory || publication.subcategorySlug || '';
-    const subsubcategorySlug = publication.subsubcategory || publication.subSubcategorySlug || '';
-
-    // Generate SEO-friendly URL with all category levels
+    // Generate SEO-friendly URL
     const seoUrl = generateSeoUrl(
       publication.id,
       publication.title || '',
       publication.slug,
-      categorySlug,
-      subcategorySlug,
-      subsubcategorySlug,
+      publication.categorySlug || '',
+      publication.subcategory || publication.subcategorySlug || '',
+      publication.subsubcategory || publication.subSubcategorySlug || '',
       !publication.slug
     );
-
-    // Formatear mensaje de WhatsApp
-    const formatWhatsAppMessage = () => {
-      let message = `Hola, estoy interesado en tu publicación "${publication.title}" de BuscaDis.`;
-
-      // Personalizar mensaje según categoría
-      if (publication.categorySlug === 'empleos') {
-        message = `Hola, estoy interesado en la oferta de trabajo "${publication.title}" publicada en BuscaDis.`;
-      } else if (publication.categorySlug === 'inmuebles') {
-        message = `Hola, estoy interesado en el inmueble "${publication.title}" que tienes en BuscaDis.`;
-      } else if (publication.categorySlug === 'vehiculos') {
-        message = `Hola, estoy interesado en el vehículo "${publication.title}" que tienes en BuscaDis.`;
-      }
-
-      return encodeURIComponent(message);
-    };
-
-    // Función para abrir WhatsApp
-    const handleWhatsAppClick = (e: React.MouseEvent) => {
-      e.preventDefault();
-      e.stopPropagation();
-      const contactPhone = publication.contactPhone || '';
-      if (!contactPhone) {
-        toast.error('No hay número de contacto disponible');
-        return;
-      }
-      const cleanPhone = contactPhone.replace(/[^0-9]/g, '');
-      // console.log('Opening WhatsApp with phone:', cleanPhone);
-      const whatsappUrl = `https://wa.me/${cleanPhone}?text=${formatWhatsAppMessage()}`;
-      window.open(whatsappUrl, '_blank');
-    };
 
     return (
       <motion.div
@@ -327,8 +269,8 @@ export default function SearchResults({
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.3, delay: index * 0.05 }}
-        className={`relative rounded-xl overflow-hidden shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1 bg-slate-800 border border-slate-700 ${
-          hasImages ? 'col-span-2 row-span-2' : 'col-span-1 row-span-1'
+        className={`relative rounded-xl overflow-hidden shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1 bg-slate-800/90 backdrop-blur-sm border border-slate-700/50 ${
+          hasImages ? 'col-span-1' : 'col-span-1'
         }`}
       >
         <a
@@ -337,116 +279,131 @@ export default function SearchResults({
           onClick={(e) => {
             if (onPublicationClick) {
               onPublicationClick(publication, e);
-            } else {
-              console.warn("onPublicationClick handler not provided to SearchResults. Defaulting to link navigation.");
-              // No e.preventDefault() aquí para permitir la navegación si no hay manejador
             }
           }}
         >
           {/* Image Container - Only show if has valid images */}
-          {hasImages && (
-            <div className="relative aspect-[4/3] overflow-hidden">
-              <div className="absolute inset-0 bg-gradient-to-br from-black/10 to-black/30 z-10" />
+          {hasImages && publication.images && (
+            <div className="relative aspect-[3/4] overflow-hidden">
+              <div className="absolute inset-0 bg-gradient-to-b from-black/0 via-black/0 to-black/80 z-10" />
               <Image
-                src={(publication.images as string[])[0]}
+                src={publication.images[0]}
                 alt={`Imagen de ${publication.title || 'publicación'}`}
                 fill
-                sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
-                className="object-cover transition-transform duration-500 hover:scale-105"
+                sizes="(max-width: 768px) 50vw, (max-width: 1200px) 33vw, 25vw"
+                className="object-cover transition-transform duration-500 group-hover:scale-105"
                 priority={index < 4}
               />
             </div>
           )}
 
-          {/* Badges */}
-          <div className="absolute top-2 left-2 flex flex-col gap-1 z-20">
-            {isPremium && (
-              <span className="bg-gradient-to-r from-teal-500 to-cyan-500 text-white text-xs font-medium px-2 py-1 rounded-full shadow-sm flex items-center">
-                <SparklesIcon className="w-3 h-3 mr-1" />
-                <span>Premium</span>
-              </span>
-            )}
-
-            {isNew && (
-              <span className="bg-gradient-to-r from-amber-500 to-orange-500 text-white text-xs font-medium px-2 py-1 rounded-full shadow-sm flex items-center">
-                <FireIcon className="w-3 h-3 mr-1" />
-                <span>Nuevo</span>
-              </span>
-            )}
-          </div>
-
-          {/* Save Button */}
-          {showInteractionButtons && (
-            <button
-              className={`absolute top-2 right-2 z-20 flex items-center justify-center transition-all rounded-full w-8 h-8 ${
-                isSaved
-                  ? "bg-blue-500 text-white"
-                  : "text-white border border-transparent hover:border-white"
-              }`}
-              onClick={(e) => {
-                e.stopPropagation();
-                e.preventDefault();
-                toggleSave(publication.id);
-              }}
-              aria-label={isSaved ? "Quitar de guardados" : "Guardar publicación"}
-            >
-              {isSaved ? (
-                <BookmarkSolid className="w-5 h-5" />
-              ) : (
-                <BookmarkOutline className="w-5 h-5" />
-              )}
-            </button>
-          )}
-
           {/* Content */}
-          <div className={`p-4 ${!hasImages ? 'h-full' : ''}`}>
-            <div className="mb-2">
-              <h3 className="text-lg font-semibold text-white mb-1 line-clamp-2">{publication.title}</h3>
-              <p className="description text-sm text-gray-300 line-clamp-2">{publication.description}</p>
+          <div className={`p-4 ${!hasImages ? 'h-full' : ''} flex flex-col`}>
+            {/* Title and Save Button Row */}
+            <div className="flex items-start justify-between gap-2 mb-2">
+              <h3 className="text-lg font-semibold text-white line-clamp-2 flex-1">
+                {publication.title}
+              </h3>
+              
+              {showInteractionButtons && (
+                <button
+                  className={`flex-shrink-0 flex items-center justify-center transition-all rounded-full w-8 h-8 ${
+                    isSaved
+                      ? "bg-blue-500 text-white"
+                      : "text-slate-400 hover:text-white hover:bg-slate-700"
+                  }`}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    e.preventDefault();
+                    toggleSave(publication.id);
+                  }}
+                  aria-label={isSaved ? "Quitar de guardados" : "Guardar publicación"}
+                >
+                  {isSaved ? (
+                    <BookmarkSolid className="w-5 h-5" />
+                  ) : (
+                    <BookmarkOutline className="w-5 h-5" />
+                  )}
+                </button>
+              )}
             </div>
 
-            <div className="mt-3 space-y-2">
+            {/* Description */}
+            <p className="text-sm text-slate-300 line-clamp-2 mb-4 flex-1">
+              {publication.description}
+            </p>
+
+            {/* Badges */}
+            <div className="flex flex-wrap gap-2 mb-3">
+              {isPremium && (
+                <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-gradient-to-r from-teal-500/20 to-cyan-500/20 text-teal-300 border border-teal-500/20">
+                  <SparklesIcon className="w-3 h-3 mr-1" />
+                  Premium
+                </span>
+              )}
+              {isNew && (
+                <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-gradient-to-r from-amber-500/20 to-orange-500/20 text-orange-300 border border-orange-500/20">
+                  <FireIcon className="w-3 h-3 mr-1" />
+                  Nuevo
+                </span>
+              )}
+            </div>
+
+            {/* Footer Info */}
+            <div className="mt-auto space-y-2">
               {/* Price */}
               {formatPrice(publication.price, publication.currency) && (
                 <div className="flex items-center justify-between">
-                  <span className="text-teal-400 font-semibold">
+                  <span className="text-lg font-semibold text-teal-400">
                     {formatPrice(publication.price, publication.currency)}
                   </span>
                 </div>
               )}
 
-              {/* Location */}
-              <div className="flex items-center text-gray-400 text-sm">
-                <MapPinIcon className="w-4 h-4 mr-1 flex-shrink-0" />
-                <span className="truncate" title={formatFullLocation(publication.location)}>
-                  {formatFullLocation(publication.location)}
+              {/* Location and Date */}
+              <div className="flex items-center justify-between text-sm">
+                <div className="flex items-center text-slate-400 truncate">
+                  <MapPinIcon className="w-4 h-4 mr-1 flex-shrink-0" />
+                  <span className="truncate" title={formatFullLocation(publication.location)}>
+                    {formatFullLocation(publication.location)}
+                  </span>
+                </div>
+                <span className="text-slate-500 text-xs whitespace-nowrap ml-2">
+                  {formatRelativeTime(publication.createdAt)}
                 </span>
               </div>
 
-              {/* Date */}
-              <div className="flex items-center justify-between text-xs text-gray-500">
-                <span>{formatRelativeTime(publication.createdAt)}</span>
-              </div>
+              {/* Contact Button */}
+              {(() => {
+                const phone = publication.contactPhone;
+                if (typeof phone !== 'string' || !phone) return null;
+                
+                return (
+                  <button
+                    onClick={(e) => {
+                      e.preventDefault();
+                      e.stopPropagation();
+                      const cleanPhone = phone.replace(/[^0-9]/g, '');
+                      const message = encodeURIComponent(
+                        `Hola, me interesa tu publicación "${publication.title}" en BuscaDis`
+                      );
+                      window.open(`https://wa.me/${cleanPhone}?text=${message}`, '_blank');
+                    }}
+                    className="w-full mt-3 bg-green-500 hover:bg-green-600 text-white text-sm font-medium px-3 py-2 rounded-lg shadow-sm flex items-center justify-center transition-colors"
+                  >
+                    <svg className="w-4 h-4 mr-2" fill="currentColor" viewBox="0 0 24 24">
+                      <path d="M17.415 14.382c-.298-.149-1.759-.867-2.031-.967-.272-.099-.47-.148-.669.15-.198.296-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.019-.458.13-.606.134-.133.297-.347.446-.52.149-.174.198-.298.297-.497.1-.198.05-.371-.025-.52-.074-.149-.669-1.612-.916-2.207-.242-.579-.486-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.064 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.57-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z" />
+                    </svg>
+                    <span>Contactar</span>
+                  </button>
+                );
+              })()}
             </div>
-
-            {/* Contact Button */}
-            {publication.contactPhone && (
-              <button
-                onClick={handleWhatsAppClick}
-                className="mt-3 w-full bg-green-500 hover:bg-green-600 text-white text-sm font-medium px-3 py-2 rounded-lg shadow-sm flex items-center justify-center"
-                aria-label="Contactar por WhatsApp"
-              >
-                <svg className="w-4 h-4 mr-2" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-                  <path d="M17.415 14.382c-.298-.149-1.759-.867-2.031-.967-.272-.099-.47-.148-.669.15-.198.296-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.019-.458.13-.606.134-.133.297-.347.446-.52.149-.174.198-.298.297-.497.1-.198.05-.371-.025-.52-.074-.149-.669-1.612-.916-2.207-.242-.579-.486-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.064 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.57-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z" />
-                </svg>
-                <span>Contactar</span>
-              </button>
-            )}
           </div>
         </a>
       </motion.div>
-    )
-  }
+    );
+  };
 
   // Renderizar item en vista de lista
   const renderListItem = (publication: Publication, index: number) => {
@@ -672,131 +629,115 @@ export default function SearchResults({
   if (loading && allResults.length === 0) {
     return (
       <div className="w-full">
-        <div className="flex items-center justify-between mb-4">
-          <div className="h-8 w-40 bg-slate-700 rounded animate-pulse"></div>
-          <div className="flex gap-2">
-            <div className="h-10 w-32 bg-slate-700 rounded animate-pulse"></div>
-            <div className="h-10 w-20 bg-slate-700 rounded animate-pulse"></div>
-          </div>
-        </div>
-
-        <div className={`grid grid-cols-1 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-3 gap-4`}>
-          {Array.from({ length: getGridCols() * 2 }).map((_, index) => (
-            <div key={index} className="bg-slate-800 rounded-xl overflow-hidden shadow-lg h-auto animate-pulse publication-card">
-              <div className="h-48 bg-slate-700 relative">
-                {/* Shimmer effect */}
-                <div className="absolute inset-0 bg-gradient-to-r from-transparent via-slate-600/20 to-transparent shimmer"></div>
+        <div className="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-3 gap-3">
+          {Array.from({ length: 6 }).map((_, index) => (
+            <div
+              key={index}
+              className="relative rounded-xl overflow-hidden shadow-lg bg-slate-800/90 backdrop-blur-sm border border-slate-700/50 animate-pulse"
+            >
+              {/* Shimmer effect for image */}
+              <div className="relative aspect-[3/4] bg-slate-700">
+                <div className="absolute inset-0 bg-gradient-to-r from-transparent via-slate-600/20 to-transparent shimmer" />
               </div>
+
+              {/* Content skeleton */}
               <div className="p-4 space-y-3">
                 <div className="h-5 bg-slate-700 rounded w-3/4"></div>
-                <div className="h-4 bg-slate-700 rounded w-1/2"></div>
-                <div className="h-3 bg-slate-700 rounded w-1/3"></div>
                 <div className="h-4 bg-slate-700 rounded w-full"></div>
-                <div className="flex justify-between items-center pt-2">
-                  <div className="h-3 bg-slate-700 rounded w-1/4"></div>
-                  <div className="h-6 bg-slate-700 rounded-full w-20"></div>
+                <div className="h-4 bg-slate-700 rounded w-2/3"></div>
+                
+                <div className="flex gap-2 mt-4">
+                  <div className="h-5 bg-slate-700 rounded-full w-16"></div>
+                  <div className="h-5 bg-slate-700 rounded-full w-20"></div>
                 </div>
+                
+                <div className="flex justify-between items-center mt-4">
+                  <div className="h-4 bg-slate-700 rounded w-1/3"></div>
+                  <div className="h-4 bg-slate-700 rounded w-1/4"></div>
+                </div>
+                
+                <div className="h-8 bg-slate-700 rounded-lg w-full mt-4"></div>
               </div>
             </div>
           ))}
         </div>
 
-        {/* Add this CSS to the globals.css file for the shimmer effect */}
         <style jsx>{`
           @keyframes shimmer {
-            0% {
-              transform: translateX(-100%);
-            }
-            100% {
-              transform: translateX(100%);
-            }
+            0% { transform: translateX(-100%); }
+            100% { transform: translateX(100%); }
           }
           .shimmer {
-            animation: shimmer 1.5s infinite;
+            animation: shimmer 2s infinite linear;
           }
         `}</style>
       </div>
-    )
+    );
+  }
+
+  if (!loading && allResults.length === 0) {
+    return (
+      <div className="w-full py-12">
+        <div className="max-w-md mx-auto text-center">
+          <div className="bg-slate-800/90 backdrop-blur-sm border border-slate-700/50 rounded-xl p-8">
+            <div className="inline-flex items-center justify-center w-16 h-16 rounded-full bg-slate-700/50 mb-4">
+              <SearchIcon className="w-8 h-8 text-slate-400" />
+            </div>
+            <h3 className="text-xl font-semibold text-white mb-2">No se encontraron resultados</h3>
+            <p className="text-slate-400 mb-6">
+              Intenta con otros términos de búsqueda o ajusta los filtros.
+            </p>
+            {activeCategory && (
+              <p className="text-sm text-teal-400">
+                Estás buscando en la categoría <span className="font-semibold">{activeCategory}</span>
+              </p>
+            )}
+          </div>
+        </div>
+      </div>
+    );
   }
 
   return (
-    <div>
-      {/* Toggle para resultados recientes (solo si hay resultados nuevos) */}
-      {/*
-      {newItemsCount > 0 && (
-        <div className="mb-4">
-          <button
-            className="w-full bg-teal-500 hover:bg-teal-600 text-white py-2 px-4 rounded-lg flex items-center justify-center gap-2"
-            onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
-          >
-            <SparklesIcon className="w-5 h-5" />
-            <span>Mostrar {newItemsCount} {newItemsCount === 1 ? 'resultado' : 'resultados'} recientes</span>
-          </button>
-        </div>
-      )}
-      */}
-      {/* Estado de carga inicial o cuando no hay resultados aún pero se está cargando */}
-      {loading && allResults.length === 0 && (
-        <div className="flex flex-col items-center justify-center p-8">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-teal-500 mb-4"></div>
-          <p className="text-slate-400">Cargando resultados...</p>
-        </div>
-      )}
+    <div className="w-full">
+      <AnimatePresence>
+        {viewType === 'grid' ? (
+          <LayoutGroup>
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              className="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-3 gap-3 auto-rows-auto"
+              style={{
+                gridAutoFlow: 'dense',
+                gridTemplateRows: 'masonry'
+              }}
+            >
+              {allResults.map((publication, index) => renderGridItem(publication, index))}
+            </motion.div>
+          </LayoutGroup>
+        ) : (
+          <LayoutGroup>
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              className="flex flex-col gap-4"
+            >
+              {allResults.map((publication, index) => renderListItem(publication, index))}
+            </motion.div>
+          </LayoutGroup>
+        )}
+      </AnimatePresence>
 
-      {/* Mensaje de no resultados */}
-      {!loading && allResults.length === 0 && (
-        <div className="bg-slate-800/50 rounded-xl p-8 text-center border border-slate-700">
-          <div className="flex justify-center mb-4">
-            <div className="p-4 bg-slate-700/50 rounded-full">
-              <SearchIcon className="w-10 h-10 text-slate-400" />
+      {/* Loading more indicator */}
+      {loading && allResults.length > 0 && (
+        <div className="flex items-center justify-center py-8">
+          <div className="relative">
+            <div className="w-8 h-8 border-2 border-slate-700 border-t-teal-500 rounded-full animate-spin"></div>
+            <div className="absolute inset-0 flex items-center justify-center">
+              <div className="w-3 h-3 bg-teal-500 rounded-full"></div>
             </div>
           </div>
-          <h3 className="text-xl font-semibold text-white mb-2">No se encontraron resultados</h3>
-          <p className="text-slate-400 mb-4">
-            Intenta con otros términos de búsqueda o filtros diferentes.
-          </p>
-
-          {activeCategory && (
-            <p className="text-teal-400">
-              Estás buscando en la categoría <span className="font-semibold">{activeCategory}</span>
-            </p>
-          )}
-        </div>
-      )}
-
-      {/* Resultados en cuadrícula o lista */}
-      {/* Mostrar resultados solo si no está cargando O si ya hay resultados cargados y se están cargando más */}
-      {(allResults.length > 0) && (
-        <AnimatePresence>
-          {viewType === 'grid' ? (
-            <LayoutGroup>
-              <motion.div
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 auto-rows-auto gap-4 grid-auto-flow-dense"
-              >
-                {allResults.map((publication, index) => renderGridItem(publication, index))}
-              </motion.div>
-            </LayoutGroup>
-          ) : (
-            <LayoutGroup>
-              <motion.div
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                className="flex flex-col gap-4"
-              >
-                {allResults.map((publication, index) => renderListItem(publication, index))}
-              </motion.div>
-            </LayoutGroup>
-          )}
-        </AnimatePresence>
-      )}
-
-      {/* "Cargar más" indicator (cuando hay resultados y se está cargando la siguiente página) */}
-      {loading && allResults.length > 0 && (
-        <div className="text-center py-4">
-          <div className="inline-block animate-spin rounded-full h-8 w-8 border-b-2 border-teal-500"></div>
-          <p className="text-slate-400 mt-2">Cargando más resultados...</p>
+          <span className="ml-3 text-slate-400">Cargando más resultados...</span>
         </div>
       )}
     </div>
