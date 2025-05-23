@@ -135,13 +135,17 @@ export default function Header() {
   const toggleUserMenu = () => {
     setShowUserMenu(prev => !prev);
   };
-
   const UserAvatar = () => (
-    user?.avatarUrl ? (
-      <Image src={user.avatarUrl} alt="Avatar" width={32} height={32} className="w-8 h-8 rounded-full" />
-    ) : (
-      <UserCircleIcon className="w-8 h-8 text-slate-600 dark:text-slate-300 group-hover:text-teal-500 dark:group-hover:text-teal-400 transition-colors" />
-    )
+    <div className="flex items-center gap-2">
+      {user?.avatarUrl ? (
+        <Image src={user.avatarUrl} alt="Avatar" width={32} height={32} className="w-8 h-8 rounded-full" />
+      ) : (
+        <UserCircleIcon className="w-8 h-8 text-slate-600 dark:text-slate-300 group-hover:text-teal-500 dark:group-hover:text-teal-400 transition-colors" />
+      )}
+      <span className="text-sm font-medium text-slate-700 dark:text-slate-200 group-hover:text-teal-500 dark:group-hover:text-teal-400">
+        {user?.full_name?.split(' ').slice(0, 2).join(' ') || user?.firstName || user?.email?.split('@')[0]}
+      </span>
+    </div>
   );
 
   const navButtonBaseClasses = "flex flex-col items-center justify-center px-4 py-2 rounded-lg font-medium transition-all duration-150 focus:outline-none focus-visible:ring-2 focus-visible:ring-teal-400 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-slate-900";
