@@ -3,11 +3,12 @@
 import Link from 'next/link';
 import Image from 'next/image';
 import { useState, useEffect, useRef, useCallback } from 'react';
+import { usePathname } from 'next/navigation';
 import {
   HomeIcon,
   NewspaperIcon,
   MagnifyingGlassIcon,
-  MegaphoneIcon,
+  PlusCircleIcon,
   UserCircleIcon,
   ArrowLeftOnRectangleIcon, // Para Logout
   BookmarkIcon, // Para Guardados
@@ -15,6 +16,7 @@ import {
   BellIcon, // Para Notificaciones
   Cog6ToothIcon, // Un ícono genérico para "Mi Perfil" o "Configuración" si UserCircle se usa en el botón
   ChevronDownIcon, // Para indicar que es un desplegable
+  SparklesIcon, // Para el botón de ADIS
 } from '@heroicons/react/24/outline';
 import { ThemeToggle } from '@/components/theme'; // Asumo que este componente ya gestiona sus íconos
 
@@ -30,9 +32,11 @@ interface User {
 
 export default function Header() {
   const [showUserMenu, setShowUserMenu] = useState(false);
+  const [showAdisChat, setShowAdisChat] = useState(false);
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [user, setUser] = useState<User | null>(null);
   const [isMounted, setIsMounted] = useState(false); // Para evitar hydration mismatch con localStorage
+  const pathname = usePathname();
 
   const userMenuRef = useRef<HTMLDivElement>(null); // Ref para el contenedor del botón y el menú
 
@@ -139,136 +143,197 @@ export default function Header() {
     <UserCircleIcon className="w-8 h-8 text-slate-600 dark:text-slate-300 group-hover:text-teal-500 dark:group-hover:text-teal-400 transition-colors" />
   );
 
+  // Estilo base para los botones de navegación
+  const navButtonBaseClasses = "flex flex-col items-center justify-center px-4 py-2 rounded-lg font-medium transition-all duration-150";
+  const navButtonActiveClasses = "text-teal-500 border-b-2 border-teal-500";
+  const navButtonInactiveClasses = "text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800/60 hover:text-teal-500";
+  
+  // Función para determinar si un botón está activo
+  const isActiveRoute = (path: string) => {
+    return pathname === path ? navButtonActiveClasses : navButtonInactiveClasses;
+  };
 
-  // Clases base para los items del menú desplegable
+  // Estilos para los items del menú desplegable
   const menuItemClasses = "flex items-center gap-3 px-3.5 py-2.5 text-sm text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-700/80 rounded-md transition-colors duration-150";
   const menuItemIconClasses = "w-5 h-5 text-slate-500 dark:text-slate-400";
 
-
   return (
     <header className="sticky top-0 z-[1000] w-full bg-white/80 dark:bg-slate-900/80 backdrop-blur-lg border-b border-slate-200 dark:border-slate-700/50 shadow-sm transition-colors duration-300">
-      <div className="mx-auto px-4 sm:px-6 lg:px-8"> {/* Ajustado max-w y padding */}
-        <div className="flex items-center justify-between h-16 md:h-20"> {/* Altura adaptable */}
+      <div className="mx-auto px-4 sm:px-6">
+        <div className="flex items-center justify-between h-16">
           {/* Logo */}
-          <Link href="/" className="flex items-center gap-2.5 select-none group" aria-label="Página de inicio de BuscAdis">
-            <Image src="/favicon.ico" alt="BuscAdis Logo" width={32} height={32} className="w-8 h-8 md:w-9 md:h-9 group-hover:opacity-80 transition-opacity" />
-            <span className="text-2xl md:text-3xl font-bold bg-gradient-to-r from-teal-500 to-cyan-500 bg-clip-text text-transparent dark:from-teal-400 dark:to-cyan-400 transition-all">
+          <Link href="/" className="flex items-center gap-2 flex-shrink-0">
+            <Image src="/favicon.ico" alt="BuscAdis Logo" width={32} height={32} className="w-8 h-8" />
+            <span className="text-2xl font-bold bg-gradient-to-r from-teal-500 to-cyan-500 bg-clip-text text-transparent">
               BuscAdis
             </span>
           </Link>
 
-          {/* Navegación principal (Desktop) */}
-          <nav className="hidden md:flex items-center space-x-2 lg:space-x-4">
-            {[
-              { href: "/inicio", label: "Inicio", icon: HomeIcon },
-              { href: "/revista", label: "Revista Digital", icon: NewspaperIcon },
-            ].map((item) => (
-              <Link
-                key={item.href}
-                href={item.href}
-                className="flex items-center gap-1.5 px-3 py-2 rounded-lg font-medium text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800/60 hover:text-teal-600 dark:hover:text-teal-400 transition-all duration-150"
-              >
-                <item.icon className="w-5 h-5" /> {item.label}
-              </Link>
-            ))}
-            <Link href="/buscar" className="flex items-center gap-1.5 px-4 py-2.5 rounded-lg border-2 border-teal-500 dark:border-teal-600 text-teal-600 dark:text-teal-400 font-semibold hover:bg-teal-500/10 dark:hover:bg-teal-600/20 transition-colors duration-150">
-              <MagnifyingGlassIcon className="w-5 h-5" /> Buscar
+          {/* Navegación principal */}
+          <nav className="flex-1 flex justify-center space-x-1" role="navigation">
+            <Link
+              href="/inicio"
+              className={`${navButtonBaseClasses} ${isActiveRoute('/inicio')}`}
+              aria-current={pathname === '/inicio' ? 'page' : undefined}
+            >
+              <HomeIcon className="w-6 h-6 mb-1" aria-hidden="true" />
+              <span className="text-xs">Inicio</span>
             </Link>
-            <Link href="/publicar" className="flex items-center gap-1.5 px-4 py-2.5 rounded-lg bg-gradient-to-r from-teal-500 to-cyan-500 text-white font-semibold shadow-md hover:shadow-lg hover:from-teal-600 hover:to-cyan-600 transform hover:scale-105 transition-all duration-150">
-              <MegaphoneIcon className="w-5 h-5" /> Publicar
+            
+            <Link
+              href="/revista"
+              className={`${navButtonBaseClasses} ${isActiveRoute('/revista')}`}
+              aria-current={pathname === '/revista' ? 'page' : undefined}
+            >
+              <NewspaperIcon className="w-6 h-6 mb-1" aria-hidden="true" />
+              <span className="text-xs">Revista</span>
             </Link>
+
+            <button
+              onClick={() => setShowAdisChat(!showAdisChat)}
+              className={`${navButtonBaseClasses} ${showAdisChat ? navButtonActiveClasses : navButtonInactiveClasses}`}
+              aria-label="Abrir chat con ADIS"
+              aria-expanded={showAdisChat ? "true" : "false"}
+              title="Chat con ADIS"
+            >
+
+              <SparklesIcon className="w-6 h-6 mb-1" aria-hidden="true" />
+              <span className="text-xs">ADIS</span>
+            </button>
+            <Link
+              href="/buscar"
+              className={`${navButtonBaseClasses} ${isActiveRoute('/buscar')}`}
+              aria-current={pathname === '/buscar' ? 'page' : undefined}
+            >
+              <MagnifyingGlassIcon className="w-6 h-6 mb-1" aria-hidden="true" />
+              <span className="text-xs">Buscar</span>
+            </Link>
+            
+            <Link
+              href="/publicar"
+              className={`${navButtonBaseClasses} ${isActiveRoute('/publicar')}`}
+              aria-current={pathname === '/publicar' ? 'page' : undefined}
+            >
+              <PlusCircleIcon className="w-6 h-6 mb-1" aria-hidden="true" />
+              <span className="text-xs">Publicar</span>
+            </Link>
+
           </nav>
 
           {/* Acciones a la derecha */}
-          <div className="flex items-center space-x-3 sm:space-x-4">
-            <div className="p-1.5 rounded-full hover:bg-slate-100 dark:hover:bg-slate-800/60 transition-colors">
-              <ThemeToggle />
-            </div>
+          <div className="flex items-center space-x-2">
+            <ThemeToggle />
 
             {isMounted && isAuthenticated && user ? (
               <div className="relative" ref={userMenuRef}>
                 <button
                   onClick={toggleUserMenu}
-                  className="group flex items-center gap-2 px-2.5 py-1.5 rounded-full hover:bg-slate-100 dark:hover:bg-slate-800/60 focus:outline-none focus-visible:ring-2 focus-visible:ring-teal-500 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-slate-900 transition-colors"
-                  aria-expanded="true"
-                  aria-haspopup="true"
-                  aria-controls="user-menu"
-                  aria-label="Abrir menú de usuario"
+                  className="flex items-center gap-2 px-3 py-2 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800/60 transition-colors"
+                  aria-label="Menú de usuario"
+                  aria-expanded={showUserMenu ? "true" : "false"}
+                  title="Abrir menú de usuario"
                 >
-                  <UserAvatar />
-                  <span className="hidden lg:block text-sm font-medium text-slate-700 dark:text-slate-200 group-hover:text-teal-600 dark:group-hover:text-teal-500 transition-colors">
-                    {user.firstName || user.full_name?.split(' ')[0] || 'Usuario'}
-                  </span>
-                  <ChevronDownIcon className={`w-4 h-4 text-slate-500 dark:text-slate-400 group-hover:text-teal-500 transition-transform duration-200 ${showUserMenu ? 'rotate-180' : ''}`} />
+                  <UserCircleIcon className="w-8 h-8 text-slate-600 dark:text-slate-300" aria-hidden="true" />
+                  <ChevronDownIcon className={`w-4 h-4 text-slate-500 transition-transform duration-200 ${showUserMenu ? 'rotate-180' : ''}`} aria-hidden="true" />
                 </button>
 
-                {/* Menú Desplegable */}
-                <div
-                  id="user-menu"
-                  role="menu"
-                  aria-orientation="vertical"
-                  aria-labelledby="user-menu-button" // Debería ser el ID del botón, pero el botón no tiene ID aquí.
-                  className={`absolute right-0 top-full mt-2.5 w-64 origin-top-right rounded-xl bg-white dark:bg-slate-800 shadow-2xl ring-1 ring-black ring-opacity-5 dark:ring-slate-700 focus:outline-none transition-all duration-200 ease-out
-                    ${showUserMenu ? 'opacity-100 scale-100 visible' : 'opacity-0 scale-95 invisible'}` // Transición mejorada
-                  }
-                >
-                  <div className="px-1.5 py-1.5" role="none">
-                    <div className="px-3.5 py-2.5 mb-1">
-                      <p className="text-sm font-semibold text-slate-800 dark:text-slate-100 truncate" role="presentation">
-                        {user.firstName && user.lastName ? `${user.firstName} ${user.lastName}` : user.full_name || 'Nombre de Usuario'}
-                      </p>
-                      {user.email && ( // Asumiendo que podrías tener email
-                        <p className="text-xs text-slate-500 dark:text-slate-400 truncate" role="presentation">{user.email}</p>
-                      )}
-                    </div>
+                {/* User Menu Dropdown */}
+                {showUserMenu && (
+                  <div 
+                    className="absolute right-0 mt-2 w-56 bg-white dark:bg-slate-800 rounded-xl shadow-lg border border-slate-200 dark:border-slate-700 overflow-hidden"
+                    role="menu"
+                    aria-orientation="vertical"
+                    aria-labelledby="user-menu-button"
+                  >
+                    <div className="px-1.5 py-1.5" role="none">
+                      <div className="px-3.5 py-2.5 mb-1">
+                        <p className="text-sm font-semibold text-slate-800 dark:text-slate-100 truncate" role="presentation">
+                          {user.firstName && user.lastName ? `${user.firstName} ${user.lastName}` : user.full_name || 'Nombre de Usuario'}
+                        </p>
+                        {user.email && ( // Asumiendo que podrías tener email
+                          <p className="text-xs text-slate-500 dark:text-slate-400 truncate" role="presentation">{user.email}</p>
+                        )}
+                      </div>
 
-                    <Link href="/perfil" role="menuitem" className={menuItemClasses} onClick={() => setShowUserMenu(false)}>
-                      <Cog6ToothIcon className={menuItemIconClasses} /> Mi Perfil
-                    </Link>
-                    <Link href="/mis-anuncios" role="menuitem" className={menuItemClasses} onClick={() => setShowUserMenu(false)}>
-                      <MegaphoneIcon className={menuItemIconClasses} /> Mis Anuncios
-                    </Link>
-                    <Link href="/guardados" role="menuitem" className={menuItemClasses} onClick={() => setShowUserMenu(false)}>
-                      <BookmarkIcon className={menuItemIconClasses} /> Guardados
-                    </Link>
-                    <Link href="/mensajes" role="menuitem" className={menuItemClasses} onClick={() => setShowUserMenu(false)}>
-                      <ChatBubbleOvalLeftEllipsisIcon className={menuItemIconClasses} /> Mensajes
-                    </Link>
-                    <Link href="/notificaciones" role="menuitem" className={menuItemClasses} onClick={() => setShowUserMenu(false)}>
-                      <BellIcon className={menuItemIconClasses} /> Notificaciones
-                    </Link>
-                    
-                    <div className="border-t border-slate-200 dark:border-slate-700/50 my-1.5 mx-1.5" role="separator"></div>
-                    
-                    <button
-                      onClick={() => { handleLogout(); setShowUserMenu(false); }}
-                      role="menuitem"
-                      className={`${menuItemClasses} w-full text-red-600 dark:text-red-500 hover:bg-red-50 dark:hover:bg-red-700/20 dark:hover:text-red-400`}
-                    >
-                      <ArrowLeftOnRectangleIcon className={`${menuItemIconClasses} text-red-500 dark:text-red-500`} /> Cerrar Sesión
-                    </button>
+                      <Link href="/perfil" role="menuitem" className={navButtonInactiveClasses} onClick={() => setShowUserMenu(false)}>
+                        <Cog6ToothIcon className="w-5 h-5 text-slate-500 dark:text-slate-400" /> Mi Perfil
+                      </Link>
+                      <Link href="/mis-anuncios" role="menuitem" className={navButtonInactiveClasses} onClick={() => setShowUserMenu(false)}>
+                        <PlusCircleIcon className="w-5 h-5 text-slate-500 dark:text-slate-400" /> Mis Anuncios
+                      </Link>
+                      <Link href="/guardados" role="menuitem" className={navButtonInactiveClasses} onClick={() => setShowUserMenu(false)}>
+                        <BookmarkIcon className="w-5 h-5 text-slate-500 dark:text-slate-400" /> Guardados
+                      </Link>
+                      <Link href="/mensajes" role="menuitem" className={navButtonInactiveClasses} onClick={() => setShowUserMenu(false)}>
+                        <ChatBubbleOvalLeftEllipsisIcon className="w-5 h-5 text-slate-500 dark:text-slate-400" /> Mensajes
+                      </Link>
+                      <Link href="/notificaciones" role="menuitem" className={navButtonInactiveClasses} onClick={() => setShowUserMenu(false)}>
+                        <BellIcon className="w-5 h-5 text-slate-500 dark:text-slate-400" /> Notificaciones
+                      </Link>
+                      
+                      <div className="border-t border-slate-200 dark:border-slate-700/50 my-1.5 mx-1.5" role="separator"></div>
+                      
+                      <button
+                        onClick={() => { handleLogout(); setShowUserMenu(false); }}
+                        role="menuitem"
+                        className={`${navButtonInactiveClasses} w-full text-red-600 dark:text-red-500 hover:bg-red-50 dark:hover:bg-red-700/20 dark:hover:text-red-400`}
+                      >
+                        <ArrowLeftOnRectangleIcon className="w-5 h-5 text-red-500 dark:text-red-500" /> Cerrar Sesión
+                      </button>
+                    </div>
                   </div>
-                </div>
-              </div>
-            ) : isMounted ? ( // Solo mostrar si está montado y no autenticado
-              <div className="flex items-center space-x-2">
-                <Link href="/login" className="px-3.5 py-2 rounded-lg border-2 border-teal-500 dark:border-teal-600 text-teal-600 dark:text-teal-400 font-semibold hover:bg-teal-500/10 dark:hover:bg-teal-600/20 transition-colors duration-150 text-sm">
-                  Iniciar sesión
-                </Link>
-                <Link href="/register" className="px-3.5 py-2 rounded-lg bg-gradient-to-r from-teal-500 to-cyan-500 text-white font-semibold shadow hover:shadow-md hover:from-teal-600 hover:to-cyan-600 transform hover:scale-105 transition-all duration-150 text-sm">
-                  Regístrate
-                </Link>
+                )}
               </div>
             ) : (
-              // Espacio reservado o un loader simple mientras se determina el estado de autenticación
-              <div className="w-24 h-8 bg-slate-200 dark:bg-slate-700 rounded-lg animate-pulse"></div>
+              <div className="flex items-center space-x-2">
+                <Link
+                  href="/login"
+                  className="px-4 py-2 text-sm font-medium text-slate-700 dark:text-slate-200 hover:text-teal-500 transition-colors"
+                >
+                  Iniciar sesión
+                </Link>
+                <Link
+                  href="/register"
+                  className="px-4 py-2 rounded-lg bg-gradient-to-r from-teal-500 to-cyan-500 text-white text-sm font-medium hover:from-teal-600 hover:to-cyan-600 transition-colors"
+                >
+                  Registrarse
+                </Link>
+              </div>
             )}
           </div>
         </div>
       </div>
 
-      {/* Navegación Móvil (Opcional, si quieres añadirla aquí o en un componente separado) */}
-      {/* <MobileNav /> */}
+      {/* Panel lateral del chat con ADIS */}
+      {showAdisChat && (
+        <div 
+          className="fixed top-16 right-0 w-[400px] h-[calc(100vh-4rem)] bg-white dark:bg-slate-900 border-l border-slate-200 dark:border-slate-700 shadow-xl transition-all transform"
+          role="complementary"
+          aria-label="Chat con ADIS"
+        >
+          <div className="flex items-center justify-between p-4 border-b border-slate-200 dark:border-slate-700">
+            <div className="flex items-center gap-2">
+              <SparklesIcon className="w-6 h-6 text-teal-500" aria-hidden="true" />
+              <h2 className="text-lg font-semibold text-slate-900 dark:text-white">Chat con ADIS</h2>
+            </div>
+            <button
+              onClick={() => setShowAdisChat(false)}
+              className="p-2 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
+              aria-label="Cerrar chat"
+              title="Cerrar chat"
+            >
+              <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+              </svg>
+            </button>
+          </div>
+          <div className="p-4">
+            <p className="text-slate-600 dark:text-slate-400">
+              ¡Hola! Soy ADIS, tu asistente virtual. ¿En qué puedo ayudarte hoy?
+            </p>
+          </div>
+        </div>
+      )}
     </header>
   );
 }
