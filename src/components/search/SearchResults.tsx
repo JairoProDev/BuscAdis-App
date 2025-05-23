@@ -136,6 +136,25 @@ const formatFullLocation = (location: Publication['location']): string => {
   return locationParts.length > 0 ? locationParts.join(', ') : 'Ubicación no especificada';
 };
 
+// Helper function to check if a publication is truly new (less than 24 hours old)
+const isPublicationNew = (createdAt: string): boolean => {
+  const publicationDate = new Date(createdAt);
+  const now = new Date();
+  const diffInHours = (now.getTime() - publicationDate.getTime()) / (1000 * 60 * 60);
+  return diffInHours < 24;
+};
+
+// Helper function to check if a publication has valid images
+const hasValidImages = (publication: Publication): boolean => {
+  if (!publication.images || !Array.isArray(publication.images)) {
+    return false;
+  }
+  
+  return publication.images.length > 0 && 
+    publication.images[0] !== '/images/placeholder-image.jpg' && 
+    publication.images[0] !== '/images/defaults/default.jpg';
+};
+
 export default function SearchResults({
   results: initialResults,
   loading: initialLoading,
@@ -235,21 +254,18 @@ export default function SearchResults({
 
   // Renderizar item en vista de cuadrícula
   const renderGridItem = (publication: Publication, index: number) => {
-    // Validate publication ID exists
     if (!publication || !publication.id) {
       console.warn('Publication or publication ID is missing', publication);
       return null;
     }
 
-    // console.log(`Rendering Card ID: ${publication.id}, Contact Phone: ${publication.contactPhone}`);
-
-    const isNew = index < newItemsCount;
+    const hasImages = hasValidImages(publication);
     const isPremium = publication.premium;
     const isSaved = savedItems.has(publication.id);
+    const isNew = isPublicationNew(publication.createdAt);
 
     // Robust image check
     const images = publication.images;
-    const hasImages = Array.isArray(images) && images.length > 0 && images[0] !== '/images/placeholder-image.jpg' && images[0] !== '/images/defaults/default.jpg';
     const imageUrl = hasImages ? images[0] : getDefaultImageForCategory(publication.categorySlug);
 
     // Log the publication object to inspect its structure
@@ -306,12 +322,14 @@ export default function SearchResults({
 
     return (
       <motion.div
-        key={`grid-item-${publication.id}`} // Key simplificada
+        key={`grid-item-${publication.id}`}
         layoutId={`publication-${publication.id}`}
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.3, delay: index * 0.05 }}
-        className="relative w-full h-auto rounded-xl overflow-hidden shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1 publication-card bg-slate-800 border border-slate-700"
+        className={`relative rounded-xl overflow-hidden shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1 bg-slate-800 border border-slate-700 ${
+          hasImages ? 'col-span-2 row-span-2' : 'col-span-1 row-span-1'
+        }`}
       >
         <a
           href={seoUrl}
@@ -325,151 +343,105 @@ export default function SearchResults({
             }
           }}
         >
-          {/* Image Container */}
-          <div className="image-container">
-            <div className="absolute inset-0 bg-gradient-to-br from-black/10 to-black/30 z-10" />
-            <Image
-              src={imageUrl}
-              alt={`Imagen de ${publication.title || 'publicación'}`}
-              width={500}
-              height={300}
-              className="w-full h-56 object-cover transition-transform duration-500 hover:scale-105"
-              onError={(e) => {
-                console.log(`Image load error for publication ${publication.id}:`, e);
-                e.currentTarget.src = '/images/placeholder-buscadis.jpg';
-              }}
-              priority={index < 4} // Prioritize loading first 4 images
-            />
-
-            {/* Badges */}
-            <div className="absolute top-2 left-2 flex flex-col gap-1 z-20">
-              {/* Subsubcategory Badge (Always shown if available) */}
-              {publication.subsubcategory && (
-                <span className="bg-blue-600 text-white text-xs font-medium px-2 py-1 rounded-full shadow-sm">
-                  {publication.subsubcategory}
-                </span>
-              )}
-
-              {isPremium && (
-                <span className="bg-gradient-to-r from-teal-500 to-cyan-500 text-white text-xs font-medium px-2 py-1 rounded-full shadow-sm flex items-center">
-                  <SparklesIcon className="w-3 h-3 mr-1" />
-                  <span>Premium</span>
-                </span>
-              )}
-
-              {isNew && (
-                <span className="bg-gradient-to-r from-amber-500 to-orange-500 text-white text-xs font-medium px-2 py-1 rounded-full shadow-sm flex items-center">
-                  <FireIcon className="w-3 h-3 mr-1" />
-                  <span>Nuevo</span>
-                </span>
-              )}
+          {/* Image Container - Only show if has valid images */}
+          {hasImages && (
+            <div className="relative aspect-[4/3] overflow-hidden">
+              <div className="absolute inset-0 bg-gradient-to-br from-black/10 to-black/30 z-10" />
+              <Image
+                src={(publication.images as string[])[0]}
+                alt={`Imagen de ${publication.title || 'publicación'}`}
+                fill
+                sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
+                className="object-cover transition-transform duration-500 hover:scale-105"
+                priority={index < 4}
+              />
             </div>
+          )}
 
-            {/* Botones de interacción (save) */}
-            {showInteractionButtons && (
-              <div className="absolute top-2 right-2 flex gap-2 z-20">
-                {/* Botón de Like ELIMINADO */}
-                <button
-                  className={`flex items-center justify-center transition-all rounded-full w-8 h-8 ${
-                    isSaved
-                      ? "bg-blue-500 text-white"
-                      : "text-white border border-transparent hover:border-white"
-                  }`}
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    e.preventDefault(); // Previene la navegación al hacer clic en el botón de guardar
-                    toggleSave(publication.id);
-                  }}
-                  aria-label={isSaved ? "Quitar de guardados" : "Guardar publicación"}
-                >
-                  {isSaved ? (
-                    <BookmarkSolid className="w-5 h-5" />
-                  ) : (
-                    <BookmarkOutline className="w-5 h-5" />
-                  )}
-                </button>
-              </div>
+          {/* Badges */}
+          <div className="absolute top-2 left-2 flex flex-col gap-1 z-20">
+            {isPremium && (
+              <span className="bg-gradient-to-r from-teal-500 to-cyan-500 text-white text-xs font-medium px-2 py-1 rounded-full shadow-sm flex items-center">
+                <SparklesIcon className="w-3 h-3 mr-1" />
+                <span>Premium</span>
+              </span>
             )}
 
-            {/* Precio o botón de WhatsApp si no hay precio */}
-            <div className="absolute bottom-2 right-2 z-10">
-              {formatPrice(publication.price, publication.currency) ? (
-                <span className="bg-blue-600 text-white text-xs font-bold px-2 py-1 rounded-full shadow-sm">
-                  {formatPrice(publication.price, publication.currency)}
-                </span>
-              ) : (
-                publication.contactPhone && (
-                  <button
-                    onClick={handleWhatsAppClick}
-                    className="bg-green-500 hover:bg-green-600 text-white text-xs font-medium px-2 py-1 rounded-full shadow-sm flex items-center"
-                    aria-label="Contactar por WhatsApp"
-                  >
-                    <svg className="w-3 h-3 mr-1" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-                      <path d="M17.415 14.382c-.298-.149-1.759-.867-2.031-.967-.272-.099-.47-.148-.669.15-.198.296-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.019-.458.13-.606.134-.133.297-.347.446-.52.149-.174.198-.298.297-.497.1-.198.05-.371-.025-.52-.074-.149-.669-1.612-.916-2.207-.242-.579-.486-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.064 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.57-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z" />
-                    </svg>
-                    <span>Consultar</span>
-                  </button>
-                )
-              )}
-            </div>
-
-            {/* WhatsApp button (always visible if contactPhone exists) */}
-            {publication.contactPhone && !formatPrice(publication.price, publication.currency) && ( /* Show only if price is not shown */
-                <button
-                    onClick={handleWhatsAppClick} //This button was duplicated, it is now conditional
-                    className="absolute bottom-2 left-2 z-20 bg-green-500 hover:bg-green-600 text-white text-xs font-medium px-2 py-1 rounded-full shadow-sm flex items-center"
-                    aria-label="Contactar por WhatsApp"
-                >
-                    <svg className="w-3 h-3 mr-1" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-                        <path d="M17.415 14.382c-.298-.149-1.759-.867-2.031-.967-.272-.099-.47-.148-.669.15-.198.296-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.019-.458.13-.606.134-.133.297-.347.446-.52.149-.174.198-.298.297-.497.1-.198.05-.371-.025-.52-.074-.149-.669-1.612-.916-2.207-.242-.579-.486-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.064 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.57-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z" />
-                    </svg>
-                    <span>Contactar</span>
-                </button>
+            {isNew && (
+              <span className="bg-gradient-to-r from-amber-500 to-orange-500 text-white text-xs font-medium px-2 py-1 rounded-full shadow-sm flex items-center">
+                <FireIcon className="w-3 h-3 mr-1" />
+                <span>Nuevo</span>
+              </span>
             )}
-             {/* Correction: The WhatsApp contact button at bottom-left was sometimes redundant with the 'Consultar' button at bottom-right.
-                 Now, the bottom-left "Contactar" button will appear if there's a phone number AND no price is displayed (meaning "Consultar" isn't shown).
-                 If a price IS shown, the bottom-left "Contactar" button will still appear if a phone number exists, providing a consistent contact option.
-                 The original code had two WhatsApp buttons potentially appearing. This is now streamlined.
-                 A more distinct logic: The "Consultar" button appears bottom-right if no price AND phone exists.
-                 A general "Contactar" button appears bottom-left if phone exists, regardless of price, to ensure contact is always possible.
-                 Let's make the "Contactar" button on the left appear if contactPhone exists AND it's not already handled by the "Consultar" (no price) button.
-                 This logic might need further refinement based on exact UI preference for button placement.
-                 For now, I've made the bottom-left "Contactar" button more generally available IF there's a phone.
-             */}
-            {publication.contactPhone && (
-                <button
-                    onClick={handleWhatsAppClick}
-                    className="absolute bottom-2 left-2 z-20 bg-green-500 hover:bg-green-600 text-white text-xs font-medium px-2 py-1 rounded-full shadow-sm flex items-center"
-                    aria-label="Contactar por WhatsApp Directo"
-                >
-                    <svg className="w-3 h-3 mr-1" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-                        <path d="M17.415 14.382c-.298-.149-1.759-.867-2.031-.967-.272-.099-.47-.148-.669.15-.198.296-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.019-.458.13-.606.134-.133.297-.347.446-.52.149-.174.198-.298.297-.497.1-.198.05-.371-.025-.52-.074-.149-.669-1.612-.916-2.207-.242-.579-.486-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.064 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.57-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z" />
-                    </svg>
-                    <span>Contactar</span>
-                </button>
-            )}
-
           </div>
 
+          {/* Save Button */}
+          {showInteractionButtons && (
+            <button
+              className={`absolute top-2 right-2 z-20 flex items-center justify-center transition-all rounded-full w-8 h-8 ${
+                isSaved
+                  ? "bg-blue-500 text-white"
+                  : "text-white border border-transparent hover:border-white"
+              }`}
+              onClick={(e) => {
+                e.stopPropagation();
+                e.preventDefault();
+                toggleSave(publication.id);
+              }}
+              aria-label={isSaved ? "Quitar de guardados" : "Guardar publicación"}
+            >
+              {isSaved ? (
+                <BookmarkSolid className="w-5 h-5" />
+              ) : (
+                <BookmarkOutline className="w-5 h-5" />
+              )}
+            </button>
+          )}
+
           {/* Content */}
-          <div className="content p-4">
+          <div className={`p-4 ${!hasImages ? 'h-full' : ''}`}>
             <div className="mb-2">
-              <h3 className="text-lg font-semibold text-white mb-1">{publication.title}</h3>
+              <h3 className="text-lg font-semibold text-white mb-1 line-clamp-2">{publication.title}</h3>
               <p className="description text-sm text-gray-300 line-clamp-2">{publication.description}</p>
             </div>
 
-            <div className="footer flex justify-between items-center mt-3 text-xs text-gray-400">
-              <div className="location flex items-center max-w-[70%]">
-                <MapPinIcon className="w-3 h-3 mr-1 flex-shrink-0" />
+            <div className="mt-3 space-y-2">
+              {/* Price */}
+              {formatPrice(publication.price, publication.currency) && (
+                <div className="flex items-center justify-between">
+                  <span className="text-teal-400 font-semibold">
+                    {formatPrice(publication.price, publication.currency)}
+                  </span>
+                </div>
+              )}
+
+              {/* Location */}
+              <div className="flex items-center text-gray-400 text-sm">
+                <MapPinIcon className="w-4 h-4 mr-1 flex-shrink-0" />
                 <span className="truncate" title={formatFullLocation(publication.location)}>
                   {formatFullLocation(publication.location)}
                 </span>
               </div>
 
-              <span className="date whitespace-nowrap">
-                {formatRelativeTime(publication.createdAt)}
-              </span>
+              {/* Date */}
+              <div className="flex items-center justify-between text-xs text-gray-500">
+                <span>{formatRelativeTime(publication.createdAt)}</span>
+              </div>
             </div>
+
+            {/* Contact Button */}
+            {publication.contactPhone && (
+              <button
+                onClick={handleWhatsAppClick}
+                className="mt-3 w-full bg-green-500 hover:bg-green-600 text-white text-sm font-medium px-3 py-2 rounded-lg shadow-sm flex items-center justify-center"
+                aria-label="Contactar por WhatsApp"
+              >
+                <svg className="w-4 h-4 mr-2" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                  <path d="M17.415 14.382c-.298-.149-1.759-.867-2.031-.967-.272-.099-.47-.148-.669.15-.198.296-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.019-.458.13-.606.134-.133.297-.347.446-.52.149-.174.198-.298.297-.497.1-.198.05-.371-.025-.52-.074-.149-.669-1.612-.916-2.207-.242-.579-.486-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.064 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.57-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z" />
+                </svg>
+                <span>Contactar</span>
+              </button>
+            )}
           </div>
         </a>
       </motion.div>
@@ -801,7 +773,7 @@ export default function SearchResults({
               <motion.div
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
-                className={`grid grid-cols-2 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-3 gap-6 pb-0`}
+                className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 auto-rows-auto gap-4 grid-auto-flow-dense"
               >
                 {allResults.map((publication, index) => renderGridItem(publication, index))}
               </motion.div>

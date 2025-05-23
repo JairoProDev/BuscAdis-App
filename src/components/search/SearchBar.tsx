@@ -66,7 +66,7 @@ export default function SearchBar({
   onSearch, 
   selectedCategory,
   onSelectCategory,
-  placeholder = "¿Qué estás buscando hoy?",
+  placeholder = "¿Qué buscas?",
   className = "",
   isMobile = false,
   isAnimated = true

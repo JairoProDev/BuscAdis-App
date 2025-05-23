@@ -26,7 +26,7 @@ interface EnhancedSearchInputProps {
 
 export default function EnhancedSearchInput({
   initialValue = '',
-  placeholder = '¿Qué estás buscando?',
+  placeholder = '¿Qué buscas?',
   appearance = 'dark',
   onSearch,
   className = '',

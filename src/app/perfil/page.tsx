@@ -625,7 +625,7 @@ export default function PerfilPage() {
       <section className="mb-8 bg-white/5 rounded-xl p-6 shadow-lg">
         <div className="flex items-center justify-between mb-3">
           <h2 className="text-lg font-semibold text-teal-400 flex items-center gap-2">
-            <UserIcon className="w-5 h-5" /> ¿Qué estás buscando?
+            <UserIcon className="w-5 h-5" /> ¿Qué buscas?
           </h2>
           <button
             type="button"

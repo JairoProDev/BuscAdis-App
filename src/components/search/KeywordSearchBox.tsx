@@ -30,7 +30,7 @@ export default function KeywordSearchBox({
   showVoiceSearch = true,
   showImageSearch = true,
   showAiAssist = true,
-  placeholder = '¿Qué estás buscando?',
+  placeholder = '¿Qué buscas?',
   isMobile = false,
 }: KeywordSearchBoxProps) {
   const router = useRouter();

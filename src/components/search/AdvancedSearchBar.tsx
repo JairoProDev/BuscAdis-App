@@ -346,7 +346,7 @@ export default function AdvancedSearchBar({
                       value={searchTerm}
                       onChange={(e) => setSearchTerm(e.target.value)}
                       onFocus={() => setIsFocused(true)}
-                      placeholder="¿Qué estás buscando?"
+                      placeholder="¿Qué buscas?"
                       className="w-full bg-transparent border-0 p-0 focus:ring-0 focus:outline-none text-slate-900 dark:text-white placeholder-slate-400"
                       disabled={isRecording}
                     />
