@@ -238,29 +238,63 @@ const CategoriesSection = () => {
                     ))}
                 </motion.div>
 
-                {/* View All Button - with premium styling */}
+                {/* Enhanced CTA Section with multiple buttons */}
                 <motion.div
-                    className="mt-12 text-center"
+                    className="mt-12 sm:mt-16 text-center space-y-6"
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ delay: 0.6, duration: 0.5 }}
                 >
-                    <motion.a
-                        href="/buscar"
-                        className="inline-flex items-center justify-center px-6 py-3 border border-transparent text-base font-medium rounded-lg text-slate-900 bg-gradient-to-r from-cyan-300 to-teal-300 transition-all duration-200 transform hover:scale-105 shadow-[0_0_20px_rgba(34,211,238,0.4)] hover:shadow-[0_0_30px_rgba(34,211,238,0.6)] relative overflow-hidden group"
-                        whileHover={{
-                            boxShadow: "0 0 30px rgba(34, 211, 238, 0.6)",
-                        }}
-                        whileTap={{ scale: 0.95 }}
-                    >
-                        {/* Platinum shimmer effect */}
-                        <span className="absolute top-0 left-0 w-full h-full bg-gradient-to-r from-white/0 via-white/40 to-white/0 transform -skew-x-30 -translate-x-full group-hover:translate-x-full transition-transform duration-700"></span>
+                    {/* Primary CTA buttons */}
+                    <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
+                        <motion.a
+                            href="/buscar"
+                            className="inline-flex items-center justify-center px-8 py-4 border border-transparent text-lg font-bold rounded-xl text-slate-900 bg-gradient-to-r from-cyan-300 via-teal-300 to-cyan-300 transition-all duration-300 transform hover:scale-105 shadow-[0_10px_25px_-5px_rgba(34,211,238,0.4)] hover:shadow-[0_15px_35px_-5px_rgba(34,211,238,0.6)] relative overflow-hidden group"
+                            style={{
+                                background: 'linear-gradient(135deg, #67e8f9 0%, #5eead4 50%, #67e8f9 100%)'
+                            }}
+                            whileHover={{
+                                boxShadow: "0 15px 35px -5px rgba(34, 211, 238, 0.6)",
+                                y: -3
+                            }}
+                            whileTap={{ scale: 0.95 }}
+                        >
+                            <span className="absolute top-0 left-0 w-full h-full bg-gradient-to-r from-white/0 via-white/70 to-white/0 transform -skew-x-30 -translate-x-full group-hover:translate-x-full transition-transform duration-1000 ease-out"></span>
+                            <svg className="w-5 h-5 mr-2 relative z-10" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                            </svg>
+                            <span className="relative z-10">Ver todas las categorías</span>
+                            <ArrowRightIcon className="h-5 w-5 ml-2 relative z-10 group-hover:translate-x-1 transition-transform duration-200" />
+                        </motion.a>
 
-                        <span className="relative z-10">Ver todas las categorías</span>
-                        <span className="relative z-10 ml-2 inline-block">
-                            <ArrowRightIcon className="h-5 w-5 inline-block group-hover:translate-x-1 transition-transform duration-200" />
-                        </span>
-                    </motion.a>
+                        <motion.a
+                            href="/publicar"
+                            className="inline-flex items-center justify-center px-8 py-4 text-lg font-bold text-white bg-white/10 backdrop-blur-sm border-2 border-teal-400/30 rounded-xl hover:bg-white/20 hover:border-teal-400/50 transition-all duration-300 relative overflow-hidden group"
+                            whileHover={{
+                                y: -3,
+                                boxShadow: "0 10px 25px rgba(20, 184, 166, 0.3)"
+                            }}
+                            whileTap={{ scale: 0.95 }}
+                        >
+                            <span className="absolute inset-0 bg-gradient-to-r from-teal-500/0 via-teal-500/15 to-teal-500/0 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></span>
+                            <svg className="w-5 h-5 mr-2 text-teal-300 relative z-10" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+                            </svg>
+                            <span className="relative z-10">Publicar Anuncio</span>
+                        </motion.a>
+                    </div>
+
+                    {/* Secondary message */}
+                    <motion.p 
+                        className="text-sm text-cyan-200/80 flex items-center justify-center"
+                        animate={{ opacity: [0.6, 1, 0.6] }}
+                        transition={{ duration: 3, repeat: Infinity }}
+                    >
+                        <svg className="w-4 h-4 mr-2 text-teal-300" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 3v4M3 5h4M6 17v4m-2-2h4m5-16l2.286 6.857L21 12l-5.714 2.143L13 21l-2.286-6.857L5 12l5.714-2.143L13 3z" />
+                        </svg>
+                        Únete a miles de usuarios que ya encontraron lo que buscaban ✨
+                    </motion.p>
                 </motion.div>
             </div>
         </section>

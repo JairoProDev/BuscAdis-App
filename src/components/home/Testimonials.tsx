@@ -2,7 +2,7 @@
 
 import { motion } from 'framer-motion';
 import Container from '@/components/shared/Container';
-import { SparklesIcon, StarIcon } from '@heroicons/react/24/solid';
+import { SparklesIcon, StarIcon, UserGroupIcon, ClockIcon } from '@heroicons/react/24/solid';
 import { UserCircleIcon } from '@heroicons/react/24/outline';
 import Image from 'next/image';
 import Slider from 'react-slick';
@@ -243,6 +243,95 @@ export default function Testimonials() {
                         </div>
                     ))}
                 </Slider>
+
+                {/* Enhanced CTA Section */}
+                <motion.div
+                    className="mt-16 sm:mt-20 text-center space-y-8"
+                    initial={{ opacity: 0, y: 30 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: 0.8, duration: 0.6 }}
+                >
+                    {/* Premium decorative divider */}
+                    <div className="flex items-center justify-center space-x-4">
+                        <div className="h-px bg-gradient-to-r from-transparent to-teal-500/50 w-20"></div>
+                        <div className="flex space-x-2">
+                            <div className="w-2 h-2 bg-teal-400 rounded-full shadow-[0_0_10px_rgba(20,184,166,0.5)]"></div>
+                            <div className="w-2 h-2 bg-cyan-400 rounded-full shadow-[0_0_10px_rgba(6,182,212,0.5)]"></div>
+                            <div className="w-2 h-2 bg-teal-400 rounded-full shadow-[0_0_10px_rgba(20,184,166,0.5)]"></div>
+                        </div>
+                        <div className="h-px bg-gradient-to-r from-teal-500/50 to-transparent w-20"></div>
+                    </div>
+
+                    {/* Main message */}
+                    <div className="space-y-4">
+                        <h3 className={`text-2xl sm:text-3xl md:text-4xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-white via-${primaryColor} to-white`}>
+                            ¿Qué esperas para ser el próximo?
+                        </h3>
+                        <p className={`text-lg md:text-xl ${textColor}/80 max-w-2xl mx-auto`}>
+                            Únete a miles de usuarios satisfechos y comienza tu historia de éxito con Buscadis.
+                        </p>
+                    </div>
+
+                    {/* CTA Buttons */}
+                    <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
+                        <motion.a
+                            href="/publicar"
+                            className="group relative inline-flex items-center justify-center px-8 py-4 text-lg font-bold text-slate-900 bg-gradient-to-r from-teal-300 via-cyan-300 to-teal-300 rounded-xl shadow-[0_10px_25px_-5px_rgba(34,211,238,0.4)] transition-all duration-300 overflow-hidden"
+                            style={{
+                                background: 'linear-gradient(135deg, #5eead4 0%, #22d3ee 50%, #5eead4 100%)'
+                            }}
+                            whileHover={{
+                                scale: 1.05,
+                                boxShadow: "0 15px 35px -5px rgba(34, 211, 238, 0.6)",
+                                y: -3
+                            }}
+                            whileTap={{ scale: 0.95 }}
+                        >
+                            <span className="absolute top-0 left-0 w-full h-full bg-gradient-to-r from-white/0 via-white/70 to-white/0 transform -skew-x-30 -translate-x-full group-hover:translate-x-full transition-transform duration-1000 ease-out"></span>
+                            <SparklesIcon className="w-5 h-5 mr-2 relative z-10" />
+                            <span className="relative z-10">Crear mi Historia</span>
+                            <svg className="w-5 h-5 ml-2 relative z-10 group-hover:translate-x-1 transition-transform duration-200" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
+                            </svg>
+                        </motion.a>
+
+                        <motion.a
+                            href="/buscar"
+                            className="group relative inline-flex items-center justify-center px-8 py-4 text-lg font-bold text-white bg-white/10 backdrop-blur-sm border-2 border-teal-400/30 rounded-xl hover:bg-white/20 hover:border-teal-400/50 transition-all duration-300 overflow-hidden"
+                            whileHover={{
+                                y: -3,
+                                boxShadow: "0 10px 25px rgba(20, 184, 166, 0.3)"
+                            }}
+                            whileTap={{ scale: 0.95 }}
+                        >
+                            <span className="absolute inset-0 bg-gradient-to-r from-teal-500/0 via-teal-500/15 to-teal-500/0 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></span>
+                            <svg className="w-5 h-5 mr-2 text-teal-300 relative z-10" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                            </svg>
+                            <span className="relative z-10">Ver Testimonios</span>
+                        </motion.a>
+                    </div>
+
+                    {/* Social proof indicators */}
+                    <motion.div 
+                        className="flex flex-col sm:flex-row items-center justify-center space-y-3 sm:space-y-0 sm:space-x-8 text-sm text-cyan-200/70"
+                        animate={{ opacity: [0.7, 1, 0.7] }}
+                        transition={{ duration: 4, repeat: Infinity }}
+                    >
+                        <div className="flex items-center">
+                            <UserGroupIcon className="w-4 h-4 mr-2 text-teal-300" />
+                            +10,000 Usuarios Activos
+                        </div>
+                        <div className="flex items-center">
+                            <StarIcon className="w-4 h-4 mr-2 text-yellow-400 fill-yellow-400" />
+                            4.9/5 Puntuación Promedio
+                        </div>
+                        <div className="flex items-center">
+                            <ClockIcon className="w-4 h-4 mr-2 text-teal-300" />
+                            Respuesta en 24h
+                        </div>
+                    </motion.div>
+                </motion.div>
             </Container>
         </section>
     );

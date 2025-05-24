@@ -152,6 +152,16 @@ const FeaturedListingsSection = () => {
                             <span className="relative z-10">Ver Todos los Destacados</span>
                             <ArrowRightIcon className="ml-1.5 h-5 w-5 relative z-10 group-hover/btn:translate-x-1 transition-transform duration-200" />
                         </Link>
+
+                        {/* Additional CTA for Publishing */}
+                        <Link
+                            href="/publicar"
+                            className="inline-flex items-center px-6 py-3 rounded-lg bg-white/10 backdrop-blur-sm border border-teal-400/30 text-white font-medium transition-all duration-200 hover:bg-white/20 hover:border-teal-400/50 relative overflow-hidden group/btn"
+                        >
+                            <span className="absolute inset-0 bg-gradient-to-r from-teal-500/0 via-teal-500/15 to-teal-500/0 opacity-0 group-hover/btn:opacity-100 transition-opacity duration-300"></span>
+                            <SparklesIcon className="h-4 w-4 mr-2 text-teal-300 relative z-10" />
+                            <span className="relative z-10">Destacar mi Anuncio</span>
+                        </Link>
                     </motion.div>
                 </motion.div>
 
