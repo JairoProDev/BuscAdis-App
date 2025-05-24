@@ -25,7 +25,7 @@ export function parsePublicationsFromText(text: string): PublicationInput[] {
     
     // Extraer precio
     let price = 0;
-    let priceMatch = adText.match(/S\/\.?\s*(\d+(?:,\d+)*(?:\.\d+)?)/i) || 
+    const priceMatch = adText.match(/S\/\.?\s*(\d+(?:,\d+)*(?:\.\d+)?)/i) || 
                     adText.match(/(\d+(?:,\d+)*(?:\.\d+)?)\s*soles/i) ||
                     adText.match(/s\/(\d+(?:,\d+)*(?:\.\d+)?)/i);
     

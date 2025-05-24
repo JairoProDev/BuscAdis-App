@@ -95,7 +95,7 @@ export const useFormStore = create<FormState>()(
       setNestedField: (path, value) => {
         Logger.debug(`Actualizando campo anidado: ${path.join('.')}`);
         set(state => {
-          let current = { ...state };
+          const current = { ...state };
           let currentObj = current;
           for (let i = 0; i < path.length - 1; i++) {
             currentObj[path[i]] = { ...currentObj[path[i]] };
