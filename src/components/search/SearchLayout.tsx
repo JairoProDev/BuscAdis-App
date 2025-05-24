@@ -390,7 +390,7 @@ export default function SearchLayout({
                 </div>
                 {/* Galería de imágenes */}
                 <div className="flex-1 overflow-y-auto">
-                    {publication.images && publication.images.length > 0 ? (
+                    {publication.images && publication.images.length > 0 && (
                         <div className="relative">
                             <div className="relative h-72 overflow-hidden">
                                 <img
@@ -416,10 +416,6 @@ export default function SearchLayout({
                                     ))}
                                 </div>
                             )}
-                        </div>
-                    ) : (
-                        <div className="flex items-center justify-center h-72 bg-slate-100 dark:bg-slate-900">
-                            <p className="text-slate-500 dark:text-slate-400">No hay imágenes disponibles</p>
                         </div>
                     )}
                     <div className="p-4">
