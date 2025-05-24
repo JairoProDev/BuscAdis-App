@@ -14,13 +14,9 @@ export function ImageGallery({ images, className = '' }: ImageGalleryProps) {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [isLightboxOpen, setIsLightboxOpen] = useState(false);
   
-  // Si no hay imágenes, mostrar placeholder
+  // Si no hay imágenes, no renderizar nada
   if (!images || images.length === 0) {
-    return (
-      <div className={`bg-gray-200 flex items-center justify-center rounded-md ${className}`}>
-        <p className="text-gray-500 text-sm">No hay imágenes disponibles</p>
-      </div>
-    );
+    return null;
   }
   
   const handlePrevImage = (e: React.MouseEvent) => {

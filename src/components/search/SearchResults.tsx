@@ -420,7 +420,6 @@ export default function SearchResults({
     // Robust image check
     const images = publication.images;
     const hasImages = Array.isArray(images) && images.length > 0 && images[0] !== '/images/placeholder-image.jpg' && images[0] !== '/images/defaults/default.jpg';
-    const imageUrl = hasImages ? images[0] : getDefaultImageForCategory(publication.categorySlug);
 
     // Log the publication object to inspect its structure
     if (index === 0) { // Log only the first item
@@ -495,101 +494,128 @@ export default function SearchResults({
           }}
         >
           <div className="relative flex flex-row bg-slate-800 rounded-xl overflow-hidden shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1 h-full">
-            {/* Imagen */}
-            <div className="relative w-40 sm:w-48 flex-shrink-0 overflow-hidden h-auto image-container">
-              <div className="absolute inset-0 bg-gradient-to-br from-slate-900/20 to-slate-900/60 z-10" />
-              <div className="relative w-full h-full min-h-[160px]">
-                <Image
-                  src={imageUrl}
-                  alt={`Imagen de ${publication.title || 'publicación'}`}
-                  fill
-                  sizes="(max-width: 640px) 30vw, 120px" // Adjusted sizes for list view
-                  className="object-cover transition-transform duration-500 group-hover:scale-110"
-                  onError={(e) => {
-                    console.log(`Image load error for publication ${publication.id}:`, e);
-                    e.currentTarget.src = '/images/placeholder-buscadis.jpg';
-                  }}
-                  priority={index < 4} // Prioritize loading first 4 images
-                />
+            {/* Imagen - Solo mostrar si hay imágenes válidas */}
+            {hasImages && (
+              <div className="relative w-40 sm:w-48 flex-shrink-0 overflow-hidden h-auto image-container">
+                <div className="absolute inset-0 bg-gradient-to-br from-slate-900/20 to-slate-900/60 z-10" />
+                <div className="relative w-full h-full min-h-[160px]">
+                  <Image
+                    src={images[0]}
+                    alt={`Imagen de ${publication.title || 'publicación'}`}
+                    fill
+                    sizes="(max-width: 640px) 30vw, 120px"
+                    className="object-cover transition-transform duration-500 group-hover:scale-110"
+                    onError={(e) => {
+                      console.log(`Image load error for publication ${publication.id}:`, e);
+                      e.currentTarget.src = '/images/placeholder-buscadis.jpg';
+                    }}
+                    priority={index < 4}
+                  />
+                </div>
+
+                {/* Badges */}
+                <div className="absolute top-2 left-2 flex flex-col gap-1 z-20">
+                  {/* Subsubcategory Badge (Always shown if available) */}
+                  {publication.subsubcategory && (
+                    <span className="bg-blue-600 text-white text-xs font-medium px-2 py-0.5 rounded-full shadow-lg">
+                      {publication.subsubcategory}
+                    </span>
+                  )}
+
+                  {isPremium && (
+                    <span className="bg-gradient-to-r from-teal-500 to-cyan-500 text-white text-xs font-medium px-2 py-0.5 rounded-full shadow-lg flex items-center">
+                      <SparklesIcon className="w-3 h-3 mr-1" />
+                      <span className="hidden sm:inline">Premium</span>
+                    </span>
+                  )}
+
+                  {isNew && (
+                    <span className="bg-gradient-to-r from-amber-500 to-orange-500 text-white text-xs font-medium px-2 py-0.5 rounded-full shadow-lg flex items-center">
+                      <FireIcon className="w-3 h-3 mr-1" />
+                      <span className="hidden sm:inline">Nuevo</span>
+                    </span>
+                  )}
+                </div>
+
+                {/* WhatsApp Button for List View */}
+                {publication.contactPhone && (
+                  <button
+                    onClick={handleWhatsAppClick}
+                    className="absolute bottom-2 left-2 z-20 bg-green-500 hover:bg-green-600 text-white text-xs font-medium px-2 py-0.5 rounded-full shadow-sm flex items-center"
+                    aria-label="Contactar por WhatsApp"
+                  >
+                    <svg className="w-3 h-3 mr-1" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                      <path d="M17.415 14.382c-.298-.149-1.759-.867-2.031-.967-.272-.099-.47-.148-.669.15-.198.296-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.019-.458.13-.606.134-.133.297-.347.446-.52.149-.174.198-.298.297-.497.1-.198.05-.371-.025-.52-.074-.149-.669-1.612-.916-2.207-.242-.579-.486-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.064 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.57-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z" />
+                    </svg>
+                    <span className="hidden sm:inline">Contactar</span>
+                  </button>
+                )}
               </div>
+            )}
 
-              {/* Badges */}
-              <div className="absolute top-2 left-2 flex flex-col gap-1 z-20">
-                {/* Subsubcategory Badge (Always shown if available) */}
-                {publication.subsubcategory && (
-                  <span className="bg-blue-600 text-white text-xs font-medium px-2 py-0.5 rounded-full shadow-lg">
-                    {publication.subsubcategory}
-                  </span>
-                )}
-
-                {isPremium && (
-                  <span className="bg-gradient-to-r from-teal-500 to-cyan-500 text-white text-xs font-medium px-2 py-0.5 rounded-full shadow-lg flex items-center">
-                    <SparklesIcon className="w-3 h-3 mr-1" />
-                    <span className="hidden sm:inline">Premium</span>
-                  </span>
-                )}
-
-                {isNew && (
-                  <span className="bg-gradient-to-r from-amber-500 to-orange-500 text-white text-xs font-medium px-2 py-0.5 rounded-full shadow-lg flex items-center">
-                    <FireIcon className="w-3 h-3 mr-1" />
-                    <span className="hidden sm:inline">Nuevo</span>
-                  </span>
-                )}
-              </div>
-
-              {/* WhatsApp Button for List View */}
-              {publication.contactPhone && (
-                <button
-                  onClick={handleWhatsAppClick}
-                  className="absolute bottom-2 left-2 z-20 bg-green-500 hover:bg-green-600 text-white text-xs font-medium px-2 py-0.5 rounded-full shadow-sm flex items-center"
-                  aria-label="Contactar por WhatsApp"
-                >
-                  <svg className="w-3 h-3 mr-1" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-                    <path d="M17.415 14.382c-.298-.149-1.759-.867-2.031-.967-.272-.099-.47-.148-.669.15-.198.296-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.019-.458.13-.606.134-.133.297-.347.446-.52.149-.174.198-.298.297-.497.1-.198.05-.371-.025-.52-.074-.149-.669-1.612-.916-2.207-.242-.579-.486-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.064 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.57-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z" />
-                  </svg>
-                  <span className="hidden sm:inline">Contactar</span>
-                </button>
-              )}
-            </div>
-
-            {/* Contenido */}
-            <div className="flex-1 p-4 flex flex-col justify-between min-h-[160px]">
+            {/* Contenido - Ajustamos el padding y layout según si hay imagen o no */}
+            <div className={`flex-1 p-4 flex flex-col justify-between min-h-[160px] ${!hasImages ? 'pl-6' : ''}`}>
               <div>
                 <div className="flex justify-between items-start mb-1">
                   <h3 className="text-lg font-semibold text-white line-clamp-1 group-hover:text-teal-300 transition-colors">
                     {publication.title}
                   </h3>
-                    {/* Interaction buttons for list view - e.g. Save button */}
-                    {showInteractionButtons && (
-                        <button
-                            className={`flex items-center justify-center transition-all rounded-full w-7 h-7 ml-2 flex-shrink-0 ${
-                            isSaved
-                                ? "bg-blue-500 text-white"
-                                : "text-slate-400 hover:text-white hover:bg-slate-700"
-                            }`}
-                            onClick={(e) => {
-                            e.stopPropagation();
-                            e.preventDefault();
-                            toggleSave(publication.id);
-                            }}
-                            aria-label={isSaved ? "Quitar de guardados" : "Guardar publicación"}
-                        >
-                            {isSaved ? (
-                            <BookmarkSolid className="w-4 h-4" />
-                            ) : (
-                            <BookmarkOutline className="w-4 h-4" />
-                            )}
-                        </button>
-                    )}
+                  {/* Interaction buttons for list view - e.g. Save button */}
+                  {showInteractionButtons && (
+                    <button
+                      className={`flex items-center justify-center transition-all rounded-full w-7 h-7 ml-2 flex-shrink-0 ${
+                        isSaved
+                          ? "bg-blue-500 text-white"
+                          : "text-slate-400 hover:text-white hover:bg-slate-700"
+                      }`}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        e.preventDefault();
+                        toggleSave(publication.id);
+                      }}
+                      aria-label={isSaved ? "Quitar de guardados" : "Guardar publicación"}
+                    >
+                      {isSaved ? (
+                        <BookmarkSolid className="w-4 h-4" />
+                      ) : (
+                        <BookmarkOutline className="w-4 h-4" />
+                      )}
+                    </button>
+                  )}
                 </div>
                 <p className="text-xs text-teal-300/80 whitespace-nowrap mb-1"> 
-                    {/* Moved date here for better layout */}
-                    {formatRelativeTime(publication.createdAt)}
+                  {/* Moved date here for better layout */}
+                  {formatRelativeTime(publication.createdAt)}
                 </p>
 
                 <p className="text-cyan-100/80 text-sm line-clamp-2 mb-2">
                   {publication.description}
                 </p>
+
+                {/* Badges cuando no hay imagen - Mostrarlos en el contenido */}
+                {!hasImages && (
+                  <div className="flex flex-wrap gap-2 mb-2">
+                    {publication.subsubcategory && (
+                      <span className="bg-blue-600 text-white text-xs font-medium px-2 py-0.5 rounded-full shadow-lg">
+                        {publication.subsubcategory}
+                      </span>
+                    )}
+
+                    {isPremium && (
+                      <span className="bg-gradient-to-r from-teal-500 to-cyan-500 text-white text-xs font-medium px-2 py-0.5 rounded-full shadow-lg flex items-center">
+                        <SparklesIcon className="w-3 h-3 mr-1" />
+                        <span className="hidden sm:inline">Premium</span>
+                      </span>
+                    )}
+
+                    {isNew && (
+                      <span className="bg-gradient-to-r from-amber-500 to-orange-500 text-white text-xs font-medium px-2 py-0.5 rounded-full shadow-lg flex items-center">
+                        <FireIcon className="w-3 h-3 mr-1" />
+                        <span className="hidden sm:inline">Nuevo</span>
+                      </span>
+                    )}
+                  </div>
+                )}
               </div>
 
               <div className="flex items-center justify-between mt-auto"> {/* mt-auto to push to bottom */}

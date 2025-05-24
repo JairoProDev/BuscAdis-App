@@ -410,8 +410,8 @@ function PublicationsGrid({ publications, onSelect }: PublicationsGridProps) {
           className="bg-white overflow-hidden rounded-lg border border-gray-200 shadow-sm hover:shadow-md transition-shadow cursor-pointer"
           onClick={() => onSelect(pub)}
         >
-          <div className="aspect-video relative bg-gray-100">
-            {pub.images && pub.images.length > 0 ? (
+          {pub.images && pub.images.length > 0 && (
+            <div className="aspect-video relative bg-gray-100">
               <Image
                 src={pub.images[0]}
                 alt={pub.title}
@@ -419,12 +419,8 @@ function PublicationsGrid({ publications, onSelect }: PublicationsGridProps) {
                 sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
                 className="object-cover"
               />
-            ) : (
-              <div className="w-full h-full flex items-center justify-center text-gray-400">
-                <Eye size={32} />
-              </div>
-            )}
-          </div>
+            </div>
+          )}
           
           <div className="p-4">
             <h3 className="font-medium line-clamp-2 mb-2 min-h-[3rem]">{pub.title}</h3>
@@ -459,8 +455,8 @@ function PublicationsList({ publications, onSelect }: PublicationsListProps) {
           className="py-4 flex gap-4 hover:bg-gray-50 cursor-pointer transition-colors"
           onClick={() => onSelect(pub)}
         >
-          <div className="h-24 w-24 flex-shrink-0 bg-gray-100 rounded-md overflow-hidden relative">
-            {pub.images && pub.images.length > 0 ? (
+          {pub.images && pub.images.length > 0 && (
+            <div className="h-24 w-24 flex-shrink-0 bg-gray-100 rounded-md overflow-hidden relative">
               <Image
                 src={pub.images[0]}
                 alt={pub.title}
@@ -468,12 +464,8 @@ function PublicationsList({ publications, onSelect }: PublicationsListProps) {
                 sizes="96px"
                 className="object-cover"
               />
-            ) : (
-              <div className="w-full h-full flex items-center justify-center text-gray-400">
-                <Eye size={24} />
-              </div>
-            )}
-          </div>
+            </div>
+          )}
           
           <div className="flex-grow">
             <h3 className="font-medium mb-1">{pub.title}</h3>
@@ -531,7 +523,7 @@ function PublicationDetail({ publication, onBack }: PublicationDetailProps) {
       
       <div className="bg-white rounded-lg overflow-hidden">
         {/* Galería de imágenes */}
-        {publication.images && publication.images.length > 0 ? (
+        {publication.images && publication.images.length > 0 && (
           <div className="aspect-video relative bg-gray-100">
             <Image
               src={publication.images[0]}
@@ -539,10 +531,6 @@ function PublicationDetail({ publication, onBack }: PublicationDetailProps) {
               fill
               className="object-contain"
             />
-          </div>
-        ) : (
-          <div className="aspect-video bg-gray-100 flex items-center justify-center">
-            <Eye size={48} className="text-gray-400" />
           </div>
         )}
         
