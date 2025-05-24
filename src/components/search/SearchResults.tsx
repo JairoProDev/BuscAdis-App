@@ -655,7 +655,7 @@ export default function SearchResults({
   if (loading && allResults.length === 0) {
     return (
       <div className="w-full">
-        <div className="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-3 gap-4">
+        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
           {Array.from({ length: 6 }).map((_, index) => (
             <div
               key={index}
@@ -732,7 +732,7 @@ export default function SearchResults({
             <motion.div
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
-              className="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-3 gap-4 auto-rows-auto"
+              className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 auto-rows-auto"
               style={{
                 gridAutoFlow: 'dense',
                 gridTemplateRows: 'masonry',

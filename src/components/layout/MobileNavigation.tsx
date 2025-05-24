@@ -12,7 +12,7 @@ const navItems = [
         id: 'home',
         icon: HomeIcon,
         label: 'Inicio',
-        path: '/',
+        path: '/inicio',
         gradient: 'from-primary-500 via-primary-400 to-primary-600', // Updated gradient colors
         glow: 'rgba(59, 130, 246, 0.7)', // Updated glow color 
         subOptions: [
@@ -36,7 +36,7 @@ const navItems = [
         id: 'search',
         icon: SearchNavIcon,
         label: 'Buscar',
-        path: '/buscar',
+        path: '/',
         gradient: 'from-primary-500 via-primary-400 to-primary-600',
         glow: 'rgba(59, 130, 246, 0.7)',
         subOptions: [
