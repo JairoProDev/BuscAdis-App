@@ -2,7 +2,7 @@
 
 import { useState, useRef, useEffect } from 'react';
 import { Search, X, Mic, Camera, Sparkles, MicOff } from 'lucide-react';
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 import SearchSuggestions from './SearchSuggestions';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/Button';
@@ -385,153 +385,259 @@ export default function EnhancedSearchInput({
   };
   
   return (
-    <div className={cn('relative w-full', className)} ref={searchContainerRef}>
-      <form
-        className={cn(
-          'flex items-center bg-white rounded-lg ring-1 ring-slate-200 focus-within:ring-blue-500 transition-all overflow-hidden',
-          showSuggestionsPanel && 'ring-blue-500 shadow-sm',
-          appearance === 'dark' && 'bg-slate-800 ring-slate-700 focus-within:ring-blue-500',
-          className
-        )}
-        onSubmit={handleSubmit}
+    <div ref={searchContainerRef} className={cn('relative w-full max-w-full', className)}>
+      <motion.div
+        initial={{ opacity: 0, y: 10 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.3 }}
       >
-        <input
-          ref={inputRef}
-          type="text"
-          value={searchTerm}
-          onChange={(e) => setSearchTerm(e.target.value)}
-          onFocus={() => setShowSuggestionsPanel(true)}
-          className={cn(
-            'flex-1 py-2 px-3 outline-none bg-transparent',
-            appearance === 'dark' && 'text-white placeholder:text-slate-400'
-          )}
-          placeholder={placeholder}
-          aria-label="Search"
-        />
-        
-        {/* Show selected image thumbnail */}
-        {selectedImage && (
-          <div className="relative mr-2">
-            <img 
-              src={URL.createObjectURL(selectedImage)} 
-              alt="Imagen para búsqueda" 
-              className="h-8 w-8 object-cover rounded"
-            />
-            <button
-              type="button"
-              onClick={() => setSelectedImage(null)}
-              className="absolute -top-1 -right-1 h-4 w-4 bg-slate-800 rounded-full flex items-center justify-center"
-              aria-label="Eliminar imagen"
-              title="Eliminar imagen"
-            >
-              <X className="h-3 w-3 text-white" />
-            </button>
-          </div>
-        )}
-        
-        {/* Input for file upload */}
-        <input
-          ref={imageInputRef}
-          type="file"
-          accept="image/*"
-          className="hidden"
-          onChange={handleImageUpload}
-          aria-label="Subir imagen para búsqueda"
-          title="Subir imagen para búsqueda"
-        />
-        
-        {searchTerm && (
-          <button
-            type="button"
-            onClick={handleClearInput}
-            className={cn(
-              'p-2 focus:outline-none',
-              appearance === 'dark' ? 'text-slate-400 hover:text-white' : 'text-slate-400 hover:text-slate-700'
-            )}
-            aria-label="Clear search"
-          >
-            <X className="h-5 w-5" />
-          </button>
-        )}
-        
-        {showVoiceSearch && (
-          <button
-            type="button"
-            onClick={handleVoiceSearch}
-            className={cn(
-              'p-2 focus:outline-none',
-              isRecording ? 'text-red-500' : appearance === 'dark' ? 'text-slate-400 hover:text-white' : 'text-slate-400 hover:text-slate-700'
-            )}
-            aria-label={isRecording ? 'Stop recording' : 'Voice search'}
-            title={isRecording ? 'Detener grabación' : 'Búsqueda por voz'}
-          >
-            {isRecording ? <MicOff className="h-5 w-5 animate-pulse" /> : <Mic className="h-5 w-5" />}
-          </button>
-        )}
-        
-        {showImageSearch && (
-          <button 
-            type="button" 
-            onClick={handleImageSearch}
-            className="flex items-center justify-center h-8 w-8 rounded-full hover:bg-slate-100/10"
-            aria-label="Buscar por imagen"
-            title="Buscar por imagen"
-          >
-            <Camera className={cn("h-4 w-4", isImageSearchActive ? "text-blue-400" : "text-slate-400")} />
-          </button>
-        )}
-        
-        {showAiAssist && !isRecording && !isAiThinking && (
-          <button
-            type="button"
-            onClick={handleAiAssist}
-            className={cn(
-              'p-2 focus:outline-none',
-              appearance === 'dark' ? 'text-purple-400 hover:text-purple-300' : 'text-purple-500 hover:text-purple-700'
-            )}
-            aria-label="AI search assistant"
-            title="Asistente de búsqueda AI"
-          >
-            <Sparkles className="h-5 w-5" />
-          </button>
-        )}
-        
-        {/* AI thinking indicator */}
-        {isAiThinking && (
-          <div className="flex-shrink-0 mx-2">
+        <form onSubmit={handleSubmit} className="relative flex items-center w-full max-w-full">
+          <div className={cn(
+            'group flex items-center w-full rounded-2xl transition-all duration-300',
+            'backdrop-blur-sm shadow-lg hover:shadow-xl',
+            appearance === 'dark'
+              ? [
+                  'bg-slate-800/40 hover:bg-slate-800/60',
+                  'ring-1 ring-slate-700/50 hover:ring-teal-500/30',
+                  'shadow-slate-900/20'
+                ]
+              : [
+                  'bg-white/80 hover:bg-white/90',
+                  'ring-1 ring-slate-200/50 hover:ring-teal-500/30',
+                  'shadow-slate-200/20'
+                ],
+            isRecording && 'ring-2 ring-red-500/50 animate-pulse',
+            isAiThinking && 'ring-2 ring-purple-500/50',
+            showSuggestionsPanel && 'ring-2 ring-teal-500/30'
+          )}>
+            {/* Search Icon with Animation */}
             <motion.div 
-              animate={{ rotate: 360 }} 
-              transition={{ duration: 2, repeat: Infinity, ease: 'linear' }}
-              className="h-5 w-5 rounded-full border-2 border-purple-500 border-t-transparent"
+              className="flex-shrink-0 pl-5"
+              animate={{ 
+                scale: isRecording || isAiThinking ? [1, 1.1, 1] : 1,
+                rotate: isAiThinking ? [0, 180, 360] : 0
+              }}
+              transition={{ 
+                duration: 2,
+                repeat: isRecording || isAiThinking ? Infinity : 0,
+                ease: "easeInOut"
+              }}
+            >
+              <Search className={cn(
+                'w-5 h-5 transition-colors duration-300',
+                appearance === 'dark' 
+                  ? 'text-teal-400 group-hover:text-teal-300' 
+                  : 'text-teal-500 group-hover:text-teal-600'
+              )} />
+            </motion.div>
+
+            {/* Input Field with Enhanced Styling */}
+            <input
+              ref={inputRef}
+              type="text"
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              onFocus={() => setShowSuggestionsPanel(true)}
+              placeholder={placeholder}
+              aria-label="Campo de búsqueda"
+              className={cn(
+                'w-full px-4 py-4 bg-transparent border-0',
+                'text-lg placeholder:text-sm',
+                'focus:ring-0 focus:outline-none',
+                'transition-all duration-300',
+                appearance === 'dark' 
+                  ? [
+                      'text-white placeholder:text-slate-400',
+                      'group-hover:placeholder:text-slate-300'
+                    ]
+                  : [
+                      'text-slate-900 placeholder:text-slate-400',
+                      'group-hover:placeholder:text-slate-500'
+                    ]
+              )}
+              disabled={isRecording}
             />
+
+            {/* Action Buttons Container */}
+            <div className="flex items-center gap-2 pr-4">
+              {/* Clear Button */}
+              {searchTerm && (
+                <motion.button
+                  initial={{ scale: 0 }}
+                  animate={{ scale: 1 }}
+                  exit={{ scale: 0 }}
+                  type="button"
+                  onClick={handleClearInput}
+                  title="Limpiar búsqueda"
+                  className={cn(
+                    'p-2 rounded-full transition-all duration-300',
+                    'hover:bg-slate-200/20 active:bg-slate-200/30',
+                    appearance === 'dark'
+                      ? 'text-slate-400 hover:text-white'
+                      : 'text-slate-500 hover:text-slate-700'
+                  )}
+                >
+                  <X className="w-4 h-4" />
+                </motion.button>
+              )}
+
+              {/* Separator Line */}
+              <div className={cn(
+                'h-6 w-px mx-1',
+                appearance === 'dark' 
+                  ? 'bg-slate-700/50' 
+                  : 'bg-slate-200'
+              )} />
+
+              {/* Voice Search Button */}
+              {showVoiceSearch && (
+                <motion.button
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
+                  type="button"
+                  onClick={handleVoiceSearch}
+                  title={isRecording ? "Detener grabación" : "Búsqueda por voz"}
+                  className={cn(
+                    'p-2 rounded-full transition-all duration-300',
+                    isRecording
+                      ? 'bg-red-500/20 text-red-500 hover:bg-red-500/30'
+                      : appearance === 'dark'
+                      ? 'text-slate-400 hover:bg-slate-700/50 hover:text-white'
+                      : 'text-slate-500 hover:bg-slate-100 hover:text-slate-700'
+                  )}
+                >
+                  <motion.div
+                    animate={isRecording ? {
+                      scale: [1, 1.2, 1],
+                      opacity: [1, 0.7, 1]
+                    } : {}}
+                    transition={{
+                      duration: 1.5,
+                      repeat: Infinity,
+                      ease: "easeInOut"
+                    }}
+                  >
+                    {isRecording ? <MicOff className="w-4 h-4" /> : <Mic className="w-4 h-4" />}
+                  </motion.div>
+                </motion.button>
+              )}
+
+              {/* Image Search Button */}
+              {showImageSearch && (
+                <motion.button
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
+                  type="button"
+                  onClick={handleImageSearch}
+                  title="Búsqueda por imagen"
+                  className={cn(
+                    'p-2 rounded-full transition-all duration-300',
+                    isImageSearchActive
+                      ? 'bg-blue-500/20 text-blue-500 hover:bg-blue-500/30'
+                      : appearance === 'dark'
+                      ? 'text-slate-400 hover:bg-slate-700/50 hover:text-white'
+                      : 'text-slate-500 hover:bg-slate-100 hover:text-slate-700'
+                  )}
+                >
+                  <Camera className="w-4 h-4" />
+                </motion.button>
+              )}
+
+              {/* AI Assist Button */}
+              {showAiAssist && (
+                <motion.button
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
+                  type="button"
+                  onClick={handleAiAssist}
+                  title="Asistente de búsqueda AI"
+                  className={cn(
+                    'p-2 rounded-full transition-all duration-300',
+                    isAiThinking
+                      ? 'bg-purple-500/20 text-purple-500 hover:bg-purple-500/30'
+                      : appearance === 'dark'
+                      ? 'text-slate-400 hover:bg-slate-700/50 hover:text-white'
+                      : 'text-slate-500 hover:bg-slate-100 hover:text-slate-700'
+                  )}
+                >
+                  <motion.div
+                    animate={isAiThinking ? {
+                      rotate: 360,
+                      scale: [1, 1.1, 1]
+                    } : {}}
+                    transition={{
+                      duration: 2,
+                      repeat: Infinity,
+                      ease: "linear"
+                    }}
+                  >
+                    <Sparkles className="w-4 h-4" />
+                  </motion.div>
+                </motion.button>
+              )}
+
+              {/* Submit Button */}
+              <motion.button
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+                type="submit"
+                title="Realizar búsqueda"
+                className={cn(
+                  'ml-2 px-6 py-2.5 rounded-xl font-medium',
+                  'transition-all duration-300',
+                  'bg-gradient-to-r shadow-lg',
+                  appearance === 'dark'
+                    ? [
+                        'from-teal-500 to-cyan-500',
+                        'hover:from-teal-400 hover:to-cyan-400',
+                        'text-white',
+                        'shadow-teal-900/20'
+                      ]
+                    : [
+                        'from-teal-500 to-cyan-500',
+                        'hover:from-teal-600 hover:to-cyan-600',
+                        'text-white',
+                        'shadow-teal-500/20'
+                      ]
+                )}
+              >
+                <span className="hidden sm:inline">Buscar</span>
+                <Search className="w-4 h-4 sm:hidden" />
+              </motion.button>
+            </div>
           </div>
+        </form>
+      </motion.div>
+
+      {/* Hidden file input for image search */}
+      <input
+        ref={imageInputRef}
+        type="file"
+        accept="image/*"
+        onChange={handleImageUpload}
+        className="hidden"
+        title="Subir imagen para búsqueda"
+      />
+
+      {/* Search suggestions panel with animation */}
+      <AnimatePresence>
+        {showSuggestions && showSuggestionsPanel && (
+          <motion.div
+            initial={{ opacity: 0, y: -10 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -10 }}
+            transition={{ duration: 0.2 }}
+          >
+            <SearchSuggestions
+              searchTerm={searchTerm}
+              onSelectSuggestion={handleSelectSuggestion}
+              appearance={appearance}
+              position={suggestionsPosition}
+              compact={compactSuggestions}
+            />
+          </motion.div>
         )}
-        
-        <button
-          type="submit"
-          className={cn(
-            'flex items-center px-4 py-2 h-full bg-teal-500 hover:bg-teal-600 text-white font-semibold rounded-r-lg transition-colors',
-            isMobile ? 'px-2' : 'px-4'
-          )}
-          aria-label="Buscar"
-        >
-          <Search className="h-5 w-5" />
-          {!isMobile && <span className="ml-2">Buscar</span>}
-        </button>
-      </form>
-      
-      {/* Search suggestions */}
-      {showSuggestionsPanel && showSuggestions && (
-        <div className="absolute z-50 w-full">
-          <SearchSuggestions
-            searchTerm={searchTerm}
-            onSelectSuggestion={handleSelectSuggestion}
-            appearance={appearance === 'dark' ? 'dark' : 'light'}
-            position={suggestionsPosition}
-            compact={compactSuggestions}
-          />
-        </div>
-      )}
+      </AnimatePresence>
     </div>
   );
 }

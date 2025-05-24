@@ -18,9 +18,13 @@ interface GeoJsonPoint {
 export interface Publication {
   // --- Identificadores y Metadatos Esenciales ---
   _id?: string; // Opcional: ObjectId de MongoDB (Automático)
+  id?: string; // Opcional: String ID, often same as _id or derived
+  slug?: string | null; // Opcional: SEO-friendly slug
+  premium?: boolean | null; // Opcional: Indica si es un anuncio premium
   createdAt?: Date; // Fecha de creación (Automático por DB/Backend)
   updatedAt?: Date; // Fecha de actualización (Automático por DB/Backend)
   userId?: string | null; // ID del usuario creador (si aplica)
+  userSince?: Date | null; // Opcional: Fecha desde que el usuario es miembro
 
   // --- Contenido Principal ---
   title: string; // Título (Obligatorio)
