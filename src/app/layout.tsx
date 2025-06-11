@@ -13,7 +13,7 @@ import { PublicationProvider } from '@/contexts/PublicationContext';
 import { SearchProvider } from '@/contexts/SearchContext';
 import { ReactNode } from 'react';
 import type { Metadata } from 'next';
-import GlobalSearchBar from '@/components/search/GlobalSearchBar';
+import ConditionalSearchBar from '@/components/search/ConditionalSearchBar';
 
 const inter = Inter({ subsets: ['latin'] });
 
@@ -32,7 +32,7 @@ export default function RootLayout({ children }: { children: ReactNode }) {
               <div className="flex min-h-screen flex-col bg-background text-foreground">
                 <Suspense fallback={<Loader />}>
                   <Header />
-                  <GlobalSearchBar />
+                  <ConditionalSearchBar />
                   <main className="flex-grow">{children}</main>
                   <Footer />
                   <MobileNavigation />
