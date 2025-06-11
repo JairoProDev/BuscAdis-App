@@ -84,15 +84,15 @@ const LocationSelector = ({ isOpen, onClose, onLocationSelect, initialSelection 
         // Reset search term on open
         setSearchTerm('');
 
-        const hasInitial = Object.values(initialSelection).filter(v => v !== null).length > 0;
+        const hasInitial = initialSelection && Object.values(initialSelection).filter(v => v !== null).length > 0;
 
         if (hasInitial) {
              let startingLevel: Level = 'continent';
-            if (initialSelection.district) startingLevel = 'district';
-            else if (initialSelection.province) startingLevel = 'district';
-            else if (initialSelection.department) startingLevel = 'province';
-            else if (initialSelection.country) startingLevel = 'department';
-            else if (initialSelection.continent) startingLevel = 'country';
+            if (initialSelection?.district) startingLevel = 'district';
+            else if (initialSelection?.province) startingLevel = 'district';
+            else if (initialSelection?.department) startingLevel = 'province';
+            else if (initialSelection?.country) startingLevel = 'department';
+            else if (initialSelection?.continent) startingLevel = 'country';
             
             setLevel(startingLevel);
             setSelection({ 

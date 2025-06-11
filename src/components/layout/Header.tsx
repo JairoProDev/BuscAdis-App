@@ -17,8 +17,10 @@ import {
   Cog6ToothIcon, // Un ícono genérico para "Mi Perfil" o "Configuración" si UserCircle se usa en el botón
   ChevronDownIcon, // Para indicar que es un desplegable
   SparklesIcon, // Para el botón de ADIS
+  MapPinIcon,
 } from '@heroicons/react/24/outline';
 import { ThemeToggle } from '@/components/theme';
+import LocationSelector from '@/components/search/LocationSelector';
 
 interface User {
   id: string;
@@ -35,6 +37,8 @@ export default function Header() {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
   const [user, setUser] = useState<User | null>(null);
   const [isMounted, setIsMounted] = useState(false);
+  const [showLocationSelector, setShowLocationSelector] = useState(false);
+  const [selectedLocation, setSelectedLocation] = useState<any>({});
   const pathname = usePathname();
   const router = useRouter(); // Inicializar useRouter
 
@@ -161,6 +165,26 @@ export default function Header() {
   const menuItemClasses = "flex w-full items-center gap-3 px-3.5 py-2.5 text-sm text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-700/80 rounded-md transition-colors duration-150 focus:outline-none focus-visible:bg-slate-100 dark:focus-visible:bg-slate-700/80 focus-visible:ring-1 focus-visible:ring-teal-500";
   const menuItemIconClasses = "w-5 h-5 flex-shrink-0 text-slate-500 dark:text-slate-400"; // flex-shrink-0 para evitar que el icono se encoja
 
+  const handleLocationSelect = (location: any) => {
+    setSelectedLocation(location);
+    setShowLocationSelector(false);
+  };
+
+  const getLocationDisplayName = () => {
+    if (!selectedLocation || Object.keys(selectedLocation).length === 0) {
+      return 'Perú'; // Default
+    }
+    
+    // Mostrar el nivel más específico disponible
+    if (selectedLocation.district?.name) return selectedLocation.district.name;
+    if (selectedLocation.province?.name) return selectedLocation.province.name;
+    if (selectedLocation.department?.name) return selectedLocation.department.name;
+    if (selectedLocation.country?.name) return selectedLocation.country.name;
+    if (selectedLocation.continent?.name) return selectedLocation.continent.name;
+    
+    return 'Perú';
+  };
+
 
   const userAuthSection = !isMounted ? (
     <div className="flex items-center space-x-2 h-10"> {/* Placeholder para evitar CLS */}
@@ -174,7 +198,7 @@ export default function Header() {
         onClick={toggleUserMenu}
         className="group flex items-center gap-1.5 pl-2 pr-1 py-1 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800/60 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-teal-500 focus-visible:ring-offset-1 dark:focus-visible:ring-offset-slate-900"
         aria-label="Menú de usuario"
-        aria-expanded={showUserMenu ? "true" : "false"}
+        aria-expanded={showUserMenu}
         aria-controls="user-menu-dropdown"
         title="Abrir menú de usuario"
       >
@@ -286,7 +310,7 @@ export default function Header() {
               onClick={() => setShowAdisChat(!showAdisChat)}
               className={`${navButtonBaseClasses} ${showAdisChat ? navButtonActiveClasses : navButtonInactiveClasses}`}
               aria-label="Abrir chat con ADIS"
-              aria-expanded={showAdisChat ? "true" : "false"}
+              aria-expanded={showAdisChat}
               title="Chat con ADIS IA"
             >
               <SparklesIcon className="w-6 h-6 mb-1 md:mb-0 md:mr-1.5" aria-hidden="true" />
@@ -311,6 +335,18 @@ export default function Header() {
           </nav>
 
           <div className="flex items-center space-x-2 md:space-x-3">
+            <button
+              onClick={() => setShowLocationSelector(true)}
+              className="flex items-center gap-1.5 px-3 py-2 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800/60 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-teal-500 focus-visible:ring-offset-1 dark:focus-visible:ring-offset-slate-900 border border-slate-200 dark:border-slate-700"
+              aria-label="Seleccionar ubicación"
+              title="Cambiar ubicación"
+            >
+              <MapPinIcon className="w-4 h-4 text-slate-600 dark:text-slate-300" />
+              <span className="text-sm text-slate-700 dark:text-slate-200 font-medium hidden sm:block">
+                {getLocationDisplayName()}
+              </span>
+              <ChevronDownIcon className="w-4 h-4 text-slate-500 dark:text-slate-400" />
+            </button>
             <ThemeToggle />
             {userAuthSection}
           </div>
@@ -353,6 +389,13 @@ export default function Header() {
           </div>
         </div>
       )}
+
+      <LocationSelector
+        isOpen={showLocationSelector}
+        onClose={() => setShowLocationSelector(false)}
+        onLocationSelect={handleLocationSelect}
+        initialSelection={selectedLocation}
+      />
     </header>
   );
 }
