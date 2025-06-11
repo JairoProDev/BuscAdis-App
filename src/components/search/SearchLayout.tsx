@@ -2,6 +2,7 @@
 
 import { useState, useEffect, type ReactNode, useMemo, useCallback } from 'react'
 import { useRouter, usePathname, useSearchParams } from 'next/navigation'
+import { useSearch } from '@/contexts/SearchContext'
 import {
     // MapIcon, // Eliminado porque la funcionalidad del mapa fue removida en la versión "después"
     Squares2X2Icon,
@@ -25,9 +26,6 @@ type FilterValue = string | number | boolean | (string | number)[] | null;
 // THIS SECTION DEFINES THE PROPS AND VIEWMODE, IT SHOULD NOT BE DELETED
 interface SearchLayoutProps {
     initialResults?: CorePublication[]
-    initialCategory?: string
-    initialSubcategory?: string
-    initialQuery?: string
     loading?: boolean
     onSearch?: (query: string, options?: Record<string, string>) => void
     onFilterChange?: (filters: Record<string, FilterValue>) => void
@@ -127,19 +125,14 @@ function adaptToCorePublication(pub: SearchResultsPublicationType): CorePublicat
 
 export default function SearchLayout({
     initialResults = [],
-    initialCategory,
-    initialSubcategory,
-    initialQuery = '',
     loading = false,
     onSearch,
     onFilterChange,
-    // onLoadMore, // Removed
-    // hasMore = false, // Removed
     totalResults = 0,
-    onPublicationClick, // Expects CorePublication
+    onPublicationClick,
     className = '',
-    useEnhancedSearch = true,
 }: SearchLayoutProps) {
+    const { searchState } = useSearch();
     const router = useRouter()
     const pathname = usePathname()
     const searchParams = useSearchParams()
@@ -155,9 +148,9 @@ export default function SearchLayout({
     }, [searchParams])
 
     // Estados del componente - Optimizados
-    const [searchQuery, setSearchQuery] = useState(initialQuery || memoizedSearchParams.q)
-    const [category, setCategory] = useState(initialCategory || memoizedSearchParams.category)
-    const [subcategory, setSubcategory] = useState(initialSubcategory || memoizedSearchParams.subcategory)
+    const [searchQuery, setSearchQuery] = useState(initialResults.length > 0 ? initialResults[0].title : memoizedSearchParams.q)
+    const [category, setCategory] = useState(searchState.category || memoizedSearchParams.category)
+    const [subcategory, setSubcategory] = useState(searchState.subcategory || memoizedSearchParams.subcategory)
     const [selectedSubSubcategory, setSelectedSubSubcategory] = useState(memoizedSearchParams.subsubcategory)
     const [results, setResults] = useState<CorePublication[]>(initialResults)
     const [listViewMode, setListViewMode] = useState<ViewMode>('grid')
@@ -205,115 +198,21 @@ export default function SearchLayout({
         }
     }, [initialResults])
 
-    // Memoize handlers to prevent unnecessary re-renders
-    const handleSearch = useCallback((query: string, options?: Record<string, string>) => {
-        setSearchQuery(query)
-        const newParams = new URLSearchParams(searchParams?.toString())
-
-        // Update URL params
-        if (query) newParams.set('q', query); else newParams.delete('q')
-        if (options?.category) { 
-            setCategory(options.category)
-            newParams.set('category', options.category)
-        } else if (options?.category === '') {
-            setCategory('')
-            newParams.delete('category')
-        }
-
-        if (options?.subcategory) {
-            setSubcategory(options.subcategory)
-            newParams.set('subcategory', options.subcategory)
-        } else if (options?.subcategory === '') {
-            setSubcategory('')
-            newParams.delete('subcategory')
-        }
-
-        if (options?.subsubcategory) {
-            setSelectedSubSubcategory(options.subsubcategory)
-            newParams.set('subsubcategory', options.subsubcategory)
-        } else if (options?.subsubcategory === '') {
-            setSelectedSubSubcategory('')
-            newParams.delete('subsubcategory')
-        }
-
-        const combinedOptions = {
-            category: options?.category !== undefined ? options.category : category,
-            subcategory: options?.subcategory !== undefined ? options.subcategory : subcategory,
-            subsubcategory: options?.subsubcategory !== undefined ? options.subsubcategory : selectedSubSubcategory,
-            ...activeFilters
-        }
-
-        // Batch URL update with state updates
-        router.push(`${pathname}?${newParams.toString()}`, { scroll: false })
-
+    // This effect will trigger a search whenever the global searchState or local filters change
+    useEffect(() => {
         if (onSearch) {
-            onSearch(query, combinedOptions)
-        } else if (onFilterChange) {
-            onFilterChange({ ...combinedOptions, q: query })
+            const { keyword, category, location } = searchState;
+            const combinedOptions = { category, location, ...activeFilters };
+            onSearch(keyword, combinedOptions);
         }
-    }, [searchParams, category, subcategory, selectedSubSubcategory, activeFilters, pathname, router, onSearch, onFilterChange])
+    }, [searchState, activeFilters, onSearch]);
 
-    const handleCategoryChange = useCallback((newCategory: string) => {
-        setCategory(newCategory)
-        setSubcategory('')
-        setSelectedSubSubcategory('')
-        setActiveFilters({})
-        
-        const params = new URLSearchParams(searchParams?.toString())
-        if (newCategory) params.set('category', newCategory); else params.delete('category')
-        params.delete('subcategory')
-        params.delete('subsubcategory')
-        
-        // Batch URL update with filter change
-        router.push(`${pathname}?${params.toString()}`, { scroll: false })
-        
+    const handleFilterChange = useCallback((newFilters: Record<string, FilterValue>) => {
+        setActiveFilters(prev => ({...prev, ...newFilters}));
         if (onFilterChange) {
-            onFilterChange({ 
-                category: newCategory, 
-                subcategory: '', 
-                subsubcategory: '', 
-                q: searchQuery || '' 
-            })
+            onFilterChange(newFilters);
         }
-    }, [searchParams, pathname, router, onFilterChange, searchQuery])
-
-    const handleSubcategoryChange = useCallback((newSubcategory: string) => {
-        setSubcategory(newSubcategory)
-        setSelectedSubSubcategory('')
-        
-        const params = new URLSearchParams(searchParams?.toString())
-        if (newSubcategory) params.set('subcategory', newSubcategory); else params.delete('subcategory')
-        params.delete('subsubcategory')
-        
-        router.push(`${pathname}?${params.toString()}`, { scroll: false })
-        
-        if (onFilterChange) {
-            onFilterChange({ 
-                category, 
-                subcategory: newSubcategory, 
-                subsubcategory: '', 
-                q: searchQuery || '' 
-            })
-        }
-    }, [searchParams, pathname, router, category, onFilterChange, searchQuery])
-
-    const handleSubSubcategoryChange = useCallback((newSubSubcategory: string) => {
-        setSelectedSubSubcategory(newSubSubcategory)
-        
-        const params = new URLSearchParams(searchParams?.toString())
-        if (newSubSubcategory) params.set('subsubcategory', newSubSubcategory); else params.delete('subsubcategory')
-        
-        router.push(`${pathname}?${params.toString()}`, { scroll: false })
-        
-        if (onFilterChange) {
-            onFilterChange({ 
-                category, 
-                subcategory, 
-                subsubcategory: newSubSubcategory, 
-                q: searchQuery || '' 
-            })
-        }
-    }, [searchParams, pathname, router, category, subcategory, onFilterChange, searchQuery])
+    }, [onFilterChange]);
 
     // This handler is called when a publication is clicked within SearchResults component
     const handleSearchResultsPublicationClick = useCallback((pubFromSearchResults: SearchResultsPublicationType, e: React.MouseEvent<HTMLAnchorElement>) => {
@@ -339,41 +238,6 @@ export default function SearchLayout({
             onPublicationClick(corePub, e);
         }
     }, [searchParams, pathname, router, onPublicationClick]);
-
-    // Memoize filter change handler
-    const handleFilterChange = useCallback((key: string, value: FilterValue) => {
-        setActiveFilters(prev => {
-            const updated = { ...prev, [key]: value }
-            if (value === undefined || value === null || value === '' || (Array.isArray(value) && value.length === 0)) {
-                delete updated[key]
-            }
-            
-            const allSearchParams = {
-                ...updated,
-                category,
-                subcategory,
-                subsubcategory: selectedSubSubcategory,
-                q: searchQuery || ''
-            }
-
-            const params = new URLSearchParams()
-            Object.entries(allSearchParams).forEach(([k, v]) => {
-                if (v !== undefined && v !== null && v !== '') {
-                    if (Array.isArray(v)) {
-                        params.set(k, v.join(','))
-                    } else {
-                        params.set(k, String(v))
-                    }
-                }
-            })
-            
-            router.push(`${pathname}?${params.toString()}`, { scroll: false })
-            if (onFilterChange) {
-                onFilterChange(allSearchParams)
-            }
-            return updated
-        })
-    }, [category, subcategory, selectedSubSubcategory, searchQuery, pathname, router, onFilterChange])
 
     // Modulariza la vista de detalles de publicación
     // This panel now expects CorePublication
@@ -611,14 +475,14 @@ export default function SearchLayout({
                 <FilterChips
                     activeFilters={activeFilters}
                     onFilterChange={handleFilterChange}
-                    category={category}
+                    category={searchState.category}
                 />
 
                 <SearchResults
                     results={results.map(adaptToSearchResultsPublication)}
                     loading={loading}
                     viewMode={listViewMode}
-                    onPublicationClick={(pub) => handlePublicationClick(adaptToCorePublication(pub))}
+                    onPublicationClick={(pub) => onPublicationClick(adaptToCorePublication(pub))}
                 />
 
                 {selectedPublication && !isMobile && (
