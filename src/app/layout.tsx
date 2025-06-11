@@ -32,7 +32,6 @@ export default function RootLayout({ children }: { children: ReactNode }) {
               <div className="flex min-h-screen flex-col bg-background text-foreground">
                 <Suspense fallback={<Loader />}>
                   <Header />
-                  <ConditionalSearchBar />
                   <main className="flex-grow">{children}</main>
                   <Footer />
                   <MobileNavigation />
