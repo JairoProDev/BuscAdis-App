@@ -456,17 +456,11 @@ export default function BuscadorPage() {
       <div className="px-1 sm:px-6 lg:px-2 py-6 sm:py-2 lg:py-3">
         <SearchLayout
           initialResults={results}
-          initialCategory={searchState.category}
-          initialSubcategory={searchState.subcategory}
-          initialQuery={searchState.query}
           loading={loading && !isInitialLoad}
           onSearch={handleSearch}
           onFilterChange={handleFilterChange}
-          onLoadMore={undefined}
-          hasMore={false}
           totalResults={totalResults}
           onPublicationClick={handleOpenModal}
-          useEnhancedSearch={true}
         />
         {error && loading && results.length > 0 && (
           <div className="mt-4 text-center text-red-400 text-sm">
