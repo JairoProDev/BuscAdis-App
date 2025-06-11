@@ -40,7 +40,7 @@ export default function InicioPage() {
   return (
     <main>
       <Hero />
-      <CategoriesSection />
+      {/* <CategoriesSection /> */}
       <FeaturedListingsSection />
       <BenefitsSection />
       <Benefits />

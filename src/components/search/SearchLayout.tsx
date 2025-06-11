@@ -9,9 +9,9 @@ import {
 } from '@heroicons/react/24/outline'
 import SearchResults from './SearchResults'
 import useMediaQuery from '@/hooks/useMediaQuery'
-import AdvancedSearchBar from './AdvancedSearchBar' // Asegúrate que la ruta sea correcta
-import KeywordSearchBox from './KeywordSearchBox'   // Asegúrate que la ruta sea correcta
-import CategorySelector from './CategorySelector'
+// import AdvancedSearchBar from './AdvancedSearchBar'
+// import KeywordSearchBox from './KeywordSearchBox'
+// import CategorySelector from './CategorySelector'
 import FilterChips from '@/components/search/FilterChips'
 import { CategoriesService } from '@/services/categories.service'
 // import { MapView } from './MapView' // Eliminado porque la funcionalidad del mapa fue removida
@@ -584,149 +584,57 @@ export default function SearchLayout({
 
     // --- Renderizado Principal ---
     return (
-        <div className={`w-full mx-auto ${className}`}>
-            <div className="flex flex-col lg:flex-row w-full">
-                {/* LEFT COLUMN - Search interface and results */}
-                <div className="w-full lg:w-[calc(100%-360px)] lg:pr-6">
-                    {/* Category selector */}
-                    <div className="mb-4">
-                        <CategorySelector
-                            activeCategory={category}
-                            activeSubcategory={subcategory}
-                            activeSubSubcategory={selectedSubSubcategory}
-                            onCategoryChange={handleCategoryChange}
-                            onSubcategoryChange={handleSubcategoryChange}
-                            onSubSubcategoryChange={handleSubSubcategoryChange}
-                            showCounts={true}
-                            variant="horizontal"
-                            className="w-full"
-                            showAllOption={true}
-                            maxVisible={isMobile ? 4 : 8}
-                        />
-                    </div>
-
-                    {/* Search bar */}
-                    <div className="flex flex-col sm:flex-row gap-4 mb-4">
-                        <div className="flex-1 w-full max-w-full overflow-hidden">
-                            <div className="relative w-full max-w-full">
-                                {useEnhancedSearch ? (
-                                    <KeywordSearchBox
-                                        initialValue={searchQuery}
-                                        onSearch={handleSearch}
-                                        appearance="dark"
-                                        showLabel={false}
-                                        autoFocus={false}
-                                        placeholder="¿Qué buscas?"
-                                        showVoiceSearch={true}
-                                        showImageSearch={true}
-                                        showAiAssist={true}
-                                        className="w-full"
-                                        isMobile={isMobile}
-                                    />
-                                ) : (
-                                    <AdvancedSearchBar
-                                        initialValue={searchQuery}
-                                        onSearch={handleSearch}
-                                        selectedCategory={category}
-                                        selectedSubcategory={subcategory}
-                                        selectedSubSubcategory={selectedSubSubcategory}
-                                        onSelectCategory={handleCategoryChange}
-                                        onSelectSubcategory={handleSubcategoryChange}
-                                        onSelectSubSubcategory={handleSubSubcategoryChange}
-                                        placeholder="¿Qué estás buscando en BuscAdis?"
-                                    />
-                                )}
-                            </div>
-                        </div>
-                    </div>
-
-                    {/* Filter chips */}
-                    {category && (
-                        <div className="mb-4">
-                            <FilterChips
-                                category={category}
-                                activeFilters={activeFilters}
-                                onFilterChange={handleFilterChange}
-                                className="pt-1 pb-0"
-                            />
-                        </div>
-                    )}
-
-                    {/* Result header with view toggle */}
-                    <div className="flex items-center justify-between mb-4">
-                        <div>
-                            <h1 className="text-xl font-bold text-white dark:text-white">
-                                {searchQuery ? `Resultados para "${searchQuery}"` :
-                                 selectedSubSubcategory && subcategory && category ? `${categoriesData.find(c => c.id === category)?.name} > ${categoriesData.find(c => c.id === category)?.subcategories?.find(sc => sc.id === subcategory)?.name} > ${categoriesData.find(c => c.id === category)?.subcategories?.find(sc => sc.id === subcategory)?.subsubcategories?.find(ssc => ssc.id === selectedSubSubcategory)?.name}` :
-                                 subcategory && category ? `${categoriesData.find(c => c.id === category)?.name} > ${categoriesData.find(c => c.id === category)?.subcategories?.find(sc => sc.id === subcategory)?.name}` :
-                                 category ? categoriesData.find(c => c.id === category)?.name :
-                                'Todos los anuncios'}
-                            </h1>
-                            <p className="text-sm text-slate-400 dark:text-slate-400">
-                                {loading && results.length === 0 ? 'Buscando...' : `${totalResults || results.length} anuncios encontrados`}
-                            </p>
-                        </div>
-
-                        {/* View mode toggle - Moved here */}
-                        <div className="inline-flex items-center gap-1 bg-white dark:bg-slate-800 rounded-lg p-1 border border-slate-200 dark:border-slate-700 shadow-sm">
-                            <button
-                                className={`p-2 rounded transition-colors duration-200 ${
-                                    listViewMode === 'grid'
-                                        ? 'bg-gradient-to-r from-teal-500 to-cyan-500 text-white'
-                                        : 'text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-700 hover:text-slate-900 dark:hover:text-white'
-                                }`}
-                                onClick={() => setListViewMode('grid')}
-                                aria-label="Ver en cuadrícula"
-                                title="Vista Cuadrícula"
-                            >
-                                <Squares2X2Icon className="w-5 h-5" />
-                            </button>
-
-                            <button
-                                className={`p-2 rounded transition-colors duration-200 ${
-                                    listViewMode === 'list'
-                                        ? 'bg-gradient-to-r from-teal-500 to-cyan-500 text-white'
-                                        : 'text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-700 hover:text-slate-900 dark:hover:text-white'
-                                }`}
-                                onClick={() => setListViewMode('list')}
-                                aria-label="Ver en lista"
-                                title="Vista Lista"
-                            >
-                                <ListBulletIcon className="w-5 h-5" />
-                            </button>
-                        </div>
-                    </div>
-
-                    {/* Search results */}
-                    <div className="pr-2 pb-8">
-                        <SearchResults
-                            results={results.map(adaptToSearchResultsPublication)}
-                            loading={loading}
-                            activeCategory={category}
-                            showInteractionButtons={true}
-                            onPublicationClick={handleSearchResultsPublicationClick}
-                            viewType={listViewMode}
-                        />
+        <div className={`w-full ${className}`}>
+            <div className="container mx-auto px-4 sm:px-6 lg:px-8 mt-4">
+                <div className="flex justify-between items-center mb-4">
+                    <p className="text-sm text-slate-500 dark:text-slate-400">
+                        {loading ? 'Buscando...' : `${totalResults} resultados encontrados`}
+                    </p>
+                    <div className="flex items-center gap-2">
+                        <button
+                            onClick={() => setListViewMode('grid')}
+                            className={`p-2 rounded-md ${listViewMode === 'grid' ? 'bg-slate-200 dark:bg-slate-700' : ''}`}
+                            aria-label="Grid View"
+                        >
+                            <Squares2X2Icon className="w-5 h-5" />
+                        </button>
+                        <button
+                            onClick={() => setListViewMode('list')}
+                            className={`p-2 rounded-md ${listViewMode === 'list' ? 'bg-slate-200 dark:bg-slate-700' : ''}`}
+                            aria-label="List View"
+                        >
+                            <ListBulletIcon className="w-5 h-5" />
+                        </button>
                     </div>
                 </div>
 
-                {/* RIGHT COLUMN - Publication details */}
-                <div className="hidden lg:block lg:w-[360px]">
-                    {selectedPublication && !isMobile && (
-                        <div className="sticky top-4 h-[calc(100vh-2rem)] overflow-y-auto custom-scrollbar">
-                            <PublicationDetailsPanel
-                                publication={selectedPublication}
-                                onClose={() => {
-                                    setSelectedPublication(null);
-                                    const newParams = new URLSearchParams(searchParams?.toString());
-                                    newParams.delete('publicationId');
-                                    newParams.delete('title');
-                                    router.push(`${pathname}?${newParams.toString()}`, { scroll: false });
-                                }}
-                            />
-                        </div>
-                    )}
-                </div>
+                <FilterChips
+                    activeFilters={activeFilters}
+                    onFilterChange={handleFilterChange}
+                    category={category}
+                />
+
+                <SearchResults
+                    results={results.map(adaptToSearchResultsPublication)}
+                    loading={loading}
+                    viewMode={listViewMode}
+                    onPublicationClick={(pub) => handlePublicationClick(adaptToCorePublication(pub))}
+                />
+
+                {selectedPublication && !isMobile && (
+                    <div className="sticky top-4 h-[calc(100vh-2rem)] overflow-y-auto custom-scrollbar">
+                        <PublicationDetailsPanel
+                            publication={selectedPublication}
+                            onClose={() => {
+                                setSelectedPublication(null);
+                                const newParams = new URLSearchParams(searchParams?.toString());
+                                newParams.delete('publicationId');
+                                newParams.delete('title');
+                                router.push(`${pathname}?${newParams.toString()}`, { scroll: false });
+                            }}
+                        />
+                    </div>
+                )}
             </div>
             <style jsx global>{`
                 .custom-scrollbar::-webkit-scrollbar {

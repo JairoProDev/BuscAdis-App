@@ -10,8 +10,10 @@ import Footer from '@/components/layout/Footer';
 import { Suspense } from 'react';
 import { Toaster } from '@/components/ui/toaster';
 import { PublicationProvider } from '@/contexts/PublicationContext';
+import { SearchProvider } from '@/contexts/SearchContext';
 import { ReactNode } from 'react';
 import type { Metadata } from 'next';
+import GlobalSearchBar from '@/components/search/GlobalSearchBar';
 
 const inter = Inter({ subsets: ['latin'] });
 
@@ -24,11 +26,13 @@ export default function RootLayout({ children }: { children: ReactNode }) {
   return (
     <html lang="es" suppressHydrationWarning>
       <body className={inter.className}>
-          <ThemeProvider>
+        <ThemeProvider>
+          <SearchProvider>
             <PublicationProvider>
               <div className="flex min-h-screen flex-col bg-background text-foreground">
                 <Suspense fallback={<Loader />}>
                   <Header />
+                  <GlobalSearchBar />
                   <main className="flex-grow">{children}</main>
                   <Footer />
                   <MobileNavigation />
@@ -36,7 +40,8 @@ export default function RootLayout({ children }: { children: ReactNode }) {
               </div>
               <Toaster />
             </PublicationProvider>
-          </ThemeProvider>
+          </SearchProvider>
+        </ThemeProvider>
       </body>
     </html>
   );
