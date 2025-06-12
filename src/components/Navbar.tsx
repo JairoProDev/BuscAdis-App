@@ -36,7 +36,7 @@ export default function Navbar() {
 
     return (
         <>
-            <nav className="sticky top-0 z-40 backdrop-blur-lg bg-white/90 dark:bg-slate-900/90 border-b border-slate-200 dark:border-slate-800 shadow-sm">
+            <nav className="relative z-40 backdrop-blur-lg bg-white/90 dark:bg-slate-900/90 border-b border-slate-200 dark:border-slate-800 shadow-sm">
                 <div className="container mx-auto px-4">
                     <div className="flex justify-between items-center h-16">
                         <Link href="/" className="flex items-center gap-2">

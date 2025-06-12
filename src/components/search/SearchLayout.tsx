@@ -67,8 +67,8 @@ export default function SearchLayout({
                 onFilterChange={handleFilterChange}
             />
 
-            {/* Results Container with proper top margin to account for sticky header */}
-            <div className="pt-32"> {/* Adjust based on actual sticky header height */}
+            {/* Results Container */}
+            <div className="pt-8"> {/* Normal padding since header is no longer sticky */}
                 <div className="max-w-7xl mx-auto">
                     <ResultsContainer
                         results={results}
