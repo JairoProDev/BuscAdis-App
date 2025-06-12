@@ -2,7 +2,7 @@
 
 import './globals.css';
 import { Inter } from 'next/font/google';
-import { ThemeProvider } from '@/components/theme/ThemeProvider'; // Asegúrate de que la ruta sea correcta
+import { ThemeProvider } from '@/components/theme/ThemeProvider';
 import Header from '@/components/layout/Header';
 import MobileNavigation from '@/components/layout/MobileNavigation';
 import { Loader } from '@/components/ui/Loader';
@@ -13,7 +13,6 @@ import { PublicationProvider } from '@/contexts/PublicationContext';
 import { SearchProvider } from '@/contexts/SearchContext';
 import { ReactNode } from 'react';
 import type { Metadata } from 'next';
-import ConditionalSearchBar from '@/components/search/ConditionalSearchBar';
 
 const inter = Inter({ subsets: ['latin'] });
 
@@ -25,15 +24,21 @@ export const metadata: Metadata = {
 export default function RootLayout({ children }: { children: ReactNode }) {
   return (
     <html lang="es" suppressHydrationWarning>
-      <body className={inter.className}>
+      <body className={`${inter.className} antialiased`}>
         <ThemeProvider>
           <SearchProvider>
             <PublicationProvider>
               <div className="flex min-h-screen flex-col bg-background text-foreground">
                 <Suspense fallback={<Loader />}>
                   <Header />
-                  <main className="flex-grow">{children}</main>
-                  <Footer />
+                  <main className="flex-grow relative">
+                    <div className="min-h-full pb-20 md:pb-0">
+                      {children}
+                    </div>
+                  </main>
+                  <div className="hidden md:block">
+                    <Footer />
+                  </div>
                   <MobileNavigation />
                 </Suspense>
               </div>
