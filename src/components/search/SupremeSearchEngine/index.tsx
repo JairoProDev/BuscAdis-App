@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect, useRef, useCallback } from 'react'
+import React, { useState, useEffect, useRef, useCallback } from 'react'
 import { useRouter } from 'next/navigation'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useSearch } from '@/contexts/SearchContext'
@@ -21,7 +21,16 @@ import {
 } from '@heroicons/react/24/outline'
 import AdvancedFilters from './AdvancedFilters'
 import { debounce } from 'lodash'
-import { categoriesMap } from '@/data/categories-data'
+import { categoriesList } from '@/data/categories-data'
+import { 
+  JobsIcon,
+  RealEstateIcon, 
+  VehicleIcon,
+  ServicesIcon,
+  ProductsIcon,
+  EventsIcon,
+  PetsIcon
+} from '@/components/icons/categories'
 
 interface SupremeSearchEngineProps {
   onSearch?: (query: string, options?: Record<string, any>) => void
@@ -68,6 +77,18 @@ const searchAPI = {
       totalCount: 150 + Math.floor(Math.random() * 500)
     }
   }
+}
+
+// Mapa de iconos para cada categoría
+const categoryIcons: Record<string, React.ComponentType<any>> = {
+  'empleos': JobsIcon,
+  'inmuebles': RealEstateIcon,
+  'vehiculos': VehicleIcon,
+  'servicios': ServicesIcon,
+  'productos': ProductsIcon,
+  'eventos': EventsIcon,
+  'comunidad': PetsIcon,
+  'negocios': ServicesIcon
 }
 
 export default function SupremeSearchEngine({
@@ -371,11 +392,11 @@ export default function SupremeSearchEngine({
 
   const getCategoryDataForLevel = (level: string) => {
     if (level === 'category') {
-      return Object.values(categoriesMap)
+      return categoriesList
     } else if (level === 'subcategory' && categorySelection.category) {
       return categorySelection.category.subcategories || []
     } else if (level === 'subsubcategory' && categorySelection.subcategory) {
-      return categorySelection.subcategory.subsubcategories || []
+      return categorySelection.subcategory.subSubcategories || []
     }
     return []
   }
@@ -790,42 +811,151 @@ export default function SupremeSearchEngine({
             initial={{ opacity: 0, y: -10 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -10 }}
-            className="absolute top-full mt-2 w-full bg-white dark:bg-slate-800 rounded-xl shadow-xl border border-slate-200 dark:border-slate-700 z-50"
+            className="absolute top-full mt-2 w-full bg-white dark:bg-slate-800 rounded-xl shadow-xl border border-slate-200 dark:border-slate-700 z-50 overflow-hidden"
           >
-            <div className="p-4">
-              <div className="flex items-center justify-between mb-3">
-                <h3 className="text-sm font-medium text-slate-900 dark:text-slate-100">
-                  {categoryLevel === 'category' ? 'Categorías' :
-                   categoryLevel === 'subcategory' ? 'Subcategorías' : 'Especialidades'}
-                </h3>
-                {categoryLevel !== 'category' && (
+            {/* Header del panel */}
+            <div className="bg-gradient-to-r from-slate-50 to-slate-100 dark:from-slate-800 dark:to-slate-700 px-6 py-4 border-b border-slate-200 dark:border-slate-600">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-3">
+                  <div className="w-8 h-8 bg-gradient-to-br from-teal-500 to-blue-600 rounded-lg flex items-center justify-center">
+                    <Squares2X2Icon className="w-4 h-4 text-white" />
+                  </div>
+                  <div>
+                    <h3 className="text-base font-semibold text-slate-900 dark:text-white">
+                      {categoryLevel === 'category' ? 'Todas las categorías' :
+                       categoryLevel === 'subcategory' ? categorySelection.category?.name : 
+                       categorySelection.subcategory?.name}
+                    </h3>
+                    <p className="text-xs text-slate-500 dark:text-slate-400">
+                      {categoryLevel === 'category' ? 'Selecciona una categoría para comenzar' :
+                       categoryLevel === 'subcategory' ? 'Subcategorías disponibles' : 
+                       'Especialidades específicas'}
+                    </p>
+                  </div>
+                </div>
+                
+                <div className="flex items-center gap-2">
+                  {categoryLevel !== 'category' && (
+                    <button
+                      onClick={() => {
+                        if (categoryLevel === 'subcategory') {
+                          setCategoryLevel('category')
+                        } else {
+                          setCategoryLevel('subcategory')
+                        }
+                      }}
+                      className="flex items-center gap-1 px-3 py-1.5 text-xs font-medium text-teal-600 dark:text-teal-400 hover:bg-teal-50 dark:hover:bg-teal-900/20 rounded-lg transition-colors"
+                    >
+                      <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
+                      </svg>
+                      Volver
+                    </button>
+                  )}
                   <button
-                    onClick={() => {
-                      if (categoryLevel === 'subcategory') {
-                        setCategoryLevel('category')
-                      } else {
-                        setCategoryLevel('subcategory')
-                      }
-                    }}
-                    className="text-xs text-teal-600 dark:text-teal-400 hover:underline"
+                    onClick={() => setActivePanel(null)}
+                    className="w-6 h-6 rounded-full hover:bg-slate-200 dark:hover:bg-slate-600 flex items-center justify-center transition-colors"
                   >
-                    ← Volver
+                    <XMarkIcon className="w-4 h-4 text-slate-500 dark:text-slate-400" />
                   </button>
-                )}
+                </div>
               </div>
-              
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2 max-h-64 overflow-y-auto">
-                {getCategoryDataForLevel(categoryLevel).map((item: any) => (
-                  <button
-                    key={item.id}
-                    onClick={() => handleCategorySelect(item, categoryLevel)}
-                    className="flex items-center gap-2 p-2.5 text-left hover:bg-slate-100 dark:hover:bg-slate-700 rounded-lg transition-colors"
-                  >
-                    {item.icon && <item.icon className="w-4 h-4 text-slate-500" />}
-                    <span className="text-sm text-slate-700 dark:text-slate-200 truncate">{item.name}</span>
-                  </button>
-                ))}
+            </div>
+
+            {/* Grid de categorías mejorado */}
+            <div className="p-6">
+              <div className={`grid gap-3 max-h-80 overflow-y-auto ${
+                categoryLevel === 'category' 
+                  ? 'grid-cols-1 sm:grid-cols-2 lg:grid-cols-4' 
+                  : 'grid-cols-1 sm:grid-cols-2 lg:grid-cols-3'
+              }`}>
+                {getCategoryDataForLevel(categoryLevel).map((item: any) => {
+                  const IconComponent = categoryLevel === 'category' ? categoryIcons[item.id] : null
+                  
+                  return (
+                    <motion.button
+                      key={item.id}
+                      onClick={() => handleCategorySelect(item, categoryLevel)}
+                      whileHover={{ scale: 1.02, y: -2 }}
+                      whileTap={{ scale: 0.98 }}
+                      className={`group relative overflow-hidden rounded-xl p-4 text-left transition-all duration-300 ${
+                        categoryLevel === 'category'
+                          ? 'bg-gradient-to-br from-white to-slate-50 dark:from-slate-700 dark:to-slate-800 border border-slate-200 dark:border-slate-600 hover:shadow-lg hover:border-teal-300 dark:hover:border-teal-500'
+                          : 'bg-slate-50 dark:bg-slate-700 border border-slate-200 dark:border-slate-600 hover:bg-slate-100 dark:hover:bg-slate-600'
+                      }`}
+                    >
+                      {/* Efecto de brillo al hover */}
+                      <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/5 to-transparent transform -skew-x-12 -translate-x-full group-hover:translate-x-full transition-transform duration-700" />
+                      
+                      <div className="relative flex items-start gap-3">
+                        {/* Icono o placeholder */}
+                        <div className={`flex-shrink-0 ${categoryLevel === 'category' ? 'w-12 h-12' : 'w-8 h-8'}`}>
+                          {IconComponent ? (
+                            <div className="w-full h-full rounded-lg bg-gradient-to-br from-slate-100 to-slate-200 dark:from-slate-600 dark:to-slate-700 p-2 group-hover:scale-110 transition-transform duration-300">
+                              <IconComponent className="w-full h-full" />
+                            </div>
+                          ) : (
+                            <div className={`w-full h-full rounded-lg bg-gradient-to-br from-teal-100 to-blue-100 dark:from-teal-800 dark:to-blue-800 flex items-center justify-center ${
+                              categoryLevel === 'subcategory' ? 'text-xs' : 'text-sm'
+                            } font-bold text-teal-700 dark:text-teal-300`}>
+                              {item.name.charAt(0).toUpperCase()}
+                            </div>
+                          )}
+                        </div>
+
+                        {/* Contenido */}
+                        <div className="flex-1 min-w-0">
+                          <div className={`font-semibold text-slate-900 dark:text-white group-hover:text-teal-700 dark:group-hover:text-teal-300 transition-colors ${
+                            categoryLevel === 'category' ? 'text-sm mb-1' : 'text-sm'
+                          }`}>
+                            {item.name}
+                          </div>
+                          
+                          {item.description && categoryLevel === 'category' && (
+                            <p className="text-xs text-slate-500 dark:text-slate-400 line-clamp-2 leading-relaxed">
+                              {item.description}
+                            </p>
+                          )}
+                          
+                          {categoryLevel === 'subcategory' && item.subSubcategories && (
+                            <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
+                              {item.subSubcategories.length} especialidades
+                            </p>
+                          )}
+                        </div>
+
+                        {/* Indicador de navegación */}
+                        {categoryLevel !== 'subsubcategory' && (
+                          <div className="flex-shrink-0 self-center">
+                            <div className="w-6 h-6 rounded-full bg-slate-100 dark:bg-slate-600 flex items-center justify-center group-hover:bg-teal-100 dark:group-hover:bg-teal-800 transition-colors">
+                              <ChevronDownIcon className="w-3 h-3 text-slate-500 dark:text-slate-400 group-hover:text-teal-600 dark:group-hover:text-teal-400 transform rotate-[-90deg] transition-colors" />
+                            </div>
+                          </div>
+                        )}
+                      </div>
+
+                      {/* Badge de cantidad para categorías principales */}
+                      {categoryLevel === 'category' && item.subcategories && (
+                        <div className="absolute top-3 right-3">
+                          <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-teal-100 text-teal-800 dark:bg-teal-800 dark:text-teal-100">
+                            {item.subcategories.length}
+                          </span>
+                        </div>
+                      )}
+                    </motion.button>
+                  )
+                })}
               </div>
+
+              {/* Footer del panel */}
+              {categoryLevel === 'category' && (
+                <div className="mt-6 pt-4 border-t border-slate-200 dark:border-slate-600">
+                  <div className="flex items-center justify-between text-xs text-slate-500 dark:text-slate-400">
+                    <span>💡 Selecciona una categoría para ver subcategorías</span>
+                    <span>{categoriesList.length} categorías disponibles</span>
+                  </div>
+                </div>
+              )}
             </div>
           </motion.div>
         )}

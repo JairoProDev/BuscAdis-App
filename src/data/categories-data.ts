@@ -63,7 +63,7 @@ export interface SubSubcategory {
     {
       id: 'empleos',
       name: 'Empleos',
-      description: 'Ofertas y Búsqueda de Trabajo',
+      description: 'Encuentra tu próxima oportunidad laboral o publica ofertas de trabajo en diversos sectores profesionales',
       subcategories: [
         {
           id: 'oficina',
@@ -238,7 +238,7 @@ export interface SubSubcategory {
     {
       id: 'inmuebles',
       name: 'Inmuebles',
-      description: 'Propiedades en Alquiler, Venta y Anticresis',
+      description: 'Casas, departamentos, terrenos y locales comerciales en venta, alquiler y anticresis',
       subcategories: [
         {
           id: 'departamentos',
@@ -356,7 +356,7 @@ export interface SubSubcategory {
     {
       id: 'vehiculos',
       name: 'Vehículos',
-      description: 'Compra, Venta y Alquiler de Vehículos',
+      description: 'Autos, motos, camiones y maquinaria. Encuentra el vehículo perfecto para ti',
       subcategories: [
         {
           id: 'autos',
@@ -449,7 +449,7 @@ export interface SubSubcategory {
     {
       id: 'servicios',
       name: 'Servicios',
-      description: 'Servicios Profesionales, Técnicos y Personales',
+      description: 'Profesionales expertos en tu área. Desde reparaciones hasta servicios especializados',
       subcategories: [
         {
           id: 'profesionales-asesoria',
@@ -613,7 +613,7 @@ export interface SubSubcategory {
     {
       id: 'productos',
       name: 'Productos',
-      description: 'Compra y Venta de Productos Nuevos y Usados',
+      description: 'Electrónicos, ropa, hogar, deportes y más. Todo lo que necesitas en un solo lugar',
       subcategories: [
         { id: 'electronicos-computacion', name: 'Electrónicos y Computación' }, // Subsubs definidas arriba
         { id: 'celulares-accesorios', name: 'Celulares y Accesorios' }, // Subsubs definidas arriba
@@ -637,7 +637,7 @@ export interface SubSubcategory {
     {
       id: 'eventos',
       name: 'Eventos',
-      description: 'Actividades Culturales, Deportivas, Sociales y Educativas',
+      description: 'Conciertos, deportes, teatro y actividades. Descubre qué está pasando cerca de ti',
       subcategories: [
         { id: 'conciertos-musica-fiestas', name: 'Conciertos, Música y Fiestas' }, // Subsubs por género definidas arriba
         { id: 'deportivos', name: 'Deportivos' }, // Subsubs por deporte definidas arriba
@@ -651,7 +651,7 @@ export interface SubSubcategory {
     {
       id: 'comunidad',
       name: 'Comunidad',
-      description: 'Avisos Personales, Objetos Perdidos y Más',
+      description: 'Conecta con tu comunidad. Avisos personales, mascotas perdidas y ayuda mutua',
       subcategories: [
         { id: 'avisos-personales-sociales', name: 'Avisos Personales y Sociales (Saludos, etc.)' }, // Sin Nivel 3 por ahora
         { id: 'objetos-perdidos-encontrados', name: 'Objetos Perdidos y Encontrados' }, // Sin Nivel 3 por ahora
@@ -663,7 +663,7 @@ export interface SubSubcategory {
     {
       id: 'negocios',
       name: 'Negocios',
-      description: 'Venta, Traspaso, Socios y Oportunidades Comerciales',
+      description: 'Oportunidades de inversión, franquicias y asociaciones comerciales estratégicas',
       subcategories: [
         {
           id: 'venta-traspaso-negocios',
