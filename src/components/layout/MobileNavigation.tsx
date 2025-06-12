@@ -40,11 +40,7 @@ export default function MobileNavigation() {
 
   return (
     <>
-      <div className="fixed top-4 right-4 z-50 md:hidden">
-        <motion.div initial={{ opacity: 0, scale: 0.8 }} animate={{ opacity: 1, scale: 1 }} className="bg-white/80 dark:bg-slate-800/80 backdrop-blur-sm rounded-full p-2 shadow-lg border border-slate-200 dark:border-slate-700">
-            <ThemeToggle />
-        </motion.div>
-      </div>
+
 
       <motion.nav
         aria-label="Navegación principal en móvil"

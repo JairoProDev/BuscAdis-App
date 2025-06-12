@@ -18,6 +18,9 @@ import {
   ChevronDownIcon, // Para indicar que es un desplegable
   SparklesIcon, // Para el botón de ADIS
   MapPinIcon,
+  UserIcon,
+  ArrowRightOnRectangleIcon,
+  UserPlusIcon,
 } from '@heroicons/react/24/outline';
 import { ThemeToggle } from '@/components/theme';
 import LocationSelector from '@/components/search/LocationSelector';
@@ -152,6 +155,48 @@ export default function Header() {
     </div>
   );
 
+  const AuthDropdown = () => {
+    const [showAuthMenu, setShowAuthMenu] = useState(false);
+
+    return (
+      <div className="relative">
+        <button
+          onClick={() => setShowAuthMenu(!showAuthMenu)}
+          className="flex items-center gap-1 px-2.5 py-1.5 rounded-lg bg-gradient-to-r from-teal-500 to-cyan-500 text-white text-sm font-medium hover:from-teal-600 hover:to-cyan-600 transition-colors shadow-sm focus:outline-none focus-visible:ring-2 focus-visible:ring-teal-500 focus-visible:ring-offset-1"
+          aria-label="Opciones de autenticación"
+          aria-expanded={showAuthMenu ? "true" : "false"}
+        >
+          <UserIcon className="w-4 h-4" />
+          <span className="hidden sm:inline">Cuenta</span>
+          <ChevronDownIcon className={`w-4 h-4 transition-transform ${showAuthMenu ? 'rotate-180' : ''}`} />
+        </button>
+
+        {showAuthMenu && (
+          <div className="absolute right-0 mt-2 w-48 origin-top-right bg-white dark:bg-slate-800 rounded-xl shadow-xl border border-slate-200 dark:border-slate-700 overflow-hidden z-50">
+            <div className="py-1">
+              <Link
+                href="/login"
+                className="flex items-center gap-3 px-4 py-3 text-sm text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-700/50 transition-colors"
+                onClick={() => setShowAuthMenu(false)}
+              >
+                <ArrowRightOnRectangleIcon className="w-4 h-4" />
+                Iniciar sesión
+              </Link>
+              <Link
+                href="/register"
+                className="flex items-center gap-3 px-4 py-3 text-sm text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-700/50 transition-colors border-t border-slate-100 dark:border-slate-700"
+                onClick={() => setShowAuthMenu(false)}
+              >
+                <UserPlusIcon className="w-4 h-4" />
+                Registrarse
+              </Link>
+            </div>
+          </div>
+        )}
+      </div>
+    );
+  };
+
   const navButtonBaseClasses = "flex flex-col items-center justify-center px-4 py-2 rounded-lg font-medium transition-all duration-150 focus:outline-none focus-visible:ring-2 focus-visible:ring-teal-400 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-slate-900";
   const navButtonActiveClasses = "text-teal-500 dark:text-teal-400"; // Simplificado, el borde puede ser opcional
   const navButtonInactiveClasses = "text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800/60 hover:text-teal-500 dark:hover:text-teal-400";
@@ -198,7 +243,7 @@ export default function Header() {
         onClick={toggleUserMenu}
         className="group flex items-center gap-1.5 pl-2 pr-1 py-1 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800/60 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-teal-500 focus-visible:ring-offset-1 dark:focus-visible:ring-offset-slate-900"
         aria-label="Menú de usuario"
-        aria-expanded={showUserMenu}
+        aria-expanded={showUserMenu ? "true" : "false"}
         aria-controls="user-menu-dropdown"
         title="Abrir menú de usuario"
       >
@@ -261,29 +306,16 @@ export default function Header() {
       )}
     </div>
   ) : (
-    <div className="flex items-center space-x-2">
-      <Link
-        href="/login"
-        className="px-4 py-2 text-sm font-medium text-slate-700 dark:text-slate-200 hover:text-teal-500 dark:hover:text-teal-400 transition-colors rounded-md"
-      >
-        Iniciar sesión
-      </Link>
-      <Link
-        href="/register"
-        className="px-4 py-2 rounded-lg bg-gradient-to-r from-teal-500 to-cyan-500 text-white text-sm font-medium hover:from-teal-600 hover:to-cyan-600 transition-colors shadow-sm"
-      >
-        Registrarse
-      </Link>
-    </div>
+    <AuthDropdown />
   );
 
   return (
     <header className="relative z-[1000] w-full bg-white/80 dark:bg-slate-900/80 backdrop-blur-lg border-b border-slate-200 dark:border-slate-700/50 shadow-sm transition-colors duration-300">
       <div className="px-4 sm:px-6 lg:px-8">
-        <div className="flex items-center justify-between h-16">
-          <Link href="/" className="flex items-center gap-2 flex-shrink-0" aria-label="Página de inicio de BuscAdis">
-            <Image src="/favicon.ico" alt="" width={32} height={32} className="w-8 h-8" aria-hidden="true" />
-            <span className="text-2xl font-bold bg-gradient-to-r from-teal-500 to-cyan-500 bg-clip-text text-transparent">
+        <div className="flex items-center justify-between h-14">
+          <Link href="/" className="flex items-center gap-1.5 flex-shrink-0" aria-label="Página de inicio de BuscAdis">
+            <Image src="/favicon.ico" alt="" width={28} height={28} className="w-7 h-7" aria-hidden="true" />
+            <span className="text-xl font-bold bg-gradient-to-r from-teal-500 to-cyan-500 bg-clip-text text-transparent">
               BuscAdis
             </span>
           </Link>
@@ -310,7 +342,7 @@ export default function Header() {
               onClick={() => setShowAdisChat(!showAdisChat)}
               className={`${navButtonBaseClasses} ${showAdisChat ? navButtonActiveClasses : navButtonInactiveClasses}`}
               aria-label="Abrir chat con ADIS"
-              aria-expanded={showAdisChat}
+              aria-expanded={showAdisChat ? "true" : "false"}
               title="Chat con ADIS IA"
             >
               <SparklesIcon className="w-6 h-6 mb-1 md:mb-0 md:mr-1.5" aria-hidden="true" />
@@ -334,10 +366,10 @@ export default function Header() {
             </Link>
           </nav>
 
-          <div className="flex items-center space-x-2 md:space-x-3">
+          <div className="flex items-center space-x-1.5 md:space-x-2">
             <button
               onClick={() => setShowLocationSelector(true)}
-              className="flex items-center gap-1.5 px-3 py-2 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800/60 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-teal-500 focus-visible:ring-offset-1 dark:focus-visible:ring-offset-slate-900 border border-slate-200 dark:border-slate-700"
+              className="flex items-center gap-1 px-2 py-1.5 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800/60 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-teal-500 focus-visible:ring-offset-1 dark:focus-visible:ring-offset-slate-900 border border-slate-200 dark:border-slate-700"
               aria-label="Seleccionar ubicación"
               title="Cambiar ubicación"
             >
