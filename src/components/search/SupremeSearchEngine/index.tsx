@@ -585,13 +585,13 @@ export default function SupremeSearchEngine({
                   </div>
                   <div className="flex flex-wrap gap-2">
                     {[
-                      { icon: '📍', label: 'Ubicación', active: false },
-                      { icon: '💰', label: 'Precio', active: false },
-                      { icon: '⭐', label: 'Valoración', active: false },
-                      { icon: '🕒', label: 'Más recientes', active: true }
-                    ].map((filter, index) => (
+                      { icon: '📍', label: 'Ubicación', active: false, id: 'location' },
+                      { icon: '💰', label: 'Precio', active: false, id: 'price' },
+                      { icon: '⭐', label: 'Valoración', active: false, id: 'rating' },
+                      { icon: '🕒', label: 'Más recientes', active: true, id: 'recent' }
+                    ].map((filter) => (
                       <button
-                        key={index}
+                        key={filter.id}
                         className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium transition-all ${
                           filter.active 
                             ? 'bg-blue-100 text-blue-700 border border-blue-200' 
@@ -617,20 +617,20 @@ export default function SupremeSearchEngine({
                     </div>
                     <div className="space-y-2">
                       {[
-                        'Casa en venta en Inmuebles',
-                        'Moto en Vehículos', 
-                        'local',
-                        'Trabajo en marketing',
-                        'Laptop gaming'
-                      ].map((recent, index) => (
+                        { text: 'Casa en venta en Inmuebles', id: 'recent-casa-venta' },
+                        { text: 'Moto en Vehículos', id: 'recent-moto-vehiculos' }, 
+                        { text: 'local', id: 'recent-local' },
+                        { text: 'Trabajo en marketing', id: 'recent-trabajo-marketing' },
+                        { text: 'Laptop gaming', id: 'recent-laptop-gaming' }
+                      ].map((recent) => (
                         <button
-                          key={index}
-                          onClick={() => handleSuggestionSelect({ id: `recent-${index}`, text: recent, type: 'recent' })}
+                          key={recent.id}
+                          onClick={() => handleSuggestionSelect({ id: recent.id, text: recent.text, type: 'recent' })}
                           className="w-full text-left p-2 hover:bg-slate-50 dark:hover:bg-slate-700 rounded-lg transition-colors flex items-center gap-2"
                         >
                           <ClockIcon className="h-3 w-3 text-slate-400 flex-shrink-0" />
                           <span className="text-sm text-slate-700 dark:text-slate-300 truncate">
-                            {recent}
+                            {recent.text}
                           </span>
                         </button>
                       ))}
@@ -650,14 +650,14 @@ export default function SupremeSearchEngine({
                     </div>
                     <div className="space-y-2">
                       {[
-                        { icon: '🏠', text: 'Departamentos con vista al mar', category: 'Inmuebles' },
-                        { icon: '⚡', text: 'Autos eléctricos segunda mano', category: 'Vehículos' },
-                        { icon: '🏗️', text: 'Terrenos construcción cerca ciudad', category: 'Inmuebles' },
-                        { icon: '📷', text: 'Cámaras digitales profesionales', category: 'Electrónicos' }
-                      ].map((suggestion, index) => (
+                        { icon: '🏠', text: 'Departamentos con vista al mar', category: 'Inmuebles', id: 'ai-depts-vista-mar' },
+                        { icon: '⚡', text: 'Autos eléctricos segunda mano', category: 'Vehículos', id: 'ai-autos-electricos' },
+                        { icon: '🏗️', text: 'Terrenos construcción cerca ciudad', category: 'Inmuebles', id: 'ai-terrenos-construccion' },
+                        { icon: '📷', text: 'Cámaras digitales profesionales', category: 'Electrónicos', id: 'ai-camaras-profesionales' }
+                      ].map((suggestion) => (
                         <button
-                          key={index}
-                          onClick={() => handleSuggestionSelect({ id: `ai-${index}`, text: suggestion.text, type: 'ai' })}
+                          key={suggestion.id}
+                          onClick={() => handleSuggestionSelect({ id: suggestion.id, text: suggestion.text, type: 'ai' })}
                           className="w-full text-left p-2 hover:bg-purple-50 dark:hover:bg-purple-900/20 rounded-lg transition-colors"
                         >
                           <div className="flex items-start gap-2">
@@ -687,15 +687,15 @@ export default function SupremeSearchEngine({
                     </div>
                     <div className="space-y-2">
                       {[
-                        { text: 'Casa en venta Lima', trend: 'up', growth: '+23%' },
-                        { text: 'Departamento alquiler', trend: 'up', growth: '+18%' },
-                        { text: 'Auto usado Toyota', trend: 'up', growth: '+15%' },
-                        { text: 'Trabajo remoto', trend: 'hot', growth: 'HOT' },
-                        { text: 'Celular Samsung', trend: 'up', growth: '+12%' }
-                      ].map((trend, index) => (
+                        { text: 'Casa en venta Lima', trend: 'up', growth: '+23%', id: 'trend-casa-lima' },
+                        { text: 'Departamento alquiler', trend: 'up', growth: '+18%', id: 'trend-depto-alquiler' },
+                        { text: 'Auto usado Toyota', trend: 'up', growth: '+15%', id: 'trend-auto-toyota' },
+                        { text: 'Trabajo remoto', trend: 'hot', growth: 'HOT', id: 'trend-trabajo-remoto' },
+                        { text: 'Celular Samsung', trend: 'up', growth: '+12%', id: 'trend-celular-samsung' }
+                      ].map((trend) => (
                         <button
-                          key={index}
-                          onClick={() => handleSuggestionSelect({ id: `trend-${index}`, text: trend.text, type: 'trending' })}
+                          key={trend.id}
+                          onClick={() => handleSuggestionSelect({ id: trend.id, text: trend.text, type: 'trending' })}
                           className="w-full text-left p-2 hover:bg-orange-50 dark:hover:bg-orange-900/20 rounded-lg transition-colors"
                         >
                           <div className="flex items-center justify-between">
@@ -763,19 +763,19 @@ export default function SupremeSearchEngine({
                     </div>
                     <div className="space-y-1">
                       {[
-                        `${query} en Lima`,
-                        `${query} segunda mano`,
-                        `${query} nuevo`,
-                        `${query} barato`
-                      ].map((suggestion, index) => (
+                        { text: `${query} en Lima`, id: `suggestion-lima-${query}` },
+                        { text: `${query} segunda mano`, id: `suggestion-usado-${query}` },
+                        { text: `${query} nuevo`, id: `suggestion-nuevo-${query}` },
+                        { text: `${query} barato`, id: `suggestion-barato-${query}` }
+                      ].map((suggestion) => (
                         <button
-                          key={index}
-                          onClick={() => handleSuggestionSelect({ id: `suggestion-${index}`, text: suggestion, type: 'ai' })}
+                          key={suggestion.id}
+                          onClick={() => handleSuggestionSelect({ id: suggestion.id, text: suggestion.text, type: 'ai' })}
                           className="w-full text-left p-2 hover:bg-blue-50 dark:hover:bg-blue-900/20 rounded-lg transition-colors flex items-center gap-2"
                         >
                           <MagnifyingGlassIcon className="h-3 w-3 text-blue-500" />
                           <span className="text-sm text-slate-700 dark:text-slate-300">
-                            {suggestion}
+                            {suggestion.text}
                           </span>
                         </button>
                       ))}

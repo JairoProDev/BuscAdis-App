@@ -40,7 +40,7 @@ const nextConfig: NextConfig = {
       "*.node": ["empty"],
     },
     resolveAlias: {
-      // MongoDB dependencies
+      // MongoDB dependencies that should be stubbed
       "mongodb-client-encryption": "next/dist/compiled/noop",
       kerberos: "next/dist/compiled/noop",
       "@mongodb-js/zstd": "next/dist/compiled/noop",
@@ -48,24 +48,6 @@ const nextConfig: NextConfig = {
       aws4: "next/dist/compiled/noop",
       "gcp-metadata": "next/dist/compiled/noop",
       "socks": "next/dist/compiled/noop",
-      // Node.js modules fallbacks for client-side
-      fs: "next/dist/compiled/noop",
-      net: "next/dist/compiled/noop",
-      tls: "next/dist/compiled/noop",
-      dns: "next/dist/compiled/noop",
-      child_process: "next/dist/compiled/noop",
-      "fs/promises": "next/dist/compiled/noop",
-      "timers/promises": "next/dist/compiled/noop",
-      path: "next/dist/compiled/noop",
-      url: "next/dist/compiled/noop",
-      http: "next/dist/compiled/noop",
-      https: "next/dist/compiled/noop",
-      zlib: "next/dist/compiled/noop",
-      stream: "next/dist/compiled/noop",
-      crypto: "next/dist/compiled/noop",
-      "util/types": "next/dist/compiled/noop",
-      // Windows casing issue fix
-      "@/components/ui/Tabs": "@/components/ui/Tabs-adapter",
     },
   },
 
@@ -96,10 +78,37 @@ const nextConfig: NextConfig = {
     },
   },
 
-  // Minimal webpack config (only used when not using Turbopack)
-  // Most configurations have been migrated to Turbopack above
-  webpack: (config) => {
-    // Minimal configuration for fallback compatibility
+  // Webpack config for client-side fallbacks (complementary to Turbopack)
+  webpack: (config, { isServer }) => {
+    if (!isServer) {
+      // Only apply Node.js fallbacks to client-side bundles
+      // This doesn't interfere with Next.js internal modules
+      config.resolve.fallback = {
+        ...config.resolve.fallback,
+        fs: false,
+        net: false,
+        tls: false,
+        dns: false,
+        child_process: false,
+        "fs/promises": false,
+        "timers/promises": false,
+        path: false,
+        url: false,
+        http: false,
+        https: false,
+        zlib: false,
+        stream: false,
+        crypto: false,
+        "util/types": false,
+      };
+    }
+
+    // Windows casing issue fix for both client and server
+    config.resolve.alias = {
+      ...config.resolve.alias,
+      "@/components/ui/Tabs": "@/components/ui/Tabs-adapter",
+    };
+
     return config;
   },
 
