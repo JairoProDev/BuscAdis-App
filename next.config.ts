@@ -34,24 +34,44 @@ const nextConfig: NextConfig = {
     "bson",
   ],
 
+  // Turbopack configuration (moved from experimental.turbo)
+  turbopack: {
+    rules: {
+      "*.node": ["empty"],
+    },
+    resolveAlias: {
+      // MongoDB dependencies
+      "mongodb-client-encryption": "next/dist/compiled/noop",
+      kerberos: "next/dist/compiled/noop",
+      "@mongodb-js/zstd": "next/dist/compiled/noop",
+      snappy: "next/dist/compiled/noop",
+      aws4: "next/dist/compiled/noop",
+      "gcp-metadata": "next/dist/compiled/noop",
+      "socks": "next/dist/compiled/noop",
+      // Node.js modules fallbacks for client-side
+      fs: "next/dist/compiled/noop",
+      net: "next/dist/compiled/noop",
+      tls: "next/dist/compiled/noop",
+      dns: "next/dist/compiled/noop",
+      child_process: "next/dist/compiled/noop",
+      "fs/promises": "next/dist/compiled/noop",
+      "timers/promises": "next/dist/compiled/noop",
+      path: "next/dist/compiled/noop",
+      url: "next/dist/compiled/noop",
+      http: "next/dist/compiled/noop",
+      https: "next/dist/compiled/noop",
+      zlib: "next/dist/compiled/noop",
+      stream: "next/dist/compiled/noop",
+      crypto: "next/dist/compiled/noop",
+      "util/types": "next/dist/compiled/noop",
+      // Windows casing issue fix
+      "@/components/ui/Tabs": "@/components/ui/Tabs-adapter",
+    },
+  },
+
   // Experimental features
   experimental: {
-    // Configure Turbopack settings
-    turbo: {
-      rules: {
-        "*.node": ["empty"],
-      },
-      resolveAlias: {
-        "mongodb-client-encryption": "next/dist/compiled/noop",
-        kerberos: "next/dist/compiled/noop",
-        "@mongodb-js/zstd": "next/dist/compiled/noop",
-        snappy: "next/dist/compiled/noop",
-        aws4: "next/dist/compiled/noop",
-        "gcp-metadata": "next/dist/compiled/noop",
-        "socks": "next/dist/compiled/noop",
-      },
-    },
-    serverMinification: false,
+    serverMinification: true,
   },
 
   // Configure image remote patterns (replaces deprecated domains)
@@ -76,47 +96,10 @@ const nextConfig: NextConfig = {
     },
   },
 
-  // Add webpack config for handling MongoDB dependencies
-  webpack: (config, { isServer }) => {
-    if (!isServer) {
-      // Don't resolve Node.js modules on the client to prevent errors
-      config.resolve.fallback = {
-        fs: false,
-        net: false,
-        tls: false,
-        dns: false,
-        child_process: false,
-        "fs/promises": false,
-        "timers/promises": false,
-        path: false,
-        url: false,
-        http: false,
-        https: false,
-        zlib: false,
-        stream: false,
-        crypto: false,
-        "util/types": false,
-      };
-
-      // Add specific MongoDB modules to noparse
-      config.module = {
-        ...config.module,
-        noParse: [
-          /mongodb-client-encryption/,
-          /kerberos/,
-          /@mongodb-js\/zstd/,
-          /@napi-rs\/snappy-win32-x64-msvc/,
-          /snappy/,
-        ],
-      };
-    }
-
-    // Configuración para manejar problemas de casing en Windows
-    config.resolve.alias = {
-      ...config.resolve.alias,
-      "@/components/ui/Tabs": "@/components/ui/Tabs-adapter",
-    };
-
+  // Minimal webpack config (only used when not using Turbopack)
+  // Most configurations have been migrated to Turbopack above
+  webpack: (config) => {
+    // Minimal configuration for fallback compatibility
     return config;
   },
 
