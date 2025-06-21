@@ -16,6 +16,7 @@ interface SearchState {
   keyword: string;
   category: string;
   subcategory: string;
+  subSubcategory: string;
   location: LocationState;
 }
 
@@ -39,6 +40,7 @@ export const SearchProvider = ({ children }: { children: ReactNode }) => {
     keyword: '',
     category: '',
     subcategory: '',
+    subSubcategory: '',
     location: initialLocation,
   });
 

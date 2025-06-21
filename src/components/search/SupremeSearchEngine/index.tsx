@@ -14,8 +14,6 @@ import {
   FireIcon,
   ArrowTrendingUpIcon,
   Squares2X2Icon,
-  AdjustmentsHorizontalIcon,
-  MapPinIcon,
   ChevronDownIcon,
   FunnelIcon
 } from '@heroicons/react/24/outline'
@@ -31,6 +29,8 @@ import {
   EventsIcon,
   PetsIcon
 } from '@/components/icons/categories'
+import Breadcrumbs from '../Breadcrumbs'
+import { getFiltersForCategory } from '@/utils/filterUtils'
 
 interface SupremeSearchEngineProps {
   onSearch?: (query: string, options?: Record<string, any>) => void
@@ -89,6 +89,217 @@ const categoryIcons: Record<string, React.ComponentType<any>> = {
   'eventos': EventsIcon,
   'comunidad': PetsIcon,
   'negocios': ServicesIcon
+}
+
+// Componente simple de filtros inline
+const InlineFilters = ({ 
+  category, 
+  activeFilters = {}, 
+  onFilterChange 
+}: { 
+  category: string
+  activeFilters: Record<string, any>
+  onFilterChange: (filters: Record<string, any>) => void 
+}) => {
+  const [openFilter, setOpenFilter] = useState<string | null>(null)
+  
+  const filters = getFiltersForCategory(category)
+  
+  if (!filters || filters.length === 0) return null
+
+  const handleFilterChange = (filterId: string, value: any) => {
+    const newFilters = { ...activeFilters }
+    
+    if (value === '' || value === null || value === undefined || 
+        (Array.isArray(value) && value.length === 0)) {
+      delete newFilters[filterId]
+    } else {
+      newFilters[filterId] = value
+    }
+    
+    onFilterChange(newFilters)
+  }
+
+  const renderFilterButton = (filter: any) => {
+    const isActive = activeFilters[filter.id] !== undefined
+    const hasValue = activeFilters[filter.id]
+    
+    let displayValue = ''
+    if (hasValue) {
+      if (filter.type === 'select' && typeof hasValue === 'string') {
+        const option = filter.options?.find((o: any) => o.value === hasValue)
+        displayValue = option ? option.label : hasValue
+      } else if (filter.type === 'range' && Array.isArray(hasValue)) {
+        displayValue = `${filter.format ? filter.format(hasValue[0]) : hasValue[0]} - ${filter.format ? filter.format(hasValue[1]) : hasValue[1]}`
+      } else if (filter.type === 'multiselect' && Array.isArray(hasValue)) {
+        displayValue = `${hasValue.length} seleccionados`
+      } else if (filter.type === 'toggle') {
+        displayValue = hasValue ? 'Sí' : 'No'
+      }
+    }
+
+    return (
+      <div key={filter.id} className="relative">
+        <button
+          onClick={() => setOpenFilter(openFilter === filter.id ? null : filter.id)}
+          className={`flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium transition-all whitespace-nowrap ${
+            isActive 
+              ? 'bg-blue-500 text-white shadow-md' 
+              : 'bg-slate-700 text-slate-200 hover:bg-slate-600 border border-slate-600'
+          }`}
+        >
+          <span>{filter.label}</span>
+          {hasValue && (
+            <span className={`text-xs px-2 py-0.5 rounded-full ${
+              isActive ? 'bg-blue-400' : 'bg-slate-600'
+            }`}>
+              {displayValue}
+            </span>
+          )}
+          <ChevronDownIcon className={`h-4 w-4 transition-transform ${openFilter === filter.id ? 'rotate-180' : ''}`} />
+        </button>
+
+        {/* Dropdown content */}
+        {openFilter === filter.id && (
+          <div className="absolute z-50 top-full left-0 mt-1 min-w-[250px] bg-white dark:bg-slate-800 rounded-lg shadow-xl border border-gray-200 dark:border-slate-700 p-4">
+            {filter.type === 'select' && (
+              <div className="space-y-2">
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">{filter.label}</label>
+                <select
+                  value={activeFilters[filter.id] || ''}
+                  onChange={(e) => {
+                    handleFilterChange(filter.id, e.target.value)
+                    if (e.target.value) {
+                      setOpenFilter(null) // Close dropdown after selection
+                    }
+                  }}
+                  className="w-full px-3 py-2 border border-gray-300 dark:border-slate-600 rounded-md text-sm bg-white dark:bg-slate-700 dark:text-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                  aria-label={filter.label}
+                >
+                  <option value="">Todos</option>
+                  {filter.options?.map((option: any) => (
+                    <option key={option.value} value={option.value}>
+                      {option.label}
+                    </option>
+                  ))}
+                </select>
+              </div>
+            )}
+            
+            {filter.type === 'multiselect' && (
+              <div className="space-y-2">
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">{filter.label}</label>
+                <div className="max-h-40 overflow-y-auto space-y-1">
+                  {filter.options?.map((option: any) => {
+                    const isSelected = (activeFilters[filter.id] || []).includes(option.value)
+                    return (
+                      <label key={option.value} className="flex items-center space-x-2 cursor-pointer">
+                        <input
+                          type="checkbox"
+                          checked={isSelected}
+                          onChange={(e) => {
+                            const currentValues = activeFilters[filter.id] || []
+                            const newValues = e.target.checked
+                              ? [...currentValues, option.value]
+                              : currentValues.filter((v: string) => v !== option.value)
+                            handleFilterChange(filter.id, newValues)
+                          }}
+                          className="rounded"
+                        />
+                        <span className="text-sm text-gray-700 dark:text-gray-300">{option.label}</span>
+                      </label>
+                    )
+                  })}
+                </div>
+              </div>
+            )}
+
+            {filter.type === 'range' && (
+              <div className="space-y-3">
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">{filter.label}</label>
+                <div className="flex gap-2 items-center">
+                  <input
+                    type="number"
+                    placeholder="Min"
+                    value={(activeFilters[filter.id] || [filter.min, filter.max])[0] || ''}
+                    onChange={(e) => {
+                      const currentRange = activeFilters[filter.id] || [filter.min, filter.max]
+                      handleFilterChange(filter.id, [parseInt(e.target.value) || filter.min, currentRange[1]])
+                    }}
+                    className="w-20 px-2 py-1 border border-gray-300 dark:border-slate-600 rounded text-sm"
+                  />
+                  <span className="text-gray-500">-</span>
+                  <input
+                    type="number"
+                    placeholder="Max"
+                    value={(activeFilters[filter.id] || [filter.min, filter.max])[1] || ''}
+                    onChange={(e) => {
+                      const currentRange = activeFilters[filter.id] || [filter.min, filter.max]
+                      handleFilterChange(filter.id, [currentRange[0], parseInt(e.target.value) || filter.max])
+                    }}
+                    className="w-20 px-2 py-1 border border-gray-300 dark:border-slate-600 rounded text-sm"
+                  />
+                  {filter.format && (
+                    <span className="text-xs text-gray-500">
+                      ({filter.format(filter.min)} - {filter.format(filter.max)})
+                    </span>
+                  )}
+                </div>
+              </div>
+            )}
+
+            {filter.type === 'toggle' && (
+              <div className="space-y-2">
+                <label className="flex items-center space-x-2 cursor-pointer">
+                  <input
+                    type="checkbox"
+                    checked={!!activeFilters[filter.id]}
+                    onChange={(e) => handleFilterChange(filter.id, e.target.checked)}
+                    className="rounded"
+                  />
+                  <span className="text-sm text-gray-700 dark:text-gray-300">{filter.label}</span>
+                </label>
+              </div>
+            )}
+
+            <div className="mt-4 flex justify-end gap-2">
+              <button
+                onClick={() => setOpenFilter(null)}
+                className="px-3 py-1 text-sm text-gray-600 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200"
+              >
+                Cerrar
+              </button>
+              {activeFilters[filter.id] && (
+                <button
+                  onClick={() => {
+                    handleFilterChange(filter.id, null)
+                    setOpenFilter(null)
+                  }}
+                  className="px-3 py-1 text-sm text-red-600 hover:text-red-700"
+                >
+                  Limpiar
+                </button>
+              )}
+            </div>
+          </div>
+        )}
+      </div>
+    )
+  }
+
+  return (
+    <div className="flex items-center gap-2 overflow-x-auto py-2">
+      {filters.slice(0, 6).map(renderFilterButton)} {/* Limit to 6 filters for better UX */}
+      
+      {/* Overlay to close dropdowns when clicking outside */}
+      {openFilter && (
+        <div 
+          className="fixed inset-0 z-40" 
+          onClick={() => setOpenFilter(null)}
+        />
+      )}
+    </div>
+  )
 }
 
 export default function SupremeSearchEngine({
@@ -526,40 +737,23 @@ export default function SupremeSearchEngine({
         </div>
       </div>
 
-      {/* Filtros rápidos - Solo desktop */}
-      {showFilters && (
-        <div className="hidden md:flex items-center gap-2 mt-3 px-1">
-          <button
-            onClick={handleFiltersClick}
-            className={`flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
-              activePanel === 'filters'
-                ? 'bg-teal-100 dark:bg-teal-900/20 text-teal-700 dark:text-teal-300'
-                : 'text-slate-600 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800'
-            }`}
-          >
-            <AdjustmentsHorizontalIcon className="w-4 h-4" />
-            Filtros
-          </button>
+      {/* Breadcrumbs */}
+      <div className="mt-3 mb-2">
+        <Breadcrumbs className="text-slate-400" />
+      </div>
 
-          <div className="flex items-center gap-2 text-sm text-slate-500 dark:text-slate-400">
-            <MapPinIcon className="w-4 h-4" />
-            <span>{getLocationDisplay()}</span>
-          </div>
+      {/* Filtros dinámicos según categoría */}
+      {showFilters && searchState.category && (
+        <div className="mt-3">
+          <InlineFilters
+            category={searchState.category}
+            activeFilters={searchState as Record<string, any>}
+            onFilterChange={onFilterChange || (() => {})}
+          />
         </div>
       )}
 
-      {/* Botón de filtros móvil */}
-      {showFilters && (
-        <div className="md:hidden mt-3">
-          <button
-            onClick={handleFiltersClick}
-            className="flex items-center justify-center gap-2 w-full px-4 py-3 bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 rounded-lg font-medium transition-colors hover:bg-slate-200 dark:hover:bg-slate-700"
-          >
-            <FunnelIcon className="w-5 h-5" />
-            Filtros y ubicación
-          </button>
-        </div>
-      )}
+
 
       {/* Panel expandido con sugerencias y resultados rápidos */}
       <AnimatePresence>
@@ -573,37 +767,58 @@ export default function SupremeSearchEngine({
             <div className="max-h-96 overflow-y-auto">
               {/* Panel de búsqueda */}
               <div>
-                {/* Filtros rápidos */}
-                <div className="p-4 border-b border-slate-100 dark:border-slate-700">
-                  <div className="flex items-center gap-2 mb-3">
-                    <svg className="h-4 w-4 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z" />
-                    </svg>
-                    <span className="text-sm font-medium text-slate-600 dark:text-slate-300">
-                      Filtros rápidos
-                    </span>
+                {/* Filtros dinámicos según categoría */}
+                {searchState.category && (
+                  <div className="p-4 border-b border-slate-100 dark:border-slate-700">
+                    <div className="flex items-center gap-2 mb-3">
+                      <FunnelIcon className="h-4 w-4 text-teal-500" />
+                      <span className="text-sm font-medium text-slate-600 dark:text-slate-300">
+                        Filtros de {searchState.category}
+                      </span>
+                    </div>
+                    <div className="max-w-full">
+                      <InlineFilters
+                        category={searchState.category}
+                        activeFilters={searchState as Record<string, any>}
+                        onFilterChange={onFilterChange || (() => {})}
+                      />
+                    </div>
                   </div>
-                  <div className="flex flex-wrap gap-2">
-                    {[
-                      { icon: '📍', label: 'Ubicación', active: false, id: 'location' },
-                      { icon: '💰', label: 'Precio', active: false, id: 'price' },
-                      { icon: '⭐', label: 'Valoración', active: false, id: 'rating' },
-                      { icon: '🕒', label: 'Más recientes', active: true, id: 'recent' }
-                    ].map((filter) => (
-                      <button
-                        key={filter.id}
-                        className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium transition-all ${
-                          filter.active 
-                            ? 'bg-blue-100 text-blue-700 border border-blue-200' 
-                            : 'bg-slate-100 text-slate-600 hover:bg-slate-200 dark:bg-slate-700 dark:text-slate-300 dark:hover:bg-slate-600'
-                        }`}
-                      >
-                        <span>{filter.icon}</span>
-                        {filter.label}
-                      </button>
-                    ))}
+                )}
+                
+                {/* Filtros rápidos generales cuando no hay categoría */}
+                {!searchState.category && (
+                  <div className="p-4 border-b border-slate-100 dark:border-slate-700">
+                    <div className="flex items-center gap-2 mb-3">
+                      <svg className="h-4 w-4 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z" />
+                      </svg>
+                      <span className="text-sm font-medium text-slate-600 dark:text-slate-300">
+                        Filtros rápidos
+                      </span>
+                    </div>
+                    <div className="flex flex-wrap gap-2">
+                      {[
+                        { icon: '📍', label: 'Ubicación', active: false, id: 'location' },
+                        { icon: '💰', label: 'Precio', active: false, id: 'price' },
+                        { icon: '⭐', label: 'Valoración', active: false, id: 'rating' },
+                        { icon: '🕒', label: 'Más recientes', active: true, id: 'recent' }
+                      ].map((filter) => (
+                        <button
+                          key={filter.id}
+                          className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium transition-all ${
+                            filter.active 
+                              ? 'bg-blue-100 text-blue-700 border border-blue-200' 
+                              : 'bg-slate-100 text-slate-600 hover:bg-slate-200 dark:bg-slate-700 dark:text-slate-300 dark:hover:bg-slate-600'
+                          }`}
+                        >
+                          <span>{filter.icon}</span>
+                          {filter.label}
+                        </button>
+                      ))}
+                    </div>
                   </div>
-                </div>
+                )}
 
                 {/* Sección principal con tres columnas */}
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-0 min-h-[300px]">
