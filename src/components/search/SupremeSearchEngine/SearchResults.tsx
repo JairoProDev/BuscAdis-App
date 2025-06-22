@@ -111,10 +111,117 @@ export default function SearchResults({
     }
   }
 
+  // Función para obtener icono y color de categoría
+  const getCategoryStyle = (category: string) => {
+    switch (category) {
+      case 'empleos':
+        return {
+          icon: (
+            <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
+              <path fillRule="evenodd" d="M6 6V5a3 3 0 013-3h2a3 3 0 013 3v1h2a2 2 0 012 2v6a2 2 0 01-2 2H4a2 2 0 01-2-2V8a2 2 0 012-2h2zm4-3a1 1 0 00-1 1v1h2V5a1 1 0 00-1-1z" clipRule="evenodd" />
+            </svg>
+          ),
+          bgClass: 'bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-200',
+          name: 'empleos'
+        }
+      case 'inmuebles':
+        return {
+          icon: (
+            <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
+              <path d="M10.707 2.293a1 1 0 00-1.414 0l-7 7a1 1 0 001.414 1.414L4 10.414V17a1 1 0 001 1h2a1 1 0 001-1v-2a1 1 0 011-1h2a1 1 0 011 1v2a1 1 0 001 1h2a1 1 0 001-1v-6.586l.293.293a1 1 0 001.414-1.414l-7-7z" />
+            </svg>
+          ),
+          bgClass: 'bg-green-100 dark:bg-green-900 text-green-800 dark:text-green-200',
+          name: 'inmuebles'
+        }
+      case 'vehiculos':
+        return {
+          icon: (
+            <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
+              <path fillRule="evenodd" d="M4 4a2 2 0 00-2 2v4a2 2 0 002 2V9a1 1 0 112 0v1h8V9a1 1 0 112 0v1a2 2 0 002-2V6a2 2 0 00-2-2H4zm2.5 5a1.5 1.5 0 100-3 1.5 1.5 0 000 3zm7 0a1.5 1.5 0 100-3 1.5 1.5 0 000 3z" clipRule="evenodd" />
+            </svg>
+          ),
+          bgClass: 'bg-orange-100 dark:bg-orange-900 text-orange-800 dark:text-orange-200',
+          name: 'vehículos'
+        }
+      case 'servicios':
+        return {
+          icon: (
+            <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
+              <path fillRule="evenodd" d="M11.49 3.17c-.38-1.56-2.6-1.56-2.98 0a1.532 1.532 0 01-2.286.948c-1.372-.836-2.942.734-2.106 2.106.54.886.061 2.042-.947 2.287-1.561.379-1.561 2.6 0 2.978a1.532 1.532 0 01.947 2.287c-.836 1.372.734 2.942 2.106 2.106a1.532 1.532 0 012.287.947c.379 1.561 2.6 1.561 2.978 0a1.533 1.533 0 012.287-.947c1.372.836 2.942-.734 2.106-2.106a1.533 1.533 0 01.947-2.287c1.561-.379 1.561-2.6 0-2.978a1.532 1.532 0 01-.947-2.287c.836-1.372-.734-2.942-2.106-2.106a1.532 1.532 0 01-2.287-.947zM10 13a3 3 0 100-6 3 3 0 000 6z" clipRule="evenodd" />
+            </svg>
+          ),
+          bgClass: 'bg-yellow-100 dark:bg-yellow-900 text-yellow-800 dark:text-yellow-200',
+          name: 'servicios'
+        }
+      case 'productos':
+        return {
+          icon: (
+            <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
+              <path fillRule="evenodd" d="M10 2L3 7v11a1 1 0 001 1h12a1 1 0 001-1V7l-7-5zM8 15v-3a1 1 0 011-1h2a1 1 0 011 1v3H8z" clipRule="evenodd" />
+            </svg>
+          ),
+          bgClass: 'bg-purple-100 dark:bg-purple-900 text-purple-800 dark:text-purple-200',
+          name: 'productos'
+        }
+      case 'eventos':
+        return {
+          icon: (
+            <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
+              <path fillRule="evenodd" d="M6 2a1 1 0 00-1 1v1H4a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V6a2 2 0 00-2-2h-1V3a1 1 0 10-2 0v1H7V3a1 1 0 00-1-1zm0 5a1 1 0 000 2h8a1 1 0 100-2H6z" clipRule="evenodd" />
+            </svg>
+          ),
+          bgClass: 'bg-pink-100 dark:bg-pink-900 text-pink-800 dark:text-pink-200',
+          name: 'eventos'
+        }
+      case 'negocios':
+        return {
+          icon: (
+            <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
+              <path fillRule="evenodd" d="M4 4a2 2 0 012-2h8a2 2 0 012 2v12a1 1 0 110 2h-3a1 1 0 01-1-1v-2a1 1 0 00-1-1H9a1 1 0 00-1 1v2a1 1 0 01-1 1H4a1 1 0 110-2V4zm3 1h2v2H7V5zm2 4H7v2h2V9zm2-4h2v2h-2V5zm2 4h-2v2h2V9z" clipRule="evenodd" />
+            </svg>
+          ),
+          bgClass: 'bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-gray-200',
+          name: 'negocios'
+        }
+      case 'comunidad':
+        return {
+          icon: (
+            <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
+              <path d="M13 6a3 3 0 11-6 0 3 3 0 016 0zM18 8a2 2 0 11-4 0 2 2 0 014 0zM14 15a4 4 0 00-8 0v3h8v-3z" />
+            </svg>
+          ),
+          bgClass: 'bg-red-100 dark:bg-red-900 text-red-800 dark:text-red-200',
+          name: 'comunidad'
+        }
+      default:
+        return {
+          icon: (
+            <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
+              <path fillRule="evenodd" d="M3 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm0 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zm0 4a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1z" clipRule="evenodd" />
+            </svg>
+          ),
+          bgClass: 'bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300',
+          name: category
+        }
+    }
+  }
+
+  // Función para crear mensaje personalizado de WhatsApp
+  const createWhatsAppMessage = (category: string, title: string, resultId: string) => {
+    const currentUrl = window.location.origin
+    const anuncioUrl = `${currentUrl}/anuncios/${resultId}/${title.toLowerCase().replace(/\s+/g, '-')}`
+    
+    return encodeURIComponent(
+      `Hola, vi su anuncio de ${category}: ${anuncioUrl} en BuscaDis y me interesó. ¿Podría brindarme más información, por favor?`
+    )
+  }
+
   const ResultCard = ({ result, index }: { result: SearchResult; index: number }) => {
     const isGridView = viewMode === 'grid'
     const isFav = favorites.has(result.id) || result.isFavorite
     const isPremium = result.isPremium || result.isPromoted
+    const categoryStyle = getCategoryStyle(result.category)
 
     return (
       <motion.div
@@ -125,7 +232,7 @@ export default function SearchResults({
           isGridView ? 'flex flex-col' : 'flex flex-row h-40'
         } ${
           isPremium 
-            ? 'publication-card-premium ring-2 ring-cyan-400 dark:ring-cyan-500 rounded-t-2xl' 
+            ? 'publication-card-premium shadow-lg shadow-cyan-400/25' 
             : 'shadow-md hover:shadow-xl border border-gray-100 dark:border-gray-700'
         }`}
         onClick={() => {
@@ -133,12 +240,18 @@ export default function SearchResults({
           console.log('Navigating to:', result.id)
         }}
       >
-        {/* Premium Badge */}
+        {/* Destacado Border - Borde celeste sólido con esquinas redondeadas */}
         {isPremium && (
-          <div className="absolute top-3 left-3 z-20">
+          <div className="absolute inset-0 rounded-2xl bg-gradient-to-r from-cyan-400 to-teal-500 p-[2px] pointer-events-none">
+            <div className="w-full h-full bg-white dark:bg-gray-800 rounded-2xl" />
+          </div>
+        )}
+        {/* Destacado Badge */}
+        {isPremium && (
+          <div className="absolute top-3 left-3 z-30">
             <div className="flex items-center bg-gradient-to-r from-cyan-500 to-teal-500 text-white px-2 py-1 rounded-full text-xs font-bold shadow-lg">
-              <span className="mr-1">👑</span>
-              PREMIUM
+              <span className="mr-1">⭐</span>
+              DESTACADO
             </div>
           </div>
         )}
@@ -150,7 +263,7 @@ export default function SearchResults({
             e.preventDefault()
             toggleFavorite(result.id)
           }}
-          className="absolute top-3 right-3 z-20 p-2 bg-white/90 dark:bg-gray-800/90 backdrop-blur-sm rounded-full shadow-lg opacity-0 group-hover:opacity-100 transition-all duration-300 hover:scale-110"
+          className="absolute top-3 right-3 z-30 p-2 bg-white/90 dark:bg-gray-800/90 backdrop-blur-sm rounded-full shadow-lg opacity-0 group-hover:opacity-100 transition-all duration-300 hover:scale-110"
           aria-label={isFav ? 'Quitar de favoritos' : 'Agregar a favoritos'}
         >
           {isFav ? (
@@ -161,7 +274,7 @@ export default function SearchResults({
         </button>
 
         {/* Image Container */}
-        <div className={`relative ${isGridView ? 'aspect-[4/3]' : 'w-36 h-full'} flex-shrink-0 overflow-hidden`}>
+        <div className={`relative ${isGridView ? 'aspect-[4/3]' : 'w-36 h-full'} flex-shrink-0 overflow-hidden z-10`}>
           <Image
             src={result.image}
             alt={result.title}
@@ -191,7 +304,7 @@ export default function SearchResults({
         </div>
 
         {/* Content */}
-        <div className={`flex-1 p-4 ${isGridView ? '' : 'flex flex-col justify-between'}`}>
+        <div className={`flex-1 p-4 ${isGridView ? '' : 'flex flex-col justify-between'} relative z-10`}>
           {/* Title and Price */}
           <div className="mb-2">
             <h3 className="font-bold text-gray-900 dark:text-white text-base line-clamp-2 mb-1 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">
@@ -224,60 +337,51 @@ export default function SearchResults({
               </div>
             </div>
 
-            {/* Action Buttons - ARREGLADO: Sin recorte y funcional */}
-            <div className="flex items-center justify-between gap-2 pt-3 mt-auto border-t border-gray-100 dark:border-gray-700 min-h-[42px]">
-              {/* Category Badge - Responsive con iconos */}
-              <span className="flex items-center gap-1 px-2 py-1 bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 text-xs rounded-full font-medium capitalize flex-shrink-0">
-                <span className="hidden md:inline whitespace-nowrap">{result.category}</span>
-                <span className="md:hidden">
-                  {result.category === 'empleos' ? '💼' : 
-                   result.category === 'inmuebles' ? '🏠' : 
-                   result.category === 'vehiculos' ? '🚗' : 
-                   result.category === 'servicios' ? '🔧' : '📂'}
-                </span>
+            {/* Action Buttons - PERFECTO: Espaciado correcto, botones personalizados */}
+            <div className="flex items-center justify-between gap-3 pt-4 px-1 mt-auto border-t border-gray-100 dark:border-gray-700 min-h-[48px]">
+              {/* Category Badge - Con icono monocromático y colores personalizados */}
+              <span className={`flex items-center gap-1.5 px-2 py-1 text-xs rounded-full font-medium capitalize flex-shrink-0 ${categoryStyle.bgClass}`}>
+                {categoryStyle.icon}
+                <span className="hidden md:inline whitespace-nowrap">{categoryStyle.name}</span>
               </span>
 
-              <div className="flex items-center gap-1.5 flex-shrink-0">
-                {/* Contact Button - Funcional con WhatsApp */}
-                <button 
-                  onClick={(e) => {
-                    e.stopPropagation()
-                    // Abrir WhatsApp con mensaje predefinido
-                    const phone = '51987654321' // Número de ejemplo
-                    const message = encodeURIComponent(`Hola, me interesa tu anuncio: ${result.title}`)
-                    window.open(`https://wa.me/${phone}?text=${message}`, '_blank')
-                  }}
-                  className="flex items-center gap-1 px-2 py-1 bg-green-600 hover:bg-green-700 text-white text-xs font-medium rounded-full transition-colors flex-shrink-0"
-                  title="Contactar por WhatsApp"
-                >
-                  <PhoneIcon className="h-3 w-3" />
-                  <span className="hidden lg:inline whitespace-nowrap">Contactar</span>
-                  <span className="lg:hidden">💬</span>
-                </button>
-                
-                {/* Share Button - Funcional */}
-                <button 
-                  onClick={(e) => {
-                    e.stopPropagation()
-                    // Compartir con Web Share API o copiar al portapapeles
-                    if (navigator.share) {
-                      navigator.share({
-                        title: result.title,
-                        text: result.description,
-                        url: window.location.href + '/' + result.id
-                      })
-                    } else {
-                      // Fallback: copiar al portapapeles
-                      navigator.clipboard.writeText(window.location.href + '/' + result.id)
-                      alert('Enlace copiado al portapapeles')
-                    }
-                  }}
-                  className="hidden sm:flex p-1.5 text-gray-400 hover:text-blue-600 dark:hover:text-blue-400 transition-colors flex-shrink-0 hover:bg-blue-50 dark:hover:bg-blue-900/20 rounded-full"
-                  title="Compartir"
-                >
-                  <ShareIcon className="h-3 w-3" />
-                </button>
-              </div>
+              {/* Share Button - En el centro */}
+              <button 
+                onClick={(e) => {
+                  e.stopPropagation()
+                  // Compartir con Web Share API o copiar al portapapeles
+                  if (navigator.share) {
+                    navigator.share({
+                      title: result.title,
+                      text: result.description,
+                      url: window.location.href + '/' + result.id
+                    })
+                  } else {
+                    // Fallback: copiar al portapapeles
+                    navigator.clipboard.writeText(window.location.href + '/' + result.id)
+                    alert('Enlace copiado al portapapeles')
+                  }
+                }}
+                className="flex p-2 text-gray-400 hover:text-blue-600 dark:hover:text-blue-400 transition-colors flex-shrink-0 hover:bg-blue-50 dark:hover:bg-blue-900/20 rounded-full"
+                title="Compartir"
+              >
+                <ShareIcon className="h-4 w-4" />
+              </button>
+
+              {/* Contact Button - Uniforme con mensaje personalizado */}
+              <button 
+                onClick={(e) => {
+                  e.stopPropagation()
+                  const phone = '51987654321'
+                  const message = createWhatsAppMessage(result.category, result.title, result.id)
+                  window.open(`https://wa.me/${phone}?text=${message}`, '_blank')
+                }}
+                className="flex items-center gap-1.5 px-3 py-1.5 bg-green-600 hover:bg-green-700 text-white text-xs font-medium rounded-full transition-colors flex-shrink-0"
+                title="Contactar por WhatsApp"
+              >
+                <PhoneIcon className="h-3 w-3" />
+                <span className="whitespace-nowrap">Contactar</span>
+              </button>
             </div>
           </div>
         </div>
