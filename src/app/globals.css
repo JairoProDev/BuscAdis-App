@@ -980,3 +980,61 @@ button[aria-label="Contactar por WhatsApp"] {
     rgba(255, 255, 255, 0) 100%
   );
 }
+
+/* === SEARCH ENGINE FIXES === */
+.search-results-header {
+  @apply flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6;
+}
+
+.search-sort-select {
+  @apply px-2 py-1.5 text-xs sm:text-sm border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500 min-w-[120px] max-w-[160px];
+}
+
+.search-filters-container {
+  @apply flex items-center gap-2 overflow-x-auto py-2 hide-scrollbar;
+}
+
+.search-filter-button {
+  @apply flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium transition-all whitespace-nowrap min-w-max;
+}
+
+.search-filter-active {
+  @apply bg-blue-500 text-white shadow-md;
+}
+
+.search-filter-inactive {
+  @apply bg-slate-700 text-slate-200 hover:bg-slate-600 border border-slate-600;
+}
+
+/* Responsive grid improvements */
+@media (max-width: 640px) {
+  .search-results-grid {
+    @apply grid-cols-1 gap-3;
+  }
+  
+  .search-sort-select {
+    @apply text-xs px-2 py-1 min-w-[100px] max-w-[140px];
+  }
+  
+  .search-filter-button {
+    @apply px-2 py-1.5 text-xs;
+  }
+}
+
+@media (min-width: 641px) and (max-width: 768px) {
+  .search-results-grid {
+    @apply grid-cols-2 gap-4;
+  }
+}
+
+@media (min-width: 769px) and (max-width: 1024px) {
+  .search-results-grid {
+    @apply grid-cols-3 gap-5;
+  }
+}
+
+@media (min-width: 1025px) {
+  .search-results-grid {
+    @apply grid-cols-4 gap-6;
+  }
+}

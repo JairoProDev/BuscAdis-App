@@ -144,14 +144,14 @@ const InlineFilters = ({
           onClick={() => setOpenFilter(openFilter === filter.id ? null : filter.id)}
           className={`flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium transition-all whitespace-nowrap ${
             isActive 
-              ? 'bg-blue-500 text-white shadow-md' 
-              : 'bg-slate-700 text-slate-200 hover:bg-slate-600 border border-slate-600'
+              ? 'bg-blue-500 text-white shadow-md hover:bg-blue-600' 
+              : 'bg-white dark:bg-slate-700 text-gray-700 dark:text-slate-200 hover:bg-gray-100 dark:hover:bg-slate-600 border border-gray-300 dark:border-slate-600 shadow-sm'
           }`}
         >
           <span>{filter.label}</span>
           {hasValue && (
             <span className={`text-xs px-2 py-0.5 rounded-full ${
-              isActive ? 'bg-blue-400' : 'bg-slate-600'
+              isActive ? 'bg-blue-400 text-white' : 'bg-gray-200 dark:bg-slate-600 text-gray-700 dark:text-slate-300'
             }`}>
               {displayValue}
             </span>
@@ -288,8 +288,10 @@ const InlineFilters = ({
   }
 
   return (
-    <div className="flex items-center gap-2 overflow-x-auto py-2">
-      {filters.slice(0, 6).map(renderFilterButton)} {/* Limit to 6 filters for better UX */}
+    <div className="flex items-center gap-2 overflow-x-auto py-2 hide-scrollbar">
+      <div className="flex items-center gap-2 min-w-max">
+        {filters.slice(0, 4).map(renderFilterButton)} {/* Reducido a 4 filtros para móvil */}
+      </div>
       
       {/* Overlay to close dropdowns when clicking outside */}
       {openFilter && (
@@ -752,8 +754,6 @@ export default function SupremeSearchEngine({
           />
         </div>
       )}
-
-
 
       {/* Panel expandido con sugerencias y resultados rápidos */}
       <AnimatePresence>

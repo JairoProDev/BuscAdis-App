@@ -203,28 +203,28 @@ export default function SearchResults({
   return (
     <div className={`space-y-6 ${className}`}>
       {/* Header */}
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
-          <h2 className="text-2xl font-bold text-gray-900 dark:text-white">
+          <h2 className="text-xl sm:text-2xl font-bold text-gray-900 dark:text-white">
             Resultados de búsqueda
           </h2>
-          <p className="text-gray-600 dark:text-gray-400">
+          <p className="text-sm text-gray-600 dark:text-gray-400">
             {totalCount > 0 ? `${totalCount} resultados encontrados` : `${results.length} resultados`}
           </p>
         </div>
 
-        <div className="flex items-center gap-4">
-          {/* Sort */}
+        <div className="flex items-center gap-2 sm:gap-4">
+          {/* Sort - Más compacto */}
           <select
             value={selectedSort}
             onChange={(e) => handleSortChange(e.target.value)}
-            className="px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className="px-2 py-1.5 text-xs sm:text-sm border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500 min-w-[120px] max-w-[160px]"
             aria-label="Ordenar resultados"
           >
             <option value="relevance">Relevancia</option>
-            <option value="date">Más recientes</option>
-            <option value="price-asc">Precio: menor a mayor</option>
-            <option value="price-desc">Precio: mayor a menor</option>
+            <option value="date">Recientes</option>
+            <option value="price-asc">Precio ↑</option>
+            <option value="price-desc">Precio ↓</option>
             <option value="views">Más vistos</option>
           </select>
 
@@ -232,7 +232,7 @@ export default function SearchResults({
           <div className="flex items-center bg-gray-100 dark:bg-gray-700 rounded-lg p-1">
             <button
               onClick={() => onViewModeChange?.('grid')}
-              className={`p-2 rounded-md transition-colors ${
+              className={`p-1.5 sm:p-2 rounded-md transition-colors ${
                 viewMode === 'grid' 
                   ? 'bg-white dark:bg-gray-600 text-blue-600 shadow-sm' 
                   : 'text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white'
@@ -240,11 +240,11 @@ export default function SearchResults({
               aria-label="Vista en cuadrícula"
               title="Vista en cuadrícula"
             >
-              <Squares2X2Icon className="h-5 w-5" />
+              <Squares2X2Icon className="h-4 w-4 sm:h-5 sm:w-5" />
             </button>
             <button
               onClick={() => onViewModeChange?.('list')}
-              className={`p-2 rounded-md transition-colors ${
+              className={`p-1.5 sm:p-2 rounded-md transition-colors ${
                 viewMode === 'list' 
                   ? 'bg-white dark:bg-gray-600 text-blue-600 shadow-sm' 
                   : 'text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white'
@@ -252,7 +252,7 @@ export default function SearchResults({
               aria-label="Vista en lista"
               title="Vista en lista"
             >
-              <ListBulletIcon className="h-5 w-5" />
+              <ListBulletIcon className="h-4 w-4 sm:h-5 sm:w-5" />
             </button>
           </div>
         </div>
