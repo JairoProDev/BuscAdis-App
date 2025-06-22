@@ -3,16 +3,16 @@
 import { useState, useRef, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { 
-  Squares2X2Icon, 
-  ListBulletIcon, 
-  MapIcon,
-  FunnelIcon,
-  EyeIcon,
-  HeartIcon,
-  ShareIcon,
+  EyeIcon, 
   ClockIcon,
   MapPinIcon,
-  TagIcon
+  TagIcon,
+  MagnifyingGlassIcon,
+  AdjustmentsHorizontalIcon,
+  Squares2X2Icon, 
+  ListBulletIcon,
+  HeartIcon,
+  FunnelIcon
 } from '@heroicons/react/24/outline'
 import { HeartIcon as HeartSolidIcon } from '@heroicons/react/24/solid'
 import Image from 'next/image'
@@ -117,85 +117,148 @@ export default function SearchResults({
   const ResultCard = ({ result, index }: { result: SearchResult; index: number }) => {
     const isGridView = viewMode === 'grid'
     const isFav = favorites.has(result.id) || result.isFavorite
+    const isPremium = result.isPremium || result.isPromoted
 
     return (
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: index * 0.05 }}
-        className={`bg-white dark:bg-gray-800 rounded-xl shadow-md hover:shadow-lg transition-all duration-300 overflow-hidden group ${
+        className={`group relative bg-white dark:bg-gray-800 rounded-2xl overflow-hidden publication-card-hover smooth-transition ${
           isGridView ? 'flex flex-col' : 'flex flex-row'
-        } ${result.isPromoted ? 'ring-2 ring-yellow-400' : ''} ${result.isPremium ? 'ring-2 ring-purple-400' : ''}`}
+        } ${
+          isPremium 
+            ? 'publication-card-premium' 
+            : 'shadow-md hover:shadow-xl border border-gray-100 dark:border-gray-700'
+        }`}
       >
-        {/* Image */}
-        <div className={`relative ${isGridView ? 'aspect-video' : 'w-48 h-36'} flex-shrink-0`}>
+        {/* Premium Badge */}
+        {isPremium && (
+          <div className="absolute top-3 left-3 z-20">
+            <div className="flex items-center bg-gradient-to-r from-yellow-400 to-amber-500 text-white px-2 py-1 rounded-full text-xs font-bold shadow-lg">
+              <span className="mr-1">👑</span>
+              PREMIUM
+            </div>
+          </div>
+        )}
+
+        {/* Favorite Button */}
+        <button
+          onClick={(e) => {
+            e.stopPropagation()
+            e.preventDefault()
+            toggleFavorite(result.id)
+          }}
+          className="absolute top-3 right-3 z-20 p-2 bg-white/90 dark:bg-gray-800/90 backdrop-blur-sm rounded-full shadow-lg opacity-0 group-hover:opacity-100 transition-all duration-300 hover:scale-110"
+          aria-label={isFav ? 'Quitar de favoritos' : 'Agregar a favoritos'}
+        >
+          {isFav ? (
+            <HeartSolidIcon className="h-4 w-4 text-red-500" />
+          ) : (
+            <HeartIcon className="h-4 w-4 text-gray-600 dark:text-gray-300" />
+          )}
+        </button>
+
+        {/* Image Container */}
+        <div className={`relative ${isGridView ? 'aspect-[4/3]' : 'w-48 h-36'} flex-shrink-0 overflow-hidden`}>
           <Image
             src={result.image}
             alt={result.title}
             fill
-            className="object-cover group-hover:scale-105 transition-transform duration-300"
+            className="object-cover transition-transform duration-500 group-hover:scale-110"
             onError={(e) => {
               const target = e.target as HTMLImageElement
               target.src = '/images/placeholder/default.jpg'
             }}
           />
           
-          {/* Actions */}
-          <div className="absolute top-2 right-2 flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-            <button
-              onClick={(e) => {
-                e.stopPropagation()
-                toggleFavorite(result.id)
-              }}
-              className="p-2 bg-white/90 backdrop-blur-sm rounded-full hover:bg-white transition-colors"
-              aria-label={isFav ? 'Quitar de favoritos' : 'Agregar a favoritos'}
-            >
-              {isFav ? (
-                <HeartSolidIcon className="h-4 w-4 text-red-500" />
-              ) : (
-                <HeartIcon className="h-4 w-4 text-gray-600" />
-              )}
-            </button>
-          </div>
-
-          {/* Views */}
-          <div className="absolute bottom-2 right-2 bg-black/50 backdrop-blur-sm text-white text-xs px-2 py-1 rounded-full flex items-center gap-1">
+          {/* Gradient Overlay */}
+          <div className="absolute inset-0 bg-gradient-to-t from-black/20 via-transparent to-transparent" />
+          
+          {/* Views Badge */}
+          <div className="absolute bottom-3 right-3 bg-black/60 backdrop-blur-sm text-white text-xs px-2 py-1 rounded-full flex items-center gap-1">
             <EyeIcon className="h-3 w-3" />
             <span>{result.views}</span>
           </div>
+
+          {/* Price Tag */}
+          {result.price && (
+            <div className="absolute bottom-3 left-3 bg-green-600 text-white font-bold px-3 py-1.5 rounded-full text-sm shadow-lg">
+              {formatPrice(result.price)}
+            </div>
+          )}
         </div>
 
         {/* Content */}
-        <div className={`p-4 flex-1 ${isGridView ? '' : 'flex flex-col justify-between'}`}>
-          <div className="mb-2">
-            <h3 className="font-semibold text-gray-900 dark:text-white text-lg line-clamp-2 group-hover:text-blue-600 transition-colors">
+        <div className={`flex-1 p-4 ${isGridView ? '' : 'flex flex-col justify-between'}`}>
+          {/* Title and Price */}
+          <div className="mb-3">
+            <h3 className="font-bold text-gray-900 dark:text-white text-base line-clamp-2 mb-2 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">
               {result.title}
             </h3>
             
-            {result.price && (
-              <div className="text-2xl font-bold text-green-600 dark:text-green-400 mt-1">
+            {result.price && isGridView && (
+              <div className="text-2xl font-bold text-green-600 dark:text-green-400 mb-1">
                 {formatPrice(result.price)}
               </div>
             )}
           </div>
 
-          <p className="text-gray-600 dark:text-gray-300 text-sm line-clamp-2 mb-3">
+          {/* Description */}
+          <p className="text-gray-600 dark:text-gray-300 text-sm line-clamp-2 mb-4 leading-relaxed">
             {result.description}
           </p>
 
-          <div className="flex items-center justify-between text-sm text-gray-500 dark:text-gray-400 mt-auto">
-            <div className="flex items-center gap-4">
-              <div className="flex items-center gap-1">
-                <MapPinIcon className="h-4 w-4" />
-                <span>{result.location}</span>
+          {/* Metadata */}
+          <div className="space-y-2 mt-auto">
+            {/* Location and Time */}
+            <div className="flex items-center justify-between text-sm text-gray-500 dark:text-gray-400">
+              <div className="flex items-center gap-1 flex-1 min-w-0">
+                <MapPinIcon className="h-4 w-4 flex-shrink-0 text-gray-400" />
+                <span className="truncate">{result.location}</span>
+              </div>
+              <div className="flex items-center gap-1 ml-2">
+                <ClockIcon className="h-4 w-4 flex-shrink-0 text-gray-400" />
+                <span className="whitespace-nowrap">{formatTimeAgo(result.publishedAt)}</span>
               </div>
             </div>
-            <div className="flex items-center gap-1">
-              <ClockIcon className="h-4 w-4" />
-              <span>{formatTimeAgo(result.publishedAt)}</span>
+
+            {/* Action Buttons */}
+            <div className="flex items-center justify-between pt-2 border-t border-gray-100 dark:border-gray-700">
+              <div className="flex items-center gap-2">
+                {/* Contact Button */}
+                <button 
+                  onClick={(e) => e.stopPropagation()}
+                  className="flex items-center gap-1 px-3 py-1.5 bg-green-600 hover:bg-green-700 text-white text-xs font-medium rounded-full transition-colors"
+                >
+                  <svg className="h-3 w-3" fill="currentColor" viewBox="0 0 20 20">
+                    <path d="M2 3a1 1 0 011-1h2.153a1 1 0 01.986.836l.74 4.435a1 1 0 01-.54 1.06l-1.548.773a11.037 11.037 0 006.105 6.105l.774-1.548a1 1 0 011.059-.54l4.435.74a1 1 0 01.836.986V17a1 1 0 01-1 1h-2C7.82 18 2 12.18 2 5V3z"/>
+                  </svg>
+                  Contactar
+                </button>
+                
+                {/* Share Button */}
+                <button 
+                  onClick={(e) => e.stopPropagation()}
+                  className="p-1.5 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 transition-colors"
+                  title="Compartir"
+                >
+                  <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.367 2.684 3 3 0 00-5.367-2.684z" />
+                  </svg>
+                </button>
+              </div>
+
+              {/* Category Badge */}
+              <span className="px-2 py-1 bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-200 text-xs rounded-full font-medium">
+                {result.category}
+              </span>
             </div>
           </div>
         </div>
+
+        {/* Hover Effects */}
+        <div className="absolute inset-0 bg-gradient-to-t from-transparent via-transparent to-blue-500/5 opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none" />
       </motion.div>
     )
   }
