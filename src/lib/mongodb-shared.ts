@@ -31,6 +31,51 @@ export const MONGODB_ERRORS = {
   INVALID_ID: 'Invalid document ID',
 }
 
+// MongoDB interfaces
+export interface PublicationDocument {
+  _id?: any;
+  id?: string;
+  title: string;
+  description: string;
+  categorySlug: string;
+  subcategorySlug?: string;
+  subSubcategorySlug?: string;
+  price?: number;
+  currency?: string;
+  location?: any;
+  contact?: any;
+  images?: string[];
+  status?: string;
+  createdAt?: Date;
+  updatedAt?: Date;
+  userId?: string;
+  premium?: boolean;
+  verified?: boolean;
+}
+
+export interface MongoClientInterface {
+  fetchPublications(
+    category: string,
+    page?: number,
+    limit?: number,
+    filters?: Record<string, any>
+  ): Promise<{ publications: any[]; totalCount: number }>;
+  
+  fetchPublicationById(id: string, category: string): Promise<any>;
+  
+  fetchPublicationsByUser(userId: string): Promise<any[]>;
+  
+  createPublication(data: PublicationDocument): Promise<any>;
+  
+  updatePublication(
+    id: string,
+    category: string,
+    data: Partial<PublicationDocument>
+  ): Promise<boolean>;
+  
+  deletePublication(id: string, category: string): Promise<boolean>;
+}
+
 /**
  * Shared MongoDB module that handles both server and client environments
  * This module detects the current environment and provides the appropriate MongoDB client

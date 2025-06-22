@@ -1,10 +1,11 @@
 import mongoose from "mongoose";
+import { Logger } from '@/services/logging.service';
 
-const MONGODB_URI = process.env.MONGODB_URI || "mongodb+srv://buscadiss:UQA8DlAqm6N7DDNx@cluster0.4qbi1hu.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0";
+const MONGODB_URI = process.env.MONGODB_URI;
 
 if (!MONGODB_URI) {
   throw new Error(
-    "Please define the MONGODB_URI environment variable"
+    "Please define the MONGODB_URI environment variable in .env.local"
   );
 }
 
@@ -26,8 +27,8 @@ const CONNECTION_STATES = {
 async function dbConnect() {
   const logConnectionState = () => {
     const state = mongoose.connection.readyState;
-    console.log(
-      `[MongoDB] Connection state: ${CONNECTION_STATES[state]} (${state})`
+    Logger.debug(
+      `MongoDB Connection state: ${CONNECTION_STATES[state]} (${state})`
     );
   };
 
@@ -46,24 +47,24 @@ async function dbConnect() {
       family: 4, // Use IPv4, skip trying IPv6
     };
 
-    console.log("[MongoDB] Creating new connection...");
+    Logger.info("MongoDB: Creating new connection...");
 
     mongoose.connection.on("connected", () => {
-      console.log("[MongoDB] Connection established successfully");
+      Logger.info("MongoDB: Connection established successfully");
     });
 
     mongoose.connection.on("error", (err) => {
-      console.error("[MongoDB] Connection error:", err);
+      Logger.error("MongoDB: Connection error", { error: err });
     });
 
     cached.promise = mongoose
       .connect(MONGODB_URI, opts)
       .then((mongoose) => {
-        console.log("[MongoDB] Initial connection successful");
+        Logger.info("MongoDB: Initial connection successful");
         return mongoose;
       })
       .catch((error) => {
-        console.error("[MongoDB] Initial connection error:", error);
+        Logger.error("MongoDB: Initial connection error", { error });
         cached.promise = null;
         throw error;
       });
@@ -111,7 +112,7 @@ export const mongoFetch = async (endpoint, options = {}) => {
     
     return await response.json();
   } catch (error) {
-    console.error('MongoDB API fetch error:', error);
+    Logger.error('MongoDB API fetch error', { error });
     throw error;
   }
 };

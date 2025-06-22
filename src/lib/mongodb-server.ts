@@ -6,14 +6,16 @@
  */
 
 import { MongoClient, ObjectId } from 'mongodb';
-import { MongoClientInterface } from './mongodb';
-import { COLLECTIONS } from './mongodb-shared';
-import { PublicationDocument } from '@/types/interfaces';
-import { Category } from './mongodb';
+import { MongoClientInterface, PublicationDocument, COLLECTIONS } from './mongodb-shared';
+import { Logger } from '@/services/logging.service';
 
-// MongoDB connection string should be in environment variables
-const MONGODB_URI = process.env.MONGODB_URI || 'mongodb://localhost:27017';
-const MONGODB_DB = process.env.MONGODB_DB || 'test';
+// MongoDB connection string from environment variables
+const MONGODB_URI = process.env.MONGODB_URI;
+const MONGODB_DB = process.env.MONGODB_DB || 'buscadis';
+
+if (!MONGODB_URI) {
+  throw new Error("Please define the MONGODB_URI environment variable in .env.local");
+}
 
 // Create cached connection variable
 let cachedClient: MongoClient | null = null;
@@ -33,12 +35,12 @@ const connectionOptions = {
 // Create a new MongoDB client with connection pooling and error handling
 export const getServerMongoClient = async (): Promise<MongoClientInterface> => {
   if (cachedClient && cachedDb) {
-    console.log('Using cached MongoDB connection');
+    Logger.debug('Using cached MongoDB connection');
     return createServerMongoClient(cachedClient, cachedDb);
   }
 
   try {
-    console.log('Establishing new MongoDB connection...');
+    Logger.info('Establishing new MongoDB connection...');
     const client = new MongoClient(MONGODB_URI, connectionOptions);
     await client.connect();
     const db = client.db(MONGODB_DB);
@@ -46,10 +48,10 @@ export const getServerMongoClient = async (): Promise<MongoClientInterface> => {
     cachedClient = client;
     cachedDb = db;
 
-    console.log('MongoDB connected successfully');
+    Logger.info('MongoDB connected successfully');
     return createServerMongoClient(client, db);
   } catch (error) {
-    console.error('MongoDB connection error:', error);
+    Logger.error('MongoDB connection error', { error });
     throw new Error('Failed to connect to MongoDB');
   }
 };
@@ -64,65 +66,19 @@ function createServerMongoClient(client: MongoClient, db: any): MongoClientInter
     ) {
       try {
         // Determine which collection to use based on category
-        let collectionName: string = COLLECTIONS.PUBLICATIONS_INMUEBLES;
+        const collectionName = getCollectionName(category);
         
-        switch (category) {
-          case 'inmuebles':
-            collectionName = COLLECTIONS.PUBLICATIONS_INMUEBLES;
-            break;
-          case 'vehiculos':
-            collectionName = COLLECTIONS.PUBLICATIONS_VEHICULOS;
-            break;
-          case 'empleos':
-            collectionName = COLLECTIONS.PUBLICATIONS_EMPLEOS;
-            break;
-          case 'servicios':
-            collectionName = COLLECTIONS.PUBLICATIONS_SERVICIOS;
-            break;
-          case 'productos':
-            collectionName = COLLECTIONS.PUBLICATIONS_PRODUCTOS;
-            break;
-          case 'eventos':
-            collectionName = COLLECTIONS.PUBLICATIONS_EVENTOS;
-            break;
-          case 'negocios':
-            collectionName = COLLECTIONS.PUBLICATIONS_NEGOCIOS;
-            break;
-          case 'comunidad':
-            collectionName = COLLECTIONS.PUBLICATIONS_COMUNIDAD;
-            break;
-          default:
-            collectionName = COLLECTIONS.PUBLICATIONS_INMUEBLES;
-        }
-
         // Check if the collection exists
         const collections = await db.listCollections({ name: collectionName }).toArray();
         if (collections.length === 0) {
-          console.log(`Collection ${collectionName} does not exist yet`);
+          Logger.debug(`Collection ${collectionName} does not exist yet`);
           return { publications: [], totalCount: 0 };
         }
         
         const collection = db.collection(collectionName);
         
         // Building the query
-        const query: any = {};
-        
-        // Add filters
-        if (filters.minPrice && filters.maxPrice) {
-          query.price = { $gte: filters.minPrice, $lte: filters.maxPrice };
-        } else if (filters.minPrice) {
-          query.price = { $gte: filters.minPrice };
-        } else if (filters.maxPrice) {
-          query.price = { $lte: filters.maxPrice };
-        }
-        
-        if (filters.location) {
-          query.location = filters.location;
-        }
-        
-        if (filters.subcategory) {
-          query.subcategory = filters.subcategory;
-        }
+        const query = buildQuery(filters);
         
         // Calculate pagination
         const skip = (page - 1) * limit;
@@ -140,234 +96,153 @@ function createServerMongoClient(client: MongoClient, db: any): MongoClientInter
         
         return { publications, totalCount };
       } catch (error) {
-        console.error('Error fetching publications:', error);
+        Logger.error('Error fetching publications', { error, category, page, limit });
         return { publications: [], totalCount: 0 };
       }
     },
     
     async fetchPublicationById(id: string, category: string) {
       try {
-        // Determine which collection to use based on category
-        let collectionName: string;
-        
-        switch (category) {
-          case 'inmuebles':
-            collectionName = COLLECTIONS.PUBLICATIONS_INMUEBLES;
-            break;
-          case 'vehiculos':
-            collectionName = COLLECTIONS.PUBLICATIONS_VEHICULOS;
-            break;
-          case 'empleos':
-            collectionName = COLLECTIONS.PUBLICATIONS_EMPLEOS;
-            break;
-          case 'servicios':
-            collectionName = COLLECTIONS.PUBLICATIONS_SERVICIOS;
-            break;
-          case 'productos':
-            collectionName = COLLECTIONS.PUBLICATIONS_PRODUCTOS;
-            break;
-          case 'eventos':
-            collectionName = COLLECTIONS.PUBLICATIONS_EVENTOS;
-            break;
-          case 'negocios':
-            collectionName = COLLECTIONS.PUBLICATIONS_NEGOCIOS;
-            break;
-          case 'comunidad':
-            collectionName = COLLECTIONS.PUBLICATIONS_COMUNIDAD;
-            break;
-          default:
-            collectionName = COLLECTIONS.PUBLICATIONS_INMUEBLES;
-        }
-        
+        const collectionName = getCollectionName(category);
         const collection = db.collection(collectionName);
         return await collection.findOne({ _id: new ObjectId(id) });
       } catch (error) {
-        console.error('Error fetching publication by ID:', error);
+        Logger.error('Error fetching publication by ID', { error, id, category });
         return null;
       }
     },
     
     async fetchPublicationsByUser(userId: string) {
       try {
-        const collections = [
-          COLLECTIONS.PUBLICATIONS_INMUEBLES,
-          COLLECTIONS.PUBLICATIONS_VEHICULOS,
-          COLLECTIONS.PUBLICATIONS_EMPLEOS,
-          COLLECTIONS.PUBLICATIONS_SERVICIOS,
-          COLLECTIONS.PUBLICATIONS_PRODUCTOS,
-          COLLECTIONS.PUBLICATIONS_EVENTOS,
-          COLLECTIONS.PUBLICATIONS_NEGOCIOS,
-          COLLECTIONS.PUBLICATIONS_COMUNIDAD
-        ];
+        const allPublications: any[] = [];
         
-        const results = [];
-        
-        for (const collectionName of collections) {
+        // Search across all category collections
+        for (const collectionName of Object.values(COLLECTIONS)) {
           try {
-            // Check if collection exists
-            const collExists = await db.listCollections({ name: collectionName }).toArray();
-            if (collExists.length === 0) {
-              continue;
-            }
-            
             const collection = db.collection(collectionName);
-            const items = await collection
+            const publications = await collection
               .find({ userId })
               .sort({ createdAt: -1 })
               .toArray();
             
-            results.push(...items);
+            allPublications.push(...publications);
           } catch (err) {
-            console.error(`Error fetching from ${collectionName}:`, err);
+            Logger.error(`Error fetching from ${collectionName}`, { error: err, userId });
           }
         }
         
-        return results;
+        // Sort by creation date
+        allPublications.sort((a, b) => 
+          new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+        );
+        
+        return allPublications;
       } catch (error) {
-        console.error('Error fetching publications by user:', error);
+        Logger.error('Error fetching publications by user', { error, userId });
         return [];
       }
     },
     
     async createPublication(data: PublicationDocument) {
       try {
-        let collectionName: string;
-        
-        switch (data.category) {
-          case 'inmuebles':
-            collectionName = COLLECTIONS.PUBLICATIONS_INMUEBLES;
-            break;
-          case 'vehiculos':
-            collectionName = COLLECTIONS.PUBLICATIONS_VEHICULOS;
-            break;
-          case 'empleos':
-            collectionName = COLLECTIONS.PUBLICATIONS_EMPLEOS;
-            break;
-          case 'servicios':
-            collectionName = COLLECTIONS.PUBLICATIONS_SERVICIOS;
-            break;
-          case 'productos':
-            collectionName = COLLECTIONS.PUBLICATIONS_PRODUCTOS;
-            break;
-          case 'eventos':
-            collectionName = COLLECTIONS.PUBLICATIONS_EVENTOS;
-            break;
-          case 'negocios':
-            collectionName = COLLECTIONS.PUBLICATIONS_NEGOCIOS;
-            break;
-          case 'comunidad':
-            collectionName = COLLECTIONS.PUBLICATIONS_COMUNIDAD;
-            break;
-          default:
-            collectionName = COLLECTIONS.PUBLICATIONS_INMUEBLES;
-        }
-        
+        const collectionName = getCollectionName(data.categorySlug);
         const collection = db.collection(collectionName);
-        const result = await collection.insertOne({
+        
+        const publicationData = {
           ...data,
+          _id: new ObjectId(),
           createdAt: new Date(),
           updatedAt: new Date(),
-        });
+        };
         
-        return { id: result.insertedId.toString(), ...data };
+        const result = await collection.insertOne(publicationData);
+        return { ...publicationData, _id: result.insertedId };
       } catch (error) {
-        console.error('Error creating publication:', error);
+        Logger.error('Error creating publication', { error, data });
         throw error;
       }
     },
     
     async updatePublication(id: string, category: string, data: Partial<PublicationDocument>) {
       try {
-        let collectionName: string;
-        
-        switch (category) {
-          case 'inmuebles':
-            collectionName = COLLECTIONS.PUBLICATIONS_INMUEBLES;
-            break;
-          case 'vehiculos':
-            collectionName = COLLECTIONS.PUBLICATIONS_VEHICULOS;
-            break;
-          case 'empleos':
-            collectionName = COLLECTIONS.PUBLICATIONS_EMPLEOS;
-            break;
-          case 'servicios':
-            collectionName = COLLECTIONS.PUBLICATIONS_SERVICIOS;
-            break;
-          case 'productos':
-            collectionName = COLLECTIONS.PUBLICATIONS_PRODUCTOS;
-            break;
-          case 'eventos':
-            collectionName = COLLECTIONS.PUBLICATIONS_EVENTOS;
-            break;
-          case 'negocios':
-            collectionName = COLLECTIONS.PUBLICATIONS_NEGOCIOS;
-            break;
-          case 'comunidad':
-            collectionName = COLLECTIONS.PUBLICATIONS_COMUNIDAD;
-            break;
-          default:
-            collectionName = COLLECTIONS.PUBLICATIONS_INMUEBLES;
-        }
-        
+        const collectionName = getCollectionName(category);
         const collection = db.collection(collectionName);
+        
+        const updateData = {
+          ...data,
+          updatedAt: new Date(),
+        };
+        
         const result = await collection.updateOne(
           { _id: new ObjectId(id) },
-          { 
-            $set: { 
-              ...data,
-              updatedAt: new Date() 
-            } 
-          }
+          { $set: updateData }
         );
         
-        return result.modifiedCount > 0;
+        return result.matchedCount > 0;
       } catch (error) {
-        console.error('Error updating publication:', error);
-        return false;
+        Logger.error('Error updating publication', { error, id, category });
+        throw error;
       }
     },
     
     async deletePublication(id: string, category: string) {
       try {
-        let collectionName: string;
-        
-        switch (category) {
-          case 'inmuebles':
-            collectionName = COLLECTIONS.PUBLICATIONS_INMUEBLES;
-            break;
-          case 'vehiculos':
-            collectionName = COLLECTIONS.PUBLICATIONS_VEHICULOS;
-            break;
-          case 'empleos':
-            collectionName = COLLECTIONS.PUBLICATIONS_EMPLEOS;
-            break;
-          case 'servicios':
-            collectionName = COLLECTIONS.PUBLICATIONS_SERVICIOS;
-            break;
-          case 'productos':
-            collectionName = COLLECTIONS.PUBLICATIONS_PRODUCTOS;
-            break;
-          case 'eventos':
-            collectionName = COLLECTIONS.PUBLICATIONS_EVENTOS;
-            break;
-          case 'negocios':
-            collectionName = COLLECTIONS.PUBLICATIONS_NEGOCIOS;
-            break;
-          case 'comunidad':
-            collectionName = COLLECTIONS.PUBLICATIONS_COMUNIDAD;
-            break;
-          default:
-            collectionName = COLLECTIONS.PUBLICATIONS_INMUEBLES;
-        }
-        
+        const collectionName = getCollectionName(category);
         const collection = db.collection(collectionName);
-        const result = await collection.deleteOne({ _id: new ObjectId(id) });
         
+        const result = await collection.deleteOne({ _id: new ObjectId(id) });
         return result.deletedCount > 0;
       } catch (error) {
-        console.error('Error deleting publication:', error);
-        return false;
+        Logger.error('Error deleting publication', { error, id, category });
+        throw error;
       }
-    }
+    },
   };
+}
+
+// Helper functions
+function getCollectionName(category: string): string {
+  const categoryMap: { [key: string]: string } = {
+    'inmuebles': COLLECTIONS.PUBLICATIONS_INMUEBLES,
+    'vehiculos': COLLECTIONS.PUBLICATIONS_VEHICULOS,
+    'empleos': COLLECTIONS.PUBLICATIONS_EMPLEOS,
+    'servicios': COLLECTIONS.PUBLICATIONS_SERVICIOS,
+    'productos': COLLECTIONS.PUBLICATIONS_PRODUCTOS,
+    'eventos': COLLECTIONS.PUBLICATIONS_EVENTOS,
+    'negocios': COLLECTIONS.PUBLICATIONS_NEGOCIOS,
+    'comunidad': COLLECTIONS.PUBLICATIONS_COMUNIDAD,
+  };
+  
+  return categoryMap[category] || COLLECTIONS.PUBLICATIONS_INMUEBLES;
+}
+
+function buildQuery(filters: Record<string, any>): any {
+  const query: any = {};
+  
+  // Price range filter
+  if (filters.minPrice !== undefined || filters.maxPrice !== undefined) {
+    query.price = {};
+    if (filters.minPrice !== undefined) query.price.$gte = filters.minPrice;
+    if (filters.maxPrice !== undefined) query.price.$lte = filters.maxPrice;
+  }
+  
+  // Location filter
+  if (filters.location) {
+    query.location = filters.location;
+  }
+  
+  // Subcategory filter
+  if (filters.subcategory) {
+    query.subcategory = filters.subcategory;
+  }
+  
+  // Search query filter
+  if (filters.search) {
+    query.$or = [
+      { title: { $regex: filters.search, $options: 'i' } },
+      { description: { $regex: filters.search, $options: 'i' } }
+    ];
+  }
+  
+  return query;
 } 

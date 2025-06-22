@@ -4,14 +4,14 @@ const nextConfig: NextConfig = {
   // Enable strict mode for better development experience
   reactStrictMode: true,
 
-  // Disable ESLint during builds to make it pass
+  // Enable ESLint during builds for better code quality
   eslint: { 
-    ignoreDuringBuilds: true 
+    ignoreDuringBuilds: false 
   },
 
-  // Disable TypeScript type checking during build
+  // Enable TypeScript type checking during build
   typescript: {
-    ignoreBuildErrors: true
+    ignoreBuildErrors: false
   },
 
   // Handle MongoDB connection errors gracefully in production
@@ -34,7 +34,7 @@ const nextConfig: NextConfig = {
     "bson",
   ],
 
-  // Turbopack configuration (moved from experimental.turbo)
+  // Turbopack configuration
   turbopack: {
     rules: {
       "*.node": ["empty"],
@@ -56,14 +56,13 @@ const nextConfig: NextConfig = {
     serverMinification: true,
   },
 
-  // Configure image remote patterns (replaces deprecated domains)
+  // Configure image remote patterns
   images: {
     remotePatterns: [
       { protocol: "http", hostname: "localhost" },
       { protocol: "https", hostname: "buscadis.com" },
       { protocol: "https", hostname: "storage.googleapis.com" },
       { protocol: "https", hostname: "cdn.buscadis.com" },
-      { protocol: "https", hostname: "buscadis-storage.s3.amazonaws.com" },
       { protocol: "https", hostname: "images.unsplash.com" },
       { protocol: "https", hostname: "randomuser.me" },
       { protocol: "https", hostname: "res.cloudinary.com" },
@@ -78,11 +77,10 @@ const nextConfig: NextConfig = {
     },
   },
 
-  // Webpack config for client-side fallbacks (complementary to Turbopack)
+  // Webpack config for client-side fallbacks
   webpack: (config, { isServer }) => {
     if (!isServer) {
       // Only apply Node.js fallbacks to client-side bundles
-      // This doesn't interfere with Next.js internal modules
       config.resolve.fallback = {
         ...config.resolve.fallback,
         fs: false,

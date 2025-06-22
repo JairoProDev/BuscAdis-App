@@ -5,22 +5,7 @@
  * that uses fetch to communicate with the server via API endpoints.
  */
 
-// Debug flag to control logging
-const DEBUG = true;
-
-// Helper functions for logging
-function logDebug(message: string, data?: any) {
-  if (DEBUG) {
-    console.log(`[MongoDB Browser] ${message}`, data ? data : '');
-  }
-}
-
-function logError(message: string, error: any) {
-  console.error(`[MongoDB Browser Error] ${message}:`, error);
-  if (error?.stack) {
-    console.error('Stack:', error.stack);
-  }
-}
+import { Logger } from '@/services/logging.service';
 
 // Maximum retries for fetch operations
 const MAX_RETRIES = 2;
@@ -54,7 +39,7 @@ export const mongoFetch = async (endpoint: string, options: MongoFetchOptions = 
       }
     }
     
-    logDebug(`Making request to ${url}`, { method: fetchOptions.method || 'GET', hasBody: !!fetchOptions.body });
+    Logger.debug(`Making request to ${url}`, { method: fetchOptions.method || 'GET', hasBody: !!fetchOptions.body });
     
     // Set default headers for JSON
     const headers = {
@@ -69,7 +54,7 @@ export const mongoFetch = async (endpoint: string, options: MongoFetchOptions = 
     while (currentRetry <= retries) {
       try {
         if (currentRetry > 0) {
-          logDebug(`Retry ${currentRetry}/${retries} for ${url}`);
+          Logger.debug(`Retry ${currentRetry}/${retries} for ${url}`);
           // Exponential backoff
           await new Promise(resolve => setTimeout(resolve, Math.pow(2, currentRetry) * 500));
         }
@@ -101,7 +86,7 @@ export const mongoFetch = async (endpoint: string, options: MongoFetchOptions = 
           error.originalText = errorText;
           
           // Log detailed error info
-          logError(`API request failed (${response.status}):`, {
+          Logger.error(`API request failed (${response.status})`, {
             url,
             status: response.status,
             statusText: response.statusText,
@@ -120,13 +105,13 @@ export const mongoFetch = async (endpoint: string, options: MongoFetchOptions = 
         
         // Parse JSON response
         const data = await response.json();
-        logDebug(`Request to ${url} succeeded`, { dataSize: JSON.stringify(data).length });
+        Logger.debug(`Request to ${url} succeeded`, { dataSize: JSON.stringify(data).length });
         return data;
       } catch (error) {
         if (error instanceof TypeError && error.message.includes('fetch')) {
           // Network error, retry
           lastError = error;
-          logError(`Network error on attempt ${currentRetry}`, error);
+          Logger.error(`Network error on attempt ${currentRetry}`, { error });
           currentRetry++;
           continue;
         }
@@ -134,7 +119,7 @@ export const mongoFetch = async (endpoint: string, options: MongoFetchOptions = 
         // For other errors, only retry if we haven't exceeded the limit
         if (currentRetry < retries) {
           lastError = error;
-          logError(`Error on attempt ${currentRetry}`, error);
+          Logger.error(`Error on attempt ${currentRetry}`, { error });
           currentRetry++;
           continue;
         }
@@ -147,7 +132,7 @@ export const mongoFetch = async (endpoint: string, options: MongoFetchOptions = 
     // If we get here, we've exhausted retries without success
     throw lastError || new Error(`Failed after ${retries} retries`);
   } catch (error) {
-    logError('API request error after all retries', error);
+    Logger.error('API request error after all retries', { error });
     throw error;
   }
 };
@@ -160,7 +145,7 @@ export const getBrowserMongoClient = () => {
     // Find documents in a collection
     find: async (collection: string, query: any = {}, options: any = {}) => {
       try {
-        logDebug(`Finding documents in ${collection}`, { query, options });
+        Logger.debug(`Finding documents in ${collection}`, { query, options });
         
         const response = await mongoFetch(`/api/${collection}`, {
           method: 'GET',
@@ -171,13 +156,13 @@ export const getBrowserMongoClient = () => {
         });
         
         if (!response.publications && response.error) {
-          logError(`Error finding documents in ${collection}`, response.error);
+          Logger.error(`Error finding documents in ${collection}`, { error: response.error });
           throw new Error(response.errorFriendly || response.error);
         }
         
         return response;
       } catch (error) {
-        logError(`Error in browser mongodb.find for ${collection}`, error);
+        Logger.error(`Error in browser mongodb.find for ${collection}`, { error });
         
         // Return empty result set instead of throwing to prevent UI breakage
         return { 
@@ -194,53 +179,46 @@ export const getBrowserMongoClient = () => {
     // Get a single document by ID
     findOne: async (collection: string, id: string) => {
       try {
-        logDebug(`Finding document ${id} in ${collection}`);
+        Logger.debug(`Finding document ${id} in ${collection}`);
         
         const response = await mongoFetch(`/api/${collection}/${id}`);
         return response;
       } catch (error) {
-        logError(`Error in browser mongodb.findOne for ${collection}/${id}`, error);
-        
-        // Return fallback error response
-        return { 
-          error: error instanceof Error ? error.message : 'Unknown error',
-          errorFriendly: 'No pudimos encontrar el documento solicitado. Por favor, verifica el ID e intenta nuevamente.'
-        };
+        Logger.error(`Error finding document ${id} in ${collection}`, { error });
+        return null;
       }
     },
     
-    // Insert a new document
+    // Insert a document
     insertOne: async (collection: string, document: any) => {
       try {
-        logDebug(`Inserting document into ${collection}`, document);
+        Logger.debug(`Inserting document into ${collection}`);
         
         const response = await mongoFetch(`/api/${collection}`, {
           method: 'POST',
           body: JSON.stringify(document),
         });
         
-        logDebug(`Insert into ${collection} successful`, response);
         return response;
       } catch (error) {
-        logError(`Error in browser mongodb.insertOne for ${collection}`, error);
+        Logger.error(`Error inserting document into ${collection}`, { error });
         throw error;
       }
     },
     
-    // Update an existing document
+    // Update a document
     updateOne: async (collection: string, id: string, update: any) => {
       try {
-        logDebug(`Updating document ${id} in ${collection}`, update);
+        Logger.debug(`Updating document ${id} in ${collection}`);
         
         const response = await mongoFetch(`/api/${collection}/${id}`, {
           method: 'PUT',
           body: JSON.stringify(update),
         });
         
-        logDebug(`Update of ${id} in ${collection} successful`, response);
         return response;
       } catch (error) {
-        logError(`Error in browser mongodb.updateOne for ${collection}/${id}`, error);
+        Logger.error(`Error updating document ${id} in ${collection}`, { error });
         throw error;
       }
     },
@@ -248,18 +226,17 @@ export const getBrowserMongoClient = () => {
     // Delete a document
     deleteOne: async (collection: string, id: string) => {
       try {
-        logDebug(`Deleting document ${id} from ${collection}`);
+        Logger.debug(`Deleting document ${id} from ${collection}`);
         
         const response = await mongoFetch(`/api/${collection}/${id}`, {
           method: 'DELETE',
         });
         
-        logDebug(`Deletion of ${id} from ${collection} successful`, response);
         return response;
       } catch (error) {
-        logError(`Error in browser mongodb.deleteOne for ${collection}/${id}`, error);
+        Logger.error(`Error deleting document ${id} from ${collection}`, { error });
         throw error;
       }
     }
   };
-} 
+}; 
