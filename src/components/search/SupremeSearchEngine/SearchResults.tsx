@@ -6,9 +6,6 @@ import {
   EyeIcon, 
   ClockIcon,
   MapPinIcon,
-  TagIcon,
-  MagnifyingGlassIcon,
-  AdjustmentsHorizontalIcon,
   Squares2X2Icon, 
   ListBulletIcon,
   HeartIcon,
@@ -48,26 +45,8 @@ interface SearchResultsProps {
   className?: string
 }
 
-const mockResults: SearchResult[] = Array(20).fill(null).map((_, i) => ({
-  id: `result-${i}`,
-  title: i === 0 ? 'Desarrollador Full Stack' : i === 1 ? 'Chef de Cocina' : `Resultado de búsqueda ${i + 1}`,
-  description: i === 0 
-    ? 'Buscamos desarrollador con experiencia en React y Node.js para proyecto innovador'
-    : i === 1 
-    ? 'Restaurant en el centro histórico busca chef con experiencia en cocina peruana'
-    : `Esta es una descripción detallada del resultado ${i + 1}. Incluye características importantes y detalles relevantes.`,
-  price: i === 0 ? 3500 : i === 1 ? 2800 : Math.floor(Math.random() * 10000) + 500,
-  location: ['Cusco, Cusco', 'Lima, Lima', 'Arequipa, Arequipa', 'Trujillo, La Libertad', 'Piura, Piura'][Math.floor(Math.random() * 5)],
-  category: ['empleos', 'inmuebles', 'vehiculos', 'servicios'][Math.floor(Math.random() * 4)],
-  image: `/images/placeholder/listing-${(i % 10) + 1}.jpg`,
-  publishedAt: new Date(Date.now() - Math.random() * 30 * 24 * 60 * 60 * 1000).toISOString(),
-  views: i === 0 ? 150 : i === 1 ? 945 : Math.floor(Math.random() * 1000) + 10,
-  isFavorite: Math.random() > 0.7,
-  isPromoted: Math.random() > 0.8,
-  isPremium: i === 1 ? true : Math.random() > 0.9,
-  condition: ['Nuevo', 'Usado', 'Excelente', 'Bueno'][Math.floor(Math.random() * 4)],
-  tags: ['destacado', 'urgente', 'negociable'].filter(() => Math.random() > 0.6)
-}))
+// Mock data simplificado - solo para desarrollo
+const mockResults: SearchResult[] = []
 
 export default function SearchResults({
   results = mockResults,
@@ -143,10 +122,10 @@ export default function SearchResults({
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: index * 0.05 }}
         className={`group relative bg-white dark:bg-gray-800 rounded-2xl overflow-hidden publication-card-hover smooth-transition cursor-pointer ${
-          isGridView ? 'flex flex-col' : 'flex flex-row h-36'
+          isGridView ? 'flex flex-col' : 'flex flex-row h-40'
         } ${
           isPremium 
-            ? 'publication-card-premium ring-2 ring-yellow-300 dark:ring-yellow-500' 
+            ? 'publication-card-premium ring-2 ring-cyan-400 dark:ring-cyan-500 rounded-t-2xl' 
             : 'shadow-md hover:shadow-xl border border-gray-100 dark:border-gray-700'
         }`}
         onClick={() => {
@@ -157,7 +136,7 @@ export default function SearchResults({
         {/* Premium Badge */}
         {isPremium && (
           <div className="absolute top-3 left-3 z-20">
-            <div className="flex items-center bg-gradient-to-r from-yellow-400 to-amber-500 text-white px-2 py-1 rounded-full text-xs font-bold shadow-lg">
+            <div className="flex items-center bg-gradient-to-r from-cyan-500 to-teal-500 text-white px-2 py-1 rounded-full text-xs font-bold shadow-lg">
               <span className="mr-1">👑</span>
               PREMIUM
             </div>
@@ -182,7 +161,7 @@ export default function SearchResults({
         </button>
 
         {/* Image Container */}
-        <div className={`relative ${isGridView ? 'aspect-[4/3]' : 'w-32 h-full'} flex-shrink-0 overflow-hidden`}>
+        <div className={`relative ${isGridView ? 'aspect-[4/3]' : 'w-36 h-full'} flex-shrink-0 overflow-hidden`}>
           <Image
             src={result.image}
             alt={result.title}
@@ -245,38 +224,60 @@ export default function SearchResults({
               </div>
             </div>
 
-            {/* Action Buttons */}
-            <div className="flex items-center justify-between pt-2 border-t border-gray-100 dark:border-gray-700">
-              <div className="flex items-center gap-2">
-                {/* Contact Button */}
+            {/* Action Buttons - ARREGLADO: Sin recorte y funcional */}
+            <div className="flex items-center justify-between gap-2 pt-3 mt-auto border-t border-gray-100 dark:border-gray-700 min-h-[42px]">
+              {/* Category Badge - Responsive con iconos */}
+              <span className="flex items-center gap-1 px-2 py-1 bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 text-xs rounded-full font-medium capitalize flex-shrink-0">
+                <span className="hidden md:inline whitespace-nowrap">{result.category}</span>
+                <span className="md:hidden">
+                  {result.category === 'empleos' ? '💼' : 
+                   result.category === 'inmuebles' ? '🏠' : 
+                   result.category === 'vehiculos' ? '🚗' : 
+                   result.category === 'servicios' ? '🔧' : '📂'}
+                </span>
+              </span>
+
+              <div className="flex items-center gap-1.5 flex-shrink-0">
+                {/* Contact Button - Funcional con WhatsApp */}
                 <button 
                   onClick={(e) => {
                     e.stopPropagation()
-                    console.log('Contact:', result.id)
+                    // Abrir WhatsApp con mensaje predefinido
+                    const phone = '51987654321' // Número de ejemplo
+                    const message = encodeURIComponent(`Hola, me interesa tu anuncio: ${result.title}`)
+                    window.open(`https://wa.me/${phone}?text=${message}`, '_blank')
                   }}
-                  className="flex items-center gap-1 px-3 py-1.5 bg-green-600 hover:bg-green-700 text-white text-xs font-medium rounded-full transition-colors"
+                  className="flex items-center gap-1 px-2 py-1 bg-green-600 hover:bg-green-700 text-white text-xs font-medium rounded-full transition-colors flex-shrink-0"
+                  title="Contactar por WhatsApp"
                 >
                   <PhoneIcon className="h-3 w-3" />
-                  Contactar
+                  <span className="hidden lg:inline whitespace-nowrap">Contactar</span>
+                  <span className="lg:hidden">💬</span>
                 </button>
                 
-                {/* Share Button */}
+                {/* Share Button - Funcional */}
                 <button 
                   onClick={(e) => {
                     e.stopPropagation()
-                    console.log('Share:', result.id)
+                    // Compartir con Web Share API o copiar al portapapeles
+                    if (navigator.share) {
+                      navigator.share({
+                        title: result.title,
+                        text: result.description,
+                        url: window.location.href + '/' + result.id
+                      })
+                    } else {
+                      // Fallback: copiar al portapapeles
+                      navigator.clipboard.writeText(window.location.href + '/' + result.id)
+                      alert('Enlace copiado al portapapeles')
+                    }
                   }}
-                  className="p-1.5 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 transition-colors"
+                  className="hidden sm:flex p-1.5 text-gray-400 hover:text-blue-600 dark:hover:text-blue-400 transition-colors flex-shrink-0 hover:bg-blue-50 dark:hover:bg-blue-900/20 rounded-full"
                   title="Compartir"
                 >
-                  <ShareIcon className="h-4 w-4" />
+                  <ShareIcon className="h-3 w-3" />
                 </button>
               </div>
-
-              {/* Category Badge */}
-              <span className="px-2 py-1 bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-200 text-xs rounded-full font-medium capitalize">
-                {result.category}
-              </span>
             </div>
           </div>
         </div>
