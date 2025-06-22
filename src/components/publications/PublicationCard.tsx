@@ -4,6 +4,17 @@ import { WhatsAppIcon } from '@/components/icons';
 import { useMemo } from 'react';
 import { generateSeoUrl } from '@/utils/url';
 import { getDefaultImageByCategory } from '@/utils/image-helpers';
+import { 
+  JobsIcon, 
+  RealEstateIcon, 
+  VehicleIcon, 
+  ServicesIcon, 
+  ProductsIcon, 
+  EventsIcon, 
+  EducationIcon, 
+  TourismIcon, 
+  PetsIcon 
+} from '@/components/icons/categories';
 
 // Define la interfaz que coincide con la estructura de tus datos JSON
 interface PublicationData {
@@ -32,6 +43,7 @@ interface PublicationData {
   images: string[];
   status: string;
   premium: boolean;
+  createdAt?: string;
 }
 
 // Adaptamos PublicationCardProps para que reciba directamente tu estructura de datos
@@ -113,8 +125,8 @@ export default function PublicationCard({ publication, id }: PublicationCardProp
     publication.title,
     undefined, // Publication slug - undefined as we don't have it
     effectiveCategory,
-    effectiveSubcategory,
-    effectiveSubsubcategory,
+    effectiveSubcategory ?? undefined,
+    effectiveSubsubcategory ?? undefined,
     true // includeTitleInSlug parameter should be boolean
   ), [
     publicationId,
@@ -149,8 +161,43 @@ export default function PublicationCard({ publication, id }: PublicationCardProp
     }
   }, [publication.contact?.phones]);
 
+  // Función para obtener el icono de la categoría
+  const getCategoryIcon = (categorySlug: string) => {
+    const iconProps = { className: "w-4 h-4", fill: "currentColor" };
+    
+    switch (categorySlug) {
+      case 'empleos':
+        return <JobsIcon {...iconProps} />;
+      case 'inmuebles':
+        return <RealEstateIcon {...iconProps} />;
+      case 'vehiculos':
+        return <VehicleIcon {...iconProps} />;
+      case 'servicios':
+        return <ServicesIcon {...iconProps} />;
+      case 'productos':
+        return <ProductsIcon {...iconProps} />;
+      case 'eventos':
+        return <EventsIcon {...iconProps} />;
+      default:
+        return <ProductsIcon {...iconProps} />;
+    }
+  };
+
+  // Función para obtener el nombre de la categoría
+  const getCategoryName = (categorySlug: string) => {
+    const categoryNames: { [key: string]: string } = {
+      'empleos': 'Empleos',
+      'inmuebles': 'Inmuebles',
+      'vehiculos': 'Vehículos',
+      'servicios': 'Servicios',
+      'productos': 'Productos',
+      'eventos': 'Eventos',
+    };
+    return categoryNames[categorySlug] || 'General';
+  };
+
   return (
-    <div className="rounded-xl shadow-md overflow-hidden transition-all duration-300 transform hover:-translate-y-1 hover:shadow-lg bg-white">
+    <div className="rounded-xl shadow-md overflow-hidden transition-all duration-300 transform hover:-translate-y-1 hover:shadow-lg bg-black">
       <Link href={seoUrl}>
         <div className="relative h-56 w-full">
           <Image
@@ -167,7 +214,6 @@ export default function PublicationCard({ publication, id }: PublicationCardProp
           </div>
 
           {/* Logo de Buscadis */}
-          {/*
           <div className="absolute top-2 left-2 z-20">
             <div className="bg-white/90 backdrop-blur-sm rounded-full p-1 shadow-md">
               <Image
@@ -179,39 +225,48 @@ export default function PublicationCard({ publication, id }: PublicationCardProp
               />
             </div>
           </div>
-          */}
         </div>
       </Link>
 
-      <div className="p-4">
+      <div className="p-4 bg-gradient-to-r from-cyan-500 to-teal-500">
         <Link href={seoUrl}>
-          <h3 className="font-semibold text-gray-800 hover:text-primary-600 transition-colors text-lg mb-1">
+          <h3 className="font-semibold text-white hover:text-cyan-100 transition-colors text-lg mb-1 truncate">
             {publication.title}
           </h3>
         </Link>
-        <div className="text-sm text-gray-500 mb-3">
-          {publication.location.city}, {publication.location.province} • {formatDate(/* Aquí deberías tener la fecha de creación */ '')}
+        <div className="text-sm text-cyan-100 mb-3">
+          {publication.location.city}, {publication.location.province} • {formatDate(publication.createdAt ?? '')}
         </div>
 
-        <div className="flex justify-between items-center">
+        {/* Fila mejorada con categoría e iconos */}
+        <div className="flex justify-between items-center gap-2">
+          {/* Categoría con icono - responsive */}
+          <div className="flex items-center gap-1 text-cyan-100 text-xs bg-white/10 px-2 py-1 rounded-full backdrop-blur-sm flex-shrink-0">
+            {getCategoryIcon(effectiveCategory)}
+            {/* Solo mostrar texto en desktop */}
+            <span className="hidden sm:inline">
+              {getCategoryName(effectiveCategory)}
+            </span>
+          </div>
+
+          {/* Botón de contacto mejorado */}
           {formattedWhatsAppNumber ? (
-            <div className="inline-flex items-center">
-              <a
-                href={`https://wa.me/${formattedWhatsAppNumber}?text=${formatWhatsAppMessage()}`}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="flex items-center text-green-600 font-medium text-sm hover:text-green-700 transition-colors"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  console.log(`WhatsApp click for publication: ${publicationId}`);
-                }}
-              >
-                <WhatsAppIcon className="w-5 h-5 mr-1" />
-                Contactar
-              </a>
-            </div>
+            <a
+              href={`https://wa.me/${formattedWhatsAppNumber}?text=${formatWhatsAppMessage()}`}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex items-center text-white font-medium text-xs hover:text-cyan-100 transition-colors bg-white/20 px-3 py-1.5 rounded-full backdrop-blur-sm flex-shrink-0"
+              onClick={(e) => {
+                e.stopPropagation();
+                console.log(`WhatsApp click for publication: ${publicationId}`);
+              }}
+            >
+              <WhatsAppIcon className="w-3 h-3 mr-1" />
+              <span className="hidden sm:inline">Contactar</span>
+              <span className="sm:hidden">💬</span>
+            </a>
           ) : (
-            <span className="text-gray-400 text-sm">Contacto no disponible</span>
+            <span className="text-cyan-200 text-xs flex-shrink-0">Sin contacto</span>
           )}
         </div>
       </div>
