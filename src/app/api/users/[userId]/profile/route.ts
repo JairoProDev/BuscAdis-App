@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server'
-import { mongoDbQuery } from '@/lib/mongodb.server'
+import { mongoDbQuery } from '@/lib/mongodb-server'
 
 export const dynamic = 'force-dynamic' // Disable caching to ensure data is always fresh
 export const runtime = 'nodejs' // Mark as server-side only

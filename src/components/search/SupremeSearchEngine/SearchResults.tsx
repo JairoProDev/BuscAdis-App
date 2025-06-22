@@ -12,7 +12,9 @@ import {
   Squares2X2Icon, 
   ListBulletIcon,
   HeartIcon,
-  FunnelIcon
+  FunnelIcon,
+  ShareIcon,
+  PhoneIcon
 } from '@heroicons/react/24/outline'
 import { HeartIcon as HeartSolidIcon } from '@heroicons/react/24/solid'
 import Image from 'next/image'
@@ -48,17 +50,21 @@ interface SearchResultsProps {
 
 const mockResults: SearchResult[] = Array(20).fill(null).map((_, i) => ({
   id: `result-${i}`,
-  title: `Resultado de búsqueda ${i + 1}`,
-  description: `Esta es una descripción detallada del resultado ${i + 1}. Incluye características importantes y detalles relevantes.`,
-  price: Math.floor(Math.random() * 10000) + 500,
-  location: ['Lima', 'Arequipa', 'Cusco', 'Trujillo', 'Piura'][Math.floor(Math.random() * 5)],
+  title: i === 0 ? 'Desarrollador Full Stack' : i === 1 ? 'Chef de Cocina' : `Resultado de búsqueda ${i + 1}`,
+  description: i === 0 
+    ? 'Buscamos desarrollador con experiencia en React y Node.js para proyecto innovador'
+    : i === 1 
+    ? 'Restaurant en el centro histórico busca chef con experiencia en cocina peruana'
+    : `Esta es una descripción detallada del resultado ${i + 1}. Incluye características importantes y detalles relevantes.`,
+  price: i === 0 ? 3500 : i === 1 ? 2800 : Math.floor(Math.random() * 10000) + 500,
+  location: ['Cusco, Cusco', 'Lima, Lima', 'Arequipa, Arequipa', 'Trujillo, La Libertad', 'Piura, Piura'][Math.floor(Math.random() * 5)],
   category: ['empleos', 'inmuebles', 'vehiculos', 'servicios'][Math.floor(Math.random() * 4)],
   image: `/images/placeholder/listing-${(i % 10) + 1}.jpg`,
   publishedAt: new Date(Date.now() - Math.random() * 30 * 24 * 60 * 60 * 1000).toISOString(),
-  views: Math.floor(Math.random() * 1000) + 10,
+  views: i === 0 ? 150 : i === 1 ? 945 : Math.floor(Math.random() * 1000) + 10,
   isFavorite: Math.random() > 0.7,
   isPromoted: Math.random() > 0.8,
-  isPremium: Math.random() > 0.9,
+  isPremium: i === 1 ? true : Math.random() > 0.9,
   condition: ['Nuevo', 'Usado', 'Excelente', 'Bueno'][Math.floor(Math.random() * 4)],
   tags: ['destacado', 'urgente', 'negociable'].filter(() => Math.random() > 0.6)
 }))
@@ -76,6 +82,7 @@ export default function SearchResults({
 }: SearchResultsProps) {
   const [selectedSort, setSelectedSort] = useState('relevance')
   const [favorites, setFavorites] = useState<Set<string>>(new Set())
+  const [loadingMore, setLoadingMore] = useState(false)
 
   const handleSortChange = (sort: string) => {
     setSelectedSort(sort)
@@ -114,6 +121,17 @@ export default function SearchResults({
     return `Hace ${Math.floor(diffInDays / 30)} meses`
   }
 
+  const handleLoadMore = async () => {
+    if (!onLoadMore || loadingMore) return
+    
+    setLoadingMore(true)
+    try {
+      await onLoadMore()
+    } finally {
+      setLoadingMore(false)
+    }
+  }
+
   const ResultCard = ({ result, index }: { result: SearchResult; index: number }) => {
     const isGridView = viewMode === 'grid'
     const isFav = favorites.has(result.id) || result.isFavorite
@@ -124,13 +142,17 @@ export default function SearchResults({
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: index * 0.05 }}
-        className={`group relative bg-white dark:bg-gray-800 rounded-2xl overflow-hidden publication-card-hover smooth-transition ${
-          isGridView ? 'flex flex-col' : 'flex flex-row'
+        className={`group relative bg-white dark:bg-gray-800 rounded-2xl overflow-hidden publication-card-hover smooth-transition cursor-pointer ${
+          isGridView ? 'flex flex-col' : 'flex flex-row h-36'
         } ${
           isPremium 
-            ? 'publication-card-premium' 
+            ? 'publication-card-premium ring-2 ring-yellow-300 dark:ring-yellow-500' 
             : 'shadow-md hover:shadow-xl border border-gray-100 dark:border-gray-700'
         }`}
+        onClick={() => {
+          // Navegar al detalle del anuncio
+          console.log('Navigating to:', result.id)
+        }}
       >
         {/* Premium Badge */}
         {isPremium && (
@@ -160,7 +182,7 @@ export default function SearchResults({
         </button>
 
         {/* Image Container */}
-        <div className={`relative ${isGridView ? 'aspect-[4/3]' : 'w-48 h-36'} flex-shrink-0 overflow-hidden`}>
+        <div className={`relative ${isGridView ? 'aspect-[4/3]' : 'w-32 h-full'} flex-shrink-0 overflow-hidden`}>
           <Image
             src={result.image}
             alt={result.title}
@@ -176,14 +198,14 @@ export default function SearchResults({
           <div className="absolute inset-0 bg-gradient-to-t from-black/20 via-transparent to-transparent" />
           
           {/* Views Badge */}
-          <div className="absolute bottom-3 right-3 bg-black/60 backdrop-blur-sm text-white text-xs px-2 py-1 rounded-full flex items-center gap-1">
+          <div className="absolute bottom-2 right-2 bg-black/60 backdrop-blur-sm text-white text-xs px-2 py-1 rounded-full flex items-center gap-1">
             <EyeIcon className="h-3 w-3" />
             <span>{result.views}</span>
           </div>
 
-          {/* Price Tag */}
-          {result.price && (
-            <div className="absolute bottom-3 left-3 bg-green-600 text-white font-bold px-3 py-1.5 rounded-full text-sm shadow-lg">
+          {/* Price Tag - Solo en grid view */}
+          {result.price && isGridView && (
+            <div className="absolute bottom-2 left-2 bg-green-600 text-white font-bold px-3 py-1.5 rounded-full text-sm shadow-lg">
               {formatPrice(result.price)}
             </div>
           )}
@@ -192,20 +214,20 @@ export default function SearchResults({
         {/* Content */}
         <div className={`flex-1 p-4 ${isGridView ? '' : 'flex flex-col justify-between'}`}>
           {/* Title and Price */}
-          <div className="mb-3">
-            <h3 className="font-bold text-gray-900 dark:text-white text-base line-clamp-2 mb-2 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">
+          <div className="mb-2">
+            <h3 className="font-bold text-gray-900 dark:text-white text-base line-clamp-2 mb-1 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">
               {result.title}
             </h3>
             
-            {result.price && isGridView && (
-              <div className="text-2xl font-bold text-green-600 dark:text-green-400 mb-1">
+            {result.price && (
+              <div className="text-xl font-bold text-green-600 dark:text-green-400">
                 {formatPrice(result.price)}
               </div>
             )}
           </div>
 
           {/* Description */}
-          <p className="text-gray-600 dark:text-gray-300 text-sm line-clamp-2 mb-4 leading-relaxed">
+          <p className="text-gray-600 dark:text-gray-300 text-sm line-clamp-2 mb-3 leading-relaxed">
             {result.description}
           </p>
 
@@ -228,29 +250,31 @@ export default function SearchResults({
               <div className="flex items-center gap-2">
                 {/* Contact Button */}
                 <button 
-                  onClick={(e) => e.stopPropagation()}
+                  onClick={(e) => {
+                    e.stopPropagation()
+                    console.log('Contact:', result.id)
+                  }}
                   className="flex items-center gap-1 px-3 py-1.5 bg-green-600 hover:bg-green-700 text-white text-xs font-medium rounded-full transition-colors"
                 >
-                  <svg className="h-3 w-3" fill="currentColor" viewBox="0 0 20 20">
-                    <path d="M2 3a1 1 0 011-1h2.153a1 1 0 01.986.836l.74 4.435a1 1 0 01-.54 1.06l-1.548.773a11.037 11.037 0 006.105 6.105l.774-1.548a1 1 0 011.059-.54l4.435.74a1 1 0 01.836.986V17a1 1 0 01-1 1h-2C7.82 18 2 12.18 2 5V3z"/>
-                  </svg>
+                  <PhoneIcon className="h-3 w-3" />
                   Contactar
                 </button>
                 
                 {/* Share Button */}
                 <button 
-                  onClick={(e) => e.stopPropagation()}
+                  onClick={(e) => {
+                    e.stopPropagation()
+                    console.log('Share:', result.id)
+                  }}
                   className="p-1.5 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300 transition-colors"
                   title="Compartir"
                 >
-                  <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.367 2.684 3 3 0 00-5.367-2.684z" />
-                  </svg>
+                  <ShareIcon className="h-4 w-4" />
                 </button>
               </div>
 
               {/* Category Badge */}
-              <span className="px-2 py-1 bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-200 text-xs rounded-full font-medium">
+              <span className="px-2 py-1 bg-blue-100 dark:bg-blue-900 text-blue-800 dark:text-blue-200 text-xs rounded-full font-medium capitalize">
                 {result.category}
               </span>
             </div>
@@ -277,17 +301,17 @@ export default function SearchResults({
         </div>
 
         <div className="flex items-center gap-2 sm:gap-4">
-          {/* Sort - Más compacto */}
+          {/* Sort */}
           <select
             value={selectedSort}
             onChange={(e) => handleSortChange(e.target.value)}
-            className="px-2 py-1.5 text-xs sm:text-sm border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500 min-w-[120px] max-w-[160px]"
+            className="px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500 min-w-[140px]"
             aria-label="Ordenar resultados"
           >
             <option value="relevance">Relevancia</option>
-            <option value="date">Recientes</option>
-            <option value="price-asc">Precio ↑</option>
-            <option value="price-desc">Precio ↓</option>
+            <option value="date">Más recientes</option>
+            <option value="price-asc">Precio: menor a mayor</option>
+            <option value="price-desc">Precio: mayor a menor</option>
             <option value="views">Más vistos</option>
           </select>
 
@@ -295,7 +319,7 @@ export default function SearchResults({
           <div className="flex items-center bg-gray-100 dark:bg-gray-700 rounded-lg p-1">
             <button
               onClick={() => onViewModeChange?.('grid')}
-              className={`p-1.5 sm:p-2 rounded-md transition-colors ${
+              className={`p-2 rounded-md transition-colors ${
                 viewMode === 'grid' 
                   ? 'bg-white dark:bg-gray-600 text-blue-600 shadow-sm' 
                   : 'text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white'
@@ -303,11 +327,11 @@ export default function SearchResults({
               aria-label="Vista en cuadrícula"
               title="Vista en cuadrícula"
             >
-              <Squares2X2Icon className="h-4 w-4 sm:h-5 sm:w-5" />
+              <Squares2X2Icon className="h-5 w-5" />
             </button>
             <button
               onClick={() => onViewModeChange?.('list')}
-              className={`p-1.5 sm:p-2 rounded-md transition-colors ${
+              className={`p-2 rounded-md transition-colors ${
                 viewMode === 'list' 
                   ? 'bg-white dark:bg-gray-600 text-blue-600 shadow-sm' 
                   : 'text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white'
@@ -315,54 +339,118 @@ export default function SearchResults({
               aria-label="Vista en lista"
               title="Vista en lista"
             >
-              <ListBulletIcon className="h-4 w-4 sm:h-5 sm:w-5" />
+              <ListBulletIcon className="h-5 w-5" />
             </button>
           </div>
         </div>
       </div>
 
-      {/* Results */}
+      {/* Loading State */}
       {isLoading && results.length === 0 ? (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+        <div className={`${
+          viewMode === 'grid' 
+            ? 'grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4' 
+            : 'space-y-4'
+        }`}>
           {Array(8).fill(null).map((_, i) => (
             <div key={i} className="bg-white dark:bg-gray-800 rounded-xl shadow-md overflow-hidden animate-pulse">
-              <div className="aspect-video bg-gray-200 dark:bg-gray-700" />
-              <div className="p-4 space-y-3">
-                <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded w-3/4" />
-                <div className="h-6 bg-gray-200 dark:bg-gray-700 rounded w-1/2" />
-                <div className="space-y-2">
-                  <div className="h-3 bg-gray-200 dark:bg-gray-700 rounded" />
-                  <div className="h-3 bg-gray-200 dark:bg-gray-700 rounded w-2/3" />
-                </div>
+              <div className={`${viewMode === 'grid' ? 'aspect-[4/3]' : 'h-36 flex'}`}>
+                {viewMode === 'grid' ? (
+                  <div className="w-full bg-gray-200 dark:bg-gray-700" />
+                ) : (
+                  <>
+                    <div className="w-32 bg-gray-200 dark:bg-gray-700" />
+                    <div className="flex-1 p-4 space-y-3">
+                      <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded w-3/4" />
+                      <div className="h-6 bg-gray-200 dark:bg-gray-700 rounded w-1/2" />
+                      <div className="space-y-2">
+                        <div className="h-3 bg-gray-200 dark:bg-gray-700 rounded" />
+                        <div className="h-3 bg-gray-200 dark:bg-gray-700 rounded w-2/3" />
+                      </div>
+                    </div>
+                  </>
+                )}
               </div>
+              {viewMode === 'grid' && (
+                <div className="p-4 space-y-3">
+                  <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded w-3/4" />
+                  <div className="h-6 bg-gray-200 dark:bg-gray-700 rounded w-1/2" />
+                  <div className="space-y-2">
+                    <div className="h-3 bg-gray-200 dark:bg-gray-700 rounded" />
+                    <div className="h-3 bg-gray-200 dark:bg-gray-700 rounded w-2/3" />
+                  </div>
+                </div>
+              )}
             </div>
           ))}
         </div>
       ) : (
-        <div className={`${
-          viewMode === 'grid' 
-            ? 'grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-4 gap-3 md:gap-4 lg:gap-6' 
-            : 'space-y-4'
-        }`}>
-          {results.map((result, index) => (
-            <ResultCard key={result.id} result={result} index={index} />
-          ))}
-        </div>
+        // Results Grid/List
+        <>
+          <AnimatePresence mode="wait">
+            <motion.div 
+              key={viewMode}
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.2 }}
+              className={`${
+                viewMode === 'grid' 
+                  ? 'grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4' 
+                  : 'space-y-4'
+              }`}
+            >
+              {results.map((result, index) => (
+                <ResultCard key={result.id} result={result} index={index} />
+              ))}
+            </motion.div>
+          </AnimatePresence>
+
+          {/* Load More Button */}
+          {hasMore && results.length > 0 && (
+            <div className="flex justify-center pt-8">
+              <button
+                onClick={handleLoadMore}
+                disabled={loadingMore}
+                className="px-6 py-3 bg-blue-600 hover:bg-blue-700 disabled:bg-blue-400 text-white font-medium rounded-lg transition-colors flex items-center gap-2"
+              >
+                {loadingMore ? (
+                  <>
+                    <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                    Cargando...
+                  </>
+                ) : (
+                  'Cargar más resultados'
+                )}
+              </button>
+            </div>
+          )}
+        </>
       )}
 
       {/* Empty State */}
       {!isLoading && results.length === 0 && (
-        <div className="text-center py-12">
+        <motion.div 
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="text-center py-12"
+        >
           <div className="w-24 h-24 mx-auto mb-4 bg-gray-100 dark:bg-gray-700 rounded-full flex items-center justify-center">
             <FunnelIcon className="h-12 w-12 text-gray-400" />
           </div>
           <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-2">
             No se encontraron resultados
           </h3>
-          <p className="text-gray-600 dark:text-gray-400 max-w-md mx-auto">
-            Intenta ajustar tus filtros de búsqueda o usa términos más generales.
+          <p className="text-gray-600 dark:text-gray-400 max-w-md mx-auto mb-6">
+            Intenta ajustar tus filtros de búsqueda o usa términos más generales para encontrar lo que buscas.
           </p>
-        </div>
+          <button
+            onClick={() => window.location.reload()}
+            className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors"
+          >
+            Reintentar búsqueda
+          </button>
+        </motion.div>
       )}
     </div>
   )

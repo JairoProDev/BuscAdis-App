@@ -245,4 +245,119 @@ function buildQuery(filters: Record<string, any>): any {
   }
   
   return query;
-} 
+}
+
+// Additional exports for compatibility with existing API routes
+export const clientPromise = new Promise<MongoClient>(async (resolve, reject) => {
+  try {
+    if (cachedClient) {
+      resolve(cachedClient);
+      return;
+    }
+    
+    const client = new MongoClient(MONGODB_URI, connectionOptions);
+    await client.connect();
+    cachedClient = client;
+    resolve(client);
+  } catch (error) {
+    reject(error);
+  }
+});
+
+// Direct MongoDB client getter (for auth routes)
+export const getMongoClient = async (): Promise<MongoClient> => {
+  if (cachedClient) {
+    return cachedClient;
+  }
+  
+  try {
+    const client = new MongoClient(MONGODB_URI, connectionOptions);
+    await client.connect();
+    cachedClient = client;
+    return client;
+  } catch (error) {
+    Logger.error('Error getting MongoDB client', { error });
+    throw error;
+  }
+};
+
+// Query helper functions for API routes
+export const mongoDbQuery = async (
+  collectionName: string, 
+  query: any = {}, 
+  options: any = {}
+): Promise<any[]> => {
+  try {
+    const client = await getMongoClient();
+    const db = client.db(MONGODB_DB);
+    const collection = db.collection(collectionName);
+    
+    return await collection.find(query, options).toArray();
+  } catch (error) {
+    Logger.error('Error in mongoDbQuery', { error, collectionName, query });
+    throw error;
+  }
+};
+
+export const mongoDbGetById = async (
+  collectionName: string, 
+  id: string
+): Promise<any | null> => {
+  try {
+    const client = await getMongoClient();
+    const db = client.db(MONGODB_DB);
+    const collection = db.collection(collectionName);
+    
+    return await collection.findOne({ _id: new ObjectId(id) });
+  } catch (error) {
+    Logger.error('Error in mongoDbGetById', { error, collectionName, id });
+    throw error;
+  }
+};
+
+export const mongoDbInsert = async (
+  collectionName: string, 
+  document: any
+): Promise<any> => {
+  try {
+    const client = await getMongoClient();
+    const db = client.db(MONGODB_DB);
+    const collection = db.collection(collectionName);
+    
+    const result = await collection.insertOne({
+      ...document,
+      _id: new ObjectId(),
+      createdAt: new Date(),
+      updatedAt: new Date()
+    });
+    
+    return { insertedId: result.insertedId, ...document };
+  } catch (error) {
+    Logger.error('Error in mongoDbInsert', { error, collectionName });
+    throw error;
+  }
+};
+
+export const mongoDbUpdate = async (
+  collectionName: string, 
+  filter: any, 
+  update: any
+): Promise<any> => {
+  try {
+    const client = await getMongoClient();
+    const db = client.db(MONGODB_DB);
+    const collection = db.collection(collectionName);
+    
+    const result = await collection.updateOne(filter, {
+      $set: {
+        ...update,
+        updatedAt: new Date()
+      }
+    });
+    
+    return result;
+  } catch (error) {
+    Logger.error('Error in mongoDbUpdate', { error, collectionName, filter });
+    throw error;
+  }
+}; 

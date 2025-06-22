@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server'
-import { mongoDbGetById } from '@/lib/mongodb.server'
+import { mongoDbGetById } from '@/lib/mongodb-server'
 
 export const dynamic = 'force-dynamic' // Disable caching to ensure data is always fresh
 export const runtime = 'nodejs' // Mark as server-side only
