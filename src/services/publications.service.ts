@@ -160,7 +160,7 @@ export class PublicationsService {
             if (query.sortBy) params.append('sortBy', query.sortBy);
 
             const url = `${this.baseUrl}?${params.toString()}`;
-            logger.info('Fetching publications', { url, query });
+            Logger.info('Fetching publications', { url, query });
 
             const response = await fetch(url, {
                 method: 'GET',
@@ -176,7 +176,7 @@ export class PublicationsService {
 
             const data = await response.json();
             
-            logger.info('Publications fetched successfully', { 
+            Logger.info('Publications fetched successfully', { 
                 count: data.publications?.length || 0,
                 total: data.total || 0 
             });
@@ -189,7 +189,7 @@ export class PublicationsService {
             };
 
         } catch (error) {
-            logger.error('Error fetching publications', { error: error.message, query });
+            Logger.error('Error fetching publications', { error: error.message, query });
             
             // Retornar datos vacíos en lugar de propagar el error
             return {
@@ -214,7 +214,7 @@ export class PublicationsService {
             
             return response.publications;
         } catch (error) {
-            logger.error('Error fetching premium publications', { error: error.message });
+            Logger.error('Error fetching premium publications', { error: error.message });
             return [];
         }
     }
@@ -232,7 +232,7 @@ export class PublicationsService {
             
             return response.publications;
         } catch (error) {
-            logger.error('Error fetching recent publications', { error: error.message });
+            Logger.error('Error fetching recent publications', { error: error.message });
             return [];
         }
     }
@@ -251,7 +251,7 @@ export class PublicationsService {
             
             return response.publications;
         } catch (error) {
-            logger.error('Error fetching publications by category', { error: error.message, category });
+            Logger.error('Error fetching publications by category', { error: error.message, category });
             return [];
         }
     }
@@ -270,7 +270,7 @@ export class PublicationsService {
             
             return response.publications;
         } catch (error) {
-            logger.error('Error fetching expiring publications', { error: error.message });
+            Logger.error('Error fetching expiring publications', { error: error.message });
             return [];
         }
     }
@@ -288,7 +288,7 @@ export class PublicationsService {
             
             return response.publications;
         } catch (error) {
-            logger.error('Error fetching trending publications', { error: error.message });
+            Logger.error('Error fetching trending publications', { error: error.message });
             return [];
         }
     }
@@ -307,7 +307,7 @@ export class PublicationsService {
             
             return response.publications;
         } catch (error) {
-            logger.error('Error fetching nearby publications', { error: error.message, location });
+            Logger.error('Error fetching nearby publications', { error: error.message, location });
             return [];
         }
     }
@@ -331,7 +331,7 @@ export class PublicationsService {
             
             return response.publications;
         } catch (error) {
-            logger.error('Error fetching publications by price range', { 
+            Logger.error('Error fetching publications by price range', { 
                 error: error.message, 
                 priceMin, 
                 priceMax 
@@ -351,7 +351,7 @@ export class PublicationsService {
                 status: 'activo'
             });
         } catch (error) {
-            logger.error('Error searching publications', { error: error.message, searchTerm });
+            Logger.error('Error searching publications', { error: error.message, searchTerm });
             return {
                 publications: [],
                 total: 0,
@@ -378,12 +378,12 @@ export class PublicationsService {
 
             const data = await response.json();
             
-            logger.info('Publication fetched by ID', { id });
+            Logger.info('Publication fetched by ID', { id });
             
             return data.publication || null;
 
         } catch (error) {
-            logger.error('Error fetching publication by ID', { error: error.message, id });
+            Logger.error('Error fetching publication by ID', { error: error.message, id });
             return null;
         }
     }
@@ -419,7 +419,7 @@ export class PublicationsService {
             };
 
         } catch (error) {
-            logger.error('Error fetching stats', { error: error.message });
+            Logger.error('Error fetching stats', { error: error.message });
             return {
                 total: 0,
                 active: 0,
