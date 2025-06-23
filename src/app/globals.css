@@ -183,19 +183,36 @@
 
   /* === Publication Card Redesign === */
   .publication-card {
-    height: 100% !important;
+    @apply bg-white dark:bg-slate-800 rounded-lg shadow-md hover:shadow-lg transition-all duration-300 overflow-hidden;
+  }
+
+  /* Grid mode - altura uniforme */
+  .publication-card:not(.list-mode) {
+    height: 320px !important;
+    min-height: 320px !important;
+    max-height: 320px !important;
     display: flex;
-    @apply flex flex-col bg-white dark:bg-slate-800 rounded-lg shadow-md hover:shadow-lg transition-shadow duration-300 overflow-hidden;
-    /* Remove fixed heights */
-    height: auto;
-    min-height: 0;
-    max-height: none;
+    flex-direction: column;
+  }
+
+  /* List mode - altura fija para lista */
+  .publication-card.list-mode {
+    height: 140px !important;
+    min-height: 140px !important;
+    max-height: 140px !important;
   }
 
   .publication-card > a {
     display: flex;
-    flex-direction: column;
     height: 100%;
+  }
+
+  .publication-card:not(.list-mode) > a {
+    flex-direction: column;
+  }
+
+  .publication-card.list-mode > a {
+    flex-direction: row;
   }
 
   .publication-card .image-container {

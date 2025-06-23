@@ -93,6 +93,7 @@ export default function PublicationCard({
   viewMode = 'grid'
 }: PublicationCardProps) {
   const [isFavorite, setIsFavorite] = useState(false);
+  const [showCopiedMessage, setShowCopiedMessage] = useState(false);
 
   // Generate SEO-friendly URL
   const seoUrl = useMemo(() => {
@@ -113,79 +114,114 @@ export default function PublicationCard({
   // Get main image
   const mainImage = publication.images?.[0] || getDefaultImageByCategory(publication.categorySlug);
 
-  // Format relative time
-  const formatRelativeTime = (date: string) => {
+  // Format exact date and time with precise relative time
+  const formatExactDateTime = (date: string) => {
     const now = new Date();
     const created = new Date(date);
-    const diffInHours = Math.floor((now.getTime() - created.getTime()) / (1000 * 60 * 60));
+    const diffInMinutes = Math.floor((now.getTime() - created.getTime()) / (1000 * 60));
     
-    if (diffInHours < 1) return 'Hace menos de 1 hora';
+    if (diffInMinutes < 1) return 'Publicado ahora mismo';
+    if (diffInMinutes < 60) return `Hace ${diffInMinutes} minuto${diffInMinutes > 1 ? 's' : ''}`;
+    
+    const diffInHours = Math.floor(diffInMinutes / 60);
     if (diffInHours < 24) return `Hace ${diffInHours} hora${diffInHours > 1 ? 's' : ''}`;
     
     const diffInDays = Math.floor(diffInHours / 24);
     if (diffInDays < 7) return `Hace ${diffInDays} día${diffInDays > 1 ? 's' : ''}`;
     
-    const diffInWeeks = Math.floor(diffInDays / 7);
-    if (diffInWeeks < 4) return `Hace ${diffInWeeks} semana${diffInWeeks > 1 ? 's' : ''}`;
-    
-    const diffInMonths = Math.floor(diffInDays / 30);
-    return `Hace ${diffInMonths} mes${diffInMonths > 1 ? 'es' : ''}`;
+    // Para fechas más antiguas, mostrar fecha exacta
+    return created.toLocaleDateString('es-ES', { 
+      day: 'numeric', 
+      month: 'short', 
+      year: diffInDays > 365 ? 'numeric' : undefined 
+    });
   };
 
-  // Create personalized WhatsApp message
-  const createWhatsAppMessage = () => {
+  // Create enhanced personalized WhatsApp message
+  const createEnhancedWhatsAppMessage = () => {
     const baseUrl = typeof window !== 'undefined' ? window.location.origin : '';
     const adUrl = `${baseUrl}${seoUrl}`;
     
     let message = '';
+    const categoryName = publication.categorySlug.charAt(0).toUpperCase() + publication.categorySlug.slice(1);
+    
     switch (publication.categorySlug) {
       case 'empleos':
-        message = `Hola, estoy interesado en la oferta de trabajo "${publication.title}" que vi en BuscaDis: ${adUrl}`;
+        message = `🔍 Hola, vi su anuncio de *${categoryName}* en BuscaDis.com y me interesó mucho la oportunidad:\n\n"${publication.title}"\n\n¿Podría brindarme más información sobre los requisitos y el proceso de selección? Estoy muy interesado/a en aplicar.\n\n🔗 Link del anuncio: ${adUrl}\n\n¡Gracias por su tiempo! 😊`;
         break;
       case 'inmuebles':
-        message = `Hola, me interesa el inmueble "${publication.title}" que tienes publicado en BuscaDis: ${adUrl}`;
+        message = `🏠 Hola, vi su publicación de *${categoryName}* en BuscaDis.com y me interesó el inmueble:\n\n"${publication.title}"\n\n¿Podría proporcionarme más detalles sobre las características, disponibilidad y condiciones? Me gustaría coordinar una visita si es posible.\n\n🔗 Link del anuncio: ${adUrl}\n\n¡Quedo atento/a a su respuesta! 😊`;
         break;
       case 'vehiculos':
-        message = `Hola, me interesa el vehículo "${publication.title}" que tienes en BuscaDis: ${adUrl}`;
+        message = `🚗 Hola, vi su anuncio de *${categoryName}* en BuscaDis.com y me interesó el vehículo:\n\n"${publication.title}"\n\n¿Podría brindarme más información sobre el estado, historial y documentación? Me gustaría conocer más detalles para una posible compra.\n\n🔗 Link del anuncio: ${adUrl}\n\n¡Gracias por su atención! 😊`;
         break;
       case 'servicios':
-        message = `Hola, necesito información sobre el servicio "${publication.title}" que ofreces en BuscaDis: ${adUrl}`;
+        message = `🛠️ Hola, vi su oferta de *${categoryName}* en BuscaDis.com y necesito información sobre:\n\n"${publication.title}"\n\n¿Podría contarme más sobre su experiencia, tarifas y disponibilidad? Estoy interesado/a en contratar este servicio.\n\n🔗 Link del anuncio: ${adUrl}\n\n¡Espero su respuesta! 😊`;
+        break;
+      case 'productos':
+        message = `🛍️ Hola, vi su producto en BuscaDis.com y me interesó:\n\n"${publication.title}"\n\n¿Podría brindarme más información sobre las especificaciones, garantía y formas de pago disponibles?\n\n🔗 Link del anuncio: ${adUrl}\n\n¡Gracias! 😊`;
         break;
       default:
-        message = `Hola, me interesa tu anuncio "${publication.title}" en BuscaDis: ${adUrl}`;
+        message = `👋 Hola, vi su anuncio de *${categoryName}* en BuscaDis.com y me interesó:\n\n"${publication.title}"\n\n¿Podría brindarme más información al respecto? Estoy muy interesado/a.\n\n🔗 Link del anuncio: ${adUrl}\n\n¡Quedo atento/a a su respuesta! 😊`;
     }
     return encodeURIComponent(message);
   };
 
   // Handle favorite toggle
-  const handleFavoriteToggle = (e: React.MouseEvent) => {
+  const handleFavoriteToggle = async (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
     setIsFavorite(!isFavorite);
-    // TODO: Aquí iría la lógica para guardar/quitar de favoritos
+    
+    // TODO: Integrar con la base de datos de favoritos
+    try {
+      const response = await fetch('/api/favorites', {
+        method: isFavorite ? 'DELETE' : 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ publicationId: publication.id })
+      });
+      
+      if (!response.ok) {
+        // Revertir el estado si hay error
+        setIsFavorite(isFavorite);
+      }
+    } catch (error) {
+      console.error('Error updating favorites:', error);
+      setIsFavorite(isFavorite);
+    }
   };
 
-  // Handle share
+  // Enhanced share function with automatic copy
   const handleShare = async (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
     
+    const baseUrl = typeof window !== 'undefined' ? window.location.origin : '';
+    const shareUrl = `${baseUrl}${seoUrl}`;
+    
     const shareData = {
-      title: publication.title,
-      text: publication.description,
-      url: `${typeof window !== 'undefined' ? window.location.origin : ''}${seoUrl}`
+      title: `${publication.title} - BuscaDis`,
+      text: `${publication.description}\n\nEncuentra más oportunidades en BuscaDis.com`,
+      url: shareUrl
     };
 
+    // Always copy to clipboard first
+    try {
+      await navigator.clipboard.writeText(shareUrl);
+      setShowCopiedMessage(true);
+      setTimeout(() => setShowCopiedMessage(false), 2000);
+    } catch (err) {
+      console.error('Error copying to clipboard:', err);
+    }
+
+    // Then try native sharing if available
     if (navigator.share) {
       try {
         await navigator.share(shareData);
       } catch (err) {
-        console.error('Error sharing:', err);
+        // User canceled sharing or error occurred
+        console.log('Sharing cancelled or failed:', err);
       }
-    } else {
-      // Fallback: copy to clipboard
-      await navigator.clipboard.writeText(shareData.url);
-      // TODO: Show toast notification
     }
   };
 
@@ -195,7 +231,7 @@ export default function PublicationCard({
     e.stopPropagation();
     if (publication.whatsapp) {
       const cleanPhone = publication.whatsapp.replace(/[^0-9]/g, '');
-      const message = createWhatsAppMessage();
+      const message = createEnhancedWhatsAppMessage();
       window.open(`https://wa.me/${cleanPhone}?text=${message}`, '_blank');
     }
   };
@@ -210,7 +246,7 @@ export default function PublicationCard({
   const CategoryIcon = categoryIcons[publication.categorySlug] || ShoppingBagIcon;
   const categoryColor = categoryColors[publication.categorySlug] || 'bg-gray-100 text-gray-800';
 
-  // Card classes based on view mode
+  // Altura uniforme para todas las cards
   const cardClasses = viewMode === 'list' 
     ? `
         publication-card list-mode group relative bg-white dark:bg-slate-800 rounded-lg shadow-md hover:shadow-lg 
@@ -221,188 +257,203 @@ export default function PublicationCard({
     : `
         publication-card group relative bg-white dark:bg-slate-800 rounded-lg shadow-md hover:shadow-lg 
         transition-all duration-300 overflow-hidden cursor-pointer border border-gray-200 dark:border-slate-700 
-        hover:border-gray-300 dark:hover:border-slate-600 ${className}
+        hover:border-gray-300 dark:hover:border-slate-600 h-80 flex flex-col ${className}
         ${variant === 'featured' ? 'ring-2 ring-blue-500 ring-opacity-50' : ''}
       `.trim();
 
   return (
-    <motion.div 
-      className={cardClasses} 
-      onClick={handleClick}
-      whileHover={{ y: -2 }}
-      transition={{ duration: 0.2 }}
-    >
-      <Link href={seoUrl} className={viewMode === 'list' ? 'flex flex-row w-full h-full' : 'block h-full'}>
-        {/* Image Container */}
-        <div className={`image-container relative overflow-hidden ${
-          viewMode === 'list' 
-            ? 'w-40 h-32 flex-shrink-0 rounded-l-lg' 
-            : 'h-48 rounded-t-lg'
-        }`}>
-          <Image
-            src={mainImage}
-            alt={publication.title}
-            fill
-            className="object-cover transition-transform duration-300 group-hover:scale-105"
-            sizes="(max-width: 768px) 50vw, (max-width: 1200px) 33vw, 25vw"
-            onError={(e) => {
-              const target = e.target as HTMLImageElement;
-              target.src = getDefaultImageByCategory(publication.categorySlug);
-            }}
-          />
-          
-          {/* Overlay Gradient */}
-          <div className="absolute inset-0 bg-gradient-to-t from-black/20 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
-          
-          {/* Premium Badge */}
-          {publication.premium && (
-            <div className="absolute top-2 left-2 bg-gradient-to-r from-yellow-400 to-orange-500 text-white text-xs font-bold px-2 py-1 rounded-full shadow-md">
-              ⭐ Premium
-            </div>
-          )}
-          
-          {/* Featured Badge */}
-          {publication.featured && (
-            <div className="absolute top-2 right-2 bg-blue-500 text-white text-xs font-bold px-2 py-1 rounded-full shadow-md">
-              🚀 Destacado
-            </div>
-          )}
-
-          {/* Views Badge - Solo en grid mode */}
-          {viewMode === 'grid' && (
-            <div className="absolute bottom-2 right-2 bg-black/60 text-white text-xs px-2 py-1 rounded-full flex items-center gap-1">
-              <EyeIcon className="w-3 h-3" />
-              {publication.views || 0}
-            </div>
-          )}
-
-          {/* Favorite Button - Solo en grid mode */}
-          {viewMode === 'grid' && (
-            <button
-              onClick={handleFavoriteToggle}
-              className="absolute top-2 left-2 p-1.5 bg-white/90 hover:bg-white rounded-full shadow-md transition-all hover:scale-110 z-10"
-              aria-label="Agregar a favoritos"
-            >
-              {isFavorite ? (
-                <HeartSolidIcon className="w-4 h-4 text-red-500" />
-              ) : (
-                <HeartIcon className="w-4 h-4 text-gray-600" />
-              )}
-            </button>
-          )}
-        </div>
-
-        {/* Content */}
-        <div className={`content flex flex-col ${
-          viewMode === 'list' 
-            ? 'flex-1 p-3 justify-between' 
-            : 'p-4 flex-1'
-        }`}>
-          {/* Title */}
-          <div className="flex-1">
-            <h3 className={`title font-semibold text-gray-900 dark:text-white group-hover:text-blue-600 transition-colors ${
-              viewMode === 'list' 
-                ? 'text-sm mb-1 line-clamp-1' 
-                : 'text-base mb-2 line-clamp-2'
-            }`}>
-              {publication.title}
-            </h3>
-
-            {/* Description - Solo en grid mode o versión compacta en list */}
-            <p className={`description text-gray-600 dark:text-gray-400 ${
-              viewMode === 'list' 
-                ? 'text-xs line-clamp-1 mb-2' 
-                : 'text-sm mb-3 line-clamp-2'
-            }`}>
-              {publication.description}
-            </p>
-
-            {/* Price */}
+    <>
+      <motion.div 
+        className={cardClasses} 
+        onClick={handleClick}
+        whileHover={{ y: -2 }}
+        transition={{ duration: 0.2 }}
+      >
+        <Link href={seoUrl} className={viewMode === 'list' ? 'flex flex-row w-full h-full' : 'block h-full w-full flex flex-col'}>
+          {/* Image Container */}
+          <div className={`image-container relative overflow-hidden ${
+            viewMode === 'list' 
+              ? 'w-40 h-32 flex-shrink-0 rounded-l-lg' 
+              : 'h-48 rounded-t-lg flex-shrink-0'
+          }`}>
+            <Image
+              src={mainImage}
+              alt={publication.title}
+              fill
+              className="object-cover transition-transform duration-300 group-hover:scale-105"
+              sizes="(max-width: 768px) 50vw, (max-width: 1200px) 33vw, 25vw"
+              onError={(e) => {
+                const target = e.target as HTMLImageElement;
+                target.src = getDefaultImageByCategory(publication.categorySlug);
+              }}
+            />
+            
+            {/* Overlay Gradient */}
+            <div className="absolute inset-0 bg-gradient-to-t from-black/20 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
+            
+            {/* Price Badge - MOVIDO ARRIBA EN LA IMAGEN */}
             {formatPrice(publication.value, publication.currency) && (
-              <div className={`font-bold text-blue-600 dark:text-blue-400 ${
-                viewMode === 'list' ? 'text-sm mb-2' : 'text-lg mb-3'
-              }`}>
+              <div className="absolute top-2 left-2 bg-gradient-to-r from-blue-600 to-blue-700 text-white text-sm font-bold px-3 py-1 rounded-full shadow-lg backdrop-blur-sm">
                 {formatPrice(publication.value, publication.currency)}
               </div>
             )}
+            
+            {/* Premium Badge */}
+            {publication.premium && (
+              <div className="absolute top-2 right-2 bg-gradient-to-r from-yellow-400 to-orange-500 text-white text-xs font-bold px-2 py-1 rounded-full shadow-md">
+                ⭐ Premium
+              </div>
+            )}
+            
+            {/* Featured Badge */}
+            {publication.featured && !publication.premium && (
+              <div className="absolute top-2 right-2 bg-blue-500 text-white text-xs font-bold px-2 py-1 rounded-full shadow-md">
+                🚀 Destacado
+              </div>
+            )}
+
+            {/* Views Badge - Solo en grid mode */}
+            {viewMode === 'grid' && (
+              <div className="absolute bottom-2 left-2 bg-black/60 text-white text-xs px-2 py-1 rounded-full flex items-center gap-1">
+                <EyeIcon className="w-3 h-3" />
+                {publication.views || 0}
+              </div>
+            )}
+
+            {/* Favorite Button - MOVIDO A LA DERECHA en grid mode */}
+            {viewMode === 'grid' && (
+              <button
+                onClick={handleFavoriteToggle}
+                className="absolute bottom-2 right-2 p-1.5 bg-white/90 hover:bg-white rounded-full shadow-md transition-all hover:scale-110 z-10"
+                aria-label="Agregar a favoritos"
+              >
+                {isFavorite ? (
+                  <HeartSolidIcon className="w-4 h-4 text-red-500" />
+                ) : (
+                  <HeartIcon className="w-4 h-4 text-gray-600" />
+                )}
+              </button>
+            )}
           </div>
 
-          {/* Footer Section */}
-          <div className="space-y-2">
-            {/* Top Row: Location, Time, Views (en list mode) */}
-            <div className="flex items-center justify-between text-xs text-gray-500 dark:text-gray-400">
-              <div className="flex items-center max-w-[60%]">
-                <MapPinIcon className="w-3 h-3 mr-1 flex-shrink-0" />
-                <span className="truncate">{formatLocation(publication.location)}</span>
-              </div>
-              
-              <div className="flex items-center gap-2">
-                <div className="flex items-center">
-                  <ClockIcon className="w-3 h-3 mr-1" />
-                  <span>{formatRelativeTime(publication.createdAt)}</span>
+          {/* Content - Altura flexible que se adapta */}
+          <div className={`content flex flex-col ${
+            viewMode === 'list' 
+              ? 'flex-1 p-3 justify-between' 
+              : 'p-4 flex-1 min-h-0'
+          }`}>
+            {/* Title */}
+            <div className="flex-1 min-h-0">
+              <h3 className={`title font-semibold text-gray-900 dark:text-white group-hover:text-blue-600 transition-colors ${
+                viewMode === 'list' 
+                  ? 'text-sm mb-1 line-clamp-1' 
+                  : 'text-base mb-2 line-clamp-2'
+              }`}>
+                {publication.title}
+              </h3>
+
+              {/* Description - ESPACIO OPTIMIZADO */}
+              <p className={`description text-gray-600 dark:text-gray-400 ${
+                viewMode === 'list' 
+                  ? 'text-xs line-clamp-1 mb-1' 
+                  : 'text-sm mb-2 line-clamp-2'
+              }`}>
+                {publication.description}
+              </p>
+            </div>
+
+            {/* Footer Section - Siempre al fondo */}
+            <div className="space-y-2 mt-auto">
+              {/* Top Row: Location, Time, Views (en list mode) */}
+              <div className="flex items-center justify-between text-xs text-gray-500 dark:text-gray-400">
+                <div className="flex items-center max-w-[60%]">
+                  <MapPinIcon className="w-3 h-3 mr-1 flex-shrink-0" />
+                  <span className="truncate">{formatLocation(publication.location)}</span>
                 </div>
                 
-                {viewMode === 'list' && (
+                <div className="flex items-center gap-2">
                   <div className="flex items-center">
-                    <EyeIcon className="w-3 h-3 mr-1" />
-                    <span>{publication.views || 0}</span>
+                    <ClockIcon className="w-3 h-3 mr-1" />
+                    <span>{formatExactDateTime(publication.createdAt)}</span>
                   </div>
-                )}
-              </div>
-            </div>
-
-            {/* Bottom Row: Category Badge and Action Buttons */}
-            <div className="flex items-center justify-between">
-              {/* Category Badge */}
-              <div className={`inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium ${categoryColor}`}>
-                <CategoryIcon className="w-3 h-3" />
-                <span className="capitalize">
-                  {publication.subcategorySlug || publication.categorySlug}
-                </span>
+                  
+                  {viewMode === 'list' && (
+                    <div className="flex items-center">
+                      <EyeIcon className="w-3 h-3 mr-1" />
+                      <span>{publication.views || 0}</span>
+                    </div>
+                  )}
+                </div>
               </div>
 
-              {/* Action Buttons */}
-              <div className="flex items-center gap-1">
-                {/* Favorite Button - Solo en list mode */}
-                {viewMode === 'list' && (
+              {/* Bottom Row: Category Badge and Action Buttons */}
+              <div className="flex items-center justify-between">
+                {/* Category Badge */}
+                <div className={`inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium ${categoryColor}`}>
+                  <CategoryIcon className="w-3 h-3" />
+                  <span className="capitalize">
+                    {publication.subcategorySlug || publication.categorySlug}
+                  </span>
+                </div>
+
+                {/* Action Buttons */}
+                <div className="flex items-center gap-1">
+                  {/* Favorite Button - EN LA DERECHA en list mode */}
+                  {viewMode === 'list' && (
+                    <button
+                      onClick={handleFavoriteToggle}
+                      className="p-1.5 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-full transition-colors"
+                      aria-label="Agregar a favoritos"
+                    >
+                      {isFavorite ? (
+                        <HeartSolidIcon className="w-4 h-4 text-red-500" />
+                      ) : (
+                        <HeartIcon className="w-4 h-4 text-gray-500" />
+                      )}
+                    </button>
+                  )}
+
+                  {/* Share Button */}
                   <button
-                    onClick={handleFavoriteToggle}
+                    onClick={handleShare}
                     className="p-1.5 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-full transition-colors"
-                    aria-label="Agregar a favoritos"
+                    aria-label="Compartir"
                   >
-                    {isFavorite ? (
-                      <HeartSolidIcon className="w-4 h-4 text-red-500" />
-                    ) : (
-                      <HeartIcon className="w-4 h-4 text-gray-500" />
-                    )}
+                    <ShareIcon className="w-4 h-4 text-gray-500" />
                   </button>
-                )}
 
-                {/* Share Button */}
-                <button
-                  onClick={handleShare}
-                  className="p-1.5 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-full transition-colors"
-                  aria-label="Compartir"
-                >
-                  <ShareIcon className="w-4 h-4 text-gray-500" />
-                </button>
-
-                {/* WhatsApp Button */}
-                {showWhatsApp && publication.whatsapp && (
-                  <button
-                    onClick={handleWhatsAppClick}
-                    className="flex items-center gap-1 bg-green-500 hover:bg-green-600 text-white text-xs font-medium px-2 py-1.5 rounded-full shadow-sm transition-all hover:scale-105"
-                    aria-label="Contactar por WhatsApp"
-                  >
-                    <WhatsAppIcon className="w-3 h-3" />
-                    {viewMode === 'grid' && <span className="hidden sm:inline">WhatsApp</span>}
-                  </button>
-                )}
+                  {/* WhatsApp Button */}
+                  {showWhatsApp && publication.whatsapp && (
+                    <button
+                      onClick={handleWhatsAppClick}
+                      className="flex items-center gap-1 bg-green-500 hover:bg-green-600 text-white text-xs font-medium px-2 py-1.5 rounded-full shadow-sm transition-all hover:scale-105"
+                      aria-label="Contactar por WhatsApp"
+                    >
+                      <WhatsAppIcon className="w-3 h-3" />
+                      {viewMode === 'grid' && <span className="hidden sm:inline">Contactar</span>}
+                    </button>
+                  )}
+                </div>
               </div>
             </div>
           </div>
-        </div>
-      </Link>
-    </motion.div>
+        </Link>
+      </motion.div>
+
+      {/* Toast notification for copied link */}
+      {showCopiedMessage && (
+        <motion.div
+          initial={{ opacity: 0, y: 50 }}
+          animate={{ opacity: 1, y: 0 }}
+          exit={{ opacity: 0, y: 50 }}
+          className="fixed bottom-4 right-4 bg-green-500 text-white px-4 py-2 rounded-lg shadow-lg z-50 flex items-center gap-2"
+        >
+          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+          </svg>
+          ¡Enlace copiado al portapapeles!
+        </motion.div>
+      )}
+    </>
   );
 }
