@@ -1,231 +1,227 @@
 'use client';
 
-import React, { useEffect, useState } from 'react';
+import React from 'react';
 import { motion } from 'framer-motion';
-import { StarIcon, TrophyIcon, FireIcon } from '@heroicons/react/24/solid';
-import confetti from 'canvas-confetti';
+import { TrophyIcon, FireIcon, StarIcon, GiftIcon } from '@heroicons/react/24/solid';
+
+interface Achievement {
+  id: string;
+  name: string;
+  description: string;
+  icon: string;
+  points: number;
+  unlocked: boolean;
+}
 
 interface PublishAchievementsProps {
-  achievements: string[];
-  totalPoints: number;
-  badges?: string[];
-  showConfetti?: boolean;
+  achievements: {
+    completed: string[];
+    points: number;
+    badges: string[];
+  };
+  quality: number;
+  onNewPublication?: () => void;
 }
 
 const PublishAchievements: React.FC<PublishAchievementsProps> = ({
-  achievements = [],
-  totalPoints = 0,
-  badges = [],
-  showConfetti = false
+  achievements,
+  quality,
+  onNewPublication
 }) => {
-  const [confettiPlayed, setConfettiPlayed] = useState(false);
-
-  useEffect(() => {
-    if (showConfetti && !confettiPlayed) {
-      setConfettiPlayed(true);
-      
-      // Trigger confetti animation
-      const duration = 4 * 1000;
-      const animationEnd = Date.now() + duration;
-      const defaults = { startVelocity: 30, spread: 360, ticks: 60, zIndex: 0 };
-
-      function randomInRange(min: number, max: number) {
-        return Math.random() * (max - min) + min;
-      }
-
-      const interval: any = setInterval(function() {
-        const timeLeft = animationEnd - Date.now();
-
-        if (timeLeft <= 0) {
-          return clearInterval(interval);
-        }
-
-        const particleCount = 50 * (timeLeft / duration);
-        
-        // since particles fall down, start a bit higher than random
-        confetti(Object.assign({}, defaults, { 
-          particleCount, 
-          origin: { x: randomInRange(0.1, 0.3), y: Math.random() - 0.2 } 
-        }));
-        
-        confetti(Object.assign({}, defaults, { 
-          particleCount, 
-          origin: { x: randomInRange(0.7, 0.9), y: Math.random() - 0.2 } 
-        }));
-      }, 250);
-      
-      return () => clearInterval(interval);
+  const availableAchievements: Achievement[] = [
+    {
+      id: 'category',
+      name: 'Clasificador Experto',
+      description: 'Seleccionaste la categoría perfecta',
+      icon: '🎯',
+      points: 10,
+      unlocked: achievements.completed.includes('category')
+    },
+    {
+      id: 'details',
+      name: 'Narrador Maestro',
+      description: 'Escribiste una descripción detallada',
+      icon: '📝',
+      points: 15,
+      unlocked: achievements.completed.includes('details')
+    },
+    {
+      id: 'location',
+      name: 'Explorador Local',
+      description: 'Añadiste ubicación específica',
+      icon: '📍',
+      points: 10,
+      unlocked: achievements.completed.includes('location')
+    },
+    {
+      id: 'images',
+      name: 'Fotógrafo Pro',
+      description: 'Subiste imágenes de calidad',
+      icon: '📸',
+      points: 20,
+      unlocked: achievements.completed.includes('images')
+    },
+    {
+      id: 'contact',
+      name: 'Comunicador',
+      description: 'Proporcionaste información de contacto',
+      icon: '📞',
+      points: 10,
+      unlocked: achievements.completed.includes('contact')
+    },
+    {
+      id: 'published',
+      name: 'Publicador Exitoso',
+      description: '¡Publicaste tu primer anuncio!',
+      icon: '🚀',
+      points: 50,
+      unlocked: achievements.completed.includes('published')
     }
-  }, [showConfetti, confettiPlayed]);
+  ];
 
-  // Determine progress level
-  const getLevel = () => {
-    if (totalPoints >= 100) return 'Experto';
-    if (totalPoints >= 80) return 'Avanzado';
-    if (totalPoints >= 50) return 'Intermedio';
-    if (totalPoints >= 30) return 'Principiante';
-    return 'Novato';
+  const getBadgeInfo = (badge: string) => {
+    switch (badge) {
+      case 'bronce':
+        return { name: 'Bronce', icon: '🥉', color: 'text-amber-600' };
+      case 'plata':
+        return { name: 'Plata', icon: '🥈', color: 'text-gray-600' };
+      case 'oro':
+        return { name: 'Oro', icon: '🥇', color: 'text-yellow-600' };
+      case 'publicado':
+        return { name: 'Primera Publicación', icon: '🎉', color: 'text-green-600' };
+      default:
+        return { name: badge, icon: '🏆', color: 'text-blue-600' };
+    }
   };
 
-  // Badge information
-  const badgeInfo = {
-    bronce: { color: 'from-amber-300 to-amber-600', name: 'Publicador de Bronce' },
-    plata: { color: 'from-slate-300 to-slate-500', name: 'Publicador de Plata' },
-    oro: { color: 'from-yellow-300 to-yellow-600', name: 'Publicador de Oro' }
+  const getQualityLevel = (quality: number) => {
+    if (quality >= 80) return { level: 'Excelente', color: 'text-green-600', bg: 'bg-green-100' };
+    if (quality >= 60) return { level: 'Bueno', color: 'text-blue-600', bg: 'bg-blue-100' };
+    if (quality >= 40) return { level: 'Regular', color: 'text-yellow-600', bg: 'bg-yellow-100' };
+    return { level: 'Básico', color: 'text-gray-600', bg: 'bg-gray-100' };
   };
+
+  const qualityInfo = getQualityLevel(quality);
 
   return (
-    <div className="bg-white rounded-lg p-5 shadow-sm border border-gray-100">
-      <div className="flex items-center justify-between mb-4">
-        <h2 className="text-lg font-bold text-gray-800">Logros</h2>
-        <div className="bg-primary-50 text-primary-700 rounded-full px-3 py-1 text-sm font-medium">
-          {totalPoints} puntos
+    <div className="space-y-6">
+      {/* Resumen de puntos y calidad */}
+      <div className="bg-gradient-to-r from-purple-50 to-blue-50 rounded-lg p-6">
+        <div className="grid grid-cols-2 gap-4">
+          <div className="text-center">
+            <div className="text-3xl font-bold text-purple-600">{achievements.points}</div>
+            <div className="text-sm text-gray-600 flex items-center justify-center">
+              <FireIcon className="w-4 h-4 mr-1 text-orange-500" />
+              Puntos totales
+            </div>
+          </div>
+          <div className="text-center">
+            <div className={`text-3xl font-bold ${qualityInfo.color}`}>{quality}%</div>
+            <div className={`text-sm px-2 py-1 rounded-full ${qualityInfo.bg} ${qualityInfo.color}`}>
+              {qualityInfo.level}
+            </div>
+          </div>
         </div>
       </div>
 
-      {/* Progress bar */}
-      <div className="mb-6">
-        <div className="flex justify-between text-xs text-gray-600 mb-1">
-          <span>Nivel: {getLevel()}</span>
-          <span>{totalPoints}/100</span>
-        </div>
-        <div className="w-full bg-gray-200 rounded-full h-2.5">
-          <motion.div 
-            className="bg-gradient-to-r from-blue-500 to-primary-600 h-2.5 rounded-full"
-            initial={{ width: 0 }}
-            animate={{ width: `${Math.min(totalPoints, 100)}%` }}
-            transition={{ duration: 1, ease: 'easeOut' }}
-          />
-        </div>
-      </div>
-
-      {/* Achievements list */}
-      <div className="space-y-3 mb-6">
-        <AchievementItem 
-          title="Categoría seleccionada" 
-          description="Clasificaste correctamente tu anuncio"
-          completed={achievements.includes('category')}
-          points={10}
-        />
-        <AchievementItem 
-          title="Detalles completos" 
-          description="Añadiste un título y descripción detallados"
-          completed={achievements.includes('details')}
-          points={15}
-        />
-        <AchievementItem 
-          title="Ubicación exacta" 
-          description="Especificaste dónde se encuentra"
-          completed={achievements.includes('location')}
-          points={10}
-        />
-        <AchievementItem 
-          title="Imágenes de calidad" 
-          description="Subiste varias imágenes de tu producto"
-          completed={achievements.includes('images')}
-          points={20}
-        />
-        <AchievementItem 
-          title="Información de contacto" 
-          description="Proporcionaste datos para que te contacten"
-          completed={achievements.includes('contact')}
-          points={10}
-        />
-      </div>
-
-      {/* Badges */}
-      {badges.length > 0 && (
-        <div>
-          <h3 className="text-sm font-medium text-gray-700 mb-3">Insignias obtenidas</h3>
-          <div className="flex flex-wrap gap-3">
-            {badges.map(badge => 
-              badgeInfo[badge as keyof typeof badgeInfo] && (
+      {/* Insignias obtenidas */}
+      {achievements.badges.length > 0 && (
+        <div className="bg-white rounded-lg border border-gray-200 p-4">
+          <h3 className="font-semibold text-gray-900 mb-3 flex items-center">
+            <TrophyIcon className="w-5 h-5 mr-2 text-yellow-500" />
+            Insignias Desbloqueadas
+          </h3>
+          <div className="flex flex-wrap gap-2">
+            {achievements.badges.map((badge, index) => {
+              const badgeInfo = getBadgeInfo(badge);
+              return (
                 <motion.div
                   key={badge}
-                  initial={{ scale: 0.8, opacity: 0 }}
-                  animate={{ scale: 1, opacity: 1 }}
-                  transition={{ type: 'spring', stiffness: 300, damping: 20 }}
-                  className="flex flex-col items-center"
+                  initial={{ scale: 0, rotate: -180 }}
+                  animate={{ scale: 1, rotate: 0 }}
+                  transition={{ delay: index * 0.1, type: "spring" }}
+                  className={`flex items-center px-3 py-1 rounded-full bg-gray-50 border ${badgeInfo.color}`}
                 >
-                  <div className={`w-12 h-12 rounded-full bg-gradient-to-br ${badgeInfo[badge as keyof typeof badgeInfo].color} flex items-center justify-center shadow-md`}>
-                    <TrophyIcon className="h-6 w-6 text-white" />
-                  </div>
-                  <span className="text-xs mt-1 text-center text-gray-600">
-                    {badgeInfo[badge as keyof typeof badgeInfo].name}
-                  </span>
+                  <span className="mr-1">{badgeInfo.icon}</span>
+                  <span className="text-xs font-medium">{badgeInfo.name}</span>
                 </motion.div>
-              )
-            )}
+              );
+            })}
           </div>
         </div>
       )}
 
-      {/* Calls to action */}
-      {totalPoints < 100 && (
-        <div className="mt-4 bg-blue-50 p-3 rounded-md">
-          <div className="flex">
-            <div className="flex-shrink-0">
-              <FireIcon className="h-5 w-5 text-blue-600" />
-            </div>
-            <div className="ml-3">
-              <h3 className="text-sm font-medium text-blue-800">¡Mejora tu anuncio!</h3>
-              <div className="mt-2 text-sm text-blue-700">
-                <p>
-                  {totalPoints < 30 && "Añade más detalles para que tu anuncio destaque."}
-                  {totalPoints >= 30 && totalPoints < 50 && "¡Buen comienzo! Añade imágenes de calidad para atraer más interesados."}
-                  {totalPoints >= 50 && totalPoints < 80 && "¡Vas muy bien! Completa la información de contacto para facilitar la comunicación."}
-                  {totalPoints >= 80 && totalPoints < 100 && "¡Casi perfecto! Finaliza los últimos detalles para maximizar las posibilidades de venta."}
-                </p>
+      {/* Lista de logros */}
+      <div className="bg-white rounded-lg border border-gray-200 p-4">
+        <h3 className="font-semibold text-gray-900 mb-3 flex items-center">
+          <StarIcon className="w-5 h-5 mr-2 text-yellow-500" />
+          Logros Desbloqueados
+        </h3>
+        <div className="space-y-3">
+          {availableAchievements.map((achievement, index) => (
+            <motion.div
+              key={achievement.id}
+              initial={{ opacity: 0, x: -20 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ delay: index * 0.05 }}
+              className={`flex items-center p-3 rounded-lg transition-all ${
+                achievement.unlocked 
+                  ? 'bg-green-50 border border-green-200' 
+                  : 'bg-gray-50 border border-gray-200 opacity-60'
+              }`}
+            >
+              <div className="text-2xl mr-3">{achievement.icon}</div>
+              <div className="flex-1">
+                <div className={`font-medium ${achievement.unlocked ? 'text-green-900' : 'text-gray-600'}`}>
+                  {achievement.name}
+                </div>
+                <div className={`text-sm ${achievement.unlocked ? 'text-green-700' : 'text-gray-500'}`}>
+                  {achievement.description}
+                </div>
               </div>
-            </div>
-          </div>
+              <div className={`text-sm font-bold ${achievement.unlocked ? 'text-green-600' : 'text-gray-400'}`}>
+                +{achievement.points} pts
+              </div>
+              {achievement.unlocked && (
+                <motion.div
+                  initial={{ scale: 0 }}
+                  animate={{ scale: 1 }}
+                  className="ml-2"
+                >
+                  ✅
+                </motion.div>
+              )}
+            </motion.div>
+          ))}
         </div>
-      )}
+      </div>
 
-      {totalPoints >= 100 && (
-        <div className="mt-4 bg-green-50 p-3 rounded-md">
-          <div className="flex">
-            <div className="flex-shrink-0">
-              <StarIcon className="h-5 w-5 text-green-600" />
-            </div>
-            <div className="ml-3">
-              <h3 className="text-sm font-medium text-green-800">¡Anuncio perfecto!</h3>
-              <div className="mt-2 text-sm text-green-700">
-                <p>Has creado un anuncio con toda la información necesaria. ¡Maximizarás tus posibilidades de éxito!</p>
-              </div>
-            </div>
-          </div>
-        </div>
+      {/* Próximos objetivos */}
+      <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+        <h3 className="font-semibold text-blue-900 mb-2 flex items-center">
+          <GiftIcon className="w-5 h-5 mr-2 text-blue-600" />
+          Próximos Objetivos
+        </h3>
+        <ul className="space-y-1 text-sm text-blue-800">
+          <li>🎯 Publica 5 anuncios para desbloquear "Vendedor Activo" (+100 pts)</li>
+          <li>📈 Recibe 10 vistas para desbloquear "Popular" (+50 pts)</li>
+          <li>💬 Responde 3 mensajes para desbloquear "Comunicativo" (+30 pts)</li>
+        </ul>
+      </div>
+
+      {/* Botón para nueva publicación */}
+      {onNewPublication && (
+        <motion.button
+          whileHover={{ scale: 1.02 }}
+          whileTap={{ scale: 0.98 }}
+          onClick={onNewPublication}
+          className="w-full bg-gradient-to-r from-purple-600 to-blue-600 text-white px-6 py-3 rounded-lg hover:from-purple-700 hover:to-blue-700 transition-all duration-300 font-medium"
+        >
+          🎯 Publicar Otro Anuncio (+Más Puntos)
+        </motion.button>
       )}
     </div>
   );
 };
-
-// Component for individual achievement items
-const AchievementItem = ({ title, description, completed, points }: { 
-  title: string; 
-  description: string;
-  completed: boolean;
-  points: number;
-}) => (
-  <div className={`flex items-center justify-between p-2 rounded-lg transition-colors ${completed ? 'bg-green-50' : 'bg-gray-50'}`}>
-    <div className="flex items-start">
-      <div className={`flex-shrink-0 w-6 h-6 rounded-full flex items-center justify-center mr-3 ${completed ? 'bg-green-500' : 'bg-gray-300'}`}>
-        {completed ? (
-          <svg width="14" height="14" viewBox="0 0 14 14" fill="none" xmlns="http://www.w3.org/2000/svg" className="text-white">
-            <path d="M5.25 9.55L2.45 6.75L1.4 7.8L5.25 11.65L12.25 4.65L11.2 3.6L5.25 9.55Z" fill="currentColor"/>
-          </svg>
-        ) : null}
-      </div>
-      <div>
-        <p className={`text-sm font-medium ${completed ? 'text-gray-900' : 'text-gray-500'}`}>{title}</p>
-        <p className={`text-xs ${completed ? 'text-gray-600' : 'text-gray-400'}`}>{description}</p>
-      </div>
-    </div>
-    <div className={`ml-4 text-sm font-medium ${completed ? 'text-green-600' : 'text-gray-400'}`}>
-      +{points}
-    </div>
-  </div>
-);
 
 export default PublishAchievements; 
