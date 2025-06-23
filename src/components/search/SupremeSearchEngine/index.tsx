@@ -798,24 +798,24 @@ export default function SupremeSearchEngine({
                       </span>
                     </div>
                     <div className="flex flex-wrap gap-2">
-                      {[
-                        { icon: '📍', label: 'Ubicación', active: false, id: 'location' },
-                        { icon: '💰', label: 'Precio', active: false, id: 'price' },
-                        { icon: '⭐', label: 'Valoración', active: false, id: 'rating' },
-                        { icon: '🕒', label: 'Más recientes', active: true, id: 'recent' }
-                      ].map((filter) => (
-                        <button
-                          key={filter.id}
-                          className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium transition-all ${
-                            filter.active 
-                              ? 'bg-blue-100 text-blue-700 border border-blue-200' 
-                              : 'bg-slate-100 text-slate-600 hover:bg-slate-200 dark:bg-slate-700 dark:text-slate-300 dark:hover:bg-slate-600'
-                          }`}
-                        >
-                          <span>{filter.icon}</span>
-                          {filter.label}
-                        </button>
-                      ))}
+                                      {[
+                  { icon: '📍', label: 'Ubicación', active: false, id: 'location' },
+                  { icon: '💰', label: 'Precio', active: false, id: 'price' },
+                  { icon: '⭐', label: 'Valoración', active: false, id: 'rating' },
+                  { icon: '🕒', label: 'Más recientes', active: true, id: 'recent' }
+                ].map((filter) => (
+                  <button
+                    key={`quick-filter-${filter.id}`}
+                    className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium transition-all ${
+                      filter.active 
+                        ? 'bg-blue-100 text-blue-700 border border-blue-200' 
+                        : 'bg-slate-100 text-slate-600 hover:bg-slate-200 dark:bg-slate-700 dark:text-slate-300 dark:hover:bg-slate-600'
+                    }`}
+                  >
+                    <span>{filter.icon}</span>
+                    {filter.label}
+                  </button>
+                ))}
                     </div>
                   </div>
                 )}
@@ -831,24 +831,39 @@ export default function SupremeSearchEngine({
                       </span>
                     </div>
                     <div className="space-y-2">
-                      {[
-                        { text: 'Casa en venta en Inmuebles', id: 'recent-casa-venta' },
-                        { text: 'Moto en Vehículos', id: 'recent-moto-vehiculos' }, 
-                        { text: 'local', id: 'recent-local' },
-                        { text: 'Trabajo en marketing', id: 'recent-trabajo-marketing' },
-                        { text: 'Laptop gaming', id: 'recent-laptop-gaming' }
-                      ].map((recent) => (
-                        <button
-                          key={recent.id}
-                          onClick={() => handleSuggestionSelect({ id: recent.id, text: recent.text, type: 'recent' })}
-                          className="w-full text-left p-2 hover:bg-slate-50 dark:hover:bg-slate-700 rounded-lg transition-colors flex items-center gap-2"
-                        >
-                          <ClockIcon className="h-3 w-3 text-slate-400 flex-shrink-0" />
-                          <span className="text-sm text-slate-700 dark:text-slate-300 truncate">
-                            {recent.text}
-                          </span>
-                        </button>
-                      ))}
+                      {searchState.recentSearches.length > 0 ? (
+                        searchState.recentSearches.slice(0, 5).map((recent) => (
+                          <button
+                            key={`recent-search-${recent.id}`}
+                            onClick={() => handleSuggestionSelect(recent)}
+                            className="w-full text-left p-2 hover:bg-slate-50 dark:hover:bg-slate-700 rounded-lg transition-colors flex items-center gap-2"
+                          >
+                            <ClockIcon className="h-3 w-3 text-slate-400 flex-shrink-0" />
+                            <span className="text-sm text-slate-700 dark:text-slate-300 truncate">
+                              {recent.text}
+                            </span>
+                          </button>
+                        ))
+                      ) : (
+                        [
+                          { text: 'Casa en venta en Inmuebles', id: 'recent-casa-venta' },
+                          { text: 'Moto en Vehículos', id: 'recent-moto-vehiculos' }, 
+                          { text: 'local', id: 'recent-local' },
+                          { text: 'Trabajo en marketing', id: 'recent-trabajo-marketing' },
+                          { text: 'Laptop gaming', id: 'recent-laptop-gaming' }
+                        ].map((recent) => (
+                          <button
+                            key={`fallback-recent-${recent.id}`}
+                            onClick={() => handleSuggestionSelect({ id: recent.id, text: recent.text, type: 'recent' })}
+                            className="w-full text-left p-2 hover:bg-slate-50 dark:hover:bg-slate-700 rounded-lg transition-colors flex items-center gap-2"
+                          >
+                            <ClockIcon className="h-3 w-3 text-slate-400 flex-shrink-0" />
+                            <span className="text-sm text-slate-700 dark:text-slate-300 truncate">
+                              {recent.text}
+                            </span>
+                          </button>
+                        ))
+                      )}
                     </div>
                   </div>
 
