@@ -2,21 +2,31 @@
 
 import Image from 'next/image';
 import Link from 'next/link';
+import { useState } from 'react';
+import { motion } from 'framer-motion';
+import { 
+  HeartIcon,
+  ShareIcon,
+  ClockIcon,
+  EyeIcon,
+  MapPinIcon,
+  BriefcaseIcon,
+  HomeIcon,
+  TruckIcon,
+  WrenchScrewdriverIcon,
+  ShoppingBagIcon,
+  CalendarIcon,
+  ChartBarIcon,
+  UserGroupIcon
+} from '@heroicons/react/24/outline';
+import { HeartIcon as HeartSolidIcon } from '@heroicons/react/24/solid';
 import { WhatsAppIcon } from '@/components/icons';
 import { useMemo } from 'react';
 import { generateSeoUrl } from '@/utils/url';
 import { getDefaultImageByCategory } from '@/utils/image-helpers';
-import { 
-  JobsIcon, 
-  RealEstateIcon, 
-  VehicleIcon, 
-  ServicesIcon, 
-  ProductsIcon, 
-  EventsIcon, 
-} from '@/components/icons/categories';
 
-// Interface remains the same, it's well-defined.
 interface PublicationData {
+  id: string;
   title: string;
   description: string;
   categorySlug: string;
@@ -28,179 +38,371 @@ interface PublicationData {
   valueType: string;
   size: number;
   location: {
-    country: string;
+    district: string;
     province: string;
     city: string;
-    district: string | null;
-    address: string | null;
-  };
-  contact: {
-    phones: string[];
-    email: string | null;
-    name: string | null;
+    country: string;
   };
   images: string[];
-  status: string;
-  premium: boolean;
-  createdAt?: string;
+  whatsapp: string;
+  createdAt: string;
+  views: number;
+  featured?: boolean;
+  premium?: boolean;
 }
 
 interface PublicationCardProps {
   publication: PublicationData;
-  id?: string;
+  onPublicationClick?: (publication: PublicationData) => void;
+  className?: string;
+  showWhatsApp?: boolean;
+  variant?: 'default' | 'compact' | 'featured';
+  viewMode?: 'grid' | 'list';
 }
 
-export default function PublicationCard({ publication, id }: PublicationCardProps) {
-  // All your helper functions (formatPrice, formatDate, etc.) are great.
-  // I'm keeping them as they are, they are well implemented.
-  const publicationId = useMemo(() => id || publication.title.replace(/\s+/g, '-').toLowerCase() + '-' + Math.random().toString(36).substring(7), [id, publication.title]);
+// Mapping de iconos de categorías
+const categoryIcons: Record<string, React.ElementType> = {
+  empleos: BriefcaseIcon,
+  inmuebles: HomeIcon,
+  vehiculos: TruckIcon,
+  servicios: WrenchScrewdriverIcon,
+  productos: ShoppingBagIcon,
+  eventos: CalendarIcon,
+  negocios: ChartBarIcon,
+  comunidad: UserGroupIcon,
+}
 
-  const formatPrice = (price: number, type: string) => {
-    if (type === 'consultar') return 'A consultar';
-    return `${publication.currency} ${price.toLocaleString('es-PE')}`;
+// Colores de categorías
+const categoryColors: Record<string, string> = {
+  empleos: 'bg-blue-100 text-blue-800',
+  inmuebles: 'bg-green-100 text-green-800',
+  vehiculos: 'bg-orange-100 text-orange-800',
+  servicios: 'bg-purple-100 text-purple-800',
+  productos: 'bg-pink-100 text-pink-800',
+  eventos: 'bg-yellow-100 text-yellow-800',
+  negocios: 'bg-indigo-100 text-indigo-800',
+  comunidad: 'bg-teal-100 text-teal-800',
+}
+
+export default function PublicationCard({
+  publication,
+  onPublicationClick,
+  className = '',
+  showWhatsApp = true,
+  variant = 'default',
+  viewMode = 'grid'
+}: PublicationCardProps) {
+  const [isFavorite, setIsFavorite] = useState(false);
+
+  // Generate SEO-friendly URL
+  const seoUrl = useMemo(() => {
+    return generateSeoUrl(publication.id, publication.title);
+  }, [publication.id, publication.title]);
+
+  // Format price
+  const formatPrice = (value: number, currency: string) => {
+    if (!value || value === 0) return null;
+    return `${currency === 'USD' ? '$' : 'S/'} ${value.toLocaleString()}`;
   };
 
-  const formatDate = (dateString: string | undefined) => {
-    if (!dateString) return 'Publicado recientemente';
-    const date = new Date(dateString);
+  // Format location
+  const formatLocation = (location: PublicationData['location']) => {
+    return `${location.district}, ${location.province}`;
+  };
+
+  // Get main image
+  const mainImage = publication.images?.[0] || getDefaultImageByCategory(publication.categorySlug);
+
+  // Format relative time
+  const formatRelativeTime = (date: string) => {
     const now = new Date();
-    const diffTime = Math.abs(now.getTime() - date.getTime());
-    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-
-    if (diffDays <= 1) return 'Hoy';
-    if (diffDays <= 2) return 'Ayer';
-    if (diffDays <= 7) return `Hace ${diffDays} días`;
-    return date.toLocaleDateString('es-PE', { day: 'numeric', month: 'short' });
+    const created = new Date(date);
+    const diffInHours = Math.floor((now.getTime() - created.getTime()) / (1000 * 60 * 60));
+    
+    if (diffInHours < 1) return 'Hace menos de 1 hora';
+    if (diffInHours < 24) return `Hace ${diffInHours} hora${diffInHours > 1 ? 's' : ''}`;
+    
+    const diffInDays = Math.floor(diffInHours / 24);
+    if (diffInDays < 7) return `Hace ${diffInDays} día${diffInDays > 1 ? 's' : ''}`;
+    
+    const diffInWeeks = Math.floor(diffInDays / 7);
+    if (diffInWeeks < 4) return `Hace ${diffInWeeks} semana${diffInWeeks > 1 ? 's' : ''}`;
+    
+    const diffInMonths = Math.floor(diffInDays / 30);
+    return `Hace ${diffInMonths} mes${diffInMonths > 1 ? 'es' : ''}`;
   };
 
-  const formatWhatsAppMessage = () => {
-    // This function is well-structured, no changes needed.
-    let message = `Hola, estoy interesado en tu publicación "${publication.title}" que vi en Buscadis.`;
+  // Create personalized WhatsApp message
+  const createWhatsAppMessage = () => {
+    const baseUrl = typeof window !== 'undefined' ? window.location.origin : '';
+    const adUrl = `${baseUrl}${seoUrl}`;
+    
+    let message = '';
+    switch (publication.categorySlug) {
+      case 'empleos':
+        message = `Hola, estoy interesado en la oferta de trabajo "${publication.title}" que vi en BuscaDis: ${adUrl}`;
+        break;
+      case 'inmuebles':
+        message = `Hola, me interesa el inmueble "${publication.title}" que tienes publicado en BuscaDis: ${adUrl}`;
+        break;
+      case 'vehiculos':
+        message = `Hola, me interesa el vehículo "${publication.title}" que tienes en BuscaDis: ${adUrl}`;
+        break;
+      case 'servicios':
+        message = `Hola, necesito información sobre el servicio "${publication.title}" que ofreces en BuscaDis: ${adUrl}`;
+        break;
+      default:
+        message = `Hola, me interesa tu anuncio "${publication.title}" en BuscaDis: ${adUrl}`;
+    }
     return encodeURIComponent(message);
   };
+
+  // Handle favorite toggle
+  const handleFavoriteToggle = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsFavorite(!isFavorite);
+    // TODO: Aquí iría la lógica para guardar/quitar de favoritos
+  };
+
+  // Handle share
+  const handleShare = async (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
     
-  const hasImage = useMemo(() => publication.images && publication.images.length > 0, [publication.images]);
+    const shareData = {
+      title: publication.title,
+      text: publication.description,
+      url: `${typeof window !== 'undefined' ? window.location.origin : ''}${seoUrl}`
+    };
 
-  const effectiveCategory = publication.categorySlug;
-  const seoUrl = useMemo(() => generateSeoUrl(publicationId, publication.title, undefined, effectiveCategory), [publicationId, publication.title, effectiveCategory]);
-  const defaultImage = useMemo(() => getDefaultImageByCategory(effectiveCategory), [effectiveCategory]);
-
-  const formattedWhatsAppNumber = useMemo(() => {
-    const phones = publication.contact?.phones;
-    if (!phones || phones.length === 0) return '';
-    const firstNumber = phones[0].replace(/\D/g, '');
-    if (firstNumber.startsWith('51')) return firstNumber;
-    if (firstNumber.length === 9) return `51${firstNumber}`;
-    return firstNumber;
-  }, [publication.contact?.phones]);
-
-  const getCategoryIcon = (categorySlug: string) => {
-    // CAMBIO: Increased icon size for better visibility
-    const iconProps = { className: "w-4 h-4 text-gray-300" }; 
-    switch (categorySlug) {
-      case 'empleos': return <JobsIcon {...iconProps} />;
-      case 'inmuebles': return <RealEstateIcon {...iconProps} />;
-      case 'vehiculos': return <VehicleIcon {...iconProps} />;
-      case 'servicios': return <ServicesIcon {...iconProps} />;
-      case 'productos': return <ProductsIcon {...iconProps} />;
-      case 'eventos': return <EventsIcon {...iconProps} />;
-      default: return <ProductsIcon {...iconProps} />;
+    if (navigator.share) {
+      try {
+        await navigator.share(shareData);
+      } catch (err) {
+        console.error('Error sharing:', err);
+      }
+    } else {
+      // Fallback: copy to clipboard
+      await navigator.clipboard.writeText(shareData.url);
+      // TODO: Show toast notification
     }
   };
 
-  const getCategoryName = (categorySlug: string) => {
-    const categoryNames: { [key: string]: string } = {
-      'empleos': 'Empleo',
-      'inmuebles': 'Inmueble',
-      'vehiculos': 'Vehículo',
-      'servicios': 'Servicio',
-      'productos': 'Producto',
-      'eventos': 'Evento',
-    };
-    return categoryNames[categorySlug] || 'General';
+  // Handle WhatsApp click
+  const handleWhatsAppClick = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    if (publication.whatsapp) {
+      const cleanPhone = publication.whatsapp.replace(/[^0-9]/g, '');
+      const message = createWhatsAppMessage();
+      window.open(`https://wa.me/${cleanPhone}?text=${message}`, '_blank');
+    }
   };
 
-  // CAMBIO: Main logic for conditional styling.
-  // This is a common and clean pattern. We define the base styles and then conditionally add premium styles.
-  const cardBaseClasses = "relative flex flex-col rounded-xl overflow-hidden transition-all duration-300 group bg-gray-800 shadow-lg hover:shadow-cyan-500/20 hover:-translate-y-1";
-  const premiumWrapperClasses = publication.premium ? "rounded-xl bg-gradient-to-br from-amber-400 to-yellow-600 p-0.5 shadow-xl shadow-amber-500/20" : "";
+  const handleClick = () => {
+    if (onPublicationClick) {
+      onPublicationClick(publication);
+    }
+  };
+
+  // Get category info
+  const CategoryIcon = categoryIcons[publication.categorySlug] || ShoppingBagIcon;
+  const categoryColor = categoryColors[publication.categorySlug] || 'bg-gray-100 text-gray-800';
+
+  // Card classes based on view mode
+  const cardClasses = viewMode === 'list' 
+    ? `
+        publication-card list-mode group relative bg-white dark:bg-slate-800 rounded-lg shadow-md hover:shadow-lg 
+        transition-all duration-300 cursor-pointer border border-gray-200 dark:border-slate-700 
+        hover:border-gray-300 dark:hover:border-slate-600 flex flex-row h-32 ${className}
+        ${variant === 'featured' ? 'ring-2 ring-blue-500 ring-opacity-50' : ''}
+      `.trim()
+    : `
+        publication-card group relative bg-white dark:bg-slate-800 rounded-lg shadow-md hover:shadow-lg 
+        transition-all duration-300 overflow-hidden cursor-pointer border border-gray-200 dark:border-slate-700 
+        hover:border-gray-300 dark:hover:border-slate-600 ${className}
+        ${variant === 'featured' ? 'ring-2 ring-blue-500 ring-opacity-50' : ''}
+      `.trim();
 
   return (
-    // CAMBIO: Wrapper div that applies the gradient border ONLY for premium cards.
-    // The inner div holds the actual content. This is a robust way to create gradient borders.
-    <div className={premiumWrapperClasses}>
-      <div className={cardBaseClasses}>
-        
-        <Link href={seoUrl} className="block">
-          <div className="relative h-48 w-full">
-            <Image
-              src={hasImage ? publication.images[0] : defaultImage}
-              alt={publication.title}
-              fill
-              className="object-cover transition-transform duration-500 group-hover:scale-105"
-              sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 33vw"
-              onError={(e) => { e.currentTarget.src = defaultImage; }}
-            />
-            {/* CAMBIO: Premium Badge. Clear, non-intrusive, and looks great. */}
-            {publication.premium && (
-              <div className="absolute top-2 left-2 bg-gradient-to-r from-amber-400 to-yellow-500 text-gray-900 font-bold px-3 py-1 rounded-full text-xs shadow-lg">
-                PREMIUM
+    <motion.div 
+      className={cardClasses} 
+      onClick={handleClick}
+      whileHover={{ y: -2 }}
+      transition={{ duration: 0.2 }}
+    >
+      <Link href={seoUrl} className={viewMode === 'list' ? 'flex flex-row w-full h-full' : 'block h-full'}>
+        {/* Image Container */}
+        <div className={`image-container relative overflow-hidden ${
+          viewMode === 'list' 
+            ? 'w-40 h-32 flex-shrink-0 rounded-l-lg' 
+            : 'h-48 rounded-t-lg'
+        }`}>
+          <Image
+            src={mainImage}
+            alt={publication.title}
+            fill
+            className="object-cover transition-transform duration-300 group-hover:scale-105"
+            sizes="(max-width: 768px) 50vw, (max-width: 1200px) 33vw, 25vw"
+            onError={(e) => {
+              const target = e.target as HTMLImageElement;
+              target.src = getDefaultImageByCategory(publication.categorySlug);
+            }}
+          />
+          
+          {/* Overlay Gradient */}
+          <div className="absolute inset-0 bg-gradient-to-t from-black/20 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
+          
+          {/* Premium Badge */}
+          {publication.premium && (
+            <div className="absolute top-2 left-2 bg-gradient-to-r from-yellow-400 to-orange-500 text-white text-xs font-bold px-2 py-1 rounded-full shadow-md">
+              ⭐ Premium
+            </div>
+          )}
+          
+          {/* Featured Badge */}
+          {publication.featured && (
+            <div className="absolute top-2 right-2 bg-blue-500 text-white text-xs font-bold px-2 py-1 rounded-full shadow-md">
+              🚀 Destacado
+            </div>
+          )}
+
+          {/* Views Badge - Solo en grid mode */}
+          {viewMode === 'grid' && (
+            <div className="absolute bottom-2 right-2 bg-black/60 text-white text-xs px-2 py-1 rounded-full flex items-center gap-1">
+              <EyeIcon className="w-3 h-3" />
+              {publication.views || 0}
+            </div>
+          )}
+
+          {/* Favorite Button - Solo en grid mode */}
+          {viewMode === 'grid' && (
+            <button
+              onClick={handleFavoriteToggle}
+              className="absolute top-2 left-2 p-1.5 bg-white/90 hover:bg-white rounded-full shadow-md transition-all hover:scale-110 z-10"
+              aria-label="Agregar a favoritos"
+            >
+              {isFavorite ? (
+                <HeartSolidIcon className="w-4 h-4 text-red-500" />
+              ) : (
+                <HeartIcon className="w-4 h-4 text-gray-600" />
+              )}
+            </button>
+          )}
+        </div>
+
+        {/* Content */}
+        <div className={`content flex flex-col ${
+          viewMode === 'list' 
+            ? 'flex-1 p-3 justify-between' 
+            : 'p-4 flex-1'
+        }`}>
+          {/* Title */}
+          <div className="flex-1">
+            <h3 className={`title font-semibold text-gray-900 dark:text-white group-hover:text-blue-600 transition-colors ${
+              viewMode === 'list' 
+                ? 'text-sm mb-1 line-clamp-1' 
+                : 'text-base mb-2 line-clamp-2'
+            }`}>
+              {publication.title}
+            </h3>
+
+            {/* Description - Solo en grid mode o versión compacta en list */}
+            <p className={`description text-gray-600 dark:text-gray-400 ${
+              viewMode === 'list' 
+                ? 'text-xs line-clamp-1 mb-2' 
+                : 'text-sm mb-3 line-clamp-2'
+            }`}>
+              {publication.description}
+            </p>
+
+            {/* Price */}
+            {formatPrice(publication.value, publication.currency) && (
+              <div className={`font-bold text-blue-600 dark:text-blue-400 ${
+                viewMode === 'list' ? 'text-sm mb-2' : 'text-lg mb-3'
+              }`}>
+                {formatPrice(publication.value, publication.currency)}
               </div>
             )}
-             <div className="absolute bottom-0 left-0 right-0 h-16 bg-gradient-to-t from-black/80 to-transparent"></div>
-
-             {/* CAMBIO: Title moved over the image for a more modern look */}
-             <div className="absolute bottom-0 left-0 p-4">
-                 <h3 className="font-bold text-white text-lg leading-tight drop-shadow-md">
-                    {publication.title}
-                 </h3>
-             </div>
           </div>
-        </Link>
 
-        {/* CAMBIO: The content area now has a consistent background, solving the contrast problem. */}
-        <div className="p-4 flex flex-col flex-grow justify-between bg-gray-800">
-            <div>
-                <div className="text-xl font-semibold text-cyan-400 mb-2">
-                    {formatPrice(publication.value, publication.valueType)}
+          {/* Footer Section */}
+          <div className="space-y-2">
+            {/* Top Row: Location, Time, Views (en list mode) */}
+            <div className="flex items-center justify-between text-xs text-gray-500 dark:text-gray-400">
+              <div className="flex items-center max-w-[60%]">
+                <MapPinIcon className="w-3 h-3 mr-1 flex-shrink-0" />
+                <span className="truncate">{formatLocation(publication.location)}</span>
+              </div>
+              
+              <div className="flex items-center gap-2">
+                <div className="flex items-center">
+                  <ClockIcon className="w-3 h-3 mr-1" />
+                  <span>{formatRelativeTime(publication.createdAt)}</span>
                 </div>
-                <div className="flex items-center text-sm text-gray-400 mb-4">
-                    <svg className="w-4 h-4 mr-1.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" /><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" /></svg>
-                    {publication.location.city}, {publication.location.province}
-                </div>
+                
+                {viewMode === 'list' && (
+                  <div className="flex items-center">
+                    <EyeIcon className="w-3 h-3 mr-1" />
+                    <span>{publication.views || 0}</span>
+                  </div>
+                )}
+              </div>
             </div>
-          
-                         {/* SOLUCIONANDO LOS PROBLEMAS DE RECORTE */}
-             <div className="flex items-center justify-between gap-1 mt-auto pt-4 border-t border-gray-700/50 min-h-[40px]">
-                 {/* Categoría - Solo icono en mobile, icono + texto en desktop */}
-                 <div className="flex items-center gap-1 bg-gray-700/50 px-2 py-1 rounded-full flex-shrink-0" title={getCategoryName(effectiveCategory)}>
-                     {getCategoryIcon(effectiveCategory)}
-                     {/* SOLUCIÓN: Solo mostrar texto en pantallas medianas y grandes */}
-                     <span className="hidden md:inline text-xs font-medium text-gray-300 whitespace-nowrap">
-                         {getCategoryName(effectiveCategory)}
-                     </span>
-                 </div>
 
-                 {/* Botón de contacto - Adaptativo según espacio disponible */}
-                 {formattedWhatsAppNumber ? (
-                     <a
-                         href={`https://wa.me/${formattedWhatsAppNumber}?text=${formatWhatsAppMessage()}`}
-                         target="_blank"
-                         rel="noopener noreferrer"
-                         className="flex items-center justify-center gap-1 bg-green-500 hover:bg-green-600 text-white font-medium px-2 py-1 rounded-full transition-colors text-xs flex-shrink-0"
-                         onClick={(e) => e.stopPropagation()}
-                     >
-                         <WhatsAppIcon className="w-3 h-3" />
-                         {/* SOLUCIÓN: Texto solo en pantallas grandes, emoji en móviles */}
-                         <span className="hidden lg:inline whitespace-nowrap">Contactar</span>
-                         <span className="lg:hidden">💬</span>
-                     </a>
-                 ) : (
-                     <span className="text-gray-500 text-xs flex-shrink-0">Sin contacto</span>
-                 )}
-             </div>
+            {/* Bottom Row: Category Badge and Action Buttons */}
+            <div className="flex items-center justify-between">
+              {/* Category Badge */}
+              <div className={`inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium ${categoryColor}`}>
+                <CategoryIcon className="w-3 h-3" />
+                <span className="capitalize">
+                  {publication.subcategorySlug || publication.categorySlug}
+                </span>
+              </div>
+
+              {/* Action Buttons */}
+              <div className="flex items-center gap-1">
+                {/* Favorite Button - Solo en list mode */}
+                {viewMode === 'list' && (
+                  <button
+                    onClick={handleFavoriteToggle}
+                    className="p-1.5 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-full transition-colors"
+                    aria-label="Agregar a favoritos"
+                  >
+                    {isFavorite ? (
+                      <HeartSolidIcon className="w-4 h-4 text-red-500" />
+                    ) : (
+                      <HeartIcon className="w-4 h-4 text-gray-500" />
+                    )}
+                  </button>
+                )}
+
+                {/* Share Button */}
+                <button
+                  onClick={handleShare}
+                  className="p-1.5 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-full transition-colors"
+                  aria-label="Compartir"
+                >
+                  <ShareIcon className="w-4 h-4 text-gray-500" />
+                </button>
+
+                {/* WhatsApp Button */}
+                {showWhatsApp && publication.whatsapp && (
+                  <button
+                    onClick={handleWhatsAppClick}
+                    className="flex items-center gap-1 bg-green-500 hover:bg-green-600 text-white text-xs font-medium px-2 py-1.5 rounded-full shadow-sm transition-all hover:scale-105"
+                    aria-label="Contactar por WhatsApp"
+                  >
+                    <WhatsAppIcon className="w-3 h-3" />
+                    {viewMode === 'grid' && <span className="hidden sm:inline">WhatsApp</span>}
+                  </button>
+                )}
+              </div>
+            </div>
+          </div>
         </div>
-      </div>
-    </div>
+      </Link>
+    </motion.div>
   );
 }

@@ -277,8 +277,44 @@
   .publications-list {
     display: flex;
     flex-direction: column;
-    gap: 12px;
+    gap: 16px;
     width: 100%;
+  }
+
+  .publication-card.list-mode {
+    display: flex !important;
+    flex-direction: row !important;
+    height: 140px !important;
+    min-height: 140px !important;
+    max-height: 140px !important;
+    overflow: hidden;
+  }
+
+  .publication-card.list-mode .image-container {
+    width: 200px !important;
+    height: 140px !important;
+    flex-shrink: 0;
+  }
+
+  .publication-card.list-mode .content {
+    flex: 1;
+    padding: 1rem;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    overflow: hidden;
+  }
+
+  .publication-card.list-mode .title {
+    font-size: 1rem;
+    margin-bottom: 0.5rem;
+    line-height: 1.3;
+  }
+
+  .publication-card.list-mode .description {
+    font-size: 0.875rem;
+    margin-bottom: 0.5rem;
+    line-height: 1.4;
   }
 
   .whatsapp-button {

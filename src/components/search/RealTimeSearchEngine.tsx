@@ -4,6 +4,7 @@ import React, { useState, useEffect, useRef, useCallback } from 'react'
 import { useRouter } from 'next/navigation'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useSearch } from '@/contexts/SearchContext'
+import CompactCategorySelector from './CompactCategorySelector'
 import { 
   MagnifyingGlassIcon,
   MicrophoneIcon,
@@ -42,6 +43,10 @@ interface RealTimeSearchEngineProps {
   placeholder?: string;
   showFilters?: boolean;
   variant?: 'header' | 'page' | 'compact';
+  selectedCategory?: string;
+  selectedSubcategory?: string;
+  onCategoryChange?: (category: string) => void;
+  onSubcategoryChange?: (subcategory: string) => void;
 }
 
 export default function RealTimeSearchEngine({
@@ -49,7 +54,11 @@ export default function RealTimeSearchEngine({
   onResultSelect,
   placeholder = "¿Qué estás buscando?",
   showFilters = true,
-  variant = 'page'
+  variant = 'page',
+  selectedCategory = 'all',
+  selectedSubcategory = '',
+  onCategoryChange,
+  onSubcategoryChange
 }: RealTimeSearchEngineProps) {
   const router = useRouter()
   const { searchState, updateSearch, addRecentSearch, trackSearch } = useSearch()
@@ -60,7 +69,6 @@ export default function RealTimeSearchEngine({
   const [quickResults, setQuickResults] = useState<SearchResult[]>([])
   const [isLoading, setIsLoading] = useState(false)
   const [showSuggestions, setShowSuggestions] = useState(false)
-  const [selectedCategory, setSelectedCategory] = useState('')
   
   const inputRef = useRef<HTMLInputElement>(null)
   const containerRef = useRef<HTMLDivElement>(null)
@@ -136,7 +144,7 @@ export default function RealTimeSearchEngine({
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value
     setInputValue(value)
-    updateSearch({ query: value })
+    // updateSearch({ query: value }) // Comentado temporalmente para evitar conflictos
     
     if (value.trim()) {
       setShowSuggestions(true)
@@ -150,7 +158,7 @@ export default function RealTimeSearchEngine({
 
   const handleSuggestionSelect = (suggestion: Suggestion) => {
     setInputValue(suggestion.text)
-    updateSearch({ query: suggestion.text })
+    // updateSearch({ query: suggestion.text }) // Comentado temporalmente para evitar conflictos
     addRecentSearch(suggestion.text, selectedCategory)
     setShowSuggestions(false)
     
@@ -205,10 +213,10 @@ export default function RealTimeSearchEngine({
 
   const clearInput = () => {
     setInputValue('')
-    updateSearch({ query: '' })
     setSuggestions([])
     setQuickResults([])
     inputRef.current?.focus()
+    // No llamar updateSearch aquí para evitar conflictos con filtros
   }
 
   const handleVoiceSearch = () => {
@@ -224,15 +232,6 @@ export default function RealTimeSearchEngine({
     }
   }
 
-  const categories = [
-    { id: '', name: 'Todas las categorías', icon: '🔍' },
-    { id: 'inmuebles', name: 'Inmuebles', icon: '🏠' },
-    { id: 'vehiculos', name: 'Vehículos', icon: '🚗' },
-    { id: 'empleos', name: 'Empleos', icon: '💼' },
-    { id: 'servicios', name: 'Servicios', icon: '🔧' },
-    { id: 'productos', name: 'Productos', icon: '📦' }
-  ]
-
   return (
     <div ref={containerRef} className="relative w-full max-w-4xl mx-auto">
       {/* Barra de búsqueda principal */}
@@ -242,20 +241,15 @@ export default function RealTimeSearchEngine({
         isInputFocused ? 'ring-2 ring-blue-500 border-blue-500 shadow-xl' : 'hover:border-gray-400 dark:hover:border-gray-500'
       }`}>
         
-        {/* Selector de categoría */}
-        {showFilters && variant !== 'compact' && (
-          <div className="flex-shrink-0 px-3">
-            <select
-              value={selectedCategory}
-              onChange={(e) => setSelectedCategory(e.target.value)}
-              className="text-sm bg-transparent border-none outline-none text-gray-600 dark:text-gray-300 cursor-pointer"
-            >
-              {categories.map(cat => (
-                <option key={cat.id} value={cat.id}>
-                  {cat.icon} {cat.name}
-                </option>
-              ))}
-            </select>
+        {/* Selector de categoría compacto */}
+        {showFilters && variant !== 'compact' && onCategoryChange && onSubcategoryChange && (
+          <div className="flex-shrink-0">
+            <CompactCategorySelector
+              selectedCategory={selectedCategory}
+              selectedSubcategory={selectedSubcategory}
+              onCategoryChange={onCategoryChange}
+              onSubcategoryChange={onSubcategoryChange}
+            />
             <div className="w-px h-6 bg-gray-300 dark:bg-gray-600 ml-3"></div>
           </div>
         )}

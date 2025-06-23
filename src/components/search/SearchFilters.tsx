@@ -1,558 +1,279 @@
 'use client'
 
-import React, { useState, useEffect, useRef, useCallback, useMemo } from 'react'
+import React, { useState, useCallback } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { FunnelIcon, XMarkIcon, TrashIcon } from '@heroicons/react/24/outline'
-import { useRouter, usePathname, useSearchParams } from 'next/navigation'
-import { CategoriesService } from '@/services/CategoriesService'
-import CategoryFilters from './CategoryFilters'
-import LoadingSpinner from '@/components/ui/LoadingSpinner'
-import { Button } from '@/components/ui/button'
-import FilterSection from '@/components/search/FilterSection'
+import { FunnelIcon, XMarkIcon, ChevronDownIcon } from '@heroicons/react/24/outline'
+import { Button } from '@/components/ui/Button'
 import { filtersByCategory } from '@/data/filterConfig'
-import { FilterValue, Filter, FilterType } from '@/types/filters'
-import type { Category } from '@/types/categories'
-
-// Enhanced filter styling constants
-const FILTER_PANEL_WIDTH = 'md:w-72 lg:w-80'
+import type { FilterOption } from '@/types/filters'
 
 interface SearchFiltersProps {
-  activeFilters?: FilterValue
-  onFiltersChange?: (filters: Record<string, unknown>) => void
-  activeCategory?: string
-  className?: string
-  compact?: boolean
-  filters?: Filter[]
-  onFilterChange?: (filters: Record<string, unknown>) => void
   selectedCategory?: string
   selectedSubcategory?: string
   selectedSubSubcategory?: string
+  onFilterChange?: (filters: Record<string, any>) => void
   onClearFilters?: () => void
-  initialCategory?: string
+  compact?: boolean
+  className?: string
 }
 
 export default function SearchFilters({
-  activeFilters = {},
-  // onFiltersChange, // Commented out as it's unused
-  activeCategory,
-  className = '',
-  compact = false,
-  filters = [],
-  onFilterChange,
   selectedCategory,
   selectedSubcategory,
   selectedSubSubcategory,
+  onFilterChange,
   onClearFilters,
-  initialCategory,
+  compact = false,
+  className = ''
 }: SearchFiltersProps) {
-  const router = useRouter()
-  const pathname = usePathname()
-  const searchParams = useSearchParams()
-  
-  // State for filter management
-  const [categories, setCategories] = useState<Category[]>([])
-  const [expanded, setExpanded] = useState<Record<string, boolean>>({})
-  const [filterCount, setFilterCount] = useState(0)
-  
-  // Mobile responsiveness
-  const [isMobile, setIsMobile] = useState(false)
-  
-  const [showMobileFilters, setShowMobileFilters] = useState(false)
-  // const [loadedCategories, setLoadedCategories] = useState<Array<{id: string, name: string}>>([])
-  const [appliedFilters, setAppliedFilters] = useState<FilterValue>(activeFilters || {})
-  const [isFilterApplied, setIsFilterApplied] = useState(false)
-  const [categoryFilters, setCategoryFilters] = useState<Filter[]>([])
-  const [currentCategory, setCurrentCategory] = useState(selectedCategory || initialCategory || '')
-  // Removed unused variables
-  // const [currentSubcategory, setCurrentSubcategory] = useState(selectedSubcategory || '')
-  // const [currentSubSubcategory, setCurrentSubSubcategory] = useState(selectedSubSubcategory || '')
-  // const isMounted = useRef(false)
+  const [showFilters, setShowFilters] = useState(false)
+  const [appliedFilters, setAppliedFilters] = useState<Record<string, any>>({})
+  const [expandedSections, setExpandedSections] = useState<Record<string, boolean>>({})
 
-  useEffect(() => {
-    // Load categories on component mount
-    const loadCategories = async () => {
-      try {
-        const response = await CategoriesService.getCategories()
-        setCategories(response)
-        // setLoadedCategories(response)
-      } catch (error) {
-        console.error('Failed to load categories:', error)
-      }
-    }
-    
-    loadCategories()
-    
-    // Check if we're on mobile
-    const checkMobile = () => {
-      setIsMobile(window.innerWidth < 768)
-    }
-    
-    checkMobile()
-    window.addEventListener('resize', checkMobile)
-    
-    return () => {
-      window.removeEventListener('resize', checkMobile)
-    }
-  }, [])
-
-  // Handle filter changes and update URL
-  const handleFilterChange = useCallback((filterKey: string, value: unknown) => {
-    setAppliedFilters((prev) => {
-      const newFilters = { ...prev, [filterKey]: value }
-      
-      // If the value is undefined, null, an empty array or an empty object, delete the property
-      if (
-        value === undefined || 
-        value === null || 
-        (Array.isArray(value) && value.length === 0) ||
-        (typeof value === 'object' && !Array.isArray(value) && Object.keys(value).length === 0)
-      ) {
-        delete newFilters[filterKey]
-      }
-      
-      // Notify parent component
-      if (onFilterChange) {
-        onFilterChange(newFilters)
-      }
-      
-      // Update URL with the new filters
-      updateQueryParams(newFilters)
-      
-      return newFilters
-    })
-    
-    setIsFilterApplied(true)
-  }, [onFilterChange, router])
-
-  // Update URL parameters without full page reload
-  const updateQueryParams = useCallback((newFilters: FilterValue) => {
-    // Create object with current parameters
-    const params = Object.fromEntries(searchParams.entries())
-    
-    // Update with the new filters
-    Object.keys(newFilters).forEach((key) => {
-      const value = newFilters[key]
-      
-      if (value === undefined || value === null) {
-        delete params[key]
-      } 
-      // Handle ranges
-      else if (typeof value === 'object' && 'min' in value && 'max' in value) {
-        params[key] = `${value.min}-${value.max}`
-      }
-      // Handle arrays
-      else if (Array.isArray(value)) {
-        params[key] = value.join(',')
-      }
-      // Simple values
-      else {
-        params[key] = String(value)
-      }
-    })
-    
-    // Build the new URL
-    const query = new URLSearchParams(params).toString()
-    const newUrl = window.location.pathname + (query ? `?${query}` : '')
-    
-    // Update URL without reloading the page
-    router.replace(newUrl, { scroll: false })
-  }, [searchParams, router])
-
-  // Handle category selection
-  const handleCategoryChange = (category: {id: string, name: string} | null) => {
-    if (category) {
-      setCurrentCategory(category.id)
-      
-      // Update URL with new category
-      if (!searchParams) return
-      
-      const params = new URLSearchParams(searchParams.toString())
-      params.set('category', category.id)
-      
-      // Clear filters when changing category
-      Object.keys(appliedFilters).forEach(key => {
-        params.delete(key)
-      })
-      
-      setAppliedFilters({})
-      setFilterCount(0)
-      
-      const newUrl = `${pathname}?${params.toString()}`
-      router.push(newUrl, { scroll: false })
-      
-      // Close filter panel on mobile after category selection
-      if (isMobile) {
-        setShowMobileFilters(false)
-      }
-    }
-  }
-
-  // Clear all filters
-  const handleClearFilters = useCallback(() => {
-    setAppliedFilters({})
-    setIsFilterApplied(false)
-    
-    if (onClearFilters) {
-      onClearFilters()
-    }
-    
-    // Remove filter parameters from URL keeping pagination and search
-    const baseParams: Record<string, string> = {}
-    ['query', 'category', 'subcategory', 'subsubcategory', 'page'].forEach((key) => {
-      const value = searchParams.get(key)
-      if (value) baseParams[key] = value
-    })
-    
-    const query = new URLSearchParams(baseParams).toString()
-    router.replace(window.location.pathname + (query ? `?${query}` : ''), { scroll: false })
-  }, [onClearFilters, router, searchParams])
+  // Get filters for the current category
+  const categoryConfig = selectedCategory ? filtersByCategory[selectedCategory] : null
+  const availableFilters = categoryConfig?.sections || []
 
   // Count applied filters
   const appliedFilterCount = Object.keys(appliedFilters).length
 
-  // Combine general filters with category-specific filters
-  const allFilters = useMemo(() => {
-    return [...filters, ...categoryFilters]
-  }, [filters, categoryFilters])
-
-  // Actualizar filtros basados en categoría seleccionada
-  useEffect(() => {
-    if (!selectedCategory && !initialCategory) return
+  const handleFilterChange = useCallback((filterId: string, value: any) => {
+    const newFilters = { ...appliedFilters }
     
-    const category = selectedCategory || initialCategory || ''
-    setCurrentCategory(category)
-
-    // Obtener filtros específicos para la categoría
-    const getFiltersForCategory = async () => {
-      try {
-        // Aquí implementar el servicio real para obtener filtros de categoría
-        const categorySpecificFilters = getCategoryFilters(category)
-        setCategoryFilters(categorySpecificFilters)
-      } catch (error) {
-        console.error('Error loading category filters:', error)
-        setCategoryFilters([])
-      }
+    if (value === null || value === undefined || value === '' || 
+        (Array.isArray(value) && value.length === 0)) {
+      delete newFilters[filterId]
+    } else {
+      newFilters[filterId] = value
     }
     
-    getFiltersForCategory()
-  }, [selectedCategory, initialCategory])
+    setAppliedFilters(newFilters)
+    if (onFilterChange) {
+      onFilterChange(newFilters)
+    }
+  }, [appliedFilters, onFilterChange])
+
+  const clearAllFilters = useCallback(() => {
+    setAppliedFilters({})
+    if (onClearFilters) {
+      onClearFilters()
+    }
+    if (onFilterChange) {
+      onFilterChange({})
+    }
+  }, [onClearFilters, onFilterChange])
+
+  const toggleSection = (sectionTitle: string) => {
+    setExpandedSections(prev => ({
+      ...prev,
+      [sectionTitle]: !prev[sectionTitle]
+    }))
+  }
+
+  const renderFilterControl = (filter: FilterOption) => {
+    const value = appliedFilters[filter.id]
+
+    switch (filter.type) {
+      case 'select':
+        return (
+          <select
+            value={value || ''}
+            onChange={(e) => handleFilterChange(filter.id, e.target.value || null)}
+            className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+          >
+            <option value="">Seleccionar...</option>
+            {filter.options?.map((option) => (
+              <option key={option.value} value={option.value}>
+                {option.label}
+              </option>
+            ))}
+          </select>
+        )
+
+      case 'multiselect':
+        const selectedValues = Array.isArray(value) ? value : []
+        return (
+          <div className="space-y-2">
+            {filter.options?.map((option) => (
+              <label key={option.value} className="flex items-center space-x-2 text-sm">
+                <input
+                  type="checkbox"
+                  checked={selectedValues.includes(option.value)}
+                  onChange={(e) => {
+                    const newValues = e.target.checked
+                      ? [...selectedValues, option.value]
+                      : selectedValues.filter(v => v !== option.value)
+                    handleFilterChange(filter.id, newValues.length > 0 ? newValues : null)
+                  }}
+                  className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                />
+                <span className="text-gray-700 dark:text-gray-300">{option.label}</span>
+              </label>
+            ))}
+          </div>
+        )
+
+      case 'range':
+        const rangeValue = value || { min: filter.min || 0, max: filter.max || 100 }
+        return (
+          <div className="space-y-3">
+            <div className="flex items-center space-x-2">
+              <input
+                type="number"
+                placeholder="Mín"
+                value={rangeValue.min || ''}
+                onChange={(e) => handleFilterChange(filter.id, {
+                  ...rangeValue,
+                  min: e.target.value ? parseInt(e.target.value) : filter.min
+                })}
+                className="w-20 px-2 py-1 border border-gray-300 dark:border-gray-600 rounded text-sm"
+              />
+              <span className="text-gray-500">-</span>
+              <input
+                type="number"
+                placeholder="Máx"
+                value={rangeValue.max || ''}
+                onChange={(e) => handleFilterChange(filter.id, {
+                  ...rangeValue,
+                  max: e.target.value ? parseInt(e.target.value) : filter.max
+                })}
+                className="w-20 px-2 py-1 border border-gray-300 dark:border-gray-600 rounded text-sm"
+              />
+            </div>
+            {filter.format && (
+              <div className="text-xs text-gray-500">
+                {filter.format(rangeValue.min || 0)} - {filter.format(rangeValue.max || 100)}
+              </div>
+            )}
+          </div>
+        )
+
+      case 'toggle':
+        return (
+          <label className="flex items-center space-x-2">
+            <input
+              type="checkbox"
+              checked={!!value}
+              onChange={(e) => handleFilterChange(filter.id, e.target.checked || null)}
+              className="rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+            />
+            <span className="text-sm text-gray-700 dark:text-gray-300">Sí</span>
+          </label>
+        )
+
+      default:
+        return (
+          <input
+            type="text"
+            value={value || ''}
+            onChange={(e) => handleFilterChange(filter.id, e.target.value || null)}
+            className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+            placeholder={filter.label}
+          />
+        )
+    }
+  }
+
+  // Don't show if no category selected or no filters available
+  if (!selectedCategory || !categoryConfig || availableFilters.length === 0) {
+    return null
+  }
 
   return (
     <div className={`relative ${className}`}>
-      {/* Filter toggle button with counter */}
+      {/* Filter Button */}
       <Button
-        onClick={() => setShowMobileFilters(true)}
+        onClick={() => setShowFilters(!showFilters)}
         variant="outline"
-        className={`flex items-center gap-2 ${compact ? 'px-3 py-1 h-9' : 'px-4 py-2'}`}
-        aria-expanded={showMobileFilters}
-        aria-controls="filter-panel"
+        className={`flex items-center gap-2 ${compact ? 'px-3 py-1.5 text-sm' : 'px-4 py-2'}`}
       >
         <FunnelIcon className="h-4 w-4" />
         <span>Filtros</span>
         {appliedFilterCount > 0 && (
-          <span className="ml-1 px-2 py-0 text-xs bg-slate-200 text-slate-800 rounded-full">
+          <span className="bg-blue-500 text-white text-xs px-1.5 py-0.5 rounded-full">
             {appliedFilterCount}
           </span>
         )}
+        <ChevronDownIcon 
+          className={`h-4 w-4 transition-transform ${showFilters ? 'rotate-180' : ''}`} 
+        />
       </Button>
 
-      {/* Filter panel with animation */}
+      {/* Filters Panel */}
       <AnimatePresence>
-        {showMobileFilters && (
-          <>
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 0.5 }}
-              exit={{ opacity: 0 }}
-              className="fixed inset-0 bg-black/50 z-40 md:hidden"
-              onClick={() => setShowMobileFilters(false)}
-            />
-            <motion.div
-              initial={{ x: '100%' }}
-              animate={{ x: 0 }}
-              exit={{ x: '100%' }}
-              transition={{ type: 'spring', damping: 25, stiffness: 300 }}
-              className="fixed right-0 top-0 bottom-0 w-4/5 bg-slate-900 z-50 md:hidden overflow-y-auto"
-            >
-              <div className="p-4 space-y-4">
-                <div className="flex justify-between items-center border-b border-slate-700 pb-3">
-                  <h3 className="text-lg font-medium text-white">Filtros</h3>
-                  <button onClick={() => setShowMobileFilters(false)} className="text-slate-400">
-                    <XMarkIcon className="w-6 h-6" />
-                  </button>
-                </div>
-
-                <div className="space-y-4">
-                  {isFilterApplied && (
-                    <button
-                      onClick={handleClearFilters}
-                      className="text-sm text-slate-400 hover:text-white transition-colors flex items-center gap-2"
-                    >
-                      <XMarkIcon className="w-4 h-4" />
-                      <span>Limpiar todos los filtros</span>
-                    </button>
-                  )}
-
-                  {allFilters.length > 0 ? (
-                    <div className="space-y-4 px-1">
-                      {allFilters.map((filter) => (
-                        <FilterSection
-                          key={filter.id}
-                          filter={filter}
-                          value={appliedFilters[filter.id]}
-                          onChange={(value) => handleFilterChange(filter.id, value)}
-                        />
-                      ))}
-                    </div>
-                  ) : (
-                    <div className="text-center py-4 text-slate-500">
-                      {currentCategory ? (
-                        <p>No hay filtros disponibles para esta categoría</p>
-                      ) : (
-                        <p>Selecciona una categoría para ver los filtros disponibles</p>
-                      )}
-                    </div>
-                  )}
-                </div>
-
-                <div className="pt-3 border-t border-slate-700">
+        {showFilters && (
+          <motion.div
+            initial={{ opacity: 0, y: -10 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -10 }}
+            className="absolute top-full left-0 mt-1 w-80 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-600 rounded-lg shadow-lg z-50 p-4"
+          >
+            {/* Header */}
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="font-medium text-gray-900 dark:text-white">
+                {categoryConfig.title}
+              </h3>
+              <div className="flex items-center gap-2">
+                {appliedFilterCount > 0 && (
                   <button
-                    onClick={() => setShowMobileFilters(false)}
-                    className="w-full py-3 bg-blue-600 text-white rounded-lg font-medium"
+                    onClick={clearAllFilters}
+                    className="text-xs text-red-600 hover:text-red-700 dark:text-red-400"
                   >
-                    Aplicar filtros
+                    Limpiar todo
                   </button>
-                </div>
+                )}
+                <button
+                  onClick={() => setShowFilters(false)}
+                  className="p-1 hover:bg-gray-100 dark:hover:bg-gray-700 rounded"
+                >
+                  <XMarkIcon className="h-4 w-4" />
+                </button>
               </div>
-            </motion.div>
-          </>
+            </div>
+
+            {/* Filter Sections */}
+            <div className="space-y-4 max-h-96 overflow-y-auto">
+              {availableFilters.map((section) => (
+                <div key={section.title} className="border-b border-gray-200 dark:border-gray-600 pb-4">
+                  <button
+                    onClick={() => toggleSection(section.title)}
+                    className="flex items-center justify-between w-full text-left"
+                  >
+                    <h4 className="font-medium text-sm text-gray-800 dark:text-gray-200">
+                      {section.title}
+                    </h4>
+                    <ChevronDownIcon
+                      className={`h-4 w-4 transition-transform ${
+                        expandedSections[section.title] !== false ? 'rotate-180' : ''
+                      }`}
+                    />
+                  </button>
+
+                  <AnimatePresence>
+                    {expandedSections[section.title] !== false && (
+                      <motion.div
+                        initial={{ height: 0, opacity: 0 }}
+                        animate={{ height: 'auto', opacity: 1 }}
+                        exit={{ height: 0, opacity: 0 }}
+                        className="mt-3 space-y-3"
+                      >
+                        {section.filters.map((filter) => (
+                          <div key={filter.id} className="space-y-1">
+                            <label className="block text-xs font-medium text-gray-700 dark:text-gray-300">
+                              {filter.label}
+                            </label>
+                            {renderFilterControl(filter)}
+                          </div>
+                        ))}
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
+                </div>
+              ))}
+            </div>
+          </motion.div>
         )}
       </AnimatePresence>
     </div>
   )
-}
-
-// Helper function to get category-specific filters
-// This function should be replaced with an actual API call
-function getCategoryFilters(category: string): Filter[] {
-  // Filters for vehicles
-  if (category === 'vehiculos') {
-    return [
-      {
-        id: 'year',
-        label: 'Año',
-        type: FilterType.RANGE,
-        min: 1980,
-        max: new Date().getFullYear(),
-        step: 1,
-      },
-      {
-        id: 'price',
-        label: 'Precio',
-        type: FilterType.RANGE,
-        min: 0,
-        max: 100000,
-        step: 500,
-      },
-      {
-        id: 'mileage',
-        label: 'Kilometraje',
-        type: FilterType.RANGE,
-        min: 0,
-        max: 300000,
-        step: 1000,
-      },
-      {
-        id: 'fuel',
-        label: 'Combustible',
-        type: FilterType.SELECT,
-        options: [
-          { value: 'gasoline', label: 'Gasolina' },
-          { value: 'diesel', label: 'Diésel' },
-          { value: 'electric', label: 'Eléctrico' },
-          { value: 'hybrid', label: 'Híbrido' },
-          { value: 'lpg', label: 'GLP' },
-        ],
-      },
-      {
-        id: 'transmission',
-        label: 'Transmisión',
-        type: FilterType.SELECT,
-        options: [
-          { value: 'manual', label: 'Manual' },
-          { value: 'automatic', label: 'Automática' },
-        ],
-      },
-      {
-        id: 'features',
-        label: 'Características',
-        type: FilterType.MULTISELECT,
-        options: [
-          { value: 'air_conditioning', label: 'Aire acondicionado' },
-          { value: 'parking_sensors', label: 'Sensores de aparcamiento' },
-          { value: 'bluetooth', label: 'Bluetooth' },
-          { value: 'cruise_control', label: 'Control de crucero' },
-          { value: 'sunroof', label: 'Techo solar' },
-        ],
-      },
-      {
-        id: 'professional',
-        label: 'Vendedor profesional',
-        type: FilterType.TOGGLE,
-      },
-    ];
-  }
-  
-  // Filters for real estate
-  if (category === 'inmuebles') {
-    return [
-      {
-        id: 'price',
-        label: 'Precio',
-        type: FilterType.RANGE,
-        min: 0,
-        max: 1000000,
-        step: 1000,
-      },
-      {
-        id: 'size',
-        label: 'Superficie (m²)',
-        type: FilterType.RANGE,
-        min: 0,
-        max: 500,
-        step: 5,
-      },
-      {
-        id: 'rooms',
-        label: 'Habitaciones',
-        type: FilterType.SELECT,
-        options: [
-          { value: '1', label: '1 o más' },
-          { value: '2', label: '2 o más' },
-          { value: '3', label: '3 o más' },
-          { value: '4', label: '4 o más' },
-          { value: '5', label: '5 o más' },
-        ],
-      },
-      {
-        id: 'bathrooms',
-        label: 'Baños',
-        type: FilterType.SELECT,
-        options: [
-          { value: '1', label: '1 o más' },
-          { value: '2', label: '2 o más' },
-          { value: '3', label: '3 o más' },
-        ],
-      },
-      {
-        id: 'features',
-        label: 'Características',
-        type: FilterType.MULTISELECT,
-        options: [
-          { value: 'garage', label: 'Garaje' },
-          { value: 'terrace', label: 'Terraza' },
-          { value: 'pool', label: 'Piscina' },
-          { value: 'garden', label: 'Jardín' },
-          { value: 'elevator', label: 'Ascensor' },
-          { value: 'storage_room', label: 'Trastero' },
-          { value: 'air_conditioning', label: 'Aire acondicionado' },
-        ],
-      },
-      {
-        id: 'furnished',
-        label: 'Amueblado',
-        type: FilterType.TOGGLE,
-      },
-      {
-        id: 'professional',
-        label: 'Anunciante profesional',
-        type: FilterType.TOGGLE,
-      },
-    ];
-  }
-  
-  // Filters for jobs
-  if (category === 'empleos') {
-    return [
-      {
-        id: 'salary',
-        label: 'Salario anual',
-        type: FilterType.RANGE,
-        min: 10000,
-        max: 100000,
-        step: 1000,
-      },
-      {
-        id: 'contract_type',
-        label: 'Tipo de contrato',
-        type: FilterType.SELECT,
-        options: [
-          { value: 'full_time', label: 'Jornada completa' },
-          { value: 'part_time', label: 'Media jornada' },
-          { value: 'temporary', label: 'Temporal' },
-          { value: 'internship', label: 'Prácticas' },
-          { value: 'freelance', label: 'Autónomo/Freelance' },
-        ],
-      },
-      {
-        id: 'experience',
-        label: 'Experiencia',
-        type: FilterType.SELECT,
-        options: [
-          { value: 'no_experience', label: 'Sin experiencia' },
-          { value: '1-2', label: '1-2 años' },
-          { value: '3-5', label: '3-5 años' },
-          { value: '5-10', label: '5-10 años' },
-          { value: '10+', label: 'Más de 10 años' },
-        ],
-      },
-      {
-        id: 'education',
-        label: 'Formación',
-        type: FilterType.SELECT,
-        options: [
-          { value: 'none', label: 'No requerida' },
-          { value: 'high_school', label: 'Educación secundaria' },
-          { value: 'vocational', label: 'Formación profesional' },
-          { value: 'bachelor', label: 'Grado universitario' },
-          { value: 'master', label: 'Máster' },
-          { value: 'phd', label: 'Doctorado' },
-        ],
-      },
-      {
-        id: 'remote',
-        label: 'Trabajo remoto',
-        type: FilterType.TOGGLE,
-      },
-    ];
-  }
-  
-  // Generic filters for other categories
-  return [
-    {
-      id: 'price',
-      label: 'Precio',
-      type: FilterType.RANGE,
-      min: 0,
-      max: 10000,
-      step: 10,
-    },
-    {
-      id: 'condition',
-      label: 'Estado',
-      type: FilterType.SELECT,
-      options: [
-        { value: 'new', label: 'Nuevo' },
-        { value: 'like_new', label: 'Como nuevo' },
-        { value: 'good', label: 'En buen estado' },
-        { value: 'fair', label: 'Estado aceptable' },
-        { value: 'poor', label: 'Necesita reparación' },
-      ],
-    },
-    {
-      id: 'professional',
-      label: 'Vendedor profesional',
-      type: FilterType.TOGGLE,
-    },
-  ];
 } 
