@@ -186,20 +186,25 @@
     @apply bg-white dark:bg-slate-800 rounded-lg shadow-md hover:shadow-lg transition-all duration-300 overflow-hidden;
   }
 
-  /* Grid mode - altura uniforme */
+  /* Grid mode - Altura adaptativa y más compacta en mobile */
   .publication-card:not(.list-mode) {
-    height: 320px !important;
-    min-height: 320px !important;
-    max-height: 320px !important;
+    height: auto !important;
+    min-height: 240px !important;
+    max-height: none !important;
     display: flex;
     flex-direction: column;
   }
 
-  /* Grid mode - altura fija para cuadrícula */
-  .publication-card:not(.publication-card-list) {
-    height: 320px !important;
-    min-height: 320px !important;
-    max-height: 320px !important;
+  @media (min-width: 640px) {
+    .publication-card:not(.list-mode) {
+      min-height: 280px !important;
+    }
+  }
+
+  @media (min-width: 768px) {
+    .publication-card:not(.list-mode) {
+      min-height: 320px !important;
+    }
   }
 
   .publication-card > a {
@@ -215,24 +220,53 @@
     flex-direction: row;
   }
 
+  /* Imagen container responsive */
   .publication-card .image-container {
     position: relative;
-    height: 180px !important;
     width: 100%;
     overflow: hidden;
+    flex-shrink: 0;
+  }
+
+  /* Mobile: imágenes más pequeñas */
+  @media (max-width: 639px) {
+    .publication-card .image-container {
+      height: 120px !important;
+    }
+  }
+
+  /* Tablet y desktop: imágenes más grandes */
+  @media (min-width: 640px) {
+    .publication-card .image-container {
+      height: 160px !important;
+    }
+  }
+
+  @media (min-width: 768px) {
+    .publication-card .image-container {
+      height: 180px !important;
+    }
   }
 
   .publication-card .content {
     flex: 1;
-    padding: 0.75rem;
+    padding: 0.5rem;
     display: flex;
     flex-direction: column;
     justify-content: space-between;
+    min-height: 0;
   }
 
+  @media (min-width: 640px) {
+    .publication-card .content {
+      padding: 0.75rem;
+    }
+  }
+
+  /* Títulos responsive */
   .publication-card h3 {
-    font-size: 0.875rem;
-    line-height: 1.25rem;
+    font-size: 0.75rem;
+    line-height: 1.1;
     font-weight: 600;
     margin-bottom: 0.25rem;
     display: -webkit-box;
@@ -241,21 +275,43 @@
     overflow: hidden;
   }
 
+  @media (min-width: 640px) {
+    .publication-card h3 {
+      font-size: 0.875rem;
+      line-height: 1.25;
+    }
+  }
+
   .publication-card .description {
-    font-size: 0.75rem;
+    font-size: 0.65rem;
     margin-bottom: 0.25rem;
     display: -webkit-box;
-    -webkit-line-clamp: 2;
+    -webkit-line-clamp: 1;
     -webkit-box-orient: vertical;
     overflow: hidden;
+    color: rgb(107 114 128);
+  }
+
+  @media (min-width: 640px) {
+    .publication-card .description {
+      font-size: 0.75rem;
+      -webkit-line-clamp: 2;
+    }
   }
 
   .publication-card .footer {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    font-size: 0.7rem;
-    margin-top: 0.5rem;
+    font-size: 0.625rem;
+    margin-top: 0.25rem;
+  }
+
+  @media (min-width: 640px) {
+    .publication-card .footer {
+      font-size: 0.7rem;
+      margin-top: 0.5rem;
+    }
   }
 
   .publication-card .location {
@@ -268,151 +324,104 @@
   }
 
   .publication-card .date {
-    font-size: 0.7rem;
+    font-size: 0.625rem;
+    color: rgb(107 114 128);
   }
 
+  /* Grid responsive mejorado - más compacto en mobile */
   .publications-grid {
     display: grid;
-    grid-template-columns: repeat(2, 1fr);
-    gap: 12px;
+    gap: 8px;
     width: 100%;
+    padding: 0 4px;
   }
 
-  @media (min-width: 768px) {
+  /* Mobile: 2 columnas más ajustadas */
+  @media (max-width: 639px) {
     .publications-grid {
-      grid-template-columns: repeat(3, 1fr);
-      gap: 16px;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 6px;
+      padding: 0 2px;
     }
   }
 
+  /* Tablet: 3 columnas */
+  @media (min-width: 640px) and (max-width: 1023px) {
+    .publications-grid {
+      grid-template-columns: repeat(3, 1fr);
+      gap: 12px;
+      padding: 0 8px;
+    }
+  }
+
+  /* Desktop: 4 columnas */
   @media (min-width: 1024px) {
     .publications-grid {
       grid-template-columns: repeat(4, 1fr);
+      gap: 16px;
+      padding: 0 12px;
     }
   }
 
+  /* Lista mode - más compacto en mobile */
   .publications-list {
     display: flex;
     flex-direction: column;
-    gap: 8px;
+    gap: 6px;
     width: 100%;
+    padding: 0 4px;
+  }
+
+  @media (min-width: 640px) {
+    .publications-list {
+      gap: 8px;
+      padding: 0 8px;
+    }
   }
 
   .publication-card-list {
     display: flex !important;
     flex-direction: row !important;
-    height: 144px !important;
-    min-height: 144px !important;
-    max-height: 144px !important;
+    height: 120px !important;
+    min-height: 120px !important;
+    max-height: 120px !important;
     overflow: hidden;
   }
 
-  .publication-card-list .image-container {
-    width: 144px !important;
-    height: 144px !important;
-    flex-shrink: 0;
-  }
-
-  /* Desktop: imagen más grande para modo lista */
-  @media (min-width: 768px) {
+  @media (min-width: 640px) {
     .publication-card-list {
-      height: 180px !important;
-      min-height: 180px !important;
-      max-height: 180px !important;
-    }
-
-    .publication-card-list .image-container {
-      width: 240px !important;
-      height: 180px !important;
-    }
-  }
-
-  /* Modo grid - Altura fija y consistente */
-  .publication-card {
-    height: 280px !important;
-    min-height: 280px !important;
-    max-height: 280px !important;
-  }
-
-  .publication-card .image-container {
-    height: 160px !important;
-    min-height: 160px !important;
-    max-height: 160px !important;
-  }
-
-  @media (max-width: 640px) {
-    .publication-card {
-      height: 260px !important;
-      min-height: 260px !important;
-      max-height: 260px !important;
-    }
-
-    .publication-card .image-container {
       height: 140px !important;
       min-height: 140px !important;
       max-height: 140px !important;
     }
   }
 
-  @media (max-width: 480px) {
+  @media (min-width: 768px) {
     .publication-card-list {
-      height: 130px !important;
-      min-height: 130px !important;
-      max-height: 130px !important;
+      height: 160px !important;
+      min-height: 160px !important;
+      max-height: 160px !important;
     }
+  }
 
+  .publication-card-list .image-container {
+    width: 120px !important;
+    height: 120px !important;
+    flex-shrink: 0;
+  }
+
+  @media (min-width: 640px) {
     .publication-card-list .image-container {
-      width: 130px !important;
-      height: 130px !important;
-    }
-    
-    .publication-card {
-      height: 240px !important;
-      min-height: 240px !important;
-      max-height: 240px !important;
-    }
-
-    .publication-card .image-container {
-      height: 120px !important;
-      min-height: 120px !important;
-      max-height: 120px !important;
+      width: 140px !important;
+      height: 140px !important;
     }
   }
 
-  .publication-card-list .content {
-    flex: 1;
-    padding: 0;
-    display: flex;
-    flex-direction: column;
-    overflow: hidden;
-    min-height: 0;
-  }
-
-  .publication-card-list .title {
-    font-size: 0.875rem;
-    margin-bottom: 0.25rem;
-    line-height: 1.2;
-  }
-
-  .publication-card-list .description {
-    font-size: 0.75rem;
-    margin-bottom: 0.25rem;
-    line-height: 1.2;
-  }
-
-  .whatsapp-button {
-    position: absolute !important;
-    bottom: 0.75rem !important;
-    right: 0.75rem !important;
-    z-index: 20 !important;
-    display: flex !important;
-    align-items: center !important;
-    background-color: #25d366 !important;
-    color: white !important;
-    font-size: 0.75rem !important;
-    padding: 0.25rem 0.5rem !important;
-    border-radius: 9999px !important;
-    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.12), 0 1px 2px rgba(0, 0, 0, 0.24) !important;
+  @media (min-width: 768px) {
+    .publication-card-list .image-container {
+      width: 200px !important;
+      height: 160px !important;
+    }
   }
 
   /* === End Publication Card Redesign === */

@@ -395,25 +395,27 @@ function SearchPageContent() {
         {/* Search Results */}
         {hasSearched && (
           <div className="space-y-6">
-            {/* Search Stats and Controls */}
-            <div className="flex items-center justify-between">
-              <div>
-                <h2 className="text-2xl font-bold text-gray-900 dark:text-white">
+            {/* Search Stats and Controls - Layout responsive mejorado */}
+            <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
+              {/* Título y stats - Siempre en la parte superior */}
+              <div className="flex-shrink-0">
+                <h2 className="text-xl sm:text-2xl font-bold text-gray-900 dark:text-white">
                   {currentQuery ? `Resultados para "${currentQuery}"` : 'Todas las oportunidades'}
                 </h2>
-                <p className="text-gray-600 dark:text-gray-400">
+                <p className="text-sm sm:text-base text-gray-600 dark:text-gray-400">
                   {isLoading ? 'Buscando...' : `${totalCount.toLocaleString()} resultados encontrados`}
                 </p>
               </div>
 
-              <div className="flex items-center gap-4">
+              {/* Controles - En mobile van abajo, en desktop a la derecha */}
+              <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:gap-4 lg:flex-shrink-0">
                 {/* View Mode Toggles */}
-                <div className="flex items-center bg-gray-100 dark:bg-gray-700 rounded-lg p-1">
+                <div className="flex items-center bg-gray-100 dark:bg-gray-700 rounded-lg p-1 self-start sm:self-auto">
                   <button
                     onClick={() => setViewMode('grid')}
                     className={`p-2 rounded-md transition-colors ${
                       viewMode === 'grid'
-                        ? 'bg-white dark:bg-gray-600 text-blue-600 shadow-sm'
+                        ? 'bg-white dark:bg-gray-600 text-teal-600 shadow-sm'
                         : 'text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white'
                     }`}
                     aria-label="Vista en cuadrícula"
@@ -424,7 +426,7 @@ function SearchPageContent() {
                     onClick={() => setViewMode('list')}
                     className={`p-2 rounded-md transition-colors ${
                       viewMode === 'list'
-                        ? 'bg-white dark:bg-gray-600 text-blue-600 shadow-sm'
+                        ? 'bg-white dark:bg-gray-600 text-teal-600 shadow-sm'
                         : 'text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white'
                     }`}
                     aria-label="Vista en lista"
@@ -437,13 +439,16 @@ function SearchPageContent() {
                 <div className="relative">
                   <button
                     onClick={() => setSortDropdownOpen(!sortDropdownOpen)}
-                    className="flex items-center gap-2 px-4 py-2 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg hover:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors shadow-sm"
+                    className="flex items-center gap-2 px-3 sm:px-4 py-2 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg hover:border-teal-500 focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-teal-500 transition-colors shadow-sm text-sm"
                   >
                     <span className="text-sm">
                       {sortOptions.find(opt => opt.value === sortBy)?.icon} 
                     </span>
-                    <span className="text-sm font-medium text-gray-700 dark:text-gray-300">
+                    <span className="text-sm font-medium text-gray-700 dark:text-gray-300 hidden sm:inline">
                       {sortOptions.find(opt => opt.value === sortBy)?.label}
+                    </span>
+                    <span className="text-sm font-medium text-gray-700 dark:text-gray-300 sm:hidden">
+                      Ordenar
                     </span>
                     <ChevronDownIcon 
                       className={`w-4 h-4 text-gray-500 transition-transform ${sortDropdownOpen ? 'rotate-180' : ''}`} 
@@ -458,14 +463,14 @@ function SearchPageContent() {
                           onClick={() => handleSortChange(option.value as SortOption)}
                           className={`w-full flex items-center gap-3 px-4 py-3 text-sm hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors ${
                             sortBy === option.value 
-                              ? 'bg-blue-50 dark:bg-blue-900/20 text-blue-700 dark:text-blue-300' 
+                              ? 'bg-teal-50 dark:bg-teal-900/20 text-teal-700 dark:text-teal-300' 
                               : 'text-gray-700 dark:text-gray-300'
                           }`}
                         >
                           <span className="text-base">{option.icon}</span>
                           <span className="font-medium">{option.label}</span>
                           {sortBy === option.value && (
-                            <span className="ml-auto text-blue-600">✓</span>
+                            <span className="ml-auto text-teal-600">✓</span>
                           )}
                         </button>
                       ))}
@@ -479,7 +484,7 @@ function SearchPageContent() {
             {isLoading && (
               <div className="flex justify-center py-12">
                 <div className="text-center">
-                  <div className="w-16 h-16 border-4 border-blue-500 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
+                  <div className="w-16 h-16 border-4 border-teal-500 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
                   <p className="text-gray-600 dark:text-gray-400">Buscando los mejores resultados...</p>
                 </div>
               </div>
@@ -532,7 +537,7 @@ function SearchPageContent() {
                     handleSearch('', {})
                     clearAllFilters()
                   }}
-                  className="px-6 py-3 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white rounded-xl font-medium transition-all shadow-lg hover:shadow-xl transform hover:-translate-y-0.5"
+                  className="px-6 py-3 bg-gradient-to-r from-teal-600 to-teal-700 hover:from-teal-700 hover:to-teal-800 text-white rounded-xl font-medium transition-all shadow-lg hover:shadow-xl transform hover:-translate-y-0.5"
                 >
                   Ver todas las oportunidades
                 </button>
@@ -550,7 +555,7 @@ export default function BuscadorPage() {
     <Suspense fallback={
       <div className="min-h-screen bg-gradient-to-br from-gray-50 to-blue-50 dark:from-gray-900 dark:to-gray-800 flex items-center justify-center">
         <div className="text-center">
-          <div className="w-16 h-16 border-4 border-blue-500 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
+          <div className="w-16 h-16 border-4 border-teal-500 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
           <h2 className="text-xl font-semibold text-gray-900 dark:text-white mb-2">
             Cargando Buscador
           </h2>

@@ -257,3 +257,38 @@ Note: The free tier of Google Maps Platform includes:
 - 10,000 free calls for other Essentials SKUs
 
 For more information, see [Google Maps Platform Pricing](https://mapsplatform.google.com/pricing/).
+
+## 🔧 Mejoras de Responsive Implementadas
+
+### 📱 Mobile First Design
+- **Header optimizado**: Muestra solo el primer nombre en mobile para ahorrar espacio
+- **Buscador mejorado**: Botón de búsqueda es solo una lupa en mobile, texto completo en desktop
+- **Selector de categorías**: Icono SVG apropiado en lugar de emoji, más compacto
+- **Layout de resultados**: "Todas las oportunidades" aparece encima de los controles en mobile
+
+### 🎨 Cards de Publicaciones Optimizados
+- **Altura adaptativa**: Cards más compactos en mobile (240px min) vs desktop (320px min)
+- **Imágenes responsive**: 120px en mobile, 160px tablet, 180px desktop
+- **Tipografía escalable**: Textos más pequeños en mobile que se agrandan en pantallas mayores
+- **Grid inteligente**: 2 columnas mobile, 3 tablet, 4 desktop con gaps apropiados
+- **Mejor aprovechamiento del espacio**: Padding y margins reducidos en mobile
+
+### 🔍 Buscador Avanzado
+- **Selector de categorías mejorado**: Con iconos SVG y dropdown responsive
+- **Botones de acción optimizados**: Búsqueda por voz solo en desktop
+- **Colores actualizados**: Cambio de azul a teal para mejor consistencia
+- **Layout flexible**: Se adapta automáticamente al tamaño de pantalla
+
+### 📊 Layout de Resultados
+- **Controles reorganizados**: Vista y ordenamiento debajo del título en mobile
+- **Responsive breakpoints**: lg:flex-row para desktop, flex-col para mobile
+- **Botones optimizados**: Textos largos ocultos en mobile, solo íconos visibles
+- **Mejor usabilidad**: Dropdown de ordenamiento con texto "Ordenar" en mobile
+
+### 🎯 Mejoras de UX
+- **Navegación simplificada**: Información del usuario más concisa
+- **Interacciones táctiles**: Botones y elementos con tamaño mínimo para touch
+- **Legibilidad mejorada**: Mejor contraste y tamaños de fuente escalables
+- **Velocidad de carga**: CSS optimizado para renderizado más rápido
+
+---
