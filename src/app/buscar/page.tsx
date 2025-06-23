@@ -407,10 +407,10 @@ function SearchPageContent() {
                 </p>
               </div>
 
-              {/* Controles - En mobile van abajo, en desktop a la derecha */}
-              <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:gap-4 lg:flex-shrink-0">
+              {/* Controles - Botones de vista y ordenar en la misma línea */}
+              <div className="flex items-center gap-3 lg:flex-shrink-0">
                 {/* View Mode Toggles */}
-                <div className="flex items-center bg-gray-100 dark:bg-gray-700 rounded-lg p-1 self-start sm:self-auto">
+                <div className="flex items-center bg-gray-100 dark:bg-gray-700 rounded-lg p-1">
                   <button
                     onClick={() => setViewMode('grid')}
                     className={`p-2 rounded-md transition-colors ${
