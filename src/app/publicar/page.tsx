@@ -36,10 +36,10 @@ type StepValue = typeof STEPS[StepKey];
 // Para mostrar errores
 function ErrorDisplay({ message }: { message: string }) {
   return (
-    <div className="bg-red-50 border-l-4 border-red-500 p-4 rounded">
+    <div className="bg-red-50 dark:bg-red-900/20 border-l-4 border-red-500 p-4 rounded">
       <div className="flex">
         <div className="ml-3">
-          <p className="text-sm text-red-700">{message}</p>
+          <p className="text-sm text-red-700 dark:text-red-300">{message}</p>
         </div>
       </div>
     </div>
@@ -50,8 +50,8 @@ function ErrorDisplay({ message }: { message: string }) {
 function LoadingDisplay({ message }: { message: string }) {
   return (
     <div className="flex flex-col items-center">
-      <div className="w-12 h-12 rounded-full border-4 border-t-primary-600 border-primary-200 animate-spin mb-4"></div>
-      <p className="text-gray-600">{message}</p>
+      <div className="w-12 h-12 rounded-full border-4 border-t-primary-600 border-primary-200 dark:border-primary-400 animate-spin mb-4"></div>
+      <p className="text-gray-600 dark:text-gray-300">{message}</p>
     </div>
   );
 }
@@ -79,7 +79,7 @@ export default function PublicarPage() {
       description: adData.description || '',
       categorySlug: adData.categorySlug || '',
       subcategorySlug: adData.subcategorySlug || '',
-      subSubcategorySlug: adData.subSubcategorySlug || null,
+      subSubcategorySlug: adData.subSubcategorySlug || undefined,
       transactionType: adData.transactionType || 'venta',
       amount: adData.amount || null,
       currency: adData.currency || 'PEN',
@@ -89,7 +89,7 @@ export default function PublicarPage() {
         district: adData.location?.district || '',
         address: adData.location?.address || '',
         referencePoint: adData.location?.referencePoint || '',
-        coordinates: adData.location?.coordinates || null
+        coordinates: adData.location?.coordinates || undefined
       },
       contact: {
         phones: Array.isArray(adData.contact?.phones) ? adData.contact.phones : [''],
@@ -350,7 +350,10 @@ export default function PublicarPage() {
         district: locationData.district || '',
         address: locationData.address || '',
         referencePoint: locationData.referencePoint || '',
-        coordinates: locationData.coordinates || null,
+        coordinates: locationData.coordinates ? {
+          lat: locationData.coordinates.lat,
+          lon: locationData.coordinates.lng
+        } : undefined,
       }
     });
   }, [updateAd]);
@@ -458,7 +461,7 @@ export default function PublicarPage() {
         return (
           <div className="space-y-6">
             <div className="space-y-4">
-              <label className="block text-sm font-medium text-gray-700">
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
                 Título
               </label>
               <input
@@ -466,13 +469,13 @@ export default function PublicarPage() {
                 name="title"
                 value={ad.title || ''}
                 onChange={handleSimpleInputChange}
-                className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-primary-500 focus:border-primary-500"
+                className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:ring-primary-500 focus:border-primary-500 dark:focus:ring-primary-400 dark:focus:border-primary-400 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
                 placeholder="Escribe un título descriptivo"
               />
             </div>
 
             <div className="space-y-4">
-              <label className="block text-sm font-medium text-gray-700">
+              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
                 Descripción
               </label>
               <textarea
@@ -480,7 +483,7 @@ export default function PublicarPage() {
                 value={ad.description || ''}
                 onChange={handleSimpleInputChange}
                 rows={4}
-                className="w-full px-4 py-2 border border-gray-300 rounded-md focus:ring-primary-500 focus:border-primary-500"
+                className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:ring-primary-500 focus:border-primary-500 dark:focus:ring-primary-400 dark:focus:border-primary-400 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
                 placeholder="Describe tu publicación en detalle"
               />
             </div>
@@ -502,11 +505,12 @@ export default function PublicarPage() {
                   initialValue={{
                     district: ad.location?.district || '',
                     province: ad.location?.province || '',
-                    city: ad.location?.city || '',
-                    country: ad.location?.country || 'PE',
                     address: ad.location?.address || '',
                     referencePoint: ad.location?.referencePoint || '',
-                    coordinates: ad.location?.coordinates || null
+                    coordinates: ad.location?.coordinates ? {
+                      lat: ad.location.coordinates.lat,
+                      lon: ad.location.coordinates.lng
+                    } : undefined
                   }}
                   onChange={handleLocationChange}
                 />
@@ -551,7 +555,7 @@ export default function PublicarPage() {
   // Mostrar mensaje de éxito si se completó la publicación
   if (success && publishedId) {
     return (
-      <div className="min-h-screen bg-gray-50 py-8">
+      <div className="min-h-screen bg-gray-50 dark:bg-gray-900 py-8">
         <div className="max-w-4xl mx-auto px-4">
           <SuccessMessage 
             title="¡Publicación Exitosa!"
@@ -559,7 +563,7 @@ export default function PublicarPage() {
             publishedId={publishedId}
           />
           
-          <div className="mt-8 bg-white shadow rounded-lg p-6">
+          <div className="mt-8 bg-white dark:bg-gray-800 shadow rounded-lg p-6 border border-gray-200 dark:border-gray-700">
             <PublishAchievements 
               achievements={achievements}
               quality={adQuality}
@@ -571,7 +575,7 @@ export default function PublicarPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 py-6">
+    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-900 dark:to-gray-800 py-6">
       <div className="max-w-7xl mx-auto px-4">
         <div className="mb-6">
           <PublicationProgress 
@@ -586,15 +590,15 @@ export default function PublicarPage() {
         <div className="flex flex-col lg:flex-row gap-6">
           {/* Columna principal */}
           <div className="lg:w-7/12">
-            <div className="bg-white shadow-lg rounded-xl p-6 mb-6 border border-gray-200">
+            <div className="bg-white dark:bg-gray-800 shadow-lg rounded-xl p-6 mb-6 border border-gray-200 dark:border-gray-700">
               {/* Tip de optimización */}
-              <div className="mb-4 bg-blue-50 border-l-4 border-blue-500 p-3 rounded">
+              <div className="mb-4 bg-blue-50 dark:bg-blue-900/20 border-l-4 border-blue-500 p-3 rounded">
                 <div className="flex">
                   <div className="flex-shrink-0">
-                    <FireIcon className="h-5 w-5 text-blue-600" />
+                    <FireIcon className="h-5 w-5 text-blue-600 dark:text-blue-400" />
                   </div>
                   <div className="ml-3">
-                    <p className="text-sm text-blue-800">{renderOptimizationTip()}</p>
+                    <p className="text-sm text-blue-800 dark:text-blue-300">{renderOptimizationTip()}</p>
                   </div>
                 </div>
               </div>
@@ -636,27 +640,27 @@ export default function PublicarPage() {
             </div>
             
             {/* Indicador de calidad */}
-            <div className="bg-white shadow-lg rounded-xl p-5 mb-6 border border-gray-200">
+            <div className="bg-white dark:bg-gray-800 shadow-lg rounded-xl p-5 mb-6 border border-gray-200 dark:border-gray-700">
               <div className="flex items-center justify-between mb-2">
-                <h3 className="text-sm font-semibold text-gray-800">Calidad del anuncio</h3>
+                <h3 className="text-sm font-semibold text-gray-800 dark:text-gray-200">Calidad del anuncio</h3>
                 <div className="flex items-center">
                   {[1,2,3,4,5].map((star) => (
                     <StarIcon 
                       key={star}
                       className={`h-5 w-5 ${star <= Math.ceil(adQuality/20) 
-                        ? 'text-yellow-500' 
-                        : 'text-gray-300'}`}
+                        ? 'text-yellow-500 dark:text-yellow-400' 
+                        : 'text-gray-300 dark:text-gray-600'}`}
                     />
                   ))}
                 </div>
               </div>
-              <div className="w-full bg-gray-200 rounded-full h-2.5">
+              <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2.5">
                 <div 
-                  className="bg-gradient-to-r from-yellow-300 to-yellow-600 h-2.5 rounded-full transition-all duration-500"
+                  className="bg-gradient-to-r from-yellow-300 to-yellow-600 dark:from-yellow-400 dark:to-yellow-500 h-2.5 rounded-full transition-all duration-500"
                   style={{ width: `${adQuality}%` }}
                 />
               </div>
-              <div className="flex justify-between mt-1 text-xs text-gray-500">
+              <div className="flex justify-between mt-1 text-xs text-gray-500 dark:text-gray-400">
                 <span>Básico</span>
                 <span>Promedio</span>
                 <span>Excelente</span>
@@ -667,83 +671,83 @@ export default function PublicarPage() {
           {/* Columna de vista previa */}
           <div className="lg:w-5/12">
             <div className="sticky top-6">
-              <div className="bg-white shadow-lg rounded-xl p-4 mb-4">
-                <h3 className="text-sm font-medium text-gray-700 mb-3 flex items-center justify-between">
+              <div className="bg-white dark:bg-gray-800 shadow-lg rounded-xl p-4 mb-4 border border-gray-200 dark:border-gray-700">
+                <h3 className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-3 flex items-center justify-between">
                   <span className="flex items-center">
                     <span className="animate-pulse h-2 w-2 rounded-full bg-green-500 mr-2"></span>
                     Vista previa en vivo
                   </span>
-                  <span className="text-xs text-gray-500">Actualización automática</span>
+                  <span className="text-xs text-gray-500 dark:text-gray-400">Actualización automática</span>
                 </h3>
                 <LivePreview ad={ad} quality={adQuality} achievements={achievements} />
               </div>
               
-              <div className="bg-white shadow-lg rounded-xl p-5 border border-gray-200">
-                <h3 className="text-sm font-semibold text-gray-800 mb-3 flex items-center">
-                  <StarIcon className="h-4 w-4 text-yellow-500 mr-1.5" />
+              <div className="bg-white dark:bg-gray-800 shadow-lg rounded-xl p-5 border border-gray-200 dark:border-gray-700">
+                <h3 className="text-sm font-semibold text-gray-800 dark:text-gray-200 mb-3 flex items-center">
+                  <StarIcon className="h-4 w-4 text-yellow-500 dark:text-yellow-400 mr-1.5" />
                   Logros desbloqueados
                 </h3>
                 <div className="space-y-3 mb-4">
                   <div className="flex items-center justify-between">
-                    <span className="text-xs text-gray-600 flex items-center">
-                      <span className={`h-3 w-3 rounded-full mr-1.5 ${achievements.completed.includes('category') ? 'bg-green-500' : 'bg-gray-200'}`}></span>
+                    <span className="text-xs text-gray-600 dark:text-gray-400 flex items-center">
+                      <span className={`h-3 w-3 rounded-full mr-1.5 ${achievements.completed.includes('category') ? 'bg-green-500' : 'bg-gray-200 dark:bg-gray-600'}`}></span>
                       Categoría seleccionada
                     </span>
                     {achievements.completed.includes('category') ? (
                       <CheckIcon className="h-4 w-4 text-green-500" />
                     ) : (
-                      <div className="h-4 w-4 rounded-full border border-gray-300"></div>
+                      <div className="h-4 w-4 rounded-full border border-gray-300 dark:border-gray-600"></div>
                     )}
                   </div>
                   <div className="flex items-center justify-between">
-                    <span className="text-xs text-gray-600 flex items-center">
-                      <span className={`h-3 w-3 rounded-full mr-1.5 ${achievements.completed.includes('details') ? 'bg-green-500' : 'bg-gray-200'}`}></span>
+                    <span className="text-xs text-gray-600 dark:text-gray-400 flex items-center">
+                      <span className={`h-3 w-3 rounded-full mr-1.5 ${achievements.completed.includes('details') ? 'bg-green-500' : 'bg-gray-200 dark:bg-gray-600'}`}></span>
                       Título y descripción
                     </span>
                     {achievements.completed.includes('details') ? (
                       <CheckIcon className="h-4 w-4 text-green-500" />
                     ) : (
-                      <div className="h-4 w-4 rounded-full border border-gray-300"></div>
+                      <div className="h-4 w-4 rounded-full border border-gray-300 dark:border-gray-600"></div>
                     )}
                   </div>
                   <div className="flex items-center justify-between">
-                    <span className="text-xs text-gray-600 flex items-center">
-                      <span className={`h-3 w-3 rounded-full mr-1.5 ${achievements.completed.includes('location') ? 'bg-green-500' : 'bg-gray-200'}`}></span>
+                    <span className="text-xs text-gray-600 dark:text-gray-400 flex items-center">
+                      <span className={`h-3 w-3 rounded-full mr-1.5 ${achievements.completed.includes('location') ? 'bg-green-500' : 'bg-gray-200 dark:bg-gray-600'}`}></span>
                       Ubicación
                     </span>
                     {achievements.completed.includes('location') ? (
                       <CheckIcon className="h-4 w-4 text-green-500" />
                     ) : (
-                      <div className="h-4 w-4 rounded-full border border-gray-300"></div>
+                      <div className="h-4 w-4 rounded-full border border-gray-300 dark:border-gray-600"></div>
                     )}
                   </div>
                   <div className="flex items-center justify-between">
-                    <span className="text-xs text-gray-600 flex items-center">
-                      <span className={`h-3 w-3 rounded-full mr-1.5 ${achievements.completed.includes('images') ? 'bg-green-500' : 'bg-gray-200'}`}></span>
+                    <span className="text-xs text-gray-600 dark:text-gray-400 flex items-center">
+                      <span className={`h-3 w-3 rounded-full mr-1.5 ${achievements.completed.includes('images') ? 'bg-green-500' : 'bg-gray-200 dark:bg-gray-600'}`}></span>
                       Imágenes (min. 2)
                     </span>
                     {achievements.completed.includes('images') ? (
                       <CheckIcon className="h-4 w-4 text-green-500" />
                     ) : (
-                      <div className="h-4 w-4 rounded-full border border-gray-300"></div>
+                      <div className="h-4 w-4 rounded-full border border-gray-300 dark:border-gray-600"></div>
                     )}
                   </div>
                   <div className="flex items-center justify-between">
-                    <span className="text-xs text-gray-600 flex items-center">
-                      <span className={`h-3 w-3 rounded-full mr-1.5 ${achievements.completed.includes('contact') ? 'bg-green-500' : 'bg-gray-200'}`}></span>
+                    <span className="text-xs text-gray-600 dark:text-gray-400 flex items-center">
+                      <span className={`h-3 w-3 rounded-full mr-1.5 ${achievements.completed.includes('contact') ? 'bg-green-500' : 'bg-gray-200 dark:bg-gray-600'}`}></span>
                       Contacto
                     </span>
                     {achievements.completed.includes('contact') ? (
                       <CheckIcon className="h-4 w-4 text-green-500" />
                     ) : (
-                      <div className="h-4 w-4 rounded-full border border-gray-300"></div>
+                      <div className="h-4 w-4 rounded-full border border-gray-300 dark:border-gray-600"></div>
                     )}
                   </div>
                 </div>
-                <div className="bg-gray-50 rounded-lg p-3 flex justify-between items-center">
+                <div className="bg-gray-50 dark:bg-gray-700 rounded-lg p-3 flex justify-between items-center">
                   <div className="flex items-center">
                     <FireIcon className="h-4 w-4 text-orange-500 mr-1.5" />
-                    <span className="text-xs font-medium text-gray-700">Puntos acumulados</span>
+                    <span className="text-xs font-medium text-gray-700 dark:text-gray-300">Puntos acumulados</span>
                   </div>
                   <span className="text-xs font-bold bg-gradient-to-r from-primary-500 to-primary-700 text-white px-3 py-1 rounded-full">
                     {achievements.points} pts
@@ -760,7 +764,7 @@ export default function PublicarPage() {
                         } text-white shadow-md`}>
                           <CheckIcon className="h-5 w-5" />
                         </div>
-                        <span className="text-[10px] mt-1 capitalize">{badge}</span>
+                        <span className="text-[10px] mt-1 capitalize text-gray-600 dark:text-gray-400">{badge}</span>
                       </div>
                     ))}
                   </div>
@@ -778,7 +782,6 @@ export default function PublicarPage() {
         }
         .custom-scrollbar::-webkit-scrollbar-track {
           background: #f1f1f1;
-          border-radius: 10px;
         }
         .custom-scrollbar::-webkit-scrollbar-thumb {
           background: #CBD5E0;
@@ -786,6 +789,18 @@ export default function PublicarPage() {
         }
         .custom-scrollbar::-webkit-scrollbar-thumb:hover {
           background: #718096;
+        }
+        
+        @media (prefers-color-scheme: dark) {
+          .custom-scrollbar::-webkit-scrollbar-track {
+            background: #374151;
+          }
+          .custom-scrollbar::-webkit-scrollbar-thumb {
+            background: #6B7280;
+          }
+          .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+            background: #9CA3AF;
+          }
         }
       `}</style>
     </div>

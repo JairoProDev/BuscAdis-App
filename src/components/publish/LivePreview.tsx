@@ -76,14 +76,14 @@ const LivePreview: React.FC<LivePreviewProps> = ({ ad, quality, achievements }) 
   return (
     <div className="space-y-4">
       {/* Header de preview */}
-      <div className="bg-white rounded-lg border border-gray-200 p-4">
+      <div className="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 p-4">
         <div className="flex items-center justify-between mb-3">
-          <h3 className="font-semibold text-gray-900 flex items-center">
-            <EyeIcon className="w-5 h-5 mr-2" />
+          <h3 className="font-semibold text-gray-900 dark:text-gray-100 flex items-center">
+            <EyeIcon className="w-5 h-5 mr-2 text-gray-600 dark:text-gray-400" />
             Vista Previa
           </h3>
           <div className="flex items-center space-x-2">
-            <span className="text-xs text-gray-500">En vivo</span>
+            <span className="text-xs text-gray-500 dark:text-gray-400">En vivo</span>
             <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
           </div>
         </div>
@@ -91,58 +91,58 @@ const LivePreview: React.FC<LivePreviewProps> = ({ ad, quality, achievements }) 
         {/* Preview del anuncio */}
         <motion.div 
           layout
-          className="border border-gray-200 rounded-lg p-4 bg-gray-50"
+          className="border border-gray-200 dark:border-gray-600 rounded-lg p-4 bg-gray-50 dark:bg-gray-700"
         >
           {/* Título */}
           <div className="mb-2">
             {safeAd.title ? (
-              <h4 className="font-semibold text-gray-900 line-clamp-2">{safeAd.title}</h4>
+              <h4 className="font-semibold text-gray-900 dark:text-gray-100 line-clamp-2">{safeAd.title}</h4>
             ) : (
-              <div className="h-6 bg-gray-200 rounded animate-pulse"></div>
+              <div className="h-6 bg-gray-200 dark:bg-gray-600 rounded animate-pulse"></div>
             )}
           </div>
 
           {/* Precio */}
           <div className="mb-2">
             {safeAd.amount ? (
-              <div className="text-lg font-bold text-blue-600">
+              <div className="text-lg font-bold text-blue-600 dark:text-blue-400">
                 S/. {safeAd.amount.toLocaleString()}
-                {safeAd.negotiable && <span className="text-sm text-gray-500 ml-1">(Negociable)</span>}
+                {safeAd.negotiable && <span className="text-sm text-gray-500 dark:text-gray-400 ml-1">(Negociable)</span>}
               </div>
             ) : (
-              <div className="h-6 bg-gray-200 rounded w-24 animate-pulse"></div>
+              <div className="h-6 bg-gray-200 dark:bg-gray-600 rounded w-24 animate-pulse"></div>
             )}
           </div>
 
           {/* Descripción */}
           <div className="mb-3">
             {safeAd.description ? (
-              <p className="text-sm text-gray-600 line-clamp-3">{safeAd.description}</p>
+              <p className="text-sm text-gray-600 dark:text-gray-300 line-clamp-3">{safeAd.description}</p>
             ) : (
               <div className="space-y-2">
-                <div className="h-4 bg-gray-200 rounded animate-pulse"></div>
-                <div className="h-4 bg-gray-200 rounded w-3/4 animate-pulse"></div>
+                <div className="h-4 bg-gray-200 dark:bg-gray-600 rounded animate-pulse"></div>
+                <div className="h-4 bg-gray-200 dark:bg-gray-600 rounded w-3/4 animate-pulse"></div>
               </div>
             )}
           </div>
 
           {/* Metadatos */}
-          <div className="flex flex-wrap gap-2 text-xs text-gray-500">
+          <div className="flex flex-wrap gap-2 text-xs text-gray-500 dark:text-gray-400">
             {safeAd.categorySlug && (
-              <span className="flex items-center bg-gray-200 px-2 py-1 rounded">
+              <span className="flex items-center bg-gray-200 dark:bg-gray-600 px-2 py-1 rounded">
                 <TagIcon className="w-3 h-3 mr-1" />
                 {safeAd.categorySlug}
               </span>
             )}
             
             {(safeAd.location?.district || safeAd.location?.province) && (
-              <span className="flex items-center bg-gray-200 px-2 py-1 rounded">
+              <span className="flex items-center bg-gray-200 dark:bg-gray-600 px-2 py-1 rounded">
                 <MapPinIcon className="w-3 h-3 mr-1" />
                 {safeAd.location.district || safeAd.location.province}
               </span>
             )}
 
-            <span className="flex items-center bg-gray-200 px-2 py-1 rounded">
+            <span className="flex items-center bg-gray-200 dark:bg-gray-600 px-2 py-1 rounded">
               <CalendarIcon className="w-3 h-3 mr-1" />
               Hoy
             </span>
@@ -150,8 +150,8 @@ const LivePreview: React.FC<LivePreviewProps> = ({ ad, quality, achievements }) 
 
           {/* Contacto */}
           {safeAd.contact?.phones?.[0] && (
-            <div className="mt-3 pt-3 border-t border-gray-200">
-              <div className="flex items-center text-sm text-gray-600">
+            <div className="mt-3 pt-3 border-t border-gray-200 dark:border-gray-600">
+              <div className="flex items-center text-sm text-gray-600 dark:text-gray-300">
                 <PhoneIcon className="w-4 h-4 mr-2" />
                 {safeAd.contact.phones[0]}
               </div>
@@ -160,46 +160,11 @@ const LivePreview: React.FC<LivePreviewProps> = ({ ad, quality, achievements }) 
         </motion.div>
       </div>
 
-      {/* Medidor de calidad */}
-      <div className="bg-white rounded-lg border border-gray-200 p-4">
-        <div className="flex items-center justify-between mb-2">
-          <span className="text-sm font-medium text-gray-700">Calidad del Anuncio</span>
-          <span className={`text-sm font-bold ${getQualityColor(safeQuality)}`}>
-            {safeQuality}%
-          </span>
-        </div>
-        
-        <div className="w-full bg-gray-200 rounded-full h-2 mb-3">
-          <motion.div
-            className={`h-2 rounded-full transition-all duration-500 ${
-              safeQuality >= 80 ? 'bg-green-500' :
-              safeQuality >= 60 ? 'bg-blue-500' :
-              safeQuality >= 40 ? 'bg-yellow-500' : 'bg-gray-400'
-            }`}
-            initial={{ width: 0 }}
-            animate={{ width: `${safeQuality}%` }}
-          />
-        </div>
-
-        <div className="flex items-center justify-center space-x-1">
-          {[...Array(5)].map((_, i) => (
-            <StarIcon
-              key={i}
-              className={`h-4 w-4 ${
-                i < Math.floor(safeQuality / 20)
-                  ? 'text-yellow-400'
-                  : 'text-gray-300'
-              }`}
-            />
-          ))}
-        </div>
-      </div>
-
       {/* Lista de completitud */}
-      <div className="bg-white rounded-lg border border-gray-200 p-4">
+      <div className="bg-white dark:bg-gray-800 rounded-lg border border-gray-200 dark:border-gray-700 p-4">
         <div className="flex items-center justify-between mb-3">
-          <span className="text-sm font-medium text-gray-700">Progreso</span>
-          <span className="text-sm text-gray-500">
+          <span className="text-sm font-medium text-gray-700 dark:text-gray-300">Progreso</span>
+          <span className="text-sm text-gray-500 dark:text-gray-400">
             {completedCount}/{totalItems}
           </span>
         </div>
@@ -207,7 +172,7 @@ const LivePreview: React.FC<LivePreviewProps> = ({ ad, quality, achievements }) 
         <div className="space-y-2">
           {completionItems.map((item) => (
             <div key={item.key} className="flex items-center justify-between">
-              <span className="text-sm text-gray-600">{item.label}</span>
+              <span className="text-sm text-gray-600 dark:text-gray-300">{item.label}</span>
               <motion.div
                 initial={false}
                 animate={{ 
@@ -216,8 +181,8 @@ const LivePreview: React.FC<LivePreviewProps> = ({ ad, quality, achievements }) 
                 }}
                 className={`w-5 h-5 rounded-full flex items-center justify-center ${
                   item.completed 
-                    ? 'bg-green-100 text-green-600' 
-                    : 'bg-gray-100 text-gray-400'
+                    ? 'bg-green-100 dark:bg-green-900/30 text-green-600 dark:text-green-400' 
+                    : 'bg-gray-100 dark:bg-gray-700 text-gray-400 dark:text-gray-500'
                 }`}
               >
                 {item.completed ? '✓' : '○'}
@@ -229,10 +194,10 @@ const LivePreview: React.FC<LivePreviewProps> = ({ ad, quality, achievements }) 
 
       {/* Gamificación rápida */}
       {safeAchievements.points > 0 && (
-        <div className="bg-gradient-to-r from-purple-50 to-blue-50 rounded-lg border border-purple-200 p-4">
+        <div className="bg-gradient-to-r from-purple-50 to-blue-50 dark:from-purple-900/20 dark:to-blue-900/20 rounded-lg border border-purple-200 dark:border-purple-800 p-4">
           <div className="text-center">
-            <div className="text-2xl font-bold text-purple-600">{safeAchievements.points}</div>
-            <div className="text-sm text-purple-700">Puntos acumulados</div>
+            <div className="text-2xl font-bold text-purple-600 dark:text-purple-400">{safeAchievements.points}</div>
+            <div className="text-sm text-purple-700 dark:text-purple-300">Puntos acumulados</div>
             
             {safeAchievements.badges.length > 0 && (
               <div className="mt-2 flex justify-center space-x-1">
