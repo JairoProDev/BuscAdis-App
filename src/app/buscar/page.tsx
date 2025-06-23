@@ -268,7 +268,7 @@ function SearchPageContent() {
               onSearch={handleSearch}
               variant="page"
               showFilters={true}
-              placeholder="Buscar productos, servicios, empleos..."
+              placeholder="¿Qué necesitas hoy? Busca empleos, inmuebles, vehículos..."
               selectedCategory={selectedCategory}
               selectedSubcategory={selectedSubcategory}
               onCategoryChange={handleCategoryChange}
