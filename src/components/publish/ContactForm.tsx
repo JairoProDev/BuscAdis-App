@@ -74,17 +74,17 @@ const ContactForm: React.FC<ContactFormProps> = ({
     <div className={`space-y-6 ${className}`}>
       {/* Nombre */}
       <div>
-        <label htmlFor="contact-name" className="block text-sm font-medium text-primary-700 mb-1">
+        <label htmlFor="contact-name" className="block text-sm font-medium text-primary-700 dark:text-primary-300 mb-1">
           Nombre de Contacto (Opcional)
         </label>
         <div className="relative">
             <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                <UserIcon className="w-5 h-5 text-gray-400" />
+                <UserIcon className="w-5 h-5 text-gray-400 dark:text-gray-500" />
             </div>
             <input
                 id="contact-name" type="text" value={name}
                 onChange={handleNameChange} onBlur={notifyChange} // Notifica en Blur
-                className="w-full pl-10 pr-4 py-2 bg-white rounded-lg border border-gray-300 focus:border-primary-500 focus:ring-1 focus:ring-primary-500 transition-all"
+                className="w-full pl-10 pr-4 py-2 bg-white dark:bg-gray-700 rounded-lg border border-gray-300 dark:border-gray-600 focus:border-primary-500 dark:focus:border-primary-400 focus:ring-1 focus:ring-primary-500 dark:focus:ring-primary-400 transition-all text-gray-900 dark:text-gray-100"
                 placeholder="Tu nombre o el de tu empresa"
             />
         </div>
@@ -92,17 +92,17 @@ const ContactForm: React.FC<ContactFormProps> = ({
 
       {/* Email */}
       <div>
-        <label htmlFor="contact-email" className="block text-sm font-medium text-primary-700 mb-1">
+        <label htmlFor="contact-email" className="block text-sm font-medium text-primary-700 dark:text-primary-300 mb-1">
            Correo Electrónico (Opcional)
         </label>
          <div className="relative">
             <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                <EnvelopeIcon className="w-5 h-5 text-gray-400" />
+                <EnvelopeIcon className="w-5 h-5 text-gray-400 dark:text-gray-500" />
             </div>
             <input
                 id="contact-email" type="email" value={email ?? ''}
                 onChange={handleEmailChange} onBlur={notifyChange} // Notifica en Blur
-                className="w-full pl-10 pr-4 py-2 bg-white rounded-lg border border-gray-300 focus:border-primary-500 focus:ring-1 focus:ring-primary-500 transition-all"
+                className="w-full pl-10 pr-4 py-2 bg-white dark:bg-gray-700 rounded-lg border border-gray-300 dark:border-gray-600 focus:border-primary-500 dark:focus:border-primary-400 focus:ring-1 focus:ring-primary-500 dark:focus:ring-primary-400 transition-all text-gray-900 dark:text-gray-100"
                 placeholder="tu@correo.com"
             />
          </div>
@@ -110,7 +110,7 @@ const ContactForm: React.FC<ContactFormProps> = ({
 
        {/* Teléfono Principal (WhatsApp preferido) */}
       <div>
-        <label htmlFor="contact-phone" className="block text-sm font-medium text-primary-700 mb-1">
+        <label htmlFor="contact-phone" className="block text-sm font-medium text-primary-700 dark:text-primary-300 mb-1">
           Teléfono / WhatsApp Principal *
         </label>
          {/* Usando react-international-phone */}
@@ -118,8 +118,8 @@ const ContactForm: React.FC<ContactFormProps> = ({
              defaultCountry="pe" // Perú por defecto
              value={primaryPhone}
              onChange={handlePhoneInputChange} // Actualiza y notifica
-             inputClassName="!w-full !py-2 !pl-14 !pr-4 !bg-white !rounded-lg !border !border-gray-300 !focus:border-primary-500 !focus:ring-1 !focus:ring-primary-500 !transition-all" // Clases para el input interno
-             countrySelectorStyleProps={{buttonClassName:"!border-gray-300 !rounded-l-lg !bg-gray-50"}}
+             inputClassName="!w-full !py-2 !pl-14 !pr-4 !bg-white dark:!bg-gray-700 !rounded-lg !border !border-gray-300 dark:!border-gray-600 !focus:border-primary-500 dark:!focus:border-primary-400 !focus:ring-1 !focus:ring-primary-500 dark:!focus:ring-primary-400 !transition-all !text-gray-900 dark:!text-gray-100" // Clases para el input interno
+             countrySelectorStyleProps={{buttonClassName:"!border-gray-300 dark:!border-gray-600 !rounded-l-lg !bg-gray-50 dark:!bg-gray-600"}}
              inputProps={{
                 id: 'contact-phone',
                 name: 'primaryPhone', // Nombre para el input
@@ -127,23 +127,23 @@ const ContactForm: React.FC<ContactFormProps> = ({
              }}
 
           />
-          <p className="text-xs text-gray-500 mt-1">Ingresa tu número principal. Se usará para WhatsApp si es válido.</p>
+          <p className="text-xs text-gray-500 dark:text-gray-400 mt-1">Ingresa tu número principal. Se usará para WhatsApp si es válido.</p>
           {/* Aquí podrías añadir lógica para más teléfonos si fuera necesario */}
       </div>
 
        {/* Website (Opcional) */}
        <div>
-        <label htmlFor="contact-website" className="block text-sm font-medium text-primary-700 mb-1">
+        <label htmlFor="contact-website" className="block text-sm font-medium text-primary-700 dark:text-primary-300 mb-1">
           Sitio Web o Red Social (Opcional)
         </label>
         <div className="relative">
             <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                <GlobeAltIcon className="w-5 h-5 text-gray-400" />
+                <GlobeAltIcon className="w-5 h-5 text-gray-400 dark:text-gray-500" />
             </div>
             <input
                 id="contact-website" type="url" value={website ?? ''}
                 onChange={handleWebsiteChange} onBlur={notifyChange} // Notifica en Blur
-                className="w-full pl-10 pr-4 py-2 bg-white rounded-lg border border-gray-300 focus:border-primary-500 focus:ring-1 focus:ring-primary-500 transition-all"
+                className="w-full pl-10 pr-4 py-2 bg-white dark:bg-gray-700 rounded-lg border border-gray-300 dark:border-gray-600 focus:border-primary-500 dark:focus:border-primary-400 focus:ring-1 focus:ring-primary-500 dark:focus:ring-primary-400 transition-all text-gray-900 dark:text-gray-100"
                 placeholder="https://tuweb.com"
             />
          </div>

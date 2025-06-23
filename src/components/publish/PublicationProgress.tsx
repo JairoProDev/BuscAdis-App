@@ -21,16 +21,16 @@ const PublicationProgress: React.FC<PublicationProgressProps> = ({
   return (
     <div className="mb-8">
       <div className="flex justify-between items-center mb-1">
-        <h1 className="text-2xl font-bold text-gray-900">Publicar Anuncio</h1>
-        <div className="text-sm font-medium text-primary-700">
+        <h1 className="text-2xl font-bold text-gray-900 dark:text-gray-100">Publicar Anuncio</h1>
+        <div className="text-sm font-medium text-primary-700 dark:text-primary-300">
           {Math.round(progress)}% completado
         </div>
       </div>
       
       {/* Barra de progreso */}
-      <div className="w-full bg-gray-200 rounded-full h-2.5 mb-4">
+      <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2.5 mb-4">
         <div
-          className="h-2.5 rounded-full bg-gradient-to-r from-primary-400 to-primary-600 transition-all duration-500 ease-out"
+          className="h-2.5 rounded-full bg-gradient-to-r from-primary-400 to-primary-600 dark:from-primary-500 dark:to-primary-700 transition-all duration-500 ease-out"
           style={{ width: `${progress}%` }}
         />
       </div>
@@ -51,10 +51,10 @@ const PublicationProgress: React.FC<PublicationProgressProps> = ({
               <div 
                 className={`flex items-center justify-center w-8 h-8 rounded-full mb-1 transition-all ${
                   isCompleted 
-                    ? 'bg-primary-600 text-white' 
+                    ? 'bg-primary-600 dark:bg-primary-500 text-white' 
                     : isCurrent 
-                      ? 'bg-primary-100 text-primary-700 border-2 border-primary-600' 
-                      : 'bg-gray-100 text-gray-500'
+                      ? 'bg-primary-100 dark:bg-primary-900/30 text-primary-700 dark:text-primary-300 border-2 border-primary-600 dark:border-primary-400' 
+                      : 'bg-gray-100 dark:bg-gray-700 text-gray-500 dark:text-gray-400'
                 }`}
               >
                 {isCompleted ? (
@@ -64,8 +64,8 @@ const PublicationProgress: React.FC<PublicationProgressProps> = ({
                 )}
               </div>
               <span className={`text-xs ${
-                isCurrent ? 'font-semibold text-primary-700' : 
-                isCompleted ? 'font-medium text-gray-700' : 'text-gray-500'
+                isCurrent ? 'font-semibold text-primary-700 dark:text-primary-300' : 
+                isCompleted ? 'font-medium text-gray-700 dark:text-gray-300' : 'text-gray-500 dark:text-gray-400'
               }`}>
                 {step}
               </span>
@@ -75,11 +75,13 @@ const PublicationProgress: React.FC<PublicationProgressProps> = ({
       </div>
 
       {/* Pasos (versión móvil) */}
-      <div className="md:hidden flex items-center justify-between bg-gray-50 p-2 rounded-lg">
+      <div className="md:hidden flex items-center justify-between bg-gray-50 dark:bg-gray-800 p-2 rounded-lg">
         <div className="flex items-center">
           <div 
             className={`flex items-center justify-center w-6 h-6 rounded-full mr-2 ${
-              currentStep > 1 ? 'bg-primary-600 text-white' : 'bg-primary-100 text-primary-700 border-2 border-primary-600'
+              currentStep > 1 
+                ? 'bg-primary-600 dark:bg-primary-500 text-white' 
+                : 'bg-primary-100 dark:bg-primary-900/30 text-primary-700 dark:text-primary-300 border-2 border-primary-600 dark:border-primary-400'
             }`}
           >
             {currentStep > 1 ? (
@@ -88,11 +90,11 @@ const PublicationProgress: React.FC<PublicationProgressProps> = ({
               <span className="text-xs font-medium">{currentStep}</span>
             )}
           </div>
-          <span className="text-sm font-medium text-gray-800">
+          <span className="text-sm font-medium text-gray-800 dark:text-gray-200">
             {stepNames[currentStep - 1]}
           </span>
         </div>
-        <span className="text-xs text-gray-500">
+        <span className="text-xs text-gray-500 dark:text-gray-400">
           Paso {currentStep} de {totalSteps}
         </span>
       </div>

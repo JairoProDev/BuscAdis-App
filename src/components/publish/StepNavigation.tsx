@@ -21,15 +21,15 @@ const StepNavigation: React.FC<StepNavigationProps> = ({
   previousText = 'Anterior'
 }) => {
   return (
-    <div className="mt-6 pt-4 border-t border-gray-100 flex justify-between">
+    <div className="mt-6 pt-4 border-t border-gray-100 dark:border-gray-700 flex justify-between">
       <button
         type="button"
         onClick={onPrevious}
         disabled={isFirstStep}
         className={`flex items-center justify-center px-5 py-2.5 rounded-lg transition-all duration-200 ${
           isFirstStep
-            ? 'text-gray-400 bg-gray-100 cursor-not-allowed'
-            : 'text-gray-700 bg-gray-100 hover:bg-gray-200'
+            ? 'text-gray-400 dark:text-gray-500 bg-gray-100 dark:bg-gray-700 cursor-not-allowed'
+            : 'text-gray-700 dark:text-gray-300 bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600'
         }`}
       >
         <ArrowLeftIcon className="w-4 h-4 mr-2" />

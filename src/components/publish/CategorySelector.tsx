@@ -201,23 +201,47 @@ const CategorySelector: React.FC<CategorySelectorProps> = ({
         key={category.id}
         onClick={() => handleCategorySelect(category)}
         className={`w-full text-left p-4 rounded-xl border-2 transition-all ${
-          isSelected ? 'border-primary-500 bg-primary-50' : 'border-gray-200 hover:border-primary-200'
+          isSelected 
+            ? 'border-primary-500 bg-primary-50 dark:bg-primary-900/20 dark:border-primary-400' 
+            : 'border-gray-200 dark:border-gray-600 hover:border-primary-200 dark:hover:border-primary-500 bg-white dark:bg-gray-700'
         }`}
         whileHover={{ scale: 1.02 }}
         whileTap={{ scale: 0.98 }}
       >
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <div className={`p-2 rounded-lg ${isSelected ? 'bg-primary-100' : 'bg-gray-100'}`}>
-              <TagIcon className={`w-6 h-6 ${isSelected ? 'text-primary-600' : 'text-gray-500'}`} />
+            <div className={`p-2 rounded-lg ${
+              isSelected 
+                ? 'bg-primary-100 dark:bg-primary-800/50' 
+                : 'bg-gray-100 dark:bg-gray-600'
+            }`}>
+              <TagIcon className={`w-6 h-6 ${
+                isSelected 
+                  ? 'text-primary-600 dark:text-primary-400' 
+                  : 'text-gray-500 dark:text-gray-300'
+              }`} />
             </div>
             <div>
-              <h3 className={`font-medium ${isSelected ? 'text-primary-900' : 'text-gray-900'}`}>{category.name}</h3>
-              {category.description && <p className="text-sm text-gray-500">{category.description}</p>}
+              <h3 className={`font-medium ${
+                isSelected 
+                  ? 'text-primary-900 dark:text-primary-100' 
+                  : 'text-gray-900 dark:text-gray-100'
+              }`}>
+                {category.name}
+              </h3>
+              {category.description && (
+                <p className="text-sm text-gray-500 dark:text-gray-400">
+                  {category.description}
+                </p>
+              )}
             </div>
           </div>
           {hasSubcategories && (
-            <ChevronRightIcon className={`w-5 h-5 ${isSelected ? 'text-primary-500' : 'text-gray-400'}`} />
+            <ChevronRightIcon className={`w-5 h-5 ${
+              isSelected 
+                ? 'text-primary-500 dark:text-primary-400' 
+                : 'text-gray-400 dark:text-gray-500'
+            }`} />
           )}
         </div>
       </motion.button>
@@ -233,22 +257,42 @@ const CategorySelector: React.FC<CategorySelectorProps> = ({
         key={subcategory.id}
         onClick={() => handleSubcategorySelect(subcategory)}
         className={`w-full text-left p-4 rounded-xl border-2 transition-all ${
-          isSelected ? 'border-primary-500 bg-primary-50' : 'border-gray-200 hover:border-primary-200'
+          isSelected 
+            ? 'border-primary-500 bg-primary-50 dark:bg-primary-900/20 dark:border-primary-400' 
+            : 'border-gray-200 dark:border-gray-600 hover:border-primary-200 dark:hover:border-primary-500 bg-white dark:bg-gray-700'
         }`}
         whileHover={{ scale: 1.02 }}
         whileTap={{ scale: 0.98 }}
       >
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <div className={`p-2 rounded-lg ${isSelected ? 'bg-primary-100' : 'bg-gray-100'}`}>
-              <TagIcon className={`w-6 h-6 ${isSelected ? 'text-primary-600' : 'text-gray-500'}`} />
+            <div className={`p-2 rounded-lg ${
+              isSelected 
+                ? 'bg-primary-100 dark:bg-primary-800/50' 
+                : 'bg-gray-100 dark:bg-gray-600'
+            }`}>
+              <TagIcon className={`w-6 h-6 ${
+                isSelected 
+                  ? 'text-primary-600 dark:text-primary-400' 
+                  : 'text-gray-500 dark:text-gray-300'
+              }`} />
             </div>
             <div>
-              <h3 className={`font-medium ${isSelected ? 'text-primary-900' : 'text-gray-900'}`}>{subcategory.name}</h3>
+              <h3 className={`font-medium ${
+                isSelected 
+                  ? 'text-primary-900 dark:text-primary-100' 
+                  : 'text-gray-900 dark:text-gray-100'
+              }`}>
+                {subcategory.name}
+              </h3>
             </div>
           </div>
           {hasSubSubcategories && (
-            <ChevronRightIcon className={`w-5 h-5 ${isSelected ? 'text-primary-500' : 'text-gray-400'}`} />
+            <ChevronRightIcon className={`w-5 h-5 ${
+              isSelected 
+                ? 'text-primary-500 dark:text-primary-400' 
+                : 'text-gray-400 dark:text-gray-500'
+            }`} />
           )}
         </div>
       </motion.button>
@@ -263,17 +307,31 @@ const CategorySelector: React.FC<CategorySelectorProps> = ({
         key={subSubcategory.id}
         onClick={() => handleSubSubcategorySelect(subSubcategory)}
         className={`w-full text-left p-4 rounded-xl border-2 transition-all ${
-          isSelected ? 'border-primary-500 bg-primary-50' : 'border-gray-200 hover:border-primary-200'
+          isSelected 
+            ? 'border-primary-500 bg-primary-50 dark:bg-primary-900/20 dark:border-primary-400' 
+            : 'border-gray-200 dark:border-gray-600 hover:border-primary-200 dark:hover:border-primary-500 bg-white dark:bg-gray-700'
         }`}
         whileHover={{ scale: 1.02 }}
         whileTap={{ scale: 0.98 }}
       >
         <div className="flex items-center justify-between">
           <div>
-            <h3 className={`font-medium ${isSelected ? 'text-primary-900' : 'text-gray-900'}`}>{subSubcategory.name}</h3>
-            {subSubcategory.description && <p className="text-sm text-gray-500">{subSubcategory.description}</p>}
+            <h3 className={`font-medium ${
+              isSelected 
+                ? 'text-primary-900 dark:text-primary-100' 
+                : 'text-gray-900 dark:text-gray-100'
+            }`}>
+              {subSubcategory.name}
+            </h3>
+            {subSubcategory.description && (
+              <p className="text-sm text-gray-500 dark:text-gray-400">
+                {subSubcategory.description}
+              </p>
+            )}
           </div>
-          {isSelected && <CheckCircleIcon className="w-5 h-5 text-primary-500" />}
+          {isSelected && (
+            <CheckCircleIcon className="w-5 h-5 text-primary-500 dark:text-primary-400" />
+          )}
         </div>
       </motion.button>
     );
@@ -293,7 +351,9 @@ const CategorySelector: React.FC<CategorySelectorProps> = ({
             transition={{ duration: 0.3 }}
             className="space-y-4"
           >
-            <h2 className="text-xl font-semibold text-gray-900">Selecciona una categoría</h2>
+            <h2 className="text-xl font-semibold text-gray-900 dark:text-gray-100">
+              Selecciona una categoría
+            </h2>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
               {categoriesList.map(renderCategoryCard)}
             </div>
@@ -309,22 +369,26 @@ const CategorySelector: React.FC<CategorySelectorProps> = ({
             transition={{ duration: 0.3 }}
             className="space-y-4"
           >
-            <div className="flex items-center justify-between pb-2 border-b">
+            <div className="flex items-center justify-between pb-2 border-b border-gray-200 dark:border-gray-600">
               <button
                 onClick={handleBack}
-                className="flex items-center gap-2 text-sm text-gray-600 hover:text-gray-900"
+                className="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100"
               >
                 <ArrowLeftIcon className="w-4 h-4" />
                 <span>Volver</span>
               </button>
-              <span className="text-sm font-medium text-gray-700">{tempCategory.name}</span>
+              <span className="text-sm font-medium text-gray-700 dark:text-gray-300">
+                {tempCategory.name}
+              </span>
             </div>
-            <h2 className="text-xl font-semibold text-gray-900">Selecciona una subcategoría</h2>
+            <h2 className="text-xl font-semibold text-gray-900 dark:text-gray-100">
+              Selecciona una subcategoría
+            </h2>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
               {currentSubcategories.length > 0 ? (
                 currentSubcategories.map(renderSubcategoryCard)
               ) : (
-                <p className="text-center text-gray-500 py-8 md:col-span-2">
+                <p className="text-center text-gray-500 dark:text-gray-400 py-8 md:col-span-2">
                   Esta categoría no tiene subcategorías definidas.
                 </p>
               )}
@@ -341,22 +405,26 @@ const CategorySelector: React.FC<CategorySelectorProps> = ({
             transition={{ duration: 0.3 }}
             className="space-y-4"
           >
-            <div className="flex items-center justify-between pb-2 border-b">
+            <div className="flex items-center justify-between pb-2 border-b border-gray-200 dark:border-gray-600">
               <button
                 onClick={handleBack}
-                className="flex items-center gap-2 text-sm text-gray-600 hover:text-gray-900"
+                className="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-gray-100"
               >
                 <ArrowLeftIcon className="w-4 h-4" />
                 <span>Volver</span>
               </button>
-              <span className="text-sm font-medium text-gray-700">{tempCategory?.name} &gt; {tempSubcategory.name}</span>
+              <span className="text-sm font-medium text-gray-700 dark:text-gray-300">
+                {tempCategory?.name} &gt; {tempSubcategory.name}
+              </span>
             </div>
-            <h2 className="text-xl font-semibold text-gray-900">Selecciona una sub-subcategoría</h2>
+            <h2 className="text-xl font-semibold text-gray-900 dark:text-gray-100">
+              Selecciona una sub-subcategoría
+            </h2>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
               {currentSubSubcategories.length > 0 ? (
                 currentSubSubcategories.map(renderSubSubcategoryCard)
               ) : (
-                <p className="text-center text-gray-500 py-8 md:col-span-2">
+                <p className="text-center text-gray-500 dark:text-gray-400 py-8 md:col-span-2">
                   Esta subcategoría no tiene más divisiones. Por favor, retrocede y selecciona otra opción o confirma.
                 </p>
               )}
@@ -367,15 +435,17 @@ const CategorySelector: React.FC<CategorySelectorProps> = ({
       
       {/* Muestra error si hay selección parcial (p.ej. categoría sin subcategoría) */}
       {selectedCategory?.categorySlug && !selectedCategory?.subcategorySlug && (
-        <div className="bg-red-50 border-l-4 border-red-500 p-4 my-2">
-          <p className="text-sm text-red-700">Debes seleccionar categoría y subcategoría.</p>
+        <div className="bg-red-50 dark:bg-red-900/20 border-l-4 border-red-500 p-4 my-2">
+          <p className="text-sm text-red-700 dark:text-red-300">
+            Debes seleccionar categoría y subcategoría.
+          </p>
         </div>
       )}
       
       {/* Muestra selección actual */}
       {selectedCategory?.categorySlug && selectedCategory?.subcategorySlug && (
-        <div className="bg-green-50 border-l-4 border-green-500 p-4 my-2">
-          <p className="text-sm text-green-700">
+        <div className="bg-green-50 dark:bg-green-900/20 border-l-4 border-green-500 p-4 my-2">
+          <p className="text-sm text-green-700 dark:text-green-300">
             {`Selección actual: ${tempCategory?.name || ''} > ${tempSubcategory?.name || ''} ${selectedCategory?.subSubcategorySlug ? '> ' + (currentSubSubcategories.find(s => s.id === selectedCategory.subSubcategorySlug)?.name || '') : ''}`}
           </p>
         </div>

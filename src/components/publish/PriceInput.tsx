@@ -106,14 +106,14 @@ const PriceInput: React.FC<PriceInputProps> = ({
 
   return (
     <div className={`space-y-4 ${className}`}>
-      <label className="block text-sm font-medium text-primary-700 mb-1">Precio</label>
+      <label className="block text-sm font-medium text-primary-700 dark:text-primary-300 mb-1">Precio</label>
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4 items-end">
          {/* Input Amount y Currency */}
          <div className="relative">
             <label htmlFor="amount" className="sr-only">Monto</label>
             <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                {/* Icono dinámico basado en moneda */}
-               <span className="text-gray-500 sm:text-sm">{currentSymbol || '$'}</span>
+               <span className="text-gray-500 dark:text-gray-400 sm:text-sm">{currentSymbol || '$'}</span>
             </div>
             <input
                 type="number"
@@ -122,7 +122,7 @@ const PriceInput: React.FC<PriceInputProps> = ({
                 value={internalAmount}
                 onChange={handleAmountChange}
                 onBlur={handleAmountBlur} // Notificar cambio en blur
-                className={`w-full pl-10 pr-20 py-2 bg-white rounded-lg border text-gray-900 ${isFree ? 'bg-gray-100 cursor-not-allowed' : 'border-gray-300 focus:border-primary-500 focus:ring-1 focus:ring-primary-500'} transition-all`}
+                className={`w-full pl-10 pr-20 py-2 bg-white dark:bg-gray-700 rounded-lg border text-gray-900 dark:text-gray-100 ${isFree ? 'bg-gray-100 dark:bg-gray-600 cursor-not-allowed' : 'border-gray-300 dark:border-gray-600 focus:border-primary-500 dark:focus:border-primary-400 focus:ring-1 focus:ring-primary-500 dark:focus:ring-primary-400'} transition-all`}
                 placeholder="0.00"
                 step="0.01"
                 min="0"
@@ -136,7 +136,7 @@ const PriceInput: React.FC<PriceInputProps> = ({
                     name="currency"
                     value={internalCurrency ?? ''}
                     onChange={handleCurrencyChange}
-                    className={`h-full py-0 pl-2 pr-7 border-transparent bg-transparent text-gray-600 ${isFree ? 'cursor-not-allowed' : 'focus:border-primary-500 focus:ring-1 focus:ring-primary-500'} rounded-md`}
+                    className={`h-full py-0 pl-2 pr-7 border-transparent bg-transparent text-gray-600 dark:text-gray-300 ${isFree ? 'cursor-not-allowed' : 'focus:border-primary-500 dark:focus:border-primary-400 focus:ring-1 focus:ring-primary-500 dark:focus:ring-primary-400'} rounded-md`}
                     disabled={isFree}
                 >
                     {currencies.map(c => (
@@ -155,10 +155,10 @@ const PriceInput: React.FC<PriceInputProps> = ({
                     type="checkbox"
                     checked={isNegotiable}
                     onChange={handleNegotiableToggle}
-                    className={`h-4 w-4 text-primary-600 border-gray-300 rounded focus:ring-primary-500 ${isFree ? 'opacity-50 cursor-not-allowed' : ''}`}
+                    className={`h-4 w-4 text-primary-600 border-gray-300 dark:border-gray-600 rounded focus:ring-primary-500 dark:focus:ring-primary-400 ${isFree ? 'opacity-50 cursor-not-allowed' : ''}`}
                     disabled={isFree}
                 />
-                <label htmlFor="negotiable" className={`ml-2 block text-sm ${isFree ? 'text-gray-400' : 'text-gray-700'}`}>
+                <label htmlFor="negotiable" className={`ml-2 block text-sm ${isFree ? 'text-gray-400 dark:text-gray-500' : 'text-gray-700 dark:text-gray-300'}`}>
                     Negociable
                 </label>
             </div>
@@ -169,10 +169,10 @@ const PriceInput: React.FC<PriceInputProps> = ({
                      type="checkbox"
                      checked={isFree}
                      onChange={handleFreeToggle}
-                     className={`h-4 w-4 text-green-600 border-gray-300 rounded focus:ring-green-500 ${isNegotiable ? 'opacity-50 cursor-not-allowed' : ''}`}
+                     className={`h-4 w-4 text-green-600 border-gray-300 dark:border-gray-600 rounded focus:ring-green-500 dark:focus:ring-green-400 ${isNegotiable && parseFloat(internalAmount) > 0 ? 'opacity-50 cursor-not-allowed' : ''}`}
                      disabled={isNegotiable && parseFloat(internalAmount) > 0} // Deshabilitar si es negociable y tiene precio > 0
                  />
-                 <label htmlFor="free" className={`ml-2 block text-sm ${isNegotiable && parseFloat(internalAmount) > 0 ? 'text-gray-400' : 'text-gray-700'}`}>
+                 <label htmlFor="free" className={`ml-2 block text-sm ${isNegotiable && parseFloat(internalAmount) > 0 ? 'text-gray-400 dark:text-gray-500' : 'text-gray-700 dark:text-gray-300'}`}>
                      Gratis
                  </label>
             </div>
@@ -180,7 +180,7 @@ const PriceInput: React.FC<PriceInputProps> = ({
       </div>
 
        {/* Vista previa simplificada */}
-       <div className="text-right text-xs text-gray-500 italic mt-1">
+       <div className="text-right text-xs text-gray-500 dark:text-gray-400 italic mt-1">
            {isFree ? "Se mostrará como Gratis" : (isNegotiable ? "Precio base negociable" : "Precio fijo")}
        </div>
     </div>
