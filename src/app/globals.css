@@ -316,14 +316,66 @@
   /* Desktop: imagen más grande para modo lista */
   @media (min-width: 768px) {
     .publication-card-list {
-      height: 160px !important;
-      min-height: 160px !important;
-      max-height: 160px !important;
+      height: 180px !important;
+      min-height: 180px !important;
+      max-height: 180px !important;
     }
 
     .publication-card-list .image-container {
-      width: 200px !important;
-      height: 160px !important;
+      width: 240px !important;
+      height: 180px !important;
+    }
+  }
+
+  /* Modo grid - Altura fija y consistente */
+  .publication-card {
+    height: 280px !important;
+    min-height: 280px !important;
+    max-height: 280px !important;
+  }
+
+  .publication-card .image-container {
+    height: 160px !important;
+    min-height: 160px !important;
+    max-height: 160px !important;
+  }
+
+  @media (max-width: 640px) {
+    .publication-card {
+      height: 260px !important;
+      min-height: 260px !important;
+      max-height: 260px !important;
+    }
+
+    .publication-card .image-container {
+      height: 140px !important;
+      min-height: 140px !important;
+      max-height: 140px !important;
+    }
+  }
+
+  @media (max-width: 480px) {
+    .publication-card-list {
+      height: 130px !important;
+      min-height: 130px !important;
+      max-height: 130px !important;
+    }
+
+    .publication-card-list .image-container {
+      width: 130px !important;
+      height: 130px !important;
+    }
+    
+    .publication-card {
+      height: 240px !important;
+      min-height: 240px !important;
+      max-height: 240px !important;
+    }
+
+    .publication-card .image-container {
+      height: 120px !important;
+      min-height: 120px !important;
+      max-height: 120px !important;
     }
   }
 
