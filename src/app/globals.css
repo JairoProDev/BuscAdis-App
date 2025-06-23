@@ -301,21 +301,35 @@
   .publication-card-list {
     display: flex !important;
     flex-direction: row !important;
-    height: 96px !important;
-    min-height: 96px !important;
-    max-height: 96px !important;
+    height: 128px !important;
+    min-height: 128px !important;
+    max-height: 128px !important;
     overflow: hidden;
   }
 
   .publication-card-list .image-container {
-    width: 96px !important;
-    height: 96px !important;
+    width: 128px !important;
+    height: 128px !important;
     flex-shrink: 0;
+  }
+
+  /* Desktop: imagen más grande para modo lista */
+  @media (min-width: 768px) {
+    .publication-card-list {
+      height: 140px !important;
+      min-height: 140px !important;
+      max-height: 140px !important;
+    }
+
+    .publication-card-list .image-container {
+      width: 180px !important;
+      height: 140px !important;
+    }
   }
 
   .publication-card-list .content {
     flex: 1;
-    padding: 0.5rem;
+    padding: 1rem;
     display: flex;
     flex-direction: column;
     justify-content: space-between;

@@ -249,12 +249,12 @@ export default function PublicationCard({
   const CategoryIcon = categoryIcons[publication.categorySlug] || ShoppingBagIcon;
   const categoryColor = categoryColors[publication.categorySlug] || 'bg-gray-100 text-gray-800';
 
-  // Diseño optimizado para modo lista compacto
+  // Diseño optimizado para modo lista con mejor aprovechamiento del espacio
   const cardClasses = viewMode === 'list' 
     ? `
         publication-card-list group relative bg-white dark:bg-slate-800 rounded-lg shadow-sm hover:shadow-md 
         transition-all duration-200 cursor-pointer border border-gray-200 dark:border-slate-700 
-        hover:border-gray-300 dark:hover:border-slate-600 flex flex-row h-24 overflow-hidden ${className}
+        hover:border-gray-300 dark:hover:border-slate-600 flex flex-row h-32 overflow-hidden ${className}
         ${publication.premium ? 'ring-1 ring-cyan-400 shadow-cyan-400/20' : ''}
         ${variant === 'featured' ? 'ring-1 ring-blue-500 ring-opacity-50' : ''}
       `.trim()
@@ -278,7 +278,7 @@ export default function PublicationCard({
           {/* Image Container */}
           <div className={`image-container relative overflow-hidden ${
             viewMode === 'list' 
-              ? 'w-24 h-24 flex-shrink-0 rounded-l-lg' 
+              ? 'w-32 h-32 flex-shrink-0 rounded-l-lg' 
               : 'h-48 rounded-t-lg flex-shrink-0'
           }`}>
             <Image
@@ -341,52 +341,71 @@ export default function PublicationCard({
               : 'p-4 flex-1 min-h-0 flex-col'
           }`}>
             {viewMode === 'list' ? (
-              /* Lista compacta - Todo en una estructura horizontal */
+              /* Lista optimizada - Máximo aprovechamiento del espacio */
               <>
                 <div className="flex-1 min-w-0">
-                  <h3 className="text-sm font-semibold text-gray-900 dark:text-white line-clamp-1 mb-1">
+                  {/* Título */}
+                  <h3 className="text-base font-semibold text-gray-900 dark:text-white line-clamp-1 mb-1">
                     {publication.title}
                   </h3>
+                  
+                  {/* Descripción */}
+                  <p className="text-sm text-gray-600 dark:text-gray-400 line-clamp-2 mb-2">
+                    {publication.description}
+                  </p>
+                  
+                  {/* Precio */}
                   {formatPrice(publication.value, publication.currency) && (
-                    <div className="text-blue-600 font-bold text-sm mb-1">
+                    <div className="text-blue-600 font-bold text-lg mb-2">
                       {formatPrice(publication.value, publication.currency)}
                     </div>
                   )}
-                </div>
-                
-                <div className="flex items-center justify-between text-xs text-gray-500">
-                  <div className="flex items-center truncate">
-                    <MapPinIcon className="w-3 h-3 mr-1 flex-shrink-0" />
-                    <span className="truncate">{formatLocation(publication.location)}</span>
-                  </div>
                   
-                  <div className="flex items-center gap-2 flex-shrink-0 ml-2">
-                    <div className="flex items-center">
-                      <EyeIcon className="w-3 h-3 mr-1" />
-                      <span>{publication.views || 0}</span>
+                  {/* Información inferior */}
+                  <div className="flex items-center justify-between">
+                    {/* Ubicación y fecha */}
+                    <div className="flex items-center text-xs text-gray-500 space-x-3">
+                      <div className="flex items-center">
+                        <MapPinIcon className="w-3 h-3 mr-1" />
+                        <span className="truncate max-w-24">{formatLocation(publication.location)}</span>
+                      </div>
+                      <div className="flex items-center">
+                        <ClockIcon className="w-3 h-3 mr-1" />
+                        <span>{formatExactDateTime(publication.createdAt)}</span>
+                      </div>
+                      <div className="flex items-center">
+                        <EyeIcon className="w-3 h-3 mr-1" />
+                        <span>{publication.views || 0}</span>
+                      </div>
                     </div>
                     
-                    {showWhatsApp && publication.whatsapp && (
-                      <button
-                        onClick={handleWhatsAppClick}
-                        className="bg-green-500 hover:bg-green-600 text-white p-1 rounded-md transition-colors"
-                        aria-label="Contactar"
-                      >
-                        <WhatsAppIcon className="w-3 h-3" />
-                      </button>
-                    )}
-                    
-                    <button
-                      onClick={handleFavoriteToggle}
-                      className="hover:bg-gray-100 p-1 rounded-md transition-colors"
-                      aria-label="Favorito"
-                    >
-                      {isFavorite ? (
-                        <HeartSolidIcon className="w-3 h-3 text-red-500" />
-                      ) : (
-                        <HeartIcon className="w-3 h-3 text-gray-400" />
+                    {/* Botones de acción */}
+                    <div className="flex items-center gap-2">
+                      {/* Botón WhatsApp con texto */}
+                      {showWhatsApp && publication.whatsapp && (
+                        <button
+                          onClick={handleWhatsAppClick}
+                          className="flex items-center gap-1 bg-green-500 hover:bg-green-600 text-white px-3 py-1.5 rounded-lg text-sm font-medium transition-colors shadow-sm"
+                          aria-label="Contactar por WhatsApp"
+                        >
+                          <WhatsAppIcon className="w-4 h-4" />
+                          <span>Contactar</span>
+                        </button>
                       )}
-                    </button>
+                      
+                      {/* Botón favorito */}
+                      <button
+                        onClick={handleFavoriteToggle}
+                        className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors"
+                        aria-label="Favorito"
+                      >
+                        {isFavorite ? (
+                          <HeartSolidIcon className="w-4 h-4 text-red-500" />
+                        ) : (
+                          <HeartIcon className="w-4 h-4 text-gray-400" />
+                        )}
+                      </button>
+                    </div>
                   </div>
                 </div>
               </>
