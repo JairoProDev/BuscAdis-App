@@ -181,15 +181,21 @@ export async function GET(request: Request) {
       ...pub,
       id: pub._id?.toString() || pub.id,
       _id: pub._id?.toString(),
-      location: pub.location || 'Cusco',
+      location: pub.location?.district || pub.location?.province || pub.location || 'Cusco',
+      fullLocation: pub.location,
+      price: pub.amount || pub.price || 0,
+      amount: pub.amount || pub.price || 0,
       images: pub.images && pub.images.length > 0 ? pub.images : ['/images/placeholder-image.jpg'],
-      price: pub.price || 0,
       currency: pub.currency || 'PEN',
       status: pub.status || 'active',
       createdAt: pub.createdAt || pub.created_at || new Date().toISOString(),
-      // Asegurar compatibilidad con el frontend
       subcategory: pub.subcategorySlug || pub.subcategory,
-      subsubcategory: pub.subSubcategorySlug || pub.subsubcategory
+      subsubcategory: pub.subSubcategorySlug || pub.subsubcategory,
+      contactName: pub.contact?.name || 'Contacto',
+      contactPhone: pub.contact?.phones?.[0] || '',
+      district: pub.location?.district || '',
+      province: pub.location?.province || '',
+      negotiable: pub.negotiable || false
     }))
 
     Logger.info(`Returning ${formattedPublications.length} publications`, { 

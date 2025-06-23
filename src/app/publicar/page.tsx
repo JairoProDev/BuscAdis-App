@@ -394,10 +394,21 @@ export default function PublicarPage() {
 
       // Enviar al servicio
       const response = await PublicationsService.createPublication(finalAdData);
+      console.log('✅ Respuesta completa del API:', response);
       
-      setPublishedId(response.id);
+      // El API devuelve: { success: true, publication: {...}, message: '...' }
+      // Necesitamos extraer el ID de la publicación creada
+      const publicationId = response.publication?.id || response.publication?._id || response.id;
+      
+      if (!publicationId) {
+        throw new Error('No se pudo obtener el ID de la publicación creada');
+      }
+      
+      console.log('🎉 Publicación creada con ID:', publicationId);
+      
+      setPublishedId(publicationId);
       setSuccess(true);
-      Logger.info('Publicación creada exitosamente', { id: response.id });
+      Logger.info('Publicación creada exitosamente', { id: publicationId });
     } catch (error) {
       console.error('❌ Error al publicar:', error);
       const errorMessage = error instanceof Error ? error.message : 'Hubo un error al publicar tu anuncio';
