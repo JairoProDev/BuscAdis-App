@@ -318,15 +318,13 @@ export default function PublicationCard({
               </div>
             )}
 
-            {/* Category Badge - Solo en modo lista */}
-            {viewMode === 'list' && (
-              <div className={`absolute top-2 right-2 inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium ${categoryColor} shadow-md backdrop-blur-sm`}>
-                <CategoryIcon className="w-3 h-3" />
-                <span className="capitalize hidden sm:inline">
-                  {publication.subcategorySlug || publication.categorySlug}
-                </span>
-              </div>
-            )}
+            {/* Category Badge - Para ambos modos */}
+            <div className={`absolute top-2 right-2 inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium ${categoryColor} shadow-md backdrop-blur-sm`}>
+              <CategoryIcon className="w-3 h-3" />
+              <span className="capitalize hidden sm:inline">
+                {publication.subcategorySlug || publication.categorySlug}
+              </span>
+            </div>
             
             {/* Featured Badge - Solo en grid */}
             {viewMode === 'grid' && publication.featured && !publication.premium && (
@@ -347,7 +345,7 @@ export default function PublicationCard({
             {viewMode === 'grid' && (
               <button
                 onClick={handleFavoriteToggle}
-                className="absolute bottom-2 right-2 p-1.5 bg-white/90 hover:bg-white rounded-full shadow-md transition-all hover:scale-110 z-10"
+                className="absolute bottom-2 left-2 p-1.5 bg-white/90 hover:bg-white rounded-full shadow-md transition-all hover:scale-110 z-10"
                 aria-label="Agregar a favoritos"
               >
                 {isFavorite ? (
@@ -368,7 +366,7 @@ export default function PublicationCard({
             {viewMode === 'list' ? (
               /* Lista optimizada - Layout responsive perfecto */
               <>
-                <div className="flex-1 min-w-0 p-2 md:p-4 flex flex-col justify-between">
+                <div className="flex-1 min-w-0 p-2 md:flex flex-col justify-between">
                   {/* Fila 1: Título y favorito */}
                   <div className="flex items-start justify-between mb-2">
                     <h3 className="text-sm md:text-base font-semibold text-gray-900 dark:text-white line-clamp-1 flex-1 mr-2">
@@ -425,7 +423,7 @@ export default function PublicationCard({
                   
                   {/* Fila 4: Botones de acción */}
                   <div className="flex items-center justify-between">
-                    {/* Botones de compartir - Desktop */}
+                    {/* Botones de compartir y contactar - Desktop */}
                     <div className="hidden md:flex items-center gap-1">
                       {/* Facebook */}
                       <button
@@ -467,7 +465,7 @@ export default function PublicationCard({
                           navigator.clipboard.writeText(`${window.location.origin}${seoUrl}`);
                           // TikTok no tiene URL de compartir web directo
                         }}
-                        className="p-1.5 hover:bg-gray-50 text-gray-800 rounded-lg transition-colors"
+                        className="p-1.5 hover:bg-gray-100 text-black rounded-lg transition-colors"
                         aria-label="Copiar enlace para TikTok"
                       >
                         <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
@@ -484,7 +482,7 @@ export default function PublicationCard({
                           const url = encodeURIComponent(`${window.location.origin}${seoUrl}`);
                           window.open(`https://twitter.com/intent/tweet?text=${text}&url=${url}`, '_blank');
                         }}
-                        className="p-1.5 hover:bg-gray-50 text-gray-800 rounded-lg transition-colors"
+                        className="p-1.5 hover:bg-gray-100 text-black rounded-lg transition-colors"
                         aria-label="Compartir en X"
                       >
                         <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
@@ -526,6 +524,18 @@ export default function PublicationCard({
                       </button>
                     </div>
                     
+                    {/* Botón Contactar WhatsApp - Desktop e incluido en la línea */}
+                    {showWhatsApp && publication.whatsapp && (
+                      <button
+                        onClick={handleWhatsAppClick}
+                        className="flex items-center gap-1 md:gap-2 bg-green-500 hover:bg-green-600 text-white px-3 md:px-4 py-1.5 md:py-2 rounded-lg text-xs md:text-sm font-medium transition-colors shadow-sm ml-2"
+                        aria-label="Contactar por WhatsApp"
+                      >
+                        <WhatsAppIcon className="w-4 h-4" />
+                        <span>Contactar</span>
+                      </button>
+                    )}
+                    
                     {/* Botón compartir móvil */}
                     <button
                       onClick={handleShare}
@@ -534,25 +544,13 @@ export default function PublicationCard({
                     >
                       <ShareIcon className="w-4 h-4 text-gray-500" />
                     </button>
-                    
-                    {/* Botón WhatsApp */}
-                    {showWhatsApp && publication.whatsapp && (
-                      <button
-                        onClick={handleWhatsAppClick}
-                        className="flex items-center gap-1 bg-green-500 hover:bg-green-600 text-white px-2 md:px-3 py-1.5 rounded-lg text-xs md:text-sm font-medium transition-colors shadow-sm"
-                        aria-label="Contactar por WhatsApp"
-                      >
-                        <WhatsAppIcon className="w-4 h-4" />
-                        <span>Contactar</span>
-                      </button>
-                    )}
                   </div>
                 </div>
               </>
             ) : (
                             /* Grid mode - Simple y consistente */
               <>
-                <div className="p-4 flex flex-col h-full">
+                <div className="flex flex-col h-full">
                   {/* Título */}
                   <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2 line-clamp-2">
                     {publication.title}
@@ -564,7 +562,7 @@ export default function PublicationCard({
                   </p>
 
                   {/* Footer con metadatos */}
-                  <div className="mt-auto space-y-2">
+                  <div className="mt-auto space-y-3">
                     {/* Ubicación y fecha */}
                     <div className="flex items-center justify-between text-xs text-gray-500">
                       <div className="flex items-center max-w-[60%]">
@@ -577,47 +575,26 @@ export default function PublicationCard({
                       </div>
                     </div>
 
-                    {/* Categoría y botones */}
+                    {/* Botones de acción */}
                     <div className="flex items-center justify-between">
-                      <div className={`inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium ${categoryColor}`}>
-                        <CategoryIcon className="w-3 h-3" />
-                        <span className="capitalize">
-                          {publication.subcategorySlug || publication.categorySlug}
-                        </span>
-                      </div>
+                      <button
+                        onClick={handleShare}
+                        className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors"
+                        aria-label="Compartir"
+                      >
+                        <ShareIcon className="w-4 h-4 text-gray-500" />
+                      </button>
 
-                      <div className="flex items-center gap-1">
+                      {showWhatsApp && publication.whatsapp && (
                         <button
-                          onClick={handleShare}
-                          className="p-1.5 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-full transition-colors"
-                          aria-label="Compartir"
+                          onClick={handleWhatsAppClick}
+                          className="flex items-center gap-2 bg-green-500 hover:bg-green-600 text-white text-sm font-medium px-4 py-2 rounded-lg shadow-sm transition-all hover:scale-105"
+                          aria-label="Contactar por WhatsApp"
                         >
-                          <ShareIcon className="w-4 h-4 text-gray-500" />
+                          <WhatsAppIcon className="w-4 h-4" />
+                          <span>Contactar</span>
                         </button>
-
-                        {showWhatsApp && publication.whatsapp && (
-                          <button
-                            onClick={handleWhatsAppClick}
-                            className="flex items-center gap-1 bg-green-500 hover:bg-green-600 text-white text-xs font-medium px-2 py-1.5 rounded-full shadow-sm transition-all hover:scale-105"
-                            aria-label="Contactar por WhatsApp"
-                          >
-                            <WhatsAppIcon className="w-3 h-3" />
-                            <span>Contactar</span>
-                          </button>
-                        )}
-
-                        <button
-                          onClick={handleFavoriteToggle}
-                          className="p-1.5 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-full transition-colors"
-                          aria-label="Agregar a favoritos"
-                        >
-                          {isFavorite ? (
-                            <HeartSolidIcon className="w-4 h-4 text-red-500" />
-                          ) : (
-                            <HeartIcon className="w-4 h-4 text-gray-500" />
-                          )}
-                        </button>
-                      </div>
+                      )}
                     </div>
                   </div>
                 </div>
