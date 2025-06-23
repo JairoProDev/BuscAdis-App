@@ -341,20 +341,7 @@ export default function PublicationCard({
               </div>
             )}
 
-            {/* Favorite Button en imagen - Solo para grid mode */}
-            {viewMode === 'grid' && (
-              <button
-                onClick={handleFavoriteToggle}
-                className="absolute bottom-2 left-2 p-1.5 bg-white/90 hover:bg-white rounded-full shadow-md transition-all hover:scale-110 z-10"
-                aria-label="Agregar a favoritos"
-              >
-                {isFavorite ? (
-                  <HeartSolidIcon className="w-4 h-4 text-red-500" />
-                ) : (
-                  <HeartIcon className="w-4 h-4 text-gray-600" />
-                )}
-              </button>
-            )}
+
           </div>
 
           {/* Content - Layout completamente diferente para lista */}
@@ -366,7 +353,7 @@ export default function PublicationCard({
             {viewMode === 'list' ? (
               /* Lista optimizada - Layout responsive perfecto */
               <>
-                <div className="flex-1 min-w-0 p-2 md:flex flex-col justify-between">
+                <div className="flex-1 min-w-0 p-3 flex flex-col justify-between">
                   {/* Fila 1: Título y favorito */}
                   <div className="flex items-start justify-between mb-2">
                     <h3 className="text-sm md:text-base font-semibold text-gray-900 dark:text-white line-clamp-1 flex-1 mr-2">
@@ -548,9 +535,9 @@ export default function PublicationCard({
                 </div>
               </>
             ) : (
-                            /* Grid mode - Simple y consistente */
+                            /* Grid mode - Estilo posts de redes sociales */
               <>
-                <div className="flex flex-col h-full">
+                <div className="p-3 flex flex-col h-full">
                   {/* Título */}
                   <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2 line-clamp-2">
                     {publication.title}
@@ -561,30 +548,58 @@ export default function PublicationCard({
                     {publication.description}
                   </p>
 
-                  {/* Footer con metadatos */}
-                  <div className="mt-auto space-y-3">
-                    {/* Ubicación y fecha */}
+                  {/* Metadatos */}
+                  <div className="mb-3 space-y-1">
+                    {/* Ubicación */}
+                    <div className="flex items-center text-xs text-gray-500">
+                      <MapPinIcon className="w-3 h-3 mr-1 text-gray-400" />
+                      <span className="truncate">{formatLocation(publication.location)}</span>
+                    </div>
+                    
+                    {/* Fecha y vistas */}
                     <div className="flex items-center justify-between text-xs text-gray-500">
-                      <div className="flex items-center max-w-[60%]">
-                        <MapPinIcon className="w-3 h-3 mr-1 text-gray-400" />
-                        <span className="truncate">{formatLocation(publication.location)}</span>
-                      </div>
                       <div className="flex items-center">
                         <ClockIcon className="w-3 h-3 mr-1 text-gray-400" />
                         <span>{formatExactDateTime(publication.createdAt)}</span>
                       </div>
+                      <div className="flex items-center">
+                        <EyeIcon className="w-3 h-3 mr-1 text-gray-400" />
+                        <span>{publication.views || 0} vistas</span>
+                      </div>
                     </div>
+                  </div>
 
-                    {/* Botones de acción */}
+                  {/* Footer de interacciones - Estilo redes sociales */}
+                  <div className="border-t border-gray-200 dark:border-gray-700 pt-3 mt-auto">
                     <div className="flex items-center justify-between">
-                      <button
-                        onClick={handleShare}
-                        className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors"
-                        aria-label="Compartir"
-                      >
-                        <ShareIcon className="w-4 h-4 text-gray-500" />
-                      </button>
+                      {/* Lado izquierdo: Favorito y Compartir */}
+                      <div className="flex items-center gap-3">
+                        <button
+                          onClick={handleFavoriteToggle}
+                          className="flex items-center gap-1 p-1.5 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors"
+                          aria-label="Agregar a favoritos"
+                        >
+                          {isFavorite ? (
+                            <HeartSolidIcon className="w-5 h-5 text-red-500" />
+                          ) : (
+                            <HeartIcon className="w-5 h-5 text-gray-500" />
+                          )}
+                          <span className="text-xs text-gray-500">
+                            {isFavorite ? 'Guardado' : 'Guardar'}
+                          </span>
+                        </button>
 
+                        <button
+                          onClick={handleShare}
+                          className="flex items-center gap-1 p-1.5 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors"
+                          aria-label="Compartir"
+                        >
+                          <ShareIcon className="w-5 h-5 text-gray-500" />
+                          <span className="text-xs text-gray-500">Compartir</span>
+                        </button>
+                      </div>
+
+                      {/* Lado derecho: Botón principal de contacto */}
                       {showWhatsApp && publication.whatsapp && (
                         <button
                           onClick={handleWhatsAppClick}
