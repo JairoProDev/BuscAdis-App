@@ -1,7 +1,6 @@
 import { v4 as uuidv4 } from 'uuid';
 import { AuthService } from '@/features/auth/services/auth.service';
 import { Logger } from '@/services/logging.service';
-import { logger } from './logger.service';
 
 // Check if we're in browser environment
 const isBrowser = typeof window !== 'undefined';
