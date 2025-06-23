@@ -195,11 +195,11 @@
     flex-direction: column;
   }
 
-  /* List mode - altura fija para lista */
-  .publication-card.list-mode {
-    height: 144px !important;
-    min-height: 144px !important;
-    max-height: 144px !important;
+  /* Grid mode - altura fija para cuadrícula */
+  .publication-card:not(.publication-card-list) {
+    height: 320px !important;
+    min-height: 320px !important;
+    max-height: 320px !important;
   }
 
   .publication-card > a {
@@ -211,7 +211,7 @@
     flex-direction: column;
   }
 
-  .publication-card.list-mode > a {
+  .publication-card-list > a {
     flex-direction: row;
   }
 
@@ -294,44 +294,44 @@
   .publications-list {
     display: flex;
     flex-direction: column;
-    gap: 16px;
+    gap: 8px;
     width: 100%;
   }
 
-  .publication-card.list-mode {
+  .publication-card-list {
     display: flex !important;
     flex-direction: row !important;
-    height: 140px !important;
-    min-height: 140px !important;
-    max-height: 140px !important;
+    height: 96px !important;
+    min-height: 96px !important;
+    max-height: 96px !important;
     overflow: hidden;
   }
 
-  .publication-card.list-mode .image-container {
-    width: 200px !important;
-    height: 140px !important;
+  .publication-card-list .image-container {
+    width: 96px !important;
+    height: 96px !important;
     flex-shrink: 0;
   }
 
-  .publication-card.list-mode .content {
+  .publication-card-list .content {
     flex: 1;
-    padding: 1rem;
+    padding: 0.5rem;
     display: flex;
     flex-direction: column;
     justify-content: space-between;
     overflow: hidden;
   }
 
-  .publication-card.list-mode .title {
-    font-size: 1rem;
-    margin-bottom: 0.5rem;
-    line-height: 1.3;
+  .publication-card-list .title {
+    font-size: 0.875rem;
+    margin-bottom: 0.25rem;
+    line-height: 1.2;
   }
 
-  .publication-card.list-mode .description {
-    font-size: 0.875rem;
-    margin-bottom: 0.5rem;
-    line-height: 1.4;
+  .publication-card-list .description {
+    font-size: 0.75rem;
+    margin-bottom: 0.25rem;
+    line-height: 1.2;
   }
 
   .whatsapp-button {

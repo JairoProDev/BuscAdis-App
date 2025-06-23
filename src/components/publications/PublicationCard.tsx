@@ -249,20 +249,20 @@ export default function PublicationCard({
   const CategoryIcon = categoryIcons[publication.categorySlug] || ShoppingBagIcon;
   const categoryColor = categoryColors[publication.categorySlug] || 'bg-gray-100 text-gray-800';
 
-  // Altura uniforme para todas las cards CON CONTORNO PREMIUM
+  // Diseño optimizado para modo lista compacto
   const cardClasses = viewMode === 'list' 
     ? `
-        publication-card list-mode group relative bg-white dark:bg-slate-800 rounded-lg shadow-md hover:shadow-lg 
-        transition-all duration-300 cursor-pointer border border-gray-200 dark:border-slate-700 
-        hover:border-gray-300 dark:hover:border-slate-600 flex flex-row h-36 ${className}
-        ${publication.premium ? 'ring-2 ring-cyan-400 shadow-cyan-400/30 shadow-lg' : ''}
-        ${variant === 'featured' ? 'ring-2 ring-blue-500 ring-opacity-50' : ''}
+        publication-card-list group relative bg-white dark:bg-slate-800 rounded-lg shadow-sm hover:shadow-md 
+        transition-all duration-200 cursor-pointer border border-gray-200 dark:border-slate-700 
+        hover:border-gray-300 dark:hover:border-slate-600 flex flex-row h-24 overflow-hidden ${className}
+        ${publication.premium ? 'ring-1 ring-cyan-400 shadow-cyan-400/20' : ''}
+        ${variant === 'featured' ? 'ring-1 ring-blue-500 ring-opacity-50' : ''}
       `.trim()
     : `
         publication-card group relative bg-white dark:bg-slate-800 rounded-lg shadow-md hover:shadow-lg 
         transition-all duration-300 overflow-hidden cursor-pointer border border-gray-200 dark:border-slate-700 
         hover:border-gray-300 dark:hover:border-slate-600 h-80 flex flex-col ${className}
-        ${publication.premium ? 'ring-3 ring-cyan-400 shadow-cyan-400/30 shadow-xl' : ''}
+        ${publication.premium ? 'ring-2 ring-cyan-400 shadow-cyan-400/30 shadow-xl' : ''}
         ${variant === 'featured' ? 'ring-2 ring-blue-500 ring-opacity-50' : ''}
       `.trim();
 
@@ -271,14 +271,14 @@ export default function PublicationCard({
       <motion.div 
         className={cardClasses} 
         onClick={handleClick}
-        whileHover={{ y: -2 }}
+        whileHover={{ y: viewMode === 'list' ? 0 : -2 }}
         transition={{ duration: 0.2 }}
       >
         <Link href={seoUrl} className={viewMode === 'list' ? 'flex flex-row w-full h-full' : 'block h-full w-full flex flex-col'}>
           {/* Image Container */}
           <div className={`image-container relative overflow-hidden ${
             viewMode === 'list' 
-              ? 'w-36 h-36 flex-shrink-0 rounded-l-lg' 
+              ? 'w-24 h-24 flex-shrink-0 rounded-l-lg' 
               : 'h-48 rounded-t-lg flex-shrink-0'
           }`}>
             <Image
@@ -296,11 +296,9 @@ export default function PublicationCard({
             {/* Overlay Gradient */}
             <div className="absolute inset-0 bg-gradient-to-t from-black/20 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
             
-            {/* Price Badge - MOVIDO ARRIBA EN LA IMAGEN */}
-            {formatPrice(publication.value, publication.currency) && (
-              <div className={`absolute top-2 left-2 bg-gradient-to-r from-blue-600 to-blue-700 text-white font-bold px-3 py-1 rounded-full shadow-lg backdrop-blur-sm ${
-                viewMode === 'list' ? 'text-xs' : 'text-sm'
-              }`}>
+            {/* Price Badge - Solo en grid mode */}
+            {viewMode === 'grid' && formatPrice(publication.value, publication.currency) && (
+              <div className="absolute top-2 left-2 bg-gradient-to-r from-blue-600 to-blue-700 text-white font-bold px-3 py-1 rounded-full shadow-lg backdrop-blur-sm text-sm">
                 {formatPrice(publication.value, publication.currency)}
               </div>
             )}
@@ -336,105 +334,135 @@ export default function PublicationCard({
             )}
           </div>
 
-          {/* Content - Altura flexible que se adapta */}
-          <div className={`content flex flex-col ${
+          {/* Content - Layout completamente diferente para lista */}
+          <div className={`content flex ${
             viewMode === 'list' 
-              ? 'flex-1 p-3 justify-between min-h-0' 
-              : 'p-4 flex-1 min-h-0'
+              ? 'flex-1 p-2 flex-col justify-between min-h-0' 
+              : 'p-4 flex-1 min-h-0 flex-col'
           }`}>
-            {/* Title */}
-            <div className="flex-1 min-h-0">
-              <h3 className={`title font-semibold text-gray-900 dark:text-white group-hover:text-blue-600 transition-colors ${
-                viewMode === 'list' 
-                  ? 'text-sm mb-1 line-clamp-1' 
-                  : 'text-base mb-2 line-clamp-2'
-              }`}>
-                {publication.title}
-              </h3>
-
-              {/* Description - ESPACIO OPTIMIZADO */}
-              <p className={`description text-gray-600 dark:text-gray-400 ${
-                viewMode === 'list' 
-                  ? 'text-xs line-clamp-1 mb-1' 
-                  : 'text-sm mb-2 line-clamp-2'
-              }`}>
-                {publication.description}
-              </p>
-            </div>
-
-            {/* Footer Section - Siempre al fondo */}
-            <div className="space-y-1 mt-auto">
-              {/* Top Row: Location and Time - FORMATO COMPACTO */}
-              <div className="flex items-center justify-between text-xs text-gray-500 dark:text-gray-400">
-                <div className="flex items-center max-w-[50%]">
-                  <MapPinIcon className="w-3 h-3 mr-1 flex-shrink-0" />
-                  <span className="truncate">{formatLocation(publication.location)}</span>
-                </div>
-                
-                <div className="flex items-center text-xs">
-                  <ClockIcon className="w-3 h-3 mr-1" />
-                  <span>{formatExactDateTime(publication.createdAt)}</span>
-                </div>
-              </div>
-
-              {/* Bottom Row: Category Badge and Action Buttons - REORGANIZADO */}
-              <div className="flex items-center justify-between">
-                {/* Category Badge - Solo icono si no hay espacio */}
-                <div className={`inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium ${categoryColor}`}>
-                  <CategoryIcon className="w-3 h-3" />
-                  {viewMode === 'grid' && (
-                    <span className="capitalize">
-                      {publication.subcategorySlug || publication.categorySlug}
-                    </span>
+            {viewMode === 'list' ? (
+              /* Lista compacta - Todo en una estructura horizontal */
+              <>
+                <div className="flex-1 min-w-0">
+                  <h3 className="text-sm font-semibold text-gray-900 dark:text-white line-clamp-1 mb-1">
+                    {publication.title}
+                  </h3>
+                  {formatPrice(publication.value, publication.currency) && (
+                    <div className="text-blue-600 font-bold text-sm mb-1">
+                      {formatPrice(publication.value, publication.currency)}
+                    </div>
                   )}
                 </div>
-
-                {/* Action Buttons - BOTÓN CONTACTAR PROMINENTE */}
-                <div className="flex items-center gap-1">
-                  {/* Views en list mode */}
-                  {viewMode === 'list' && (
-                    <div className="flex items-center text-xs text-gray-500 mr-2">
+                
+                <div className="flex items-center justify-between text-xs text-gray-500">
+                  <div className="flex items-center truncate">
+                    <MapPinIcon className="w-3 h-3 mr-1 flex-shrink-0" />
+                    <span className="truncate">{formatLocation(publication.location)}</span>
+                  </div>
+                  
+                  <div className="flex items-center gap-2 flex-shrink-0 ml-2">
+                    <div className="flex items-center">
                       <EyeIcon className="w-3 h-3 mr-1" />
                       <span>{publication.views || 0}</span>
                     </div>
-                  )}
-
-                  {/* Share Button - CENTRO */}
-                  <button
-                    onClick={handleShare}
-                    className="p-1.5 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-full transition-colors"
-                    aria-label="Compartir"
-                  >
-                    <ShareIcon className="w-4 h-4 text-gray-500" />
-                  </button>
-
-                  {/* WhatsApp Button - ESQUINA INFERIOR DERECHA */}
-                  {showWhatsApp && publication.whatsapp && (
-                    <button
-                      onClick={handleWhatsAppClick}
-                      className="flex items-center gap-1 bg-green-500 hover:bg-green-600 text-white text-xs font-medium px-2 py-1.5 rounded-full shadow-sm transition-all hover:scale-105"
-                      aria-label="Contactar por WhatsApp"
-                    >
-                      <WhatsAppIcon className="w-3 h-3" />
-                      <span>Contactar</span>
-                    </button>
-                  )}
-
-                  {/* Favorite Button - ULTIMO EN LA DERECHA */}
-                  <button
-                    onClick={handleFavoriteToggle}
-                    className="p-1.5 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-full transition-colors"
-                    aria-label="Agregar a favoritos"
-                  >
-                    {isFavorite ? (
-                      <HeartSolidIcon className="w-4 h-4 text-red-500" />
-                    ) : (
-                      <HeartIcon className="w-4 h-4 text-gray-500" />
+                    
+                    {showWhatsApp && publication.whatsapp && (
+                      <button
+                        onClick={handleWhatsAppClick}
+                        className="bg-green-500 hover:bg-green-600 text-white p-1 rounded-md transition-colors"
+                        aria-label="Contactar"
+                      >
+                        <WhatsAppIcon className="w-3 h-3" />
+                      </button>
                     )}
-                  </button>
+                    
+                    <button
+                      onClick={handleFavoriteToggle}
+                      className="hover:bg-gray-100 p-1 rounded-md transition-colors"
+                      aria-label="Favorito"
+                    >
+                      {isFavorite ? (
+                        <HeartSolidIcon className="w-3 h-3 text-red-500" />
+                      ) : (
+                        <HeartIcon className="w-3 h-3 text-gray-400" />
+                      )}
+                    </button>
+                  </div>
+                </div>
+              </>
+            ) : (
+              /* Grid mode - Layout original */
+              <>
+                <div className="flex-1 min-h-0">
+                  <h3 className="title font-semibold text-gray-900 dark:text-white group-hover:text-blue-600 transition-colors text-base mb-2 line-clamp-2">
+                    {publication.title}
+                  </h3>
+
+                  <p className="description text-gray-600 dark:text-gray-400 text-sm mb-2 line-clamp-2">
+                    {publication.description}
+                  </p>
+                </div>
+              </>
+            )}
+
+            {/* Footer Section - Solo para grid mode */}
+            {viewMode === 'grid' && (
+              <div className="space-y-1 mt-auto">
+                <div className="flex items-center justify-between text-xs text-gray-500 dark:text-gray-400">
+                  <div className="flex items-center max-w-[50%]">
+                    <MapPinIcon className="w-3 h-3 mr-1 flex-shrink-0" />
+                    <span className="truncate">{formatLocation(publication.location)}</span>
+                  </div>
+                  
+                  <div className="flex items-center text-xs">
+                    <ClockIcon className="w-3 h-3 mr-1" />
+                    <span>{formatExactDateTime(publication.createdAt)}</span>
+                  </div>
+                </div>
+
+                <div className="flex items-center justify-between">
+                  <div className={`inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium ${categoryColor}`}>
+                    <CategoryIcon className="w-3 h-3" />
+                    <span className="capitalize">
+                      {publication.subcategorySlug || publication.categorySlug}
+                    </span>
+                  </div>
+
+                  <div className="flex items-center gap-1">
+                    <button
+                      onClick={handleShare}
+                      className="p-1.5 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-full transition-colors"
+                      aria-label="Compartir"
+                    >
+                      <ShareIcon className="w-4 h-4 text-gray-500" />
+                    </button>
+
+                    {showWhatsApp && publication.whatsapp && (
+                      <button
+                        onClick={handleWhatsAppClick}
+                        className="flex items-center gap-1 bg-green-500 hover:bg-green-600 text-white text-xs font-medium px-2 py-1.5 rounded-full shadow-sm transition-all hover:scale-105"
+                        aria-label="Contactar por WhatsApp"
+                      >
+                        <WhatsAppIcon className="w-3 h-3" />
+                        <span>Contactar</span>
+                      </button>
+                    )}
+
+                    <button
+                      onClick={handleFavoriteToggle}
+                      className="p-1.5 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-full transition-colors"
+                      aria-label="Agregar a favoritos"
+                    >
+                      {isFavorite ? (
+                        <HeartSolidIcon className="w-4 h-4 text-red-500" />
+                      ) : (
+                        <HeartIcon className="w-4 h-4 text-gray-500" />
+                      )}
+                    </button>
+                  </div>
                 </div>
               </div>
-            </div>
+            )}
           </div>
         </Link>
       </motion.div>
