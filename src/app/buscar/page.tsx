@@ -22,6 +22,10 @@ interface SearchResult {
   price: number;
   location: string;
   image: string;
+  createdAt: string;
+  views: number;
+  featured?: boolean;
+  premium?: boolean;
 }
 
 interface PublicationData {
@@ -99,11 +103,11 @@ function SearchPageContent() {
         country: 'Perú'
       },
       images: [searchResult.image],
-      whatsapp: '',
-      createdAt: new Date().toISOString(),
-      views: Math.floor(Math.random() * 500) + 50,
-      featured: Math.random() > 0.8,
-      premium: Math.random() > 0.9,
+      whatsapp: '51987654321', // Número de WhatsApp por defecto
+      createdAt: searchResult.createdAt || new Date().toISOString(), // Usar fecha real de MongoDB
+      views: searchResult.views || Math.floor(Math.random() * 500) + 50,
+      featured: searchResult.featured || false,
+      premium: searchResult.premium || false,
     }
   }
 
@@ -150,7 +154,11 @@ function SearchPageContent() {
           ? `${pub.location.district || pub.location.province || pub.location.city || 'Sin ubicación'}` 
           : pub.location || 'Sin ubicación',
         category: pub.categorySlug || pub.category || 'general',
-        image: pub.images?.[0] || '/images/placeholder-image.jpg'
+        image: pub.images?.[0] || '/images/placeholder-image.jpg',
+        createdAt: pub.createdAt || pub.created_at || new Date().toISOString(), // Fecha real de MongoDB
+        views: pub.views || Math.floor(Math.random() * 500) + 50,
+        premium: pub.premium || false,
+        featured: pub.featured || false
       }))
 
       setResults(adaptedResults)
