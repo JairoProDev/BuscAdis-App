@@ -296,17 +296,21 @@ export default function PublicationCard({
             {/* Overlay Gradient */}
             <div className="absolute inset-0 bg-gradient-to-t from-black/20 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
             
-            {/* Price Badge - Solo en grid mode */}
-            {viewMode === 'grid' && formatPrice(publication.value, publication.currency) && (
-              <div className="absolute top-2 left-2 bg-gradient-to-r from-blue-600 to-blue-700 text-white font-bold px-3 py-1 rounded-full shadow-lg backdrop-blur-sm text-sm">
+            {/* Price Badge - Para ambos modos */}
+            {formatPrice(publication.value, publication.currency) && (
+              <div className={`absolute top-2 left-2 bg-gradient-to-r from-blue-600 to-blue-700 text-white font-bold rounded-full shadow-lg backdrop-blur-sm ${
+                viewMode === 'list' ? 'px-2 py-1 text-xs' : 'px-3 py-1 text-sm'
+              }`}>
                 {formatPrice(publication.value, publication.currency)}
               </div>
             )}
             
-            {/* Featured Badge - Sin texto premium, solo contorno vibrante */}
+            {/* Featured Badge */}
             {publication.featured && !publication.premium && (
-              <div className="absolute top-2 right-2 bg-blue-500 text-white text-xs font-bold px-2 py-1 rounded-full shadow-md">
-                🚀 Destacado
+              <div className={`absolute top-2 right-2 bg-blue-500 text-white font-bold rounded-full shadow-md ${
+                viewMode === 'list' ? 'px-1.5 py-0.5 text-xs' : 'px-2 py-1 text-xs'
+              }`}>
+                {viewMode === 'list' ? '🚀' : '🚀 Destacado'}
               </div>
             )}
 
@@ -318,7 +322,7 @@ export default function PublicationCard({
               </div>
             )}
 
-            {/* Favorite Button - MOVIDO A LA DERECHA en grid mode */}
+            {/* Favorite Button en imagen - Solo para grid mode */}
             {viewMode === 'grid' && (
               <button
                 onClick={handleFavoriteToggle}
@@ -341,46 +345,85 @@ export default function PublicationCard({
               : 'p-4 flex-1 min-h-0 flex-col'
           }`}>
             {viewMode === 'list' ? (
-              /* Lista optimizada - Máximo aprovechamiento del espacio */
+              /* Lista completa - Toda la información organizada */
               <>
-                <div className="flex-1 min-w-0">
-                  {/* Título */}
-                  <h3 className="text-base font-semibold text-gray-900 dark:text-white line-clamp-1 mb-1">
-                    {publication.title}
-                  </h3>
+                <div className="flex-1 min-w-0 flex flex-col justify-between">
+                  {/* Fila superior: Título, categoría y favorito */}
+                  <div className="flex items-start justify-between mb-2">
+                    <div className="flex-1 min-w-0 mr-2">
+                      <h3 className="text-base font-semibold text-gray-900 dark:text-white line-clamp-1 mb-1">
+                        {publication.title}
+                      </h3>
+                      
+                      {/* Categoría badge */}
+                      <div className={`inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium ${categoryColor}`}>
+                        <CategoryIcon className="w-3 h-3" />
+                        <span className="capitalize">
+                          {publication.subcategorySlug || publication.categorySlug}
+                        </span>
+                      </div>
+                    </div>
+                    
+                    {/* Botón favorito */}
+                    <button
+                      onClick={handleFavoriteToggle}
+                      className="p-1.5 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-full transition-colors flex-shrink-0"
+                      aria-label="Favorito"
+                    >
+                      {isFavorite ? (
+                        <HeartSolidIcon className="w-4 h-4 text-red-500" />
+                      ) : (
+                        <HeartIcon className="w-4 h-4 text-gray-400" />
+                      )}
+                    </button>
+                  </div>
                   
                   {/* Descripción */}
-                  <p className="text-sm text-gray-600 dark:text-gray-400 line-clamp-2 mb-2">
+                  <p className="text-sm text-gray-600 dark:text-gray-400 line-clamp-2 mb-3 flex-1">
                     {publication.description}
                   </p>
                   
-                  {/* Precio */}
+                  {/* Precio destacado - Solo si no hay precio en la imagen o para dar énfasis */}
                   {formatPrice(publication.value, publication.currency) && (
-                    <div className="text-blue-600 font-bold text-lg mb-2">
+                    <div className="text-blue-600 font-bold text-lg mb-3">
                       {formatPrice(publication.value, publication.currency)}
                     </div>
                   )}
                   
-                  {/* Información inferior */}
+                  {/* Fila inferior: Metadatos y botón contactar */}
                   <div className="flex items-center justify-between">
-                    {/* Ubicación y fecha */}
-                    <div className="flex items-center text-xs text-gray-500 space-x-3">
+                    {/* Metadatos izquierda */}
+                    <div className="flex items-center text-xs text-gray-500 space-x-2 sm:space-x-4 flex-wrap">
+                      {/* Ubicación */}
                       <div className="flex items-center">
-                        <MapPinIcon className="w-3 h-3 mr-1" />
-                        <span className="truncate max-w-24">{formatLocation(publication.location)}</span>
+                        <MapPinIcon className="w-3 h-3 mr-1 text-gray-400" />
+                        <span className="truncate max-w-20 sm:max-w-24">{formatLocation(publication.location)}</span>
                       </div>
+                      
+                      {/* Fecha */}
                       <div className="flex items-center">
-                        <ClockIcon className="w-3 h-3 mr-1" />
-                        <span>{formatExactDateTime(publication.createdAt)}</span>
+                        <ClockIcon className="w-3 h-3 mr-1 text-gray-400" />
+                        <span className="whitespace-nowrap">{formatExactDateTime(publication.createdAt)}</span>
                       </div>
+                      
+                      {/* Vistas */}
                       <div className="flex items-center">
-                        <EyeIcon className="w-3 h-3 mr-1" />
+                        <EyeIcon className="w-3 h-3 mr-1 text-gray-400" />
                         <span>{publication.views || 0}</span>
                       </div>
                     </div>
                     
-                    {/* Botones de acción */}
-                    <div className="flex items-center gap-2">
+                    {/* Botones de acción derecha */}
+                    <div className="flex items-center gap-2 flex-shrink-0">
+                      {/* Botón compartir */}
+                      <button
+                        onClick={handleShare}
+                        className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors"
+                        aria-label="Compartir"
+                      >
+                        <ShareIcon className="w-4 h-4 text-gray-500" />
+                      </button>
+                      
                       {/* Botón WhatsApp con texto */}
                       {showWhatsApp && publication.whatsapp && (
                         <button
@@ -392,19 +435,6 @@ export default function PublicationCard({
                           <span>Contactar</span>
                         </button>
                       )}
-                      
-                      {/* Botón favorito */}
-                      <button
-                        onClick={handleFavoriteToggle}
-                        className="p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors"
-                        aria-label="Favorito"
-                      >
-                        {isFavorite ? (
-                          <HeartSolidIcon className="w-4 h-4 text-red-500" />
-                        ) : (
-                          <HeartIcon className="w-4 h-4 text-gray-400" />
-                        )}
-                      </button>
                     </div>
                   </div>
                 </div>

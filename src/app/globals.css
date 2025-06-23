@@ -329,11 +329,12 @@
 
   .publication-card-list .content {
     flex: 1;
-    padding: 1rem;
+    padding: 0.75rem;
     display: flex;
     flex-direction: column;
     justify-content: space-between;
     overflow: hidden;
+    min-height: 0;
   }
 
   .publication-card-list .title {
