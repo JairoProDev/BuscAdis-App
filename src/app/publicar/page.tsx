@@ -72,35 +72,40 @@ export default function PublicarPage() {
     badges: []
   });
 
-  // Estado principal del anuncio
-  const [ad, setAd] = useState<PublicationFormData>({
-    title: '',
-    description: '',
-    categorySlug: '',
-    subcategorySlug: '',
-    subSubcategorySlug: '',
-    transactionType: 'venta',
-    amount: null,
-    currency: 'PEN',
-    negotiable: false,
-    location: {
-      province: 'Cusco',
-      district: '',
-      address: '',
-      referencePoint: '',
-      coordinates: null,
-    },
-    contact: {
-      phones: [''],
-      email: '',
-      name: '',
-      website: '',
-    },
-    attributes: {},
-    images: [],
-    status: 'pending',
-    premium: false,
-  });
+  // Función para asegurar la estructura correcta del objeto ad
+  const ensureAdStructure = (adData: Partial<PublicationFormData>): PublicationFormData => {
+    return {
+      title: adData.title || '',
+      description: adData.description || '',
+      categorySlug: adData.categorySlug || '',
+      subcategorySlug: adData.subcategorySlug || '',
+      subSubcategorySlug: adData.subSubcategorySlug || '',
+      transactionType: adData.transactionType || 'venta',
+      amount: adData.amount || null,
+      currency: adData.currency || 'PEN',
+      negotiable: adData.negotiable || false,
+      location: {
+        province: adData.location?.province || 'Cusco',
+        district: adData.location?.district || '',
+        address: adData.location?.address || '',
+        referencePoint: adData.location?.referencePoint || '',
+        coordinates: adData.location?.coordinates || null,
+      },
+      contact: {
+        phones: adData.contact?.phones || [''],
+        email: adData.contact?.email || '',
+        name: adData.contact?.name || '',
+        website: adData.contact?.website || '',
+      },
+      attributes: adData.attributes || {},
+      images: Array.isArray(adData.images) ? adData.images : [],
+      status: adData.status || 'pending',
+      premium: adData.premium || false,
+    };
+  };
+
+  // Estado principal del anuncio con estructura garantizada
+  const [ad, setAd] = useState<PublicationFormData>(() => ensureAdStructure({}));
 
   // Actualizar logros y gamificación
   const updateAchievements = useCallback((newAd: PublicationFormData) => {
@@ -332,8 +337,8 @@ export default function PublicarPage() {
   const handlePriceChange = useCallback((priceData: any) => {
     updateAd({
       amount: priceData.amount,
-      currency: priceData.currency,
-      negotiable: priceData.negotiable,
+      currency: priceData.currency as 'PEN' | 'USD' || 'PEN',
+      negotiable: priceData.negotiable || false,
     });
   }, [updateAd]);
 
@@ -377,10 +382,15 @@ export default function PublicarPage() {
     setError('');
 
     try {
+      // Debug: Ver qué datos se están enviando
+      console.log('🚀 Datos del anuncio a enviar:', ad);
+      
       // Preparar datos finales
       const finalAdData = { ...ad };
       if (!finalAdData.subSubcategorySlug) delete finalAdData.subSubcategorySlug;
       if (finalAdData.images?.length === 0) delete finalAdData.images;
+
+      console.log('🚀 Datos finales procesados:', finalAdData);
 
       // Enviar al servicio
       const response = await PublicationsService.createPublication(finalAdData);
@@ -389,6 +399,7 @@ export default function PublicarPage() {
       setSuccess(true);
       Logger.info('Publicación creada exitosamente', { id: response.id });
     } catch (error) {
+      console.error('❌ Error al publicar:', error);
       const errorMessage = error instanceof Error ? error.message : 'Hubo un error al publicar tu anuncio';
       setError(errorMessage);
       Logger.error('Error al crear publicación', { error });
@@ -468,7 +479,7 @@ export default function PublicarPage() {
                 <PriceInput
                   initialValue={{
                     amount: ad.amount || null,
-                    currency: ad.currency || 'PEN',
+                    currency: ad.currency as 'PEN' | 'USD' || 'PEN',
                     negotiable: ad.negotiable || false
                   }}
                   onChange={handlePriceChange}
@@ -477,7 +488,15 @@ export default function PublicarPage() {
               
               <div>
                 <LocationSelector
-                  initialValue={ad.location as PublicationLocation}
+                  initialValue={{
+                    district: ad.location?.district || '',
+                    province: ad.location?.province || '',
+                    city: ad.location?.city || '',
+                    country: ad.location?.country || 'PE',
+                    address: ad.location?.address || '',
+                    referencePoint: ad.location?.referencePoint || '',
+                    coordinates: ad.location?.coordinates || null
+                  }}
                   onChange={handleLocationChange}
                 />
               </div>
@@ -503,14 +522,13 @@ export default function PublicarPage() {
         return (
           <div className="space-y-6">
             <AdPreview 
-              adData={ad} 
-              isPreview={true}
+              ad={ad} 
+              quality={adQuality}
             />
             
             <PublishAchievements 
-              achievements={achievements.completed}
-              totalPoints={achievements.points}
-              badges={achievements.badges}
+              achievements={achievements}
+              quality={adQuality}
             />
           </div>
         );
@@ -525,15 +543,15 @@ export default function PublicarPage() {
       <div className="min-h-screen bg-gray-50 py-8">
         <div className="max-w-4xl mx-auto px-4">
           <SuccessMessage 
-            publicationId={publishedId} 
+            title="¡Publicación Exitosa!"
+            message="Tu anuncio ha sido publicado correctamente y ya está visible para miles de usuarios."
+            publishedId={publishedId}
           />
           
           <div className="mt-8 bg-white shadow rounded-lg p-6">
             <PublishAchievements 
-              achievements={achievements.completed}
-              totalPoints={achievements.points}
-              badges={achievements.badges}
-              showConfetti={true}
+              achievements={achievements}
+              quality={adQuality}
             />
           </div>
         </div>

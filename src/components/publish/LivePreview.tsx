@@ -23,6 +23,31 @@ interface LivePreviewProps {
 }
 
 const LivePreview: React.FC<LivePreviewProps> = ({ ad, quality, achievements }) => {
+  // Validaciones defensivas para asegurar que todos los datos estén bien definidos
+  const safeAd = {
+    title: ad?.title || '',
+    description: ad?.description || '',
+    categorySlug: ad?.categorySlug || '',
+    amount: ad?.amount || null,
+    negotiable: ad?.negotiable || false,
+    location: {
+      district: ad?.location?.district || '',
+      province: ad?.location?.province || ''
+    },
+    contact: {
+      phones: Array.isArray(ad?.contact?.phones) ? ad.contact.phones : ['']
+    },
+    images: Array.isArray(ad?.images) ? ad.images : []
+  };
+
+  const safeQuality = typeof quality === 'number' ? quality : 0;
+  
+  const safeAchievements = {
+    completed: Array.isArray(achievements?.completed) ? achievements.completed : [],
+    points: achievements?.points || 0,
+    badges: Array.isArray(achievements?.badges) ? achievements.badges : []
+  };
+
   const getQualityColor = (quality: number) => {
     if (quality >= 80) return 'text-green-600';
     if (quality >= 60) return 'text-blue-600';
@@ -32,13 +57,13 @@ const LivePreview: React.FC<LivePreviewProps> = ({ ad, quality, achievements }) 
 
   const getCompletionItems = () => {
     const items = [
-      { key: 'title', label: 'Título', completed: !!ad.title && ad.title.length >= 10 },
-      { key: 'description', label: 'Descripción', completed: !!ad.description && ad.description.length >= 30 },
-      { key: 'category', label: 'Categoría', completed: !!ad.categorySlug },
-      { key: 'price', label: 'Precio', completed: ad.amount !== null && ad.amount > 0 },
-      { key: 'location', label: 'Ubicación', completed: !!ad.location?.district || !!ad.location?.province },
-      { key: 'contact', label: 'Contacto', completed: !!ad.contact?.phones?.[0] },
-      { key: 'images', label: 'Imágenes', completed: !!ad.images?.length }
+      { key: 'title', label: 'Título', completed: !!safeAd.title && safeAd.title.length >= 10 },
+      { key: 'description', label: 'Descripción', completed: !!safeAd.description && safeAd.description.length >= 30 },
+      { key: 'category', label: 'Categoría', completed: !!safeAd.categorySlug },
+      { key: 'price', label: 'Precio', completed: safeAd.amount !== null && safeAd.amount > 0 },
+      { key: 'location', label: 'Ubicación', completed: !!safeAd.location?.district || !!safeAd.location?.province },
+      { key: 'contact', label: 'Contacto', completed: !!safeAd.contact?.phones?.[0] },
+      { key: 'images', label: 'Imágenes', completed: !!safeAd.images?.length }
     ];
     return items;
   };
@@ -70,8 +95,8 @@ const LivePreview: React.FC<LivePreviewProps> = ({ ad, quality, achievements }) 
         >
           {/* Título */}
           <div className="mb-2">
-            {ad.title ? (
-              <h4 className="font-semibold text-gray-900 line-clamp-2">{ad.title}</h4>
+            {safeAd.title ? (
+              <h4 className="font-semibold text-gray-900 line-clamp-2">{safeAd.title}</h4>
             ) : (
               <div className="h-6 bg-gray-200 rounded animate-pulse"></div>
             )}
@@ -79,10 +104,10 @@ const LivePreview: React.FC<LivePreviewProps> = ({ ad, quality, achievements }) 
 
           {/* Precio */}
           <div className="mb-2">
-            {ad.amount ? (
+            {safeAd.amount ? (
               <div className="text-lg font-bold text-blue-600">
-                S/. {ad.amount.toLocaleString()}
-                {ad.negotiable && <span className="text-sm text-gray-500 ml-1">(Negociable)</span>}
+                S/. {safeAd.amount.toLocaleString()}
+                {safeAd.negotiable && <span className="text-sm text-gray-500 ml-1">(Negociable)</span>}
               </div>
             ) : (
               <div className="h-6 bg-gray-200 rounded w-24 animate-pulse"></div>
@@ -91,8 +116,8 @@ const LivePreview: React.FC<LivePreviewProps> = ({ ad, quality, achievements }) 
 
           {/* Descripción */}
           <div className="mb-3">
-            {ad.description ? (
-              <p className="text-sm text-gray-600 line-clamp-3">{ad.description}</p>
+            {safeAd.description ? (
+              <p className="text-sm text-gray-600 line-clamp-3">{safeAd.description}</p>
             ) : (
               <div className="space-y-2">
                 <div className="h-4 bg-gray-200 rounded animate-pulse"></div>
@@ -103,17 +128,17 @@ const LivePreview: React.FC<LivePreviewProps> = ({ ad, quality, achievements }) 
 
           {/* Metadatos */}
           <div className="flex flex-wrap gap-2 text-xs text-gray-500">
-            {ad.categorySlug && (
+            {safeAd.categorySlug && (
               <span className="flex items-center bg-gray-200 px-2 py-1 rounded">
                 <TagIcon className="w-3 h-3 mr-1" />
-                {ad.categorySlug}
+                {safeAd.categorySlug}
               </span>
             )}
             
-            {(ad.location?.district || ad.location?.province) && (
+            {(safeAd.location?.district || safeAd.location?.province) && (
               <span className="flex items-center bg-gray-200 px-2 py-1 rounded">
                 <MapPinIcon className="w-3 h-3 mr-1" />
-                {ad.location.district || ad.location.province}
+                {safeAd.location.district || safeAd.location.province}
               </span>
             )}
 
@@ -124,11 +149,11 @@ const LivePreview: React.FC<LivePreviewProps> = ({ ad, quality, achievements }) 
           </div>
 
           {/* Contacto */}
-          {ad.contact?.phones?.[0] && (
+          {safeAd.contact?.phones?.[0] && (
             <div className="mt-3 pt-3 border-t border-gray-200">
               <div className="flex items-center text-sm text-gray-600">
                 <PhoneIcon className="w-4 h-4 mr-2" />
-                {ad.contact.phones[0]}
+                {safeAd.contact.phones[0]}
               </div>
             </div>
           )}
@@ -139,20 +164,20 @@ const LivePreview: React.FC<LivePreviewProps> = ({ ad, quality, achievements }) 
       <div className="bg-white rounded-lg border border-gray-200 p-4">
         <div className="flex items-center justify-between mb-2">
           <span className="text-sm font-medium text-gray-700">Calidad del Anuncio</span>
-          <span className={`text-sm font-bold ${getQualityColor(quality)}`}>
-            {quality}%
+          <span className={`text-sm font-bold ${getQualityColor(safeQuality)}`}>
+            {safeQuality}%
           </span>
         </div>
         
         <div className="w-full bg-gray-200 rounded-full h-2 mb-3">
           <motion.div
             className={`h-2 rounded-full transition-all duration-500 ${
-              quality >= 80 ? 'bg-green-500' :
-              quality >= 60 ? 'bg-blue-500' :
-              quality >= 40 ? 'bg-yellow-500' : 'bg-gray-400'
+              safeQuality >= 80 ? 'bg-green-500' :
+              safeQuality >= 60 ? 'bg-blue-500' :
+              safeQuality >= 40 ? 'bg-yellow-500' : 'bg-gray-400'
             }`}
             initial={{ width: 0 }}
-            animate={{ width: `${quality}%` }}
+            animate={{ width: `${safeQuality}%` }}
           />
         </div>
 
@@ -161,7 +186,7 @@ const LivePreview: React.FC<LivePreviewProps> = ({ ad, quality, achievements }) 
             <StarIcon
               key={i}
               className={`h-4 w-4 ${
-                i < Math.floor(quality / 20)
+                i < Math.floor(safeQuality / 20)
                   ? 'text-yellow-400'
                   : 'text-gray-300'
               }`}
@@ -203,15 +228,15 @@ const LivePreview: React.FC<LivePreviewProps> = ({ ad, quality, achievements }) 
       </div>
 
       {/* Gamificación rápida */}
-      {achievements.points > 0 && (
+      {safeAchievements.points > 0 && (
         <div className="bg-gradient-to-r from-purple-50 to-blue-50 rounded-lg border border-purple-200 p-4">
           <div className="text-center">
-            <div className="text-2xl font-bold text-purple-600">{achievements.points}</div>
+            <div className="text-2xl font-bold text-purple-600">{safeAchievements.points}</div>
             <div className="text-sm text-purple-700">Puntos acumulados</div>
             
-            {achievements.badges.length > 0 && (
+            {safeAchievements.badges.length > 0 && (
               <div className="mt-2 flex justify-center space-x-1">
-                {achievements.badges.slice(0, 3).map((badge, index) => (
+                {safeAchievements.badges.slice(0, 3).map((badge, index) => (
                   <span key={index} className="text-lg">
                     {badge === 'oro' ? '🥇' : badge === 'plata' ? '🥈' : '🥉'}
                   </span>

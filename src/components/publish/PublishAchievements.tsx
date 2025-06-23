@@ -28,6 +28,13 @@ const PublishAchievements: React.FC<PublishAchievementsProps> = ({
   quality,
   onNewPublication
 }) => {
+  // Validación defensiva para asegurar que achievements esté bien definido
+  const safeAchievements = {
+    completed: Array.isArray(achievements?.completed) ? achievements.completed : [],
+    points: achievements?.points || 0,
+    badges: Array.isArray(achievements?.badges) ? achievements.badges : []
+  };
+
   const availableAchievements: Achievement[] = [
     {
       id: 'category',
@@ -35,7 +42,7 @@ const PublishAchievements: React.FC<PublishAchievementsProps> = ({
       description: 'Seleccionaste la categoría perfecta',
       icon: '🎯',
       points: 10,
-      unlocked: achievements.completed.includes('category')
+      unlocked: safeAchievements.completed.includes('category')
     },
     {
       id: 'details',
@@ -43,7 +50,7 @@ const PublishAchievements: React.FC<PublishAchievementsProps> = ({
       description: 'Escribiste una descripción detallada',
       icon: '📝',
       points: 15,
-      unlocked: achievements.completed.includes('details')
+      unlocked: safeAchievements.completed.includes('details')
     },
     {
       id: 'location',
@@ -51,7 +58,7 @@ const PublishAchievements: React.FC<PublishAchievementsProps> = ({
       description: 'Añadiste ubicación específica',
       icon: '📍',
       points: 10,
-      unlocked: achievements.completed.includes('location')
+      unlocked: safeAchievements.completed.includes('location')
     },
     {
       id: 'images',
@@ -59,7 +66,7 @@ const PublishAchievements: React.FC<PublishAchievementsProps> = ({
       description: 'Subiste imágenes de calidad',
       icon: '📸',
       points: 20,
-      unlocked: achievements.completed.includes('images')
+      unlocked: safeAchievements.completed.includes('images')
     },
     {
       id: 'contact',
@@ -67,7 +74,7 @@ const PublishAchievements: React.FC<PublishAchievementsProps> = ({
       description: 'Proporcionaste información de contacto',
       icon: '📞',
       points: 10,
-      unlocked: achievements.completed.includes('contact')
+      unlocked: safeAchievements.completed.includes('contact')
     },
     {
       id: 'published',
@@ -75,7 +82,7 @@ const PublishAchievements: React.FC<PublishAchievementsProps> = ({
       description: '¡Publicaste tu primer anuncio!',
       icon: '🚀',
       points: 50,
-      unlocked: achievements.completed.includes('published')
+      unlocked: safeAchievements.completed.includes('published')
     }
   ];
 
@@ -109,7 +116,7 @@ const PublishAchievements: React.FC<PublishAchievementsProps> = ({
       <div className="bg-gradient-to-r from-purple-50 to-blue-50 rounded-lg p-6">
         <div className="grid grid-cols-2 gap-4">
           <div className="text-center">
-            <div className="text-3xl font-bold text-purple-600">{achievements.points}</div>
+            <div className="text-3xl font-bold text-purple-600">{safeAchievements.points}</div>
             <div className="text-sm text-gray-600 flex items-center justify-center">
               <FireIcon className="w-4 h-4 mr-1 text-orange-500" />
               Puntos totales
@@ -125,14 +132,14 @@ const PublishAchievements: React.FC<PublishAchievementsProps> = ({
       </div>
 
       {/* Insignias obtenidas */}
-      {achievements.badges.length > 0 && (
+      {safeAchievements.badges.length > 0 && (
         <div className="bg-white rounded-lg border border-gray-200 p-4">
           <h3 className="font-semibold text-gray-900 mb-3 flex items-center">
             <TrophyIcon className="w-5 h-5 mr-2 text-yellow-500" />
             Insignias Desbloqueadas
           </h3>
           <div className="flex flex-wrap gap-2">
-            {achievements.badges.map((badge, index) => {
+            {safeAchievements.badges.map((badge, index) => {
               const badgeInfo = getBadgeInfo(badge);
               return (
                 <motion.div

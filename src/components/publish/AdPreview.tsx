@@ -2,7 +2,7 @@
 
 import React from 'react'
 import Image from 'next/image'
-import { MapPinIcon, CalendarDaysIcon, PhoneIcon, EnvelopeIcon, TagIcon, ClockIcon, CheckCircleIcon, ArrowTopRightOnSquareIcon, StarIcon, EyeIcon } from '@heroicons/react/24/outline'
+import { MapPinIcon, PhoneIcon, EnvelopeIcon, TagIcon, CalendarIcon, StarIcon, EyeIcon } from '@heroicons/react/24/outline'
 import formatUtils from '@/utils/format'
 import { getClassificationNames } from '@/data/categories-data'
 import { motion } from 'framer-motion'
@@ -45,7 +45,16 @@ interface AdPreviewProps {
 }
 
 const AdPreview: React.FC<AdPreviewProps> = ({ ad, quality }) => {
-  const formatPrice = (amount: number | null) => {
+  // Verificación defensiva para asegurar que ad esté bien definido
+  if (!ad || typeof ad !== 'object') {
+    return (
+      <div className="bg-gray-50 border border-gray-200 rounded-lg p-6 text-center">
+        <p className="text-gray-500">Datos del anuncio no disponibles</p>
+      </div>
+    );
+  }
+
+  const formatPrice = (amount: number | null | undefined) => {
     if (!amount) return 'Precio a consultar';
     return `S/. ${amount.toLocaleString()}`;
   };
@@ -89,7 +98,7 @@ const AdPreview: React.FC<AdPreviewProps> = ({ ad, quality }) => {
       >
         {/* Imágenes placeholder */}
         <div className="aspect-video bg-gradient-to-br from-blue-50 to-purple-50 flex items-center justify-center">
-          {ad.images && ad.images.length > 0 ? (
+          {ad.images && Array.isArray(ad.images) && ad.images.length > 0 ? (
             <div className="text-center">
               <div className="text-4xl mb-2">📸</div>
               <p className="text-sm text-gray-600">{ad.images.length} imagen(es)</p>
@@ -224,7 +233,7 @@ const AdPreview: React.FC<AdPreviewProps> = ({ ad, quality }) => {
       <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
         <h4 className="font-medium text-blue-900 mb-2">💡 Consejos para mejorar tu anuncio</h4>
         <ul className="space-y-1 text-sm text-blue-800">
-          {!ad.images?.length && (
+          {(!ad.images || !Array.isArray(ad.images) || ad.images.length === 0) && (
             <li>• Añade al menos 2-3 imágenes para atraer más compradores</li>
           )}
           {ad.title && ad.title.length < 20 && (
