@@ -5,11 +5,19 @@ import { CheckIcon } from '@heroicons/react/24/solid';
 
 interface PublicationProgressProps {
   progress: number;
-  steps: string[];
+  stepNames: string[];
   currentStep: number;
+  totalSteps: number;
+  onStepClick?: (step: number) => void;
 }
 
-const PublicationProgress: React.FC<PublicationProgressProps> = ({ progress, steps, currentStep }) => {
+const PublicationProgress: React.FC<PublicationProgressProps> = ({ 
+  progress, 
+  stepNames, 
+  currentStep, 
+  totalSteps,
+  onStepClick 
+}) => {
   return (
     <div className="mb-8">
       <div className="flex justify-between items-center mb-1">
@@ -29,12 +37,17 @@ const PublicationProgress: React.FC<PublicationProgressProps> = ({ progress, ste
 
       {/* Pasos (versión dispositivos medianos y grandes) */}
       <div className="hidden md:flex justify-between">
-        {steps.map((step, index) => {
-          const isCompleted = index < currentStep;
-          const isCurrent = index === currentStep;
+        {stepNames.map((step, index) => {
+          const stepNumber = index + 1;
+          const isCompleted = stepNumber < currentStep;
+          const isCurrent = stepNumber === currentStep;
           
           return (
-            <div key={index} className="flex flex-col items-center">
+            <div 
+              key={index} 
+              className={`flex flex-col items-center ${onStepClick ? 'cursor-pointer' : ''}`}
+              onClick={() => onStepClick && onStepClick(stepNumber)}
+            >
               <div 
                 className={`flex items-center justify-center w-8 h-8 rounded-full mb-1 transition-all ${
                   isCompleted 
@@ -47,7 +60,7 @@ const PublicationProgress: React.FC<PublicationProgressProps> = ({ progress, ste
                 {isCompleted ? (
                   <CheckIcon className="w-5 h-5" />
                 ) : (
-                  <span className="text-sm font-medium">{index + 1}</span>
+                  <span className="text-sm font-medium">{stepNumber}</span>
                 )}
               </div>
               <span className={`text-xs ${
@@ -66,21 +79,21 @@ const PublicationProgress: React.FC<PublicationProgressProps> = ({ progress, ste
         <div className="flex items-center">
           <div 
             className={`flex items-center justify-center w-6 h-6 rounded-full mr-2 ${
-              currentStep > 0 ? 'bg-primary-600 text-white' : 'bg-primary-100 text-primary-700 border-2 border-primary-600'
+              currentStep > 1 ? 'bg-primary-600 text-white' : 'bg-primary-100 text-primary-700 border-2 border-primary-600'
             }`}
           >
-            {currentStep > 0 ? (
+            {currentStep > 1 ? (
               <CheckIcon className="w-4 h-4" />
             ) : (
-              <span className="text-xs font-medium">1</span>
+              <span className="text-xs font-medium">{currentStep}</span>
             )}
           </div>
           <span className="text-sm font-medium text-gray-800">
-            {steps[currentStep]}
+            {stepNames[currentStep - 1]}
           </span>
         </div>
         <span className="text-xs text-gray-500">
-          Paso {currentStep + 1} de {steps.length}
+          Paso {currentStep} de {totalSteps}
         </span>
       </div>
     </div>
