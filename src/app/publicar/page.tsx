@@ -79,28 +79,28 @@ export default function PublicarPage() {
       description: adData.description || '',
       categorySlug: adData.categorySlug || '',
       subcategorySlug: adData.subcategorySlug || '',
-      subSubcategorySlug: adData.subSubcategorySlug || '',
+      subSubcategorySlug: adData.subSubcategorySlug || null,
       transactionType: adData.transactionType || 'venta',
       amount: adData.amount || null,
       currency: adData.currency || 'PEN',
       negotiable: adData.negotiable || false,
       location: {
-        province: adData.location?.province || 'Cusco',
+        province: adData.location?.province || '',
         district: adData.location?.district || '',
         address: adData.location?.address || '',
         referencePoint: adData.location?.referencePoint || '',
-        coordinates: adData.location?.coordinates || null,
+        coordinates: adData.location?.coordinates || null
       },
       contact: {
-        phones: adData.contact?.phones || [''],
+        phones: Array.isArray(adData.contact?.phones) ? adData.contact.phones : [''],
         email: adData.contact?.email || '',
         name: adData.contact?.name || '',
-        website: adData.contact?.website || '',
+        website: adData.contact?.website || ''
       },
-      attributes: adData.attributes || {},
       images: Array.isArray(adData.images) ? adData.images : [],
-      status: adData.status || 'pending',
+      attributes: adData.attributes || {},
       premium: adData.premium || false,
+      status: 'active'
     };
   };
 
