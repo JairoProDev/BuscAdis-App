@@ -6,36 +6,74 @@ export const runtime = 'nodejs' // Mark as server-side only
 
 export async function GET(
   request: Request,
-  { params }: { params: { userId: string } }
+  context: { params: Promise<{ userId: string }> }
 ) {
   try {
-    const userId = params.userId
+    const params = await context.params
+    const { userId } = params
     
-    // Build MongoDB query to fetch user's publications from each collection
-    const query = { userId }
+    if (!userId) {
+      return NextResponse.json(
+        { error: 'User ID is required' },
+        { status: 400 }
+      )
+    }
     
-    // Execute the query using server-side MongoDB utilities across all collections
-    // We'll fetch from each collection and combine the results
-    const inmuebles = await mongoDbQuery('publications_inmuebles', query, {})
-    const empleos = await mongoDbQuery('publications_empleos', query, {})
-    const servicios = await mongoDbQuery('publications_servicios', query, {})
-    const vehiculos = await mongoDbQuery('publications_vehiculos', query, {})
+    // Search across all publication collections
+    const collections = [
+      'publications_inmuebles',
+      'publications_vehiculos', 
+      'publications_empleos',
+      'publications_servicios',
+      'publications_productos',
+      'publications_eventos',
+      'publications_negocios',
+      'publications_comunidad'
+    ]
     
-    // Combine all results
-    const allPublications = [...inmuebles, ...empleos, ...servicios, ...vehiculos]
+    let allPublications: any[] = []
     
-    // Sort by creation date descending (newest first)
-    allPublications.sort((a, b) => {
-      const dateA = new Date(a.createdAt || a.created_at || 0)
-      const dateB = new Date(b.createdAt || b.created_at || 0)
-      return dateB.getTime() - dateA.getTime()
+    for (const collectionName of collections) {
+      try {
+        const publicationsResult = await mongoDbQuery(collectionName, { 
+          $or: [
+            { userId: userId },
+            { 'contact.userId': userId },
+            { 'contact.email': userId } // In case userId is actually an email
+          ]
+        }, { sort: { createdAt: -1 } })
+        
+        const publications = Array.isArray(publicationsResult) ? publicationsResult : []
+        
+        // Add category information to each publication
+        const category = collectionName.replace('publications_', '')
+        const categorizedPublications = publications.map((pub: any) => ({
+          ...pub,
+          id: pub._id.toString(),
+          category: category,
+          collection: collectionName
+        }))
+        
+        allPublications.push(...categorizedPublications)
+      } catch (error) {
+        console.log(`Error searching in ${collectionName}:`, error)
+        continue
+      }
+    }
+    
+    // Sort all publications by creation date
+    allPublications.sort((a, b) => 
+      new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+    )
+    
+    return NextResponse.json({
+      publications: allPublications,
+      total: allPublications.length
     })
-    
-    return NextResponse.json(allPublications)
   } catch (error) {
     console.error('Error fetching user publications:', error)
-    return new NextResponse(
-      JSON.stringify({ error: 'Failed to fetch user publications' }),
+    return NextResponse.json(
+      { error: 'Internal server error' },
       { status: 500 }
     )
   }

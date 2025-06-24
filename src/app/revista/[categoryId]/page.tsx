@@ -4,9 +4,9 @@ import MagazineCategoryViewer from '@/components/magazine/MagazineCategoryViewer
 import { notFound } from 'next/navigation';
 
 interface RouteParams {
-  params: {
+  params: Promise<{
     categoryId: string;
-  };
+  }>;
 }
 
 // Lista de categorías válidas
@@ -28,14 +28,16 @@ const CATEGORY_NAMES: Record<string, string> = {
 };
 
 export async function generateMetadata({ params }: RouteParams): Promise<Metadata> {
+  const { categoryId } = await params;
+  
   // Verificar si la categoría existe
-  if (!VALID_CATEGORIES.includes(params.categoryId)) {
+  if (!VALID_CATEGORIES.includes(categoryId)) {
     return {
       title: 'Categoría no encontrada | Buscadis'
     };
   }
   
-  const categoryName = CATEGORY_NAMES[params.categoryId] || params.categoryId;
+  const categoryName = CATEGORY_NAMES[categoryId] || categoryId;
   
   return {
     title: `Revista de ${categoryName} | Buscadis`,
@@ -43,13 +45,15 @@ export async function generateMetadata({ params }: RouteParams): Promise<Metadat
   };
 }
 
-export default function RevistaCategoryPage({ params }: RouteParams) {
+export default async function RevistaCategoryPage({ params }: RouteParams) {
+  const { categoryId } = await params;
+  
   // Verificar si la categoría existe
-  if (!VALID_CATEGORIES.includes(params.categoryId)) {
+  if (!VALID_CATEGORIES.includes(categoryId)) {
     return notFound();
   }
   
-  const categoryName = CATEGORY_NAMES[params.categoryId] || params.categoryId;
+  const categoryName = CATEGORY_NAMES[categoryId] || categoryId;
   
   return (
     <div className="container mx-auto px-4 py-8">
@@ -58,7 +62,7 @@ export default function RevistaCategoryPage({ params }: RouteParams) {
           Revista de {categoryName}
         </h1>
         
-        <MagazineCategoryViewer categoryId={params.categoryId} />
+        <MagazineCategoryViewer categoryId={categoryId} />
       </div>
     </div>
   );

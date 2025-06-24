@@ -5,12 +5,22 @@ import { useRouter, useParams } from 'next/navigation';
 import { mongoFetch } from '@/lib/dbConnect';
 import BuscadorPage from '@/app/buscar/page';
 
+interface Category {
+  slug: string;
+  name: string;
+}
+
+interface Subcategory {
+  slug: string;
+  name: string;
+}
+
 export default function SubSubcategoryPage() {
   const router = useRouter();
   const params = useParams();
-  const category = params.category as string;
-  const subcategory = params.subcategory as string;
-  const subsubcategory = params.subsubcategory as string;
+  const category = params?.category as string;
+  const subcategory = params?.subcategory as string;
+  const subsubcategory = params?.subsubcategory as string;
   
   // Validate the category path
   useEffect(() => {
@@ -21,7 +31,7 @@ export default function SubSubcategoryPage() {
         const categories = categoriesResponse || [];
         
         const validCategory = categories.some(
-          (cat: any) => cat.slug === category
+          (cat: Category) => cat.slug === category
         );
         
         if (!validCategory) {
@@ -34,7 +44,7 @@ export default function SubSubcategoryPage() {
         const subcategories = subcategoriesResponse || [];
         
         const validSubcategory = subcategories.some(
-          (subcat: any) => subcat.slug === subcategory
+          (subcat: Subcategory) => subcat.slug === subcategory
         );
         
         if (!validSubcategory) {
@@ -50,7 +60,7 @@ export default function SubSubcategoryPage() {
         const subsubcategories = subsubcategoriesResponse || [];
         
         const validSubSubcategory = subsubcategories.some(
-          (subsubcat: any) => subsubcat.slug === subsubcategory
+          (subsubcat: Subcategory) => subsubcat.slug === subsubcategory
         );
         
         if (!validSubSubcategory) {
@@ -64,12 +74,13 @@ export default function SubSubcategoryPage() {
     validateCategoryPath();
   }, [category, subcategory, subsubcategory, router]);
   
-  // Re-use the search page component with all category levels pre-selected
+  // Re-use the search page component 
   return (
-    <BuscadorPage 
-      initialCategory={category} 
-      initialSubcategory={subcategory}
-      initialSubSubcategory={subsubcategory}
-    />
+    <div className="container py-16">
+      <h1>Subsubcategoría: {subsubcategory}</h1>
+      <p>Categoría: {category}</p>
+      <p>Subcategoría: {subcategory}</p>
+      <BuscadorPage />
+    </div>
   );
 } 

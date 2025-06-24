@@ -66,7 +66,7 @@ const faqItems = [
 ];
 
 export default function ComoFunciona() {
-    const [openFaq, setOpenFaq] = useState(null);
+    const [openFaq, setOpenFaq] = useState<number | null>(null);
 
     return (
         <div className="bg-slate-900 pt-24">

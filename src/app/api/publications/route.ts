@@ -139,7 +139,7 @@ export async function GET(request: Request) {
           const publications = await collection.find(mongoQuery).toArray()
           
           // Agregar categoría a cada publicación
-          return publications.map(pub => ({
+          return publications.map((pub: any) => ({
             ...pub,
             categorySlug: cat,
             category: cat

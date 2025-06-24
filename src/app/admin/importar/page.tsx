@@ -5,15 +5,34 @@ import { parsePublicationsFromText, preparePublicationForAPI } from '@/utils/pub
 import { PublicationsService } from '@/services/publications.service';
 import LoadingSpinner from '@/components/ui/LoadingSpinner';
 
+interface Publication {
+  title: string;
+  category: string;
+  subcategory?: string;
+  price: number;
+  price_type: string;
+  contact: {
+    phone?: string;
+    email?: string;
+  };
+}
+
+interface ImportError {
+  publication: string;
+  error: string;
+}
+
+interface ImportResult {
+  success: boolean;
+  imported: number;
+  errors: ImportError[];
+}
+
 export default function ImportPublicationsPage() {
   const [rawText, setRawText] = useState('');
   const [parsedPublications, setParsedPublications] = useState<any[]>([]);
   const [importing, setImporting] = useState(false);
-  const [importResult, setImportResult] = useState<{
-    success: boolean;
-    imported: number;
-    errors: any[];
-  } | null>(null);
+  const [importResult, setImportResult] = useState<ImportResult | null>(null);
   const [step, setStep] = useState(1);
 
   // Analizar texto para previsualizar publicaciones
@@ -44,10 +63,10 @@ export default function ImportPublicationsPage() {
     setImportResult(null);
 
     try {
-      const result = {
+      const result: ImportResult = {
         success: true,
         imported: 0,
-        errors: [] as any[],
+        errors: [],
       };
 
       // Importar cada publicación
@@ -82,7 +101,7 @@ export default function ImportPublicationsPage() {
       setImportResult({
         success: false,
         imported: 0,
-        errors: [error instanceof Error ? error.message : String(error)]
+        errors: [{ publication: 'General', error: error instanceof Error ? error.message : String(error) }]
       });
     } finally {
       setImporting(false);
@@ -154,7 +173,7 @@ export default function ImportPublicationsPage() {
         <div className="bg-white rounded-lg shadow-sm p-6 border border-gray-100">
           <h2 className="text-lg font-semibold text-gray-800 mb-4">Paso 2: Previsualizar publicaciones</h2>
           <p className="text-gray-600 mb-4">
-            Se han encontrado {parsedPublications.length} publicaciones. Revisa la información y haz clic en "Importar" para continuar.
+            Se han encontrado {parsedPublications.length} publicaciones. Revisa la información y haz clic en &ldquo;Importar&rdquo; para continuar.
           </p>
           
           <div className="max-h-96 overflow-y-auto border border-gray-200 rounded-lg mb-6">

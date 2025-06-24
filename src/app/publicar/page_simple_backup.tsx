@@ -145,7 +145,7 @@ export default function PublicarPage() {
     if (ad.categorySlug) quality += 10;
     
     // Precio
-    if (ad.amount !== null && ad.amount > 0) quality += 15;
+    if (ad.amount !== null && ad.amount !== undefined && ad.amount > 0) quality += 15;
     
     // Ubicación detallada
     if (ad.location?.district) quality += 10;
@@ -550,7 +550,11 @@ export default function PublicarPage() {
                   onChange={(e) => {
                     const newAd = { 
                       ...ad, 
-                      contact: { ...ad.contact, name: e.target.value } 
+                      contact: { 
+                        ...ad.contact, 
+                        name: e.target.value,
+                        phones: ad.contact?.phones || ['']
+                      } 
                     };
                     setAd(newAd);
                     updateAchievements(newAd);
@@ -591,7 +595,11 @@ export default function PublicarPage() {
                 onChange={(e) => {
                   const newAd = { 
                     ...ad, 
-                    contact: { ...ad.contact, email: e.target.value } 
+                    contact: { 
+                      ...ad.contact, 
+                      email: e.target.value,
+                      phones: ad.contact?.phones || ['']
+                    } 
                   };
                   setAd(newAd);
                   updateAchievements(newAd);
@@ -611,7 +619,11 @@ export default function PublicarPage() {
                 onChange={(e) => {
                   const newAd = { 
                     ...ad, 
-                    location: { ...ad.location, district: e.target.value } 
+                    location: { 
+                      ...ad.location, 
+                      district: e.target.value,
+                      province: ad.location?.province || ''
+                    } 
                   };
                   setAd(newAd);
                   updateAchievements(newAd);
@@ -729,7 +741,7 @@ export default function PublicarPage() {
                 totalSteps={Object.keys(STEPS).length}
                 stepNames={STEP_NAMES}
                 progress={progress}
-                onStepClick={goToStep}
+                onStepClick={(step: number) => goToStep(step as StepValue)}
               />
             )}
           </div>

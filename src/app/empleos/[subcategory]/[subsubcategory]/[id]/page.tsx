@@ -51,7 +51,7 @@ interface PublicationData {
 }
 
 // Componente de contenido de detalle de empleo
-export default function EmpleoDetailPageContent({ publication: initialPublication }: { publication: PublicationData }) {
+function EmpleoDetailPageContent({ publication: initialPublication }: { publication: PublicationData }) {
   const router = useRouter();
   const [publication, setPublication] = useState<PublicationData | null>(initialPublication);
   const [relatedPublications, setRelatedPublications] = useState<PublicationData[]>([]);
@@ -116,7 +116,7 @@ export default function EmpleoDetailPageContent({ publication: initialPublicatio
   } = publication;
   const formattedDate = formatDate(createdAt);
   // Adaptar formato de precio para salarios
-  const formattedSalary = priceType === 'salary' ? formatPrice(price, 'PEN', 'S/ ') : (priceType === 'negotiable' ? 'A convenir' : 'No especificado');
+  const formattedSalary = priceType === 'salary' ? formatPrice({ amount: price, currency: 'PEN' }) : (priceType === 'negotiable' ? 'A convenir' : 'No especificado');
   const city = location?.city || '';
   const region = location?.region || '';
   const companyLogo = images && images.length > 0 ? images[0] : '/images/company-placeholder.png';
@@ -259,9 +259,44 @@ export default function EmpleoDetailPageContent({ publication: initialPublicatio
 
         {/* Ofertas Relacionadas */}
         {relatedPublications.length > 0 && (
-          <RelatedPublications publications={relatedPublications} />
+          <RelatedPublications publications={relatedPublications} category="empleos" />
         )}
       </div>
     </div>
   );
+}
+
+// Main page component for Next.js 15 with async params
+interface PageProps {
+  params: Promise<{
+    subcategory: string;
+    subsubcategory: string;
+    id: string;
+  }>;
+}
+
+export default async function EmpleoDetailPage({ params }: PageProps) {
+  const { id } = await params;
+  
+  // In a real implementation, you would fetch the publication data here
+  // For now, we'll create a mock publication to satisfy the component
+  const mockPublication: PublicationData = {
+    id: id,
+    title: "Empleo de ejemplo",
+    description: "Descripción del empleo",
+    price: 0,
+    price_type: "negotiable",
+    images: [],
+    location: {
+      city: "Lima",
+      region: "Lima",
+      country: "Perú"
+    },
+    contact: {
+      email: "contacto@example.com"
+    },
+    created_at: new Date().toISOString()
+  };
+
+  return <EmpleoDetailPageContent publication={mockPublication} />;
 } 

@@ -6,9 +6,10 @@ export const dynamic = 'force-dynamic'; // Disable caching
 
 export async function GET(
   request: Request,
-  { params }: { params: { category: string } }
+  context: { params: Promise<{ category: string }> }
 ) {
   try {
+    const params = await context.params;
     const categorySlug = params.category.toLowerCase();
     
     if (!categorySlug) {
@@ -48,10 +49,11 @@ export async function GET(
     const total = inmuebles + empleos + servicios + vehiculos;
     
     return NextResponse.json({ count: total });
-  } catch (error: any) {
-    console.error(`Error getting count for category ${params.category}:`, error);
+  } catch (error: unknown) {
+    const errorMessage = error instanceof Error ? error.message : 'Unknown error';
+    console.error(`Error getting count for category:`, error);
     return NextResponse.json(
-      { error: `Error retrieving category count: ${error.message}` },
+      { error: `Error retrieving category count: ${errorMessage}` },
       { status: 500 }
     );
   }

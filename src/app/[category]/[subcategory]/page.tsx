@@ -5,13 +5,23 @@ import { useRouter, useParams } from 'next/navigation';
 import { mongoFetch } from '@/lib/dbConnect';
 import BuscadorPage from '@/app/buscar/page';
 
+interface Category {
+  slug: string;
+  name: string;
+}
+
+interface Subcategory {
+  slug: string;
+  name: string;
+}
+
 export default function SubcategoryPage() {
   const router = useRouter();
   const params = useParams();
-  const category = params.category as string;
-  const subcategory = params.subcategory as string;
+  const category = params?.category as string;
+  const subcategory = params?.subcategory as string;
   
-  // Validate the category and subcategory
+  // Validate the category path
   useEffect(() => {
     const validateCategoryPath = async () => {
       try {
@@ -20,7 +30,7 @@ export default function SubcategoryPage() {
         const categories = categoriesResponse || [];
         
         const validCategory = categories.some(
-          (cat: any) => cat.slug === category
+          (cat: Category) => cat.slug === category
         );
         
         if (!validCategory) {
@@ -34,7 +44,7 @@ export default function SubcategoryPage() {
         const subcategories = subcategoriesResponse || [];
         
         const validSubcategory = subcategories.some(
-          (subcat: any) => subcat.slug === subcategory
+          (subcat: Subcategory) => subcat.slug === subcategory
         );
         
         if (!validSubcategory) {
@@ -49,11 +59,12 @@ export default function SubcategoryPage() {
     validateCategoryPath();
   }, [category, subcategory, router]);
   
-  // Re-use the search page component with the category and subcategory pre-selected
+  // Re-use the search page component 
   return (
-    <BuscadorPage 
-      initialCategory={category} 
-      initialSubcategory={subcategory} 
-    />
+    <div className="container py-16">
+      <h1>Subcategoría: {subcategory}</h1>
+      <p>Categoría: {category}</p>
+      <BuscadorPage />
+    </div>
   );
 } 

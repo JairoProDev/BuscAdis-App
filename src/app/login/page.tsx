@@ -18,7 +18,7 @@ export default function LoginPage() {
             title="Iniciar sesión" 
             subtitle="Accede a tu cuenta para publicar anuncios"
         >
-            <LoginForm isOpen={isModalOpen} onClose={handleCloseModal} />
+            <LoginForm />
         </AuthLayout>
     );
 }

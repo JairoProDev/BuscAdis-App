@@ -25,13 +25,13 @@ import { posts as mockPosts } from '@/data/mockPosts'
 import Container from '@/components/shared/Container'
 
 interface PostPageProps {
-  params: {
+  params: Promise<{
     slug: string
-  }
+  }>
 }
 
-export default function PostPage({ params }: PostPageProps) {
-  const { slug } = params
+export default async function PostPage({ params }: PostPageProps) {
+  const { slug } = await params
   const [post, setPost] = useState<Post | null>(null)
   const [isLoading, setIsLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)

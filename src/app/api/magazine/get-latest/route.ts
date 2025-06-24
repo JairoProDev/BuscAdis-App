@@ -1,18 +1,13 @@
 import { NextResponse } from 'next/server';
-import { getServerMongoClient } from '@/lib/mongodb-server';
+import { mongoDbQuery } from '@/lib/mongodb-server';
 
 export async function GET() {
   try {
-    const { client, db } = await getServerMongoClient();
-    
     // Find all magazines ordered by creation date (newest first)
-    const magazinesCollection = db.collection('magazines');
-    const magazines = await magazinesCollection
-      .find({})
-      .sort({ createdAt: -1 })
-      .toArray();
-    
-    await client.close();
+    const magazineResults = await mongoDbQuery('magazines', {}, { 
+      sort: { createdAt: -1 } 
+    });
+    const magazines = Array.isArray(magazineResults) ? magazineResults : [];
     
     if (magazines.length === 0) {
       return NextResponse.json({ magazines: [] });

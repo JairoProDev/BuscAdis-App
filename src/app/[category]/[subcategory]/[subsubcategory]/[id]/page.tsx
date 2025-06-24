@@ -13,10 +13,10 @@ export default function PublicationDetailPage() {
   const [error, setError] = useState('');
   
   // Extract parameters from the URL
-  const categorySlugParam = params.category as string;
-  const subcategorySlugParam = params.subcategory as string;
-  const subsubcategorySlugParam = params.subsubcategory as string;
-  const id = params.id as string;
+  const categorySlugParam = params?.category as string;
+  const subcategorySlugParam = params?.subcategory as string;
+  const subsubcategorySlugParam = params?.subsubcategory as string;
+  const id = params?.id as string;
   
   useEffect(() => {
     const fetchPublication = async () => {
@@ -38,12 +38,14 @@ export default function PublicationDetailPage() {
         }
         
         // Check if this is the correct URL structure for this publication
+        const publicationAny = publication as any;
         const correctUrl = generateSeoUrl(
-          publication.id,
-          publication.title,
-          publication.categorySlug || publication.category || 'general',
-          publication.subcategory,
-          publication.subsubcategory,
+          publicationAny._id || publicationAny.id,
+          publicationAny.title,
+          undefined, // publicationSlug
+          publicationAny.categorySlug || publicationAny.category || 'general',
+          publicationAny.subcategory,
+          publicationAny.subsubcategory,
           false // Sin título para la página principal
         );
         

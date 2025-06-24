@@ -4,8 +4,9 @@ import { mongoDbQuery } from '@/lib/mongodb-server'
 export const dynamic = 'force-dynamic' // Disable caching to ensure data is always fresh
 export const runtime = 'nodejs' // Mark as server-side only
 
-export async function GET(request: Request, { params }: { params: { userId: string } }) {
+export async function GET(request: Request, context: { params: Promise<{ userId: string }> }) {
   try {
+    const params = await context.params;
     const userId = params.userId;
 
     // Search for existing profile

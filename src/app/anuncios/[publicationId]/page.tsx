@@ -38,12 +38,14 @@ export default function OldAnuncioRedirect() {
         }
         
         // Generate the new, correct URL
+        const publicationAny = publication as any;
         const correctUrl = generateSeoUrl(
-          publication.id,
-          publication.title,
-          publication.categorySlug || publication.category || 'general',
-          publication.subcategory,
-          publication.subsubcategory,
+          publicationAny._id || publicationAny.id,
+          publicationAny.title,
+          undefined, // publicationSlug
+          publicationAny.categorySlug || publicationAny.category || 'general',
+          publicationAny.subcategory,
+          publicationAny.subsubcategory,
           true // Incluir el título en la URL
         );
         

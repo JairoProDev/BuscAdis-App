@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server';
-import { getServerMongoClient } from '@/lib/mongodb-server';
+import { mongoDbQuery } from '@/lib/mongodb-server';
 import { ObjectId } from 'mongodb';
 
 // Mapa de categorías a colecciones de MongoDB
@@ -16,9 +16,10 @@ const CATEGORY_TO_COLLECTION = {
 
 export async function GET(
   request: Request,
-  { params }: { params: { categoryId: string } }
+  context: { params: Promise<{ categoryId: string }> }
 ) {
   try {
+    const params = await context.params;
     const categoryId = params.categoryId;
     
     // Verificar si la categoría existe
@@ -30,23 +31,20 @@ export async function GET(
     }
     
     const collectionName = CATEGORY_TO_COLLECTION[categoryId as keyof typeof CATEGORY_TO_COLLECTION];
-    const { client, db } = await getServerMongoClient();
     
     // Comprobar si existe la revista para esta categoría
-    const magazinesCollection = db.collection('magazines_by_category');
-    const latestMagazine = await magazinesCollection
-      .find({ categoryId })
-      .sort({ createdAt: -1 })
-      .limit(1)
-      .toArray();
+    const latestMagazineResults = await mongoDbQuery('magazines_by_category', { categoryId }, { 
+      sort: { createdAt: -1 }, 
+      limit: 1 
+    });
+    const latestMagazine = Array.isArray(latestMagazineResults) ? latestMagazineResults : [];
     
     // Obtener las últimas publicaciones de esta categoría
-    const publicationsCollection = db.collection(collectionName);
-    const recentPublications = await publicationsCollection
-      .find({})
-      .sort({ createdAt: -1 })
-      .limit(20)
-      .toArray();
+    const recentPublicationsResults = await mongoDbQuery(collectionName, {}, { 
+      sort: { createdAt: -1 }, 
+      limit: 20 
+    });
+    const recentPublications = Array.isArray(recentPublicationsResults) ? recentPublicationsResults : [];
     
     // Procesar las publicaciones para enviar al cliente
     const processedPublications = recentPublications.map(pub => ({
@@ -61,7 +59,7 @@ export async function GET(
       attributes: pub.attributes || {}
     }));
     
-    await client.close();
+    // Connection will be closed automatically
     
     // Si hay una revista, devolver la información
     if (latestMagazine.length > 0) {

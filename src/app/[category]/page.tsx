@@ -5,25 +5,28 @@ import { useRouter, useParams } from 'next/navigation';
 import { mongoFetch } from '@/lib/dbConnect';
 import BuscadorPage from '@/app/buscar/page';
 
+interface Category {
+  slug: string;
+  name: string;
+}
+
 export default function CategoryPage() {
   const router = useRouter();
   const params = useParams();
-  const category = params.category as string;
+  const category = params?.category as string;
   
   // Validate the category
   useEffect(() => {
     const validateCategory = async () => {
       try {
-        // Check if category is valid
         const response = await mongoFetch('/api/categories', {});
         const categories = response || [];
         
-        const validCategory = categories.some(
-          (cat: any) => cat.slug === category
+        const isValidCategory = categories.some(
+          (cat: Category) => cat.slug === category
         );
         
-        if (!validCategory) {
-          // Redirect to search page if category is invalid
+        if (!isValidCategory) {
           router.replace('/buscar');
         }
       } catch (error) {
@@ -34,6 +37,11 @@ export default function CategoryPage() {
     validateCategory();
   }, [category, router]);
   
-  // Re-use the search page component with the category pre-selected
-  return <BuscadorPage initialCategory={category} />;
+  // Re-use the search page component 
+  return (
+    <div className="container py-16">
+      <h1>Categoría: {category}</h1>
+      <BuscadorPage />
+    </div>
+  );
 } 

@@ -12,10 +12,10 @@ import { DocumentTextIcon, PhotoIcon } from '@heroicons/react/24/outline';
 
 export default function MyPublicationsPage() {
   const { user } = useAuth();
-  const [publications, setPublications] = useState([]);
+  const [publications, setPublications] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
-  const [deleteConfirm, setDeleteConfirm] = useState(null);
+  const [deleteConfirm, setDeleteConfirm] = useState<string | null>(null);
 
   useEffect(() => {
     const fetchPublications = async () => {
@@ -36,7 +36,7 @@ export default function MyPublicationsPage() {
     fetchPublications();
   }, [user]);
 
-  const handleDeletePublication = async (id) => {
+  const handleDeletePublication = async (id: string) => {
     try {
       await PublicationsService.deletePublication(id);
       setPublications(publications.filter(publication => publication.id !== id));
@@ -47,7 +47,7 @@ export default function MyPublicationsPage() {
     }
   };
 
-  const formatDate = (dateString) => {
+  const formatDate = (dateString: string) => {
     return formatDistance(new Date(dateString), new Date(), {
       addSuffix: true,
       locale: es

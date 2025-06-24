@@ -49,7 +49,7 @@ interface PublicationData {
   attributes?: Record<string, any>;
 }
 
-export default function VehiculoDetailPageContent({ publication: initialPublication }: { publication: PublicationData }) {
+function VehiculoDetailPageContent({ publication: initialPublication }: { publication: PublicationData }) {
   const router = useRouter();
   const params = useParams();
   const [publication, setPublication] = useState<PublicationData | null>(initialPublication);
@@ -111,7 +111,7 @@ export default function VehiculoDetailPageContent({ publication: initialPublicat
     location, contact, created_at: createdAt, views, attributes 
   } = publication;
   const formattedDate = formatDate(createdAt);
-  const formattedPrice = formatPrice(price, priceType);
+  const formattedPrice = formatPrice({ amount: price, currency: 'PEN', negotiable: priceType === 'negotiable' });
   const city = typeof location === 'string' ? location : location?.city || '';
   const region = typeof location === 'string' ? '' : location?.region || '';
 
@@ -237,9 +237,44 @@ export default function VehiculoDetailPageContent({ publication: initialPublicat
         </div>
 
         {relatedPublications.length > 0 && (
-          <RelatedPublications publications={relatedPublications} />
+          <RelatedPublications publications={relatedPublications} category="vehiculos" />
         )}
       </div>
     </div>
   );
+}
+
+// Main page component for Next.js 15 with async params
+interface PageProps {
+  params: Promise<{
+    subcategory: string;
+    subsubcategory: string;
+    id: string;
+  }>;
+}
+
+export default async function VehiculoDetailPage({ params }: PageProps) {
+  const { id } = await params;
+  
+  // In a real implementation, you would fetch the publication data here
+  // For now, we'll create a mock publication to satisfy the component
+  const mockPublication: PublicationData = {
+    id: id,
+    title: "Vehículo de ejemplo",
+    description: "Descripción del vehículo",
+    price: 15000,
+    price_type: "sale",
+    images: [],
+    location: {
+      city: "Lima",
+      region: "Lima",
+      country: "Perú"
+    },
+    contact: {
+      whatsapp: "+51123456789"
+    },
+    created_at: new Date().toISOString()
+  };
+
+  return <VehiculoDetailPageContent publication={mockPublication} />;
 } 

@@ -352,7 +352,7 @@ export default function PublicarPage() {
         referencePoint: locationData.referencePoint || '',
         coordinates: locationData.coordinates ? {
           lat: locationData.coordinates.lat,
-          lon: locationData.coordinates.lng
+          lng: locationData.coordinates.lng
         } : undefined,
       }
     });
@@ -503,10 +503,10 @@ export default function PublicarPage() {
               <div>
                 <LocationSelector
                   initialValue={{
+                    city: ad.location?.province || '',
+                    country: 'PE',
                     district: ad.location?.district || '',
                     province: ad.location?.province || '',
-                    address: ad.location?.address || '',
-                    referencePoint: ad.location?.referencePoint || '',
                     coordinates: ad.location?.coordinates ? {
                       lat: ad.location.coordinates.lat,
                       lon: ad.location.coordinates.lng
