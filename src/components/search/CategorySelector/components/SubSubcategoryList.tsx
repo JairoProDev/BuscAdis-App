@@ -2,7 +2,7 @@
 
 import React from 'react';
 import { motion } from 'framer-motion';
-import { SubSubcategoryListProps } from '../types';
+import { SubSubcategoryListProps } from '../types/index';
 import { getCategoryColor } from '../utils';
 
 const SubSubcategoryList: React.FC<SubSubcategoryListProps> = ({

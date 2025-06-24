@@ -394,7 +394,7 @@ export default function AdvancedSearchBar({
                   onSubcategoryChange={handleSubcategoryChange}
                   onSubSubcategoryChange={handleSubSubcategoryChange}
                   showCounts={true}
-                  variant="horizontal"
+                  variant="inline"
                 />
               </motion.div>
             )}

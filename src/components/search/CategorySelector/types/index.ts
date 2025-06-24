@@ -25,9 +25,9 @@ export interface Subcategory {
   name: string;
   slug: string;
   count?: number;
-  icon: ElementType;
+  icon?: ElementType;
   parentId: string;
-  subSubcategories: SubSubcategory[];
+  subSubcategories?: SubSubcategory[];
 }
 
 export interface SubSubcategory {
@@ -40,15 +40,17 @@ export interface SubSubcategory {
 }
 
 export interface CategorySelectorProps {
-  onSelectCategory?: (category: Category | null) => void;
-  onSelectSubcategory?: (subcategory: Subcategory | null) => void;
-  onSelectSubSubcategory?: (subSubcategory: SubSubcategory | null) => void;
-  variant?: CategoryCardVariant;
+  activeCategory?: string;
+  activeSubcategory?: string;
+  activeSubSubcategory?: string;
+  onCategoryChange?: (category: string) => void;
+  onSubcategoryChange?: (subcategory: string) => void;
+  onSubSubcategoryChange?: (subSubcategory: string) => void;
+  showAllOption?: boolean;
   className?: string;
+  showSubcategories?: boolean;
   showCounts?: boolean;
-  initialCategorySlug?: string;
-  initialSubcategorySlug?: string;
-  initialSubSubcategorySlug?: string;
+  variant?: "inline" | "dropdown" | "modal";
 }
 
 export interface CategoryCardProps {

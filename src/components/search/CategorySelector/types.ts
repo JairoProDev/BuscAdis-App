@@ -25,4 +25,18 @@ export interface SubSubcategory {
   count?: number;
   emoji?: string;
   parentId: string;
-} 
+}
+
+export interface CategorySelectorProps {
+  activeCategory?: string;
+  activeSubcategory?: string;
+  activeSubSubcategory?: string;
+  onCategoryChange?: (category: string) => void;
+  onSubcategoryChange?: (subcategory: string) => void;
+  onSubSubcategoryChange?: (subSubcategory: string) => void;
+  showAllOption?: boolean;
+  className?: string;
+  showSubcategories?: boolean;
+  showCounts?: boolean;
+  variant?: "inline" | "dropdown" | "modal";
+}

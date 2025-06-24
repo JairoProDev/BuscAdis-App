@@ -32,6 +32,8 @@ export default function AdvancedFilters({
 
   useEffect(() => {
     // Sincronizar filtros con URL al montar
+    if (!searchParams) return
+    
     const params = new URLSearchParams(searchParams.toString())
     const filtersFromUrl: Record<string, FilterValue> = {}
     
@@ -55,9 +57,11 @@ export default function AdvancedFilters({
     onFiltersChange(newFilters)
 
     // Actualizar URL
-    const params = new URLSearchParams(searchParams.toString())
-    params.set(filterId, JSON.stringify(value))
-    router.push(`?${params.toString()}`)
+    if (searchParams) {
+      const params = new URLSearchParams(searchParams.toString())
+      params.set(filterId, JSON.stringify(value))
+      router.push(`?${params.toString()}`)
+    }
   }
 
   const toggleSection = (section: string) => {
@@ -78,7 +82,7 @@ export default function AdvancedFilters({
             </label>
             <Slider
               id={filter.id}
-              value={activeFilters[filter.id] || [filter.min, filter.max]}
+              value={Array.isArray(activeFilters[filter.id]) ? activeFilters[filter.id] as number[] : [filter.min, filter.max]}
               onChange={(_, value) => handleFilterChange(filter.id, value)}
               min={filter.min}
               max={filter.max}
@@ -102,7 +106,7 @@ export default function AdvancedFilters({
             </label>
             <select
               id={filter.id}
-              value={activeFilters[filter.id] || ''}
+              value={typeof activeFilters[filter.id] === 'string' ? activeFilters[filter.id] as string : ''}
               onChange={(e) => handleFilterChange(filter.id, e.target.value)}
               className="w-full rounded-lg bg-white/10 border-white/20 text-white placeholder-white/40
                        focus:border-white/40 focus:ring-white/20"
@@ -125,14 +129,15 @@ export default function AdvancedFilters({
             </label>
             <div className="flex flex-wrap gap-2">
               {filter.options.map((option: any) => {
-                const isSelected = (activeFilters[filter.id] || []).includes(option.value)
+                const filterValue = activeFilters[filter.id]
+                const isSelected = Array.isArray(filterValue) ? filterValue.includes(option.value) : false
                 return (
                   <button
                     key={option.value}
                     onClick={() => {
-                      const current = activeFilters[filter.id] || []
+                      const current = Array.isArray(activeFilters[filter.id]) ? activeFilters[filter.id] as (string | number)[] : []
                       const newValue = isSelected
-                        ? current.filter((v: string) => v !== option.value)
+                        ? current.filter((v: string | number) => v !== option.value)
                         : [...current, option.value]
                       handleFilterChange(filter.id, newValue)
                     }}
@@ -159,7 +164,7 @@ export default function AdvancedFilters({
               </Switch.Label>
               <Switch
                 id={filter.id}
-                checked={activeFilters[filter.id] || false}
+                checked={typeof activeFilters[filter.id] === 'boolean' ? activeFilters[filter.id] as boolean : false}
                 onChange={(checked) => handleFilterChange(filter.id, checked)}
                 className={`${
                   activeFilters[filter.id] ? 'bg-primary-600' : 'bg-white/20'

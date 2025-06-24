@@ -2,7 +2,7 @@
 
 import React from 'react';
 import { motion } from 'framer-motion';
-import { SubcategoryListProps } from '../types';
+import { SubcategoryListProps } from '../types/index';
 import { CategoryCard } from './CategoryCard';
 
 const SubcategoryList: React.FC<SubcategoryListProps> = ({

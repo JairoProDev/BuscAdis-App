@@ -26,12 +26,15 @@ interface SubSubcategory {
 }
 
 interface CategorySelectorProps {
-  selectedCategory?: string;
-  selectedSubcategory?: string;
-  selectedSubSubcategory?: string;
-  onCategoryChange?: (category: string, subcategory?: string, subsubcategory?: string) => void;
+  activeCategory?: string;
+  activeSubcategory?: string;
+  activeSubSubcategory?: string;
+  onCategoryChange?: (category: string) => void;
+  onSubcategoryChange?: (subcategory: string) => void;
+  onSubSubcategoryChange?: (subsubcategory: string) => void;
   variant?: 'dropdown' | 'modal' | 'inline';
   showIcon?: boolean;
+  showCounts?: boolean;
   className?: string;
 }
 
@@ -158,12 +161,15 @@ const categoriesData: Category[] = [
 ]
 
 export default function CategorySelector({
-  selectedCategory = '',
-  selectedSubcategory = '',
-  selectedSubSubcategory = '',
+  activeCategory = '',
+  activeSubcategory = '',
+  activeSubSubcategory = '',
   onCategoryChange,
+  onSubcategoryChange,
+  onSubSubcategoryChange,
   variant = 'dropdown',
   showIcon = true,
+  showCounts = false,
   className = ''
 }: CategorySelectorProps) {
   const [isOpen, setIsOpen] = useState(false)
@@ -171,8 +177,8 @@ export default function CategorySelector({
   const [hoveredCategory, setHoveredCategory] = useState<string>('')
   const [hoveredSubcategory, setHoveredSubcategory] = useState<string>('')
 
-  const currentCategory = categoriesData.find(cat => cat.slug === selectedCategory)
-  const currentSubcategory = currentCategory?.subcategories?.find(sub => sub.slug === selectedSubcategory)
+  const currentCategory = categoriesData.find(cat => cat.slug === activeCategory)
+  const currentSubcategory = currentCategory?.subcategories?.find(sub => sub.slug === activeSubcategory)
 
   const handleCategorySelect = (categorySlug: string) => {
     onCategoryChange?.(categorySlug)
@@ -182,28 +188,28 @@ export default function CategorySelector({
   }
 
   const handleSubcategorySelect = (subcategorySlug: string) => {
-    onCategoryChange?.(selectedCategory, subcategorySlug)
+    onSubcategoryChange?.(subcategorySlug)
     if (variant === 'dropdown') {
       setIsOpen(false)
     }
   }
 
   const handleSubSubcategorySelect = (subsubcategorySlug: string) => {
-    onCategoryChange?.(selectedCategory, selectedSubcategory, subsubcategorySlug)
+    onSubSubcategoryChange?.(subsubcategorySlug)
     if (variant === 'dropdown') {
       setIsOpen(false)
     }
   }
 
   const getDisplayText = () => {
-    if (selectedSubSubcategory && currentSubcategory) {
-      const subSub = currentSubcategory.subsubcategories?.find(s => s.slug === selectedSubSubcategory)
+    if (activeSubSubcategory && currentSubcategory) {
+      const subSub = currentSubcategory.subsubcategories?.find(s => s.slug === activeSubSubcategory)
       return `${currentCategory?.icon} ${subSub?.name}`
     }
-    if (selectedSubcategory && currentSubcategory) {
+    if (activeSubcategory && currentSubcategory) {
       return `${currentCategory?.icon} ${currentSubcategory.name}`
     }
-    if (selectedCategory && currentCategory) {
+    if (activeCategory && currentCategory) {
       return `${currentCategory.icon} ${currentCategory.name}`
     }
     return `${showIcon ? '🔍 ' : ''}Todas las categorías`
@@ -242,7 +248,7 @@ export default function CategorySelector({
                 <button
                   onClick={() => handleCategorySelect('')}
                   className={`w-full text-left p-3 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors flex items-center gap-3 ${
-                    !selectedCategory ? 'bg-blue-50 dark:bg-blue-900/20 text-blue-600' : ''
+                    !activeCategory ? 'bg-blue-50 dark:bg-blue-900/20 text-blue-600' : ''
                   }`}
                 >
                   <span className="text-lg">🔍</span>
@@ -256,7 +262,7 @@ export default function CategorySelector({
                       onClick={() => handleCategorySelect(category.slug)}
                       onMouseEnter={() => setHoveredCategory(category.slug)}
                       className={`w-full text-left p-3 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors flex items-center gap-3 ${
-                        selectedCategory === category.slug ? 'bg-blue-50 dark:bg-blue-900/20 text-blue-600' : ''
+                        activeCategory === category.slug ? 'bg-blue-50 dark:bg-blue-900/20 text-blue-600' : ''
                       }`}
                     >
                       <span className="text-lg">{category.icon}</span>
@@ -274,7 +280,7 @@ export default function CategorySelector({
                     </button>
 
                     {/* Subcategories */}
-                    {selectedCategory === category.slug && category.subcategories && (
+                    {activeCategory === category.slug && category.subcategories && (
                       <div className="bg-gray-50 dark:bg-gray-700/50">
                         {category.subcategories.map((subcategory) => (
                           <div key={subcategory.id}>
@@ -282,7 +288,7 @@ export default function CategorySelector({
                               onClick={() => handleSubcategorySelect(subcategory.slug)}
                               onMouseEnter={() => setHoveredSubcategory(subcategory.slug)}
                               className={`w-full text-left p-3 pl-12 hover:bg-gray-100 dark:hover:bg-gray-600 transition-colors flex items-center gap-2 ${
-                                selectedSubcategory === subcategory.slug ? 'bg-blue-100 dark:bg-blue-800/30 text-blue-600' : ''
+                                activeSubcategory === subcategory.slug ? 'bg-blue-100 dark:bg-blue-800/30 text-blue-600' : ''
                               }`}
                             >
                               <div className="flex-1">
@@ -299,14 +305,14 @@ export default function CategorySelector({
                             </button>
 
                             {/* Sub-subcategories */}
-                            {selectedSubcategory === subcategory.slug && subcategory.subsubcategories && (
+                            {activeSubcategory === subcategory.slug && subcategory.subsubcategories && (
                               <div className="bg-gray-100 dark:bg-gray-600/50">
                                 {subcategory.subsubcategories.map((subsubcategory) => (
                                   <button
                                     key={subsubcategory.id}
                                     onClick={() => handleSubSubcategorySelect(subsubcategory.slug)}
                                     className={`w-full text-left p-2 pl-20 hover:bg-gray-200 dark:hover:bg-gray-500 transition-colors text-sm ${
-                                      selectedSubSubcategory === subsubcategory.slug ? 'bg-blue-200 dark:bg-blue-700/50 text-blue-700' : ''
+                                      activeSubSubcategory === subsubcategory.slug ? 'bg-blue-200 dark:bg-blue-700/50 text-blue-700' : ''
                                     }`}
                                   >
                                     {subsubcategory.name}
