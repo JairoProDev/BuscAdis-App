@@ -7,8 +7,31 @@
 <metadata>
 Created by potrace 1.16, written by Peter Selinger 2001-2019
 </metadata>
+<style>
+  .logo-fill {
+    fill: var(--logo-color, #000000);
+    transition: fill 0.3s ease;
+  }
+  
+  /* Dark theme support */
+  @media (prefers-color-scheme: dark) {
+    .logo-fill {
+      fill: var(--logo-color, #ffffff);
+    }
+  }
+  
+  /* Explicit dark class support for manual theme switching */
+  .dark .logo-fill {
+    fill: var(--logo-color, #ffffff);
+  }
+  
+  /* Light theme explicit */
+  .light .logo-fill {
+    fill: var(--logo-color, #000000);
+  }
+</style>
 <g transform="translate(0.000000,540.000000) scale(0.100000,-0.100000)"
-fill="#000000" stroke="none">
+class="logo-fill" stroke="none">
 <path d="M2475 5389 c-160 -19 -226 -32 -365 -74 -676 -205 -1197 -751 -1375
 -1440 -56 -215 -73 -557 -39 -784 87 -598 423 -1328 1009 -2191 176 -261 431
 -606 612 -828 l43 -54 0 606 0 606 338 -2 337 -3 5 -600 5 -599 106 134 c783

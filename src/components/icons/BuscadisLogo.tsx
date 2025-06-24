@@ -1,0 +1,79 @@
+import React from 'react';
+
+interface BuscadisLogoProps {
+  width?: number;
+  height?: number;
+  className?: string;
+  color?: string;
+  variant?: 'default' | 'gradient' | 'white' | 'dark';
+}
+
+export const BuscadisLogo: React.FC<BuscadisLogoProps> = ({
+  width = 32,
+  height = 32,
+  className = '',
+  color,
+  variant = 'default'
+}) => {
+  const getLogoColor = () => {
+    switch (variant) {
+      case 'white':
+        return '#ffffff';
+      case 'dark':
+        return '#000000';
+      case 'gradient':
+        return 'url(#logoGradient)';
+      default:
+        return color || 'currentColor';
+    }
+  };
+
+  return (
+    <svg
+      width={width}
+      height={height}
+      viewBox="0 0 540 540"
+      className={`transition-all duration-300 ${className}`}
+      style={{ '--logo-color': getLogoColor() } as React.CSSProperties}
+      preserveAspectRatio="xMidYMid meet"
+      aria-label="BuscAdis Logo"
+      role="img"
+    >
+      {variant === 'gradient' && (
+        <defs>
+          <linearGradient id="logoGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+            <stop offset="0%" stopColor="#14B8A6" />
+            <stop offset="100%" stopColor="#06B6D4" />
+          </linearGradient>
+        </defs>
+      )}
+      <g 
+        transform="translate(0,540) scale(0.1,-0.1)"
+        className={variant === 'default' ? 'logo-fill' : ''}
+        fill={variant === 'default' ? undefined : getLogoColor()}
+        stroke="none"
+      >
+        <path d="M2475 5389 c-160 -19 -226 -32 -365 -74 -676 -205 -1197 -751 -1375
+        -1440 -56 -215 -73 -557 -39 -784 87 -598 423 -1328 1009 -2191 176 -261 431
+        -606 612 -828 l43 -54 0 606 0 606 338 -2 337 -3 5 -600 5 -599 106 134 c783
+        998 1308 1928 1489 2636 55 212 80 396 80 581 0 455 -135 860 -405 1218 -306
+        404 -735 672 -1240 774 -143 29 -441 39 -600 20z m558 -407 c562 -133 995
+        -523 1172 -1056 179 -537 65 -1108 -307 -1543 -215 -250 -550 -446 -876 -512
+        l-87 -18 -3 -222 -2 -221 -233 2 -232 3 -3 221 -2 221 -53 7 c-196 26 -486
+        155 -681 303 -91 70 -253 237 -320 332 -76 106 -184 320 -220 435 -59 188 -70
+        263 -71 496 0 173 4 232 19 300 74 340 226 615 468 845 124 118 231 194 384
+        271 140 71 237 105 399 140 102 22 127 23 335 20 183 -3 241 -8 313 -24z"/>
+        <path d="M2505 4660 c-166 -27 -377 -112 -522 -212 -268 -184 -465 -498 -519
+        -823 -19 -121 -15 -329 11 -450 85 -403 359 -737 737 -899 148 -63 261 -87
+        438 -93 186 -6 297 9 450 63 184 64 321 147 456 276 151 145 254 304 323 500
+        87 248 87 542 1 800 -132 393 -466 705 -865 809 -106 27 -139 31 -285 34 -91
+        2 -192 0 -225 -5z m34 -136 c33 -27 41 -67 21 -104 -14 -26 -35 -36 -135 -65
+        -323 -94 -585 -362 -664 -680 -22 -85 -39 -111 -81 -120 -32 -7 -84 15 -94 40
+        -28 75 45 289 160 467 50 78 163 199 248 267 114 91 261 165 400 201 95 25
+        109 24 145 -6z"/>
+      </g>
+    </svg>
+  );
+};
+
+export default BuscadisLogo; 
