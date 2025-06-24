@@ -35,7 +35,7 @@ export interface SubSubcategory {
   name: string;
   slug: string;
   count?: number;
-  emoji: string;
+  emoji?: string;
   parentId: string;
 }
 

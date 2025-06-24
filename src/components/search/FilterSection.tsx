@@ -14,13 +14,13 @@ import {
 import { Switch } from '@/components/ui/switch'
 import { Label } from '@/components/ui/label'
 import { ChevronDownIcon, ChevronUpIcon } from '@heroicons/react/24/outline'
-import { FilterOption, FilterType, FilterValue } from '@/types/filters'
+import { FilterSelectOption, FilterType, FilterValue } from '@/types/filters'
 
 interface FilterSectionProps {
   title: string
   description?: string
   type: FilterType
-  options?: FilterOption[]
+  options?: FilterSelectOption[]
   min?: number
   max?: number
   step?: number

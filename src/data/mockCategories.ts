@@ -9,10 +9,9 @@ import {
   TourismIcon,
   PetsIcon
 } from '@/components/icons/categories'
-import { Category } from '@/types/marketplace'
 
 // Estructura de datos para categorías
-export interface Category {
+export interface MockCategory {
   id: string;
   name: string;
   icon: string;
@@ -25,7 +24,7 @@ export interface Category {
 }
 
 // Datos de ejemplo para categorías
-export const categories: Category[] = [
+export const categories: MockCategory[] = [
   {
     id: "inmuebles",
     name: "Inmuebles",

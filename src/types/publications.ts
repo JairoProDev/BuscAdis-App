@@ -132,3 +132,40 @@ export interface Publication {
     // --- Añadir más atributos específicos según sea necesario ---
   } | null;
 }
+
+/**
+ * Filters for publication queries
+ */
+export interface PublicationFilters {
+  category?: string;
+  subcategory?: string;
+  subSubcategory?: string;
+  district?: string;
+  priceMin?: number;
+  priceMax?: number;
+  currency?: 'PEN' | 'USD';
+  page?: number;
+  limit?: number;
+  sort?: 'newest' | 'oldest' | 'price_asc' | 'price_desc';
+  search?: string;
+}
+
+/**
+ * Response structure for publication queries
+ */
+export interface PublicationResponse {
+  publications: Publication[];
+  total: number;
+  page: number;
+  limit: number;
+  totalPages: number;
+}
+
+/**
+ * Image structure for publications
+ */
+export interface PublicationImage {
+  url: string;
+  isPrimary?: boolean;
+  alt?: string;
+}

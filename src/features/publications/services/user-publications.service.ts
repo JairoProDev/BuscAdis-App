@@ -1,15 +1,14 @@
-import { supabase } from '@/lib/supabase';
+// MongoDB implementation to replace Supabase
+import { mongoDbQuery, mongoDbUpdate } from '@/lib/mongodb-server';
 
 export class UserPublicationsService {
   static async getUserPublications(userId: string) {
     try {
-      const { data, error } = await supabase
-        .from('publications')
-        .select('*')
-        .eq('user_id', userId)
-        .order('created_at', { ascending: false });
-
-      if (error) throw error;
+      const data = await mongoDbQuery(
+        'publications',
+        { userId },
+        { sort: { createdAt: -1 } }
+      );
       return data;
     } catch (error) {
       console.error('Error getting user publications:', error);
@@ -19,14 +18,11 @@ export class UserPublicationsService {
 
   static async updatePublication(publicationId: string, updates: any) {
     try {
-      const { data, error } = await supabase
-        .from('publications')
-        .update(updates)
-        .eq('id', publicationId)
-        .select()
-        .single();
-
-      if (error) throw error;
+      const data = await mongoDbUpdate(
+        'publications',
+        { _id: publicationId },
+        { $set: updates }
+      );
       return data;
     } catch (error) {
       console.error('Error updating publication:', error);
@@ -36,12 +32,11 @@ export class UserPublicationsService {
 
   static async deletePublication(publicationId: string) {
     try {
-      const { error } = await supabase
-        .from('publications')
-        .delete()
-        .eq('id', publicationId);
-
-      if (error) throw error;
+      await mongoDbUpdate(
+        'publications',
+        { _id: publicationId },
+        { $set: { status: 'deleted' } }
+      );
     } catch (error) {
       console.error('Error deleting publication:', error);
       throw error;
@@ -50,14 +45,11 @@ export class UserPublicationsService {
 
   static async togglePublicationStatus(publicationId: string, isActive: boolean) {
     try {
-      const { data, error } = await supabase
-        .from('publications')
-        .update({ is_active: isActive })
-        .eq('id', publicationId)
-        .select()
-        .single();
-
-      if (error) throw error;
+      const data = await mongoDbUpdate(
+        'publications',
+        { _id: publicationId },
+        { $set: { isActive } }
+      );
       return data;
     } catch (error) {
       console.error('Error toggling publication status:', error);

@@ -6,7 +6,7 @@ import { NotificationsService } from '../services/notifications.service';
 import { BellIcon } from '@heroicons/react/24/outline';
 
 export default function NotificationsDropdown() {
-  const [notifications, setNotifications] = useState([]);
+  const [notifications, setNotifications] = useState<any[]>([]);
   const [unreadCount, setUnreadCount] = useState(0);
   const [isOpen, setIsOpen] = useState(false);
   const { user } = useAuth();

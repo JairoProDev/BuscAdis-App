@@ -4,7 +4,7 @@ import { useState, useEffect, useRef } from 'react';
 import { useAuth } from '@/features/auth/hooks/useAuth';
 import { MessagesService } from '../services/messages.service';
 import { PaperAirplaneIcon } from '@heroicons/react/24/solid';
-import { ApiGatewayManagementApiClient, PostToConnectionCommand } from '@aws-sdk/client-apigatewaymanagementapi';
+// AWS SDK removed due to missing dependency
 
 interface ChatProps {
   conversationId: string;
@@ -13,15 +13,15 @@ interface ChatProps {
 }
 
 export default function Chat({ conversationId, otherUser, publication }: ChatProps) {
-  const [messages, setMessages] = useState([]);
+  const [messages, setMessages] = useState<any[]>([]);
   const [newMessage, setNewMessage] = useState('');
   const { user } = useAuth();
   const messagesEndRef = useRef<HTMLDivElement>(null);
-  const wsRef = useRef(null);
+  const wsRef = useRef<WebSocket | null>(null);
 
   useEffect(() => {
     // Conectar al WebSocket de API Gateway
-    const ws = new WebSocket(process.env.NEXT_PUBLIC_WS_URL);
+    const ws = new WebSocket(process.env.NEXT_PUBLIC_WS_URL || 'ws://localhost:8080');
     wsRef.current = ws;
 
     ws.onmessage = (event) => {

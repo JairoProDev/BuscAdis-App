@@ -1,7 +1,5 @@
-"use server";
-
 import { Publication } from '@/types/publications';
-import { getServerMongoClient } from '@/lib/mongodb-server';
+import { mongoDbQuery, mongoDbInsert } from '@/lib/mongodb-server';
 
 // Type for the Magazine metadata
 export interface MagazineMetadata {
@@ -25,25 +23,20 @@ export async function fetchLatestMagazine(): Promise<MagazineMetadata | null> {
   console.log('[Magazine Service] Fetching latest magazine');
   
   try {
-    const { client, db } = await getServerMongoClient();
-    
     // Find the latest magazine by creation date
-    const magazinesCollection = db.collection('magazines');
-    const latestMagazine = await magazinesCollection
-      .find({})
-      .sort({ createdAt: -1 })
-      .limit(1)
-      .toArray();
+    const latestMagazines = await mongoDbQuery(
+      'magazines', 
+      {}, 
+      { sort: { createdAt: -1 }, limit: 1 }
+    );
     
-    await client.close();
-    
-    if (latestMagazine.length === 0) {
+    if (latestMagazines.length === 0) {
       console.log('[Magazine Service] No magazines found');
       return null;
     }
     
     // Transform to the expected interface
-    const magazine = latestMagazine[0];
+    const magazine = latestMagazines[0];
     return {
       _id: magazine._id.toString(),
       pdfUrl: magazine.pdfUrl,
@@ -65,18 +58,14 @@ export async function getMagazineHistory(): Promise<MagazineMetadata[]> {
   console.log('[Magazine Service] Getting magazine history');
   
   try {
-    const { client, db } = await getServerMongoClient();
-    
-    const magazinesCollection = db.collection('magazines');
-    const magazines = await magazinesCollection
-      .find({})
-      .sort({ createdAt: -1 })
-      .toArray();
-    
-    await client.close();
+    const magazines = await mongoDbQuery(
+      'magazines', 
+      {}, 
+      { sort: { createdAt: -1 } }
+    );
     
     // Transform to the expected interface
-    return magazines.map(magazine => ({
+    return magazines.map((magazine: any) => ({
       _id: magazine._id.toString(),
       pdfUrl: magazine.pdfUrl,
       fileId: magazine.fileId.toString(),

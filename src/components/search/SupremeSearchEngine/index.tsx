@@ -311,11 +311,11 @@ export default function SupremeSearchEngine({
   variant = 'page',
   showFilters = true
 }: SupremeSearchEngineProps) {
-  const { searchState, setSearchState } = useSearch()
+  const { searchState, updateSearch } = useSearch()
   const router = useRouter()
   
   // Estados principales
-  const [query, setQuery] = useState(searchState.keyword || '')
+  const [query, setQuery] = useState(searchState.query || '')
   const [isFocused, setIsFocused] = useState(false)
   const [suggestions, setSuggestions] = useState<SearchSuggestion[]>([])
   const [isLoading, setIsLoading] = useState(false)
@@ -465,9 +465,8 @@ export default function SupremeSearchEngine({
     localStorage.setItem('recentSearches', JSON.stringify(updatedSearches))
 
     // Actualizar estado de búsqueda
-    setSearchState({
-      ...searchState,
-      keyword: query
+    updateSearch({
+      query: query
     })
 
     // Ejecutar búsqueda
@@ -600,7 +599,7 @@ export default function SupremeSearchEngine({
     }
     
     setCategorySelection(newSelection)
-    setSearchState({ ...searchState, category: newSelection.category?.id })
+    updateSearch({ category: newSelection.category?.id || '' })
   }
 
   const getCategoryDataForLevel = (level: string) => {
@@ -622,9 +621,9 @@ export default function SupremeSearchEngine({
   }
 
   const getLocationDisplay = () => {
-    if (searchState.location?.district) return searchState.location.district.name
-    if (searchState.location?.province) return searchState.location.province.name
-    if (searchState.location?.department) return searchState.location.department.name
+    if (searchState.fullLocation?.district) return searchState.fullLocation.district.name
+    if (searchState.fullLocation?.province) return searchState.fullLocation.province.name
+    if (searchState.fullLocation?.department) return searchState.fullLocation.department.name
     return 'Toda ubicación'
   }
 

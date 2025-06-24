@@ -26,3 +26,11 @@ export interface LoginCredentials {
   password?: string;
   code?: string;
 }
+
+export interface AuthResponse {
+  success: boolean;
+  user?: User;
+  token?: string;
+  message?: string;
+  error?: string;
+}

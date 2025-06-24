@@ -65,7 +65,7 @@ export class AnalyticsService {
       if (!searches || searches.length === 0) return [];
 
       // Group by search term and count
-      const searchCounts = searches.reduce((acc, search) => {
+      const searchCounts = searches.reduce((acc: Record<string, number>, search) => {
         const query = search.query.toLowerCase();
         acc[query] = (acc[query] || 0) + 1;
         return acc;
@@ -73,8 +73,8 @@ export class AnalyticsService {
 
       // Convert to array and sort
       return Object.entries(searchCounts)
-        .map(([query, count]) => ({ query, count }))
-        .sort((a, b) => b.count - a.count)
+        .map(([query, count]) => ({ query, count: count as number }))
+        .sort((a, b) => (b.count as number) - (a.count as number))
         .slice(0, 10);
     } catch (error) {
       console.error('Error getting popular search terms:', error);

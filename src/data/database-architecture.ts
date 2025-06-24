@@ -573,8 +573,6 @@ export const SHARDING_STRATEGY = {
 }
 
 export default {
-  BulkPublicationImport,
-  PublicationDocument,
   DATABASE_COLLECTIONS,
   DATABASE_INDEXES,
   SHARDING_STRATEGY

@@ -64,22 +64,9 @@ export interface FilterChipsProps {
   className?: string
 }
 
-export interface Filter {
-  id: string
-  label: string
-  type: FilterType
-  // For range filters
-  min?: number
-  max?: number
-  step?: number
-  format?: (value: number) => string
-  // For select and multiselect filters
-  options?: FilterOption[]
-}
-
 export interface CategoryFilter {
   category: string
-  filters: Filter[]
+  filters: FilterOption[]
 }
 
 export interface BaseFilter {
@@ -98,12 +85,12 @@ export interface RangeFilter extends BaseFilter {
 
 export interface SelectFilter extends BaseFilter {
   type: 'select'
-  options: FilterOption[]
+  options: FilterSelectOption[]
 }
 
 export interface MultiSelectFilter extends BaseFilter {
   type: 'multiselect'
-  options: FilterOption[]
+  options: FilterSelectOption[]
 }
 
 export interface ToggleFilter extends BaseFilter {
@@ -125,24 +112,10 @@ export interface RadiusFilter extends BaseFilter {
   step: number
 }
 
-export type Filter =
+export type FilterUnion =
   | RangeFilter
   | SelectFilter
   | MultiSelectFilter
   | ToggleFilter
   | LocationFilter
-  | RadiusFilter
-
-export interface FilterSection {
-  title: string
-  filters: Filter[]
-}
-
-export interface CategoryFilters {
-  title: string
-  sections: FilterSection[]
-}
-
-export interface FiltersByCategory {
-  [key: string]: CategoryFilters
-} 
+  | RadiusFilter 

@@ -30,7 +30,7 @@ export class NotificationsService {
         { returnDocument: 'after' }
       );
       
-      return result.value;
+      return result?.value || null;
     } catch (error) {
       console.error('Error marking notification as read:', error);
       throw error;

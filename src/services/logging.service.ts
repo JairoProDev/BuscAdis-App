@@ -112,6 +112,18 @@ class LoggingService {
   }
 
   /**
+   * Log success messages
+   */
+  success(message: string, context?: Record<string, any>): void {
+    this.log('info', message, context);
+    
+    // Show success toast in browser
+    if (typeof window !== 'undefined') {
+      toast.success(message);
+    }
+  }
+
+  /**
    * Log performance timing
    */
   performance(operation: string, duration: number, context?: Record<string, any>): void {

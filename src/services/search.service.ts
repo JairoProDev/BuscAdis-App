@@ -108,7 +108,7 @@ export class SearchService {
             const skip = (page - 1) * limit;
             const items = await publications
                 .find(filter)
-                .sort(sortOptions)
+                .sort(sortOptions as any)
                 .skip(skip)
                 .limit(limit)
                 .toArray();
@@ -122,7 +122,7 @@ export class SearchService {
             };
         } catch (error) {
             console.error('Error searching publications:', error);
-            throw new Error(`Error searching publications: ${error.message}`);
+            throw new Error(`Error searching publications: ${error instanceof Error ? error.message : 'Unknown error'}`);
         }
     }
 }

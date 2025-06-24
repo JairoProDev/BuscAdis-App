@@ -245,10 +245,10 @@ export function SplitLayout({
                 {selectedPublication.title}
               </h2>
               
-              {selectedPublication.price && (
+              {selectedPublication.amount && (
                 <p className="text-2xl font-bold mb-4">
                   {formatCurrency(
-                    selectedPublication.price, 
+                    selectedPublication.amount, 
                     selectedPublication.currency || 'PEN'
                   )}
                 </p>
@@ -325,10 +325,10 @@ export function SplitLayout({
                   </Button>
                 </div>
                 
-                {selectedPublication.price && (
+                {selectedPublication.amount && (
                   <p className="text-xl font-bold mb-2">
                     {formatCurrency(
-                      selectedPublication.price, 
+                      selectedPublication.amount, 
                       selectedPublication.currency || 'PEN'
                     )}
                   </p>

@@ -40,7 +40,7 @@ export class AuthService {
             if (user) {
                 return {
                     success: true,
-                    user: user as User
+                    user: user as unknown as User
                 };
             }
 

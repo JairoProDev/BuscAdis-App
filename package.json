@@ -8,7 +8,8 @@
     "start": "next start",
     "lint": "next lint",
     "seed": "node src/scripts/seed-publications.js",
-    "seed:force": "node src/scripts/seed-publications.js --force"
+    "seed:force": "node src/scripts/seed-publications.js --force",
+    "build:all-errors": "__NEXT_TEST_MODE=true next build"
   },
   "dependencies": {
     "@emotion/styled": "^11.14.0",

@@ -72,6 +72,7 @@ export function parsePublicationsFromText(text: string): PublicationInput[] {
     
     // Extraer ubicación
     const locationInfo = {
+      province: 'Cusco' as const, // Required property
       city: 'Cusco', // Default por el contexto de los anuncios
       region: 'Cusco',
       district: ''
@@ -97,61 +98,18 @@ export function parsePublicationsFromText(text: string): PublicationInput[] {
       title,
       description: adText,
       price,
-      price_type: priceType,
       currency: 'PEN', // Sol peruano
-      category: classification.category as MainCategory,
+      category: classification.category,
       subcategory: classification.subcategory,
-      subsubcategory: classification.subsubcategory,
-      images: [], // Sin imágenes por defecto
       location: locationInfo,
-      contact: contactInfo,
-      attributes: {}
+      contactName: contactInfo.name || '',
+      contactPhone: contactInfo.phone,
+      contactEmail: contactInfo.email,
+      images: [] // Sin imágenes por defecto
     };
     
-    // Extraer atributos específicos según categoría
-    if (classification.category === 'empleos') {
-      // Extraer tipo de trabajo
-      if (adText.toLowerCase().includes('tiempo completo')) {
-        publication.attributes.tipo_trabajo = 'Tiempo completo';
-      } else if (adText.toLowerCase().includes('medio tiempo') || adText.toLowerCase().includes('part time')) {
-        publication.attributes.tipo_trabajo = 'Medio tiempo';
-      } else if (adText.toLowerCase().includes('por horas')) {
-        publication.attributes.tipo_trabajo = 'Por horas';
-      }
-      
-      // Extraer requisitos
-      const requisitos = [];
-      if (adText.toLowerCase().includes('requisito')) {
-        const reqSection = adText.toLowerCase().split('requisito')[1]?.split(/\.|empresa|informes/i)[0];
-        if (reqSection) {
-          const reqs = reqSection.split(/,|;|\n/).map(r => r.trim()).filter(r => r.length > 3);
-          requisitos.push(...reqs);
-        }
-      }
-      if (requisitos.length > 0) {
-        publication.attributes.requisitos = requisitos;
-      }
-    } else if (classification.category === 'inmuebles') {
-      // Extraer características
-      if (adText.toLowerCase().includes('dormitorio')) {
-        const dormMatch = adText.match(/(\d+)\s*dormitorio/i);
-        if (dormMatch) {
-          publication.attributes.dormitorios = parseInt(dormMatch[1]);
-        }
-      }
-      if (adText.toLowerCase().includes('baño')) {
-        const bathMatch = adText.match(/(\d+)\s*baño/i);
-        if (bathMatch) {
-          publication.attributes.baños = parseInt(bathMatch[1]);
-        }
-      }
-      if (adText.toLowerCase().includes('m²') || adText.toLowerCase().includes('metros cuadrados')) {
-        const areaMatch = adText.match(/(\d+)\s*m²/i) || adText.match(/(\d+)\s*metros cuadrados/i);
-        if (areaMatch) {
-          publication.attributes.area = parseInt(areaMatch[1]);
-        }
-      }
-    }
+    // Note: Specific attributes would be handled through the category-specific detail interfaces
+    // like jobDetails, realEstateDetails, etc. in a real implementation
     
     return publication;
   });

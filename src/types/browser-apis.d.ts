@@ -6,8 +6,8 @@
 // Web Speech API
 declare global {
   interface Window {
-    SpeechRecognition: typeof SpeechRecognition;
-    webkitSpeechRecognition: typeof SpeechRecognition;
+    SpeechRecognition: any;
+    webkitSpeechRecognition: any;
     SpeechSynthesis: typeof SpeechSynthesis;
     speechSynthesis: SpeechSynthesis;
   }

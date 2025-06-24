@@ -757,27 +757,31 @@ export interface SubSubcategory {
    * @returns Un objeto con los nombres encontrados o null si no se encuentran.
    */
   export const getClassificationNames = (
-      categoryId: string,
-      subcategoryId?: string | null,
-      subSubcategoryId?: string | null
-  ): { categoryName: string | null; subcategoryName: string | null; subSubcategoryName: string | null } => {
-      const result = { categoryName: null, subcategoryName: null, subSubcategoryName: null };
-      const category = categoriesMap.get(categoryId);
-      if (!category) return result;
-  
-      result.categoryName = category.name;
-  
-      if (subcategoryId) {
-          const subcategory = category.subcategories.find(sub => sub.id === subcategoryId);
-          if (subcategory) {
-              result.subcategoryName = subcategory.name;
-              if (subSubcategoryId && subcategory.subSubcategories) {
-                  const subSub = subcategory.subSubcategories.find(ssub => ssub.id === subSubcategoryId);
-                  if (subSub) {
-                      result.subSubcategoryName = subSub.name;
-                  }
-              }
-          }
-      }
-      return result;
-  };
+    categoryId: string,
+    subcategoryId?: string | null,
+    subSubcategoryId?: string | null
+): { categoryName: string | null; subcategoryName: string | null; subSubcategoryName: string | null } => {
+    const result: { categoryName: string | null; subcategoryName: string | null; subSubcategoryName: string | null } = { 
+        categoryName: null, 
+        subcategoryName: null, 
+        subSubcategoryName: null 
+    };
+    const category = categoriesMap.get(categoryId);
+    if (!category) return result;
+
+    result.categoryName = category.name;
+
+    if (subcategoryId) {
+        const subcategory = category.subcategories.find(sub => sub.id === subcategoryId);
+        if (subcategory) {
+            result.subcategoryName = subcategory.name;
+            if (subSubcategoryId && subcategory.subSubcategories) {
+                const subSub = subcategory.subSubcategories.find(ssub => ssub.id === subSubcategoryId);
+                if (subSub) {
+                    result.subSubcategoryName = subSub.name;
+                }
+            }
+        }
+    }
+    return result;
+};

@@ -5,8 +5,16 @@ import SearchBar from '../SearchBar'
 import FiltersBar from '../FiltersBar'
 import Breadcrumbs from '../Breadcrumbs'
 
+interface SearchOptions {
+  category?: string;
+  location?: string;
+  filters?: Record<string, unknown>;
+  type?: string;
+  subType?: string;
+}
+
 interface StickySearchContainerProps {
-  onSearch?: (query: string, options?: Record<string, string>) => void
+  onSearch?: (query: string, options?: SearchOptions) => void
   onFilterChange?: (filters: Record<string, any>) => void
   className?: string
 }
@@ -38,7 +46,7 @@ export default function StickySearchContainer({
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         {/* Search Bar */}
         <SearchBar 
-          onSearch={onSearch}
+          onSearch={onSearch || (() => {})}
           className={isSticky ? 'rounded-none' : ''}
         />
         

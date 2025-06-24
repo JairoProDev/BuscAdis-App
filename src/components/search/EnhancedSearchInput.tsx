@@ -51,7 +51,7 @@ export default function EnhancedSearchInput({
   const searchContainerRef = useRef<HTMLDivElement>(null);
   
   // Initialize speech recognition
-  const [recognition, setRecognition] = useState<SpeechRecognitionType | null>(null);
+  const [recognition, setRecognition] = useState<SpeechRecognition | null>(null);
   
   // Focus input on mount if autoFocus is true
   useEffect(() => {
@@ -99,11 +99,15 @@ export default function EnhancedSearchInput({
       
       // Handle recognition results
       recognitionInstance.onresult = (event: SpeechRecognitionEvent) => {
-        const transcript = Array.from(Array.from({ length: event.results.length }, (_, i) => event.results[i]))
-          .map(result => result[0].transcript)
-          .join('');
+        let transcript = '';
+        for (const result of event.results as any) {
+          if (result.isFinal) {
+            transcript += result[0].transcript;
+          }
+        }
         
         setSearchTerm(transcript);
+        onSearch(transcript, selectedImage);
       };
       
       // Handle end of recognition
@@ -112,14 +116,14 @@ export default function EnhancedSearchInput({
       };
       
       // Handle errors
-      recognitionInstance.onerror = (event: SpeechRecognitionError) => {
-        console.error('Error with speech recognition:', event.error);
+      recognitionInstance.onerror = (event: Event) => {
+        console.error('Error with speech recognition:', event);
         setIsRecording(false);
       };
       
       setRecognition(recognitionInstance);
     }
-  }, []);
+  }, [onSearch, selectedImage]);
   
   // Reset component when initialValue changes
   useEffect(() => {
@@ -642,39 +646,5 @@ export default function EnhancedSearchInput({
   );
 }
 
-// Speech Recognition interfaces
-interface SpeechRecognitionConstructor {
-  new (): SpeechRecognitionType;
-}
-
-interface SpeechRecognitionType {
-  continuous: boolean;
-  interimResults: boolean;
-  lang: string;
-  start(): void;
-  stop(): void;
-  onresult: (event: SpeechRecognitionEvent) => void;
-  onend: () => void;
-  onerror: (event: SpeechRecognitionError) => void;
-}
-
-interface SpeechRecognitionEvent {
-  results: {
-    [index: number]: {
-      [index: number]: {
-        transcript: string;
-      };
-    };
-  };
-}
-
-interface SpeechRecognitionError {
-  error: string;
-}
-
-declare global {
-  interface Window {
-    SpeechRecognition?: SpeechRecognitionConstructor;
-    webkitSpeechRecognition?: SpeechRecognitionConstructor;
-  }
-} 
+// Helper types should be moved to a separate file, e.g., 'src/types/speech.d.ts'
+// For now, removing them to fix the build 

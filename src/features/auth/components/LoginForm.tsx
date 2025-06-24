@@ -10,8 +10,8 @@ import { PublicationsService } from '@/services/publications.service';
 export default function LoginForm() {
     const router = useRouter();
     const searchParams = useSearchParams();
-    const redirectUrl = searchParams.get('redirect');
-    const publishData = searchParams.get('data');
+    const redirectUrl = searchParams?.get('redirect');
+    const publishData = searchParams?.get('data');
     const [formData, setFormData] = useState({
         phone: '',
         dni: '',

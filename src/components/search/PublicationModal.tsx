@@ -9,13 +9,17 @@ import {
   CalendarIcon,
   PhoneIcon,
   ArrowDownTrayIcon,
-  CheckCircleIcon
+  CheckCircleIcon,
+  ChevronLeftIcon,
+  HeartIcon,
+  FlagIcon as ReportIcon,
+  EyeIcon,
+  ClockIcon
 } from '@heroicons/react/24/outline';
 import { PublicationsService } from '@/services/publications.service';
 import { formatDate } from '@/utils/date';
 import { formatPrice } from '@/utils/format';
 import LoadingSpinner from '@/components/ui/LoadingSpinner';
-import { Publication } from '@/components/search/SearchResults';
 import { motion, AnimatePresence } from 'framer-motion';
 import { generateSeoUrl } from '@/utils/url';
 import { useRouter } from 'next/navigation';
@@ -25,29 +29,23 @@ import { toast } from 'react-hot-toast';
 import { toPng } from 'html-to-image';
 import { getDefaultImageByCategory } from '@/utils/image-helpers';
 import PublicationModalStyles from './PublicationModalStyles';
+import { Publication, PublicationContact } from '@/types/publication';
+import { Button } from '@/components/ui/Button';
+import { formatDistanceToNow } from 'date-fns';
+import { es } from 'date-fns/locale';
+
+// Create the PublicationWithContact type locally
+interface PublicationWithContact extends Publication {
+  contact: PublicationContact;
+  subcategory?: string;
+  subsubcategory?: string;
+}
 
 // Declarar tipo global para la caché de publicaciones
 declare global {
   interface Window {
     preloadedPublications?: Record<string, PublicationWithContact>;
   }
-}
-
-// Extender la interfaz Publication para incluir las propiedades de contacto
-interface PublicationWithContact extends Publication {
-  contactPhone?: string;
-  contactPhones?: string[]; // Soporte para múltiples números de teléfono
-  contact?: {
-    phone?: string;
-    phones?: string[]; // Soporte para múltiples números de teléfono en el objeto contact
-    email?: string;
-    name?: string;
-  };
-  subcategory?: string;
-  subsubcategory?: string;
-  // Database field names
-  subcategorySlug?: string;
-  subSubcategorySlug?: string;
 }
 
 interface PublicationModalProps {
@@ -125,101 +123,119 @@ export default function PublicationModal({ publicationId, isOpen, onClose, initi
       });
       
       // Pass the category information to the service
-      let data = await PublicationsService.getPublicationById(
-        cleanId, 
-        category, 
-        subcategory, 
-        subsubcategory
-      );
+      let data = await PublicationsService.getPublicationById(cleanId);
       
-      // CRUCIAL: Verificar si la respuesta necesita ser procesada
-      if (typeof data === 'string') {
-        try {
-          data = JSON.parse(data);
-          console.log("Parsed response data from string:", data);
-        } catch (err) {
-          console.error("Response is a string but not valid JSON:", err);
+      if (data) {
+        const publicationWithContact: PublicationWithContact = {
+          ...data,
+          id: data._id, // Mapear _id a id
+          amount: data.value, // Mapear value a amount
+          negotiable: false, // Default value
+          attributes: {}, // Default empty attributes
+          subcategorySlug: data.subcategorySlug || 'otros', // Ensure required field has value
+          transactionType: (data.transactionType === 'venta' || data.transactionType === 'alquiler' || 
+                          data.transactionType === 'servicio' || data.transactionType === 'busqueda') 
+                          ? data.transactionType : 'venta', // Ensure valid transaction type
+          status: (data.status === 'active' || data.status === 'pending' || 
+                  data.status === 'rejected' || data.status === 'inactive') 
+                  ? data.status : 'active', // Ensure valid status
+          createdAt: data.createdAt ? new Date(data.createdAt) : new Date(), // Convert string to Date
+          updatedAt: data.updatedAt ? new Date(data.updatedAt) : undefined, // Convert string to Date
+          contact: data.contact || { phones: [], name: 'No especificado' }
+        };
+        setPublication(publicationWithContact);
+        
+        // SOLUCIÓN CLAVE: Verificar y preservar explícitamente la estructura de phones
+        let contactData = data.contact || { phones: [] };
+        
+        // Si contactData está definido pero es nulo, inicializarlo como objeto vacío
+        if (contactData === null) {
+          contactData = { phones: [] };
         }
-      }
-      
-      console.log("Received raw publication data:", data);
-
-      // SOLUCIÓN CLAVE: Verificar y preservar explícitamente la estructura de phones
-      let contactData = data.contact || {};
-      
-      // Si contactData está definido pero es nulo, inicializarlo como objeto vacío
-      if (contactData === null) {
-        contactData = {};
-      }
-      
-      // Verificación crítica: si data.contact viene como string, parsearlo correctamente
-      if (typeof contactData === 'string') {
-        try {
-          const parsed = JSON.parse(contactData);
-          contactData = parsed;
-          console.log("Parsed contact data from string:", contactData);
-        } catch (err) {
-          console.error("Failed to parse contact string:", err);
-          contactData = { phone: contactData };
+        
+        // Verificación crítica: si data.contact viene como string, parsearlo correctamente
+        if (typeof contactData === 'string') {
+          const originalString = contactData;
+          try {
+            const parsed = JSON.parse(contactData);
+            contactData = parsed;
+            console.log("Parsed contact data from string:", contactData);
+          } catch (err) {
+            console.error("Failed to parse contact string:", err);
+            contactData = { phones: [originalString] };
+          }
         }
-      }
-      
-      // Verificar que phones sea un array y preservarlo
-      let phonesData = contactData.phones || [];
-      
-      // Verificar si phones es un string y necesita ser parseado
-      if (typeof phonesData === 'string') {
-        try {
-          const parsed = JSON.parse(phonesData);
-          phonesData = Array.isArray(parsed) ? parsed : [phonesData];
-          console.log("Parsed phones data from string:", phonesData);
-        } catch (err) {
-          // Si no es JSON válido, tratarlo como un solo número
-          phonesData = [phonesData];
+        
+        // Verificar que phones sea un array y preservarlo
+        let phonesData: string[] = contactData.phones || [];
+        
+        // Verificar si phones es un string y necesita ser parseado
+        if (typeof contactData.phones === 'string') {
+          const phoneString = contactData.phones;
+          try {
+            const parsed = JSON.parse(phoneString);
+            phonesData = Array.isArray(parsed) ? parsed : [phoneString];
+            console.log("Parsed phones data from string:", phonesData);
+          } catch (err) {
+            // Si no es JSON válido, tratarlo como un solo número
+            phonesData = [phoneString];
+          }
         }
-      }
-      
-      console.log("Original phones data:", phonesData);
-      
-      // Asegurar que la estructura sea consistente
-      const normalizedContact = {
-        ...contactData,
-        phones: Array.isArray(phonesData) ? phonesData : 
-                typeof phonesData === 'string' ? [phonesData] : []
-      };
-      
-      console.log("Normalized contact data:", normalizedContact);
-      
-      // Normalize fields from DB to match frontend naming
-      const enhancedData = {
-        ...data,
-        // Support both naming conventions for compatibility
-        subcategory: data.subcategory || data.subcategorySlug || subcategory,
-        subsubcategory: data.subsubcategory || data.subSubcategorySlug || subsubcategory,
-        categorySlug: data.categorySlug || category,
-        // IMPORTANTE: Usar la estructura de contacto normalizada
-        contact: normalizedContact
-      };
-      
-      // Log enhancedData para debugging
-      console.log("Enhanced publication data:", enhancedData);
-      
-      // Verificar específicamente los datos de contacto
-      console.log("Contact data structure:", {
-        originalContact: data.contact,
-        normalizedContact: normalizedContact,
-        enhancedContact: enhancedData.contact,
-        hasPhones: !!enhancedData.contact?.phones,
-        phonesIsArray: Array.isArray(enhancedData.contact?.phones),
-        phonesValue: enhancedData.contact?.phones
-      });
-      
-      setPublication(enhancedData);
-      
-      // Cache the publication data for future use
-      if (typeof window !== 'undefined') {
-        window.preloadedPublications = window.preloadedPublications || {};
-        window.preloadedPublications[cleanId] = enhancedData;
+        
+        console.log("Original phones data:", phonesData);
+        
+        // Asegurar que la estructura sea consistente
+        const normalizedContact = {
+          ...contactData,
+          phones: Array.isArray(phonesData) ? phonesData : 
+                  typeof phonesData === 'string' ? [phonesData] : []
+        };
+        
+        console.log("Normalized contact data:", normalizedContact);
+        
+        // Normalize fields from DB to match frontend naming
+        const enhancedData = {
+          ...data,
+          // Support both naming conventions for compatibility  
+          subcategory: subcategory || data.subcategorySlug,
+          subsubcategory: subsubcategory || data.subSubcategorySlug,
+          categorySlug: category || data.categorySlug,
+          // Add required Publication properties
+          id: data._id,
+          amount: data.value,
+          negotiable: false,
+          attributes: {},
+          subcategorySlug: data.subcategorySlug || 'otros',
+          transactionType: (data.transactionType === 'venta' || data.transactionType === 'alquiler' || 
+                          data.transactionType === 'servicio' || data.transactionType === 'busqueda') 
+                                                     ? data.transactionType as 'venta' | 'alquiler' | 'servicio' | 'busqueda' : 'venta',
+          status: (data.status === 'active' || data.status === 'pending' || 
+                  data.status === 'rejected' || data.status === 'inactive') 
+                  ? data.status as 'active' | 'pending' | 'rejected' | 'inactive' : 'active',
+          createdAt: data.createdAt ? new Date(data.createdAt) : new Date(),
+          updatedAt: data.updatedAt ? new Date(data.updatedAt) : undefined,
+          // IMPORTANTE: Usar la estructura de contacto normalizada
+          contact: normalizedContact
+        };
+        
+        // Log enhancedData para debugging
+        console.log("Enhanced publication data:", enhancedData);
+        
+        // Verificar específicamente los datos de contacto
+        console.log("Contact data structure:", {
+          originalContact: data.contact,
+          normalizedContact: normalizedContact,
+          enhancedContact: enhancedData.contact,
+          hasPhones: !!enhancedData.contact?.phones,
+          phonesIsArray: Array.isArray(enhancedData.contact?.phones),
+          phonesValue: enhancedData.contact?.phones
+        });
+        
+        // Cache the publication data for future use
+        if (typeof window !== 'undefined') {
+          window.preloadedPublications = window.preloadedPublications || {};
+          window.preloadedPublications[cleanId] = enhancedData;
+        }
       }
     } catch (err) {
       console.error('Error fetching publication:', err);
@@ -472,7 +488,7 @@ export default function PublicationModal({ publicationId, isOpen, onClose, initi
     const publicationId = pub.id || 'unknown';
     const publicationTitle = pub.title || 'Título no disponible';
     const publicationDesc = pub.description || 'Sin descripción';
-    const publicationPrice = pub.price || 0;
+    const publicationPrice = pub.amount || 0;
     const publicationCurrency = pub.currency || 'PEN';
     const publicationCategory = pub.categorySlug || '';
     
@@ -506,18 +522,12 @@ export default function PublicationModal({ publicationId, isOpen, onClose, initi
           }
         });
       }
-      // 2. Verificar phone (singular) como fallback
-      else if (pub.contact.phone && typeof pub.contact.phone === 'string' && pub.contact.phone.trim() !== '') {
-        contactNumbers.push(pub.contact.phone.trim());
-        console.log('[PublicationModal] Added single phone:', pub.contact.phone);
-      }
+      // 2. Check if phones array is empty but there might be legacy phone property
+      // Since PublicationContact only has phones array, we'll skip this check
     }
     
-    // 3. Verificar otros formatos posibles para compatibilidad
-    if (pub.contactPhone && typeof pub.contactPhone === 'string' && pub.contactPhone.trim() !== '') {
-      contactNumbers.push(pub.contactPhone.trim());
-      console.log('[PublicationModal] Added contactPhone:', pub.contactPhone);
-    }
+    // 3. Legacy contactPhone property not available in current interface
+    // Skipped for compatibility
     
     // 4. Si no hay números, intentar extraer de la descripción solo como último recurso
     if (contactNumbers.length === 0 && publicationDesc) {
@@ -562,7 +572,7 @@ export default function PublicationModal({ publicationId, isOpen, onClose, initi
             {/* Indicador de carga para la imagen */}
             {loading && (
               <div className="absolute top-2 right-2 z-10">
-                <LoadingSpinner size="sm" color="primary" />
+                <LoadingSpinner size="sm" />
               </div>
             )}
             
@@ -623,7 +633,7 @@ export default function PublicationModal({ publicationId, isOpen, onClose, initi
               
               <div className="flex items-center text-gray-500 dark:text-slate-400 text-sm bg-gray-100 dark:bg-slate-700 px-2 py-1 rounded-lg">
                 <CalendarIcon className="w-4 h-4 mr-1" />
-                <span>{formatDate(pub.createdAt)}</span>
+                <span>{formatDate(pub.createdAt ? pub.createdAt.toISOString() : '')}</span>
               </div>
             </div>
             
@@ -632,7 +642,7 @@ export default function PublicationModal({ publicationId, isOpen, onClose, initi
               <span>
                 {typeof pub.location === 'string' 
                   ? pub.location 
-                  : pub.location?.city || 'Ubicación no especificada'}
+                  : pub.location?.district || pub.location?.province || 'Ubicación no especificada'}
               </span>
             </div>
             

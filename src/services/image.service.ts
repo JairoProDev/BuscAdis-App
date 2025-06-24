@@ -1,5 +1,21 @@
-import { S3Client, PutObjectCommand } from '@aws-sdk/client-s3';
-import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
+// Conditional AWS SDK imports
+let S3Client: any = null;
+let PutObjectCommand: any = null;
+let DeleteObjectCommand: any = null;
+let getSignedUrl: any = null;
+
+try {
+  const s3Module = require('@aws-sdk/client-s3');
+  const presignerModule = require('@aws-sdk/s3-request-presigner');
+  
+  S3Client = s3Module.S3Client;
+  PutObjectCommand = s3Module.PutObjectCommand;
+  DeleteObjectCommand = s3Module.DeleteObjectCommand;
+  getSignedUrl = presignerModule.getSignedUrl;
+} catch (error) {
+  // AWS SDK not available, service will use fallback methods
+}
+
 import { v4 as uuidv4 } from 'uuid';
 import { AuthService } from '@/features/auth/services/auth.service';
 import { Logger } from './logging.service';
@@ -54,7 +70,7 @@ export class ImageService {
     allowedTypes: ['image/jpeg', 'image/png', 'image/webp']
   };
 
-  static async getUploadUrl(contentType) {
+  static async getUploadUrl(contentType: string) {
     try {
       const currentUser = await AuthService.getCurrentUser();
       if (!currentUser) {
@@ -88,7 +104,7 @@ export class ImageService {
     }
   }
 
-  static async uploadImage(file) {
+  static async uploadImage(file: File) {
     try {
       // Validar tamaño y tipo
       if (file.size > 5 * 1024 * 1024) { // 5MB max
@@ -122,7 +138,7 @@ export class ImageService {
     }
   }
 
-  static async deleteImage(key) {
+  static async deleteImage(key: string) {
     try {
       const currentUser = await AuthService.getCurrentUser();
       if (!currentUser) {
@@ -132,6 +148,10 @@ export class ImageService {
       // Verificar que la imagen pertenece al usuario
       if (!key.startsWith(`${currentUser.id}/`)) {
         throw new Error('No tienes permiso para eliminar esta imagen');
+      }
+      
+      if (!DeleteObjectCommand) {
+        throw new Error('AWS SDK not available');
       }
       
       const command = new DeleteObjectCommand({
@@ -223,7 +243,7 @@ export class ImageService {
     try {
       return await createImageBitmap(file);
     } catch (error) {
-      Logger.error('Error al crear ImageBitmap:', error);
+      Logger.error('Error al crear ImageBitmap:', error instanceof Error ? { message: error.message } : { error });
       throw new Error('Error al procesar la imagen');
     }
   }

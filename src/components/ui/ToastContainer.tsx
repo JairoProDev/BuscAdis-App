@@ -26,7 +26,7 @@ export default function ToastContainer({ toasts, removeToast }: ToastContainerPr
           title={toast.title}
           message={toast.message}
           type={toast.type}
-          onClose={removeToast}
+          onRemove={removeToast}
         />
       ))}
     </div>

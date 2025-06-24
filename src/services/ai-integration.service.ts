@@ -134,7 +134,10 @@ class AIIntegrationService {
       return {
         isAppropriate: textModeration.isAppropriate && imageModeration.isAppropriate,
         issues: [...textModeration.issues, ...imageModeration.issues],
-        confidence: Math.min(textModeration.confidence, imageModeration.confidence || 1),
+        confidence: Math.min(
+          textModeration.confidence ?? 1, 
+          (imageModeration as { isAppropriate: boolean; issues: string[]; confidence?: number }).confidence ?? 1
+        ),
         suggestedEdits: textModeration.suggestedEdits
       };
       

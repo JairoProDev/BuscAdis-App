@@ -1,35 +1,26 @@
 // src\components\ui\Toaster.tsx
 'use client';
 
-import {
-  Toast,
-  ToastDescription,
-  ToastProvider,
-  ToastTitle,
-  ToastViewport,
-} from '@/components/ui/toast';
+import Toast from '@/components/ui/Toast';
 import { useToast } from '@/components/ui/use-toast';
 
 export function Toaster() {
-  const { toasts } = useToast();
+  const { toasts, dismiss } = useToast();
 
   return (
-    <ToastProvider>
-      {toasts.map(function ({ id, title, description, action, ...props }) {
+    <div className="fixed bottom-4 right-4 flex flex-col gap-2 z-50">
+      {toasts.map(function ({ id, title, description, ...props }) {
         return (
-          <Toast key={id} {...props}>
-            <div className="grid gap-1">
-              {title && <ToastTitle>{title}</ToastTitle>}
-              {description && (
-                <ToastDescription>{description}</ToastDescription>
-              )}
-            </div>
-            {action}
-            {/* Si necesitas un botón de cerrar, puedes agregarlo aquí */}
-          </Toast>
+          <Toast 
+            key={id} 
+            id={id}
+            title={title as string}
+            message={description as string}
+            onRemove={dismiss}
+            type={props.type}
+          />
         );
       })}
-      <ToastViewport />
-    </ToastProvider>
+    </div>
   );
 }

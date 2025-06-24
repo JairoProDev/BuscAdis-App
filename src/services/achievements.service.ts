@@ -3,10 +3,14 @@ import { persist } from 'zustand/middleware';
 import { Logger } from './logging.service';
 import { Achievement } from '@/components/publish/PublishAchievements';
 
+interface AchievementWithTimestamp extends Achievement {
+  timestamp?: Date;
+}
+
 interface AchievementProgress {
   achievements: Achievement[];
   totalPoints: number;
-  lastAchievement?: Achievement;
+  lastAchievement?: AchievementWithTimestamp;
 }
 
 interface AchievementStore extends AchievementProgress {
@@ -21,43 +25,43 @@ interface AchievementStore extends AchievementProgress {
 const INITIAL_ACHIEVEMENTS: Achievement[] = [
   {
     id: 'first_image',
-    title: 'Fotógrafo Novato',
+    name: 'Fotógrafo Novato',
     description: 'Subiste tu primera imagen',
     points: 10,
-    icon: () => null, // Icons are handled by the component
-    completed: false
+    icon: '📸',
+    unlocked: false
   },
   {
     id: 'image_collection',
-    title: 'Coleccionista',
+    name: 'Coleccionista',
     description: 'Subiste 5 imágenes',
     points: 20,
-    icon: () => null,
-    completed: false
+    icon: '🖼️',
+    unlocked: false
   },
   {
     id: 'all_fields',
-    title: 'Detallista',
+    name: 'Detallista',
     description: 'Completaste todos los campos del formulario',
     points: 20,
-    icon: () => null,
-    completed: false
+    icon: '✅',
+    unlocked: false
   },
   {
     id: 'location',
-    title: 'Geolocalizador',
+    name: 'Geolocalizador',
     description: 'Añadiste la ubicación exacta',
     points: 15,
-    icon: () => null,
-    completed: false
+    icon: '📍',
+    unlocked: false
   },
   {
     id: 'description_pro',
-    title: 'Comunicador Pro',
+    name: 'Comunicador Pro',
     description: 'Escribiste una descripción de más de 100 palabras',
     points: 25,
-    icon: () => null,
-    completed: false
+    icon: '📝',
+    unlocked: false
   }
 ];
 
@@ -72,19 +76,19 @@ export const useAchievements = create<AchievementStore>()(
         const { achievements, totalPoints } = get();
         const achievement = achievements.find(a => a.id === id);
 
-        if (achievement && !achievement.completed) {
-          Logger.success(`Logro desbloqueado: ${achievement.title}`);
+        if (achievement && !achievement.unlocked) {
+          Logger.success(`Logro desbloqueado: ${achievement.name}`);
           
           const updatedAchievements = achievements.map(a =>
             a.id === id
-              ? { ...a, completed: true, timestamp: new Date() }
+              ? { ...a, unlocked: true, timestamp: new Date() }
               : a
           );
 
           set({
             achievements: updatedAchievements,
             totalPoints: totalPoints + achievement.points,
-            lastAchievement: { ...achievement, completed: true, timestamp: new Date() }
+            lastAchievement: { ...achievement, unlocked: true, timestamp: new Date() } as AchievementWithTimestamp
           });
         }
       },

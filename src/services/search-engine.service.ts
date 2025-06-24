@@ -185,7 +185,7 @@ class SupremeSearchEngine {
         Logger.info('Voice search started');
       };
       
-      recognition.onresult = async (event) => {
+      recognition.onresult = async (event: any) => {
         const transcript = event.results[event.results.length - 1][0].transcript;
         
         if (event.results[event.results.length - 1].isFinal) {
@@ -200,7 +200,7 @@ class SupremeSearchEngine {
         }
       };
       
-      recognition.onerror = (event) => {
+      recognition.onerror = (event: any) => {
         Logger.error('Voice search error', { error: event.error });
         reject(new Error(`Error en búsqueda por voz: ${event.error}`));
       };
@@ -270,7 +270,7 @@ class SupremeSearchEngine {
       // 1. Buscar en historial del usuario
       const historySuggestions = this.searchHistory
         .map(q => q.text)
-        .filter(text => text && text.toLowerCase().includes(input.toLowerCase()))
+        .filter((text): text is string => text !== undefined && text.toLowerCase().includes(input.toLowerCase()))
         .slice(0, 3);
       
       // 2. Buscar en búsquedas populares

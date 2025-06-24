@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { ChevronDownIcon, FunnelIcon, XMarkIcon } from '@heroicons/react/24/outline';
-import { FilterOption, FilterValue } from '@/types/filters';
+import { FilterOption, FilterSelectOption, FilterValue } from '@/types/filters';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/Select';
 import { Button } from '@/components/ui/Button';
 import { Slider } from '@/components/ui/slider';
@@ -10,7 +10,7 @@ import { filtersByCategory } from '@/data/filterConfig';
 
 interface HorizontalFilterBarProps {
   category: string;
-  activeFilters: FilterValue;
+  activeFilters: Record<string, FilterValue>;
   onFilterChange: (filters: Record<string, unknown>) => void;
   className?: string;
 }
@@ -46,7 +46,7 @@ export default function HorizontalFilterBar({
         (Array.isArray(value) && value.length === 0)) {
       delete newFilters[filterId];
     } else {
-      newFilters[filterId] = value;
+      newFilters[filterId] = value as FilterValue;
     }
     
     onFilterChange(newFilters);
@@ -110,17 +110,18 @@ export default function HorizontalFilterBar({
     
     switch (filter.type) {
       case 'range':
+        const rangeValue = Array.isArray(value) ? value : [filter.min || 0, filter.max || 100];
         return (
           <div className="space-y-3 min-w-[180px]">
             <div className="flex justify-between">
               <span className="text-xs text-slate-300 font-medium">{filter.label}</span>
               <span className="text-xs text-slate-400">
-                {filter.format ? filter.format(value?.[0] || filter.min || 0) : value?.[0] || filter.min || 0} - 
-                {filter.format ? filter.format(value?.[1] || filter.max || 100) : value?.[1] || filter.max || 100}
+                {filter.format ? filter.format(Number(rangeValue[0])) : rangeValue[0]} - 
+                {filter.format ? filter.format(Number(rangeValue[1])) : rangeValue[1]}
               </span>
             </div>
             <Slider
-              defaultValue={[value?.[0] || filter.min || 0, value?.[1] || filter.max || 100]}
+              defaultValue={rangeValue.map(Number)}
               min={filter.min || 0}
               max={filter.max || 100}
               step={filter.step || 1}
@@ -150,7 +151,7 @@ export default function HorizontalFilterBar({
         return (
           <div className="space-y-3 min-w-[180px]">
             <Select
-              value={value || ''}
+              value={String(value) || ''}
               onValueChange={(newValue) => handleFilterChange(filter.id, newValue)}
             >
               <SelectTrigger className="border-slate-700 bg-slate-800 text-white text-sm">
@@ -158,7 +159,7 @@ export default function HorizontalFilterBar({
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="">Todos</SelectItem>
-                {filter.options?.map((option: FilterOption) => (
+                {filter.options?.map((option: FilterSelectOption) => (
                   <SelectItem key={option.value} value={option.value}>
                     {option.label}
                   </SelectItem>
@@ -177,18 +178,18 @@ export default function HorizontalFilterBar({
         );
         
       case 'multiselect':
-        const selectedValues = value || [];
+        const selectedValues = Array.isArray(value) ? value : [];
         return (
           <div className="space-y-3 min-w-[180px]">
             <div className="flex flex-wrap gap-1">
-              {filter.options?.map((option: FilterOption) => (
+              {filter.options?.map((option: FilterSelectOption) => (
                 <Badge
                   key={option.value}
                   variant={selectedValues.includes(option.value) ? "default" : "outline"}
                   className="cursor-pointer text-xs py-0.5 px-2"
                   onClick={() => {
                     const newValues = selectedValues.includes(option.value)
-                      ? selectedValues.filter((v: string) => v !== option.value)
+                      ? selectedValues.filter((v: string | number) => v !== option.value)
                       : [...selectedValues, option.value];
                     handleFilterChange(filter.id, newValues);
                   }}
@@ -299,15 +300,15 @@ export default function HorizontalFilterBar({
               // Determine display value based on filter type
               let displayValue = value;
               if (filter.type === 'select' && typeof value === 'string') {
-                const option = filter.options?.find((o: FilterOption) => o.value === value);
+                const option = filter.options?.find((o: FilterSelectOption) => o.value === value);
                 if (option) displayValue = option.label;
               } else if (filter.type === 'multiselect' && Array.isArray(value)) {
-                displayValue = value.map((v: string) => {
-                  const option = filter.options?.find((o: FilterOption) => o.value === v);
+                displayValue = value.map((v: string | number) => {
+                  const option = filter.options?.find((o: FilterSelectOption) => o.value === v);
                   return option ? option.label : v;
                 }).join(', ');
               } else if (filter.type === 'range' && Array.isArray(value)) {
-                displayValue = `${filter.format ? filter.format(value[0]) : value[0]} - ${filter.format ? filter.format(value[1]) : value[1]}`;
+                displayValue = `${filter.format ? filter.format(Number(value[0])) : value[0]} - ${filter.format ? filter.format(Number(value[1])) : value[1]}`;
               } else if (filter.type === 'toggle') {
                 displayValue = value ? 'Sí' : 'No';
               } else if (typeof value === 'object') {

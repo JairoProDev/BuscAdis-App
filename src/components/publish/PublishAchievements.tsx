@@ -4,7 +4,7 @@ import React from 'react';
 import { motion } from 'framer-motion';
 import { TrophyIcon, FireIcon, StarIcon, GiftIcon } from '@heroicons/react/24/solid';
 
-interface Achievement {
+export interface Achievement {
   id: string;
   name: string;
   description: string;

@@ -1,55 +1,57 @@
 'use client'
 
 import { useEffect } from 'react'
-import { gsap } from 'gsap'
+
+// Conditionally import gsap if available
+let gsap: any = null;
+try {
+  gsap = require('gsap').gsap;
+} catch (error) {
+  // gsap not available, hook will be disabled
+}
 
 export function useCursor() {
   useEffect(() => {
-    const cursor = document.createElement('div')
-    cursor.className = 'custom-cursor'
-    document.body.appendChild(cursor)
+    if (!gsap || typeof window === 'undefined') {
+      // Disable cursor effects if gsap is not available or on server
+      return;
+    }
 
-    const follower = document.createElement('div')
-    follower.className = 'cursor-follower'
-    document.body.appendChild(follower)
+    // Initialize cursor
+    const cursor = document.createElement('div');
+    cursor.className = 'custom-cursor';
+    cursor.style.cssText = `
+      position: fixed;
+      width: 20px;
+      height: 20px;
+      border-radius: 50%;
+      background: rgba(255, 255, 255, 0.8);
+      pointer-events: none;
+      z-index: 9999;
+      mix-blend-mode: difference;
+      transform: translate(-50%, -50%);
+    `;
+    document.body.appendChild(cursor);
 
-    document.addEventListener('mousemove', (e) => {
+    // Mouse move handler
+    const onMouseMove = (e: MouseEvent) => {
       gsap.to(cursor, {
         x: e.clientX,
         y: e.clientY,
-        duration: 0.1
-      })
-      
-      gsap.to(follower, {
-        x: e.clientX,
-        y: e.clientY,
-        duration: 0.3
-      })
-    })
+        duration: 0.1,
+        ease: "power2.out"
+      });
+    };
 
-    const handleMouseEnter = () => {
-      cursor.classList.add('active')
-      follower.classList.add('active')
-    }
+    // Add event listener
+    document.addEventListener('mousemove', onMouseMove);
 
-    const handleMouseLeave = () => {
-      cursor.classList.remove('active')
-      follower.classList.remove('active')
-    }
-
-    const elements = document.querySelectorAll('a, button, [role="button"]')
-    elements.forEach(el => {
-      el.addEventListener('mouseenter', handleMouseEnter)
-      el.addEventListener('mouseleave', handleMouseLeave)
-    })
-
+    // Cleanup
     return () => {
-      document.body.removeChild(cursor)
-      document.body.removeChild(follower)
-      elements.forEach(el => {
-        el.removeEventListener('mouseenter', handleMouseEnter)
-        el.removeEventListener('mouseleave', handleMouseLeave)
-      })
-    }
-  }, [])
+      document.removeEventListener('mousemove', onMouseMove);
+      if (cursor.parentNode) {
+        cursor.parentNode.removeChild(cursor);
+      }
+    };
+  }, []);
 } 

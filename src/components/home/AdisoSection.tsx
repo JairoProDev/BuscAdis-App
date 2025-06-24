@@ -44,7 +44,7 @@ export default function AdisoSection({
         const data = await PublicationsService.getPublications({
           category: type === 'featured' ? undefined : type.toLowerCase(),
           limit: 6,
-          featured: type === 'featured'
+          premium: type === 'featured'
         });
         
         setAdisos(data.publications);

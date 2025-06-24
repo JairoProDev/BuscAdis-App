@@ -74,7 +74,7 @@ export class SearchService {
       };
     } catch (error) {
       console.error('Error searching publications:', error);
-      throw new Error(`Error searching publications: ${error.message}`);
+      throw new Error(`Error searching publications: ${error instanceof Error ? error.message : 'Unknown error'}`);
     }
   }
 }

@@ -1,4 +1,4 @@
-export const handlePostAuthRedirect = (router, searchParams) => {
+export const handlePostAuthRedirect = (router: any, searchParams: any) => {
   const redirect = searchParams.get('redirect');
   const data = searchParams.get('data');
   

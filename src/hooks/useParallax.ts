@@ -1,10 +1,19 @@
 'use client'
 
 import { useEffect, useRef } from 'react'
-import { gsap } from 'gsap'
-import { ScrollTrigger } from 'gsap/ScrollTrigger'
 
-gsap.registerPlugin(ScrollTrigger)
+// Conditionally import gsap if available
+let gsap: any = null;
+let ScrollTrigger: any = null;
+try {
+  gsap = require('gsap').gsap;
+  ScrollTrigger = require('gsap/ScrollTrigger').ScrollTrigger;
+  if (gsap && ScrollTrigger) {
+    gsap.registerPlugin(ScrollTrigger);
+  }
+} catch (error) {
+  // gsap not available, hook will be disabled
+}
 
 interface ParallaxOptions {
   speed?: number
@@ -17,6 +26,11 @@ export function useParallax(options: ParallaxOptions = {}) {
   const { speed = 1, direction = 'vertical', container = false } = options
 
   useEffect(() => {
+    if (!gsap || !ScrollTrigger || typeof window === 'undefined') {
+      // Disable parallax effects if gsap is not available or on server
+      return;
+    }
+
     const element = elementRef.current
     if (!element) return
 
@@ -48,7 +62,7 @@ export function useParallax(options: ParallaxOptions = {}) {
         trigger: element,
         start: 'top top',
         end: 'bottom bottom',
-        onUpdate: (self) => {
+        onUpdate: (self: any) => {
           const progress = self.progress
           const distance = 100 * progress * speed
           const transform = direction === 'vertical'
@@ -69,4 +83,48 @@ export function useParallax(options: ParallaxOptions = {}) {
   }, [speed, direction, container])
 
   return elementRef
+}
+
+export function useParallaxImage(speed: number = 0.3) {
+  const imageRef = useRef<HTMLImageElement>(null)
+
+  useEffect(() => {
+    if (!gsap || !ScrollTrigger || typeof window === 'undefined') {
+      return;
+    }
+
+    const image = imageRef.current
+    if (!image) return
+
+    const animation = gsap.fromTo(image,
+      {
+        y: 0
+      },
+      {
+        y: -100 * speed,
+        ease: 'none',
+        scrollTrigger: {
+          trigger: image.parentElement,
+          start: 'top bottom',
+          end: 'bottom top',
+          scrub: true,
+          onUpdate: (self: any) => {
+            const progress = self.progress
+            const distance = 100 * progress * speed
+            const transform = `translateY(${distance}px)`
+            
+            if (image) {
+              image.style.transform = transform
+            }
+          }
+        }
+      }
+    )
+
+    return () => {
+      animation.kill()
+    }
+  }, [speed])
+
+  return imageRef
 } 

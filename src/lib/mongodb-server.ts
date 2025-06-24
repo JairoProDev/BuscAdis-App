@@ -1,5 +1,3 @@
-"use server";
-
 /**
  * Server-side MongoDB client implementation
  * This uses the real MongoDB driver and is only imported on the server
@@ -7,7 +5,7 @@
 
 import { MongoClient, ObjectId } from 'mongodb';
 import { MongoClientInterface, PublicationDocument, COLLECTIONS } from './mongodb-shared';
-import { Logger } from '@/services/logging.service';
+import { LoggingService } from '@/services/logging.service';
 
 // MongoDB connection string from environment variables
 const MONGODB_URI = process.env.MONGODB_URI;
@@ -35,12 +33,12 @@ const connectionOptions = {
 // Create a new MongoDB client with connection pooling and error handling
 export const getServerMongoClient = async (): Promise<MongoClientInterface> => {
   if (cachedClient && cachedDb) {
-    Logger.debug('Using cached MongoDB connection');
+    LoggingService.getInstance().debug('Using cached MongoDB connection');
     return createServerMongoClient(cachedClient, cachedDb);
   }
 
   try {
-    Logger.info('Establishing new MongoDB connection...');
+    LoggingService.getInstance().info('Establishing new MongoDB connection...');
     const client = new MongoClient(MONGODB_URI, connectionOptions);
     await client.connect();
     const db = client.db(MONGODB_DB);
@@ -48,10 +46,10 @@ export const getServerMongoClient = async (): Promise<MongoClientInterface> => {
     cachedClient = client;
     cachedDb = db;
 
-    Logger.info('MongoDB connected successfully');
+    LoggingService.getInstance().info('MongoDB connected successfully');
     return createServerMongoClient(client, db);
   } catch (error) {
-    Logger.error('MongoDB connection error', { error });
+    LoggingService.getInstance().error('MongoDB connection error', { error: error instanceof Error ? error.message : String(error) });
     throw new Error('Failed to connect to MongoDB');
   }
 };
@@ -71,7 +69,7 @@ function createServerMongoClient(client: MongoClient, db: any): MongoClientInter
         // Check if the collection exists
         const collections = await db.listCollections({ name: collectionName }).toArray();
         if (collections.length === 0) {
-          Logger.debug(`Collection ${collectionName} does not exist yet`);
+          LoggingService.getInstance().debug(`Collection ${collectionName} does not exist yet`);
           return { publications: [], totalCount: 0 };
         }
         
@@ -96,7 +94,7 @@ function createServerMongoClient(client: MongoClient, db: any): MongoClientInter
         
         return { publications, totalCount };
       } catch (error) {
-        Logger.error('Error fetching publications', { error, category, page, limit });
+        LoggingService.getInstance().error('Error fetching publications', { error: error instanceof Error ? error.message : String(error), category, page, limit });
         return { publications: [], totalCount: 0 };
       }
     },
@@ -107,7 +105,7 @@ function createServerMongoClient(client: MongoClient, db: any): MongoClientInter
         const collection = db.collection(collectionName);
         return await collection.findOne({ _id: new ObjectId(id) });
       } catch (error) {
-        Logger.error('Error fetching publication by ID', { error, id, category });
+        LoggingService.getInstance().error('Error fetching publication by ID', { error: error instanceof Error ? error.message : String(error), id, category });
         return null;
       }
     },
@@ -127,7 +125,7 @@ function createServerMongoClient(client: MongoClient, db: any): MongoClientInter
             
             allPublications.push(...publications);
           } catch (err) {
-            Logger.error(`Error fetching from ${collectionName}`, { error: err, userId });
+            LoggingService.getInstance().error(`Error fetching from ${collectionName}`, { error: err instanceof Error ? err.message : String(err), userId });
           }
         }
         
@@ -138,7 +136,7 @@ function createServerMongoClient(client: MongoClient, db: any): MongoClientInter
         
         return allPublications;
       } catch (error) {
-        Logger.error('Error fetching publications by user', { error, userId });
+        LoggingService.getInstance().error('Error fetching publications by user', { error: error instanceof Error ? error.message : String(error), userId });
         return [];
       }
     },
@@ -158,7 +156,7 @@ function createServerMongoClient(client: MongoClient, db: any): MongoClientInter
         const result = await collection.insertOne(publicationData);
         return { ...publicationData, _id: result.insertedId };
       } catch (error) {
-        Logger.error('Error creating publication', { error, data });
+        LoggingService.getInstance().error('Error creating publication', { error: error instanceof Error ? error.message : String(error), data });
         throw error;
       }
     },
@@ -180,7 +178,7 @@ function createServerMongoClient(client: MongoClient, db: any): MongoClientInter
         
         return result.matchedCount > 0;
       } catch (error) {
-        Logger.error('Error updating publication', { error, id, category });
+        LoggingService.getInstance().error('Error updating publication', { error: error instanceof Error ? error.message : String(error), id, category });
         throw error;
       }
     },
@@ -193,7 +191,7 @@ function createServerMongoClient(client: MongoClient, db: any): MongoClientInter
         const result = await collection.deleteOne({ _id: new ObjectId(id) });
         return result.deletedCount > 0;
       } catch (error) {
-        Logger.error('Error deleting publication', { error, id, category });
+        LoggingService.getInstance().error('Error deleting publication', { error: error instanceof Error ? error.message : String(error), id, category });
         throw error;
       }
     },
@@ -276,7 +274,7 @@ export const getMongoClient = async (): Promise<MongoClient> => {
     cachedClient = client;
     return client;
   } catch (error) {
-    Logger.error('Error getting MongoDB client', { error });
+    LoggingService.getInstance().error('Error getting MongoDB client', { error: error instanceof Error ? error.message : String(error) });
     throw error;
   }
 };
@@ -294,7 +292,7 @@ export const mongoDbQuery = async (
     
     return await collection.find(query, options).toArray();
   } catch (error) {
-    Logger.error('Error in mongoDbQuery', { error, collectionName, query });
+    LoggingService.getInstance().error('Error in mongoDbQuery', { error: error instanceof Error ? error.message : String(error), collectionName, query });
     throw error;
   }
 };
@@ -310,7 +308,7 @@ export const mongoDbGetById = async (
     
     return await collection.findOne({ _id: new ObjectId(id) });
   } catch (error) {
-    Logger.error('Error in mongoDbGetById', { error, collectionName, id });
+    LoggingService.getInstance().error('Error in mongoDbGetById', { error: error instanceof Error ? error.message : String(error), collectionName, id });
     throw error;
   }
 };
@@ -333,7 +331,7 @@ export const mongoDbInsert = async (
     
     return { insertedId: result.insertedId, ...document };
   } catch (error) {
-    Logger.error('Error in mongoDbInsert', { error, collectionName });
+    LoggingService.getInstance().error('Error in mongoDbInsert', { error: error instanceof Error ? error.message : String(error), collectionName });
     throw error;
   }
 };
@@ -357,7 +355,7 @@ export const mongoDbUpdate = async (
     
     return result;
   } catch (error) {
-    Logger.error('Error in mongoDbUpdate', { error, collectionName, filter });
+    LoggingService.getInstance().error('Error in mongoDbUpdate', { error: error instanceof Error ? error.message : String(error), collectionName, filter });
     throw error;
   }
 }; 

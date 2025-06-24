@@ -146,13 +146,13 @@ export function MapView({
           {selectedPublication && (
             <div className="mt-4 p-4 bg-slate-700 rounded-lg text-left">
               <p className="font-semibold text-white">{selectedPublication.title}</p>
-              {selectedPublication.price && (
+              {selectedPublication.amount && (
                 <p className="text-teal-300 font-bold">
                   {new Intl.NumberFormat('es-PE', {
                     style: 'currency',
                     currency: selectedPublication.currency || 'PEN',
                     maximumFractionDigits: 0
-                  }).format(selectedPublication.price)}
+                  }).format(selectedPublication.amount)}
                 </p>
               )}
               <button 

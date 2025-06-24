@@ -30,6 +30,8 @@ interface SearchOptions {
   category?: string;
   location?: string;
   filters?: Record<string, unknown>;
+  type?: string;
+  subType?: string;
 }
 
 interface SearchBarProps {

@@ -1,8 +1,8 @@
 import React, { useState, useCallback } from 'react';
-import { useDropzone } from 'react-dropzone';
+import { useDropzone, Accept } from 'react-dropzone';
 import { CloudinaryService, CloudinaryUploadResult } from '@/services/cloudinary.service';
 import { XCircleIcon, PhotoIcon, ArrowUpTrayIcon, CheckCircleIcon } from '@heroicons/react/24/outline';
-import { Spinner } from '@/components/ui/spinner';
+import { Spinner } from '@/components/ui/Spinner';
 import { Logger } from '@/services/logging.service';
 
 export interface ImageUploaderProps {
@@ -11,13 +11,13 @@ export interface ImageUploaderProps {
   maxSizeInMB?: number;
   showPreview?: boolean;
   className?: string;
-  accept?: string;
+  accept?: Accept;
   folder?: string;
   tags?: string[];
 }
 
 const MAX_SIZE_MB = 5;
-const ACCEPTED_TYPES = {
+const ACCEPTED_TYPES: Accept = {
   'image/jpeg': ['.jpg', '.jpeg'],
   'image/png': ['.png'],
   'image/webp': ['.webp']

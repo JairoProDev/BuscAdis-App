@@ -13,7 +13,7 @@ export interface NetflixRow {
   priority: number;                    // Para ordenar filas (1 = más importante)
   maxItems: number;                    // Máximo items por fila
   autoRefresh: boolean;                // Si se actualiza automáticamente
-  data: Publication[];
+  data: AdRowItem[];
   metadata: {
     totalCount: number;                // Total de items disponibles
     lastUpdated: Date;
@@ -44,8 +44,10 @@ export interface AdRowItem {
   };
 }
 
+import { LoggingService } from './logging.service';
+
 export class NetflixViewService {
-  private logger = new Logger('NetflixViewService');
+  private logger = LoggingService.getInstance();
 
   /**
    * Genera la vista completa tipo Netflix
@@ -115,7 +117,7 @@ export class NetflixViewService {
       return rows;
 
     } catch (error) {
-      this.logger.error('Error generando vista Netflix', error);
+      this.logger.error('Error generando vista Netflix', { error: error instanceof Error ? error.message : String(error) });
       throw error;
     }
   }
@@ -466,7 +468,7 @@ export class NetflixViewService {
           return null;
       }
     } catch (error) {
-      this.logger.error('Error actualizando fila', error);
+      this.logger.error('Error actualizando fila', { error: error instanceof Error ? error.message : String(error) });
       return null;
     }
   }
@@ -485,7 +487,7 @@ export class NetflixViewService {
         conversionRate: Math.random() * 0.05
       };
     } catch (error) {
-      this.logger.error('Error obteniendo métricas de fila', error);
+      this.logger.error('Error obteniendo métricas de fila', { error: error instanceof Error ? error.message : String(error) });
       return null;
     }
   }

@@ -141,36 +141,36 @@ const AdRow: React.FC<AdRowProps> = ({ row, onAdClick, onSeeAll }) => {
         >
           {row.data.slice(0, row.maxItems).map((publication) => (
             <div 
-              key={publication._id || publication.title}
+              key={publication.id || publication.title}
               className="flex-shrink-0 w-72"
-              onClick={() => onAdClick(publication)}
+              onClick={() => onAdClick(publication as any)}
             >
               <PublicationCard 
                 publication={{
-                  id: publication._id,
+                  id: publication.id,
                   title: publication.title,
                   description: publication.description,
-                  categorySlug: publication.categorySlug,
-                  subcategorySlug: publication.subcategorySlug || null,
-                  subSubcategorySlug: publication.subSubcategorySlug || null,
-                  transactionType: publication.transactionType,
-                  value: publication.value,
-                  currency: publication.currency,
-                  valueType: publication.valueType,
-                  size: publication.size || 1,
+                  categorySlug: publication.category,
+                  subcategorySlug: publication.subcategory,
+                  subSubcategorySlug: null,
+                  transactionType: 'venta',
+                  value: parseFloat(publication.price?.replace(/[^\d.-]/g, '') || '0'),
+                  currency: 'PEN',
+                  valueType: 'fixed',
+                  size: 1,
                   location: {
-                    reference: publication.location.address || undefined,
-                    district: publication.location.district || publication.location.city,
-                    province: publication.location.province,
-                    city: publication.location.city,
-                    country: publication.location.country
+                    reference: publication.location || '',
+                    district: publication.location || 'Cusco',
+                    province: 'Cusco',
+                    city: 'Cusco',
+                    country: 'Perú'
                   },
                   images: publication.images,
-                  whatsapp: publication.contact?.phones?.[0] || '900000000',
-                  createdAt: publication.createdAt,
-                  views: publication.views || 0,
-                  featured: publication.premium,
-                  premium: publication.premium
+                  whatsapp: '900000000',
+                  createdAt: publication.publishedDate.toISOString(),
+                  views: publication.views,
+                  featured: publication.isPremium,
+                  premium: publication.isPremium
                 }}
               />
             </div>

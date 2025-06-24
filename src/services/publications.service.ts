@@ -189,7 +189,7 @@ export class PublicationsService {
             };
 
         } catch (error) {
-            Logger.error('Error fetching publications', { error: error.message, query });
+            Logger.error('Error fetching publications', { error: error instanceof Error ? error.message : 'Unknown error', query });
             
             // Retornar datos vacíos en lugar de propagar el error
             return {
@@ -214,7 +214,7 @@ export class PublicationsService {
             
             return response.publications;
         } catch (error) {
-            Logger.error('Error fetching premium publications', { error: error.message });
+            Logger.error('Error fetching premium publications', { error: error instanceof Error ? error.message : 'Unknown error' });
             return [];
         }
     }
@@ -232,7 +232,7 @@ export class PublicationsService {
             
             return response.publications;
         } catch (error) {
-            Logger.error('Error fetching recent publications', { error: error.message });
+            Logger.error('Error fetching recent publications', { error: error instanceof Error ? error.message : 'Unknown error' });
             return [];
         }
     }
@@ -251,7 +251,7 @@ export class PublicationsService {
             
             return response.publications;
         } catch (error) {
-            Logger.error('Error fetching publications by category', { error: error.message, category });
+            Logger.error('Error fetching publications by category', { error: error instanceof Error ? error.message : 'Unknown error', category });
             return [];
         }
     }
@@ -270,7 +270,7 @@ export class PublicationsService {
             
             return response.publications;
         } catch (error) {
-            Logger.error('Error fetching expiring publications', { error: error.message });
+            Logger.error('Error fetching expiring publications', { error: error instanceof Error ? error.message : 'Unknown error' });
             return [];
         }
     }
@@ -288,7 +288,7 @@ export class PublicationsService {
             
             return response.publications;
         } catch (error) {
-            Logger.error('Error fetching trending publications', { error: error.message });
+            Logger.error('Error fetching trending publications', { error: error instanceof Error ? error.message : 'Unknown error' });
             return [];
         }
     }
@@ -307,7 +307,7 @@ export class PublicationsService {
             
             return response.publications;
         } catch (error) {
-            Logger.error('Error fetching nearby publications', { error: error.message, location });
+            Logger.error('Error fetching nearby publications', { error: error instanceof Error ? error.message : 'Unknown error', location });
             return [];
         }
     }
@@ -332,7 +332,7 @@ export class PublicationsService {
             return response.publications;
         } catch (error) {
             Logger.error('Error fetching publications by price range', { 
-                error: error.message, 
+                error: error instanceof Error ? error.message : 'Unknown error', 
                 priceMin, 
                 priceMax 
             });
@@ -351,7 +351,7 @@ export class PublicationsService {
                 status: 'activo'
             });
         } catch (error) {
-            Logger.error('Error searching publications', { error: error.message, searchTerm });
+            Logger.error('Error searching publications', { error: error instanceof Error ? error.message : 'Unknown error', searchTerm });
             return {
                 publications: [],
                 total: 0,
@@ -383,7 +383,7 @@ export class PublicationsService {
             return data.publication || null;
 
         } catch (error) {
-            Logger.error('Error fetching publication by ID', { error: error.message, id });
+            Logger.error('Error fetching publication by ID', { error: error instanceof Error ? error.message : 'Unknown error', id });
             return null;
         }
     }
@@ -419,7 +419,7 @@ export class PublicationsService {
             };
 
         } catch (error) {
-            Logger.error('Error fetching stats', { error: error.message });
+            Logger.error('Error fetching stats', { error: error instanceof Error ? error.message : 'Unknown error' });
             return {
                 total: 0,
                 active: 0,
@@ -430,9 +430,9 @@ export class PublicationsService {
     }
 
     /**
-     * Fetch all publications with optional filtering
+     * Fetch all publications with optional filtering - Alternative method
      */
-    static async getPublications(options: any = {}) {
+    static async fetchPublications(options: any = {}) {
         try {
             // Build query params
             const params = new URLSearchParams();
@@ -565,8 +565,8 @@ export class PublicationsService {
 
     static async getAllPublications(): Promise<any[]> {
         try {
-            // Use the regular getPublications method with a high limit
-            const result = await this.getPublications({ limit: 100 });
+            // Use the regular fetchPublications method with a high limit
+            const result = await this.fetchPublications({ limit: 100 });
             return result.publications || [];
         } catch (error) {
             console.error('Error getting all publications:', error);

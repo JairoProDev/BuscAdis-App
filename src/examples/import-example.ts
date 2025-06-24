@@ -120,7 +120,7 @@ async function importFromText() {
             const price = matches[0].replace(/S\/?\s?/, '').replace(/,/g, '')
             return parseFloat(price)
           }
-          return undefined
+          return 0
         },
         currency: () => 'PEN',
         type: () => 'negotiable'
@@ -137,6 +137,7 @@ async function importFromText() {
       enableAI: true,
       generateSlugs: true,
       geocodeAddresses: false,
+      generateThumbnails: false,
       extractKeywords: true,
       detectLanguage: true
     },
@@ -212,8 +213,8 @@ async function importWithCustomValidation() {
       
       // Validaciones personalizadas
       customValidators: {
-        titulo: (value: string) => value && value.length >= 10 && value.length <= 100,
-        descripcion: (value: string) => value && value.length >= 50 && value.length <= 2000,
+        titulo: (value: string) => !!(value && value.length >= 10 && value.length <= 100),
+        descripcion: (value: string) => !!(value && value.length >= 50 && value.length <= 2000),
         precio: (value: number) => !value || (value > 0 && value < 10000000),
         telefono: (value: string) => {
           if (!value) return true // Campo opcional

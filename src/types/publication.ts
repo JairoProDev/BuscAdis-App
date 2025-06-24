@@ -199,14 +199,14 @@ export interface CommunityPublication {
   currency: string;
 }
 
-// Publicación base que puede ser extendida por tipos específicos
-export interface Publication {
+// Extended publication interface for legacy API compatibility
+export interface PublicationExtended {
   id: string;
   title: string;
   description: string;
   category: string;
   subcategory?: string;
-  price: PublicationPrice | number;
+  price: number;
   currency?: string;
   location: PublicationLocation;
   contactName: string;
@@ -287,7 +287,7 @@ export interface PublicationInput {
   description: string;
   category: string;
   subcategory?: string;
-  price: number | PublicationPrice;
+  price: number;
   currency?: string;
   location: PublicationLocation;
   contactName: string;

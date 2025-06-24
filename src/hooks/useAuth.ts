@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { AuthService } from '../services/auth.service';
 import { useRouter } from 'next/navigation';
+import { AuthResponse } from '../features/auth/types/auth.types';
 
 export function useAuth() {
     const [user, setUser] = useState<any | null>(null); // User type is now 'any'
@@ -18,7 +19,7 @@ export function useAuth() {
         } finally {
             setLoading(false);
         }
-    },);
+    }, []);
 
     useEffect(() => {
         checkSession();
@@ -32,7 +33,7 @@ export function useAuth() {
     const login = async (credentials: any) => {
         setLoading(true);
         try {
-            const result = await AuthService.login(credentials);
+            const result = await AuthService.login(credentials) as any;
             if (result.error) {
                 return { success: false, message: result.error };
             }
@@ -42,7 +43,7 @@ export function useAuth() {
             console.error('Error during login:', error);
             return {
                 success: false,
-                message: error.message || 'Error durante el inicio de sesión'
+                message: error instanceof Error ? error.message : 'Error durante el inicio de sesión'
             };
         } finally {
             setLoading(false);

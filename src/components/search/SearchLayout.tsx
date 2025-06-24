@@ -13,7 +13,7 @@ type FilterValue = string | number | boolean | (string | number)[] | null;
 interface SearchLayoutProps {
     initialResults?: CorePublication[]
     loading?: boolean
-    onSearch?: (query: string, options?: Record<string, string>) => void
+    onSearch?: (query: string, options?: any) => void
     onFilterChange?: (filters: Record<string, FilterValue>) => void
     totalResults?: number
     onPublicationClick?: (publication: CorePublication, e: React.MouseEvent<HTMLAnchorElement>) => void
@@ -46,7 +46,7 @@ export default function SearchLayout({
     }, [initialResults, results])
 
     // Handle search from the search bar
-    const handleSearch = (query: string, options: Record<string, string> = {}) => {
+    const handleSearch = (query: string, options: any = {}) => {
         if (onSearch) {
             onSearch(query, options)
         }
