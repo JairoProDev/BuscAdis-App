@@ -25,6 +25,7 @@ import {
 import { ThemeToggle } from '@/components/theme';
 import BuscadisLogo from '@/components/icons/BuscadisLogo';
 import LocationSelector from '@/components/search/LocationSelector';
+import LanguageSelector from '@/components/ui/LanguageSelector';
 
 interface User {
   id: string;
@@ -381,6 +382,7 @@ export default function Header() {
           </nav>
 
           <div className="flex items-center space-x-1.5 md:space-x-2">
+            {/* Selector de Ubicación */}
             <button
               onClick={() => setShowLocationSelector(true)}
               className="flex items-center gap-1 px-2 py-1.5 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800/60 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-teal-500 focus-visible:ring-offset-1 dark:focus-visible:ring-offset-slate-900 border border-slate-200 dark:border-slate-700"
@@ -393,7 +395,14 @@ export default function Header() {
               </span>
               <ChevronDownIcon className="w-4 h-4 text-slate-500 dark:text-slate-400" />
             </button>
+            
+            {/* Selector de Idioma */}
+            <LanguageSelector variant="pill" />
+            
+            {/* Toggle de Tema */}
             <ThemeToggle />
+            
+            {/* Autenticación/Usuario */}
             {userAuthSection}
           </div>
         </div>
