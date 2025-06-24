@@ -38,6 +38,7 @@ interface PublicationData {
   valueType: string;
   size: number;
   location: {
+    reference?: string;
     district: string;
     province: string;
     city: string;
@@ -84,6 +85,24 @@ const categoryColors: Record<string, string> = {
   comunidad: 'bg-teal-100 text-teal-800',
 }
 
+// Componente SVG para flecha curveada de compartir (estilo Facebook/TikTok)
+const CurvedShareIcon = ({ className }: { className?: string }) => (
+  <svg 
+    className={className} 
+    fill="none" 
+    stroke="currentColor" 
+    viewBox="0 0 24 24" 
+    xmlns="http://www.w3.org/2000/svg"
+  >
+    <path 
+      strokeLinecap="round" 
+      strokeLinejoin="round" 
+      strokeWidth={2} 
+      d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"
+    />
+  </svg>
+)
+
 export default function PublicationCard({
   publication,
   onPublicationClick,
@@ -119,9 +138,49 @@ export default function PublicationCard({
     return `${currency === 'USD' ? '$' : 'S/'} ${value.toLocaleString()}`;
   };
 
-  // Format location
+  // Format location - mostrar ubicación completa
   const formatLocation = (location: PublicationData['location']) => {
-    return `${location.district}, ${location.province}`;
+    if (!location) return 'Ubicación no especificada';
+    
+    // Mostrar ubicación completa: Referencia → Distrito → Provincia → Departamento → País
+    const parts = [];
+    if (location.reference) parts.push(location.reference);
+    if (location.district) parts.push(location.district);
+    if (location.province) parts.push(location.province);
+    if (location.city) parts.push(location.city);
+    if (location.country) parts.push(location.country);
+    
+    return parts.length > 0 ? parts.join(', ') : 'Ubicación no especificada';
+  };
+
+  // Format title - siempre en mayúsculas
+  const formatTitle = (title: string) => {
+    return title.toUpperCase();
+  };
+
+  // Format description - primera letra mayúscula y remover números de teléfono
+  const formatDescription = (description: string) => {
+    if (!description) return '';
+    
+    // Remover números de teléfono (patrones comunes)
+    let cleanDescription = description
+      .replace(/(\+?51\s?)?9\d{8}/g, '') // Celulares peruanos
+      .replace(/(\+?51\s?)?\d{2,3}[-\s]?\d{6,7}/g, '') // Teléfonos fijos peruanos
+      .replace(/\b\d{9,12}\b/g, '') // Números largos
+      .replace(/\b\d{3}[-\s]?\d{3}[-\s]?\d{3,4}\b/g, '') // Formatos con guiones/espacios
+      .replace(/whatsapp\s*:?\s*\d+/gi, '') // "WhatsApp: 123456789"
+      .replace(/celular\s*:?\s*\d+/gi, '') // "Celular: 123456789"
+      .replace(/teléfono\s*:?\s*\d+/gi, '') // "Teléfono: 123456789"
+      .replace(/contacto\s*:?\s*\d+/gi, '') // "Contacto: 123456789"
+      .trim()
+      .replace(/\s+/g, ' '); // Limpiar espacios múltiples
+    
+    // Primera letra mayúscula
+    if (cleanDescription.length > 0) {
+      return cleanDescription.charAt(0).toUpperCase() + cleanDescription.slice(1);
+    }
+    
+    return cleanDescription;
   };
 
   // Get main image
@@ -333,14 +392,19 @@ export default function PublicationCard({
               </div>
             )}
 
-            {/* Views Badge - Solo en grid mode */}
-            {viewMode === 'grid' && (
-              <div className="absolute bottom-2 left-2 bg-black/60 text-white text-xs px-2 py-1 rounded-full flex items-center gap-1">
-                <EyeIcon className="w-3 h-3" />
-                {publication.views || 0}
-              </div>
-            )}
+            {/* Views Badge removido - solo en el footer ahora */}
 
+            {/* Botón Contactar sobre la imagen - esquina inferior derecha */}
+            {showWhatsApp && publication.whatsapp && (
+              <button
+                onClick={handleWhatsAppClick}
+                className="absolute bottom-2 right-2 flex items-center gap-1.5 bg-green-500 hover:bg-green-600 text-white px-2.5 py-1.5 rounded-lg transition-colors font-medium text-xs shadow-lg backdrop-blur-sm"
+                aria-label="Contactar por WhatsApp"
+              >
+                <WhatsAppIcon className="w-3.5 h-3.5" />
+                <span>Contactar</span>
+              </button>
+            )}
 
           </div>
 
@@ -357,7 +421,7 @@ export default function PublicationCard({
                   {/* Fila 1: Título y favorito */}
                   <div className="flex items-start justify-between mb-2">
                     <h3 className="text-sm md:text-base font-semibold text-gray-900 dark:text-white line-clamp-1 flex-1 mr-2">
-                      {publication.title}
+                      {formatTitle(publication.title)}
                     </h3>
                     
                     {/* Botón favorito */}
@@ -376,19 +440,16 @@ export default function PublicationCard({
                   
                   {/* Fila 2: Descripción */}
                   <p className="text-xs md:text-sm text-gray-600 dark:text-gray-400 line-clamp-1 md:line-clamp-2 mb-2 md:mb-3 flex-1">
-                    {publication.description}
+                    {formatDescription(publication.description)}
                   </p>
                   
                   {/* Fila 3: Metadatos */}
                   <div className="flex items-center text-xs text-gray-500 space-x-2 md:space-x-4 mb-2">
-                    {/* Ubicación */}
+                    {/* Ubicación completa - solo una línea */}
                     <div className="flex items-center">
                       <MapPinIcon className="w-3 h-3 mr-1 text-gray-400" />
-                      <span className="truncate max-w-12 md:max-w-none">
-                        {isDesktop 
-                          ? `${publication.location.district}, ${publication.location.province}, ${publication.location.city}`
-                          : formatLocation(publication.location)
-                        }
+                      <span className="truncate">
+                        {formatLocation(publication.location)}
                       </span>
                     </div>
                     
@@ -511,17 +572,7 @@ export default function PublicationCard({
                       </button>
                     </div>
                     
-                    {/* Botón Contactar WhatsApp - Desktop e incluido en la línea */}
-                    {showWhatsApp && publication.whatsapp && (
-                      <button
-                        onClick={handleWhatsAppClick}
-                        className="flex items-center gap-1 md:gap-2 bg-green-500 hover:bg-green-600 text-white px-3 md:px-4 py-1.5 md:py-2 rounded-lg text-xs md:text-sm font-medium transition-colors shadow-sm ml-2"
-                        aria-label="Contactar por WhatsApp"
-                      >
-                        <WhatsAppIcon className="w-4 h-4" />
-                        <span>Contactar</span>
-                      </button>
-                    )}
+                    {/* Botón Contactar movido a la imagen */}
                     
                     {/* Botón compartir móvil */}
                     <button
@@ -529,35 +580,35 @@ export default function PublicationCard({
                       className="md:hidden p-1.5 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors"
                       aria-label="Compartir"
                     >
-                      <ShareIcon className="w-4 h-4 text-gray-500" />
+                      <CurvedShareIcon className="w-4 h-4 text-gray-500" />
                     </button>
                   </div>
                 </div>
               </>
             ) : (
-                            /* Grid mode - Estilo posts de redes sociales */
+              /* Grid mode - Estilo posts de redes sociales */
               <>
-                <div className="p-3 flex flex-col h-full">
+                <div className="p-0 flex flex-col h-full">
                   {/* Título */}
-                  <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2 line-clamp-2">
-                    {publication.title}
+                  <h3 className="text-base sm:text-lg font-semibold text-gray-900 dark:text-white mb-2 line-clamp-2">
+                    {formatTitle(publication.title)}
                   </h3>
 
                   {/* Descripción */}
                   <p className="text-sm text-gray-600 dark:text-gray-400 mb-3 line-clamp-2 flex-grow">
-                    {publication.description}
+                    {formatDescription(publication.description)}
                   </p>
 
-                  {/* Metadatos */}
-                  <div className="mb-3 space-y-1">
-                    {/* Ubicación */}
-                    <div className="flex items-center text-xs text-gray-500">
-                      <MapPinIcon className="w-3 h-3 mr-1 text-gray-400" />
+                  {/* Información - diferenciada de los botones */}
+                  <div className="mb-3 space-y-1.5 text-xs text-gray-500 bg-gray-50 dark:bg-gray-800/50 rounded-lg p-2">
+                    {/* Ubicación completa en una línea */}
+                    <div className="flex items-center">
+                      <MapPinIcon className="w-3 h-3 mr-1 text-gray-400 flex-shrink-0" />
                       <span className="truncate">{formatLocation(publication.location)}</span>
                     </div>
                     
                     {/* Fecha y vistas */}
-                    <div className="flex items-center justify-between text-xs text-gray-500">
+                    <div className="flex items-center justify-between">
                       <div className="flex items-center">
                         <ClockIcon className="w-3 h-3 mr-1 text-gray-400" />
                         <span>{formatExactDateTime(publication.createdAt)}</span>
@@ -569,47 +620,36 @@ export default function PublicationCard({
                     </div>
                   </div>
 
-                  {/* Footer de interacciones - Estilo redes sociales */}
-                  <div className="border-t border-gray-200 dark:border-gray-700 pt-3 mt-auto">
-                    <div className="flex items-center justify-between">
-                      {/* Lado izquierdo: Favorito y Compartir */}
-                      <div className="flex items-center gap-3">
-                        <button
-                          onClick={handleFavoriteToggle}
-                          className="flex items-center gap-1 p-1.5 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors"
-                          aria-label="Agregar a favoritos"
-                        >
-                          {isFavorite ? (
-                            <HeartSolidIcon className="w-5 h-5 text-red-500" />
-                          ) : (
-                            <HeartIcon className="w-5 h-5 text-gray-500" />
-                          )}
-                          <span className="text-xs text-gray-500">
-                            {isFavorite ? 'Guardado' : 'Guardar'}
-                          </span>
-                        </button>
+                  {/* Footer de interacciones - Solo Guardar y Compartir */}
+                  <div className="border-t border-gray-200 dark:border-gray-700 pt-2 mt-auto">
+                    <div className="flex items-center justify-center gap-8">
+                      {/* Guardar */}
+                      <button
+                        onClick={handleFavoriteToggle}
+                        className="flex items-center gap-1 p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors"
+                        aria-label="Guardar"
+                      >
+                        {isFavorite ? (
+                          <HeartSolidIcon className="w-5 h-5 text-red-500" />
+                        ) : (
+                          <HeartIcon className="w-5 h-5 text-gray-500 hover:text-red-500" />
+                        )}
+                        <span className="text-xs text-gray-500 font-medium hidden sm:inline">
+                          Guardar
+                        </span>
+                      </button>
 
-                        <button
-                          onClick={handleShare}
-                          className="flex items-center gap-1 p-1.5 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors"
-                          aria-label="Compartir"
-                        >
-                          <ShareIcon className="w-5 h-5 text-gray-500" />
-                          <span className="text-xs text-gray-500">Compartir</span>
-                        </button>
-                      </div>
-
-                      {/* Lado derecho: Botón principal de contacto */}
-                      {showWhatsApp && publication.whatsapp && (
-                        <button
-                          onClick={handleWhatsAppClick}
-                          className="flex items-center gap-2 bg-green-500 hover:bg-green-600 text-white text-sm font-medium px-4 py-2 rounded-lg shadow-sm transition-all hover:scale-105"
-                          aria-label="Contactar por WhatsApp"
-                        >
-                          <WhatsAppIcon className="w-4 h-4" />
-                          <span>Contactar</span>
-                        </button>
-                      )}
+                      {/* Compartir */}
+                      <button
+                        onClick={handleShare}
+                        className="flex items-center gap-1 p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors"
+                        aria-label="Compartir"
+                      >
+                        <CurvedShareIcon className="w-5 h-5 text-gray-500 hover:text-blue-500" />
+                        <span className="text-xs text-gray-500 font-medium hidden sm:inline">
+                          Compartir
+                        </span>
+                      </button>
                     </div>
                   </div>
                 </div>
