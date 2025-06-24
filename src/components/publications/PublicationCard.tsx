@@ -590,17 +590,17 @@ export default function PublicationCard({
               <>
                 <div className="p-0 flex flex-col h-full">
                   {/* Título */}
-                  <h3 className="text-base sm:text-lg font-semibold text-gray-900 dark:text-white mb-2 line-clamp-2">
+                  <h3 className="text-base sm:text-lg font-semibold text-gray-900 dark:text-white mb-2 line-clamp-2 px-2">
                     {formatTitle(publication.title)}
                   </h3>
 
                   {/* Descripción */}
-                  <p className="text-sm text-gray-600 dark:text-gray-400 mb-3 line-clamp-2 flex-grow">
+                  <p className="text-sm text-gray-600 dark:text-gray-400 mb-3 line-clamp-2 flex-grow px-2">
                     {formatDescription(publication.description)}
                   </p>
 
                   {/* Información - diferenciada de los botones */}
-                  <div className="mb-3 space-y-1.5 text-xs text-gray-500 bg-gray-50 dark:bg-gray-800/50 rounded-lg p-2">
+                  <div className="mb-3 mx-2 space-y-1.5 text-xs text-gray-500 bg-gray-50 dark:bg-gray-800/50 rounded-lg p-2">
                     {/* Ubicación completa en una línea */}
                     <div className="flex items-center">
                       <MapPinIcon className="w-3 h-3 mr-1 text-gray-400 flex-shrink-0" />
@@ -621,7 +621,7 @@ export default function PublicationCard({
                   </div>
 
                   {/* Footer de interacciones - Solo Guardar y Compartir */}
-                  <div className="border-t border-gray-200 dark:border-gray-700 pt-2 mt-auto">
+                  <div className="border-t border-gray-200 dark:border-gray-700 pt-2 mt-auto px-2">
                     <div className="flex items-center justify-center gap-8">
                       {/* Guardar */}
                       <button
