@@ -1,8 +1,22 @@
 import { useEffect, useState } from 'react';
 import { PublicationsService } from '@/services/publications.service';
 
+interface PublicationLocation {
+  city: string;
+  country: string;
+}
+
+interface Publication {
+  id: string;
+  title: string;
+  description: string;
+  location: PublicationLocation;
+  price: number;
+  currency: string;
+}
+
 const PublicationsList = () => {
-  const [publications, setPublications] = useState([]);
+  const [publications, setPublications] = useState<Publication[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
 
@@ -10,7 +24,7 @@ const PublicationsList = () => {
     const fetchPublications = async () => {
       try {
         const data = await PublicationsService.getPublications();
-        setPublications(data);
+        setPublications(data.publications);
       } catch (err) {
         setError('Error al cargar los anuncios');
       } finally {

@@ -132,8 +132,8 @@ export default function PublicationCard({
     return generateSeoUrl(publication.id, publication.title);
   }, [publication.id, publication.title]);
 
-  // Format price
-  const formatPrice = (value: number, currency: string) => {
+  // Format price locally
+  const formatPriceLocal = (value: number, currency: string) => {
     if (!value || value === 0) return null;
     return `${currency === 'USD' ? '$' : 'S/'} ${value.toLocaleString()}`;
   };
@@ -369,13 +369,13 @@ export default function PublicationCard({
             <div className="absolute inset-0 bg-gradient-to-t from-black/20 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
             
             {/* Price Badge - Para ambos modos */}
-            {formatPrice(publication.value, publication.currency) && (
-              <div className={`absolute top-2 left-2 bg-gradient-to-r from-blue-600 to-blue-700 text-white font-bold rounded-full shadow-lg backdrop-blur-sm ${
-                viewMode === 'list' ? 'px-2 py-1 text-xs' : 'px-3 py-1 text-sm'
-              }`}>
-                {formatPrice(publication.value, publication.currency)}
-              </div>
-            )}
+                          {formatPriceLocal(publication.value, publication.currency) && (
+                <div className={`absolute top-2 left-2 bg-gradient-to-r from-blue-600 to-blue-700 text-white font-bold rounded-full shadow-lg backdrop-blur-sm ${
+                  viewMode === 'list' ? 'px-2 py-1 text-xs' : 'px-3 py-1 text-sm'
+                }`}>
+                  {formatPriceLocal(publication.value, publication.currency)}
+                </div>
+              )}
 
             {/* Category Badge - Para ambos modos */}
             <div className={`absolute top-2 right-2 inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-medium ${categoryColor} shadow-md backdrop-blur-sm`}>
@@ -526,7 +526,7 @@ export default function PublicationCard({
                         onClick={(e) => {
                           e.preventDefault();
                           e.stopPropagation();
-                          const text = encodeURIComponent(`${publication.title} - ${formatPrice(publication.value, publication.currency) || 'Ver precio'}`);
+                          const text = encodeURIComponent(`${publication.title} - ${formatPriceLocal(publication.value, publication.currency) || 'Ver precio'}`);
                           const url = encodeURIComponent(`${window.location.origin}${seoUrl}`);
                           window.open(`https://twitter.com/intent/tweet?text=${text}&url=${url}`, '_blank');
                         }}
@@ -560,7 +560,7 @@ export default function PublicationCard({
                         onClick={(e) => {
                           e.preventDefault();
                           e.stopPropagation();
-                          const text = encodeURIComponent(`Mira este anuncio: ${publication.title} - ${window.location.origin}${seoUrl}`);
+                          const text = encodeURIComponent(`${publication.title} - ${formatPriceLocal(publication.value, publication.currency) || 'Ver precio'}`);
                           window.open(`https://wa.me/?text=${text}`, '_blank');
                         }}
                         className="p-1.5 hover:bg-green-50 text-green-600 rounded-lg transition-colors"

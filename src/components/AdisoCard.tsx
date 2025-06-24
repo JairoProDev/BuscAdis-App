@@ -3,7 +3,34 @@ import Image from 'next/image';
 import { MapPinIcon, StarIcon } from '@heroicons/react/24/solid';
 import { generateSeoUrl } from '@/utils/url';
 
-export default function AdisoCard({ adiso, featured = false }) {
+interface AdisoLocation {
+  city?: string;
+  country?: string;
+}
+
+interface AdisoPrice {
+  amount?: number;
+}
+
+interface AdisoData {
+  id: string;
+  title: string;
+  price: number | AdisoPrice;
+  location: string | AdisoLocation;
+  image?: string;
+  is_premium?: boolean;
+  is_verified?: boolean;
+  rating?: number;
+  category?: string;
+  categorySlug?: string;
+}
+
+interface AdisoCardProps {
+  adiso: AdisoData;
+  featured?: boolean;
+}
+
+export default function AdisoCard({ adiso, featured = false }: AdisoCardProps) {
   // Si adiso es undefined o null, mostrar un placeholder
   if (!adiso) {
     return (

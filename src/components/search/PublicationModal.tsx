@@ -618,7 +618,7 @@ export default function PublicationModal({ publicationId, isOpen, onClose, initi
             
             <div className="flex flex-wrap justify-between items-center gap-2 mb-3">
               <div className="text-lg font-bold text-blue-600 dark:text-blue-400 bg-blue-50 dark:bg-blue-900/30 px-3 py-1 rounded-lg">
-                {formatPrice(publicationPrice, publicationCurrency)}
+                {formatPrice({ amount: publicationPrice, currency: publicationCurrency || 'PEN' })}
               </div>
               
               <div className="flex items-center text-gray-500 dark:text-slate-400 text-sm bg-gray-100 dark:bg-slate-700 px-2 py-1 rounded-lg">

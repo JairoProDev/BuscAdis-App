@@ -109,7 +109,7 @@ function RelatedPublicationCard({ publication, category }: { publication: Public
           
           <div className="mt-2 flex items-center justify-between">
             <p className="text-blue-600 font-medium">
-              {formatPrice(price, price_type)}
+              {formatPrice({ amount: price, currency: 'PEN', negotiable: price_type === 'negotiable' })}
             </p>
             
             <p className="text-xs text-gray-500">
