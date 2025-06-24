@@ -10,7 +10,7 @@ import {
   BriefcaseIcon, HomeIcon, TruckIcon
 } from '@heroicons/react/24/outline';
 
-const iconMap = {
+const iconMap: Record<string, React.ComponentType<any>> = {
   'Empleos': BriefcaseIcon,
   'Inmuebles': HomeIcon,
   'Vehículos': TruckIcon,

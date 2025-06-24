@@ -70,18 +70,18 @@ export default function SwipeablePanel({
     [0.5, 0.5, 0]
   )
   
-  const handleDragEnd = (_, info: { offset: { y: number }; velocity: { y: number } }) => {
+  const handleDragEnd = (_: any, info: { offset: { y: number }; velocity: { y: number } }) => {
     const offset = info.offset.y
     const velocity = info.velocity.y
     
     // Swipe up with high velocity - go to full
-    if (velocity.y < -500) {
+    if (velocity < -500) {
       setPanelState('full')
       return
     }
     
     // Swipe down with high velocity - close or go to half
-    if (velocity.y > 500) {
+    if (velocity > 500) {
       if (panelState === 'full') {
         setPanelState('half')
       } else {
@@ -117,8 +117,7 @@ export default function SwipeablePanel({
       {showBackdrop && (
         <motion.div
           className="fixed inset-0 bg-black z-40"
-          initial={{ opacity: 0 }}
-          animate={{ opacity: backdropOpacity }}
+          style={{ opacity: backdropOpacity }}
           onClick={() => setPanelState('closed')}
         />
       )}

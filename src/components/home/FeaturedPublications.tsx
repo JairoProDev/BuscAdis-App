@@ -1,12 +1,12 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { PublicationsService } from '@/services/publications.service';
+import { PublicationsService, Publication } from '@/services/publications.service';
 import PublicationCard from '@/components/publications/PublicationCard';
 import LoadingSpinner from '@/components/ui/LoadingSpinner';
 
 export default function FeaturedPublications() {
-  const [publications, setPublications] = useState([]);
+  const [publications, setPublications] = useState<Publication[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
 
@@ -15,7 +15,7 @@ export default function FeaturedPublications() {
       try {
         const data = await PublicationsService.getPublications();
         console.log('Featured Publications:', data);
-        setPublications(data);
+        setPublications(data.publications);
       } catch (err) {
         console.error('Error fetching featured publications:', err);
         setError('No se pudieron cargar los anuncios destacados');
@@ -54,7 +54,32 @@ export default function FeaturedPublications() {
   return (
     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
       {publications.map((publication) => (
-        <PublicationCard key={publication.id} publication={publication} />
+        <PublicationCard key={publication._id} publication={{
+          id: publication._id,
+          title: publication.title,
+          description: publication.description,
+          categorySlug: publication.categorySlug,
+          subcategorySlug: publication.subcategorySlug || null,
+          subSubcategorySlug: publication.subSubcategorySlug || null,
+          transactionType: publication.transactionType,
+          value: publication.value,
+          currency: publication.currency,
+          valueType: publication.valueType,
+          size: publication.size || 1,
+          location: {
+            reference: publication.location.address || undefined,
+            district: publication.location.district || publication.location.city,
+            province: publication.location.province,
+            city: publication.location.city,
+            country: publication.location.country
+          },
+          images: publication.images,
+          whatsapp: publication.contact?.phones?.[0] || '900000000',
+          createdAt: publication.createdAt,
+          views: publication.views || 0,
+          featured: publication.premium,
+          premium: publication.premium
+        }} />
       ))}
     </div>
   );

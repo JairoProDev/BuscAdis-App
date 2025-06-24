@@ -19,11 +19,11 @@ export default function AdvancedFilters({
   initialFilters = {}
 }: {
   category: keyof typeof filtersByCategory
-  onFiltersChange: (filters: FilterValue) => void
-  initialFilters?: FilterValue
+  onFiltersChange: (filters: Record<string, FilterValue>) => void
+  initialFilters?: Record<string, FilterValue>
 }) {
   const [isOpen, setIsOpen] = useState(false)
-  const [activeFilters, setActiveFilters] = useState<FilterValue>(initialFilters)
+  const [activeFilters, setActiveFilters] = useState<Record<string, FilterValue>>(initialFilters)
   const [expandedSections, setExpandedSections] = useState<string[]>([])
   const router = useRouter()
   const searchParams = useSearchParams()
@@ -33,7 +33,7 @@ export default function AdvancedFilters({
   useEffect(() => {
     // Sincronizar filtros con URL al montar
     const params = new URLSearchParams(searchParams.toString())
-    const filtersFromUrl: FilterValue = {}
+    const filtersFromUrl: Record<string, FilterValue> = {}
     
     params.forEach((value, key) => {
       try {

@@ -1,8 +1,8 @@
 'use client';
 
 import React, { useState, useEffect, useRef } from 'react';
-import { ChevronLeft, ChevronRight } from 'lucide-react';
-import { NetflixRow } from '../../services/netflix-view.service';
+import { ChevronLeft, ChevronRight, Eye, MapPin, Star, Clock } from 'lucide-react';
+import { NetflixRow, AdRowItem } from '../../services/netflix-view.service';
 import { Publication } from '../../services/publication-netflix.service';
 import PublicationCard from '../publications/PublicationCard';
 
@@ -146,8 +146,32 @@ const AdRow: React.FC<AdRowProps> = ({ row, onAdClick, onSeeAll }) => {
               onClick={() => onAdClick(publication)}
             >
               <PublicationCard 
-                publication={publication}
-                id={publication._id}
+                publication={{
+                  id: publication._id,
+                  title: publication.title,
+                  description: publication.description,
+                  categorySlug: publication.categorySlug,
+                  subcategorySlug: publication.subcategorySlug || null,
+                  subSubcategorySlug: publication.subSubcategorySlug || null,
+                  transactionType: publication.transactionType,
+                  value: publication.value,
+                  currency: publication.currency,
+                  valueType: publication.valueType,
+                  size: publication.size || 1,
+                  location: {
+                    reference: publication.location.address || undefined,
+                    district: publication.location.district || publication.location.city,
+                    province: publication.location.province,
+                    city: publication.location.city,
+                    country: publication.location.country
+                  },
+                  images: publication.images,
+                  whatsapp: publication.contact?.phones?.[0] || '900000000',
+                  createdAt: publication.createdAt,
+                  views: publication.views || 0,
+                  featured: publication.premium,
+                  premium: publication.premium
+                }}
               />
             </div>
           ))}

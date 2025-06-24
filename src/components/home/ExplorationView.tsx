@@ -208,6 +208,7 @@ const ExplorationRowComponent: React.FC<ExplorationRowProps> = ({ row, onSearch 
 
   // Adaptador robusto para trabajar con los datos reales de tu API
   const adaptPublication = (publication: any) => ({
+    id: publication.id || publication._id || 'unknown',
     title: publication.title || 'Sin título',
     description: publication.description || '',
     categorySlug: publication.categorySlug || 'general',
@@ -221,9 +222,9 @@ const ExplorationRowComponent: React.FC<ExplorationRowProps> = ({ row, onSearch 
     location: {
       country: 'Perú',
       province: 'Cusco',
-      city: publication.location || 'Cusco',
-      district: null,
-      address: null
+      city: publication.location?.city || publication.location || 'Cusco',
+      district: publication.location?.district || null,
+      address: publication.location?.address || null
     },
     contact: {
       phones: publication.contactPhone ? [publication.contactPhone] : ['900000000'],
@@ -234,7 +235,10 @@ const ExplorationRowComponent: React.FC<ExplorationRowProps> = ({ row, onSearch 
       ? publication.images 
       : ['/images/placeholder-image.jpg'],
     status: publication.status || 'active',
-    premium: publication.premium || false
+    premium: publication.premium || false,
+    whatsapp: publication.contact?.phones?.[0] || publication.whatsapp || '900000000',
+    createdAt: publication.createdAt || publication.created_at || new Date().toISOString(),
+    views: publication.views || 0
   });
 
   return (
@@ -294,7 +298,6 @@ const ExplorationRowComponent: React.FC<ExplorationRowProps> = ({ row, onSearch 
             <div key={publication.id || publication._id || Math.random()} className="flex-shrink-0 w-80">
               <PublicationCard 
                 publication={adaptPublication(publication)}
-                id={publication.id || publication._id || 'unknown'}
               />
             </div>
           ))}

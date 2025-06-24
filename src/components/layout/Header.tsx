@@ -215,7 +215,7 @@ export default function Header() {
 
   const isActiveRoute = (path: string) => {
     if (path === '/') return pathname === path ? navButtonActiveClasses : navButtonInactiveClasses;
-    return pathname.startsWith(path) ? navButtonActiveClasses : navButtonInactiveClasses;
+    return pathname?.startsWith(path) ? navButtonActiveClasses : navButtonInactiveClasses;
   };
 
   // Estilos para los items del menú desplegable (CORREGIDO)

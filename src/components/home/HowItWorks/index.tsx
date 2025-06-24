@@ -4,7 +4,7 @@ import { useState, useRef, useEffect } from 'react';
 import { motion, useInView } from 'framer-motion';
 import Container from '@/components/shared/Container';
 import { ArrowRightIcon, ArrowPathIcon, BookmarkIcon, MapIcon, BellIcon, UserIcon } from '@heroicons/react/24/outline';
-import { Orb } from '@/components/ui/animations/Orb';
+// import { Orb } from '@/components/ui/animations/Orb'; // Component not found, commented out
 
 const steps = [
   {
@@ -128,14 +128,14 @@ export default function HowItWorks() {
           <rect x="0" y="0" width="100%" height="100%" fill="url(#circuit-pattern)" />
         </svg>
         
-        {/* Floating orbs */}
+        {/* Floating orbs - replaced with simple divs */}
         <div className="absolute opacity-80 pointer-events-none">
-          <Orb size={160} color="#14b8a630" top="10%" left="5%" duration={25} />
-          <Orb size={100} color="#06b6d430" top="30%" left="15%" duration={18} />
-          <Orb size={120} color="#10b98130" top="70%" left="8%" duration={22} />
-          <Orb size={140} color="#14b8a630" top="15%" right="5%" duration={20} />
-          <Orb size={90} color="#06b6d430" top="50%" right="10%" duration={15} />
-          <Orb size={110} color="#10b98130" top="80%" right="15%" duration={24} />
+          <div className="absolute w-40 h-40 bg-teal-500/20 rounded-full blur-xl" style={{ top: '10%', left: '5%' }}></div>
+          <div className="absolute w-25 h-25 bg-cyan-500/20 rounded-full blur-xl" style={{ top: '30%', left: '15%' }}></div>
+          <div className="absolute w-30 h-30 bg-emerald-500/20 rounded-full blur-xl" style={{ top: '70%', left: '8%' }}></div>
+          <div className="absolute w-35 h-35 bg-teal-500/20 rounded-full blur-xl" style={{ top: '15%', right: '5%' }}></div>
+          <div className="absolute w-22 h-22 bg-cyan-500/20 rounded-full blur-xl" style={{ top: '50%', right: '10%' }}></div>
+          <div className="absolute w-28 h-28 bg-emerald-500/20 rounded-full blur-xl" style={{ top: '80%', right: '15%' }}></div>
         </div>
       </div>
       

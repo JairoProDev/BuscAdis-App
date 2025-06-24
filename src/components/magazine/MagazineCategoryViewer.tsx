@@ -550,7 +550,7 @@ function PublicationDetail({ publication, onBack }: PublicationDetailProps) {
               <Badge variant="outline" className="px-3 py-1">
                 <MapPin size={14} className="mr-1" />
                 {publication.location.district}
-                {publication.location.province && `, ${publication.location.province}`}
+                {(publication.location as any).province && `, ${(publication.location as any).province}`}
               </Badge>
             )}
             

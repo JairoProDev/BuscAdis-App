@@ -5,6 +5,51 @@ import { Loader } from '@googlemaps/js-api-loader'
 import { cn } from '@/lib/utils'
 import { MapPinIcon } from '@heroicons/react/24/outline'
 
+// Temporary Google Maps type declarations for build
+declare global {
+  namespace google {
+    namespace maps {
+      interface MapOptions {
+        center: { lat: number; lng: number };
+        zoom: number;
+        mapTypeControl?: boolean;
+        fullscreenControl?: boolean;
+        streetViewControl?: boolean;
+        zoomControl?: boolean;
+        scrollwheel?: boolean;
+        draggable?: boolean;
+        clickableIcons?: boolean;
+        styles?: any[];
+      }
+      class Map {
+        constructor(element: HTMLElement, options: MapOptions);
+        addListener(event: string, handler: (e?: any) => void): void;
+        setCenter(position: { lat: number; lng: number }): void;
+        setZoom(zoom: number): void;
+      }
+      interface MapMouseEvent {
+        latLng: LatLng;
+      }
+      class LatLng {
+        lat(): number;
+        lng(): number;
+      }
+      class Marker {
+        constructor(options: any);
+        addListener(event: string, handler: () => void): void;
+        getPosition(): { lat(): number; lng(): number } | null;
+        setPosition(position: { lat: number; lng: number }): void;
+      }
+      class Size {
+        constructor(width: number, height: number);
+      }
+      class Point {
+        constructor(x: number, y: number);
+      }
+    }
+  }
+}
+
 interface LocationMapProps {
   latitude: number | string | undefined
   longitude: number | string | undefined

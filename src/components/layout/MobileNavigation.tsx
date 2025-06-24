@@ -35,7 +35,7 @@ export default function MobileNavigation() {
   
   const isActiveRoute = (path: string) => {
     if (path === '/') return pathname === '/'
-    return pathname.startsWith(path)
+    return pathname?.startsWith(path)
   }
 
   return (

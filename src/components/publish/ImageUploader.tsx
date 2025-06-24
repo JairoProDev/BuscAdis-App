@@ -54,9 +54,9 @@ export const ImageUploader: React.FC<ImageUploaderProps> = ({
 
           const processed = await ImageService.processImage(optimizedFile);
           processedImages.push(processed);
-          Logger.success(`Imagen ${i + 1} procesada exitosamente`);
+          Logger.info(`Imagen ${i + 1} procesada exitosamente`);
         } catch (error) {
-          Logger.error(`Error al procesar la imagen ${i + 1}:`, error);
+          Logger.error(`Error al procesar la imagen ${i + 1}:`, { error: error instanceof Error ? error.message : String(error) });
           newErrors.push(`Error al procesar la imagen ${file.name}`);
         }
       }
@@ -67,7 +67,7 @@ export const ImageUploader: React.FC<ImageUploaderProps> = ({
         onImagesChange(updatedImages);
       }
     } catch (error) {
-      Logger.error('Error al procesar las imágenes:', error);
+      Logger.error('Error al procesar las imágenes:', { error: error instanceof Error ? error.message : String(error) });
       newErrors.push('Error al procesar las imágenes');
     } finally {
       setErrors(newErrors);

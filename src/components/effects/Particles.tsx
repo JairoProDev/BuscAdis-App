@@ -1,7 +1,6 @@
 'use client'
 
 import { useEffect, useRef } from 'react'
-import { gsap } from 'gsap'
 
 interface Particle {
   x: number
@@ -51,12 +50,11 @@ export default function Particles() {
         if (particle.x <= 0 || particle.x >= 100) particle.speedX *= -1
         if (particle.y <= 0 || particle.y >= 100) particle.speedY *= -1
 
-        gsap.set(particle.element, {
-          left: `${particle.x}%`,
-          top: `${particle.y}%`,
-          width: particle.size,
-          height: particle.size
-        })
+        // Usar estilos CSS nativos en lugar de gsap
+        particle.element.style.left = `${particle.x}%`
+        particle.element.style.top = `${particle.y}%`
+        particle.element.style.width = `${particle.size}px`
+        particle.element.style.height = `${particle.size}px`
       })
 
       requestAnimationFrame(animate)

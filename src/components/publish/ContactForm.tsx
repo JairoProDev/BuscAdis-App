@@ -44,10 +44,10 @@ const ContactForm: React.FC<ContactFormProps> = ({
       // Por ahora, solo manejamos el primer teléfono del array simple
       const updatedPhones = primaryPhone.trim() ? [primaryPhone.trim()] : [];
       onChange({
-          name: name || null, // Enviar null si está vacío
-          email: email || null,
+          name: name || undefined, // Enviar undefined si está vacío
+          email: email || undefined,
           phones: updatedPhones,
-          website: website || null,
+          website: website || undefined,
       });
   }, [name, email, primaryPhone, website, onChange]);
 
@@ -62,10 +62,10 @@ const ContactForm: React.FC<ContactFormProps> = ({
      // Por simplicidad, notificamos aquí, pero puede ser ineficiente
      const updatedPhones = phoneValue.trim() ? [phoneValue.trim()] : [];
       onChange({
-          name: name || null,
-          email: email || null,
+          name: name || undefined,
+          email: email || undefined,
           phones: updatedPhones,
-          website: website || null,
+          website: website || undefined,
       });
   };
 

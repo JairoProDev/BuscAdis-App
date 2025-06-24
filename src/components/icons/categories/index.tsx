@@ -1,4 +1,7 @@
-import { IconType } from '@/types/icons'
+// import { IconType } from '@/types/icons' // Type not found, using React.ComponentType instead
+import React from 'react'
+
+type IconType = React.ComponentType<React.SVGProps<SVGSVGElement>>
 
 export const JobsIcon: IconType = (props) => (
   <svg viewBox="0 0 24 24" fill="none" {...props}>

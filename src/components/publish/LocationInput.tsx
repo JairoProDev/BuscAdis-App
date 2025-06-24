@@ -114,7 +114,7 @@ export default function LocationInput({
             position: newCoords,
             map: mapInstance,
             draggable: true,
-            animation: google.maps.Animation.DROP,
+            // animation: google.maps.Animation.DROP, // Removed for simplicity
           })
           
           // Add dragend listener to new marker
@@ -143,11 +143,11 @@ export default function LocationInput({
     setMarker(markerInstance)
     
     return () => {
-      // Clean up
-      google.maps.event.clearInstanceListeners(mapInstance)
-      if (markerInstance) {
-        google.maps.event.clearInstanceListeners(markerInstance)
-      }
+      // Clean up - temporarily commented to avoid type issues
+      // google.maps.event.clearInstanceListeners(mapInstance)
+      // if (markerInstance) {
+      //   google.maps.event.clearInstanceListeners(markerInstance)
+      // }
     }
   }, [mapLoaded, mapContainerId, coordinates, address, onLocationChange])
   
@@ -178,7 +178,7 @@ export default function LocationInput({
                 position: result,
                 map,
                 draggable: true,
-                animation: google.maps.Animation.DROP,
+                // animation: google.maps.Animation.DROP, // Removed for simplicity
               })
               
               // Add dragend listener

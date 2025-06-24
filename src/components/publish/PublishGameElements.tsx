@@ -33,7 +33,7 @@ export default function PublishGameElements({
 
   const renderAchievement = (achievement: Achievement) => {
     if (achievement.unlocked) {
-      Logger.success(`¡Felicitaciones! Has desbloqueado: ${achievement.title}`);
+      Logger.info(`¡Felicitaciones! Has desbloqueado: ${achievement.title}`);
     }
 
     return (

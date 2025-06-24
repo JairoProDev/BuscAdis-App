@@ -1,19 +1,5 @@
 import { useEffect, useState } from 'react';
-import { PublicationsService } from '@/services/publications.service';
-
-interface PublicationLocation {
-  city: string;
-  country: string;
-}
-
-interface Publication {
-  id: string;
-  title: string;
-  description: string;
-  location: PublicationLocation;
-  price: number;
-  currency: string;
-}
+import { PublicationsService, Publication } from '@/services/publications.service';
 
 const PublicationsList = () => {
   const [publications, setPublications] = useState<Publication[]>([]);
@@ -43,11 +29,11 @@ const PublicationsList = () => {
       <h2>Anuncios Publicados</h2>
       <ul>
         {publications.map((publication) => (
-          <li key={publication.id}>
+          <li key={publication._id}>
             <h3>{publication.title}</h3>
             <p>{publication.description}</p>
             <p>Ubicación: {publication.location.city}, {publication.location.country}</p>
-            <p>Precio: {publication.price} {publication.currency}</p>
+            <p>Precio: {publication.value} {publication.currency}</p>
           </li>
         ))}
       </ul>

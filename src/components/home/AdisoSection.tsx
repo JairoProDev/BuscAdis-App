@@ -4,7 +4,7 @@ import { motion } from 'framer-motion'
 import { CategoryId, Adiso } from '@/types/marketplace'
 import FeaturedAds from './FeaturedAds'
 import { useEffect, useState } from 'react'
-import { PublicationsService } from '@/services/publications.service'
+import { PublicationsService, Publication } from '@/services/publications.service'
 import AdisoCard from '@/components/AdisoCard'
 import LoadingState from '@/components/ui/LoadingState'
 import ErrorMessage from '@/components/ui/ErrorMessage'
@@ -20,9 +20,23 @@ export default function AdisoSection({
   title, 
   featured = false 
 }: AdisoSectionProps) {
-  const [adisos, setAdisos] = useState([]);
+  const [adisos, setAdisos] = useState<Publication[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+
+  // Función para adaptar Publication a AdisoData
+  const adaptPublicationToAdiso = (publication: Publication) => ({
+    id: publication._id,
+    title: publication.title,
+    price: publication.value,
+    location: publication.location,
+    image: publication.images?.[0],
+    is_premium: publication.premium,
+    is_verified: false, // No disponible en Publication
+    rating: 0, // No disponible en Publication
+    category: publication.categorySlug,
+    categorySlug: publication.categorySlug
+  });
 
   useEffect(() => {
     const fetchAdisos = async () => {
@@ -83,7 +97,7 @@ export default function AdisoSection({
       <h2 className="text-2xl font-bold mb-4">{title}</h2>
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {adisos.map((adiso) => (
-          <AdisoCard key={adiso.id} adiso={adiso} featured={featured} />
+          <AdisoCard key={adiso._id} adiso={adaptPublicationToAdiso(adiso)} featured={featured} />
         ))}
       </div>
     </div>

@@ -98,7 +98,7 @@ const tools = [
 export default function Tools() {
     const [activeTool, setActiveTool] = useState(tools[0]);
     const [isPlaying, setIsPlaying] = useState(false);
-    const [hoverState, setHoverState] = useState(null);
+    const [hoverState, setHoverState] = useState<string | null>(null);
     const [animationComplete, setAnimationComplete] = useState(false);
 
     useEffect(() => {
@@ -107,12 +107,12 @@ export default function Tools() {
         return () => clearTimeout(timer);
     }, [activeTool]);
 
-    const renderDemo = (tool) => {
+    const renderDemo = (tool: any) => {
         switch (tool.demo.type) {
             case 'chart':
                 return (
                     <div className="h-40 flex items-end justify-between gap-2 p-2">
-                        {tool.demo.data.map((value, index) => (
+                        {tool.demo.data.map((value: any, index: number) => (
                             <div key={index} className="relative flex flex-col items-center">
                                 <motion.div
                                     className={`w-10 sm:w-12 rounded-t-md bg-gradient-to-b ${tool.demo.colors[index % tool.demo.colors.length]}`}
@@ -146,7 +146,7 @@ export default function Tools() {
             case 'chat':
                 return (
                     <div className="space-y-3 p-1">
-                        {tool.demo.messages.map((message, index) => (
+                        {tool.demo.messages.map((message: any, index: number) => (
                             <motion.div
                                 key={index}
                                 className="bg-gradient-to-r from-slate-800/95 to-slate-900/95 p-3 rounded-lg border border-teal-500/30 backdrop-blur-sm text-cyan-100 shadow-lg relative overflow-hidden"
@@ -183,7 +183,7 @@ export default function Tools() {
             case 'calendar':
                 return (
                     <div className="grid grid-cols-2 gap-3">
-                        {tool.demo.events.map((event, index) => (
+                        {tool.demo.events.map((event: any, index: number) => (
                             <motion.div
                                 key={index}
                                 className="bg-gradient-to-r from-slate-800/90 to-slate-900/90 text-cyan-100 p-3 rounded-lg border border-teal-500/30 relative overflow-hidden group"

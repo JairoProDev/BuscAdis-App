@@ -4,7 +4,7 @@ import React from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { formatPrice } from '@/utils/format';
-import { formatDate } from '@/utils/date';
+import { formatDate, timeAgo } from '@/utils/date';
 import { generateSeoUrl } from '@/utils/url';
 import { Skeleton } from '@/components/ui/Skeleton';
 
@@ -73,13 +73,14 @@ function RelatedPublicationCard({ publication, category }: { publication: Public
     subsubcategory 
   } = publication;
   
-  const url = generateSeoUrl({
-    category,
-    subcategory: subcategory || '',
-    subsubcategory: subsubcategory || '',
+  const url = generateSeoUrl(
     id,
-    title
-  });
+    title,
+    undefined, // publicationSlug
+    category,
+    subcategory || undefined,
+    subsubcategory || undefined
+  );
   
   const thumbnailImage = images && images.length > 0 
     ? images[0] 
@@ -113,7 +114,7 @@ function RelatedPublicationCard({ publication, category }: { publication: Public
             </p>
             
             <p className="text-xs text-gray-500">
-              {formatDate(created_at, 'short')}
+              {timeAgo(created_at)}
             </p>
           </div>
           

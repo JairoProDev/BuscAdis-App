@@ -1,10 +1,10 @@
 'use client'
 
 import { useRef, useEffect } from 'react'
-import { gsap } from 'gsap'
-import { ScrollTrigger } from 'gsap/ScrollTrigger'
+// import { gsap } from 'gsap' // GSAP not installed, commenting out
+// import { ScrollTrigger } from 'gsap/ScrollTrigger'
 
-gsap.registerPlugin(ScrollTrigger)
+// gsap.registerPlugin(ScrollTrigger)
 
 interface HorizontalScrollProps {
   children: React.ReactNode
@@ -16,32 +16,17 @@ export default function HorizontalScroll({ children, className = '' }: Horizonta
   const containerRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
+    // Simple horizontal scroll implementation without GSAP
     const container = containerRef.current
     const scrollContainer = scrollRef.current
 
     if (!container || !scrollContainer) return
 
+    // Simple CSS-based horizontal scroll for mobile
     const isMobile = window.innerWidth < 768
-
-    if (!isMobile) return
-
-    const sections = gsap.utils.toArray<HTMLElement>(container.children)
-    const totalWidth = sections.reduce((acc, section) => acc + section.offsetWidth, 0)
-
-    gsap.to(sections, {
-      x: () => -(totalWidth - window.innerWidth),
-      ease: "none",
-      scrollTrigger: {
-        trigger: scrollContainer,
-        pin: true,
-        scrub: 1,
-        end: () => `+=${totalWidth}`,
-        invalidateOnRefresh: true
-      }
-    })
-
-    return () => {
-      ScrollTrigger.getAll().forEach(trigger => trigger.kill())
+    if (isMobile) {
+      container.style.overflowX = 'auto'
+      container.style.display = 'flex'
     }
   }, [])
 

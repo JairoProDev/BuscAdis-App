@@ -4,7 +4,7 @@ import React from 'react';
 import { useRouter } from 'next/navigation';
 import { 
   Home, Car, Briefcase, Wrench, ShoppingBag, 
-  Calendar, TrendingUp, Users, Icon, ArrowRight 
+  Calendar, TrendingUp, Users, Package, ArrowRight 
 } from 'lucide-react';
 import { Button } from '@/components/ui/Button';
 
@@ -53,7 +53,7 @@ export default function MagazineCategoryCard({
         <div className="flex items-center mb-4">
           <div className="w-10 h-10 rounded-full flex items-center justify-center mr-3" style={{ backgroundColor: `${color}20` }}>
             <div style={{ color }}>
-              {iconMap[icon] || <Icon size={24} />}
+              {iconMap[icon] || <Package size={24} />}
             </div>
           </div>
           <h3 className="text-xl font-bold">{name}</h3>

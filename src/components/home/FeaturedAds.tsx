@@ -7,7 +7,7 @@ import { VerifiedIcon, PremiumIcon } from '@/components/icons'
 import { Adiso } from '@/types/marketplace'
 import { categories } from '@/data/mockCategories'
 import { useEffect, useState } from 'react'
-import { PublicationsService } from '@/services/publications.service'
+import { PublicationsService, Publication } from '@/services/publications.service'
 import AdisoCard from '@/components/AdisoCard'
 
 interface FeaturedAdsProps {
@@ -15,14 +15,14 @@ interface FeaturedAdsProps {
 }
 
 export default function FeaturedAds({ featured = false }: FeaturedAdsProps) {
-  const [ads, setAds] = useState([]);
+  const [ads, setAds] = useState<Publication[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
 
   useEffect(() => {
     const fetchAds = async () => {
       try {
-        const data = await PublicationsService.getFeaturedPublications();
+        const data = await PublicationsService.getPremiumPublications();
         setAds(data);
       } catch (err) {
         console.error('Error fetching featured ads:', err);
@@ -54,7 +54,18 @@ export default function FeaturedAds({ featured = false }: FeaturedAdsProps) {
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
       {ads.map((ad) => (
-        <AdisoCard key={ad.id} adiso={ad} featured={featured} />
+        <AdisoCard key={ad._id} adiso={{
+          id: ad._id,
+          title: ad.title,
+          price: ad.value,
+          location: ad.location,
+          image: ad.images?.[0],
+          is_premium: ad.premium,
+          is_verified: false,
+          rating: 0,
+          category: ad.categorySlug,
+          categorySlug: ad.categorySlug
+        }} featured={featured} />
       ))}
     </div>
   );

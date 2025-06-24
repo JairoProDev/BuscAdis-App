@@ -36,7 +36,7 @@ export function ImageGallery({ images, className = '' }: ImageGalleryProps) {
   
   // Obtener la imagen principal
   const mainImage = images[0];
-  const mainImageUrl = mainImage?.secureUrl || mainImage?.url || '';
+  const mainImageUrl = (mainImage as any)?.secureUrl || (mainImage as any)?.url || '';
   
   return (
     <>
@@ -77,7 +77,7 @@ export function ImageGallery({ images, className = '' }: ImageGalleryProps) {
                 `}
               >
                 <Image
-                  src={image.secureUrl || image.url}
+                  src={(image as any).secureUrl || (image as any).url}
                   alt={`Miniatura ${idx + 1}`}
                   className="object-cover"
                   fill
@@ -102,7 +102,7 @@ export function ImageGallery({ images, className = '' }: ImageGalleryProps) {
           <div className="relative h-[80vh] flex items-center justify-center">
             {/* Imagen actual - for lightbox, we'll keep using img to allow for zooming and better modal handling */}
             <img
-              src={images[currentIndex]?.secureUrl || images[currentIndex]?.url}
+              src={(images[currentIndex] as any)?.secureUrl || (images[currentIndex] as any)?.url}
               alt={`Imagen ${currentIndex + 1}`}
               className="max-h-full max-w-full object-contain"
             />
