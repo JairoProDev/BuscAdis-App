@@ -575,7 +575,7 @@ export default function EnhancedSearchInput({
                       ease: "linear"
                     }}
                   >
-                    <Sparkles className="w-4 h-4" />
+                    <span className="text-lg">✨</span>
                   </motion.div>
                 </motion.button>
               )}

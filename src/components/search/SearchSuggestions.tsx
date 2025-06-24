@@ -412,7 +412,7 @@ export default function SearchSuggestions({
               {randomizedAiSuggestions.length > 0 && (
                 <div className="space-y-1.5" onMouseDown={(e) => e.preventDefault()}>
                   <div className="flex items-center">
-                    <Sparkles className="h-4 w-4 mr-1 text-purple-500" />
+                    <span className="text-lg mr-1">✨</span>
                     <h3 className="text-sm font-medium">Sugerencias IA</h3>
                   </div>
                   <div className="flex flex-wrap gap-1.5">
@@ -427,8 +427,8 @@ export default function SearchSuggestions({
                             ? appearance === 'dark' ? 'bg-slate-700' : 'bg-slate-100'
                             : appearance === 'dark' ? 'bg-gradient-to-r from-slate-800 to-purple-900/30 hover:from-slate-700 hover:to-purple-900/50' : 'bg-gradient-to-r from-slate-50 to-purple-50 hover:from-slate-100 hover:to-purple-100'
                         } border ${appearance === 'dark' ? 'border-purple-500/30' : 'border-purple-200'}`}
-                      >
-                        <Sparkles className={`${compact ? 'h-3 w-3' : 'h-3.5 w-3.5'} text-purple-500`} />
+                                              >
+                        <span className={`${compact ? 'text-sm' : 'text-base'}`}>✨</span>
                         <span className="truncate">{item.text}</span>
                       </button>
                     ))}

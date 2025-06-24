@@ -433,7 +433,7 @@ export default function SearchBar({
                       </>
                     ) : (
                       <>
-                        <SparklesIcon className="h-4 w-4 mr-1 text-teal-500" />
+                        <span className="text-lg mr-1">✨</span>
                         Sugerencias para ti
                       </>
                     )}
@@ -449,7 +449,7 @@ export default function SearchBar({
                         <div className="flex items-center">
                           {suggestion.isAI ? (
                             <div className="flex-shrink-0 p-1.5 bg-purple-100 dark:bg-purple-900/30 text-purple-600 dark:text-purple-400 rounded-full mr-3">
-                              <SparklesIcon className="h-4 w-4" />
+                              <span className="text-lg">✨</span>
                             </div>
                           ) : (
                             <div className="flex-shrink-0 p-1.5 bg-teal-100 dark:bg-teal-900/30 text-teal-600 dark:text-teal-400 rounded-full mr-3">

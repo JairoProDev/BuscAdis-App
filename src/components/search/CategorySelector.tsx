@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { ChevronDownIcon, Squares2X2Icon } from '@heroicons/react/24/outline'
+import { ChevronDownIcon, Squares2X2Icon, BriefcaseIcon } from '@heroicons/react/24/outline'
 
 interface Category {
   id: string;
@@ -104,7 +104,7 @@ const categoriesData: Category[] = [
     id: 'empleos',
     name: 'Empleos',
     slug: 'empleos',
-    icon: '💼',
+    icon: 'briefcase',
     subcategories: [
       {
         id: 'tecnologia',
@@ -265,7 +265,11 @@ export default function CategorySelector({
                         activeCategory === category.slug ? 'bg-blue-50 dark:bg-blue-900/20 text-blue-600' : ''
                       }`}
                     >
-                      <span className="text-lg">{category.icon}</span>
+                      {category.icon === 'briefcase' ? (
+                        <BriefcaseIcon className="w-5 h-5 text-blue-600" />
+                      ) : (
+                        <span className="text-lg">{category.icon}</span>
+                      )}
                       <div className="flex-1">
                         <span className="font-medium">{category.name}</span>
                         {category.subcategories && (

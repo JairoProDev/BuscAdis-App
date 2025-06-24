@@ -1486,48 +1486,68 @@ button[aria-label="Contactar por WhatsApp"] {
   border: 1px solid rgba(255, 255, 255, 0.1);
 }
 
-/* Google Translate - Ocultar completamente todos los elementos visuales */
-.goog-te-banner-frame,
-.goog-te-banner,
-.goog-te-combo,
-.goog-te-gadget,
-.goog-te-menu-frame,
-.goog-te-menu-value,
-.goog-te-menu-value span,
-.goog-te-gadget-simple,
-.goog-te-gadget-icon,
-#google_translate_element,
-.goog-te-spinner-pos {
-  display: none !important;
-  visibility: hidden !important;
-  opacity: 0 !important;
-  height: 0 !important;
-  width: 0 !important;
-  position: absolute !important;
-  left: -9999px !important;
-  top: -9999px !important;
-  z-index: -1 !important;
+/* Sistema de traducción local - Estilos para diferentes idiomas */
+[data-translate-lang] {
+  transition: all 0.3s ease;
 }
 
-/* Asegurar que el body no se modifique por Google Translate */
-body {
-  top: 0 !important;
-  position: relative !important;
+/* Estilos específicos por idioma */
+.lang-en {
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
 }
 
-/* Ocultar la barra superior de Google Translate si aparece */
-.goog-te-banner-frame.skiptranslate {
-  display: none !important;
+.lang-zh {
+  font-family: 'Noto Sans SC', -apple-system, BlinkMacSystemFont, sans-serif;
 }
 
-/* Estilos para elementos traducidos (mantener el diseño original) */
-.goog-text-highlight {
-  background-color: transparent !important;
-  border: none !important;
-  box-shadow: none !important;
+.lang-ja {
+  font-family: 'Noto Sans JP', -apple-system, BlinkMacSystemFont, sans-serif;
 }
 
-/* Evitar que Google Translate rompa el layout */
+.lang-ar {
+  direction: rtl;
+  text-align: right;
+}
+
+/* Indicador visual de contenido traducido */
+.translated-content {
+  position: relative;
+}
+
+.translated-content::before {
+  content: '';
+  position: fixed;
+  top: 0;
+  right: 0;
+  width: 4px;
+  height: 100vh;
+  background: linear-gradient(to bottom, #14b8a6, #0891b2);
+  z-index: 9999;
+  opacity: 0.7;
+}
+
+/* Evitar que ciertos elementos se traduzcan */
 .notranslate {
   white-space: nowrap;
+}
+
+/* Animación suave para cambios de texto */
+.translated-content * {
+  transition: opacity 0.2s ease;
+}
+
+/* Mejorar legibilidad en diferentes idiomas */
+[data-translate-lang="zh"] *,
+[data-translate-lang="ja"] * {
+  line-height: 1.6;
+}
+
+[data-translate-lang="ar"] * {
+  text-align: right;
+}
+
+/* Ocultar elementos específicos durante la traducción */
+.translating .search-suggestions,
+.translating .dropdown-menu {
+  display: none;
 }

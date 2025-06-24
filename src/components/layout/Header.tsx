@@ -21,11 +21,13 @@ import {
   ArrowRightOnRectangleIcon,
   UserPlusIcon,
   GlobeAltIcon,
+  HeartIcon,
+  SpeakerWaveIcon,
 } from '@heroicons/react/24/outline';
 import { ThemeToggle } from '@/components/theme';
 import BuscadisLogo from '@/components/icons/BuscadisLogo';
 import LocationSelector from '@/components/search/LocationSelector';
-import LanguageSelector from '@/components/ui/LanguageSelector';
+import LanguageSelectorMenuItem from '@/components/ui/LanguageSelectorMenuItem';
 
 interface User {
   id: string;
@@ -281,11 +283,11 @@ export default function Header() {
               <span>Mi Perfil</span>
             </Link>
             <Link href="/mis-anuncios" role="menuitem" className={menuItemClasses} onClick={() => setShowUserMenu(false)}>
-              <PlusCircleIcon className={menuItemIconClasses} />
-              <span>Mis Anuncios</span>
+              <SpeakerWaveIcon className={menuItemIconClasses} />
+              <span>Mis Publicaciones</span>
             </Link>
             <Link href="/guardados" role="menuitem" className={menuItemClasses} onClick={() => setShowUserMenu(false)}>
-              <BookmarkIcon className={menuItemIconClasses} />
+              <HeartIcon className={menuItemIconClasses} />
               <span>Guardados</span>
             </Link>
             <Link href="/mensajes" role="menuitem" className={menuItemClasses} onClick={() => setShowUserMenu(false)}>
@@ -296,6 +298,13 @@ export default function Header() {
               <BellIcon className={menuItemIconClasses} />
               <span>Notificaciones</span>
             </Link>
+
+            {/* Selector de Idioma */}
+            <LanguageSelectorMenuItem 
+              menuItemClasses={menuItemClasses}
+              menuItemIconClasses={menuItemIconClasses}
+              onClose={() => setShowUserMenu(false)}
+            />
 
             <div className="border-t border-slate-200 dark:border-slate-700/50 my-1.5 mx-1.5" role="separator"></div>
 
@@ -395,9 +404,6 @@ export default function Header() {
               </span>
               <ChevronDownIcon className="w-4 h-4 text-slate-500 dark:text-slate-400" />
             </button>
-            
-            {/* Selector de Idioma */}
-            <LanguageSelector variant="pill" />
             
             {/* Toggle de Tema */}
             <ThemeToggle />

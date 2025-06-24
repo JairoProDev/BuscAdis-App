@@ -723,8 +723,8 @@ export default function SupremeSearchEngine({
                 : 'text-slate-500 dark:text-slate-400 hover:bg-gradient-to-r hover:from-purple-100 hover:to-pink-100 dark:hover:from-purple-900/20 dark:hover:to-pink-900/20 hover:text-purple-600 dark:hover:text-purple-400'
             }`}
             title="Búsqueda con IA"
-          >
-            <SparklesIcon className="w-4 h-4 sm:w-5 sm:h-5" />
+                      >
+            <span className="text-lg">✨</span>
           </button>
 
           {/* Botón de búsqueda */}
@@ -869,7 +869,7 @@ export default function SupremeSearchEngine({
                   {/* Columna 2: Sugerencias IA */}
                   <div className="p-4 border-r border-slate-100 dark:border-slate-700">
                     <div className="flex items-center gap-2 mb-3">
-                      <SparklesIcon className="h-4 w-4 text-purple-500" />
+                      <span className="text-lg">✨</span>
                       <span className="text-sm font-medium text-slate-600 dark:text-slate-300">
                         Sugerencias IA
                       </span>
