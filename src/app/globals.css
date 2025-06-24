@@ -1485,3 +1485,49 @@ button[aria-label="Contactar por WhatsApp"] {
   backdrop-filter: blur(8px);
   border: 1px solid rgba(255, 255, 255, 0.1);
 }
+
+/* Google Translate - Ocultar completamente todos los elementos visuales */
+.goog-te-banner-frame,
+.goog-te-banner,
+.goog-te-combo,
+.goog-te-gadget,
+.goog-te-menu-frame,
+.goog-te-menu-value,
+.goog-te-menu-value span,
+.goog-te-gadget-simple,
+.goog-te-gadget-icon,
+#google_translate_element,
+.goog-te-spinner-pos {
+  display: none !important;
+  visibility: hidden !important;
+  opacity: 0 !important;
+  height: 0 !important;
+  width: 0 !important;
+  position: absolute !important;
+  left: -9999px !important;
+  top: -9999px !important;
+  z-index: -1 !important;
+}
+
+/* Asegurar que el body no se modifique por Google Translate */
+body {
+  top: 0 !important;
+  position: relative !important;
+}
+
+/* Ocultar la barra superior de Google Translate si aparece */
+.goog-te-banner-frame.skiptranslate {
+  display: none !important;
+}
+
+/* Estilos para elementos traducidos (mantener el diseño original) */
+.goog-text-highlight {
+  background-color: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
+}
+
+/* Evitar que Google Translate rompa el layout */
+.notranslate {
+  white-space: nowrap;
+}
