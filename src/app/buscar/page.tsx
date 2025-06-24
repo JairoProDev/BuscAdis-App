@@ -268,7 +268,7 @@ function SearchPageContent() {
               onSearch={handleSearch}
               variant="page"
               showFilters={true}
-              placeholder="¿Qué necesitas hoy? Busca empleos, inmuebles, vehículos..."
+              placeholder="¿Qué necesitas hoy? Encuentra oportunidades cerca de ti..."
               selectedCategory={selectedCategory}
               selectedSubcategory={selectedSubcategory}
               onCategoryChange={handleCategoryChange}

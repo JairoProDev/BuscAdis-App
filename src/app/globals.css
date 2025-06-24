@@ -311,14 +311,14 @@
     align-items: center;
     font-size: 0.65rem;
     margin-top: auto;
-    padding-top: 0.5rem;
+    padding-top: 0rem;
     flex-shrink: 0;
   }
 
   @media (min-width: 640px) {
     .publication-card .footer {
       font-size: 0.75rem;
-      padding-top: 0.75rem;
+      padding-top: 0rem;
     }
   }
 
@@ -995,7 +995,7 @@
 }
 
 .publication-card .content {
-  @apply flex flex-col flex-grow p-3; /* Reduced padding */
+  @apply flex flex-col flex-grow p-0; /* Reduced padding */
   min-height: 0; /* Remove minimum height */
 }
 
