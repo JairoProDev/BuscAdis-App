@@ -1,7 +1,6 @@
 'use client';
 
 import Link from 'next/link';
-import Image from 'next/image';
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { usePathname, useRouter } from 'next/navigation'; // Importar useRouter
 import {
@@ -21,8 +20,10 @@ import {
   UserIcon,
   ArrowRightOnRectangleIcon,
   UserPlusIcon,
+  GlobeAltIcon,
 } from '@heroicons/react/24/outline';
 import { ThemeToggle } from '@/components/theme';
+import BuscadisLogo from '@/components/icons/BuscadisLogo';
 import LocationSelector from '@/components/search/LocationSelector';
 
 interface User {
@@ -143,26 +144,18 @@ export default function Header() {
     setShowUserMenu(prev => !prev);
   };
   const UserAvatar = () => (
-    <div className="flex items-center gap-2 text-sm">
+    <div className="flex items-center gap-2">
       {user?.avatarUrl ? (
-        <Image 
+        <img 
           src={user.avatarUrl} 
           alt={`Avatar de ${user.firstName || user.full_name || 'Usuario'}`}
-          width={32} 
-          height={32} 
           className="w-8 h-8 rounded-full object-cover border-2 border-slate-200 dark:border-slate-600"
         />
       ) : (
-        <UserCircleIcon className="w-8 h-8 text-slate-600 dark:text-slate-300 group-hover:text-teal-500 dark:group-hover:text-teal-400 transition-colors" />
+        <UserCircleIcon className="w-8 h-8 text-slate-600 dark:text-slate-300" />
       )}
-      {/* Mobile: solo primer nombre, Desktop: nombre completo */}
-      <span className="text-sm font-medium text-slate-700 dark:text-slate-200 group-hover:text-teal-500 dark:group-hover:text-teal-400">
-        <span className="sm:hidden">
-          {user?.firstName || user?.full_name?.split(' ')[0] || user?.email?.split('@')[0] || 'Usuario'}
-        </span>
-        <span className="hidden sm:inline">
-          {user?.full_name?.split(' ').slice(0, 2).join(' ') || user?.firstName || user?.email?.split('@')[0]}
-        </span>
+      <span className="text-sm font-medium text-slate-700 dark:text-slate-200 hidden lg:block">
+        {user?.firstName || user?.full_name?.split(' ')[0] || user?.email?.split('@')[0] || 'Usuario'}
       </span>
     </div>
   );
@@ -325,8 +318,17 @@ export default function Header() {
     <header className="relative z-[1000] w-full bg-white/80 dark:bg-slate-900/80 backdrop-blur-lg border-b border-slate-200 dark:border-slate-700/50 shadow-sm transition-colors duration-300">
       <div className="px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-14">
-          <Link href="/" className="flex items-center gap-1.5 flex-shrink-0" aria-label="Página de inicio de BuscAdis">
-            <Image src="/favicon.ico" alt="" width={28} height={28} className="w-7 h-7" aria-hidden="true" />
+          <Link 
+            href="/" 
+            className="flex items-center gap-2 flex-shrink-0 group" 
+            aria-label="Ir al inicio de BuscAdis"
+          >
+            <BuscadisLogo 
+              width={32} 
+              height={32} 
+              variant="gradient" 
+              className="group-hover:scale-105 transition-transform duration-200" 
+            />
             <span className="text-xl font-bold bg-gradient-to-r from-teal-500 to-cyan-500 bg-clip-text text-transparent">
               BuscAdis
             </span>
@@ -434,12 +436,13 @@ export default function Header() {
         </div>
       )}
 
-      <LocationSelector
-        isOpen={showLocationSelector}
-        onClose={() => setShowLocationSelector(false)}
-        onLocationSelect={handleLocationSelect}
-        initialSelection={selectedLocation}
-      />
+      {showLocationSelector && (
+        <LocationSelector
+          onClose={() => setShowLocationSelector(false)}
+          onLocationSelect={handleLocationSelect}
+          initialSelection={selectedLocation}
+        />
+      )}
     </header>
   );
 }
