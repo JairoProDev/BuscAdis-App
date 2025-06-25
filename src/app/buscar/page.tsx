@@ -15,6 +15,8 @@ import SearchFilters from '@/components/search/SearchFilters'
 import PublicationCard from '@/components/publications/PublicationCard'
 import CategorySelector from '@/components/search/CategorySelector'
 import { parseCategoryUrl, getSubcategories } from '@/lib/categories'
+import { filtersByCategory } from '@/data/filterConfig'
+import type { FilterOption } from '@/types/filters'
 
 interface SearchResult {
   id: string;
@@ -124,6 +126,161 @@ const SubcategorySelector = ({
             </button>
           ))}
         </div>
+      )}
+    </div>
+  )
+}
+
+// Componente para selector individual de filtros
+const FilterSelector = ({ 
+  filter, 
+  value, 
+  onFilterChange 
+}: {
+  filter: FilterOption
+  value: any
+  onFilterChange: (filterId: string, value: any) => void
+}) => {
+  const [isOpen, setIsOpen] = useState(false)
+
+  if (filter.type === 'select') {
+    const selectedOption = filter.options?.find(option => option.value === value)
+    
+    return (
+      <div className="relative">
+        <button
+          onClick={() => setIsOpen(!isOpen)}
+          className="flex items-center gap-2 px-3 py-2 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg hover:border-teal-500 focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-teal-500 transition-colors shadow-sm text-sm"
+        >
+          <span className="text-sm font-medium text-gray-700 dark:text-gray-300">
+            {selectedOption ? selectedOption.label : filter.label}
+          </span>
+          <ChevronDownIcon 
+            className={`w-4 h-4 text-gray-500 transition-transform ${isOpen ? 'rotate-180' : ''}`} 
+          />
+        </button>
+
+        {isOpen && (
+          <div className="absolute top-full left-0 mt-1 w-56 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-600 rounded-lg shadow-lg z-50 max-h-64 overflow-y-auto">
+            <button
+              onClick={() => {
+                onFilterChange(filter.id, null)
+                setIsOpen(false)
+              }}
+              className="w-full flex items-center px-4 py-3 text-sm hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors text-gray-700 dark:text-gray-300"
+            >
+              Cualquier {filter.label.toLowerCase()}
+            </button>
+            {filter.options?.map((option) => (
+              <button
+                key={option.value}
+                onClick={() => {
+                  onFilterChange(filter.id, option.value)
+                  setIsOpen(false)
+                }}
+                className={`w-full flex items-center px-4 py-3 text-sm hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors ${
+                  value === option.value 
+                    ? 'bg-teal-50 dark:bg-teal-900/20 text-teal-700 dark:text-teal-300' 
+                    : 'text-gray-700 dark:text-gray-300'
+                }`}
+              >
+                {option.label}
+              </button>
+            ))}
+          </div>
+        )}
+      </div>
+    )
+  }
+
+  // Para otros tipos de filtros, devolver null por ahora
+  return null
+}
+
+// Componente mejorado que fusiona selector + chip cuando está activo
+const EnhancedFilterSelector = ({ 
+  label,
+  value, 
+  options,
+  onChange,
+  placeholder
+}: {
+  label: string
+  value: any
+  options: Array<{value: string, label: string}>
+  onChange: (value: string | null) => void
+  placeholder: string
+}) => {
+  const [isOpen, setIsOpen] = useState(false)
+  const selectedOption = options.find(option => option.value === value)
+  const hasValue = value && value !== ''
+  
+  return (
+    <div className="relative">
+      <button
+        onClick={() => setIsOpen(!isOpen)}
+        className={`flex items-center gap-2 px-3 py-2 border rounded-lg hover:border-teal-500 focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-teal-500 transition-colors shadow-sm text-sm ${
+          hasValue 
+            ? 'bg-teal-50 dark:bg-teal-900/20 border-teal-300 dark:border-teal-600 text-teal-700 dark:text-teal-300' 
+            : 'bg-white dark:bg-gray-800 border-gray-300 dark:border-gray-600 text-gray-700 dark:text-gray-300'
+        }`}
+      >
+        <span className="text-sm font-medium">
+          {selectedOption ? selectedOption.label : placeholder}
+        </span>
+        {hasValue && (
+          <button
+            onClick={(e) => {
+              e.stopPropagation()
+              onChange(null)
+            }}
+            className="ml-1 hover:bg-teal-200 dark:hover:bg-teal-800 rounded-full p-0.5 transition-colors"
+            title="Limpiar filtro"
+          >
+            <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+            </svg>
+          </button>
+        )}
+        <ChevronDownIcon 
+          className={`w-4 h-4 text-gray-500 transition-transform ${isOpen ? 'rotate-180' : ''}`} 
+        />
+      </button>
+
+      {isOpen && (
+        <>
+          <div 
+            className="fixed inset-0 z-40" 
+            onClick={() => setIsOpen(false)}
+          />
+          <div className="absolute top-full left-0 mt-1 w-56 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-600 rounded-lg shadow-lg z-50 max-h-64 overflow-y-auto">
+            <button
+              onClick={() => {
+                onChange(null)
+                setIsOpen(false)
+              }}
+              className="w-full flex items-center px-4 py-3 text-sm hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors text-gray-700 dark:text-gray-300"
+            >
+              {placeholder}
+            </button>
+            {options.map((option) => (
+              <button
+                key={option.value}
+                onClick={() => {
+                  onChange(option.value)
+                  setIsOpen(false)
+                }}
+                className={`w-full flex items-center px-4 py-3 text-sm hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors ${
+                  value === option.value 
+                    ? 'bg-teal-50 dark:bg-teal-900/20 text-teal-700 dark:text-teal-300' 
+                    : 'text-gray-700 dark:text-gray-300'
+                }`}
+              >
+                {option.label}
+              </button>
+            ))}
+          </div>
+        </>
       )}
     </div>
   )
@@ -337,10 +494,6 @@ function SearchPageContent() {
     handleSearch(currentQuery, {})
   }
 
-  const activeFilterCount = Object.keys(activeFilters).length + 
-    (selectedCategory && selectedCategory !== 'all' ? 1 : 0) +
-    (selectedSubcategory ? 1 : 0)
-
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 via-blue-50/30 to-purple-50/30 dark:from-gray-900 dark:via-gray-900 dark:to-gray-800">
       {/* Enhanced Search Header */}
@@ -348,7 +501,7 @@ function SearchPageContent() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
           
           {/* Main Search Bar */}
-          <div className="mb-0">
+          <div className="mb-2">
             <RealTimeSearchEngine 
               onSearch={handleSearch}
               variant="page"
@@ -361,41 +514,119 @@ function SearchPageContent() {
             />
           </div>
 
+          {/* Breadcrumbs */}
+          {(selectedCategory && selectedCategory !== 'all') && (
+            <div className="mb-4">
+              <nav className="flex items-center space-x-2 text-sm text-gray-600 dark:text-gray-400">
+                <button
+                  onClick={() => handleCategoryChange('all')}
+                  className="hover:text-teal-600 dark:hover:text-teal-400 transition-colors"
+                >
+                  Inicio
+                </button>
+                <span className="text-gray-400">/</span>
+                <button
+                  onClick={() => {
+                    setSelectedSubcategory('')
+                    setSelectedSubSubcategory('')
+                  }}
+                  className={`transition-colors ${
+                    !selectedSubcategory 
+                      ? 'text-teal-600 dark:text-teal-400 font-medium' 
+                      : 'hover:text-teal-600 dark:hover:text-teal-400'
+                  }`}
+                >
+                  {(() => {
+                    const categoryNames: Record<string, string> = {
+                      'inmuebles': 'Inmuebles',
+                      'vehiculos': 'Vehículos', 
+                      'empleos': 'Empleos',
+                      'servicios': 'Servicios',
+                      'productos': 'Productos',
+                      'eventos': 'Eventos',
+                      'comunidad': 'Comunidad',
+                      'negocios': 'Negocios'
+                    }
+                    return categoryNames[selectedCategory] || selectedCategory
+                  })()}
+                </button>
+                {selectedSubcategory && (
+                  <>
+                    <span className="text-gray-400">/</span>
+                    <button
+                      onClick={() => setSelectedSubSubcategory('')}
+                      className={`transition-colors ${
+                        !selectedSubSubcategory 
+                          ? 'text-teal-600 dark:text-teal-400 font-medium' 
+                          : 'hover:text-teal-600 dark:hover:text-teal-400'
+                      }`}
+                    >
+                      {getSubcategories(selectedCategory).find(sub => sub.id === selectedSubcategory)?.name}
+                    </button>
+                  </>
+                )}
+                {selectedSubSubcategory && (
+                  <>
+                    <span className="text-gray-400">/</span>
+                    <span className="text-teal-600 dark:text-teal-400 font-medium">
+                      {selectedSubSubcategory}
+                    </span>
+                  </>
+                )}
+              </nav>
+            </div>
+          )}
 
+          {/* Separador visual */}
+          {(selectedCategory && selectedCategory !== 'all') && (
+            <div className="h-px bg-gradient-to-r from-transparent via-gray-200 dark:via-gray-700 to-transparent mb-2"></div>
+          )}
 
-          {/* Filters Row */}
-          <div className="flex flex-wrap items-center gap-4">
+          {/* Filters Row Mejorado - Fusionando selectores con estado activo */}
+          {(selectedCategory && selectedCategory !== 'all') && (
+            <div className="mb-2">
+              <div className="flex flex-wrap items-center gap-3">
+                {/* Selector de Subcategorías */}
+                                 <EnhancedFilterSelector
+                   label="Subcategoría"
+                   value={selectedSubcategory}
+                   options={getSubcategories(selectedCategory).map(sub => ({ value: sub.id, label: sub.name }))}
+                   onChange={(value) => handleSubcategoryChange(value || '')}
+                   placeholder="Todas las subcategorías"
+                 />
 
-            {/* Selector de Subcategorías */}
-            {selectedCategory && selectedCategory !== 'all' && (
-              <SubcategorySelector
-                selectedCategory={selectedCategory}
-                selectedSubcategory={selectedSubcategory}
-                onSubcategoryChange={handleSubcategoryChange}
-              />
-            )}
-
-            {/* Category-specific Filters */}
-            {selectedCategory && selectedCategory !== 'all' && (
-              <SearchFilters
-                selectedCategory={selectedCategory}
-                selectedSubcategory={selectedSubcategory}
-                selectedSubSubcategory={selectedSubSubcategory}
-                onFilterChange={handleFiltersChange}
-                compact={true}
-              />
-            )}
-
-            {/* Clear Filters Button */}
-            {activeFilterCount > 0 && (
-              <button
-                onClick={clearAllFilters}
-                className="text-sm text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 underline"
-              >
-                Limpiar filtros ({activeFilterCount})
-              </button>
-            )}
-          </div>
+                {/* Filtros dinámicos según categoría */}
+                {(() => {
+                  const categoryConfig = filtersByCategory[selectedCategory]
+                  if (!categoryConfig) return null
+                  
+                  const selectFilters = categoryConfig.sections
+                    .flatMap(section => section.filters)
+                    .filter(filter => filter.type === 'select')
+                    .slice(0, 4)
+                  
+                  return selectFilters.map(filter => (
+                    <EnhancedFilterSelector
+                      key={filter.id}
+                      label={filter.label}
+                      value={activeFilters[filter.id]}
+                      options={filter.options || []}
+                      onChange={(value) => {
+                        const newFilters = { ...activeFilters }
+                        if (value === null || value === undefined || value === '') {
+                          delete newFilters[filter.id]
+                        } else {
+                          newFilters[filter.id] = value
+                        }
+                        handleFiltersChange(newFilters)
+                      }}
+                      placeholder={`Cualquier ${filter.label.toLowerCase()}`}
+                    />
+                  ))
+                })()}
+              </div>
+            </div>
+          )}
         </div>
       </div>
 
