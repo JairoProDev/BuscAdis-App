@@ -1,70 +1,45 @@
 'use client';
 
-import { useEffect } from 'react';
-import { useRouter, useParams } from 'next/navigation';
-import { mongoFetch } from '@/lib/dbConnect';
-import BuscadorPage from '@/app/buscar/page';
+import React, { Suspense } from 'react'
+import { notFound } from 'next/navigation'
+import SearchPageContent from '../../buscar/page'
+import { isValidCategoryPath } from '@/lib/categories'
 
-interface Category {
-  slug: string;
-  name: string;
+interface SubcategoryPageProps {
+  params: Promise<{
+    category: string
+    subcategory: string
+  }>
 }
 
-interface Subcategory {
-  slug: string;
-  name: string;
-}
-
-export default function SubcategoryPage() {
-  const router = useRouter();
-  const params = useParams();
-  const category = params?.category as string;
-  const subcategory = params?.subcategory as string;
-  
-  // Validate the category path
-  useEffect(() => {
-    const validateCategoryPath = async () => {
-      try {
-        // Check if category is valid
-        const categoriesResponse = await mongoFetch('/api/categories', {});
-        const categories = categoriesResponse || [];
-        
-        const validCategory = categories.some(
-          (cat: Category) => cat.slug === category
-        );
-        
-        if (!validCategory) {
-          // Redirect to search page if category is invalid
-          router.replace('/buscar');
-          return;
-        }
-        
-        // Check if subcategory is valid for this category
-        const subcategoriesResponse = await mongoFetch(`/api/categories/${category}/subcategories`, {});
-        const subcategories = subcategoriesResponse || [];
-        
-        const validSubcategory = subcategories.some(
-          (subcat: Subcategory) => subcat.slug === subcategory
-        );
-        
-        if (!validSubcategory) {
-          // Redirect to category page if subcategory is invalid
-          router.replace(`/${category}`);
-        }
-      } catch (error) {
-        console.error('Error validating category path:', error);
-      }
-    };
-    
-    validateCategoryPath();
-  }, [category, subcategory, router]);
-  
-  // Re-use the search page component 
+export default function SubcategoryPage({ params }: SubcategoryPageProps) {
   return (
-    <div className="container py-16">
-      <h1>Subcategoría: {subcategory}</h1>
-      <p>Categoría: {category}</p>
-      <BuscadorPage />
-    </div>
-  );
+    <Suspense fallback={
+      <div className="min-h-screen bg-gradient-to-br from-gray-50 to-blue-50 dark:from-gray-900 dark:to-gray-800 flex items-center justify-center">
+        <div className="text-center">
+          <div className="w-16 h-16 border-4 border-teal-500 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
+          <h2 className="text-xl font-semibold text-gray-900 dark:text-white mb-2">
+            Cargando Subcategoría
+          </h2>
+          <p className="text-gray-600 dark:text-gray-400">
+            Preparando la mejor experiencia para ti...
+          </p>
+        </div>
+      </div>
+    }>
+      <SubcategoryPageContent params={params} />
+    </Suspense>
+  )
+}
+
+async function SubcategoryPageContent({ params }: SubcategoryPageProps) {
+  const { category, subcategory } = await params
+  
+  // Validar que la categoría y subcategoría existen
+  if (!isValidCategoryPath(category, subcategory)) {
+    notFound()
+  }
+
+  // Renderizar la misma página de búsqueda pero con la categoría y subcategoría preseleccionadas
+  return <SearchPageContent />
 } 

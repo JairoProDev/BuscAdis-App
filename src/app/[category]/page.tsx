@@ -1,47 +1,44 @@
 'use client';
 
-import { useEffect } from 'react';
-import { useRouter, useParams } from 'next/navigation';
-import { mongoFetch } from '@/lib/dbConnect';
-import BuscadorPage from '@/app/buscar/page';
+import React, { Suspense } from 'react'
+import { notFound } from 'next/navigation'
+import SearchPageContent from '../buscar/page'
+import { isValidCategoryPath } from '@/lib/categories'
 
-interface Category {
-  slug: string;
-  name: string;
+interface CategoryPageProps {
+  params: Promise<{
+    category: string
+  }>
 }
 
-export default function CategoryPage() {
-  const router = useRouter();
-  const params = useParams();
-  const category = params?.category as string;
-  
-  // Validate the category
-  useEffect(() => {
-    const validateCategory = async () => {
-      try {
-        const response = await mongoFetch('/api/categories', {});
-        const categories = response || [];
-        
-        const isValidCategory = categories.some(
-          (cat: Category) => cat.slug === category
-        );
-        
-        if (!isValidCategory) {
-          router.replace('/buscar');
-        }
-      } catch (error) {
-        console.error('Error validating category:', error);
-      }
-    };
-    
-    validateCategory();
-  }, [category, router]);
-  
-  // Re-use the search page component 
+export default function CategoryPage({ params }: CategoryPageProps) {
   return (
-    <div className="container py-16">
-      <h1>Categoría: {category}</h1>
-      <BuscadorPage />
-    </div>
-  );
+    <Suspense fallback={
+      <div className="min-h-screen bg-gradient-to-br from-gray-50 to-blue-50 dark:from-gray-900 dark:to-gray-800 flex items-center justify-center">
+        <div className="text-center">
+          <div className="w-16 h-16 border-4 border-teal-500 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
+          <h2 className="text-xl font-semibold text-gray-900 dark:text-white mb-2">
+            Cargando Categoría
+          </h2>
+          <p className="text-gray-600 dark:text-gray-400">
+            Preparando la mejor experiencia para ti...
+          </p>
+        </div>
+      </div>
+    }>
+      <CategoryPageContent params={params} />
+    </Suspense>
+  )
+}
+
+async function CategoryPageContent({ params }: CategoryPageProps) {
+  const { category } = await params
+  
+  // Validar que la categoría existe
+  if (!isValidCategoryPath(category)) {
+    notFound()
+  }
+
+  // Renderizar la misma página de búsqueda pero con la categoría preseleccionada
+  return <SearchPageContent />
 } 

@@ -15,98 +15,13 @@ import {
   HeartIcon
 } from '@heroicons/react/24/outline';
 
-// Categorías de la plataforma con sus datos
-export const categories = [
-  {
-    id: 'empleos',
-    name: 'Empleos',
-    slug: 'empleos',
-    description: 'Encuentra trabajos o publica ofertas laborales en toda la región.',
-    icon: BriefcaseIcon,
-    iconName: 'BriefcaseIcon',
-    gradient: 'from-blue-500 to-blue-700',
-    imageUrl: '/images/empleo-dev.jpg',
-    count: 163
-  },
-  {
-    id: 'inmuebles',
-    name: 'Inmuebles',
-    slug: 'inmuebles',
-    description: 'Casas, departamentos, terrenos y locales comerciales en venta o alquiler.',
-    icon: HomeIcon,
-    iconName: 'HomeIcon',
-    gradient: 'from-green-500 to-green-700',
-    imageUrl: '/images/departamento-miraflores.jpg',
-    count: 257
-  },
-  {
-    id: 'vehiculos',
-    name: 'Vehículos',
-    slug: 'vehiculos',
-    description: 'Autos, motos, camionetas y más vehículos nuevos y usados.',
-    icon: TruckIcon,
-    iconName: 'TruckIcon',
-    gradient: 'from-red-500 to-red-700',
-    imageUrl: '/images/vehiculo-corolla.jpg',
-    count: 184
-  },
-  {
-    id: 'servicios',
-    name: 'Servicios',
-    slug: 'servicios',
-    description: 'Profesionales y técnicos que ofrecen servicios de calidad.',
-    icon: WrenchIcon,
-    iconName: 'WrenchIcon',
-    gradient: 'from-purple-500 to-purple-700',
-    imageUrl: '/images/servicio-clases.jpg',
-    count: 209
-  },
-  {
-    id: 'productos',
-    name: 'Productos',
-    slug: 'productos',
-    description: 'Compra y venta de todo tipo de productos nuevos o de segunda mano.',
-    icon: ShoppingBagIcon,
-    iconName: 'ShoppingBagIcon',
-    gradient: 'from-orange-500 to-orange-700',
-    imageUrl: '/images/producto-laptop.jpg',
-    count: 318
-  },
-  {
-    id: 'turismo',
-    name: 'Turismo',
-    slug: 'turismo',
-    description: 'Tours, hoteles, restaurantes y experiencias turísticas.',
-    icon: GlobeAltIcon,
-    iconName: 'GlobeAltIcon',
-    gradient: 'from-cyan-500 to-cyan-700',
-    imageUrl: '/images/turismo-machupicchu.jpg',
-    count: 125
-  },
-  {
-    id: 'eventos',
-    name: 'Eventos',
-    slug: 'eventos',
-    description: 'Conciertos, talleres, conferencias y todo tipo de eventos.',
-    icon: CalendarIcon,
-    iconName: 'CalendarIcon',
-    gradient: 'from-pink-500 to-pink-700',
-    imageUrl: '/images/evento-concierto.jpg',
-    count: 73
-  },
-  {
-    id: 'educacion',
-    name: 'Educación',
-    slug: 'educacion',
-    description: 'Cursos, talleres, clases particulares y material educativo.',
-    icon: AcademicCapIcon,
-    iconName: 'AcademicCapIcon',
-    gradient: 'from-indigo-500 to-indigo-700',
-    imageUrl: '/images/educacion-marketing.jpg',
-    count: 95
-  }
-];
+// Importar desde el sistema unificado de categorías
+import { getCategoriesWithIcons } from './categories';
 
+// Categorías de la plataforma - ahora usando el sistema unificado
+export const categories = getCategoriesWithIcons();
+
+// Posts para el blog (mantener como estaba)
 export const posts = [
     {
         id: 'empleo-1',
@@ -130,9 +45,9 @@ export const posts = [
             <p>Mantén tu perfil de LinkedIn actualizado y conecta con reclutadores y profesionales de tu sector en Cusco. ¡Muchas ofertas de empleo se publican primero en redes sociales!</p>
             <p>Siguiendo estos consejos, aumentarás significativamente tus posibilidades de encontrar el empleo ideal en Cusco. ¡Mucha suerte en tu búsqueda!</p>
         `,
-        featuredImage: '/images/blog/empleo-cusco.jpg', // Reemplaza con una imagen relevante
-        author: { name: 'BuscAdis', avatar: '/images/logo-buscadis.png' }, // Reemplaza con tu información
-        category: categories.find(cat => cat.slug === 'empleos'),
+        featuredImage: '/images/blog/empleo-cusco.jpg',
+        author: { name: 'BuscAdis', avatar: '/images/logo-buscadis.png' },
+        category: categories.find(cat => cat.id === 'empleos'),
         tags: [],
         readingTime: 7,
         views: 0,
@@ -182,9 +97,9 @@ export const posts = [
             <p>El mercado laboral cambia constantemente, por lo que la capacidad de adaptarse y aprender es vital.</p>
             <p>Desarrollar estas habilidades te abrirá muchas puertas en el mercado laboral peruano. ¡Invierte en tu futuro!</p>
         `,
-        featuredImage: '/images/blog/habilidades-peru.jpg', // Reemplaza con una imagen relevante
-        author: { name: 'BuscAdis', avatar: '/images/logo-buscadis.png' }, // Reemplaza con tu información
-        category: categories.find(cat => cat.slug === 'empleos'),
+        featuredImage: '/images/blog/habilidades-peru.jpg',
+        author: { name: 'BuscAdis', avatar: '/images/logo-buscadis.png' },
+        category: categories.find(cat => cat.id === 'empleos'),
         tags: [],
         readingTime: 9,
         views: 0,
@@ -227,9 +142,9 @@ export const posts = [
             <p>Agradezco de antemano su tiempo y consideración.</p>
             <p>Atentamente,<br/>[Tu Nombre Completo]</p>
         `,
-        featuredImage: '/images/blog/carta-presentacion.jpg', // Reemplaza con una imagen relevante
-        author: { name: 'BuscAdis', avatar: '/images/logo-buscadis.png' }, // Reemplaza con tu información
-        category: categories.find(cat => cat.slug === 'empleos'),
+        featuredImage: '/images/blog/carta-presentacion.jpg',
+        author: { name: 'BuscAdis', avatar: '/images/logo-buscadis.png' },
+        category: categories.find(cat => cat.id === 'empleos'),
         tags: [],
         readingTime: 11,
         views: 0,
@@ -242,5 +157,4 @@ export const posts = [
         featured: false,
         premium: false,
     },
-    // ... (Aquí añadirás los 21 artículos restantes para las otras categorías) ...
 ];

@@ -2,7 +2,7 @@
 'use client'
 
 import React, { Suspense, useState, useEffect, useCallback } from 'react'
-import { useSearchParams } from 'next/navigation'
+import { useSearchParams, usePathname } from 'next/navigation'
 import { motion } from 'framer-motion'
 import { 
   Squares2X2Icon, 
@@ -13,6 +13,8 @@ import {
 import RealTimeSearchEngine from '@/components/search/RealTimeSearchEngine'
 import SearchFilters from '@/components/search/SearchFilters'
 import PublicationCard from '@/components/publications/PublicationCard'
+import CategorySelector from '@/components/search/CategorySelector'
+import { parseCategoryUrl, getSubcategories } from '@/lib/categories'
 
 interface SearchResult {
   id: string;
@@ -65,11 +67,94 @@ const sortOptions = [
   { value: 'distance', label: 'Más cercanos', icon: '📍' }
 ]
 
+// Componente simple para selector de subcategorías
+const SubcategorySelector = ({ 
+  selectedCategory, 
+  selectedSubcategory, 
+  onSubcategoryChange 
+}: {
+  selectedCategory: string
+  selectedSubcategory: string
+  onSubcategoryChange: (subcategory: string) => void
+}) => {
+  const [isOpen, setIsOpen] = useState(false)
+  const subcategories = getSubcategories(selectedCategory)
+  
+  if (!subcategories.length) return null
+  
+  return (
+    <div className="relative">
+      <button
+        onClick={() => setIsOpen(!isOpen)}
+        className="flex items-center gap-2 px-3 py-2 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg hover:border-teal-500 focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-teal-500 transition-colors shadow-sm text-sm"
+      >
+        <span className="text-sm font-medium text-gray-700 dark:text-gray-300">
+          {selectedSubcategory ? subcategories.find(sub => sub.id === selectedSubcategory)?.name : 'Subcategoría'}
+        </span>
+        <ChevronDownIcon 
+          className={`w-4 h-4 text-gray-500 transition-transform ${isOpen ? 'rotate-180' : ''}`} 
+        />
+      </button>
+
+      {isOpen && (
+        <div className="absolute top-full left-0 mt-1 w-56 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-600 rounded-lg shadow-lg z-50 max-h-64 overflow-y-auto">
+          <button
+            onClick={() => {
+              onSubcategoryChange('')
+              setIsOpen(false)
+            }}
+            className="w-full flex items-center px-4 py-3 text-sm hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors text-gray-700 dark:text-gray-300"
+          >
+            Todas las subcategorías
+          </button>
+          {subcategories.map((subcategory) => (
+            <button
+              key={subcategory.id}
+              onClick={() => {
+                onSubcategoryChange(subcategory.id)
+                setIsOpen(false)
+              }}
+              className={`w-full flex items-center px-4 py-3 text-sm hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors ${
+                selectedSubcategory === subcategory.id 
+                  ? 'bg-teal-50 dark:bg-teal-900/20 text-teal-700 dark:text-teal-300' 
+                  : 'text-gray-700 dark:text-gray-300'
+              }`}
+            >
+              {subcategory.name}
+            </button>
+          ))}
+        </div>
+      )}
+    </div>
+  )
+}
+
 function SearchPageContent() {
   const searchParams = useSearchParams()
-  const [selectedCategory, setSelectedCategory] = useState<string>('all')
-  const [selectedSubcategory, setSelectedSubcategory] = useState<string>('')
-  const [selectedSubSubcategory, setSelectedSubSubcategory] = useState<string>('')
+  const currentPathname = usePathname()
+  
+  // Inicializar estados con valores de URL si están disponibles
+  const [selectedCategory, setSelectedCategory] = useState<string>(() => {
+    if (currentPathname && currentPathname !== '/buscar') {
+      const parsed = parseCategoryUrl(currentPathname)
+      return parsed.categoryId || 'all'
+    }
+    return 'all'
+  })
+  const [selectedSubcategory, setSelectedSubcategory] = useState<string>(() => {
+    if (currentPathname && currentPathname !== '/buscar') {
+      const parsed = parseCategoryUrl(currentPathname)
+      return parsed.subcategoryId || ''
+    }
+    return ''
+  })
+  const [selectedSubSubcategory, setSelectedSubSubcategory] = useState<string>(() => {
+    if (currentPathname && currentPathname !== '/buscar') {
+      const parsed = parseCategoryUrl(currentPathname)
+      return parsed.subSubcategoryId || ''
+    }
+    return ''
+  })
   const [activeFilters, setActiveFilters] = useState<Record<string, any>>({})
   const [viewMode, setViewMode] = useState<ViewMode>('grid')
   const [sortBy, setSortBy] = useState<SortOption>('recent')
@@ -276,8 +361,19 @@ function SearchPageContent() {
             />
           </div>
 
+
+
           {/* Filters Row */}
           <div className="flex flex-wrap items-center gap-4">
+
+            {/* Selector de Subcategorías */}
+            {selectedCategory && selectedCategory !== 'all' && (
+              <SubcategorySelector
+                selectedCategory={selectedCategory}
+                selectedSubcategory={selectedSubcategory}
+                onSubcategoryChange={handleSubcategoryChange}
+              />
+            )}
 
             {/* Category-specific Filters */}
             {selectedCategory && selectedCategory !== 'all' && (
@@ -513,34 +609,77 @@ function SearchPageContent() {
               </div>
             )}
 
-            {/* No Results */}
+            {/* No Results - UX/UI Expert Version */}
             {!isLoading && results.length === 0 && hasSearched && (
               <motion.div
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                className="text-center py-16"
+                initial={{ opacity: 0, scale: 0.98, y: 20 }}
+                animate={{ opacity: 1, scale: 1, y: 0 }}
+                className="flex flex-col items-center justify-center py-20"
               >
-                <div className="w-24 h-24 mx-auto mb-6 bg-gradient-to-br from-gray-100 to-gray-200 dark:from-gray-800 dark:to-gray-700 rounded-full flex items-center justify-center">
-                  <span className="text-4xl">😔</span>
+                {/* Icon with subtle animation */}
+                <div className="relative w-28 h-28 mb-7 flex items-center justify-center">
+                  <div className="absolute inset-0 rounded-full bg-gradient-to-br from-teal-100/80 via-blue-100/60 to-gray-200 dark:from-gray-800 dark:via-gray-700 dark:to-gray-800 shadow-lg animate-pulse-slow" />
+                  <span className="relative z-10 text-5xl select-none" aria-label="Sin resultados">
+                    <svg width="56" height="56" viewBox="0 0 56 56" fill="none">
+                      <circle cx="28" cy="28" r="28" fill="url(#sadGradient)" />
+                      <g>
+                        <ellipse cx="28" cy="34" rx="8" ry="4" fill="#FBBF24" opacity="0.18"/>
+                        <circle cx="28" cy="26" r="12" fill="#FBBF24"/>
+                        <ellipse cx="24" cy="25" rx="1.5" ry="2" fill="#92400E"/>
+                        <ellipse cx="32" cy="25" rx="1.5" ry="2" fill="#92400E"/>
+                        <path d="M24 30c1.5 1.5 6.5 1.5 8 0" stroke="#92400E" strokeWidth="1.5" strokeLinecap="round"/>
+                      </g>
+                      <defs>
+                        <linearGradient id="sadGradient" x1="0" y1="0" x2="56" y2="56" gradientUnits="userSpaceOnUse">
+                          <stop stopColor="#F0FDFA"/>
+                          <stop offset="1" stopColor="#A7F3D0"/>
+                        </linearGradient>
+                      </defs>
+                    </svg>
+                  </span>
                 </div>
-                <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-2">
-                  No se encontraron resultados
+                <h3 className="text-2xl font-bold text-gray-900 dark:text-white mb-2 tracking-tight">
+                  Sin coincidencias por ahora
                 </h3>
-                <p className="text-gray-600 dark:text-gray-400 mb-6">
-                  {currentQuery 
-                    ? `No hay anuncios que coincidan con "${currentQuery}"`
-                    : 'No hay anuncios disponibles en este momento'
+                <p className="text-base text-gray-600 dark:text-gray-400 mb-6 max-w-md mx-auto">
+                  {currentQuery
+                    ? (
+                        <>
+                          No encontramos anuncios que coincidan con <span className="font-semibold text-teal-700 dark:text-teal-300">"{currentQuery}"</span>.
+                          <br />
+                          <span className="text-sm text-gray-500 dark:text-gray-500">
+                            Prueba ajustando tus filtros, usando palabras clave diferentes o explora todas las oportunidades disponibles.
+                          </span>
+                        </>
+                      )
+                    : (
+                        <>
+                          Actualmente no hay anuncios publicados en esta categoría o filtro.
+                          <br />
+                          <span className="text-sm text-gray-500 dark:text-gray-500">
+                            ¡Vuelve pronto o revisa otras categorías para encontrar lo que buscas!
+                          </span>
+                        </>
+                      )
                   }
                 </p>
-                <button
-                  onClick={() => {
-                    handleSearch('', {})
-                    clearAllFilters()
-                  }}
-                  className="px-6 py-3 bg-gradient-to-r from-teal-600 to-teal-700 hover:from-teal-700 hover:to-teal-800 text-white rounded-xl font-medium transition-all shadow-lg hover:shadow-xl transform hover:-translate-y-0.5"
-                >
-                  Ver todas las oportunidades
-                </button>
+                <div className="flex flex-col sm:flex-row gap-3 justify-center">
+                  <button
+                    onClick={() => {
+                      handleSearch('', {})
+                      clearAllFilters()
+                    }}
+                    className="px-7 py-3 bg-gradient-to-r from-teal-600 to-teal-500 hover:from-teal-700 hover:to-teal-600 text-white rounded-xl font-semibold text-base shadow-md hover:shadow-xl transition-all duration-150 focus:outline-none focus:ring-2 focus:ring-teal-400 focus:ring-offset-2"
+                  >
+                    Ver todas las oportunidades
+                  </button>
+                  <button
+                    onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
+                    className="px-7 py-3 bg-white/80 dark:bg-gray-900/80 border border-gray-200 dark:border-gray-700 text-teal-700 dark:text-teal-300 rounded-xl font-medium text-base shadow-sm hover:bg-gray-50 dark:hover:bg-gray-800 transition-all duration-150"
+                  >
+                    Ajustar búsqueda
+                  </button>
+                </div>
               </motion.div>
             )}
           </div>
