@@ -1,7 +1,7 @@
 // src\app\buscar\page.tsx
 'use client'
 
-import React, { Suspense, useState, useEffect, useCallback } from 'react'
+import React, { Suspense, useState, useEffect, useCallback, useRef } from 'react'
 import { useSearchParams, usePathname } from 'next/navigation'
 import { motion } from 'framer-motion'
 import { 
@@ -17,6 +17,7 @@ import CategorySelector from '@/components/search/CategorySelector'
 import { parseCategoryUrl, getSubcategories } from '@/lib/categories'
 import { filtersByCategory } from '@/data/filterConfig'
 import type { FilterOption } from '@/types/filters'
+import { createPortal } from 'react-dom'
 
 interface SearchResult {
   id: string;
@@ -80,13 +81,24 @@ const SubcategorySelector = ({
   onSubcategoryChange: (subcategory: string) => void
 }) => {
   const [isOpen, setIsOpen] = useState(false)
+  const buttonRef = useRef<HTMLButtonElement>(null)
   const subcategories = getSubcategories(selectedCategory)
+  
+  const handleClose = useCallback(() => {
+    setIsOpen(false)
+  }, [])
+
+  const handleSubcategorySelect = useCallback((subcategoryId: string) => {
+    onSubcategoryChange(subcategoryId)
+    setIsOpen(false)
+  }, [onSubcategoryChange])
   
   if (!subcategories.length) return null
   
   return (
     <div className="relative">
       <button
+        ref={buttonRef}
         onClick={() => setIsOpen(!isOpen)}
         className="flex items-center gap-2 px-3 py-2 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg hover:border-teal-500 focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-teal-500 transition-colors shadow-sm text-sm"
       >
@@ -98,35 +110,31 @@ const SubcategorySelector = ({
         />
       </button>
 
-      {isOpen && (
-        <div className="absolute top-full left-0 mt-1 w-56 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-600 rounded-lg shadow-lg z-50 max-h-64 overflow-y-auto">
+      <DropdownPortal 
+        isOpen={isOpen}
+        buttonRef={buttonRef.current}
+        onClose={handleClose}
+      >
+        <button
+          onClick={() => handleSubcategorySelect('')}
+          className="w-full flex items-center px-4 py-2 text-sm hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors text-gray-700 dark:text-gray-300"
+        >
+          Todas las subcategorías
+        </button>
+        {subcategories.map((subcategory) => (
           <button
-            onClick={() => {
-              onSubcategoryChange('')
-              setIsOpen(false)
-            }}
-            className="w-full flex items-center px-4 py-3 text-sm hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors text-gray-700 dark:text-gray-300"
+            key={subcategory.id}
+            onClick={() => handleSubcategorySelect(subcategory.id)}
+            className={`w-full flex items-center px-4 py-2 text-sm hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors ${
+              selectedSubcategory === subcategory.id 
+                ? 'bg-teal-50 dark:bg-teal-900/20 text-teal-700 dark:text-teal-300' 
+                : 'text-gray-700 dark:text-gray-300'
+            }`}
           >
-            Todas las subcategorías
+            {subcategory.name}
           </button>
-          {subcategories.map((subcategory) => (
-            <button
-              key={subcategory.id}
-              onClick={() => {
-                onSubcategoryChange(subcategory.id)
-                setIsOpen(false)
-              }}
-              className={`w-full flex items-center px-4 py-3 text-sm hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors ${
-                selectedSubcategory === subcategory.id 
-                  ? 'bg-teal-50 dark:bg-teal-900/20 text-teal-700 dark:text-teal-300' 
-                  : 'text-gray-700 dark:text-gray-300'
-              }`}
-            >
-              {subcategory.name}
-            </button>
-          ))}
-        </div>
-      )}
+        ))}
+      </DropdownPortal>
     </div>
   )
 }
@@ -142,6 +150,16 @@ const FilterSelector = ({
   onFilterChange: (filterId: string, value: any) => void
 }) => {
   const [isOpen, setIsOpen] = useState(false)
+  const buttonRef = useRef<HTMLButtonElement>(null)
+
+  const handleClose = useCallback(() => {
+    setIsOpen(false)
+  }, [])
+
+  const handleFilterSelect = useCallback((optionValue: any) => {
+    onFilterChange(filter.id, optionValue)
+    setIsOpen(false)
+  }, [filter.id, onFilterChange])
 
   if (filter.type === 'select') {
     const selectedOption = filter.options?.find(option => option.value === value)
@@ -149,6 +167,7 @@ const FilterSelector = ({
     return (
       <div className="relative">
         <button
+          ref={buttonRef}
           onClick={() => setIsOpen(!isOpen)}
           className="flex items-center gap-2 px-3 py-2 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg hover:border-teal-500 focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-teal-500 transition-colors shadow-sm text-sm"
         >
@@ -160,41 +179,103 @@ const FilterSelector = ({
           />
         </button>
 
-        {isOpen && (
-          <div className="absolute top-full left-0 mt-1 w-56 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-600 rounded-lg shadow-lg z-50 max-h-64 overflow-y-auto">
+        <DropdownPortal 
+          isOpen={isOpen}
+          buttonRef={buttonRef.current}
+          onClose={handleClose}
+        >
+          <button
+            onClick={() => handleFilterSelect(null)}
+            className="w-full flex items-center px-4 py-2 text-sm hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors text-gray-700 dark:text-gray-300"
+          >
+            Cualquier {filter.label.toLowerCase()}
+          </button>
+          {filter.options?.map((option) => (
             <button
-              onClick={() => {
-                onFilterChange(filter.id, null)
-                setIsOpen(false)
-              }}
-              className="w-full flex items-center px-4 py-3 text-sm hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors text-gray-700 dark:text-gray-300"
+              key={option.value}
+              onClick={() => handleFilterSelect(option.value)}
+              className={`w-full flex items-center px-4 py-2 text-sm hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors ${
+                value === option.value 
+                  ? 'bg-teal-50 dark:bg-teal-900/20 text-teal-700 dark:text-teal-300' 
+                  : 'text-gray-700 dark:text-gray-300'
+              }`}
             >
-              Cualquier {filter.label.toLowerCase()}
+              {option.label}
             </button>
-            {filter.options?.map((option) => (
-              <button
-                key={option.value}
-                onClick={() => {
-                  onFilterChange(filter.id, option.value)
-                  setIsOpen(false)
-                }}
-                className={`w-full flex items-center px-4 py-3 text-sm hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors ${
-                  value === option.value 
-                    ? 'bg-teal-50 dark:bg-teal-900/20 text-teal-700 dark:text-teal-300' 
-                    : 'text-gray-700 dark:text-gray-300'
-                }`}
-              >
-                {option.label}
-              </button>
-            ))}
-          </div>
-        )}
+          ))}
+        </DropdownPortal>
       </div>
     )
   }
 
   // Para otros tipos de filtros, devolver null por ahora
   return null
+}
+
+// Custom hook para manejar positioning de dropdowns
+const useDropdownPosition = (buttonRef: HTMLButtonElement | null, isOpen: boolean) => {
+  const [position, setPosition] = useState({ top: 0, left: 0 })
+
+  useEffect(() => {
+    if (!buttonRef || !isOpen) return
+
+    const updatePosition = () => {
+      const rect = buttonRef.getBoundingClientRect()
+      setPosition({
+        top: rect.bottom,
+        left: rect.left
+      })
+    }
+
+    updatePosition()
+    window.addEventListener('scroll', updatePosition)
+    window.addEventListener('resize', updatePosition)
+
+    return () => {
+      window.removeEventListener('scroll', updatePosition)
+      window.removeEventListener('resize', updatePosition)
+    }
+  }, [buttonRef, isOpen])
+
+  return position
+}
+
+// Componente Dropdown Portal - Solución profesional
+const DropdownPortal = ({ 
+  isOpen, 
+  buttonRef, 
+  onClose, 
+  children 
+}: {
+  isOpen: boolean
+  buttonRef: HTMLButtonElement | null
+  onClose: () => void
+  children: React.ReactNode
+}) => {
+  const position = useDropdownPosition(buttonRef, isOpen)
+
+  if (!isOpen || typeof window === 'undefined') return null
+
+  return createPortal(
+    <>
+      {/* Backdrop para cerrar al hacer click fuera */}
+      <div 
+        className="fixed inset-0 z-[100000]" 
+        onClick={onClose}
+      />
+      {/* Dropdown content */}
+      <div 
+        className="fixed w-56 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-600 rounded-lg shadow-xl max-h-64 overflow-y-auto z-[100001]"
+        style={{ 
+          top: `${position.top}px`,
+          left: `${position.left}px`
+        }}
+      >
+        {children}
+      </div>
+    </>,
+    document.body
+  )
 }
 
 // Componente mejorado que fusiona selector + chip cuando está activo
@@ -212,12 +293,23 @@ const EnhancedFilterSelector = ({
   placeholder: string
 }) => {
   const [isOpen, setIsOpen] = useState(false)
+  const buttonRef = useRef<HTMLButtonElement>(null)
   const selectedOption = options.find(option => option.value === value)
   const hasValue = value && value !== ''
+  
+  const handleClose = useCallback(() => {
+    setIsOpen(false)
+  }, [])
+
+  const handleOptionSelect = useCallback((optionValue: string | null) => {
+    onChange(optionValue)
+    setIsOpen(false)
+  }, [onChange])
   
   return (
     <div className="relative">
       <button
+        ref={buttonRef}
         onClick={() => setIsOpen(!isOpen)}
         className={`flex items-center gap-2 px-3 py-2 border rounded-lg hover:border-teal-500 focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-teal-500 transition-colors shadow-sm text-sm ${
           hasValue 
@@ -247,41 +339,31 @@ const EnhancedFilterSelector = ({
         />
       </button>
 
-      {isOpen && (
-        <>
-          <div 
-            className="fixed inset-0 z-40" 
-            onClick={() => setIsOpen(false)}
-          />
-          <div className="absolute top-full left-0 mt-1 w-56 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-600 rounded-lg shadow-lg z-50 max-h-64 overflow-y-auto">
-            <button
-              onClick={() => {
-                onChange(null)
-                setIsOpen(false)
-              }}
-              className="w-full flex items-center px-4 py-3 text-sm hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors text-gray-700 dark:text-gray-300"
-            >
-              {placeholder}
-            </button>
-            {options.map((option) => (
-              <button
-                key={option.value}
-                onClick={() => {
-                  onChange(option.value)
-                  setIsOpen(false)
-                }}
-                className={`w-full flex items-center px-4 py-3 text-sm hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors ${
-                  value === option.value 
-                    ? 'bg-teal-50 dark:bg-teal-900/20 text-teal-700 dark:text-teal-300' 
-                    : 'text-gray-700 dark:text-gray-300'
-                }`}
-              >
-                {option.label}
-              </button>
-            ))}
-          </div>
-        </>
-      )}
+      <DropdownPortal 
+        isOpen={isOpen}
+        buttonRef={buttonRef.current}
+        onClose={handleClose}
+      >
+        <button
+          onClick={() => handleOptionSelect(null)}
+          className="w-full flex items-center px-4 py-2 text-sm hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors text-gray-700 dark:text-gray-300"
+        >
+          {placeholder}
+        </button>
+        {options.map((option) => (
+          <button
+            key={option.value}
+            onClick={() => handleOptionSelect(option.value)}
+            className={`w-full flex items-center px-4 py-2 text-sm hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors ${
+              value === option.value 
+                ? 'bg-teal-50 dark:bg-teal-900/20 text-teal-700 dark:text-teal-300' 
+                : 'text-gray-700 dark:text-gray-300'
+            }`}
+          >
+            {option.label}
+          </button>
+        ))}
+      </DropdownPortal>
     </div>
   )
 }
@@ -496,38 +578,38 @@ function SearchPageContent() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 via-blue-50/30 to-purple-50/30 dark:from-gray-900 dark:via-gray-900 dark:to-gray-800">
-      {/* Enhanced Search Header */}
-      <div className="bg-white/80 dark:bg-gray-900/80 backdrop-blur-xl border-b border-gray-200/50 dark:border-gray-700/50 shadow-lg sticky top-0 z-40">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
-          
-          {/* Main Search Bar */}
-          <div className="mb-2">
-            <RealTimeSearchEngine 
-              onSearch={handleSearch}
-              variant="page"
-              showFilters={true}
-              placeholder="¿Qué necesitas hoy? Encuentra oportunidades cerca de ti..."
-              selectedCategory={selectedCategory}
-              selectedSubcategory={selectedSubcategory}
-              onCategoryChange={handleCategoryChange}
-              onSubcategoryChange={handleSubcategoryChange}
-            />
-          </div>
+              {/* Enhanced Search Header */}
+        <div className="bg-white/80 dark:bg-gray-900/80 backdrop-blur-xl border-b border-gray-200/50 dark:border-gray-700/50 shadow-lg sticky top-0 z-30 overflow-visible">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-1 overflow-visible">
+            
+            {/* Main Search Bar */}
+            <div className="mb-1">
+              <RealTimeSearchEngine 
+                onSearch={handleSearch}
+                variant="page"
+                showFilters={true}
+                placeholder="¿Qué necesitas hoy? Encuentra oportunidades cerca de ti..."
+                selectedCategory={selectedCategory}
+                selectedSubcategory={selectedSubcategory}
+                onCategoryChange={handleCategoryChange}
+                onSubcategoryChange={handleSubcategoryChange}
+              />
+            </div>
 
-
-
-          {/* Filters Row Mejorado - Fusionando selectores con estado activo */}
-          {(selectedCategory && selectedCategory !== 'all') && (
-            <div className="mb-2">
-              <div className="flex flex-wrap items-center gap-3">
+            {/* Filters Row Mejorado - Fusionando selectores con estado activo */}
+            {(selectedCategory && selectedCategory !== 'all') && (
+              <div className="pb-1 overflow-visible">
+                <div className="flex items-center gap-3 overflow-x-auto overflow-y-visible scrollbar-thin scrollbar-thumb-gray-300 dark:scrollbar-thumb-gray-600 scrollbar-track-transparent">
                 {/* Selector de Subcategorías */}
-                                 <EnhancedFilterSelector
-                   label="Subcategoría"
-                   value={selectedSubcategory}
-                   options={getSubcategories(selectedCategory).map(sub => ({ value: sub.id, label: sub.name }))}
-                   onChange={(value) => handleSubcategoryChange(value || '')}
-                   placeholder="Todas las subcategorías"
-                 />
+                                 <div className="flex-shrink-0">
+                   <EnhancedFilterSelector
+                     label="Subcategoría"
+                     value={selectedSubcategory}
+                     options={getSubcategories(selectedCategory).map(sub => ({ value: sub.id, label: sub.name }))}
+                     onChange={(value) => handleSubcategoryChange(value || '')}
+                     placeholder="Todas las subcategorías"
+                   />
+                 </div>
 
                 {/* Filtros dinámicos según categoría */}
                 {(() => {
@@ -539,24 +621,25 @@ function SearchPageContent() {
                     .filter(filter => filter.type === 'select')
                     .slice(0, 4)
                   
-                  return selectFilters.map(filter => (
-                    <EnhancedFilterSelector
-                      key={filter.id}
-                      label={filter.label}
-                      value={activeFilters[filter.id]}
-                      options={filter.options || []}
-                      onChange={(value) => {
-                        const newFilters = { ...activeFilters }
-                        if (value === null || value === undefined || value === '') {
-                          delete newFilters[filter.id]
-                        } else {
-                          newFilters[filter.id] = value
-                        }
-                        handleFiltersChange(newFilters)
-                      }}
-                      placeholder={`Cualquier ${filter.label.toLowerCase()}`}
-                    />
-                  ))
+                                   return selectFilters.map(filter => (
+                   <div key={filter.id} className="flex-shrink-0">
+                     <EnhancedFilterSelector
+                       label={filter.label}
+                       value={activeFilters[filter.id]}
+                       options={filter.options || []}
+                       onChange={(value) => {
+                         const newFilters = { ...activeFilters }
+                         if (value === null || value === undefined || value === '') {
+                           delete newFilters[filter.id]
+                         } else {
+                           newFilters[filter.id] = value
+                         }
+                         handleFiltersChange(newFilters)
+                       }}
+                       placeholder={`Cualquier ${filter.label.toLowerCase()}`}
+                     />
+                   </div>
+                 ))
                 })()}
               </div>
             </div>
@@ -565,7 +648,7 @@ function SearchPageContent() {
       </div>
 
       {/* Main Content */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-2">
+      <div className="max-w-7xl mx-auto px-2 sm:px-4 lg:px-8 pt-2 pb-2">
         
         {/* Welcome State */}
         {!hasSearched && (
@@ -655,10 +738,10 @@ function SearchPageContent() {
 
         {/* Search Results */}
         {hasSearched && (
-          <div className="space-y-6">
+          <div className="space-y-4">
             {/* Breadcrumbs en área de resultados */}
             {(selectedCategory && selectedCategory !== 'all') && (
-              <div className="mb-4">
+              <div className="mb-2">
                 <nav className="flex items-center space-x-2 text-sm text-gray-600 dark:text-gray-400">
                   <button
                     onClick={() => handleCategoryChange('all')}
