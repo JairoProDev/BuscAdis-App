@@ -514,73 +514,7 @@ function SearchPageContent() {
             />
           </div>
 
-          {/* Breadcrumbs */}
-          {(selectedCategory && selectedCategory !== 'all') && (
-            <div className="mb-4">
-              <nav className="flex items-center space-x-2 text-sm text-gray-600 dark:text-gray-400">
-                <button
-                  onClick={() => handleCategoryChange('all')}
-                  className="hover:text-teal-600 dark:hover:text-teal-400 transition-colors"
-                >
-                  Inicio
-                </button>
-                <span className="text-gray-400">/</span>
-                <button
-                  onClick={() => {
-                    setSelectedSubcategory('')
-                    setSelectedSubSubcategory('')
-                  }}
-                  className={`transition-colors ${
-                    !selectedSubcategory 
-                      ? 'text-teal-600 dark:text-teal-400 font-medium' 
-                      : 'hover:text-teal-600 dark:hover:text-teal-400'
-                  }`}
-                >
-                  {(() => {
-                    const categoryNames: Record<string, string> = {
-                      'inmuebles': 'Inmuebles',
-                      'vehiculos': 'Vehículos', 
-                      'empleos': 'Empleos',
-                      'servicios': 'Servicios',
-                      'productos': 'Productos',
-                      'eventos': 'Eventos',
-                      'comunidad': 'Comunidad',
-                      'negocios': 'Negocios'
-                    }
-                    return categoryNames[selectedCategory] || selectedCategory
-                  })()}
-                </button>
-                {selectedSubcategory && (
-                  <>
-                    <span className="text-gray-400">/</span>
-                    <button
-                      onClick={() => setSelectedSubSubcategory('')}
-                      className={`transition-colors ${
-                        !selectedSubSubcategory 
-                          ? 'text-teal-600 dark:text-teal-400 font-medium' 
-                          : 'hover:text-teal-600 dark:hover:text-teal-400'
-                      }`}
-                    >
-                      {getSubcategories(selectedCategory).find(sub => sub.id === selectedSubcategory)?.name}
-                    </button>
-                  </>
-                )}
-                {selectedSubSubcategory && (
-                  <>
-                    <span className="text-gray-400">/</span>
-                    <span className="text-teal-600 dark:text-teal-400 font-medium">
-                      {selectedSubSubcategory}
-                    </span>
-                  </>
-                )}
-              </nav>
-            </div>
-          )}
 
-          {/* Separador visual */}
-          {(selectedCategory && selectedCategory !== 'all') && (
-            <div className="h-px bg-gradient-to-r from-transparent via-gray-200 dark:via-gray-700 to-transparent mb-2"></div>
-          )}
 
           {/* Filters Row Mejorado - Fusionando selectores con estado activo */}
           {(selectedCategory && selectedCategory !== 'all') && (
@@ -631,7 +565,7 @@ function SearchPageContent() {
       </div>
 
       {/* Main Content */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-2">
         
         {/* Welcome State */}
         {!hasSearched && (
@@ -722,8 +656,71 @@ function SearchPageContent() {
         {/* Search Results */}
         {hasSearched && (
           <div className="space-y-6">
+            {/* Breadcrumbs en área de resultados */}
+            {(selectedCategory && selectedCategory !== 'all') && (
+              <div className="mb-4">
+                <nav className="flex items-center space-x-2 text-sm text-gray-600 dark:text-gray-400">
+                  <button
+                    onClick={() => handleCategoryChange('all')}
+                    className="hover:text-teal-600 dark:hover:text-teal-400 transition-colors"
+                  >
+                    Inicio
+                  </button>
+                  <span className="text-gray-400">/</span>
+                  <button
+                    onClick={() => {
+                      setSelectedSubcategory('')
+                      setSelectedSubSubcategory('')
+                    }}
+                    className={`transition-colors ${
+                      !selectedSubcategory 
+                        ? 'text-teal-600 dark:text-teal-400 font-medium' 
+                        : 'hover:text-teal-600 dark:hover:text-teal-400'
+                    }`}
+                  >
+                    {(() => {
+                      const categoryNames: Record<string, string> = {
+                        'inmuebles': 'Inmuebles',
+                        'vehiculos': 'Vehículos', 
+                        'empleos': 'Empleos',
+                        'servicios': 'Servicios',
+                        'productos': 'Productos',
+                        'eventos': 'Eventos',
+                        'comunidad': 'Comunidad',
+                        'negocios': 'Negocios'
+                      }
+                      return categoryNames[selectedCategory] || selectedCategory
+                    })()}
+                  </button>
+                  {selectedSubcategory && (
+                    <>
+                      <span className="text-gray-400">/</span>
+                      <button
+                        onClick={() => setSelectedSubSubcategory('')}
+                        className={`transition-colors ${
+                          !selectedSubSubcategory 
+                            ? 'text-teal-600 dark:text-teal-400 font-medium' 
+                            : 'hover:text-teal-600 dark:hover:text-teal-400'
+                        }`}
+                      >
+                        {getSubcategories(selectedCategory).find(sub => sub.id === selectedSubcategory)?.name}
+                      </button>
+                    </>
+                  )}
+                  {selectedSubSubcategory && (
+                    <>
+                      <span className="text-gray-400">/</span>
+                      <span className="text-teal-600 dark:text-teal-400 font-medium">
+                        {selectedSubSubcategory}
+                      </span>
+                    </>
+                  )}
+                </nav>
+              </div>
+            )}
+
             {/* Search Stats and Controls - Layout responsive mejorado */}
-            <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
+            <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between">
               {/* Título y stats - Siempre en la parte superior */}
               <div className="flex-shrink-0">
                 <h2 className="text-xl sm:text-2xl font-bold text-gray-900 dark:text-white">
