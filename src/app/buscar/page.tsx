@@ -599,7 +599,7 @@ function SearchPageContent() {
             {/* Filters Row Mejorado - Fusionando selectores con estado activo */}
             {(selectedCategory && selectedCategory !== 'all') && (
               <div className="pb-1 overflow-visible">
-                <div className="flex items-center gap-3 overflow-x-auto overflow-y-visible scrollbar-thin scrollbar-thumb-gray-300 dark:scrollbar-thumb-gray-600 scrollbar-track-transparent">
+                <div className="flex items-center gap-3 overflow-x-auto overflow-y-visible scrollbar-thin scrollbar-thumb-gray-300 dark:scrollbar-thumb-gray-600 scrollbar-track-transparent justify-start md:justify-center">
                 {/* Selector de Subcategorías */}
                                  <div className="flex-shrink-0">
                    <EnhancedFilterSelector
