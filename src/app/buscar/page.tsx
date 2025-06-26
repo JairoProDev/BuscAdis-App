@@ -578,38 +578,38 @@ function SearchPageContent() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 via-blue-50/30 to-purple-50/30 dark:from-gray-900 dark:via-gray-900 dark:to-gray-800">
-              {/* Enhanced Search Header */}
-        <div className="bg-white/80 dark:bg-gray-900/80 backdrop-blur-xl border-b border-gray-200/50 dark:border-gray-700/50 shadow-lg sticky top-0 z-30 overflow-visible">
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-1 overflow-visible">
-            
-            {/* Main Search Bar */}
-            <div className="mb-1">
-              <RealTimeSearchEngine 
-                onSearch={handleSearch}
-                variant="page"
-                showFilters={true}
-                placeholder="¿Qué necesitas hoy? Encuentra oportunidades cerca de ti..."
-                selectedCategory={selectedCategory}
-                selectedSubcategory={selectedSubcategory}
-                onCategoryChange={handleCategoryChange}
-                onSubcategoryChange={handleSubcategoryChange}
-              />
-            </div>
+      {/* Enhanced Search Header */}
+      <div className="bg-white/80 dark:bg-gray-900/80 backdrop-blur-xl border-b border-gray-200/50 dark:border-gray-700/50 shadow-lg sticky top-0 z-30 overflow-visible">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-1 overflow-visible">
+          
+          {/* Main Search Bar */}
+          <div className="mb-1 search-input">
+            <RealTimeSearchEngine 
+              onSearch={handleSearch}
+              variant="page"
+              showFilters={true}
+              placeholder="¿Qué necesitas hoy? Encuentra oportunidades cerca de ti..."
+              selectedCategory={selectedCategory}
+              selectedSubcategory={selectedSubcategory}
+              onCategoryChange={handleCategoryChange}
+              onSubcategoryChange={handleSubcategoryChange}
+            />
+          </div>
 
-            {/* Filters Row Mejorado - Fusionando selectores con estado activo */}
-            {(selectedCategory && selectedCategory !== 'all') && (
-              <div className="pb-1 overflow-visible">
-                <div className="flex items-center gap-3 overflow-x-auto overflow-y-visible scrollbar-thin scrollbar-thumb-gray-300 dark:scrollbar-thumb-gray-600 scrollbar-track-transparent justify-start md:justify-center">
+          {/* Filters Row Mejorado - Fusionando selectores con estado activo */}
+          {(selectedCategory && selectedCategory !== 'all') && (
+            <div className="pb-1 overflow-visible">
+              <div className="flex items-center gap-3 overflow-x-auto overflow-y-visible scrollbar-thin scrollbar-thumb-gray-300 dark:scrollbar-thumb-gray-600 scrollbar-track-transparent justify-start md:justify-center">
                 {/* Selector de Subcategorías */}
-                                 <div className="flex-shrink-0">
-                   <EnhancedFilterSelector
-                     label="Subcategoría"
-                     value={selectedSubcategory}
-                     options={getSubcategories(selectedCategory).map(sub => ({ value: sub.id, label: sub.name }))}
-                     onChange={(value) => handleSubcategoryChange(value || '')}
-                     placeholder="Todas las subcategorías"
-                   />
-                 </div>
+                <div className="flex-shrink-0">
+                  <EnhancedFilterSelector
+                    label="Subcategoría"
+                    value={selectedSubcategory}
+                    options={getSubcategories(selectedCategory).map(sub => ({ value: sub.id, label: sub.name }))}
+                    onChange={(value) => handleSubcategoryChange(value || '')}
+                    placeholder="Todas las subcategorías"
+                  />
+                </div>
 
                 {/* Filtros dinámicos según categoría */}
                 {(() => {
@@ -621,25 +621,25 @@ function SearchPageContent() {
                     .filter(filter => filter.type === 'select')
                     .slice(0, 4)
                   
-                                   return selectFilters.map(filter => (
-                   <div key={filter.id} className="flex-shrink-0">
-                     <EnhancedFilterSelector
-                       label={filter.label}
-                       value={activeFilters[filter.id]}
-                       options={filter.options || []}
-                       onChange={(value) => {
-                         const newFilters = { ...activeFilters }
-                         if (value === null || value === undefined || value === '') {
-                           delete newFilters[filter.id]
-                         } else {
-                           newFilters[filter.id] = value
-                         }
-                         handleFiltersChange(newFilters)
-                       }}
-                       placeholder={`Cualquier ${filter.label.toLowerCase()}`}
-                     />
-                   </div>
-                 ))
+                  return selectFilters.map(filter => (
+                    <div key={filter.id} className="flex-shrink-0">
+                      <EnhancedFilterSelector
+                        label={filter.label}
+                        value={activeFilters[filter.id]}
+                        options={filter.options || []}
+                        onChange={(value) => {
+                          const newFilters = { ...activeFilters }
+                          if (value === null || value === undefined || value === '') {
+                            delete newFilters[filter.id]
+                          } else {
+                            newFilters[filter.id] = value
+                          }
+                          handleFiltersChange(newFilters)
+                        }}
+                        placeholder={`Cualquier ${filter.label.toLowerCase()}`}
+                      />
+                    </div>
+                  ))
                 })()}
               </div>
             </div>

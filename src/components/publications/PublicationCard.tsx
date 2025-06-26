@@ -24,6 +24,8 @@ import { WhatsAppIcon } from '@/components/icons';
 import { useMemo } from 'react';
 import { generateSeoUrl } from '@/utils/url';
 import { getDefaultImageByCategory } from '@/utils/image-helpers';
+import { Clock, MapPin, Phone } from 'lucide-react';
+import { timeAgo } from '@/utils/date';
 
 interface PublicationData {
   id: string;
@@ -370,7 +372,7 @@ export default function PublicationCard({
             
             {/* Price Badge - Para ambos modos */}
                           {formatPriceLocal(publication.value, publication.currency) && (
-                <div className={`absolute top-2 left-2 bg-gradient-to-r from-blue-600 to-blue-700 text-white font-bold rounded-full shadow-lg backdrop-blur-sm ${
+                <div className={`absolute top-2 left-2 bg-gradient-to-r from-blue-600 to-blue-700 text-white font-bold rounded-full shadow-lg backdrop-blur-sm price-element ${
                   viewMode === 'list' ? 'px-2 py-1 text-xs' : 'px-3 py-1 text-sm'
                 }`}>
                   {formatPriceLocal(publication.value, publication.currency)}
@@ -387,7 +389,7 @@ export default function PublicationCard({
             
             {/* Featured Badge - Solo en grid */}
             {viewMode === 'grid' && publication.featured && !publication.premium && (
-              <div className="absolute top-2 right-2 bg-blue-500 text-white font-bold rounded-full shadow-md px-2 py-1 text-xs">
+              <div className="absolute top-2 right-2 bg-blue-500 text-white font-bold rounded-full shadow-md px-2 py-1 text-xs favorite-element">
                 🚀 Destacado
               </div>
             )}
@@ -398,7 +400,7 @@ export default function PublicationCard({
             {showWhatsApp && publication.whatsapp && (
               <button
                 onClick={handleWhatsAppClick}
-                className="absolute bottom-2 right-2 flex items-center gap-1.5 bg-green-500 hover:bg-green-600 text-white px-2.5 py-1.5 rounded-lg transition-colors font-medium text-xs shadow-lg backdrop-blur-sm"
+                className="absolute bottom-2 right-2 flex items-center gap-1.5 bg-green-500 hover:bg-green-600 text-white px-2.5 py-1.5 rounded-lg transition-colors font-medium text-xs shadow-lg backdrop-blur-sm contact-element"
                 aria-label="Contactar por WhatsApp"
               >
                 <WhatsAppIcon className="w-3.5 h-3.5" />
@@ -446,7 +448,7 @@ export default function PublicationCard({
                   {/* Fila 3: Metadatos */}
                   <div className="flex items-center text-xs text-gray-500 space-x-2 md:space-x-4 mb-2">
                     {/* Ubicación completa - solo una línea */}
-                    <div className="flex items-center">
+                    <div className="flex items-center location-element">
                       <MapPinIcon className="w-3 h-3 mr-1 text-gray-400" />
                       <span className="truncate">
                         {formatLocation(publication.location)}
@@ -602,7 +604,7 @@ export default function PublicationCard({
                   {/* Información - diferenciada de los botones */}
                   <div className="mb-3 mx-2 space-y-1.5 text-xs text-gray-500 bg-gray-50 dark:bg-gray-800/50 rounded-lg p-2">
                     {/* Ubicación completa en una línea */}
-                    <div className="flex items-center">
+                    <div className="flex items-center location-element">
                       <MapPinIcon className="w-3 h-3 mr-1 text-gray-400 flex-shrink-0" />
                       <span className="truncate">{formatLocation(publication.location)}</span>
                     </div>
