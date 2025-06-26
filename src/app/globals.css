@@ -6,138 +6,14 @@
     🔍 CURSOR PERSONALIZADO BUSCADIS - SIMPLE
      =============================================== */
   
-  /* Cursor por defecto - Lupa teal con puntito al centro */
-  * {
+  /* Cursor de lupa por defecto - herencia natural del navegador */
+  body {
     cursor: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 22 22" fill="none"><circle cx="9" cy="9" r="7" stroke="%2314B8A6" stroke-width="2" fill="none"/><path d="m15 15 5 5" stroke="%2314B8A6" stroke-width="2" stroke-linecap="round"/><circle cx="9" cy="9" r="2" fill="%2314B8A6" opacity="0.4"/></svg>') 11 11, auto;
   }
-  
-  /* Mantener cursors clásicos para elementos interactivos */
-  button, 
-  a, 
-  [role="button"], 
-  .cursor-pointer,
-  input[type="button"],
-  input[type="submit"],
-  input[type="reset"],
-  select,
-  .clickable {
-    cursor: pointer !important;
-  }
-
-/* Cursor de texto para inputs y áreas editables */
-input[type="text"],
-input[type="email"],
-input[type="password"],
-input[type="search"]:not(:focus),
-input[type="url"],
-input[type="tel"],
-input[type="number"],
-textarea,
-[contenteditable],
-.cursor-text {
-  cursor: text !important;
-}
-
-/* Cursor de redimensionar para elementos resizable */
-.cursor-resize,
-.resize,
-textarea.resize {
-  cursor: nw-resize !important;
-}
-
-/* Cursor de mover para elementos draggable */
-[draggable="true"],
-.cursor-move,
-.draggable {
-  cursor: move !important;
-}
-
-/* Cursor no permitido para elementos disabled */
-[disabled],
-.cursor-not-allowed,
-.disabled {
-  cursor: not-allowed !important;
-}
-
-/* Cursor de ayuda para elementos con tooltips */
-.cursor-help,
-[title]:not([title=""]) {
-  cursor: help !important;
-}
-
-/* Cursor de espera para estados de carga */
-.cursor-wait,
-.loading {
-  cursor: wait !important;
-}
-
-
-
-
 
 /* Animación suave para cambios de cursor */
 * {
   transition: filter 0.2s ease, transform 0.2s ease;
-}
-
-/* ===============================================
-   🚨 SOLUCIÓN DEFINITIVA PARA BOTONES
-   =============================================== */
-
-/* Capturar TODOS los posibles botones y enlaces */
-*[class*="bg-"]:hover,
-*[class*="hover:bg-"],
-*[class*="hover:"],
-*[class*="cursor-pointer"],
-*[class*="clickable"],
-*[class*="btn"],
-*[class*="button"],
-*[onclick],
-*[onmousedown],
-*[onmouseup],
-*[role="button"],
-button,
-a[href],
-input[type="button"],
-input[type="submit"],
-input[type="reset"],
-input[type="checkbox"],
-input[type="radio"],
-select,
-.motion-button,
-.motion-div[onClick],
-[data-testid*="button"],
-[aria-label*="button"],
-[aria-label*="Contactar"],
-[aria-label*="WhatsApp"],
-[aria-label*="click"] {
-  cursor: pointer !important;
-}
-
-/* Elementos que definitivamente NO deben tener pointer */
-input[type="text"],
-input[type="email"], 
-input[type="password"],
-input[type="search"],
-input[type="url"],
-input[type="tel"],
-input[type="number"],
-textarea,
-[contenteditable],
-[disabled],
-.cursor-text,
-.cursor-not-allowed,
-.cursor-wait,
-.cursor-help,
-.cursor-move,
-.cursor-resize {
-  cursor: text !important;
-}
-
-[disabled],
-.cursor-not-allowed,
-.disabled {
-  cursor: not-allowed !important;
 }
 
 :root {
@@ -365,17 +241,7 @@ body {
     box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
   }
 
-  .custom-cursor {
-    @apply w-2 h-2 bg-primary-500 rounded-full fixed pointer-events-none z-50 -translate-x-1/2 -translate-y-1/2;
-  }
 
-  .cursor-follower {
-    @apply w-10 h-10 bg-primary-500/10 border border-primary-500 rounded-full fixed pointer-events-none z-40 -translate-x-1/2 -translate-y-1/2 transition-[width,height] duration-300;
-  }
-
-  .cursor-follower.active {
-    @apply w-[60px] h-[60px] bg-primary-500/20;
-  }
 
   /* Estilos para publicaciones sin imagen */
   .publication-no-image {
@@ -726,40 +592,7 @@ body {
   }
 }
 
-/* Cursor personalizado */
-.custom-cursor {
-  width: 8px;
-  height: 8px;
-  background: theme("colors.primary.500");
-  border-radius: 50%;
-  position: fixed;
-  pointer-events: none;
-  z-index: 9999;
-  transform: translate(-50%, -50%);
-}
 
-.cursor-follower {
-  width: 40px;
-  height: 40px;
-  background: rgba(14, 165, 233, 0.1);
-  border: 1px solid theme("colors.primary.500");
-  border-radius: 50%;
-  position: fixed;
-  pointer-events: none;
-  z-index: 9998;
-  transform: translate(-50%, -50%);
-  transition: width 0.3s, height 0.3s;
-}
-
-.custom-cursor.active {
-  transform: translate(-50%, -50%) scale(1.5);
-}
-
-.cursor-follower.active {
-  width: 60px;
-  height: 60px;
-  background: rgba(14, 165, 233, 0.2);
-}
 
 /* Efectos de scroll */
 .scroll-section {
