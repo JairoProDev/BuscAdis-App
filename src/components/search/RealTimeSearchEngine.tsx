@@ -309,6 +309,11 @@ export default function RealTimeSearchEngine({
     // Tracking de búsqueda
     addRecentSearch(searchQuery, selectedCategory)
     trackSearch(searchQuery, selectedCategory, quickResults.length)
+    
+    // Actualizar historial local
+    const newHistory = [searchQuery, ...searchHistory.filter(h => h !== searchQuery)].slice(0, 10)
+    setSearchHistory(newHistory)
+    localStorage.setItem('searchHistory', JSON.stringify(newHistory))
 
     setShowSuggestions(false)
 
@@ -346,6 +351,21 @@ export default function RealTimeSearchEngine({
   const [isListening, setIsListening] = useState(false)
   const [voiceError, setVoiceError] = useState('')
   const recognitionRef = useRef<any>(null)
+  
+  // Estado para historial de búsqueda
+  const [searchHistory, setSearchHistory] = useState<string[]>([])
+  
+  // Cargar historial al montar componente
+  useEffect(() => {
+    const saved = localStorage.getItem('searchHistory')
+    if (saved) {
+      try {
+        setSearchHistory(JSON.parse(saved))
+      } catch (error) {
+        console.error('Error loading search history:', error)
+      }
+    }
+  }, [])
 
   const startVoiceSearch = () => {
     if (!('webkitSpeechRecognition' in window) && !('SpeechRecognition' in window)) {
@@ -541,7 +561,7 @@ export default function RealTimeSearchEngine({
         )}
       </div>
 
-      {/* Panel de sugerencias y resultados */}
+      {/* Panel de sugerencias y resultados mejorado */}
       <AnimatePresence>
         {showSuggestions && isInputFocused && (
           <motion.div
@@ -550,143 +570,342 @@ export default function RealTimeSearchEngine({
             exit={{ opacity: 0, y: -10, scale: 0.95 }}
             className="absolute top-full mt-2 w-full bg-white dark:bg-gray-800 rounded-xl shadow-2xl border border-gray-200 dark:border-gray-700 overflow-hidden z-50"
           >
-            <div className="max-h-96 overflow-y-auto">
-              
-              {/* Loading state */}
-              {isLoading && (
-                <div className="p-4 text-center">
-                  <div className="inline-flex items-center gap-2 text-gray-500">
-                    <div className="w-4 h-4 border-2 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
-                    Buscando...
-                  </div>
+            {/* Loading state */}
+            {isLoading && (
+              <div className="p-6 text-center">
+                <div className="inline-flex items-center gap-2 text-gray-500">
+                  <div className="w-4 h-4 border-2 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
+                  Buscando...
                 </div>
-              )}
+              </div>
+            )}
 
-              {/* Sugerencias */}
-              {suggestions.length > 0 && (
-                <div className="p-4 border-b border-gray-100 dark:border-gray-700">
-                  <div className="flex items-center gap-2 mb-3">
-                    <svg className="h-4 w-4 text-purple-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
-                    </svg>
-                    <span className="text-sm font-medium text-gray-600 dark:text-gray-300">
-                      Sugerencias
-                    </span>
-                  </div>
-                  <div className="space-y-1">
-                    {suggestions.map((suggestion) => (
+            {/* Mobile: Layout optimizado */}
+            <div className="lg:hidden">
+              {/* Sugerencias e Historial lado a lado en mobile */}
+              <div className="grid grid-cols-2 gap-0 border-b border-gray-100 dark:border-gray-700">
+                
+                {/* Columna izquierda: Sugerencias */}
+                <div className="border-r border-gray-100 dark:border-gray-700">
+                  {suggestions.length > 0 && (
+                    <div className="p-3">
+                      <div className="flex items-center gap-2 mb-2">
+                        <svg className="h-3 w-3 text-purple-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
+                        </svg>
+                        <span className="text-xs font-medium text-gray-600 dark:text-gray-300">
+                          Sugerencias
+                        </span>
+                      </div>
+                      <div className="space-y-1 max-h-32 overflow-y-auto">
+                        {suggestions.slice(0, 4).map((suggestion) => (
+                          <button
+                            key={suggestion.id}
+                            onClick={() => handleSuggestionSelect(suggestion)}
+                            className="w-full text-left p-1.5 hover:bg-gray-50 dark:hover:bg-gray-700 rounded text-xs transition-colors"
+                          >
+                            <span className="text-gray-900 dark:text-white block truncate">
+                              {suggestion.text}
+                            </span>
+                            {suggestion.category && (
+                              <span className="text-xs text-gray-500 truncate">
+                                en {suggestion.category}
+                              </span>
+                            )}
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                </div>
+
+                {/* Columna derecha: Historial */}
+                <div>
+                  {searchHistory.length > 0 && (
+                    <div className="p-3">
+                      <div className="flex items-center gap-2 mb-2">
+                        <svg className="h-3 w-3 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        </svg>
+                        <span className="text-xs font-medium text-gray-600 dark:text-gray-300">
+                          Recientes
+                        </span>
+                      </div>
+                      <div className="space-y-1 max-h-32 overflow-y-auto">
+                        {searchHistory.slice(0, 4).map((historyItem, index) => (
+                          <button
+                            key={index}
+                            onClick={() => setInputValue(historyItem)}
+                            className="w-full text-left p-1.5 hover:bg-gray-50 dark:hover:bg-gray-700 rounded text-xs transition-colors"
+                          >
+                            <span className="text-gray-600 dark:text-gray-300 block truncate">
+                              {historyItem}
+                            </span>
+                          </button>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                </div>
+              </div>
+
+              {/* Resultados rápidos móvil con scroll funcional */}
+              <div className="max-h-64 overflow-y-auto">
+                {quickResults.length > 0 && (
+                  <div className="p-4">
+                    <div className="flex items-center gap-2 mb-3">
+                      <svg className="h-4 w-4 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
+                      </svg>
+                      <span className="text-sm font-medium text-gray-600 dark:text-gray-300">
+                        Resultados rápidos
+                      </span>
+                      <span className="text-xs text-green-600 bg-green-100 dark:bg-green-900/30 px-2 py-1 rounded-full">
+                        {quickResults.length} encontrados
+                      </span>
+                    </div>
+                    <div className="space-y-2">
+                      {quickResults.map((result) => (
+                        <button
+                          key={result.id}
+                          onClick={() => handleResultSelect(result)}
+                          className="w-full text-left p-3 hover:bg-gray-50 dark:hover:bg-gray-700 rounded-lg transition-colors flex items-start gap-3"
+                        >
+                          <img
+                            src={result.image}
+                            alt={result.title}
+                            className="w-12 h-12 object-cover rounded-lg flex-shrink-0"
+                            onError={(e) => {
+                              (e.target as HTMLImageElement).src = '/images/placeholder-image.jpg'
+                            }}
+                          />
+                          <div className="flex-1 min-w-0">
+                            <h4 className="text-sm font-medium text-gray-900 dark:text-white truncate">
+                              {result.title}
+                            </h4>
+                            <p className="text-xs text-gray-500 dark:text-gray-400 truncate">
+                              {result.description}
+                            </p>
+                            <div className="flex items-center gap-2 mt-1">
+                              <span className="text-sm font-bold text-blue-600">
+                                S/ {result.price.toLocaleString()}
+                              </span>
+                              <span className="text-xs text-gray-500 flex items-center gap-1">
+                                <svg className="h-3 w-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                                </svg>
+                                {result.location}
+                              </span>
+                            </div>
+                          </div>
+                        </button>
+                      ))}
+                      
                       <button
-                        key={suggestion.id}
-                        onClick={() => handleSuggestionSelect(suggestion)}
-                        className="w-full text-left p-2 hover:bg-gray-50 dark:hover:bg-gray-700 rounded-lg transition-colors flex items-center gap-3"
+                        onClick={() => performSearch()}
+                        className="w-full p-2 text-center text-sm text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-900/20 rounded-lg transition-colors font-medium"
                       >
-                        {suggestion.type === 'recent' && <svg className="h-4 w-4 text-gray-400 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
-                        </svg>}
-                        {suggestion.type === 'trending' && <svg className="h-4 w-4 text-orange-500 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
-                        </svg>}
-                        {suggestion.type === 'ai' && <svg className="h-4 w-4 text-purple-500 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
-                        </svg>}
-                        {suggestion.type === 'category' && <svg className="h-4 w-4 text-blue-500 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
-                        </svg>}
-                        
-                        <div className="flex-1">
-                          <span className="text-sm text-gray-900 dark:text-white">
-                            {suggestion.text}
-                          </span>
-                          {suggestion.category && (
-                            <span className="text-xs text-gray-500 ml-2">
-                              en {suggestion.category}
+                        Ver todos los resultados →
+                      </button>
+                    </div>
+                  </div>
+                )}
+              </div>
+            </div>
+
+            {/* Desktop: Layout de 2 columnas */}
+            <div className="hidden lg:grid lg:grid-cols-2 gap-0 max-h-96 overflow-hidden">
+              
+              {/* Columna izquierda: Sugerencias e Historial */}
+              <div className="border-r border-gray-100 dark:border-gray-700 max-h-96 overflow-y-auto">
+                
+                {/* Sugerencias */}
+                {suggestions.length > 0 && (
+                  <div className="p-4 border-b border-gray-100 dark:border-gray-700">
+                    <div className="flex items-center gap-2 mb-3">
+                      <svg className="h-4 w-4 text-purple-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
+                      </svg>
+                      <span className="text-sm font-medium text-gray-600 dark:text-gray-300">
+                        Sugerencias
+                      </span>
+                    </div>
+                    <div className="space-y-1">
+                      {suggestions.map((suggestion) => (
+                        <button
+                          key={suggestion.id}
+                          onClick={() => handleSuggestionSelect(suggestion)}
+                          className="w-full text-left p-2 hover:bg-gray-50 dark:hover:bg-gray-700 rounded-lg transition-colors flex items-center gap-3"
+                        >
+                          {suggestion.type === 'recent' && (
+                            <svg className="h-4 w-4 text-gray-400 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                            </svg>
+                          )}
+                          {suggestion.type === 'trending' && (
+                            <svg className="h-4 w-4 text-orange-500 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
+                            </svg>
+                          )}
+                          {suggestion.type === 'ai' && (
+                            <svg className="h-4 w-4 text-purple-500 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
+                            </svg>
+                          )}
+                          {suggestion.type === 'category' && (
+                            <svg className="h-4 w-4 text-blue-500 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z" />
+                            </svg>
+                          )}
+                          
+                          <div className="flex-1">
+                            <span className="text-sm text-gray-900 dark:text-white">
+                              {suggestion.text}
+                            </span>
+                            {suggestion.category && (
+                              <span className="text-xs text-gray-500 ml-2">
+                                en {suggestion.category}
+                              </span>
+                            )}
+                          </div>
+                          
+                          {suggestion.count && (
+                            <span className="text-xs text-gray-400 bg-gray-100 dark:bg-gray-700 px-2 py-1 rounded-full">
+                              {suggestion.count}
                             </span>
                           )}
-                        </div>
-                        
-                        {suggestion.count && (
-                          <span className="text-xs text-gray-400 bg-gray-100 dark:bg-gray-700 px-2 py-1 rounded-full">
-                            {suggestion.count}
-                          </span>
-                        )}
-                      </button>
-                    ))}
+                        </button>
+                      ))}
+                    </div>
                   </div>
-                </div>
-              )}
+                )}
 
-              {/* Resultados rápidos */}
-              {quickResults.length > 0 && (
-                <div className="p-4">
-                  <div className="flex items-center gap-2 mb-3">
-                    <svg className="h-4 w-4 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
-                    </svg>
-                    <span className="text-sm font-medium text-gray-600 dark:text-gray-300">
-                      Resultados rápidos
-                    </span>
-                    <span className="text-xs text-green-600 bg-green-100 dark:bg-green-900/30 px-2 py-1 rounded-full">
-                      {quickResults.length} encontrados
-                    </span>
-                  </div>
-                  <div className="space-y-2">
-                    {quickResults.map((result) => (
+                {/* Historial de búsqueda */}
+                {searchHistory.length > 0 && (
+                  <div className="p-4">
+                    <div className="flex items-center gap-2 mb-3">
+                      <svg className="h-4 w-4 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                      </svg>
+                      <span className="text-sm font-medium text-gray-600 dark:text-gray-300">
+                        Búsquedas recientes
+                      </span>
                       <button
-                        key={result.id}
-                        onClick={() => handleResultSelect(result)}
-                        className="w-full text-left p-3 hover:bg-gray-50 dark:hover:bg-gray-700 rounded-lg transition-colors flex items-start gap-3"
+                        onClick={() => {
+                          setSearchHistory([])
+                          localStorage.removeItem('searchHistory')
+                        }}
+                        className="ml-auto text-xs text-gray-400 hover:text-gray-600 dark:hover:text-gray-300"
                       >
-                        <img
-                          src={result.image}
-                          alt={result.title}
-                          className="w-12 h-12 object-cover rounded-lg flex-shrink-0"
-                          onError={(e) => {
-                            (e.target as HTMLImageElement).src = '/images/placeholder-image.jpg'
-                          }}
-                        />
-                        <div className="flex-1 min-w-0">
-                          <h4 className="text-sm font-medium text-gray-900 dark:text-white truncate">
-                            {result.title}
-                          </h4>
-                          <p className="text-xs text-gray-500 dark:text-gray-400 truncate">
-                            {result.description}
-                          </p>
-                          <div className="flex items-center gap-2 mt-1">
-                            <span className="text-sm font-bold text-blue-600">
-                              S/ {result.price.toLocaleString()}
-                            </span>
-                            <span className="text-xs text-gray-500 flex items-center gap-1">
-                              <svg className="h-3 w-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 10l4.553-2.276A1 1 0 0121 8.618v6.764a1 1 0 01-1.447.894L15 14M5 18h8a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z" />
-                              </svg>
-                              {result.location}
-                            </span>
-                          </div>
-                        </div>
+                        Limpiar
                       </button>
-                    ))}
-                    
-                    <button
-                      onClick={() => performSearch()}
-                      className="w-full p-2 text-center text-sm text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-900/20 rounded-lg transition-colors font-medium"
-                    >
-                      Ver todos los resultados →
-                    </button>
+                    </div>
+                    <div className="space-y-1">
+                      {searchHistory.slice(0, 5).map((historyItem, index) => (
+                        <button
+                          key={index}
+                          onClick={() => setInputValue(historyItem)}
+                          className="w-full text-left p-2 hover:bg-gray-50 dark:hover:bg-gray-700 rounded-lg transition-colors flex items-center gap-3"
+                        >
+                          <svg className="h-4 w-4 text-gray-400 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                          </svg>
+                          <span className="text-sm text-gray-600 dark:text-gray-300 truncate">
+                            {historyItem}
+                          </span>
+                        </button>
+                      ))}
+                    </div>
                   </div>
-                </div>
-              )}
+                )}
+              </div>
 
-              {/* Estado vacío */}
-              {!isLoading && suggestions.length === 0 && quickResults.length === 0 && inputValue.trim() && (
-                <div className="p-8 text-center text-gray-500">
-                  <svg className="h-12 w-12 mx-auto mb-3 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
-                  </svg>
-                  <p>No se encontraron sugerencias</p>
-                  <p className="text-sm">Presiona Enter para buscar "{inputValue}"</p>
-                </div>
-              )}
+              {/* Columna derecha: Resultados rápidos */}
+              <div className="max-h-96 overflow-y-auto">
+                {quickResults.length > 0 && (
+                  <div className="p-4">
+                    <div className="flex items-center gap-2 mb-3">
+                      <svg className="h-4 w-4 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
+                      </svg>
+                      <span className="text-sm font-medium text-gray-600 dark:text-gray-300">
+                        Resultados rápidos
+                      </span>
+                      <span className="text-xs text-green-600 bg-green-100 dark:bg-green-900/30 px-2 py-1 rounded-full">
+                        {quickResults.length} encontrados
+                      </span>
+                    </div>
+                    <div className="space-y-2">
+                      {quickResults.map((result) => (
+                        <button
+                          key={result.id}
+                          onClick={() => handleResultSelect(result)}
+                          className="w-full text-left p-3 hover:bg-gray-50 dark:hover:bg-gray-700 rounded-lg transition-colors flex items-start gap-3"
+                        >
+                          <img
+                            src={result.image}
+                            alt={result.title}
+                            className="w-12 h-12 object-cover rounded-lg flex-shrink-0"
+                            onError={(e) => {
+                              (e.target as HTMLImageElement).src = '/images/placeholder-image.jpg'
+                            }}
+                          />
+                          <div className="flex-1 min-w-0">
+                            <h4 className="text-sm font-medium text-gray-900 dark:text-white truncate">
+                              {result.title}
+                            </h4>
+                            <p className="text-xs text-gray-500 dark:text-gray-400 truncate">
+                              {result.description}
+                            </p>
+                            <div className="flex items-center gap-2 mt-1">
+                              <span className="text-sm font-bold text-blue-600">
+                                S/ {result.price.toLocaleString()}
+                              </span>
+                              <span className="text-xs text-gray-500 flex items-center gap-1">
+                                <svg className="h-3 w-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+                                </svg>
+                                {result.location}
+                              </span>
+                            </div>
+                          </div>
+                        </button>
+                      ))}
+                      
+                      <button
+                        onClick={() => performSearch()}
+                        className="w-full p-2 text-center text-sm text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-900/20 rounded-lg transition-colors font-medium"
+                      >
+                        Ver todos los resultados →
+                      </button>
+                    </div>
+                  </div>
+                )}
+
+                {/* Estado vacío solo para desktop en columna derecha */}
+                {quickResults.length === 0 && inputValue.trim() && !isLoading && (
+                  <div className="p-8 text-center text-gray-400">
+                    <svg className="h-8 w-8 mx-auto mb-2 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                    </svg>
+                    <p className="text-sm">Escribe para ver resultados</p>
+                  </div>
+                )}
+              </div>
             </div>
+
+            {/* Estado vacío general para mobile */}
+            {!isLoading && suggestions.length === 0 && quickResults.length === 0 && searchHistory.length === 0 && !inputValue.trim() && (
+              <div className="p-8 text-center text-gray-500 lg:hidden">
+                <svg className="h-12 w-12 mx-auto mb-3 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                </svg>
+                <p>Empieza a escribir para buscar</p>
+                <p className="text-sm text-gray-400">Encuentra lo que necesitas</p>
+              </div>
+            )}
           </motion.div>
         )}
       </AnimatePresence>
