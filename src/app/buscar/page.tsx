@@ -11,6 +11,7 @@ import {
   FunnelIcon 
 } from '@heroicons/react/24/outline'
 import RealTimeSearchEngine from '@/components/search/RealTimeSearchEngine'
+import EnhancedSearchInput from '@/components/search/EnhancedSearchInput'
 import SearchFilters from '@/components/search/SearchFilters'
 import PublicationCard from '@/components/publications/PublicationCard'
 import CategorySelector from '@/components/search/CategorySelector'
@@ -1015,7 +1016,8 @@ export default function BuscadorPage() {
         </div>
       </div>
     }>
-      <SearchPageContent />
+              <SearchPageContent />
+        {/* Componentes de prueba removidos - La funcionalidad de voz está completamente integrada */}
     </Suspense>
   )
 }

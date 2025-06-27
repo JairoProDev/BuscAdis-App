@@ -342,26 +342,91 @@ export default function RealTimeSearchEngine({
     // No llamar updateSearch aquí para evitar conflictos con filtros
   }
 
-  const handleVoiceSearch = () => {
-    if ('webkitSpeechRecognition' in window) {
-      const recognition = new (window as any).webkitSpeechRecognition()
-      recognition.lang = 'es-ES'
-      recognition.onresult = (event: any) => {
-        const transcript = event.results[0][0].transcript
-        setInputValue(transcript)
-        performSearch(transcript)
-      }
-      recognition.start()
+  // Estados para reconocimiento de voz
+  const [isListening, setIsListening] = useState(false)
+  const [voiceError, setVoiceError] = useState('')
+  const recognitionRef = useRef<any>(null)
+
+  const startVoiceSearch = () => {
+    if (!('webkitSpeechRecognition' in window) && !('SpeechRecognition' in window)) {
+      setVoiceError('Reconocimiento de voz no disponible');
+      return;
     }
-  }
+
+    try {
+      const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+      recognitionRef.current = new SpeechRecognition();
+      
+      recognitionRef.current.lang = 'es-PE';
+      recognitionRef.current.interimResults = false;
+      recognitionRef.current.maxAlternatives = 1;
+      recognitionRef.current.continuous = false;
+
+      recognitionRef.current.onstart = () => {
+        setIsListening(true);
+        setVoiceError('');
+      };
+
+      recognitionRef.current.onresult = (event: any) => {
+        const transcript = event.results[0][0].transcript;
+        setInputValue(transcript);
+        performSearch(transcript);
+        setIsListening(false);
+      };
+
+      recognitionRef.current.onerror = (event: any) => {
+        setIsListening(false);
+        if (event.error === 'no-speech') {
+          setVoiceError('No se detectó habla. Intenta de nuevo.');
+        } else if (event.error === 'not-allowed') {
+          setVoiceError('Permisos de micrófono denegados');
+        } else {
+          setVoiceError(`Error: ${event.error}`);
+        }
+      };
+
+      recognitionRef.current.onend = () => {
+        setIsListening(false);
+      };
+
+      recognitionRef.current.start();
+    } catch (error) {
+      setVoiceError('Error iniciando reconocimiento de voz');
+      setIsListening(false);
+    }
+  };
+
+  const stopVoiceSearch = () => {
+    if (recognitionRef.current) {
+      recognitionRef.current.stop();
+    }
+    setIsListening(false);
+  };
 
   return (
     <div ref={containerRef} className="relative w-full max-w-4xl mx-auto">
+      {/* Banner de grabación */}
+      {isListening && (
+        <div className="fixed top-0 left-0 right-0 z-50 bg-gradient-to-r from-red-500 to-red-600 text-white px-6 py-3 shadow-lg">
+          <div className="flex items-center justify-center gap-3">
+            <div className="w-3 h-3 bg-white rounded-full animate-pulse"></div>
+            <span className="font-bold text-lg tracking-wider">GRABANDO</span>
+            <span className="text-red-100">|</span>
+            <span className="text-red-100">Habla ahora tu búsqueda...</span>
+            <button
+              onClick={stopVoiceSearch}
+              className="ml-6 bg-white/20 hover:bg-white/30 px-4 py-1 rounded-full text-sm font-medium transition-colors"
+            >
+              DETENER
+            </button>
+          </div>
+        </div>
+      )}
       {/* Barra de búsqueda principal */}
       <div className={`relative flex items-center ${
         variant === 'header' ? 'h-10' : variant === 'compact' ? 'h-12' : 'h-14'
-      } bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-xl shadow-lg transition-all duration-200 ${
-        isInputFocused ? 'ring-2 ring-blue-500 border-blue-500 shadow-xl' : 'hover:border-gray-400 dark:hover:border-gray-500'
+      } bg-white dark:bg-gray-800 border border-teal-500/60 dark:border-teal-500/60 rounded-xl shadow-lg transition-all duration-200 ${
+        isInputFocused ? 'ring-2 ring-teal-500 border-teal-500 shadow-xl shadow-teal-500/20' : 'ring-1 ring-teal-500/40 hover:ring-2 hover:ring-teal-400/60 shadow-teal-500/10'
       }`}>
         
         {/* Selector de categoría compacto */}
@@ -388,7 +453,7 @@ export default function RealTimeSearchEngine({
             onChange={handleInputChange}
             onFocus={handleInputFocus}
             onKeyDown={handleKeyDown}
-            placeholder={placeholder}
+            placeholder={isListening ? "🎤 Escuchando tu voz..." : placeholder}
             className="w-full bg-transparent border-none outline-none text-gray-900 dark:text-white placeholder-gray-500 dark:placeholder-gray-400 text-sm sm:text-base"
             autoComplete="off"
           />
@@ -407,15 +472,36 @@ export default function RealTimeSearchEngine({
               </button>
             )}
             
-            {/* Botón de micrófono (voz) */}
+            {/* Botón de micrófono funcional con feedback visual */}
             <button
-              onClick={handleVoiceSearch}
-              className="p-1.5 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-full transition-colors"
-              title="Búsqueda por voz"
+              onClick={isListening ? stopVoiceSearch : startVoiceSearch}
+              className={`p-2.5 rounded-full transition-all duration-300 transform relative ${
+                isListening
+                  ? 'bg-red-500 text-white animate-pulse shadow-lg hover:bg-red-600 scale-110 ring-4 ring-red-200' 
+                  : 'bg-blue-500 text-white shadow-md hover:bg-blue-600 hover:shadow-lg hover:scale-105'
+              }`}
+              title={isListening ? 'Detener grabación' : 'Buscar por voz'}
             >
-              <svg className="h-4 w-4 text-gray-400 hover:text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3V5a3 3 0 116 0v6a3 3 0 01-3 3z" />
-              </svg>
+              <div className="relative z-10">
+                {isListening ? (
+                  <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5.586 15H4a1 1 0 01-1-1v-4a1 1 0 011-1h1.586l4.707-4.707C10.923 3.663 12 4.109 12 5v14c0 .891-1.077 1.337-1.707.707L5.586 15z" />
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2" />
+                  </svg>
+                ) : (
+                  <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3V5a3 3 0 116 0v6a3 3 0 01-3 3z" />
+                  </svg>
+                )}
+              </div>
+              
+              {/* Efectos visuales animados solo cuando está escuchando */}
+              {isListening && (
+                <>
+                  <div className="absolute inset-0 rounded-full bg-red-300 animate-ping opacity-30" />
+                  <div className="absolute inset-0 rounded-full bg-red-400 animate-pulse opacity-20" />
+                </>
+              )}
             </button>
             
             {/* Botón de cámara (búsqueda visual) */}

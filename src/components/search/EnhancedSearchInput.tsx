@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useRef, useEffect } from 'react';
-import { Search, X, Mic, Camera, Sparkles, MicOff } from 'lucide-react';
+import { Search, X, Mic, Camera, Sparkles, MicOff, Loader2, AlertCircle, CheckCircle } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import SearchSuggestions from './SearchSuggestions';
 import { cn } from '@/lib/utils';
@@ -42,16 +42,16 @@ export default function EnhancedSearchInput({
 }: EnhancedSearchInputProps) {
   const [searchTerm, setSearchTerm] = useState(initialValue);
   const [showSuggestionsPanel, setShowSuggestionsPanel] = useState(false);
-  const [isRecording, setIsRecording] = useState(false);
+
   const [isAiThinking, setIsAiThinking] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
   const [isImageSearchActive, setIsImageSearchActive] = useState(false);
   const [selectedImage, setSelectedImage] = useState<File | null>(null);
   const imageInputRef = useRef<HTMLInputElement>(null);
   const searchContainerRef = useRef<HTMLDivElement>(null);
-  
-  // Initialize speech recognition
-  const [recognition, setRecognition] = useState<SpeechRecognition | null>(null);
+  const [isListening, setIsListening] = useState(false);
+  const [voiceError, setVoiceError] = useState('');
+  const recognitionRef = useRef<any>(null);
   
   // Focus input on mount if autoFocus is true
   useEffect(() => {
@@ -85,45 +85,6 @@ export default function EnhancedSearchInput({
       onFocusChange(showSuggestionsPanel);
     }
   }, [showSuggestionsPanel, onFocusChange]);
-  
-  // Initialize Web Speech API if available
-  useEffect(() => {
-    if ('webkitSpeechRecognition' in window || 'SpeechRecognition' in window) {
-      const SpeechRecognition = window.webkitSpeechRecognition || window.SpeechRecognition;
-      if (!SpeechRecognition) return;
-      
-      const recognitionInstance = new SpeechRecognition();
-      recognitionInstance.continuous = false;
-      recognitionInstance.interimResults = true;
-      recognitionInstance.lang = 'es-ES';
-      
-      // Handle recognition results
-      recognitionInstance.onresult = (event: SpeechRecognitionEvent) => {
-        let transcript = '';
-        for (const result of event.results as any) {
-          if (result.isFinal) {
-            transcript += result[0].transcript;
-          }
-        }
-        
-        setSearchTerm(transcript);
-        onSearch(transcript, selectedImage);
-      };
-      
-      // Handle end of recognition
-      recognitionInstance.onend = () => {
-        setIsRecording(false);
-      };
-      
-      // Handle errors
-      recognitionInstance.onerror = (event: Event) => {
-        console.error('Error with speech recognition:', event);
-        setIsRecording(false);
-      };
-      
-      setRecognition(recognitionInstance);
-    }
-  }, [onSearch, selectedImage]);
   
   // Reset component when initialValue changes
   useEffect(() => {
@@ -167,22 +128,60 @@ export default function EnhancedSearchInput({
     }
   };
   
-  const handleVoiceSearch = () => {
-    if (isRecording) {
-      setIsRecording(false);
+  const startVoiceSearch = () => {
+    if (!('webkitSpeechRecognition' in window) && !('SpeechRecognition' in window)) {
+      setVoiceError('Reconocimiento de voz no disponible');
       return;
     }
-    
-    if (!recognition) return;
-    
+
     try {
-      setIsRecording(true);
-      recognition.start();
+      const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+      recognitionRef.current = new SpeechRecognition();
+      
+      recognitionRef.current.lang = 'es-PE';
+      recognitionRef.current.interimResults = false;
+      recognitionRef.current.maxAlternatives = 1;
+      recognitionRef.current.continuous = false;
+
+      recognitionRef.current.onstart = () => {
+        setIsListening(true);
+        setVoiceError('');
+      };
+
+      recognitionRef.current.onresult = (event: any) => {
+        const transcript = event.results[0][0].transcript;
+        setSearchTerm(transcript);
+        onSearch(transcript, null);
+        setIsListening(false);
+      };
+
+      recognitionRef.current.onerror = (event: any) => {
+        setIsListening(false);
+        if (event.error === 'no-speech') {
+          setVoiceError('No se detectó habla. Intenta de nuevo.');
+        } else if (event.error === 'not-allowed') {
+          setVoiceError('Permisos de micrófono denegados');
+        } else {
+          setVoiceError(`Error: ${event.error}`);
+        }
+      };
+
+      recognitionRef.current.onend = () => {
+        setIsListening(false);
+      };
+
+      recognitionRef.current.start();
     } catch (error) {
-      console.error('Speech recognition error:', error);
-      setIsRecording(false);
-      alert('Hubo un error al iniciar el reconocimiento de voz. Por favor intenta nuevamente.');
+      setVoiceError('Error iniciando reconocimiento de voz');
+      setIsListening(false);
     }
+  };
+
+  const stopVoiceSearch = () => {
+    if (recognitionRef.current) {
+      recognitionRef.current.stop();
+    }
+    setIsListening(false);
   };
   
   const handleImageSearch = () => {
@@ -401,29 +400,32 @@ export default function EnhancedSearchInput({
             'backdrop-blur-sm shadow-lg hover:shadow-xl',
             appearance === 'dark'
               ? [
-                  'bg-slate-800/40 hover:bg-slate-800/60',
-                  'ring-1 ring-slate-700/50 hover:ring-teal-500/30',
-                  'shadow-slate-900/20'
+                  isListening 
+                    ? 'bg-red-900/40 ring-2 ring-red-500/50 shadow-red-900/30'
+                    : 'bg-slate-800/40 hover:bg-slate-800/60',
+                  !isListening && 'ring-2 ring-teal-500/40 hover:ring-teal-400/60',
+                  !isListening && 'shadow-teal-900/20 hover:shadow-teal-900/30'
                 ]
               : [
-                  'bg-white/80 hover:bg-white/90',
-                  'ring-1 ring-slate-200/50 hover:ring-teal-500/30',
-                  'shadow-slate-200/20'
+                  isListening 
+                    ? 'bg-red-50/80 ring-2 ring-red-400/50 shadow-red-200/30'
+                    : 'bg-white/80 hover:bg-white/90',
+                  !isListening && 'ring-2 ring-teal-500/40 hover:ring-teal-400/60',
+                  !isListening && 'shadow-teal-200/20 hover:shadow-teal-200/30'
                 ],
-            isRecording && 'ring-2 ring-red-500/50 animate-pulse',
-            isAiThinking && 'ring-2 ring-purple-500/50',
-            showSuggestionsPanel && 'ring-2 ring-teal-500/30'
+            isAiThinking && !isListening && 'ring-2 ring-purple-500/50',
+            showSuggestionsPanel && !isListening && 'ring-2 ring-teal-500/50'
           )}>
             {/* Search Icon with Animation */}
             <motion.div 
               className="flex-shrink-0 pl-5"
               animate={{ 
-                scale: isRecording || isAiThinking ? [1, 1.1, 1] : 1,
+                scale: isAiThinking ? [1, 1.1, 1] : 1,
                 rotate: isAiThinking ? [0, 180, 360] : 0
               }}
               transition={{ 
                 duration: 2,
-                repeat: isRecording || isAiThinking ? Infinity : 0,
+                repeat: isAiThinking ? Infinity : 0,
                 ease: "easeInOut"
               }}
             >
@@ -442,7 +444,7 @@ export default function EnhancedSearchInput({
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
               onFocus={() => setShowSuggestionsPanel(true)}
-              placeholder={placeholder}
+              placeholder={isListening ? "🎤 Escuchando tu voz..." : placeholder}
               aria-label="Campo de búsqueda"
               className={cn(
                 'w-full px-4 py-4 bg-transparent border-0',
@@ -451,15 +453,19 @@ export default function EnhancedSearchInput({
                 'transition-all duration-300',
                 appearance === 'dark' 
                   ? [
-                      'text-white placeholder:text-slate-400',
+                      isListening 
+                        ? 'text-red-300 placeholder:text-red-400'
+                        : 'text-white placeholder:text-slate-400',
                       'group-hover:placeholder:text-slate-300'
                     ]
                   : [
-                      'text-slate-900 placeholder:text-slate-400',
+                      isListening 
+                        ? 'text-red-700 placeholder:text-red-500'
+                        : 'text-slate-900 placeholder:text-slate-400',
                       'group-hover:placeholder:text-slate-500'
                     ]
               )}
-              disabled={isRecording}
+              disabled={isListening}
             />
 
             {/* Action Buttons Container */}
@@ -493,37 +499,40 @@ export default function EnhancedSearchInput({
                   : 'bg-slate-200'
               )} />
 
-              {/* Voice Search Button */}
+              {/* Voice Search Button with Enhanced UX */}
               {showVoiceSearch && (
-                <motion.button
-                  whileHover={{ scale: 1.05 }}
-                  whileTap={{ scale: 0.95 }}
-                  type="button"
-                  onClick={handleVoiceSearch}
-                  title={isRecording ? "Detener grabación" : "Búsqueda por voz"}
-                  className={cn(
-                    'p-2 rounded-full transition-all duration-300',
-                    isRecording
-                      ? 'bg-red-500/20 text-red-500 hover:bg-red-500/30'
-                      : appearance === 'dark'
-                      ? 'text-slate-400 hover:bg-slate-700/50 hover:text-white'
-                      : 'text-slate-500 hover:bg-slate-100 hover:text-slate-700'
-                  )}
-                >
-                  <motion.div
-                    animate={isRecording ? {
-                      scale: [1, 1.2, 1],
-                      opacity: [1, 0.7, 1]
-                    } : {}}
-                    transition={{
-                      duration: 1.5,
-                      repeat: Infinity,
-                      ease: "easeInOut"
-                    }}
+                <motion.div className="relative">
+                  <button
+                    type="button"
+                    onClick={isListening ? stopVoiceSearch : startVoiceSearch}
+                    className={cn(
+                      'p-2.5 rounded-full transition-all duration-300 transform relative',
+                      isListening
+                        ? 'bg-red-500 text-white animate-pulse shadow-lg hover:bg-red-600 scale-110 ring-4 ring-red-200' 
+                        : 'bg-blue-500 text-white shadow-md hover:bg-blue-600 hover:shadow-lg hover:scale-105',
+                      appearance === 'dark'
+                        ? 'shadow-black/20'
+                        : 'shadow-gray-200'
+                    )}
+                    title={isListening ? 'Detener grabación' : 'Buscar por voz'}
                   >
-                    {isRecording ? <MicOff className="w-4 h-4" /> : <Mic className="w-4 h-4" />}
-                  </motion.div>
-                </motion.button>
+                    <div className="relative z-10">
+                      {isListening ? (
+                        <MicOff className="h-5 w-5" />
+                      ) : (
+                        <Mic className="h-5 w-5" />
+                      )}
+                    </div>
+                    
+                    {/* Pulsing ring animations only when listening */}
+                    {isListening && (
+                      <>
+                        <div className="absolute inset-0 rounded-full bg-red-300 animate-ping opacity-30" />
+                        <div className="absolute inset-0 rounded-full bg-red-400 animate-pulse opacity-20" />
+                      </>
+                    )}
+                  </button>
+                </motion.div>
               )}
 
               {/* Image Search Button */}
@@ -642,6 +651,63 @@ export default function EnhancedSearchInput({
           </motion.div>
         )}
       </AnimatePresence>
+
+      {/* Recording Status Banner */}
+      {isListening && (
+        <motion.div
+          initial={{ opacity: 0, y: -10 }}
+          animate={{ opacity: 1, y: 0 }}
+          exit={{ opacity: 0, y: -10 }}
+          className="absolute top-full left-0 right-0 mt-2 z-50"
+        >
+          <div className="bg-red-500 text-white px-6 py-3 rounded-lg shadow-xl flex items-center justify-center gap-3">
+            <div className="flex items-center gap-2">
+              <div className="w-3 h-3 bg-white rounded-full animate-pulse" />
+              <Mic className="h-5 w-5" />
+              <span className="font-semibold">GRABANDO</span>
+            </div>
+            <div className="text-red-100">|</div>
+            <span className="text-red-100">Habla ahora tu búsqueda...</span>
+            <div className="text-red-100">|</div>
+            <button
+              onClick={stopVoiceSearch}
+              className="bg-red-600 hover:bg-red-700 px-3 py-1 rounded text-sm font-medium transition-colors"
+            >
+              Detener
+            </button>
+          </div>
+        </motion.div>
+      )}
+
+      {/* Voice Error Message */}
+      {voiceError && (
+        <motion.div
+          initial={{ opacity: 0, scale: 0.95 }}
+          animate={{ opacity: 1, scale: 1 }}
+          className="mt-3 p-4 bg-red-50 border-l-4 border-red-400 rounded-lg text-red-700 shadow-md"
+        >
+          <div className="flex items-center gap-2">
+            <AlertCircle className="h-5 w-5 flex-shrink-0" />
+            <span className="font-medium">Error de voz:</span>
+            <span>{voiceError}</span>
+          </div>
+        </motion.div>
+      )}
+
+      {/* Success Feedback */}
+      {searchTerm && !isListening && searchTerm !== initialValue && (
+        <motion.div
+          initial={{ opacity: 0, scale: 0.95 }}
+          animate={{ opacity: 1, scale: 1 }}
+          className="mt-3 p-4 bg-green-50 border-l-4 border-green-400 rounded-lg text-green-700 shadow-md"
+        >
+          <div className="flex items-center gap-2">
+            <CheckCircle className="h-5 w-5 flex-shrink-0" />
+            <span className="font-medium">¡Búsqueda por voz exitosa!</span>
+            <span>"{searchTerm}"</span>
+          </div>
+        </motion.div>
+      )}
     </div>
   );
 }

@@ -164,21 +164,43 @@ export default function SearchBar({
 
   const handleVoiceSearch = () => {
     if ('webkitSpeechRecognition' in window || 'SpeechRecognition' in window) {
-      setIsRecording(!isRecording)
+      const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+      const recognition = new SpeechRecognition();
       
-      // Simulación de reconocimiento de voz
-      if (!isRecording) {
+      recognition.lang = 'es-PE';
+      recognition.interimResults = false;
+      recognition.continuous = false;
+      
+      setIsRecording(true);
+      
+      recognition.onresult = (event: any) => {
+        const transcript = event.results[0][0].transcript;
+        setSearchTerm(transcript);
+        setRecognizedText(transcript);
+        setIsRecording(false);
+        
+        // Auto-submit después de reconocimiento
         setTimeout(() => {
-          const simulatedText = "departamentos en alquiler"
-          setSearchTerm(simulatedText)
-          setRecognizedText(simulatedText)
-          setIsRecording(false)
-          
-          // Auto-submit después de reconocimiento
-          setTimeout(() => {
-            onSearch(simulatedText)
-          }, 1000)
-        }, 2000)
+          onSearch(transcript);
+        }, 500);
+      };
+      
+      recognition.onerror = (event: any) => {
+        console.error('Speech recognition error:', event.error);
+        setIsRecording(false);
+        alert(`Error de reconocimiento de voz: ${event.error}`);
+      };
+      
+      recognition.onend = () => {
+        setIsRecording(false);
+      };
+      
+      try {
+        recognition.start();
+      } catch (error) {
+        console.error('Error starting recognition:', error);
+        setIsRecording(false);
+        alert('Error al iniciar el reconocimiento de voz');
       }
     } else {
       alert("Lo sentimos, tu navegador no soporta reconocimiento de voz")

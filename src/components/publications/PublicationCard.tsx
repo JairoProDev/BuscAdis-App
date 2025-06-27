@@ -251,16 +251,16 @@ export default function PublicationCard({
     setIsFavorite(!isFavorite);
     
     // TODO: Integrar con la base de datos de favoritos
+    // Funcionalidad de favoritos simulada localmente por ahora
     try {
-      const response = await fetch('/api/favorites', {
-        method: isFavorite ? 'DELETE' : 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ publicationId: publication.id })
-      });
-      
-      if (!response.ok) {
-        // Revertir el estado si hay error
-        setIsFavorite(isFavorite);
+      // Guardar en localStorage temporalmente
+      const favorites = JSON.parse(localStorage.getItem('favorites') || '[]');
+      if (isFavorite) {
+        const updatedFavorites = favorites.filter((id: string) => id !== publication.id);
+        localStorage.setItem('favorites', JSON.stringify(updatedFavorites));
+      } else {
+        favorites.push(publication.id);
+        localStorage.setItem('favorites', JSON.stringify(favorites));
       }
     } catch (error) {
       console.error('Error updating favorites:', error);
