@@ -121,8 +121,7 @@ const ListingCard: React.FC<ListingCardProps> = ({ listing, index }) => {
         transition: { duration: 0.15, ease: "circOut" },
       }}
     >
-      <Link href={adUrl} legacyBehavior>
-        <a className="block h-full transform-style-3d focus:outline-none focus-visible:ring-2 focus-visible:ring-teal-500 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-slate-900 rounded-xl">
+      <Link href={adUrl} className="block h-full transform-style-3d focus:outline-none focus-visible:ring-2 focus-visible:ring-teal-500 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-slate-900 rounded-xl">
           <div className="flex flex-col overflow-hidden rounded-xl bg-white dark:bg-slate-800/80
             border border-slate-200/80 dark:border-slate-700/60
             shadow-md dark:shadow-xl dark:shadow-slate-900/70
@@ -204,7 +203,6 @@ const ListingCard: React.FC<ListingCardProps> = ({ listing, index }) => {
             <div className="absolute -inset-px rounded-xl opacity-0 group-hover:opacity-100 transition-opacity duration-300 
                           bg-gradient-radial from-teal-500/5 via-transparent to-transparent pointer-events-none blur-[1px]"></div>
           </div>
-        </a>
       </Link>
     </motion.div>
   );

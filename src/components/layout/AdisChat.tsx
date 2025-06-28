@@ -24,6 +24,9 @@ export default function AdisChat({ isOpen, onClose, variant = 'mobile' }: AdisCh
   const messagesEndRef = useRef<HTMLDivElement>(null)
   const inputRef = useRef<HTMLInputElement>(null)
 
+  // Configuración responsive temprana
+  const isMobile = variant === 'mobile'
+
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
   }
@@ -33,11 +36,11 @@ export default function AdisChat({ isOpen, onClose, variant = 'mobile' }: AdisCh
   }, [messages])
 
   useEffect(() => {
-    if (isOpen && inputRef.current) {
-      // Pequeño delay para que la animación termine antes de hacer focus
+    if (isOpen && inputRef.current && !isMobile) {
+      // Solo hacer focus en desktop para evitar scroll automático en mobile
       setTimeout(() => inputRef.current?.focus(), 300)
     }
-  }, [isOpen])
+  }, [isOpen, isMobile])
 
   const handleSendMessage = async (text: string) => {
     if (!text.trim()) return
@@ -106,11 +109,9 @@ export default function AdisChat({ isOpen, onClose, variant = 'mobile' }: AdisCh
   }
 
   // Configuración responsive
-  const isMobile = variant === 'mobile'
-  
   const containerClasses = isMobile
-    ? "fixed bottom-0 left-0 right-0 h-[85vh] bg-white dark:bg-slate-900 rounded-t-3xl shadow-2xl z-50 md:hidden"
-    : "fixed top-0 right-0 w-full md:w-[400px] h-full md:h-[calc(100vh-4rem)] md:top-16 bg-white dark:bg-slate-900 border-l border-slate-200 dark:border-slate-700 shadow-xl z-50"
+    ? "fixed bottom-0 left-0 right-0 h-[75vh] bg-white dark:bg-slate-900 rounded-t-3xl shadow-2xl z-50 md:hidden"
+    : "fixed top-20 right-4 w-[400px] h-[calc(100vh-6rem)] max-h-[600px] bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-2xl shadow-xl z-50 hidden md:block"
 
   const motionProps = isMobile
     ? {
@@ -128,20 +129,23 @@ export default function AdisChat({ isOpen, onClose, variant = 'mobile' }: AdisCh
     <AnimatePresence>
       {isOpen && (
         <>
-          {/* Overlay */}
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            onClick={onClose}
-            className="fixed inset-0 bg-black/50 z-40"
-          />
+          {/* Overlay - Solo para mobile */}
+          {isMobile && (
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              onClick={onClose}
+              className="fixed inset-0 bg-black/50 z-40"
+            />
+          )}
           
           {/* Chat Container */}
           <motion.div
             {...motionProps}
             transition={{ type: 'spring', damping: 30, stiffness: 300 }}
             className={containerClasses}
+            onClick={(e) => e.stopPropagation()}
           >
             {/* Header */}
             <div className="flex items-center justify-between p-4 border-b border-slate-200 dark:border-slate-700 bg-gradient-to-r from-teal-50 to-cyan-50 dark:from-teal-900/20 dark:to-cyan-900/20">

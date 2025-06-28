@@ -28,9 +28,9 @@ export default function Header() {
     // Define tus colores personalizados basados en tu diseño
     const backgroundColor = 'bg-slate-900';
     const textColor = 'text-gray-300';
-    const primaryButtonBg = 'bg-primary-600';
-    const primaryButtonHoverBg = 'hover:bg-primary-700';
-    const primaryButtonTextColor = 'text-white';
+    const primaryButtonBg = 'bg-gradient-to-r from-teal-500 to-cyan-500';
+    const primaryButtonHoverBg = 'hover:from-teal-600 hover:to-cyan-600';
+    const primaryButtonTextColor = 'text-slate-900 dark:text-white font-semibold';
     const hoverTextColor = 'text-white';
     const activeLinkBg = 'bg-primary-800';
     const activeLinkTextColor = 'text-white';
@@ -100,7 +100,7 @@ export default function Header() {
                             </Link>
                             <Link
                                 href="/publicar"
-                                className={`${primaryButtonBg} ${primaryButtonTextColor} px-4 py-2 rounded-md font-semibold ${primaryButtonHoverBg} transition-colors`}
+                                className={`${primaryButtonBg} ${primaryButtonTextColor} px-4 py-2 rounded-md shadow-md hover:shadow-lg ${primaryButtonHoverBg} transition-all duration-300`}
                             >
                                 <MegaphoneIcon className="w-5 h-5 mr-1 inline-block" /> Publicar
                             </Link>
@@ -165,7 +165,7 @@ export default function Header() {
                                 </Link>
                                 <Link
                                     href="/register"
-                                    className={`${primaryButtonBg} ${primaryButtonTextColor} px-3 py-2 rounded-md text-sm ${primaryButtonHoverBg} transition-colors`}
+                                    className={`${primaryButtonBg} ${primaryButtonTextColor} px-3 py-2 rounded-md text-sm shadow-md hover:shadow-lg ${primaryButtonHoverBg} transition-all duration-300`}
                                 >
                                     Regístrate
                                 </Link>
