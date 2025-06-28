@@ -323,18 +323,18 @@ const EnhancedFilterSelector = ({
           {selectedOption ? selectedOption.label : placeholder}
         </span>
         {hasValue && (
-          <button
+          <span
             onClick={(e) => {
               e.stopPropagation()
               onChange(null)
             }}
-            className="ml-1 hover:bg-teal-200 dark:hover:bg-teal-800 rounded-full p-0.5 transition-colors"
+            className="ml-1 hover:bg-teal-200 dark:hover:bg-teal-800 rounded-full p-0.5 transition-colors cursor-pointer"
             title="Limpiar filtro"
           >
             <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
             </svg>
-          </button>
+          </span>
         )}
         <ChevronDownIcon 
           className={`w-4 h-4 text-gray-500 transition-transform ${isOpen ? 'rotate-180' : ''}`} 
@@ -873,10 +873,11 @@ function SearchPageContent() {
                     categoryId={category.id}
                     isLoading={categoryLoading[category.id]}
                     onViewAll={() => {
-                      // Navegar a la categoría completa
-                      setSelectedCategory(category.id)
-                      setHasSearched(true)
-                      handleSearch('', { category: category.id })
+                      // Navegar a la URL de la categoría
+                      console.log('🔗 Ver todos clicked for category:', category.id)
+                      const categoryUrl = generateCategoryUrl(category.id)
+                      console.log('🔗 Navigating to:', categoryUrl)
+                      router.push(categoryUrl)
                     }}
                     showViewAll={true}
                   />
