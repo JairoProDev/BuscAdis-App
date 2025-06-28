@@ -95,11 +95,11 @@ const CurvedShareIcon = ({ className }: { className?: string }) => (
     stroke="currentColor" 
     viewBox="0 0 24 24" 
     xmlns="http://www.w3.org/2000/svg"
+    strokeWidth={2}
   >
     <path 
       strokeLinecap="round" 
       strokeLinejoin="round" 
-      strokeWidth={2} 
       d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"
     />
   </svg>
@@ -564,13 +564,13 @@ export default function PublicationCard({
                       </button>
                     </div>
                     
-                    {/* Lado derecho - Botón Contactar Desktop o Compartir Móvil */}
+                    {/* Lado derecho - Botón Contactar para Modo Lista */}
                     <div className="flex items-center gap-2">
                       {/* Botón Contactar - CTA principal (Desktop) */}
                       {showWhatsApp && publication.whatsapp && (
                         <button
                           onClick={handleWhatsAppClick}
-                          className="hidden md:flex items-center gap-1.5 px-3 py-1.5 bg-green-500 hover:bg-green-600 text-white rounded-lg transition-colors font-medium text-sm shadow-md"
+                          className="hidden md:flex items-center gap-1.5 px-3 py-1.5 bg-green-500 hover:bg-green-600 dark:bg-green-600 dark:hover:bg-green-500 text-white rounded-lg transition-all duration-200 font-medium text-sm shadow-md hover:shadow-lg hover:scale-105"
                           aria-label="Contactar por WhatsApp"
                         >
                           <WhatsAppIcon className="w-4 h-4" />
@@ -578,26 +578,28 @@ export default function PublicationCard({
                         </button>
                       )}
                       
-                      {/* Botón Contactar - CTA principal (Móvil) */}
-                      {showWhatsApp && publication.whatsapp && (
-                        <button
-                          onClick={handleWhatsAppClick}
-                          className="md:hidden flex items-center gap-1 px-2 py-1 bg-green-500 hover:bg-green-600 text-white rounded-lg transition-colors font-medium text-xs"
-                          aria-label="Contactar por WhatsApp"
-                        >
-                          <WhatsAppIcon className="w-3 h-3" />
-                          <span>Contactar</span>
-                        </button>
-                      )}
-                      
-                      {/* Botón compartir móvil */}
-                      <button
-                        onClick={handleShare}
-                        className="md:hidden p-1.5 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors"
-                        aria-label="Compartir"
-                      >
-                        <CurvedShareIcon className="w-4 h-4 text-gray-500" />
-                      </button>
+                                              {/* Botones móviles - Solo iconos */}
+                        <div className="md:hidden flex items-center gap-1">
+                          {/* Botón Contactar - Móvil */}
+                          {showWhatsApp && publication.whatsapp && (
+                            <button
+                              onClick={handleWhatsAppClick}
+                              className="flex items-center justify-center p-2 hover:bg-green-100 dark:hover:bg-green-900/30 rounded-md transition-all duration-200 hover:scale-105"
+                              aria-label="Contactar por WhatsApp"
+                            >
+                              <WhatsAppIcon className="w-4 h-4 text-green-600 dark:text-green-400" />
+                            </button>
+                          )}
+                          
+                          {/* Botón compartir móvil */}
+                          <button
+                            onClick={handleShare}
+                            className="flex items-center justify-center p-2 hover:bg-blue-100 dark:hover:bg-blue-900/30 rounded-md transition-all duration-200 hover:scale-105"
+                            aria-label="Compartir"
+                          >
+                            <CurvedShareIcon className="w-4 h-4 text-blue-500 dark:text-blue-400" />
+                          </button>
+                        </div>
                     </div>
                   </div>
                 </div>
@@ -637,48 +639,62 @@ export default function PublicationCard({
                     </div>
                   </div>
 
-                  {/* Footer de interacciones - Guardar, Contactar y Compartir */}
-                  <div className="border-t border-gray-200 dark:border-gray-700 pt-2 mt-auto px-2">
-                    <div className="flex items-center justify-center gap-6">
+                  {/* Footer de interacciones - Tres botones hermanos iguales */}
+                  <div className="border-t border-gray-200 dark:border-gray-700 pt-3 mt-auto">
+                    <div className="grid grid-cols-3 gap-1 px-2">
                       {/* Guardar */}
                       <button
                         onClick={handleFavoriteToggle}
-                        className="flex items-center gap-1 p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors"
+                        className="flex flex-col items-center justify-center gap-1 py-3 px-2 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-all duration-200 group"
                         aria-label="Guardar"
+                        title="Guardar"
                       >
                         {isFavorite ? (
-                          <HeartSolidIcon className="w-5 h-5 text-red-500" />
+                          <HeartSolidIcon className="w-5 h-5 text-red-500 dark:text-red-400" />
                         ) : (
-                          <HeartIcon className="w-5 h-5 text-gray-500 hover:text-red-500" />
+                          <HeartIcon className="w-5 h-5 text-red-500 dark:text-red-400" />
                         )}
-                        <span className="text-xs text-gray-500 font-medium hidden sm:inline">
+                        <span className="text-xs font-medium text-red-500 dark:text-red-400 hidden sm:block">
                           Guardar
                         </span>
                       </button>
 
-                      {/* Contactar - Solo en modo grid */}
-                      {showWhatsApp && publication.whatsapp && (
-                        <button
-                          onClick={handleWhatsAppClick}
-                          className="flex items-center gap-1 p-2 bg-green-500 hover:bg-green-600 text-white rounded-lg transition-colors"
-                          aria-label="Contactar por WhatsApp"
-                        >
-                          <WhatsAppIcon className="w-5 h-5" />
-                          <span className="text-xs font-medium hidden sm:inline">
-                            Contactar
-                          </span>
-                        </button>
-                      )}
-
                       {/* Compartir */}
                       <button
                         onClick={handleShare}
-                        className="flex items-center gap-1 p-2 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors"
+                        className="flex flex-col items-center justify-center gap-1 py-3 px-2 hover:bg-blue-50 dark:hover:bg-blue-900/20 rounded-lg transition-all duration-200 group"
                         aria-label="Compartir"
+                        title="Compartir"
                       >
-                        <CurvedShareIcon className="w-5 h-5 text-gray-500 hover:text-blue-500" />
-                        <span className="text-xs text-gray-500 font-medium hidden sm:inline">
+                        <CurvedShareIcon className="w-5 h-5 text-blue-500 dark:text-blue-400" />
+                        <span className="text-xs font-medium text-blue-500 dark:text-blue-400 hidden sm:block">
                           Compartir
+                        </span>
+                      </button>
+
+                      {/* Contactar */}
+                      <button
+                        onClick={showWhatsApp && publication.whatsapp ? handleWhatsAppClick : undefined}
+                        disabled={!showWhatsApp || !publication.whatsapp}
+                        className={`flex flex-col items-center justify-center gap-1 py-3 px-2 rounded-lg transition-all duration-200 group ${
+                          showWhatsApp && publication.whatsapp 
+                            ? 'bg-green-500 hover:bg-green-600 dark:bg-green-600 dark:hover:bg-green-500' 
+                            : 'opacity-50 cursor-not-allowed bg-gray-100 dark:bg-gray-800'
+                        }`}
+                        aria-label="Contactar por WhatsApp"
+                        title="Contactar por WhatsApp"
+                      >
+                        <WhatsAppIcon className={`w-5 h-5 ${
+                          showWhatsApp && publication.whatsapp 
+                            ? 'text-white' 
+                            : 'text-gray-400 dark:text-gray-600'
+                        }`} />
+                        <span className={`text-xs font-medium hidden sm:block ${
+                          showWhatsApp && publication.whatsapp 
+                            ? 'text-white' 
+                            : 'text-gray-400 dark:text-gray-600'
+                        }`}>
+                          Contactar
                         </span>
                       </button>
                     </div>
