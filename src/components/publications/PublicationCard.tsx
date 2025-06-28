@@ -396,17 +396,7 @@ export default function PublicationCard({
 
             {/* Views Badge removido - solo en el footer ahora */}
 
-            {/* Botón Contactar sobre la imagen - esquina inferior derecha */}
-            {showWhatsApp && publication.whatsapp && (
-              <button
-                onClick={handleWhatsAppClick}
-                className="absolute bottom-2 right-2 flex items-center gap-1.5 bg-green-500 hover:bg-green-600 text-white px-2.5 py-1.5 rounded-lg transition-colors font-medium text-xs shadow-lg backdrop-blur-sm contact-element"
-                aria-label="Contactar por WhatsApp"
-              >
-                <WhatsAppIcon className="w-3.5 h-3.5" />
-                <span>Contactar</span>
-              </button>
-            )}
+
 
           </div>
 
@@ -473,7 +463,7 @@ export default function PublicationCard({
                   
                   {/* Fila 4: Botones de acción */}
                   <div className="flex items-center justify-between">
-                    {/* Botones de compartir y contactar - Desktop */}
+                    {/* Botones de redes sociales - Desktop (lado izquierdo) */}
                     <div className="hidden md:flex items-center gap-1">
                       {/* Facebook */}
                       <button
@@ -574,16 +564,41 @@ export default function PublicationCard({
                       </button>
                     </div>
                     
-                    {/* Botón Contactar movido a la imagen */}
-                    
-                    {/* Botón compartir móvil */}
-                    <button
-                      onClick={handleShare}
-                      className="md:hidden p-1.5 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors"
-                      aria-label="Compartir"
-                    >
-                      <CurvedShareIcon className="w-4 h-4 text-gray-500" />
-                    </button>
+                    {/* Lado derecho - Botón Contactar Desktop o Compartir Móvil */}
+                    <div className="flex items-center gap-2">
+                      {/* Botón Contactar - CTA principal (Desktop) */}
+                      {showWhatsApp && publication.whatsapp && (
+                        <button
+                          onClick={handleWhatsAppClick}
+                          className="hidden md:flex items-center gap-1.5 px-3 py-1.5 bg-green-500 hover:bg-green-600 text-white rounded-lg transition-colors font-medium text-sm shadow-md"
+                          aria-label="Contactar por WhatsApp"
+                        >
+                          <WhatsAppIcon className="w-4 h-4" />
+                          <span>Contactar</span>
+                        </button>
+                      )}
+                      
+                      {/* Botón Contactar - CTA principal (Móvil) */}
+                      {showWhatsApp && publication.whatsapp && (
+                        <button
+                          onClick={handleWhatsAppClick}
+                          className="md:hidden flex items-center gap-1 px-2 py-1 bg-green-500 hover:bg-green-600 text-white rounded-lg transition-colors font-medium text-xs"
+                          aria-label="Contactar por WhatsApp"
+                        >
+                          <WhatsAppIcon className="w-3 h-3" />
+                          <span>Contactar</span>
+                        </button>
+                      )}
+                      
+                      {/* Botón compartir móvil */}
+                      <button
+                        onClick={handleShare}
+                        className="md:hidden p-1.5 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-lg transition-colors"
+                        aria-label="Compartir"
+                      >
+                        <CurvedShareIcon className="w-4 h-4 text-gray-500" />
+                      </button>
+                    </div>
                   </div>
                 </div>
               </>
@@ -622,9 +637,9 @@ export default function PublicationCard({
                     </div>
                   </div>
 
-                  {/* Footer de interacciones - Solo Guardar y Compartir */}
+                  {/* Footer de interacciones - Guardar, Contactar y Compartir */}
                   <div className="border-t border-gray-200 dark:border-gray-700 pt-2 mt-auto px-2">
-                    <div className="flex items-center justify-center gap-8">
+                    <div className="flex items-center justify-center gap-6">
                       {/* Guardar */}
                       <button
                         onClick={handleFavoriteToggle}
@@ -640,6 +655,20 @@ export default function PublicationCard({
                           Guardar
                         </span>
                       </button>
+
+                      {/* Contactar - Solo en modo grid */}
+                      {showWhatsApp && publication.whatsapp && (
+                        <button
+                          onClick={handleWhatsAppClick}
+                          className="flex items-center gap-1 p-2 bg-green-500 hover:bg-green-600 text-white rounded-lg transition-colors"
+                          aria-label="Contactar por WhatsApp"
+                        >
+                          <WhatsAppIcon className="w-5 h-5" />
+                          <span className="text-xs font-medium hidden sm:inline">
+                            Contactar
+                          </span>
+                        </button>
+                      )}
 
                       {/* Compartir */}
                       <button
