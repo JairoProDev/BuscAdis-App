@@ -280,7 +280,7 @@ export default function CategorySelector({
               {/* Todas las categorías */}
               <button
                 onClick={() => handleCategorySelect('')}
-                className={`w-full text-left p-3 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors flex items-center gap-3 ${
+                className={`w-full text-left p-3 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors flex items-start gap-3 ${
                   !activeCategory ? 'bg-blue-50 dark:bg-blue-900/20 text-blue-600' : ''
                 }`}
               >
@@ -300,7 +300,7 @@ export default function CategorySelector({
                         setExpandedCategory(category.id)
                       }
                     }}
-                    className={`w-full text-left p-3 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors flex items-center gap-3 ${
+                    className={`w-full text-left p-3 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors flex items-start gap-3 ${
                       activeCategory === category.id ? 'bg-blue-50 dark:bg-blue-900/20 text-blue-600' : ''
                     }`}
                   >
@@ -336,7 +336,7 @@ export default function CategorySelector({
                                 setExpandedSubcategory(subcategory.id)
                               }
                             }}
-                            className={`w-full text-left p-3 pl-12 hover:bg-gray-100 dark:hover:bg-gray-600 transition-colors flex items-center gap-2 ${
+                            className={`w-full text-left p-3 pl-12 hover:bg-gray-100 dark:hover:bg-gray-600 transition-colors flex items-start gap-2 ${
                               activeSubcategory === subcategory.id ? 'bg-blue-100 dark:bg-blue-800/30 text-blue-600' : ''
                             }`}
                           >

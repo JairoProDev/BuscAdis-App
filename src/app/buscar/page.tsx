@@ -119,7 +119,7 @@ const SubcategorySelector = ({
       >
         <button
           onClick={() => handleSubcategorySelect('')}
-          className="w-full flex items-center px-4 py-2 text-sm hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors text-gray-700 dark:text-gray-300"
+          className="w-full flex items-start px-4 py-2 text-sm text-left hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors text-gray-700 dark:text-gray-300"
         >
           Todas las subcategorías
         </button>
@@ -127,7 +127,7 @@ const SubcategorySelector = ({
           <button
             key={subcategory.id}
             onClick={() => handleSubcategorySelect(subcategory.id)}
-            className={`w-full flex items-center px-4 py-2 text-sm hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors ${
+            className={`w-full flex items-start px-4 py-2 text-sm text-left hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors ${
               selectedSubcategory === subcategory.id 
                 ? 'bg-teal-50 dark:bg-teal-900/20 text-teal-700 dark:text-teal-300' 
                 : 'text-gray-700 dark:text-gray-300'
@@ -188,7 +188,7 @@ const FilterSelector = ({
         >
           <button
             onClick={() => handleFilterSelect(null)}
-            className="w-full flex items-center px-4 py-2 text-sm hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors text-gray-700 dark:text-gray-300"
+            className="w-full flex items-start px-4 py-2 text-sm text-left hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors text-gray-700 dark:text-gray-300"
           >
             Cualquier {filter.label.toLowerCase()}
           </button>
@@ -196,7 +196,7 @@ const FilterSelector = ({
             <button
               key={option.value}
               onClick={() => handleFilterSelect(option.value)}
-              className={`w-full flex items-center px-4 py-2 text-sm hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors ${
+              className={`w-full flex items-start px-4 py-2 text-sm text-left hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors ${
                 value === option.value 
                   ? 'bg-teal-50 dark:bg-teal-900/20 text-teal-700 dark:text-teal-300' 
                   : 'text-gray-700 dark:text-gray-300'
@@ -348,7 +348,7 @@ const EnhancedFilterSelector = ({
       >
         <button
           onClick={() => handleOptionSelect(null)}
-          className="w-full flex items-center px-4 py-2 text-sm hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors text-gray-700 dark:text-gray-300"
+          className="w-full flex items-start px-4 py-2 text-sm text-left hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors text-gray-700 dark:text-gray-300"
         >
           {placeholder}
         </button>
@@ -356,7 +356,7 @@ const EnhancedFilterSelector = ({
           <button
             key={option.value}
             onClick={() => handleOptionSelect(option.value)}
-            className={`w-full flex items-center px-4 py-2 text-sm hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors ${
+            className={`w-full flex items-start px-4 py-2 text-sm text-left hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors ${
               value === option.value 
                 ? 'bg-teal-50 dark:bg-teal-900/20 text-teal-700 dark:text-teal-300' 
                 : 'text-gray-700 dark:text-gray-300'
@@ -727,26 +727,6 @@ function SearchPageContent() {
             animate={{ opacity: 1, y: 0 }}
             className="space-y-4 lg:space-y-8"
           >
-            {/* Hero Section Compacto */}
-            <div className="text-center py-6 lg:py-12">
-              <motion.h1
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.1 }}
-                className="text-3xl lg:text-5xl font-bold bg-gradient-to-r from-teal-600 via-blue-600 to-purple-600 bg-clip-text text-transparent mb-4"
-              >
-                Descubre Oportunidades
-              </motion.h1>
-              
-              <motion.p
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.2 }}
-                className="text-lg lg:text-xl text-gray-600 dark:text-gray-300 mb-8 max-w-2xl mx-auto"
-              >
-                Explora miles de anuncios organizados por categorías para encontrar exactamente lo que necesitas
-              </motion.p>
-            </div>
 
             {/* Filas de Categorías */}
             <div className="space-y-6 lg:space-y-12">

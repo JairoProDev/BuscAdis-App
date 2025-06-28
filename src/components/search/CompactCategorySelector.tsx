@@ -154,7 +154,7 @@ export default function CompactCategorySelector({
                   <button
                     key={category.id}
                     onClick={() => handleCategorySelect(category.id)}
-                    className={`flex items-center gap-2 px-3 py-2 rounded-md text-sm font-medium transition-colors text-left ${
+                    className={`flex items-start gap-2 px-3 py-2 rounded-md text-sm font-medium transition-colors text-left ${
                       selectedCategory === category.id
                         ? 'bg-blue-50 text-blue-700 dark:bg-blue-900/20 dark:text-blue-300'
                         : 'text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700'
@@ -190,7 +190,7 @@ export default function CompactCategorySelector({
                   <button
                     key={subcategory.id}
                     onClick={() => handleSubcategorySelect(subcategory.id)}
-                    className={`w-full flex items-center px-3 py-2 rounded-md text-sm transition-colors text-left ${
+                    className={`w-full flex items-start px-3 py-2 rounded-md text-sm transition-colors text-left ${
                       selectedSubcategory === subcategory.id
                         ? 'bg-blue-50 text-blue-700 dark:bg-blue-900/20 dark:text-blue-300'
                         : 'text-gray-700 dark:text-gray-300 hover:bg-gray-50 dark:hover:bg-gray-700'
