@@ -7,6 +7,9 @@ import {
   PaperAirplaneIcon,
   XMarkIcon
 } from '@heroicons/react/24/outline'
+import { categories } from '@/data/categories'
+import { categoriesList } from '@/data/categories-data'
+import { featuredAds } from '@/data/featuredAds'
 
 interface AdisChatProps {
   isOpen: boolean
@@ -18,12 +21,28 @@ interface Message {
   text: string
   sender: 'user' | 'adis'
   timestamp: Date
+  options?: string[]
+  onOptionClick?: (option: string) => void
+}
+
+type ConversationStage =
+  | 'welcome'
+  | 'category_selected'
+  | 'subcategory_selected'
+  | 'subsubcategory_selected'
+  | 'show_results'
+
+interface ConversationContext {
+  stage: ConversationStage
+  selectedCategory?: string
+  selectedSubcategory?: string
+  selectedSubSubcategory?: string
 }
 
 const WelcomeScreen = ({
-  onQuickSuggestion
+  onCategorySelect
 }: {
-  onQuickSuggestion: (suggestion: string) => void
+  onCategorySelect: (categoryId: string) => void
 }) => (
   <div className='text-center py-8 flex flex-col justify-center h-full'>
     <div className='w-16 h-16 bg-gradient-to-r from-teal-100 to-cyan-100 dark:from-teal-900/40 dark:to-cyan-900/40 rounded-full flex items-center justify-center mx-auto mb-4'>
@@ -33,33 +52,143 @@ const WelcomeScreen = ({
       ¡Hola! Soy ADIS ✨
     </h4>
     <p className='text-sm text-slate-600 dark:text-slate-400 mb-6 max-w-xs mx-auto'>
-      Tu asistente personal de BuscAdis. Te ayudo a encontrar exactamente lo que
-      necesitas.
+      Estoy aquí para ayudarte. ¿Qué estás buscando hoy? Elige una categoría para empezar.
     </p>
     <div className='space-y-2 flex-grow-0'>
-      <p className='text-xs font-semibold text-slate-500 dark:text-slate-400 mb-3'>
-        Prueba preguntándome:
-      </p>
-      {[
-        { text: 'Buscar empleos remotos', emoji: '💼' },
-        { text: 'Departamentos en Miraflores', emoji: '🏠' },
-        { text: 'Autos usados baratos', emoji: '🚗' },
-        { text: 'Cursos de programación', emoji: '💻' }
-      ].map((suggestion, index) => (
+      {categoriesList.map(category => (
         <button
-          key={index}
-          onClick={() => onQuickSuggestion(suggestion.text)}
+          key={category.id}
+          onClick={() => onCategorySelect(category.id)}
           className='w-full p-3 text-left bg-slate-50 dark:bg-slate-800 hover:bg-slate-100 dark:hover:bg-slate-700 rounded-xl transition-all duration-200 text-sm group border border-transparent hover:border-teal-200 dark:hover:border-teal-800'
         >
-          <span className='mr-2'>{suggestion.emoji}</span>
           <span className='group-hover:text-teal-600 dark:group-hover:text-teal-400'>
-            {suggestion.text}
+            {category.name}
           </span>
         </button>
       ))}
     </div>
   </div>
 )
+
+const SubcategoryScreen = ({
+  categoryId,
+  onSubcategorySelect,
+  onBack
+}: {
+  categoryId: string
+  onSubcategorySelect: (subcategoryId: string) => void
+  onBack: () => void
+}) => {
+  const category = categoriesList.find(c => c.id === categoryId)
+  if (!category) return null
+  return (
+    <div className='py-8 flex flex-col h-full'>
+      <button onClick={onBack} className='mb-4 text-teal-600 dark:text-teal-400 text-sm'>&larr; Volver a categorías</button>
+      <h4 className='text-lg font-bold text-slate-900 dark:text-white mb-4'>
+        {category.name}
+      </h4>
+      <div className='space-y-2 flex-grow-0'>
+        {category.subcategories.map(subcat => (
+          <button
+            key={subcat.id}
+            onClick={() => onSubcategorySelect(subcat.id)}
+            className='w-full p-3 text-left bg-slate-50 dark:bg-slate-800 hover:bg-slate-100 dark:hover:bg-slate-700 rounded-xl transition-all duration-200 text-sm group border border-transparent hover:border-teal-200 dark:hover:border-teal-800'
+          >
+            <span className='group-hover:text-teal-600 dark:group-hover:text-teal-400'>
+              {subcat.name}
+            </span>
+          </button>
+        ))}
+      </div>
+    </div>
+  )
+}
+
+const SubSubcategoryScreen = ({
+  categoryId,
+  subcategoryId,
+  onSubSubcategorySelect,
+  onBack
+}: {
+  categoryId: string
+  subcategoryId: string
+  onSubSubcategorySelect: (subSubcategoryId: string) => void
+  onBack: () => void
+}) => {
+  const category = categoriesList.find(c => c.id === categoryId)
+  const subcategory = category?.subcategories.find(s => s.id === subcategoryId)
+  if (!subcategory || !subcategory.subSubcategories || subcategory.subSubcategories.length === 0) return null
+  return (
+    <div className='py-8 flex flex-col h-full'>
+      <button onClick={onBack} className='mb-4 text-teal-600 dark:text-teal-400 text-sm'>&larr; Volver a subcategorías</button>
+      <h4 className='text-lg font-bold text-slate-900 dark:text-white mb-4'>
+        {subcategory.name}
+      </h4>
+      <div className='space-y-2 flex-grow-0'>
+        {subcategory.subSubcategories.map(subsub => (
+          <button
+            key={subsub.id}
+            onClick={() => onSubSubcategorySelect(subsub.id)}
+            className='w-full p-3 text-left bg-slate-50 dark:bg-slate-800 hover:bg-slate-100 dark:hover:bg-slate-700 rounded-xl transition-all duration-200 text-sm group border border-transparent hover:border-teal-200 dark:hover:border-teal-800'
+          >
+            <span className='group-hover:text-teal-600 dark:group-hover:text-teal-400'>
+              {subsub.name}
+            </span>
+          </button>
+        ))}
+      </div>
+    </div>
+  )
+}
+
+const ResultsScreen = ({
+  categoryId,
+  subcategoryId,
+  subSubcategoryId,
+  onRestart
+}: {
+  categoryId: string
+  subcategoryId?: string
+  subSubcategoryId?: string
+  onRestart: () => void
+}) => {
+  const category = categoriesList.find(c => c.id === categoryId)
+  const subcategory = category?.subcategories.find(s => s.id === subcategoryId)
+  const subSubcategory = subcategory?.subSubcategories?.find(ss => ss.id === subSubcategoryId)
+  const ads = featuredAds.filter(ad => {
+    if (category && ad.category && ad.category.toLowerCase().includes(category.name.toLowerCase())) {
+      return true
+    }
+    return false
+  })
+  return (
+    <div className='py-8 flex flex-col h-full'>
+      <button onClick={onRestart} className='mb-4 text-teal-600 dark:text-teal-400 text-sm'>
+        &larr; Nueva búsqueda
+      </button>
+      <h4 className='text-lg font-bold text-slate-900 dark:text-white mb-4'>
+        Resultados para {category?.name}{subcategory ? ` / ${subcategory.name}` : ''}{subSubcategory ? ` / ${subSubcategory.name}` : ''}
+      </h4>
+      {ads.length === 0 ? (
+        <div className='text-slate-500 dark:text-slate-400'>No se encontraron anuncios destacados para esta categoría.</div>
+      ) : (
+        <div className='space-y-4'>
+          {ads.map((ad, idx) => (
+            <div key={idx} className='bg-slate-50 dark:bg-slate-800 rounded-xl p-4 flex gap-4 items-center'>
+              <img src={ad.imageUrl} alt={ad.title} className='w-16 h-16 object-cover rounded-lg' />
+              <div className='flex-1'>
+                <h5 className='font-semibold text-slate-900 dark:text-white'>{ad.title}</h5>
+                <p className='text-sm text-slate-600 dark:text-slate-400'>{ad.description}</p>
+                <div className='text-xs text-slate-500 dark:text-slate-400 mt-1'>{ad.location} &bull; {ad.price}</div>
+              </div>
+              <button className='ml-2 px-3 py-1.5 bg-gradient-to-r from-teal-500 to-cyan-500 text-white rounded-full text-xs'>Contactar</button>
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
+  )
+}
 
 const ChatMessages = ({
   messages,
@@ -74,8 +203,8 @@ const ChatMessages = ({
     {messages.map((message: Message) => (
       <div
         key={message.id}
-        className={`flex ${
-          message.sender === 'user' ? 'justify-end' : 'justify-start'
+        className={`flex flex-col ${
+          message.sender === 'user' ? 'items-end' : 'items-start'
         }`}
       >
         <div
@@ -102,6 +231,19 @@ const ChatMessages = ({
             })}
           </p>
         </div>
+        {message.options && message.onOptionClick && (
+          <div className='mt-2 flex flex-wrap gap-2'>
+            {message.options.map(option => (
+              <button
+                key={option}
+                onClick={() => message.onOptionClick?.(option)}
+                className='px-3 py-1.5 bg-white dark:bg-slate-700 border border-slate-300 dark:border-slate-600 rounded-full text-sm hover:bg-slate-50 dark:hover:bg-slate-600 transition-all'
+              >
+                {option}
+              </button>
+            ))}
+          </div>
+        )}
       </div>
     ))}
     {isTyping && (
@@ -194,6 +336,9 @@ export default function AdisChat ({ isOpen, onClose }: AdisChatProps) {
   const [messages, setMessages] = useState<Message[]>([])
   const [inputValue, setInputValue] = useState('')
   const [isTyping, setIsTyping] = useState(false)
+  const [context, setContext] = useState<ConversationContext>({
+    stage: 'welcome'
+  })
   const messagesEndRef = useRef<HTMLDivElement>(null)
   const inputRef = useRef<HTMLInputElement>(null)
   const [isMobile, setIsMobile] = useState(false)
@@ -219,33 +364,43 @@ export default function AdisChat ({ isOpen, onClose }: AdisChatProps) {
     }
   }, [isOpen, isMobile])
 
+  const addMessage = (
+    text: string,
+    sender: 'user' | 'adis',
+    options?: {
+      payload: string[]
+      handler: (option: string) => void
+    }
+  ) => {
+    const newMessage: Message = {
+      id: Date.now().toString(),
+      text,
+      sender,
+      timestamp: new Date(),
+      ...(options && {
+        options: options.payload,
+        onOptionClick: options.handler
+      })
+    }
+    setMessages(prev => [...prev, newMessage])
+  }
+
   const handleSendMessage = async (text: string) => {
     if (!text.trim()) return
 
-    const userMessage: Message = {
-      id: Date.now().toString(),
-      text: text.trim(),
-      sender: 'user',
-      timestamp: new Date()
-    }
-
-    setMessages(prev => [...prev, userMessage])
+    addMessage(text, 'user')
     setInputValue('')
     setIsTyping(true)
 
+    // TODO: Advanced response generation based on context
     setTimeout(() => {
-      const adisResponse: Message = {
-        id: (Date.now() + 1).toString(),
-        text: getAdisResponse(text),
-        sender: 'adis',
-        timestamp: new Date()
-      }
-      setMessages(prev => [...prev, adisResponse])
+      addMessage(getAdisResponse(text), 'adis')
       setIsTyping(false)
     }, 1500)
   }
 
   const getAdisResponse = (userText: string): string => {
+    // This will be replaced with context-aware logic
     const text = userText.toLowerCase()
     const responses: { [key: string]: string } = {
       empleo:
@@ -262,13 +417,48 @@ export default function AdisChat ({ isOpen, onClose }: AdisChatProps) {
     return 'Entiendo que estás buscando algo específico. ¿Podrías darme más detalles? Puedo ayudarte a encontrar empleos, inmuebles, vehículos, servicios y mucho más en BuscAdis.'
   }
 
-  const handleQuickSuggestion = (suggestion: string) => {
-    handleSendMessage(suggestion)
+  const handleCategorySelect = (categoryId: string) => {
+    setContext({ stage: 'category_selected', selectedCategory: categoryId })
+  }
+
+  const handleSubcategorySelect = (subcategoryId: string) => {
+    setContext(ctx => ({ ...ctx, stage: 'subcategory_selected', selectedSubcategory: subcategoryId }))
+  }
+
+  const handleSubSubcategorySelect = (subSubcategoryId: string) => {
+    setContext(ctx => ({ ...ctx, stage: 'subsubcategory_selected', selectedSubSubcategory: subSubcategoryId }))
+  }
+
+  const handleShowResults = () => {
+    setContext(ctx => ({ ...ctx, stage: 'show_results' }))
+  }
+
+  const handleRestart = () => {
+    setContext({ stage: 'welcome' })
   }
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault()
     handleSendMessage(inputValue)
+  }
+
+  let content
+  if (context.stage === 'welcome') {
+    content = <WelcomeScreen onCategorySelect={handleCategorySelect} />
+  } else if (context.stage === 'category_selected' && context.selectedCategory) {
+    content = <SubcategoryScreen categoryId={context.selectedCategory} onSubcategorySelect={handleSubcategorySelect} onBack={handleRestart} />
+  } else if (context.stage === 'subcategory_selected' && context.selectedCategory && context.selectedSubcategory) {
+    const category = categoriesList.find(c => c.id === context.selectedCategory)
+    const subcategory = category?.subcategories.find(s => s.id === context.selectedSubcategory)
+    if (subcategory?.subSubcategories && subcategory.subSubcategories.length > 0) {
+      content = <SubSubcategoryScreen categoryId={context.selectedCategory} subcategoryId={context.selectedSubcategory} onSubSubcategorySelect={subId => { handleSubSubcategorySelect(subId); handleShowResults(); }} onBack={() => setContext(ctx => ({ ...ctx, stage: 'category_selected', selectedSubcategory: undefined }))} />
+    } else {
+      content = <ResultsScreen categoryId={context.selectedCategory} subcategoryId={context.selectedSubcategory} onRestart={handleRestart} />
+    }
+  } else if (context.stage === 'subsubcategory_selected' && context.selectedCategory && context.selectedSubcategory && context.selectedSubSubcategory) {
+    content = <ResultsScreen categoryId={context.selectedCategory} subcategoryId={context.selectedSubcategory} subSubcategoryId={context.selectedSubSubcategory} onRestart={handleRestart} />
+  } else if (context.stage === 'show_results' && context.selectedCategory) {
+    content = <ResultsScreen categoryId={context.selectedCategory} subcategoryId={context.selectedSubcategory} subSubcategoryId={context.selectedSubSubcategory} onRestart={handleRestart} />
   }
 
   const containerClasses = isMobile
@@ -287,7 +477,7 @@ export default function AdisChat ({ isOpen, onClose }: AdisChatProps) {
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            onClick={onClose}
+            onClick={isMobile ? undefined : onClose}
             className='fixed inset-0 bg-transparent z-40'
           />
 
@@ -298,17 +488,8 @@ export default function AdisChat ({ isOpen, onClose }: AdisChatProps) {
             onPointerDown={e => e.stopPropagation()}
           >
             <ChatHeader isTyping={isTyping} onClose={onClose} />
-
             <div className='flex-1 h-0 overflow-y-auto p-4 space-y-4'>
-              {messages.length === 0 ? (
-                <WelcomeScreen onQuickSuggestion={handleQuickSuggestion} />
-              ) : (
-                <ChatMessages
-                  messages={messages}
-                  isTyping={isTyping}
-                  messagesEndRef={messagesEndRef}
-                />
-              )}
+              {content}
             </div>
 
             <ChatInput
