@@ -782,7 +782,7 @@ function SearchPageContent() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-1 overflow-visible">
           
           {/* Main Search Bar */}
-          <div className="mb-1 search-input">
+          <div className="mb-3 search-input">
             <RealTimeSearchEngine 
               onSearch={handleSearch}
               variant="page"
