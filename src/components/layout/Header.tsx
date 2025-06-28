@@ -4,10 +4,6 @@ import Link from 'next/link';
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { usePathname, useRouter } from 'next/navigation'; // Importar useRouter
 import {
-  HomeIcon,
-  NewspaperIcon,
-  MagnifyingGlassIcon,
-  PlusCircleIcon,
   UserCircleIcon,
   ArrowLeftOnRectangleIcon, // Para Logout
   BookmarkIcon, // Para Guardados
@@ -15,7 +11,6 @@ import {
   BellIcon, // Para Notificaciones
   Cog6ToothIcon, // Un ícono genérico para "Mi Perfil" o "Configuración" si UserCircle se usa en el botón
   ChevronDownIcon, // Para indicar que es un desplegable
-  SparklesIcon, // Para el botón de ADIS
   MapPinIcon,
   UserIcon,
   ArrowRightOnRectangleIcon,
@@ -24,10 +19,13 @@ import {
   HeartIcon,
   SpeakerWaveIcon,
 } from '@heroicons/react/24/outline';
+
 import { ThemeToggle } from '@/components/theme';
 import BuscadisLogo from '@/components/icons/BuscadisLogo';
 import LocationSelector from '@/components/search/LocationSelector';
 import LanguageSelectorMenuItem from '@/components/ui/LanguageSelectorMenuItem';
+import NavigationMenu from './NavigationMenu';
+import AdisChat from './AdisChat';
 
 interface User {
   id: string;
@@ -205,14 +203,7 @@ export default function Header() {
     );
   };
 
-  const navButtonBaseClasses = "flex flex-col items-center justify-center px-4 py-2 rounded-lg font-medium transition-all duration-150 focus:outline-none focus-visible:ring-2 focus-visible:ring-teal-400 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-slate-900";
-  const navButtonActiveClasses = "text-teal-500 dark:text-teal-400"; // Simplificado, el borde puede ser opcional
-  const navButtonInactiveClasses = "text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800/60 hover:text-teal-500 dark:hover:text-teal-400";
 
-  const isActiveRoute = (path: string) => {
-    if (path === '/') return pathname === path ? navButtonActiveClasses : navButtonInactiveClasses;
-    return pathname?.startsWith(path) ? navButtonActiveClasses : navButtonInactiveClasses;
-  };
 
   // Estilos para los items del menú desplegable (CORREGIDO)
   const menuItemClasses = "flex w-full items-center gap-3 px-3.5 py-2.5 text-sm text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-700/80 rounded-md transition-colors duration-150 focus:outline-none focus-visible:bg-slate-100 dark:focus-visible:bg-slate-700/80 focus-visible:ring-1 focus-visible:ring-teal-500";
@@ -344,51 +335,12 @@ export default function Header() {
             </span>
           </Link>
 
-          {/* NAVEGACIÓN PRINCIPAL CORREGIDA: oculta en mobile (md:flex) */}
-          <nav className="hidden md:flex flex-1 justify-center space-x-1 lg:space-x-2" role="navigation" aria-label="Navegación principal">
-            <Link
-              href="/inicio"
-              className={`${navButtonBaseClasses} ${isActiveRoute('/inicio')}`}
-              aria-current={pathname === '/inicio' ? 'page' : undefined}
-            >
-              <HomeIcon className="w-6 h-6 mb-1 md:mb-0 md:mr-1.5" aria-hidden="true" />
-              <span className="text-xs md:text-sm">Inicio</span>
-            </Link>
-            <Link
-              href="/revista"
-              className={`${navButtonBaseClasses} ${isActiveRoute('/revista')}`}
-              aria-current={pathname === '/revista' ? 'page' : undefined}
-            >
-              <NewspaperIcon className="w-6 h-6 mb-1 md:mb-0 md:mr-1.5" aria-hidden="true" />
-              <span className="text-xs md:text-sm">Revista</span>
-            </Link>
-            <button
-              onClick={() => setShowAdisChat(!showAdisChat)}
-              className={`${navButtonBaseClasses} ${showAdisChat ? navButtonActiveClasses : navButtonInactiveClasses}`}
-              aria-label="Abrir chat con ADIS"
-              aria-expanded={showAdisChat ? "true" : "false"}
-              title="Chat con ADIS IA"
-            >
-              <SparklesIcon className="w-6 h-6 mb-1 md:mb-0 md:mr-1.5" aria-hidden="true" />
-              <span className="text-xs md:text-sm">ADIS</span>
-            </button>
-            <Link
-              href="/buscar"
-              className={`${navButtonBaseClasses} ${isActiveRoute('/buscar')}`}
-              aria-current={pathname === '/buscar' ? 'page' : undefined}
-            >
-              <MagnifyingGlassIcon className="w-6 h-6 mb-1 md:mb-0 md:mr-1.5" aria-hidden="true" />
-              <span className="text-xs md:text-sm">Buscar</span>
-            </Link>
-            <Link
-              href="/publicar"
-              className={`${navButtonBaseClasses} ${isActiveRoute('/publicar')}`}
-              aria-current={pathname === '/publicar' ? 'page' : undefined}
-            >
-              <PlusCircleIcon className="w-6 h-6 mb-1 md:mb-0 md:mr-1.5" aria-hidden="true" />
-              <span className="text-xs md:text-sm">Publicar</span>
-            </Link>
-          </nav>
+          {/* NAVEGACIÓN PRINCIPAL */}
+          <NavigationMenu 
+            variant="desktop" 
+            onAdisClick={() => setShowAdisChat(!showAdisChat)}
+            showAdisChat={showAdisChat}
+          />
 
           <div className="flex items-center space-x-1.5 md:space-x-2">
             {/* Selector de Ubicación */}
@@ -421,35 +373,11 @@ export default function Header() {
       </nav>
     */}
 
-      {showAdisChat && (
-        <div
-          className="fixed top-0 right-0 w-full md:w-[400px] h-full md:h-[calc(100vh-4rem)] md:top-16 bg-white dark:bg-slate-900 border-l border-slate-200 dark:border-slate-700 shadow-xl transition-transform duration-300 ease-in-out transform animate-slide-in-from-right-panel z-[990]"
-          role="complementary"
-          aria-label="Chat con ADIS"
-        >
-          <div className="flex items-center justify-between p-4 border-b border-slate-200 dark:border-slate-700">
-            <div className="flex items-center gap-2">
-              <SparklesIcon className="w-6 h-6 text-teal-500" aria-hidden="true" />
-              <h2 className="text-lg font-semibold text-slate-900 dark:text-white">ADIS IA</h2>
-            </div>
-            <button
-              onClick={() => setShowAdisChat(false)}
-              className="p-2 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors focus:outline-none focus-visible:ring-1 focus-visible:ring-teal-500"
-              aria-label="Cerrar chat"
-              title="Cerrar chat"
-            >
-              <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" aria-hidden="true">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-              </svg>
-            </button>
-          </div>
-          <div className="p-4 h-[calc(100%-65px)] overflow-y-auto">
-            <p className="text-slate-600 dark:text-slate-400 text-center mt-10">
-              Conversa con ADIS, tu asistente inteligente de BuscAdis.
-            </p>
-          </div>
-        </div>
-      )}
+      <AdisChat 
+        isOpen={showAdisChat} 
+        onClose={() => setShowAdisChat(false)} 
+        variant="desktop" 
+      />
 
       {showLocationSelector && (
         <LocationSelector
