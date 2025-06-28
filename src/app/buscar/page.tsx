@@ -2,7 +2,7 @@
 'use client'
 
 import React, { Suspense, useState, useEffect, useCallback, useRef } from 'react'
-import { useSearchParams, usePathname } from 'next/navigation'
+import { useSearchParams, usePathname, useRouter } from 'next/navigation'
 import { motion } from 'framer-motion'
 import { 
   Squares2X2Icon, 
@@ -15,6 +15,7 @@ import EnhancedSearchInput from '@/components/search/EnhancedSearchInput'
 import SearchFilters from '@/components/search/SearchFilters'
 import PublicationCard from '@/components/publications/PublicationCard'
 import CategorySelector from '@/components/search/CategorySelector'
+import ContentRow from '@/components/search/ContentRow'
 import { parseCategoryUrl, getSubcategories } from '@/lib/categories'
 import { filtersByCategory } from '@/data/filterConfig'
 import type { FilterOption } from '@/types/filters'
@@ -372,6 +373,7 @@ const EnhancedFilterSelector = ({
 function SearchPageContent() {
   const searchParams = useSearchParams()
   const currentPathname = usePathname()
+  const router = useRouter()
   
   // Inicializar estados con valores de URL si están disponibles
   const [selectedCategory, setSelectedCategory] = useState<string>(() => {
@@ -404,6 +406,22 @@ function SearchPageContent() {
   const [isLoading, setIsLoading] = useState<boolean>(false)
   const [results, setResults] = useState<SearchResult[]>([])
   const [totalCount, setTotalCount] = useState<number>(0)
+  
+  // Estados para las filas de categorías (Time To Value = 0)
+  const [categoryRows, setCategoryRows] = useState<Record<string, SearchResult[]>>({})
+  const [categoryLoading, setCategoryLoading] = useState<Record<string, boolean>>({})
+  
+  // Configuración de las 8 categorías principales
+  const categories = [
+    { id: 'empleos', name: 'Empleos', description: 'Oportunidades laborales destacadas' },
+    { id: 'inmuebles', name: 'Inmuebles', description: 'Propiedades en venta y alquiler' },
+    { id: 'vehiculos', name: 'Vehículos', description: 'Autos, motos y más' },
+    { id: 'servicios', name: 'Servicios', description: 'Servicios profesionales y especializados' },
+    { id: 'productos', name: 'Productos', description: 'Artículos nuevos y usados' },
+    { id: 'eventos', name: 'Eventos', description: 'Actividades y entretenimiento' },
+    { id: 'negocios', name: 'Negocios', description: 'Oportunidades de negocio' },
+    { id: 'comunidad', name: 'Comunidad', description: 'Conexiones locales' }
+  ]
 
   // Convert SearchResult to PublicationData format
   const convertToPublicationData = (searchResult: SearchResult): PublicationData => {
@@ -546,8 +564,59 @@ function SearchPageContent() {
     })
   }, [currentQuery, selectedCategory, selectedSubcategory, selectedSubSubcategory, handleSearch])
 
-  // Cargar resultados iniciales basado en parámetros URL (solo una vez)
+  // Función para cargar publicaciones por categoría (Time To Value = 0)
+  const loadCategoryData = useCallback(async (categoryId: string) => {
+    setCategoryLoading(prev => ({ ...prev, [categoryId]: true }))
+    
+    try {
+      const response = await fetch(`/api/publications?category=${categoryId}&limit=10&sortBy=recent`)
+      const data = await response.json()
+      
+      if (data.publications) {
+        const formattedResults = data.publications.map((pub: any) => ({
+          id: pub._id || pub.id,
+          title: pub.title || 'Sin título',
+          description: pub.description || '',
+          category: categoryId,
+          price: pub.price || pub.amount || 0,
+          location: `${pub.location?.district || ''}, ${pub.location?.province || ''}`.replace(/^,\s*/, '') || 'Sin ubicación',
+          image: pub.images?.[0] || '/images/placeholder-image.jpg',
+          createdAt: pub.createdAt || new Date().toISOString(),
+          views: pub.views || 0,
+          featured: pub.featured || false,
+          premium: pub.premium || false
+        }))
+        
+        setCategoryRows(prev => ({
+          ...prev,
+          [categoryId]: formattedResults
+        }))
+      }
+    } catch (error) {
+      console.error(`Error loading category ${categoryId}:`, error)
+      setCategoryRows(prev => ({
+        ...prev,
+        [categoryId]: []
+      }))
+    } finally {
+      setCategoryLoading(prev => ({ ...prev, [categoryId]: false }))
+    }
+  }, [])
+
+  // Cargar todas las categorías al montar el componente (Time To Value = 0)
   useEffect(() => {
+    const loadAllCategories = async () => {
+      // Cargar las primeras 4 categorías inmediatamente
+      const priorityCategories = categories.slice(0, 4)
+      await Promise.all(priorityCategories.map(cat => loadCategoryData(cat.id)))
+      
+      // Cargar las restantes después de un breve delay
+      setTimeout(() => {
+        const remainingCategories = categories.slice(4)
+        remainingCategories.forEach(cat => loadCategoryData(cat.id))
+      }, 500)
+    }
+
     if (typeof window !== 'undefined') {
       const urlParams = new URLSearchParams(window.location.search)
       const query = urlParams.get('q')
@@ -562,8 +631,8 @@ function SearchPageContent() {
           category: category || undefined
         })
       } else {
-        // Cargar publicaciones recientes sin filtro
-        handleSearch('', {})
+        // Time To Value = 0: Cargar todas las categorías inmediatamente
+        loadAllCategories()
       }
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -651,89 +720,87 @@ function SearchPageContent() {
       {/* Main Content */}
       <div className="max-w-7xl mx-auto px-2 sm:px-4 lg:px-8 pt-2 pb-2">
         
-        {/* Welcome State */}
+        {/* Time To Value = 0: Filas de Categorías */}
         {!hasSearched && (
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            className="text-center py-16"
+            className="space-y-4 lg:space-y-8"
           >
-            <div className="max-w-4xl mx-auto">
-              <motion.div
-                initial={{ scale: 0.8 }}
-                animate={{ scale: 1 }}
-                transition={{ delay: 0.2, type: "spring", stiffness: 200 }}
-                className="w-32 h-32 mx-auto mb-8 bg-gradient-to-br from-blue-500 via-purple-500 to-pink-500 rounded-full flex items-center justify-center shadow-2xl"
-              >
-                <span className="text-6xl">🔍</span>
-              </motion.div>
-              
+            {/* Hero Section Compacto */}
+            <div className="text-center py-6 lg:py-12">
               <motion.h1
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.3 }}
-                className="text-4xl md:text-6xl font-bold bg-gradient-to-r from-blue-600 via-purple-600 to-pink-600 bg-clip-text text-transparent mb-6"
+                transition={{ delay: 0.1 }}
+                className="text-3xl lg:text-5xl font-bold bg-gradient-to-r from-teal-600 via-blue-600 to-purple-600 bg-clip-text text-transparent mb-4"
               >
-                Búsqueda Inteligente
+                Descubre Oportunidades
               </motion.h1>
               
               <motion.p
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.4 }}
-                className="text-xl text-gray-600 dark:text-gray-300 mb-12 leading-relaxed"
+                transition={{ delay: 0.2 }}
+                className="text-lg lg:text-xl text-gray-600 dark:text-gray-300 mb-8 max-w-2xl mx-auto"
               >
-                Encuentra exactamente lo que buscas con nuestro buscador en tiempo real. 
-                <br />Sugerencias inteligentes, resultados instantáneos y filtros avanzados.
+                Explora miles de anuncios organizados por categorías para encontrar exactamente lo que necesitas
               </motion.p>
-
-              <motion.div
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.5 }}
-                className="grid grid-cols-1 md:grid-cols-4 gap-6 text-left"
-              >
-                <div className="bg-white/70 dark:bg-gray-800/70 backdrop-blur-sm p-6 rounded-2xl shadow-xl border border-gray-200/50 dark:border-gray-700/50 hover:shadow-2xl transition-all duration-300 hover:-translate-y-1">
-                  <div className="w-12 h-12 bg-gradient-to-br from-blue-400 to-blue-600 rounded-xl flex items-center justify-center mb-4 shadow-lg">
-                    <span className="text-2xl">⚡</span>
-                  </div>
-                  <h3 className="font-bold text-gray-900 dark:text-white mb-2">Tiempo Real</h3>
-                  <p className="text-gray-600 dark:text-gray-300 text-sm">
-                    Resultados mientras escribes, sin esperas
-                  </p>
-                </div>
-
-                <div className="bg-white/70 dark:bg-gray-800/70 backdrop-blur-sm p-6 rounded-2xl shadow-xl border border-gray-200/50 dark:border-gray-700/50 hover:shadow-2xl transition-all duration-300 hover:-translate-y-1">
-                  <div className="w-12 h-12 bg-gradient-to-br from-purple-400 to-purple-600 rounded-xl flex items-center justify-center mb-4 shadow-lg">
-                    <span className="text-2xl">🧠</span>
-                  </div>
-                  <h3 className="font-bold text-gray-900 dark:text-white mb-2">IA Inteligente</h3>
-                  <p className="text-gray-600 dark:text-gray-300 text-sm">
-                    Sugerencias que aprenden de tus búsquedas
-                  </p>
-                </div>
-
-                <div className="bg-white/70 dark:bg-gray-800/70 backdrop-blur-sm p-6 rounded-2xl shadow-xl border border-gray-200/50 dark:border-gray-700/50 hover:shadow-2xl transition-all duration-300 hover:-translate-y-1">
-                  <div className="w-12 h-12 bg-gradient-to-br from-green-400 to-green-600 rounded-xl flex items-center justify-center mb-4 shadow-lg">
-                    <span className="text-2xl">🎯</span>
-                  </div>
-                  <h3 className="font-bold text-gray-900 dark:text-white mb-2">Filtros Avanzados</h3>
-                  <p className="text-gray-600 dark:text-gray-300 text-sm">
-                    Encuentra exactamente lo que necesitas
-                  </p>
-                </div>
-
-                <div className="bg-white/70 dark:bg-gray-800/70 backdrop-blur-sm p-6 rounded-2xl shadow-xl border border-gray-200/50 dark:border-gray-700/50 hover:shadow-2xl transition-all duration-300 hover:-translate-y-1">
-                  <div className="w-12 h-12 bg-gradient-to-br from-pink-400 to-pink-600 rounded-xl flex items-center justify-center mb-4 shadow-lg">
-                    <span className="text-2xl">📊</span>
-                  </div>
-                  <h3 className="font-bold text-gray-900 dark:text-white mb-2">Analytics</h3>
-                  <p className="text-gray-600 dark:text-gray-300 text-sm">
-                    Recomendaciones personalizadas
-                  </p>
-                </div>
-              </motion.div>
             </div>
+
+            {/* Filas de Categorías */}
+            <div className="space-y-6 lg:space-y-12">
+              {categories.map((category, index) => (
+                <motion.div
+                  key={category.id}
+                  initial={{ opacity: 0, y: 50 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: 0.1 * index, duration: 0.6 }}
+                >
+                  <ContentRow
+                    title={category.name}
+                    description={category.description}
+                    publications={categoryRows[category.id]?.map(result => convertToPublicationData(result)) || []}
+                    categoryId={category.id}
+                    isLoading={categoryLoading[category.id]}
+                    onViewAll={() => {
+                      // Navegar a la categoría completa
+                      setSelectedCategory(category.id)
+                      setHasSearched(true)
+                      handleSearch('', { category: category.id })
+                    }}
+                    showViewAll={true}
+                  />
+                </motion.div>
+              ))}
+            </div>
+
+            {/* Call to Action Footer */}
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.8 }}
+              className="text-center py-12 lg:py-16"
+            >
+              <div className="max-w-3xl mx-auto">
+                <h2 className="text-2xl lg:text-3xl font-bold text-gray-900 dark:text-white mb-4">
+                  ¿No encuentras lo que buscas?
+                </h2>
+                <p className="text-gray-600 dark:text-gray-400 mb-8">
+                  Usa nuestro buscador avanzado para encontrar exactamente lo que necesitas con filtros específicos
+                </p>
+                <button
+                  onClick={() => {
+                    const searchInput = document.querySelector('input[type="text"]') as HTMLInputElement
+                    searchInput?.focus()
+                  }}
+                  className="inline-flex items-center gap-2 px-8 py-3 bg-gradient-to-r from-teal-600 to-teal-500 hover:from-teal-700 hover:to-teal-600 text-white rounded-xl font-semibold text-lg shadow-lg hover:shadow-xl transition-all duration-200"
+                >
+                  <span>Buscar Ahora</span>
+                  <ChevronDownIcon className="w-5 h-5 -rotate-90" />
+                </button>
+              </div>
+            </motion.div>
           </motion.div>
         )}
 
