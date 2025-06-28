@@ -149,11 +149,11 @@ const CompactCategorySelector = ({
                 <button
                   key={category.id}
                   onClick={() => {
-                    onCategoryChange(category.id === 'all' ? '' : category.id)
+                    onCategoryChange(category.id)
                     setIsOpen(false)
                   }}
                   className={`w-full flex items-center gap-3 px-4 py-2 text-left hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors text-sm ${
-                    selectedCategory === category.id || (category.id === 'all' && !selectedCategory)
+                    selectedCategory === category.id || (category.id === 'all' && selectedCategory === 'all')
                       ? 'bg-teal-50 dark:bg-teal-900/20 text-teal-600 dark:text-teal-400' 
                       : 'text-gray-700 dark:text-gray-300'
                   }`}

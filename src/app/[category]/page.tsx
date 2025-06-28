@@ -31,12 +31,41 @@ export default function CategoryPage({ params }: CategoryPageProps) {
   )
 }
 
-async function CategoryPageContent({ params }: CategoryPageProps) {
-  const { category } = await params
-  
-  // Validar que la categoría existe
-  if (!isValidCategoryPath(category)) {
-    notFound()
+function CategoryPageContent({ params }: CategoryPageProps) {
+  const [category, setCategory] = React.useState<string | null>(null)
+  const [isValid, setIsValid] = React.useState<boolean | null>(null)
+
+  React.useEffect(() => {
+    const resolveParams = async () => {
+      const resolvedParams = await params
+      const categoryId = resolvedParams.category
+      
+      // Validar que la categoría existe
+      const valid = isValidCategoryPath(categoryId)
+      
+      if (!valid) {
+        notFound()
+        return
+      }
+      
+      setCategory(categoryId)
+      setIsValid(true)
+    }
+    
+    resolveParams()
+  }, [params])
+
+  if (isValid === null) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-gray-50 to-blue-50 dark:from-gray-900 dark:to-gray-800 flex items-center justify-center">
+        <div className="text-center">
+          <div className="w-16 h-16 border-4 border-teal-500 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
+          <h2 className="text-xl font-semibold text-gray-900 dark:text-white mb-2">
+            Validando Categoría
+          </h2>
+        </div>
+      </div>
+    )
   }
 
   // Renderizar la misma página de búsqueda pero con la categoría preseleccionada

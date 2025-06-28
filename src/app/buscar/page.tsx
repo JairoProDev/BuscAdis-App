@@ -16,7 +16,7 @@ import SearchFilters from '@/components/search/SearchFilters'
 import PublicationCard from '@/components/publications/PublicationCard'
 import CategorySelector from '@/components/search/CategorySelector'
 import ContentRow from '@/components/search/ContentRow'
-import { parseCategoryUrl, getSubcategories } from '@/lib/categories'
+import { parseCategoryUrl, getSubcategories, generateCategoryUrl } from '@/lib/categories'
 import { filtersByCategory } from '@/data/filterConfig'
 import type { FilterOption } from '@/types/filters'
 import { createPortal } from 'react-dom'
@@ -403,6 +403,7 @@ function SearchPageContent() {
   const [sortDropdownOpen, setSortDropdownOpen] = useState(false)
   const [currentQuery, setCurrentQuery] = useState<string>('')
   const [hasSearched, setHasSearched] = useState<boolean>(false)
+  const [lastSearchCategory, setLastSearchCategory] = useState<string>('')
   const [isLoading, setIsLoading] = useState<boolean>(false)
   const [results, setResults] = useState<SearchResult[]>([])
   const [totalCount, setTotalCount] = useState<number>(0)
@@ -525,22 +526,48 @@ function SearchPageContent() {
     setSelectedSubcategory('')
     setSelectedSubSubcategory('')
     setActiveFilters({})
+    setLastSearchCategory('') // Reset para permitir nueva búsqueda
+    
+    // Navegar a la URL correspondiente
+    if (category === 'all') {
+      console.log('🔄 Navigating to: /buscar')
+      router.push('/buscar')
+    } else {
+      const categoryUrl = generateCategoryUrl(category)
+      console.log('🔄 Navigating to:', categoryUrl)
+      router.push(categoryUrl)
+    }
     
     handleSearch(currentQuery, {
       category: category === 'all' ? undefined : category
     })
-  }, [currentQuery, handleSearch])
+  }, [currentQuery, handleSearch, router])
 
   const handleSubcategoryChange = useCallback((subcategory: string) => {
     setSelectedSubcategory(subcategory)
     setSelectedSubSubcategory('')
     setActiveFilters({})
+    setLastSearchCategory('') // Reset para permitir nueva búsqueda
+    
+    // Navegar a la URL correspondiente
+    if (selectedCategory === 'all') {
+      console.log('🔄 Subcategory: Navigating to: /buscar')
+      router.push('/buscar')
+    } else if (subcategory) {
+      const categoryUrl = generateCategoryUrl(selectedCategory, subcategory)
+      console.log('🔄 Subcategory: Navigating to:', categoryUrl)
+      router.push(categoryUrl)
+    } else {
+      const categoryUrl = generateCategoryUrl(selectedCategory)
+      console.log('🔄 Subcategory: Navigating to:', categoryUrl)
+      router.push(categoryUrl)
+    }
     
     handleSearch(currentQuery, {
       category: selectedCategory === 'all' ? undefined : selectedCategory,
       subcategory: subcategory || undefined
     })
-  }, [currentQuery, selectedCategory, handleSearch])
+  }, [currentQuery, selectedCategory, handleSearch, router])
 
   const handleFiltersChange = useCallback((filters: Record<string, any>) => {
     setActiveFilters(filters)
@@ -603,6 +630,103 @@ function SearchPageContent() {
     }
   }, [])
 
+  // Sincronizar estado con cambios en la URL (navegación back/forward)
+  useEffect(() => {
+    console.log('🔄 URL Effect - pathname:', currentPathname)
+    
+    if (currentPathname && currentPathname !== '/buscar') {
+      const parsed = parseCategoryUrl(currentPathname)
+      console.log('🔄 URL parsed:', parsed)
+      
+      // Solo actualizar si hay cambios reales y no es un loop
+      const needsUpdate = parsed.categoryId !== selectedCategory || 
+                         parsed.subcategoryId !== selectedSubcategory ||
+                         parsed.subSubcategoryId !== selectedSubSubcategory
+      
+      if (needsUpdate) {
+        
+        console.log('🔄 Updating category state from URL')
+        setSelectedCategory(parsed.categoryId || 'all')
+        setSelectedSubcategory(parsed.subcategoryId || '')
+        setSelectedSubSubcategory(parsed.subSubcategoryId || '')
+        setActiveFilters({})
+        
+        // Marcar que necesitamos hacer búsqueda
+        if (parsed.categoryId) {
+          setHasSearched(true)
+        }
+      }
+    } else if (currentPathname === '/buscar' && selectedCategory !== 'all') {
+      // Si estamos en /buscar pero hay categoría seleccionada, limpiar
+      console.log('🔄 Clearing category for /buscar')
+      setSelectedCategory('all')
+      setSelectedSubcategory('')
+      setSelectedSubSubcategory('')
+      setActiveFilters({})
+    }
+  }, [currentPathname]) // Solo depende del pathname
+
+  // Realizar búsqueda automática cuando cambie la categoría desde URL
+  useEffect(() => {
+    console.log('🔄 Search Effect - hasSearched:', hasSearched, 'selectedCategory:', selectedCategory, 'lastSearchCategory:', lastSearchCategory)
+    
+    if (hasSearched && selectedCategory && selectedCategory !== 'all' && selectedCategory !== lastSearchCategory) {
+      console.log('🔍 Performing automatic search for category:', selectedCategory)
+      setLastSearchCategory(selectedCategory)
+      
+      // Hacer la búsqueda directamente sin usar handleSearch para evitar loops
+      const searchDirectly = async () => {
+        setIsLoading(true)
+        
+        try {
+          const searchParams: Record<string, string> = {
+            sortBy: sortBy,
+            category: selectedCategory
+          }
+          
+          if (selectedSubcategory) searchParams.subcategory = selectedSubcategory
+          if (selectedSubSubcategory) searchParams.subsubcategory = selectedSubSubcategory
+          if (currentQuery.trim()) searchParams.query = currentQuery
+          
+          const queryString = new URLSearchParams(searchParams).toString()
+          const response = await fetch(`/api/publications?${queryString}`)
+          const data = await response.json()
+          
+          if (data.publications) {
+            const adaptedResults: SearchResult[] = data.publications.map((pub: any) => ({
+              id: pub._id || pub.id || `result-${Date.now()}-${Math.random()}`,
+              title: pub.title || 'Sin título',
+              description: pub.description || '',
+              price: pub.price || pub.amount || 0,
+              location: typeof pub.location === 'object' 
+                ? `${pub.location.district || pub.location.province || pub.location.city || 'Sin ubicación'}` 
+                : pub.location || 'Sin ubicación',
+              category: pub.categorySlug || pub.category || 'general',
+              image: pub.images?.[0] || '/images/placeholder-image.jpg',
+              createdAt: pub.createdAt || pub.created_at || new Date().toISOString(),
+              views: pub.views || Math.floor(Math.random() * 500) + 50,
+              premium: pub.premium || false,
+              featured: pub.featured || false
+            }))
+
+            setResults(adaptedResults)
+            setTotalCount(data.total || adaptedResults.length)
+            
+            console.log(`Found ${adaptedResults.length} results for category "${selectedCategory}"`)
+          }
+        } catch (error) {
+          console.error('Error in category search:', error)
+          setResults([])
+          setTotalCount(0)
+        } finally {
+          setIsLoading(false)
+        }
+      }
+      
+      searchDirectly()
+    }
+  }, [selectedCategory, selectedSubcategory, selectedSubSubcategory, hasSearched, sortBy, lastSearchCategory])
+
   // Cargar todas las categorías al montar el componente (Time To Value = 0)
   useEffect(() => {
     const loadAllCategories = async () => {
@@ -643,6 +767,11 @@ function SearchPageContent() {
     setSelectedSubcategory('')
     setSelectedSubSubcategory('')
     setActiveFilters({})
+    setLastSearchCategory('') // Reset para permitir nueva búsqueda
+    
+    // Navegar de vuelta a la página de búsqueda
+    router.push('/buscar')
+    
     handleSearch(currentQuery, {})
   }
 
