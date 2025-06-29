@@ -384,6 +384,7 @@ function SearchPageContent() {
   const [isLoading, setIsLoading] = useState<boolean>(false)
   const [results, setResults] = useState<SearchResult[]>([])
   const [totalCount, setTotalCount] = useState<number>(0)
+  const [isSidebarOpen, setIsSidebarOpen] = useState<boolean>(false)
   
   // Estados para las filas de categorías (Time To Value = 0)
   const [categoryRows, setCategoryRows] = useState<Record<string, SearchResult[]>>({})
@@ -975,7 +976,9 @@ function SearchPageContent() {
                     </div>
 
                     {/* Controles - Botones de vista y ordenar en la misma línea */}
-                    <div className="flex items-center gap-3 lg:flex-shrink-0">
+                    <div className={`flex items-center gap-3 lg:flex-shrink-0 transition-all duration-300 ${
+                      isSidebarOpen ? 'lg:pr-[calc(33.333333%+2rem)] xl:pr-[calc(25%+2rem)]' : ''
+                    }`}>
                       {/* View Mode Toggles */}
                       <div className="flex items-center bg-gray-100 dark:bg-gray-700 rounded-lg p-1">
                         <button
@@ -1062,6 +1065,7 @@ function SearchPageContent() {
                     <PublicationDetailContainer
                       publications={publicationsData}
                       viewMode={viewMode}
+                      onDetailStateChange={setIsSidebarOpen}
                     />
                   )}
 

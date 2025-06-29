@@ -244,21 +244,21 @@ export default function PublicationDetailSidebar({
               </div>
 
               {/* Publication Info */}
-              <div className="p-6 space-y-6">
+              <div className="p-4 md:p-6 space-y-4 md:space-y-6">
                 {/* Title and Price */}
                 <div>
-                  <h1 className="text-2xl font-bold text-gray-900 dark:text-white mb-3">
+                  <h1 className="text-xl md:text-2xl font-bold text-gray-900 dark:text-white mb-2 md:mb-3 leading-tight">
                     {publication.title}
                   </h1>
                   {formatPrice(publication.value, publication.currency) && (
-                    <div className="text-3xl font-bold text-blue-600 dark:text-blue-400">
+                    <div className="text-2xl md:text-3xl font-bold text-blue-600 dark:text-blue-400">
                       {formatPrice(publication.value, publication.currency)}
                     </div>
                   )}
                 </div>
 
                 {/* Meta Information */}
-                <div className="grid grid-cols-2 gap-4 text-sm text-gray-600 dark:text-gray-400">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-3 md:gap-4 text-sm text-gray-600 dark:text-gray-400">
                   <div className="flex items-center gap-2">
                     <MapPinIcon className="w-4 h-4" />
                     <span className="truncate">{formatLocation(publication.location)}</span>
@@ -279,10 +279,10 @@ export default function PublicationDetailSidebar({
 
                 {/* Description */}
                 <div>
-                  <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-3">
+                  <h3 className="text-base md:text-lg font-semibold text-gray-900 dark:text-white mb-2 md:mb-3">
                     Descripción
                   </h3>
-                  <p className="text-gray-700 dark:text-gray-300 whitespace-pre-line leading-relaxed">
+                  <p className="text-sm md:text-base text-gray-700 dark:text-gray-300 whitespace-pre-line leading-relaxed">
                     {publication.description}
                   </p>
                 </div>
@@ -290,10 +290,10 @@ export default function PublicationDetailSidebar({
                 {/* Additional Details */}
                 {publication.size > 0 && (
                   <div>
-                    <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-3">
+                    <h3 className="text-base md:text-lg font-semibold text-gray-900 dark:text-white mb-2 md:mb-3">
                       Detalles
                     </h3>
-                    <div className="grid grid-cols-2 gap-4 text-sm">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-3 md:gap-4 text-sm">
                       <div className="flex items-center gap-2">
                         <CurrencyDollarIcon className="w-4 h-4 text-gray-500" />
                         <span>Tipo: {publication.valueType}</span>
