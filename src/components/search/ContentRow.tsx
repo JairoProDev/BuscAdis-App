@@ -41,6 +41,7 @@ interface ContentRowProps {
   categoryId?: string
   isLoading?: boolean
   showViewAll?: boolean
+  onPublicationClick?: (publication: PublicationData) => void
 }
 
 export default function ContentRow({
@@ -50,7 +51,8 @@ export default function ContentRow({
   onViewAll,
   categoryId,
   isLoading = false,
-  showViewAll = true
+  showViewAll = true,
+  onPublicationClick
 }: ContentRowProps) {
   const [canScrollLeft, setCanScrollLeft] = useState(false)
   const [canScrollRight, setCanScrollRight] = useState(true)
@@ -171,10 +173,7 @@ export default function ContentRow({
               <PublicationCard
                 publication={publication}
                 viewMode="grid"
-                onPublicationClick={() => {
-                  // Navegar al detalle de la publicación
-                  window.location.href = `/anuncios/${publication.id}/${publication.title.replace(/\s+/g, '-').toLowerCase()}`
-                }}
+                onPublicationClick={onPublicationClick ? () => onPublicationClick(publication) : undefined}
               />
             </motion.div>
           ))}

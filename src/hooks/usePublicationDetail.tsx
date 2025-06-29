@@ -1,0 +1,213 @@
+'use client'
+
+import React, {
+  createContext,
+  useContext,
+  useEffect,
+  useCallback,
+  useReducer,
+} from 'react'
+import { useRouter, usePathname } from 'next/navigation'
+import { generateSeoUrl } from '@/utils/url' // Asegúrate que esta ruta es correcta
+import useMediaQuery from './useMediaQuery' // Asegúrate que esta ruta es correcta
+import { PublicationData } from '@/types/publication' // Asegúrate que esta ruta es correcta
+
+// ============================================================================
+// 1. TYPES AND STATE MANAGEMENT
+// ============================================================================
+
+interface PublicationDetailState {
+  selectedPublication: PublicationData | null
+  isDetailOpen: boolean
+}
+
+type PublicationDetailAction =
+  | { type: 'OPEN_DETAIL'; payload: PublicationData }
+  | { type: 'CLOSE_DETAIL' }
+  | { type: 'SET_STATE_FROM_URL'; payload: PublicationData | null }
+
+interface PublicationDetailContextValue extends PublicationDetailState {
+  openPublicationDetail: (publication: PublicationData) => void
+  closePublicationDetail: () => void
+  isMobile: boolean
+  handleWhatsAppClick: (publication: PublicationData) => void
+  handleShare: (publication: PublicationData) => void
+  handleFavorite: (publication: PublicationData) => boolean
+}
+
+const PublicationDetailContext = createContext<
+  PublicationDetailContextValue | undefined
+>(undefined)
+
+const initialState: PublicationDetailState = {
+  selectedPublication: null,
+  isDetailOpen: false
+}
+
+function publicationDetailReducer(
+  state: PublicationDetailState,
+  action: PublicationDetailAction
+): PublicationDetailState {
+  switch (action.type) {
+    case 'OPEN_DETAIL':
+      return {
+        selectedPublication: action.payload,
+        isDetailOpen: true
+      }
+    case 'CLOSE_DETAIL':
+      return {
+        selectedPublication: null,
+        isDetailOpen: false
+      }
+    case 'SET_STATE_FROM_URL':
+      return {
+        selectedPublication: action.payload,
+        isDetailOpen: !!action.payload
+      }
+    default:
+      return state
+  }
+}
+
+// ============================================================================
+// 2. HELPER FUNCTIONS
+// ============================================================================
+
+const whatsAppMessageTemplates: Record<string, (p: PublicationData, url: string) => string> = {
+  empleos: (p, url) => `🔍 Hola, vi su anuncio de *Empleos* en BuscaDis.com y me interesó la oportunidad:\n\n"${p.title}"\n\n🔗 Link: ${url}`,
+  inmuebles: (p, url) => `🏠 Hola, vi su publicación de *Inmuebles* en BuscaDis.com y me interesó:\n\n"${p.title}"\n\n🔗 Link: ${url}`,
+  vehiculos: (p, url) => `🚗 Hola, vi su anuncio de *Vehículos* en BuscaDis.com y me interesó:\n\n"${p.title}"\n\n🔗 Link: ${url}`,
+  default: (p, url) => `👋 Hola, vi su anuncio de *${p.categorySlug.charAt(0).toUpperCase() + p.categorySlug.slice(1)}* en BuscaDis.com:\n\n"${p.title}"\n\n🔗 Link: ${url}`
+};
+
+// ============================================================================
+// 3. THE PROVIDER COMPONENT
+// ============================================================================
+
+export function PublicationDetailProvider({
+  children,
+  publications
+}: {
+  children: React.ReactNode
+  publications: PublicationData[]
+}) {
+  const router = useRouter()
+  const pathname = usePathname()
+  const isMobile = useMediaQuery('(max-width: 1023px)')
+  const [state, dispatch] = useReducer(publicationDetailReducer, initialState)
+
+  const generatePublicationUrl = useCallback((publication: PublicationData) => {
+    const seoUrl = generateSeoUrl(
+      publication.id, 
+      publication.title,
+      undefined, // publicationSlug
+      publication.categorySlug,
+      publication.subcategorySlug || undefined,
+      publication.subSubcategorySlug || undefined
+    )
+    return seoUrl
+  }, [])
+
+  // Handler for browser Back/Forward buttons
+  useEffect(() => {
+    const handlePopState = () => {
+      const slug = window.location.pathname.split('/').pop()
+      const publicationId = slug?.split('_').shift()
+      if (publicationId) {
+        const publication = publications.find(p => p.id === publicationId) ?? null
+        dispatch({ type: 'SET_STATE_FROM_URL', payload: publication })
+      } else {
+        dispatch({ type: 'SET_STATE_FROM_URL', payload: null })
+      }
+    }
+    window.addEventListener('popstate', handlePopState)
+    return () => window.removeEventListener('popstate', handlePopState)
+  }, [publications])
+
+  // Sync state with URL on initial load
+  useEffect(() => {
+    if (!pathname) return
+    const slug = pathname.split('/').pop()
+    const publicationId = slug?.split('_').shift()
+    if (pathname.startsWith('/anuncio/') && publicationId) {
+      const publication = publications.find(p => p.id === publicationId) ?? null
+      dispatch({ type: 'SET_STATE_FROM_URL', payload: publication })
+    }
+  }, [pathname, publications])
+
+  const openPublicationDetail = useCallback((publication: PublicationData) => {
+    dispatch({ type: 'OPEN_DETAIL', payload: publication })
+    const newUrl = generatePublicationUrl(publication)
+    window.history.pushState({ publicationId: publication.id }, '', newUrl)
+  }, [generatePublicationUrl])
+
+  const closePublicationDetail = useCallback(() => {
+    dispatch({ type: 'CLOSE_DETAIL' })
+    window.history.back()
+  }, [])
+
+  const handleWhatsAppClick = useCallback((publication: PublicationData) => {
+    if (!publication.whatsapp) return
+    const cleanPhone = publication.whatsapp.replace(/[^0-9]/g, '')
+    const adUrl = `${window.location.origin}${generatePublicationUrl(publication)}`
+    const template = whatsAppMessageTemplates[publication.categorySlug] || whatsAppMessageTemplates.default
+    const message = template(publication, adUrl)
+    window.open(`https://wa.me/${cleanPhone}?text=${encodeURIComponent(message)}`, '_blank')
+  }, [generatePublicationUrl])
+
+  const handleShare = useCallback((publication: PublicationData) => {
+    const shareUrl = `${window.location.origin}${generatePublicationUrl(publication)}`
+    if (navigator.share) {
+      navigator.share({
+        title: `${publication.title} - BuscaDis`,
+        text: `${publication.description}\n\nEncuentra más en BuscaDis.com`,
+        url: shareUrl
+      }).catch(err => console.log('Sharing failed:', err))
+    }
+  }, [generatePublicationUrl])
+
+  const handleFavorite = useCallback((publication: PublicationData) => {
+    try {
+      const favorites: string[] = JSON.parse(localStorage.getItem('favorites') || '[]')
+      const isFavorite = favorites.includes(publication.id)
+      const updatedFavorites = isFavorite
+        ? favorites.filter(id => id !== publication.id)
+        : [...favorites, publication.id]
+      localStorage.setItem('favorites', JSON.stringify(updatedFavorites))
+      return !isFavorite
+    } catch (error) {
+      console.error('Error updating favorites:', error)
+      return false
+    }
+  }, [])
+
+  const contextValue: PublicationDetailContextValue = {
+    ...state,
+    openPublicationDetail,
+    closePublicationDetail,
+    isMobile,
+    handleWhatsAppClick,
+    handleShare,
+    handleFavorite
+  }
+
+  return (
+    <PublicationDetailContext.Provider value={contextValue}>
+      {children}
+    </PublicationDetailContext.Provider>
+  )
+}
+
+// ============================================================================
+// 4. THE CUSTOM HOOK
+// ============================================================================
+
+export function usePublicationDetail() {
+  const context = useContext(PublicationDetailContext)
+  if (context === undefined) {
+    throw new Error(
+      'usePublicationDetail must be used within a PublicationDetailProvider'
+    )
+  }
+  return context
+}

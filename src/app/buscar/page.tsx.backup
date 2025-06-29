@@ -1,0 +1,161 @@
+// src\app\buscar\page.tsx
+'use client'
+
+import React, { Suspense, useState, useEffect, useCallback, useRef } from 'react'
+import { useSearchParams, usePathname, useRouter } from 'next/navigation'
+import { motion } from 'framer-motion'
+import { 
+  Squares2X2Icon, 
+  ListBulletIcon, 
+  ChevronDownIcon,
+  FunnelIcon 
+} from '@heroicons/react/24/outline'
+import RealTimeSearchEngine from '@/components/search/RealTimeSearchEngine'
+import EnhancedSearchInput from '@/components/search/EnhancedSearchInput'
+import SearchFilters from '@/components/search/SearchFilters'
+import PublicationCard from '@/components/publications/PublicationCard'
+import PublicationDetailContainer from '@/components/publications/PublicationDetailContainer'
+import CategorySelector from '@/components/search/CategorySelector'
+import ContentRow from '@/components/search/ContentRow'
+import { parseCategoryUrl, getSubcategories, generateCategoryUrl } from '@/lib/categories'
+import { filtersByCategory } from '@/data/filterConfig'
+import type { FilterOption } from '@/types/filters'
+import { PublicationData } from '@/types/publication'
+import { createPortal } from 'react-dom'
+import { PublicationDetailProvider } from '@/hooks/usePublicationDetail'
+
+interface SearchResult {
+  id: string;
+  title: string;
+  description: string;
+  category: string;
+  subcategorySlug?: string;
+  price: number;
+  location: string;
+  image: string;
+  createdAt: string;
+  views: number;
+  featured?: boolean;
+  premium?: boolean;
+}
+
+// Convert SearchResult to PublicationData format
+const convertToPublicationData = (searchResult: SearchResult): PublicationData => {
+  let district = '', province = '', city = '', country = 'Perú';
+  if (typeof searchResult.location === 'string') {
+    const locationParts = searchResult.location.split(',').map(part => part.trim());
+    district = locationParts[0] || '';
+    province = locationParts[1] || '';
+    city = locationParts[2] || 'Cusco';
+  }
+  const category = searchResult.category || 'general';
+  return {
+    id: searchResult.id,
+    title: searchResult.title,
+    description: searchResult.description,
+    categorySlug: category.toLowerCase(),
+    subcategorySlug: searchResult.subcategorySlug || null,
+    subSubcategorySlug: null,
+    transactionType: 'venta',
+    value: searchResult.price,
+    currency: 'PEN',
+    valueType: 'fixed',
+    size: 0,
+    location: {
+      district,
+      province,
+      city,
+      country
+    },
+    images: [searchResult.image],
+    whatsapp: '51987654321',
+    createdAt: searchResult.createdAt || new Date().toISOString(),
+    views: searchResult.views || Math.floor(Math.random() * 500) + 50,
+    featured: searchResult.featured || false,
+    premium: searchResult.premium || false,
+  }
+}
+
+function SearchPageContent() {
+  const [results, setResults] = useState<SearchResult[]>([])
+  const [isLoading, setIsLoading] = useState(false)
+  const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid')
+
+  // Simulate some results for testing
+  useEffect(() => {
+    const mockResults: SearchResult[] = [
+      {
+        id: '1',
+        title: 'Casa en San Sebastián',
+        description: 'Hermosa casa con 3 dormitorios',
+        category: 'inmuebles',
+        price: 250000,
+        location: 'San Sebastián, Cusco, Perú',
+        image: '/images/placeholder-image.jpg',
+        createdAt: new Date().toISOString(),
+        views: 120,
+        featured: true
+      },
+      {
+        id: '2', 
+        title: 'Departamento en Wanchaq',
+        description: 'Departamento moderno de 2 habitaciones',
+        category: 'inmuebles',
+        price: 180000,
+        location: 'Wanchaq, Cusco, Perú',
+        image: '/images/placeholder-image.jpg',
+        createdAt: new Date().toISOString(),
+        views: 85
+      }
+    ]
+    setResults(mockResults)
+  }, [])
+
+  const publicationsData = results.map(convertToPublicationData)
+
+  return (
+    <PublicationDetailProvider publications={publicationsData}>
+      <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
+        <div className="max-w-7xl mx-auto px-4 py-8">
+          <h1 className="text-2xl font-bold mb-6">Resultados de búsqueda</h1>
+          
+          {/* View Mode Toggle */}
+          <div className="flex items-center gap-2 mb-6">
+            <button
+              onClick={() => setViewMode('grid')}
+              className={`p-2 rounded ${viewMode === 'grid' ? 'bg-blue-500 text-white' : 'bg-gray-200'}`}
+            >
+              <Squares2X2Icon className="w-5 h-5" />
+            </button>
+            <button
+              onClick={() => setViewMode('list')}
+              className={`p-2 rounded ${viewMode === 'list' ? 'bg-blue-500 text-white' : 'bg-gray-200'}`}
+            >
+              <ListBulletIcon className="w-5 h-5" />
+            </button>
+          </div>
+
+          {/* Results with PublicationDetailContainer */}
+          <PublicationDetailContainer
+            publications={publicationsData}
+            viewMode={viewMode}
+          >
+            {results.map((result) => (
+              <PublicationCard
+                key={result.id}
+                publication={convertToPublicationData(result)}
+                viewMode={viewMode}
+              />
+            ))}
+          </PublicationDetailContainer>
+        </div>
+      </div>
+    </PublicationDetailProvider>
+  )
+}
+
+export default function BuscadorPage() {
+  return (
+    <SearchPageContent />
+  )
+}

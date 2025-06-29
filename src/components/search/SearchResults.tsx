@@ -171,6 +171,9 @@ export default function SearchResults({
   const [allResults, setAllResults] = useState<Publication[]>(initialResults || [])
   const [loading, setLoading] = useState(initialLoading)
 
+  // Add state to track selected publication
+  const [selectedPublication, setSelectedPublication] = useState<Publication | null>(null);
+
   // Actualizar resultados cuando cambian los resultados iniciales
   useEffect(() => {
     console.log('SearchResults: Updating results from props, count:', initialResults ? initialResults.length : 0);
@@ -238,6 +241,11 @@ export default function SearchResults({
   }
     */}
 
+  // Modify the onPublicationClick handler to set the selected publication
+  const handlePublicationClick = (publication: Publication, e: React.MouseEvent<HTMLAnchorElement>) => {
+    e.preventDefault();
+    setSelectedPublication(publication);
+  };
 
   // Renderizar item en vista de cuadrícula
   const renderGridItem = (publication: Publication, index: number) => {
@@ -276,11 +284,7 @@ export default function SearchResults({
         <a
           href={seoUrl}
           className="block w-full h-full"
-          onClick={(e) => {
-            if (onPublicationClick) {
-              onPublicationClick(publication, e);
-            }
-          }}
+          onClick={(e) => handlePublicationClick(publication, e)}
         >
           {/* Image Container - Only show if has valid images */}
           {hasImages && publication.images && (
@@ -484,14 +488,7 @@ export default function SearchResults({
         <a
           href={seoUrl}
           className="block w-full"
-          onClick={(e) => {
-            if (onPublicationClick) {
-              onPublicationClick(publication, e);
-            } else {
-              console.warn("onPublicationClick handler not provided to SearchResults. Defaulting to link navigation.");
-              // No e.preventDefault() aquí para permitir la navegación si no hay manejador
-            }
-          }}
+          onClick={(e) => handlePublicationClick(publication, e)}
         >
           <div className="relative flex flex-row bg-slate-800 rounded-xl overflow-hidden shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1 h-full">
             {/* Imagen - Solo mostrar si hay imágenes válidas */}
@@ -652,6 +649,12 @@ export default function SearchResults({
     )
   }
 
+  // Adjust the grid layout based on whether a publication is selected
+  const gridClassName = selectedPublication ? 'grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2' : 'grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4';
+
+  // Adjust the list layout based on whether a publication is selected
+  const listClassName = selectedPublication ? 'flex flex-col gap-2' : 'flex flex-col gap-4';
+
   if (loading && allResults.length === 0) {
     return (
       <div className="w-full">
@@ -732,7 +735,7 @@ export default function SearchResults({
             <motion.div
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
-              className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 auto-rows-auto"
+              className={`${gridClassName} gap-4 auto-rows-auto`}
               style={{
                 gridAutoFlow: 'dense',
                 gridTemplateRows: 'masonry',
@@ -747,13 +750,22 @@ export default function SearchResults({
             <motion.div
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
-              className="flex flex-col gap-4"
+              className={listClassName}
             >
               {allResults.map((publication, index) => renderListItem(publication, index))}
             </motion.div>
           </LayoutGroup>
         )}
       </AnimatePresence>
+
+      {/* Display selected publication details */}
+      {selectedPublication && (
+        <div className="w-full lg:w-1/2 p-4">
+          <h2 className="text-xl font-bold mb-4">{selectedPublication.title}</h2>
+          <p>{selectedPublication.description}</p>
+          {/* Add more details as needed */}
+        </div>
+      )}
 
       {/* Loading more indicator */}
       {loading && allResults.length > 0 && (

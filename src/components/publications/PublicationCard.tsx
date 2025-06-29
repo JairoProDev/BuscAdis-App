@@ -26,33 +26,7 @@ import { generateSeoUrl } from '@/utils/url';
 import { getDefaultImageByCategory } from '@/utils/image-helpers';
 import { Clock, MapPin, Phone } from 'lucide-react';
 import { timeAgo } from '@/utils/date';
-
-interface PublicationData {
-  id: string;
-  title: string;
-  description: string;
-  categorySlug: string;
-  subcategorySlug: string | null;
-  subSubcategorySlug: string | null;
-  transactionType: string;
-  value: number;
-  currency: string;
-  valueType: string;
-  size: number;
-  location: {
-    reference?: string;
-    district: string;
-    province: string;
-    city: string;
-    country: string;
-  };
-  images: string[];
-  whatsapp: string;
-  createdAt: string;
-  views: number;
-  featured?: boolean;
-  premium?: boolean;
-}
+import { PublicationData } from '@/types/publication';
 
 interface PublicationCardProps {
   publication: PublicationData;
@@ -313,7 +287,12 @@ export default function PublicationCard({
     }
   };
 
-  const handleClick = () => {
+  const handleClick = (e: React.MouseEvent) => {
+    // Prevent any default link behavior if nested
+    e.preventDefault();
+    e.stopPropagation();
+    
+    // Call the parent handler if provided
     if (onPublicationClick) {
       onPublicationClick(publication);
     }
@@ -347,8 +326,9 @@ export default function PublicationCard({
         onClick={handleClick}
         whileHover={{ y: viewMode === 'list' ? 0 : -2 }}
         transition={{ duration: 0.2 }}
+        style={{ cursor: 'pointer' }} // Explicitly set cursor
       >
-        <Link href={seoUrl} className={viewMode === 'list' ? 'flex flex-row w-full h-full' : 'block h-full w-full flex flex-col'}>
+        <div className={viewMode === 'list' ? 'flex flex-row w-full h-full' : 'block h-full w-full flex flex-col'}>
           {/* Image Container */}
           <div className={`image-container relative overflow-hidden ${
             viewMode === 'list' 
@@ -703,7 +683,7 @@ export default function PublicationCard({
               </>
             )}
           </div>
-        </Link>
+        </div>
       </motion.div>
 
       {/* Toast notification for copied link */}

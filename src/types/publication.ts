@@ -303,6 +303,33 @@ export interface PublicationInput {
   communityDetails?: Partial<CommunityPublication>;
 }
 
+export interface PublicationData {
+  id: string;
+  title: string;
+  description: string;
+  categorySlug: string;
+  subcategorySlug: string | null;
+  subSubcategorySlug: string | null;
+  transactionType: string;
+  value: number;
+  currency: string;
+  valueType: string;
+  size: number;
+  location: {
+    reference?: string;
+    district: string;
+    province: string;
+    city: string;
+    country: string;
+  };
+  images: string[];
+  whatsapp: string;
+  createdAt: string;
+  views: number;
+  featured?: boolean;
+  premium?: boolean;
+}
+
 /**
  * Función para clasificar anuncios basados en su contenido
  * @param title Título del anuncio

@@ -1,28 +1,33 @@
 'use client'
 
-import { useState, useRef, useEffect, RefObject, ChangeEventHandler, FormEventHandler } from 'react'
+import {
+  useState,
+  useRef,
+  useEffect,
+  RefObject,
+  ChangeEventHandler,
+  FormEventHandler,
+  useReducer,
+  useMemo,
+  FC,
+  Dispatch
+} from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import {
   SparklesIcon,
   PaperAirplaneIcon,
   XMarkIcon
 } from '@heroicons/react/24/outline'
-import { categories } from '@/data/categories'
 import { categoriesList } from '@/data/categories-data'
-import { featuredAds } from '@/data/featuredAds'
+import { PublicationsService, Publication } from '@/services/publications.service'
+
+// ============================================================================
+// 1. TYPES & INTERFACES (Centralized & Clear)
+// ============================================================================
 
 interface AdisChatProps {
   isOpen: boolean
   onClose: () => void
-}
-
-interface Message {
-  id: string
-  text: string
-  sender: 'user' | 'adis'
-  timestamp: Date
-  options?: string[]
-  onOptionClick?: (option: string) => void
 }
 
 type ConversationStage =
@@ -32,18 +37,115 @@ type ConversationStage =
   | 'subsubcategory_selected'
   | 'show_results'
 
-interface ConversationContext {
+interface ConversationState {
   stage: ConversationStage
   selectedCategory?: string
   selectedSubcategory?: string
   selectedSubSubcategory?: string
 }
 
-const WelcomeScreen = ({
-  onCategorySelect
-}: {
-  onCategorySelect: (categoryId: string) => void
-}) => (
+type ConversationAction =
+  | { type: 'SELECT_CATEGORY'; payload: string }
+  | { type: 'SELECT_SUBCATEGORY'; payload: string }
+  | { type: 'SELECT_SUB_SUBCATEGORY'; payload: string }
+  | { type: 'SHOW_RESULTS' }
+  | { type: 'GO_BACK' }
+  | { type: 'RESTART' }
+
+interface Category {
+  id: string
+  name: string
+  subcategories: Subcategory[]
+}
+
+interface Subcategory {
+  id: string
+  name: string
+  subSubcategories?: SubSubcategory[]
+}
+
+interface SubSubcategory {
+  id: string
+  name: string
+}
+
+// ============================================================================
+// 2. STATE MANAGEMENT (The useReducer Logic)
+// ============================================================================
+
+const initialState: ConversationState = {
+  stage: 'welcome'
+}
+
+function conversationReducer(
+  state: ConversationState,
+  action: ConversationAction
+): ConversationState {
+  switch (action.type) {
+    case 'SELECT_CATEGORY':
+      const category = categoriesList.find(c => c.id === action.payload)
+      const hasSubcategories = category && category.subcategories.length > 0
+      return {
+        ...initialState,
+        stage: hasSubcategories ? 'category_selected' : 'show_results',
+        selectedCategory: action.payload
+      }
+    case 'SELECT_SUBCATEGORY':
+      const currentCategory = categoriesList.find(c => c.id === state.selectedCategory)
+      const subcategory = currentCategory?.subcategories.find(s => s.id === action.payload)
+      const hasSubSubcategories = subcategory?.subSubcategories && subcategory.subSubcategories.length > 0
+      return {
+        ...state,
+        stage: hasSubSubcategories ? 'subcategory_selected' : 'show_results',
+        selectedSubcategory: action.payload
+      }
+    case 'SELECT_SUB_SUBCATEGORY':
+      return {
+        ...state,
+        stage: 'show_results',
+        selectedSubSubcategory: action.payload
+      }
+    case 'SHOW_RESULTS':
+      return { ...state, stage: 'show_results' }
+    case 'GO_BACK':
+      if (state.stage === 'subcategory_selected' || state.stage === 'show_results' && state.selectedSubcategory) {
+        return {
+          ...state,
+          stage: 'category_selected',
+          selectedSubcategory: undefined,
+          selectedSubSubcategory: undefined
+        }
+      }
+      return { ...initialState } // Default back action is to restart
+    case 'RESTART':
+      return initialState
+    default:
+      return state
+  }
+}
+
+// ============================================================================
+// 3. CUSTOM HOOKS (For Reusability & Separation of Concerns)
+// ============================================================================
+
+const useIsMobile = () => {
+  const [isMobile, setIsMobile] = useState(false)
+  useEffect(() => {
+    const checkMobile = () => setIsMobile(window.innerWidth < 768)
+    checkMobile()
+    window.addEventListener('resize', checkMobile)
+    return () => window.removeEventListener('resize', checkMobile)
+  }, [])
+  return isMobile
+}
+
+// ============================================================================
+// 4. UI COMPONENTS (Modular & Focused)
+// ============================================================================
+
+// --- Screen Components ---
+
+const WelcomeScreen: FC<{ dispatch: Dispatch<ConversationAction> }> = ({ dispatch }) => (
   <div className='text-center py-8 flex flex-col justify-center h-full'>
     <div className='w-16 h-16 bg-gradient-to-r from-teal-100 to-cyan-100 dark:from-teal-900/40 dark:to-cyan-900/40 rounded-full flex items-center justify-center mx-auto mb-4'>
       <SparklesIcon className='w-8 h-8 text-teal-600 dark:text-teal-400' />
@@ -58,7 +160,7 @@ const WelcomeScreen = ({
       {categoriesList.map(category => (
         <button
           key={category.id}
-          onClick={() => onCategorySelect(category.id)}
+          onClick={() => dispatch({ type: 'SELECT_CATEGORY', payload: category.id })}
           className='w-full p-3 text-left bg-slate-50 dark:bg-slate-800 hover:bg-slate-100 dark:hover:bg-slate-700 rounded-xl transition-all duration-200 text-sm group border border-transparent hover:border-teal-200 dark:hover:border-teal-800'
         >
           <span className='group-hover:text-teal-600 dark:group-hover:text-teal-400'>
@@ -70,118 +172,120 @@ const WelcomeScreen = ({
   </div>
 )
 
-const SubcategoryScreen = ({
-  categoryId,
-  onSubcategorySelect,
-  onBack
-}: {
-  categoryId: string
-  onSubcategorySelect: (subcategoryId: string) => void
-  onBack: () => void
-}) => {
-  const category = categoriesList.find(c => c.id === categoryId)
-  if (!category) return null
-  return (
-    <div className='py-8 flex flex-col h-full'>
-      <button onClick={onBack} className='mb-4 text-teal-600 dark:text-teal-400 text-sm'>&larr; Volver a categorías</button>
-      <h4 className='text-lg font-bold text-slate-900 dark:text-white mb-4'>
-        {category.name}
-      </h4>
-      <div className='space-y-2 flex-grow-0'>
-        {category.subcategories.map(subcat => (
-          <button
-            key={subcat.id}
-            onClick={() => onSubcategorySelect(subcat.id)}
-            className='w-full p-3 text-left bg-slate-50 dark:bg-slate-800 hover:bg-slate-100 dark:hover:bg-slate-700 rounded-xl transition-all duration-200 text-sm group border border-transparent hover:border-teal-200 dark:hover:border-teal-800'
-          >
-            <span className='group-hover:text-teal-600 dark:group-hover:text-teal-400'>
-              {subcat.name}
-            </span>
-          </button>
-        ))}
-      </div>
+const SubcategoryScreen: FC<{ category: Category; dispatch: Dispatch<ConversationAction> }> = ({ category, dispatch }) => (
+  <div className='py-8 flex flex-col h-full'>
+    <button onClick={() => dispatch({ type: 'GO_BACK' })} className='mb-4 text-teal-600 dark:text-teal-400 text-sm'>
+      &larr; Volver a categorías
+    </button>
+    <h4 className='text-lg font-bold text-slate-900 dark:text-white mb-4'>
+      {category.name}
+    </h4>
+    <div className='space-y-2 flex-grow-0'>
+      {category.subcategories.map(subcat => (
+        <button
+          key={subcat.id}
+          onClick={() => dispatch({ type: 'SELECT_SUBCATEGORY', payload: subcat.id })}
+          className='w-full p-3 text-left bg-slate-50 dark:bg-slate-800 hover:bg-slate-100 dark:hover:bg-slate-700 rounded-xl transition-all duration-200 text-sm group border border-transparent hover:border-teal-200 dark:hover:border-teal-800'
+        >
+          <span className='group-hover:text-teal-600 dark:group-hover:text-teal-400'>
+            {subcat.name}
+          </span>
+        </button>
+      ))}
     </div>
-  )
-}
+  </div>
+)
 
-const SubSubcategoryScreen = ({
-  categoryId,
-  subcategoryId,
-  onSubSubcategorySelect,
-  onBack
-}: {
-  categoryId: string
-  subcategoryId: string
-  onSubSubcategorySelect: (subSubcategoryId: string) => void
-  onBack: () => void
-}) => {
-  const category = categoriesList.find(c => c.id === categoryId)
-  const subcategory = category?.subcategories.find(s => s.id === subcategoryId)
-  if (!subcategory || !subcategory.subSubcategories || subcategory.subSubcategories.length === 0) return null
-  return (
-    <div className='py-8 flex flex-col h-full'>
-      <button onClick={onBack} className='mb-4 text-teal-600 dark:text-teal-400 text-sm'>&larr; Volver a subcategorías</button>
-      <h4 className='text-lg font-bold text-slate-900 dark:text-white mb-4'>
-        {subcategory.name}
-      </h4>
-      <div className='space-y-2 flex-grow-0'>
-        {subcategory.subSubcategories.map(subsub => (
-          <button
-            key={subsub.id}
-            onClick={() => onSubSubcategorySelect(subsub.id)}
-            className='w-full p-3 text-left bg-slate-50 dark:bg-slate-800 hover:bg-slate-100 dark:hover:bg-slate-700 rounded-xl transition-all duration-200 text-sm group border border-transparent hover:border-teal-200 dark:hover:border-teal-800'
-          >
-            <span className='group-hover:text-teal-600 dark:group-hover:text-teal-400'>
-              {subsub.name}
-            </span>
-          </button>
-        ))}
-      </div>
+const SubSubcategoryScreen: FC<{ subcategory: Subcategory; dispatch: Dispatch<ConversationAction> }> = ({ subcategory, dispatch }) => (
+  <div className='py-8 flex flex-col h-full'>
+    <button onClick={() => dispatch({ type: 'GO_BACK' })} className='mb-4 text-teal-600 dark:text-teal-400 text-sm'>
+      &larr; Volver a subcategorías
+    </button>
+    <h4 className='text-lg font-bold text-slate-900 dark:text-white mb-4'>
+      {subcategory.name}
+    </h4>
+    <div className='space-y-2 flex-grow-0'>
+      {subcategory.subSubcategories?.map(subsub => (
+        <button
+          key={subsub.id}
+          onClick={() => dispatch({ type: 'SELECT_SUB_SUBCATEGORY', payload: subsub.id })}
+          className='w-full p-3 text-left bg-slate-50 dark:bg-slate-800 hover:bg-slate-100 dark:hover:bg-slate-700 rounded-xl transition-all duration-200 text-sm group border border-transparent hover:border-teal-200 dark:hover:border-teal-800'
+        >
+          <span className='group-hover:text-teal-600 dark:group-hover:text-teal-400'>
+            {subsub.name}
+          </span>
+        </button>
+      ))}
     </div>
-  )
-}
+  </div>
+)
 
-const ResultsScreen = ({
-  categoryId,
-  subcategoryId,
-  subSubcategoryId,
-  onRestart
-}: {
-  categoryId: string
-  subcategoryId?: string
-  subSubcategoryId?: string
-  onRestart: () => void
-}) => {
-  const category = categoriesList.find(c => c.id === categoryId)
-  const subcategory = category?.subcategories.find(s => s.id === subcategoryId)
-  const subSubcategory = subcategory?.subSubcategories?.find(ss => ss.id === subSubcategoryId)
-  const ads = featuredAds.filter(ad => {
-    if (category && ad.category && ad.category.toLowerCase().includes(category.name.toLowerCase())) {
-      return true
-    }
-    return false
-  })
+const ResultsScreen: FC<{
+  state: ConversationState
+  dispatch: Dispatch<ConversationAction>
+}> = ({ state, dispatch }) => {
+  const { selectedCategory, selectedSubcategory, selectedSubSubcategory } = state
+  const [ads, setAds] = useState<Publication[]>([])
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState('')
+
+  const { category, subcategory, subSubcategory } = useMemo(() => {
+    const cat = categoriesList.find(c => c.id === selectedCategory)
+    const sub = cat?.subcategories.find(s => s.id === selectedSubcategory)
+    const subSub = sub?.subSubcategories?.find(ss => ss.id === selectedSubSubcategory)
+    return { category: cat, subcategory: sub, subSubcategory: subSub }
+  }, [selectedCategory, selectedSubcategory, selectedSubSubcategory])
+
+  useEffect(() => {
+    setLoading(true)
+    setError('')
+    PublicationsService.getPublications({
+      category: selectedCategory,
+      subcategory: selectedSubcategory,
+      // subSubcategory: selectedSubSubcategory, // Prepare for backend implementation
+      status: 'activo',
+      limit: 12
+    })
+      .then(res => {
+        setAds(res.publications)
+        setLoading(false)
+      })
+      .catch(() => {
+        setError('No se pudieron cargar los anuncios. Intenta de nuevo.')
+        setLoading(false)
+      })
+  }, [selectedCategory, selectedSubcategory, selectedSubSubcategory])
+
   return (
     <div className='py-8 flex flex-col h-full'>
-      <button onClick={onRestart} className='mb-4 text-teal-600 dark:text-teal-400 text-sm'>
+      <button onClick={() => dispatch({ type: 'RESTART' })} className='mb-4 text-teal-600 dark:text-teal-400 text-sm'>
         &larr; Nueva búsqueda
       </button>
       <h4 className='text-lg font-bold text-slate-900 dark:text-white mb-4'>
-        Resultados para {category?.name}{subcategory ? ` / ${subcategory.name}` : ''}{subSubcategory ? ` / ${subSubcategory.name}` : ''}
+        Resultados para {category?.name}
+        {subcategory ? ` / ${subcategory.name}` : ''}
+        {subSubcategory ? ` / ${subSubcategory.name}` : ''}
       </h4>
-      {ads.length === 0 ? (
-        <div className='text-slate-500 dark:text-slate-400'>No se encontraron anuncios destacados para esta categoría.</div>
+      {loading ? (
+        <div className='text-slate-500 dark:text-slate-400'>Cargando anuncios...</div>
+      ) : error ? (
+        <div className='text-red-500 dark:text-red-400'>{error}</div>
+      ) : ads.length === 0 ? (
+        <div className='text-slate-500 dark:text-slate-400'>No se encontraron anuncios para esta búsqueda.</div>
       ) : (
         <div className='space-y-4'>
-          {ads.map((ad, idx) => (
-            <div key={idx} className='bg-slate-50 dark:bg-slate-800 rounded-xl p-4 flex gap-4 items-center'>
-              <img src={ad.imageUrl} alt={ad.title} className='w-16 h-16 object-cover rounded-lg' />
+          {ads.map((ad) => (
+            <div key={ad._id} className='bg-slate-50 dark:bg-slate-800 rounded-xl p-4 flex gap-4 items-center'>
+              <img src={ad.images?.[0] || '/images/no-image.png'} alt={ad.title} className='w-16 h-16 object-cover rounded-lg' />
               <div className='flex-1'>
                 <h5 className='font-semibold text-slate-900 dark:text-white'>{ad.title}</h5>
-                <p className='text-sm text-slate-600 dark:text-slate-400'>{ad.description}</p>
-                <div className='text-xs text-slate-500 dark:text-slate-400 mt-1'>{ad.location} &bull; {ad.price}</div>
+                <p className='text-sm text-slate-600 dark:text-slate-400 line-clamp-2'>{ad.description}</p>
+                <div className='text-xs text-slate-500 dark:text-slate-400 mt-1'>
+                  {ad.location?.city || ad.location?.province || ad.location?.country || 'Sin ubicación'}
+                  {ad.value ? ` • S/ ${ad.value}` : ''}
+                </div>
               </div>
-              <button className='ml-2 px-3 py-1.5 bg-gradient-to-r from-teal-500 to-cyan-500 text-white rounded-full text-xs'>Contactar</button>
+              <a href={`/anuncio/${ad._id}`} target='_blank' rel="noopener noreferrer" className='ml-2 px-3 py-1.5 bg-gradient-to-r from-teal-500 to-cyan-500 text-white rounded-full text-xs'>Ver</a>
             </div>
           ))}
         </div>
@@ -190,99 +294,15 @@ const ResultsScreen = ({
   )
 }
 
-const ChatMessages = ({
-  messages,
-  isTyping,
-  messagesEndRef
-}: {
-  messages: Message[]
-  isTyping: boolean
-  messagesEndRef: RefObject<HTMLDivElement>
-}) => (
-  <>
-    {messages.map((message: Message) => (
-      <div
-        key={message.id}
-        className={`flex flex-col ${
-          message.sender === 'user' ? 'items-end' : 'items-start'
-        }`}
-      >
-        <div
-          className={`
-            max-w-xs lg:max-w-sm px-4 py-2 rounded-2xl shadow-sm
-            ${
-              message.sender === 'user'
-                ? 'bg-gradient-to-r from-teal-500 to-cyan-500 text-white'
-                : 'bg-slate-100 dark:bg-slate-800 text-slate-900 dark:text-white'
-            }
-          `}
-        >
-          <p className='text-sm'>{message.text}</p>
-          <p
-            className={`text-xs mt-1 ${
-              message.sender === 'user'
-                ? 'text-teal-100'
-                : 'text-slate-500 dark:text-slate-400'
-            }`}
-          >
-            {message.timestamp.toLocaleTimeString([], {
-              hour: '2-digit',
-              minute: '2-digit'
-            })}
-          </p>
-        </div>
-        {message.options && message.onOptionClick && (
-          <div className='mt-2 flex flex-wrap gap-2'>
-            {message.options.map(option => (
-              <button
-                key={option}
-                onClick={() => message.onOptionClick?.(option)}
-                className='px-3 py-1.5 bg-white dark:bg-slate-700 border border-slate-300 dark:border-slate-600 rounded-full text-sm hover:bg-slate-50 dark:hover:bg-slate-600 transition-all'
-              >
-                {option}
-              </button>
-            ))}
-          </div>
-        )}
-      </div>
-    ))}
-    {isTyping && (
-      <div className='flex justify-start'>
-        <div className='bg-slate-100 dark:bg-slate-800 px-4 py-2 rounded-2xl shadow-sm'>
-          <div className='flex space-x-1'>
-            {[...Array(3)].map((_, i) => (
-              <motion.div
-                key={i}
-                className='w-2 h-2 bg-slate-400 rounded-full'
-                animate={{ scale: [1, 1.2, 1] }}
-                transition={{
-                  duration: 1,
-                  repeat: Infinity,
-                  delay: i * 0.2
-                }}
-              />
-            ))}
-          </div>
-        </div>
-      </div>
-    )}
-    <div ref={messagesEndRef} />
-  </>
-)
+// --- Wrapper & Layout Components ---
 
-const ChatInput = ({
-  value,
-  onChange,
-  onSubmit,
-  isTyping,
-  inputRef
-}: {
+const ChatInput: FC<{
   value: string
   onChange: ChangeEventHandler<HTMLInputElement>
   onSubmit: FormEventHandler<HTMLFormElement>
   isTyping: boolean
   inputRef: RefObject<HTMLInputElement>
-}) => (
+}> = ({ value, onChange, onSubmit, isTyping, inputRef }) => (
   <div className='flex-shrink-0 p-4 border-t border-slate-200 dark:border-slate-700'>
     <form onSubmit={onSubmit} className='flex gap-2'>
       <input
@@ -304,13 +324,7 @@ const ChatInput = ({
   </div>
 )
 
-const ChatHeader = ({
-  isTyping,
-  onClose
-}: {
-  isTyping: boolean
-  onClose: () => void
-}) => (
+const ChatHeader: FC<{ isTyping: boolean; onClose: () => void }> = ({ isTyping, onClose }) => (
   <div className='flex-shrink-0 flex items-center justify-between p-4 border-b border-slate-200 dark:border-slate-700 bg-gradient-to-r from-teal-50 to-cyan-50 dark:from-teal-900/20 dark:to-cyan-900/20'>
     <div className='flex items-center gap-3'>
       <div className='w-10 h-10 bg-gradient-to-r from-teal-500 to-cyan-500 rounded-full flex items-center justify-center shadow-lg'>
@@ -332,135 +346,57 @@ const ChatHeader = ({
   </div>
 )
 
-export default function AdisChat ({ isOpen, onClose }: AdisChatProps) {
-  const [messages, setMessages] = useState<Message[]>([])
+// This is the Presentational Component
+const AdisChatView: FC<{
+  state: ConversationState
+  dispatch: Dispatch<ConversationAction>
+  onClose: () => void
+}> = ({ state, dispatch, onClose }) => {
+  const isMobile = useIsMobile()
+  const inputRef = useRef<HTMLInputElement>(null)
+  
+  // The free-text input state is managed here as it's purely UI state
   const [inputValue, setInputValue] = useState('')
   const [isTyping, setIsTyping] = useState(false)
-  const [context, setContext] = useState<ConversationContext>({
-    stage: 'welcome'
-  })
-  const messagesEndRef = useRef<HTMLDivElement>(null)
-  const inputRef = useRef<HTMLInputElement>(null)
-  const [isMobile, setIsMobile] = useState(false)
 
-  useEffect(() => {
-    const checkMobile = () => setIsMobile(window.innerWidth < 768)
-    checkMobile()
-    window.addEventListener('resize', checkMobile)
-    return () => window.removeEventListener('resize', checkMobile)
-  }, [])
-
-  const scrollToBottom = () => {
-    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' })
-  }
-
-  useEffect(() => {
-    scrollToBottom()
-  }, [messages])
-
-  useEffect(() => {
-    if (isOpen && inputRef.current && !isMobile) {
-      setTimeout(() => inputRef.current?.focus(), 300)
+  const { category, subcategory } = useMemo(() => {
+    const cat = categoriesList.find(c => c.id === state.selectedCategory)
+    const sub = cat?.subcategories.find(s => s.id === state.selectedSubcategory)
+    return { category: cat, subcategory: sub }
+  }, [state.selectedCategory, state.selectedSubcategory])
+  
+  // This logic is simplified with a declarative map
+  const renderContent = () => {
+    switch (state.stage) {
+      case 'welcome':
+        return <WelcomeScreen dispatch={dispatch} />
+      case 'category_selected':
+        if (!category) return null // Or a fallback UI
+        return <SubcategoryScreen category={category} dispatch={dispatch} />
+      case 'subcategory_selected':
+        if (!subcategory) return null // Or a fallback UI
+        return <SubSubcategoryScreen subcategory={subcategory} dispatch={dispatch} />
+      case 'show_results':
+        return <ResultsScreen state={state} dispatch={dispatch} />
+      default:
+        return <WelcomeScreen dispatch={dispatch} />
     }
-  }, [isOpen, isMobile])
-
-  const addMessage = (
-    text: string,
-    sender: 'user' | 'adis',
-    options?: {
-      payload: string[]
-      handler: (option: string) => void
-    }
-  ) => {
-    const newMessage: Message = {
-      id: Date.now().toString(),
-      text,
-      sender,
-      timestamp: new Date(),
-      ...(options && {
-        options: options.payload,
-        onOptionClick: options.handler
-      })
-    }
-    setMessages(prev => [...prev, newMessage])
   }
 
-  const handleSendMessage = async (text: string) => {
-    if (!text.trim()) return
-
-    addMessage(text, 'user')
-    setInputValue('')
-    setIsTyping(true)
-
-    // TODO: Advanced response generation based on context
-    setTimeout(() => {
-      addMessage(getAdisResponse(text), 'adis')
-      setIsTyping(false)
-    }, 1500)
-  }
-
-  const getAdisResponse = (userText: string): string => {
-    // This will be replaced with context-aware logic
-    const text = userText.toLowerCase()
-    const responses: { [key: string]: string } = {
-      empleo:
-        '¡Perfecto! Te ayudo a encontrar empleos. ¿En qué área te interesa trabajar? Tenemos oportunidades en tecnología, marketing, ventas, y muchas más.',
-      inmueble:
-        'Te ayudo a encontrar el hogar perfecto. ¿Qué tipo de propiedad buscas y en qué zona? Puedo mostrarte las mejores opciones disponibles.',
-      vehículo:
-        '¡Genial! Te ayudo con vehículos. ¿Buscas algo específico? Puedo ayudarte a encontrar autos, motos, o cualquier tipo de vehículo que necesites.',
-      hola: '¡Hola! 👋 Soy ADIS, tu asistente inteligente de BuscAdis. Estoy aquí para ayudarte a encontrar exactamente lo que necesitas. ¿Qué estás buscando hoy?'
-    }
-    for (const key in responses) {
-      if (text.includes(key)) return responses[key]
-    }
-    return 'Entiendo que estás buscando algo específico. ¿Podrías darme más detalles? Puedo ayudarte a encontrar empleos, inmuebles, vehículos, servicios y mucho más en BuscAdis.'
-  }
-
-  const handleCategorySelect = (categoryId: string) => {
-    setContext({ stage: 'category_selected', selectedCategory: categoryId })
-  }
-
-  const handleSubcategorySelect = (subcategoryId: string) => {
-    setContext(ctx => ({ ...ctx, stage: 'subcategory_selected', selectedSubcategory: subcategoryId }))
-  }
-
-  const handleSubSubcategorySelect = (subSubcategoryId: string) => {
-    setContext(ctx => ({ ...ctx, stage: 'subsubcategory_selected', selectedSubSubcategory: subSubcategoryId }))
-  }
-
-  const handleShowResults = () => {
-    setContext(ctx => ({ ...ctx, stage: 'show_results' }))
-  }
-
-  const handleRestart = () => {
-    setContext({ stage: 'welcome' })
-  }
-
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleFreeTextMessage = (e: React.FormEvent) => {
     e.preventDefault()
-    handleSendMessage(inputValue)
+    if (!inputValue.trim()) return
+    // TODO: Implement advanced NLP or keyword-based routing
+    // For now, it just clears the input
+    console.log("User message:", inputValue)
+    setIsTyping(true)
+    setTimeout(() => {
+        setIsTyping(false)
+        // You could dispatch an action here based on text analysis
+    }, 1000)
+    setInputValue('')
   }
-
-  let content
-  if (context.stage === 'welcome') {
-    content = <WelcomeScreen onCategorySelect={handleCategorySelect} />
-  } else if (context.stage === 'category_selected' && context.selectedCategory) {
-    content = <SubcategoryScreen categoryId={context.selectedCategory} onSubcategorySelect={handleSubcategorySelect} onBack={handleRestart} />
-  } else if (context.stage === 'subcategory_selected' && context.selectedCategory && context.selectedSubcategory) {
-    const category = categoriesList.find(c => c.id === context.selectedCategory)
-    const subcategory = category?.subcategories.find(s => s.id === context.selectedSubcategory)
-    if (subcategory?.subSubcategories && subcategory.subSubcategories.length > 0) {
-      content = <SubSubcategoryScreen categoryId={context.selectedCategory} subcategoryId={context.selectedSubcategory} onSubSubcategorySelect={subId => { handleSubSubcategorySelect(subId); handleShowResults(); }} onBack={() => setContext(ctx => ({ ...ctx, stage: 'category_selected', selectedSubcategory: undefined }))} />
-    } else {
-      content = <ResultsScreen categoryId={context.selectedCategory} subcategoryId={context.selectedSubcategory} onRestart={handleRestart} />
-    }
-  } else if (context.stage === 'subsubcategory_selected' && context.selectedCategory && context.selectedSubcategory && context.selectedSubSubcategory) {
-    content = <ResultsScreen categoryId={context.selectedCategory} subcategoryId={context.selectedSubcategory} subSubcategoryId={context.selectedSubSubcategory} onRestart={handleRestart} />
-  } else if (context.stage === 'show_results' && context.selectedCategory) {
-    content = <ResultsScreen categoryId={context.selectedCategory} subcategoryId={context.selectedSubcategory} subSubcategoryId={context.selectedSubSubcategory} onRestart={handleRestart} />
-  }
-
+  
   const containerClasses = isMobile
     ? 'fixed bottom-0 left-0 right-0 h-[85vh] bg-white dark:bg-slate-900 rounded-t-3xl shadow-2xl z-50 flex flex-col'
     : 'fixed top-20 right-4 w-[400px] h-[calc(100vh-6rem)] max-h-[700px] bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-2xl shadow-xl z-50 flex flex-col'
@@ -468,40 +404,63 @@ export default function AdisChat ({ isOpen, onClose }: AdisChatProps) {
   const motionProps = isMobile
     ? { initial: { y: '100%' }, animate: { y: 0 }, exit: { y: '100%' } }
     : { initial: { x: '100%' }, animate: { x: 0 }, exit: { x: '100%' } }
+    
+  return (
+    <motion.div
+      {...motionProps}
+      transition={{ type: 'spring', damping: 30, stiffness: 300 }}
+      className={containerClasses}
+      onPointerDown={e => e.stopPropagation()}
+    >
+      <ChatHeader isTyping={isTyping} onClose={onClose} />
+      <div className='flex-1 h-0 overflow-y-auto p-4 space-y-4'>
+        {renderContent()}
+      </div>
+      <ChatInput
+        value={inputValue}
+        onChange={e => setInputValue(e.target.value)}
+        onSubmit={handleFreeTextMessage}
+        isTyping={isTyping}
+        inputRef={inputRef}
+      />
+    </motion.div>
+  )
+}
+
+// ============================================================================
+// 5. FINAL EXPORTED COMPONENT (Container)
+// ============================================================================
+
+export default function AdisChat({ isOpen, onClose }: AdisChatProps) {
+  const [state, dispatch] = useReducer(conversationReducer, initialState)
+  const isMobile = useIsMobile()
+
+  // Reset state when the chat is closed
+  useEffect(() => {
+    if (!isOpen) {
+      // Delay reset to allow exit animation to complete
+      setTimeout(() => {
+        dispatch({ type: 'RESTART' })
+      }, 300)
+    }
+  }, [isOpen])
 
   return (
     <AnimatePresence>
       {isOpen && (
         <>
+          {/* Overlay */}
           <motion.div
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
             onClick={isMobile ? undefined : onClose}
-            className='fixed inset-0 bg-transparent z-40'
+            className='fixed inset-0 bg-black/20 dark:bg-black/40 backdrop-blur-sm z-40'
           />
-
-          <motion.div
-            {...motionProps}
-            transition={{ type: 'spring', damping: 30, stiffness: 300 }}
-            className={containerClasses}
-            onPointerDown={e => e.stopPropagation()}
-          >
-            <ChatHeader isTyping={isTyping} onClose={onClose} />
-            <div className='flex-1 h-0 overflow-y-auto p-4 space-y-4'>
-              {content}
-            </div>
-
-            <ChatInput
-              value={inputValue}
-              onChange={e => setInputValue(e.target.value)}
-              onSubmit={handleSubmit}
-              isTyping={isTyping}
-              inputRef={inputRef}
-            />
-          </motion.div>
+          {/* The chat window itself */}
+          <AdisChatView state={state} dispatch={dispatch} onClose={onClose} />
         </>
       )}
     </AnimatePresence>
   )
-} 
+}
