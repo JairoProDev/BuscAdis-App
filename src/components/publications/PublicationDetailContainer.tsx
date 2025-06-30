@@ -78,7 +78,7 @@ export default function PublicationDetailContainer({
       {/* Publications Grid/List */}
       <div
         className={getPublicationsContainerClasses()}
-        style={!isMobile && isDetailOpen ? { flex: '1 1 0%', maxWidth: 'calc(100% - 420px)' } : {}}
+        style={!isMobile && isDetailOpen ? { flex: '1 1 0%', maxWidth: 'calc(100% - 500px)' } : {}}
       >
         <div className={getGridClasses()}>
           {publications.map((publication, index) => (
@@ -97,7 +97,7 @@ export default function PublicationDetailContainer({
 
       {/* Desktop Sidebar - Sticky position within content area */}
       {!isMobile && isDetailOpen && (
-        <div className="sticky top-[14rem] right-0 w-[400px] max-w-[32vw] min-h-[400px] z-40 ml-6">
+        <div className="sticky top-[0.5rem] right-0 min-h-[400px] z-40 ml-6" style={{ flex: '1 1 500px', maxWidth: '500px', width: '100%' }}>
           <PublicationDetailSidebar
             publication={selectedPublication}
             isOpen={isDetailOpen}
