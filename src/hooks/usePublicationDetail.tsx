@@ -108,42 +108,13 @@ export function PublicationDetailProvider({
     return seoUrl
   }, [])
 
-  // Handler for browser Back/Forward buttons
-  useEffect(() => {
-    const handlePopState = () => {
-      const slug = window.location.pathname.split('/').pop()
-      const publicationId = slug?.split('_').shift()
-      if (publicationId) {
-        const publication = publications.find(p => p.id === publicationId) ?? null
-        dispatch({ type: 'SET_STATE_FROM_URL', payload: publication })
-      } else {
-        dispatch({ type: 'SET_STATE_FROM_URL', payload: null })
-      }
-    }
-    window.addEventListener('popstate', handlePopState)
-    return () => window.removeEventListener('popstate', handlePopState)
-  }, [publications])
-
-  // Sync state with URL on initial load
-  useEffect(() => {
-    if (!pathname) return
-    const slug = pathname.split('/').pop()
-    const publicationId = slug?.split('_').shift()
-    if (pathname.startsWith('/anuncio/') && publicationId) {
-      const publication = publications.find(p => p.id === publicationId) ?? null
-      dispatch({ type: 'SET_STATE_FROM_URL', payload: publication })
-    }
-  }, [pathname, publications])
-
+  // Simplificado: Solo abrir/cerrar sin manipular URLs automáticamente
   const openPublicationDetail = useCallback((publication: PublicationData) => {
     dispatch({ type: 'OPEN_DETAIL', payload: publication })
-    const newUrl = generatePublicationUrl(publication)
-    window.history.pushState({ publicationId: publication.id }, '', newUrl)
-  }, [generatePublicationUrl])
+  }, [])
 
   const closePublicationDetail = useCallback(() => {
     dispatch({ type: 'CLOSE_DETAIL' })
-    window.history.back()
   }, [])
 
   const handleWhatsAppClick = useCallback((publication: PublicationData) => {
@@ -163,6 +134,9 @@ export function PublicationDetailProvider({
         text: `${publication.description}\n\nEncuentra más en BuscaDis.com`,
         url: shareUrl
       }).catch(err => console.log('Sharing failed:', err))
+    } else {
+      // Fallback: copiar al portapapeles
+      navigator.clipboard?.writeText(shareUrl).catch(err => console.log('Copy failed:', err))
     }
   }, [generatePublicationUrl])
 

@@ -1,29 +1,32 @@
 'use client';
 
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { usePublicationDetail } from '@/hooks/usePublicationDetail';
 import PublicationDetailSidebar from './PublicationDetailSidebar';
 import PublicationDetailModal from './PublicationDetailModal';
 import PublicationCard from './PublicationCard';
 import { PublicationData } from '@/types/publication';
 
-interface PublicationDetailContainerProps {
+export interface PublicationDetailContainerProps {
   publications: PublicationData[];
   className?: string;
   viewMode?: 'grid' | 'list';
   onDetailStateChange?: (isOpen: boolean) => void;
+  renderSidebarInParent?: boolean;
 }
 
 export default function PublicationDetailContainer({
   publications,
   className = '',
   viewMode = 'grid',
-  onDetailStateChange
+  onDetailStateChange,
+  renderSidebarInParent = false
 }: PublicationDetailContainerProps) {
+  const [isMobile, setIsMobile] = useState(false);
+  
   const {
     selectedPublication,
     isDetailOpen,
-    isMobile,
     openPublicationDetail,
     closePublicationDetail,
     handleWhatsAppClick,
@@ -31,14 +34,32 @@ export default function PublicationDetailContainer({
     handleFavorite
   } = usePublicationDetail();
 
-  // Notify parent about detail state changes
-  React.useEffect(() => {
-    onDetailStateChange?.(isDetailOpen && !isMobile);
-  }, [isDetailOpen, isMobile, onDetailStateChange]);
+  // Check if mobile on mount and window resize
+  useEffect(() => {
+    const checkMobile = () => {
+      setIsMobile(window.innerWidth < 1024);
+    };
+    
+    checkMobile();
+    window.addEventListener('resize', checkMobile);
+    
+    return () => window.removeEventListener('resize', checkMobile);
+  }, []);
 
-  // Handle publication click
+  // Notify parent about detail state changes
+  useEffect(() => {
+    onDetailStateChange?.(isDetailOpen);
+  }, [isDetailOpen, onDetailStateChange]);
+
+  // Handle publication click - Simplificado
   const handlePublicationClick = (publication: PublicationData) => {
-    openPublicationDetail(publication);
+    if (isDetailOpen && selectedPublication?.id === publication.id) {
+      // Si está abierto el mismo aviso, cerrarlo
+      closePublicationDetail();
+    } else {
+      // Abrir el nuevo aviso (o cambiar al nuevo si hay uno diferente abierto)
+      openPublicationDetail(publication);
+    }
   };
 
   // Get grid classes based on view mode and detail state
@@ -47,9 +68,9 @@ export default function PublicationDetailContainer({
       return 'flex flex-col gap-3';
     }
     
-    // Desktop: reduce columns when detail is open
+    // Desktop: adjust columns when detail is open
     if (!isMobile && isDetailOpen) {
-      return 'grid grid-cols-1 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-2 xl:grid-cols-2 gap-3 md:gap-4'; // 2 columnas siempre cuando sidebar abierto
+      return 'grid grid-cols-1 sm:grid-cols-2 gap-3 md:gap-4';
     }
     
     // Default: responsive grid
@@ -58,46 +79,55 @@ export default function PublicationDetailContainer({
 
   // Get container classes for the publications area
   const getPublicationsContainerClasses = () => {
-    const baseClasses = 'transition-all duration-300 ease-in-out';
-    
-    // No need for right margin since we're reducing columns instead
-    return `${baseClasses} w-full`;
+    if (!isMobile && isDetailOpen) {
+      return 'w-full'; // Full width in its column
+    }
+    return 'w-full';
   };
 
   // Get main container classes
   const getMainContainerClasses = () => {
-    const baseClasses = 'relative w-full';
-    if (!isMobile && isDetailOpen) {
-      return `${baseClasses} flex flex-row items-start`;
-    }
-    return baseClasses;
+    return `relative w-full ${className}`;
   };
 
   return (
-    <div className={`${getMainContainerClasses()} ${className}`}>
-      {/* Publications Grid/List */}
-      <div
-        className={getPublicationsContainerClasses()}
-        style={!isMobile && isDetailOpen ? { flex: '1 1 0%', maxWidth: 'calc(100% - 500px)' } : {}}
-      >
-        <div className={getGridClasses()}>
-          {publications.map((publication, index) => (
-            <PublicationCard
-              key={publication.id}
-              publication={publication}
-              onPublicationClick={handlePublicationClick}
-              viewMode={viewMode}
-              className={viewMode === 'list' && !isMobile && isDetailOpen 
-                ? 'max-w-none' 
-                : undefined}
-            />
-          ))}
+    <>
+      {/* Publications Grid/List - siempre renderizado */}
+      <div className={getMainContainerClasses()}>
+        <div className={getPublicationsContainerClasses()}>
+          <div className={getGridClasses()}>
+            {publications.map((publication, index) => (
+              <PublicationCard
+                key={publication.id}
+                publication={publication}
+                onPublicationClick={handlePublicationClick}
+                viewMode={viewMode}
+                className={viewMode === 'list' && !isMobile && isDetailOpen 
+                  ? 'max-w-none' 
+                  : undefined}
+              />
+            ))}
+          </div>
         </div>
       </div>
 
-      {/* Desktop Sidebar - Sticky position within content area */}
-      {!isMobile && isDetailOpen && (
-        <div className="sticky top-[0.5rem] right-0 min-h-[400px] z-40 ml-6" style={{ flex: '1 1 500px', maxWidth: '500px', width: '100%' }}>
+      {/* Mobile Sidebar - solo en móviles */}
+      {isMobile && isDetailOpen && selectedPublication && (
+        <div className="fixed inset-0 z-50 lg:hidden">
+          <PublicationDetailSidebar
+            publication={selectedPublication}
+            isOpen={isDetailOpen}
+            onClose={closePublicationDetail}
+            onWhatsAppClick={handleWhatsAppClick}
+            onShare={handleShare}
+            onFavorite={handleFavorite}
+          />
+        </div>
+      )}
+
+      {/* Desktop Sidebar - solo si NO se renderiza en el padre */}
+      {!renderSidebarInParent && !isMobile && isDetailOpen && selectedPublication && (
+        <div className="w-full h-fit">
           <PublicationDetailSidebar
             publication={selectedPublication}
             isOpen={isDetailOpen}
@@ -120,6 +150,6 @@ export default function PublicationDetailContainer({
           onFavorite={handleFavorite}
         />
       )}
-    </div>
+    </>
   );
 } 

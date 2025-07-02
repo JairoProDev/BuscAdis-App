@@ -23,6 +23,7 @@ import { createPortal } from 'react-dom'
 import { PublicationData } from '@/types/publication'
 import PublicationDetailContainer from '@/components/publications/PublicationDetailContainer'
 import { PublicationDetailProvider, usePublicationDetail } from '@/hooks/usePublicationDetail'
+import PublicationDetailSidebar from '@/components/publications/PublicationDetailSidebar'
 
 interface SearchResult {
   id: string;
@@ -408,8 +409,18 @@ function SearchPageContent({ publicationsData, results, setResults, isLoading, s
     { id: 'comunidad', name: 'Comunidad', description: 'Conexiones locales' }
   ]
 
-  const { openPublicationDetail, selectedPublication, isDetailOpen } = usePublicationDetail();
   const [deepLinkError, setDeepLinkError] = useState<string | null>(null);
+
+  // Hook del contexto de publicación
+  const {
+    selectedPublication,
+    isDetailOpen,
+    openPublicationDetail,
+    closePublicationDetail,
+    handleWhatsAppClick,
+    handleShare,
+    handleFavorite
+  } = usePublicationDetail();
 
   // Convert SearchResult to PublicationData format
   const convertToPublicationData = (searchResult: SearchResult): PublicationData => {
@@ -764,34 +775,42 @@ function SearchPageContent({ publicationsData, results, setResults, isLoading, s
 
   // Deep linking: abrir panel si la URL es de detalle
   useEffect(() => {
-    if (!currentPathname || currentPathname === '/buscar') return;
-    const slug = currentPathname.split('/').pop();
-    if (slug && slug.length > 0) {
-      // Buscar el aviso en los resultados cargados
-      const allPublications = results.map(convertToPublicationData);
-      let pub = allPublications.find(p => p.title.toLowerCase().replace(/\s+/g, '-') === slug);
-      if (pub && (!selectedPublication || selectedPublication.id !== pub.id)) {
-        openPublicationDetail(pub);
-        setDeepLinkError(null);
-      } else if (!pub) {
-        // Fetch individual si no está en el listado
-        setIsLoading(true);
-        fetch(`/api/publications/by-slug?slug=${slug}`)
-          .then(res => res.ok ? res.json() : Promise.reject('No encontrado'))
-          .then(data => {
-            if (data && data.publication) {
-              const pubData = convertToPublicationData(data.publication);
-              openPublicationDetail(pubData);
-              setDeepLinkError(null);
+    const handleDeepLinking = async () => {
+      if (!currentPathname || currentPathname === '/buscar') return;
+      const slug = currentPathname.split('/').pop();
+      if (slug && slug.length > 0) {
+        // Buscar el aviso en los resultados cargados
+        const allPublications = results.map(convertToPublicationData);
+        let pub = allPublications.find(p => p.title.toLowerCase().replace(/\s+/g, '-') === slug);
+        if (pub && (!selectedPublication || selectedPublication.id !== pub.id)) {
+          openPublicationDetail(pub);
+          setDeepLinkError(null);
+        } else if (!pub) {
+          // Try to fetch from API
+          try {
+            const response = await fetch(`/api/publications/${encodeURIComponent(slug)}`);
+            if (response.ok) {
+              const data = await response.json();
+              if (data && data.publication) {
+                const pubData = convertToPublicationData(data.publication);
+                openPublicationDetail(pubData);
+                setDeepLinkError(null);
+              } else {
+                setDeepLinkError('Publicación no encontrada');
+              }
             } else {
-              setDeepLinkError('No se encontró el aviso.');
+              setDeepLinkError('Error al cargar la publicación');
             }
-          })
-          .catch(() => setDeepLinkError('No se encontró el aviso.'))
-          .finally(() => setIsLoading(false));
+          } catch (error) {
+            console.error('Error fetching publication:', error);
+            setDeepLinkError('Error al cargar la publicación');
+          }
+        }
       }
-    }
-  }, [currentPathname, results]);
+    };
+    
+    handleDeepLinking();
+  }, [currentPathname, results, selectedPublication, openPublicationDetail]);
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 via-blue-50/30 to-purple-50/30 dark:from-gray-900 dark:via-gray-900 dark:to-gray-800">
@@ -935,248 +954,266 @@ function SearchPageContent({ publicationsData, results, setResults, isLoading, s
 
             {/* Search Results */}
             {hasSearched && (
-              <div className="space-y-4">
-                {/* Breadcrumbs en área de resultados */}
-                {(selectedCategory && selectedCategory !== 'all') && (
-                  <div className="mb-2">
-                    <nav className="flex items-center space-x-2 text-sm text-gray-600 dark:text-gray-400">
-                      <button
-                        onClick={() => handleCategoryChange('all')}
-                        className="hover:text-teal-600 dark:hover:text-teal-400 transition-colors"
-                      >
-                        Inicio
-                      </button>
-                      <span className="text-gray-400">/</span>
-                      <button
-                        onClick={() => {
-                          setSelectedSubcategory('')
-                          setSelectedSubSubcategory('')
-                        }}
-                        className={`transition-colors ${
-                          !selectedSubcategory 
-                            ? 'text-teal-600 dark:text-teal-400 font-medium' 
-                            : 'hover:text-teal-600 dark:hover:text-teal-400'
-                        }`}
-                      >
-                        {(() => {
-                          const categoryNames: Record<string, string> = {
-                            'inmuebles': 'Inmuebles',
-                            'vehiculos': 'Vehículos', 
-                            'empleos': 'Empleos',
-                            'servicios': 'Servicios',
-                            'productos': 'Productos',
-                            'eventos': 'Eventos',
-                            'comunidad': 'Comunidad',
-                            'negocios': 'Negocios'
-                          }
-                          return categoryNames[selectedCategory] || selectedCategory
-                        })()}
-                      </button>
-                      {selectedSubcategory && (
-                        <>
-                          <span className="text-gray-400">/</span>
-                          <button
-                            onClick={() => setSelectedSubSubcategory('')}
-                            className={`transition-colors ${
-                              !selectedSubSubcategory 
-                                ? 'text-teal-600 dark:text-teal-400 font-medium' 
-                                : 'hover:text-teal-600 dark:hover:text-teal-400'
-                            }`}
-                          >
-                            {getSubcategories(selectedCategory).find(sub => sub.id === selectedSubcategory)?.name}
-                          </button>
-                        </>
-                      )}
-                      {selectedSubSubcategory && (
-                        <>
-                          <span className="text-gray-400">/</span>
-                          <span className="text-teal-600 dark:text-teal-400 font-medium">
-                            {selectedSubSubcategory}
-                          </span>
-                        </>
-                      )}
-                    </nav>
-                  </div>
-                )}
-
-                {/* Search Stats and Controls - Layout responsive mejorado */}
-                <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between">
-                  {/* Título y stats - Siempre en la parte superior */}
-                  <div className="flex-shrink-0">
-                    <h2 className="text-xl sm:text-2xl font-bold text-gray-900 dark:text-white">
-                      {currentQuery ? `Resultados para "${currentQuery}"` : 'Todas las oportunidades'}
-                    </h2>
-                    <p className="text-sm sm:text-base text-gray-600 dark:text-gray-400">
-                      {isLoading ? 'Buscando...' : `${totalCount.toLocaleString()} resultados encontrados`}
-                    </p>
-                  </div>
-
-                  {/* Controles - Botones de vista y ordenar en la misma línea */}
-                  <div className={`flex items-center gap-3 lg:flex-shrink-0 transition-all duration-300 ${
-                    isSidebarOpen ? 'lg:pr-[calc(33.333333%+2rem)] xl:pr-[calc(25%+2rem)]' : ''
-                  }`}>
-                    {/* View Mode Toggles */}
-                    <div className="flex items-center bg-gray-100 dark:bg-gray-700 rounded-lg p-1">
-                      <button
-                        onClick={() => setViewMode('grid')}
-                        className={`p-2 rounded-md transition-colors ${
-                          viewMode === 'grid'
-                            ? 'bg-white dark:bg-gray-600 text-teal-600 shadow-sm'
-                            : 'text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white'
-                        }`}
-                        aria-label="Vista en cuadrícula"
-                      >
-                        <Squares2X2Icon className="h-5 w-5" />
-                      </button>
-                      <button
-                        onClick={() => setViewMode('list')}
-                        className={`p-2 rounded-md transition-colors ${
-                          viewMode === 'list'
-                            ? 'bg-white dark:bg-gray-600 text-teal-600 shadow-sm'
-                            : 'text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white'
-                        }`}
-                        aria-label="Vista en lista"
-                      >
-                        <ListBulletIcon className="h-5 w-5" />
-                      </button>
-                    </div>
-
-                    {/* Enhanced Sort Dropdown */}
-                    <div className="relative">
-                      <button
-                        onClick={() => setSortDropdownOpen(!sortDropdownOpen)}
-                        className="flex items-center gap-2 px-3 sm:px-4 py-2 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg hover:border-teal-500 focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-teal-500 transition-colors shadow-sm text-sm"
-                      >
-                        <span className="text-sm">
-                          {sortOptions.find(opt => opt.value === sortBy)?.icon} 
-                        </span>
-                        <span className="text-sm font-medium text-gray-700 dark:text-gray-300 hidden sm:inline">
-                          {sortOptions.find(opt => opt.value === sortBy)?.label}
-                        </span>
-                        <span className="text-sm font-medium text-gray-700 dark:text-gray-300 sm:hidden">
-                          Ordenar
-                        </span>
-                        <ChevronDownIcon 
-                          className={`w-4 h-4 text-gray-500 transition-transform ${sortDropdownOpen ? 'rotate-180' : ''}`} 
-                        />
-                      </button>
-
-                      {sortDropdownOpen && (
-                        <div className="absolute top-full right-0 mt-1 w-56 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-600 rounded-lg shadow-lg z-50">
-                          {sortOptions.map((option) => (
+              <div className={`space-y-4 ${isSidebarOpen ? 'lg:flex lg:gap-6 lg:items-start lg:h-full' : ''}`}>
+                {/* Columna izquierda: Breadcrumbs, Título, Controles y Publicaciones */}
+                <div className={`${isSidebarOpen ? 'lg:w-1/2 lg:flex-shrink-0' : 'w-full'} space-y-4`}>
+                  {/* Breadcrumbs en área de resultados */}
+                  {(selectedCategory && selectedCategory !== 'all') && (
+                    <div className="mb-2">
+                      <nav className="flex items-center space-x-2 text-sm text-gray-600 dark:text-gray-400">
+                        <button
+                          onClick={() => handleCategoryChange('all')}
+                          className="hover:text-teal-600 dark:hover:text-teal-400 transition-colors"
+                        >
+                          Inicio
+                        </button>
+                        <span className="text-gray-400">/</span>
+                        <button
+                          onClick={() => {
+                            setSelectedSubcategory('')
+                            setSelectedSubSubcategory('')
+                          }}
+                          className={`transition-colors ${
+                            !selectedSubcategory 
+                              ? 'text-teal-600 dark:text-teal-400 font-medium' 
+                              : 'hover:text-teal-600 dark:hover:text-teal-400'
+                          }`}
+                        >
+                          {(() => {
+                            const categoryNames: Record<string, string> = {
+                              'inmuebles': 'Inmuebles',
+                              'vehiculos': 'Vehículos', 
+                              'empleos': 'Empleos',
+                              'servicios': 'Servicios',
+                              'productos': 'Productos',
+                              'eventos': 'Eventos',
+                              'comunidad': 'Comunidad',
+                              'negocios': 'Negocios'
+                            }
+                            return categoryNames[selectedCategory] || selectedCategory
+                          })()}
+                        </button>
+                        {selectedSubcategory && (
+                          <>
+                            <span className="text-gray-400">/</span>
                             <button
-                              key={option.value}
-                              onClick={() => handleSortChange(option.value as SortOption)}
-                              className={`w-full flex items-center gap-3 px-4 py-3 text-sm hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors ${
-                                sortBy === option.value 
-                                  ? 'bg-teal-50 dark:bg-teal-900/20 text-teal-700 dark:text-teal-300' 
-                                  : 'text-gray-700 dark:text-gray-300'
+                              onClick={() => setSelectedSubSubcategory('')}
+                              className={`transition-colors ${
+                                !selectedSubSubcategory 
+                                  ? 'text-teal-600 dark:text-teal-400 font-medium' 
+                                  : 'hover:text-teal-600 dark:hover:text-teal-400'
                               }`}
                             >
-                              <span className="text-base">{option.icon}</span>
-                              <span className="font-medium">{option.label}</span>
-                              {sortBy === option.value && (
-                                <span className="ml-auto text-teal-600">✓</span>
-                              )}
+                              {getSubcategories(selectedCategory).find(sub => sub.id === selectedSubcategory)?.name}
                             </button>
-                          ))}
-                        </div>
-                      )}
+                          </>
+                        )}
+                        {selectedSubSubcategory && (
+                          <>
+                            <span className="text-gray-400">/</span>
+                            <span className="text-teal-600 dark:text-teal-400 font-medium">
+                              {selectedSubSubcategory}
+                            </span>
+                          </>
+                        )}
+                      </nav>
+                    </div>
+                  )}
+
+                  {/* Search Stats and Controls - Layout responsive mejorado */}
+                  <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between">
+                    {/* Título y stats - Siempre en la parte superior */}
+                    <div className="flex-shrink-0">
+                      <h2 className="text-xl sm:text-2xl font-bold text-gray-900 dark:text-white">
+                        {currentQuery ? `Resultados para "${currentQuery}"` : 'Todas las oportunidades'}
+                      </h2>
+                      <p className="text-sm sm:text-base text-gray-600 dark:text-gray-400">
+                        {isLoading ? 'Buscando...' : `${totalCount.toLocaleString()} resultados encontrados`}
+                      </p>
+                    </div>
+
+                    {/* Controles - Botones de vista y ordenar en la misma línea */}
+                    <div className="flex items-center gap-3 lg:flex-shrink-0">
+                      {/* View Mode Toggles */}
+                      <div className="flex items-center bg-gray-100 dark:bg-gray-700 rounded-lg p-1">
+                        <button
+                          onClick={() => setViewMode('grid')}
+                          className={`p-2 rounded-md transition-colors ${
+                            viewMode === 'grid'
+                              ? 'bg-white dark:bg-gray-600 text-teal-600 shadow-sm'
+                              : 'text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white'
+                          }`}
+                          aria-label="Vista en cuadrícula"
+                        >
+                          <Squares2X2Icon className="h-5 w-5" />
+                        </button>
+                        <button
+                          onClick={() => setViewMode('list')}
+                          className={`p-2 rounded-md transition-colors ${
+                            viewMode === 'list'
+                              ? 'bg-white dark:bg-gray-600 text-teal-600 shadow-sm'
+                              : 'text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white'
+                          }`}
+                          aria-label="Vista en lista"
+                        >
+                          <ListBulletIcon className="h-5 w-5" />
+                        </button>
+                      </div>
+
+                      {/* Enhanced Sort Dropdown */}
+                      <div className="relative">
+                        <button
+                          onClick={() => setSortDropdownOpen(!sortDropdownOpen)}
+                          className="flex items-center gap-2 px-3 sm:px-4 py-2 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg hover:border-teal-500 focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-teal-500 transition-colors shadow-sm text-sm"
+                        >
+                          <span className="text-sm">
+                            {sortOptions.find(opt => opt.value === sortBy)?.icon} 
+                          </span>
+                          <span className="text-sm font-medium text-gray-700 dark:text-gray-300 hidden sm:inline">
+                            {sortOptions.find(opt => opt.value === sortBy)?.label}
+                          </span>
+                          <span className="text-sm font-medium text-gray-700 dark:text-gray-300 sm:hidden">
+                            Ordenar
+                          </span>
+                          <ChevronDownIcon 
+                            className={`w-4 h-4 text-gray-500 transition-transform ${sortDropdownOpen ? 'rotate-180' : ''}`} 
+                          />
+                        </button>
+
+                        {sortDropdownOpen && (
+                          <div className="absolute top-full right-0 mt-1 w-56 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-600 rounded-lg shadow-lg z-50">
+                            {sortOptions.map((option) => (
+                              <button
+                                key={option.value}
+                                onClick={() => handleSortChange(option.value as SortOption)}
+                                className={`w-full flex items-center gap-3 px-4 py-3 text-sm hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors ${
+                                  sortBy === option.value 
+                                    ? 'bg-teal-50 dark:bg-teal-900/20 text-teal-700 dark:text-teal-300' 
+                                    : 'text-gray-700 dark:text-gray-300'
+                                }`}
+                              >
+                                <span className="text-base">{option.icon}</span>
+                                <span className="font-medium">{option.label}</span>
+                                {sortBy === option.value && (
+                                  <span className="ml-auto text-teal-600">✓</span>
+                                )}
+                              </button>
+                            ))}
+                          </div>
+                        )}
+                      </div>
                     </div>
                   </div>
+
+                  {/* Loading State */}
+                  {isLoading && (
+                    <div className="flex justify-center py-12">
+                      <div className="text-center">
+                        <div className="w-16 h-16 border-4 border-teal-500 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
+                        <p className="text-gray-600 dark:text-gray-400">Buscando los mejores resultados...</p>
+                      </div>
+                    </div>
+                  )}
+
+                        {/* Results */}
+      {!isLoading && results.length > 0 && (
+        <PublicationDetailContainer
+          publications={publicationsData}
+          viewMode={viewMode}
+          onDetailStateChange={setIsSidebarOpen}
+          renderSidebarInParent={true}
+        />
+      )}
+
+                  {/* No Results - UX/UI Expert Version */}
+                  {!isLoading && results.length === 0 && hasSearched && (
+                    <motion.div
+                      initial={{ opacity: 0, scale: 0.98, y: 20 }}
+                      animate={{ opacity: 1, scale: 1, y: 0 }}
+                      className="flex flex-col items-center justify-center py-20"
+                    >
+                      {/* Icon with subtle animation */}
+                      <div className="relative w-28 h-28 mb-7 flex items-center justify-center">
+                        <div className="absolute inset-0 rounded-full bg-gradient-to-br from-teal-100/80 via-blue-100/60 to-gray-200 dark:from-gray-800 dark:via-gray-700 dark:to-gray-800 shadow-lg animate-pulse-slow" />
+                        <span className="relative z-10 text-5xl select-none" aria-label="Sin resultados">
+                          <svg width="56" height="56" viewBox="0 0 56 56" fill="none">
+                            <circle cx="28" cy="28" r="28" fill="url(#sadGradient)" />
+                            <g>
+                              <ellipse cx="28" cy="34" rx="8" ry="4" fill="#FBBF24" opacity="0.18"/>
+                              <circle cx="28" cy="26" r="12" fill="#FBBF24"/>
+                              <ellipse cx="24" cy="25" rx="1.5" ry="2" fill="#92400E"/>
+                              <ellipse cx="32" cy="25" rx="1.5" ry="2" fill="#92400E"/>
+                              <path d="M24 30c1.5 1.5 6.5 1.5 8 0" stroke="#92400E" strokeWidth="1.5" strokeLinecap="round"/>
+                            </g>
+                            <defs>
+                              <linearGradient id="sadGradient" x1="0" y1="0" x2="56" y2="56" gradientUnits="userSpaceOnUse">
+                                <stop stopColor="#F0FDFA"/>
+                                <stop offset="1" stopColor="#A7F3D0"/>
+                              </linearGradient>
+                            </defs>
+                          </svg>
+                        </span>
+                      </div>
+                      <h3 className="text-2xl font-bold text-gray-900 dark:text-white mb-2 tracking-tight">
+                        Sin coincidencias por ahora
+                      </h3>
+                      <p className="text-base text-gray-600 dark:text-gray-400 mb-6 max-w-md mx-auto">
+                        {currentQuery
+                          ? (
+                              <>
+                                No encontramos anuncios que coincidan con <span className="font-semibold text-teal-700 dark:text-teal-300">"{currentQuery}"</span>.
+                                <br />
+                                <span className="text-sm text-gray-500 dark:text-gray-500">
+                                  Prueba ajustando tus filtros, usando palabras clave diferentes o explora todas las oportunidades disponibles.
+                                </span>
+                              </>
+                            )
+                          : (
+                              <>
+                                Actualmente no hay anuncios publicados en esta categoría o filtro.
+                                <br />
+                                <span className="text-sm text-gray-500 dark:text-gray-500">
+                                  ¡Vuelve pronto o revisa otras categorías para encontrar lo que buscas!
+                                </span>
+                              </>
+                            )
+                        }
+                      </p>
+                      <div className="flex flex-col sm:flex-row gap-3 justify-center">
+                        <button
+                          onClick={() => {
+                            handleSearch('', {})
+                            clearAllFilters()
+                          }}
+                          className="px-7 py-3 bg-gradient-to-r from-teal-600 to-teal-500 hover:from-teal-700 hover:to-teal-600 text-white rounded-xl font-semibold text-base shadow-md hover:shadow-xl transition-all duration-150 focus:outline-none focus:ring-2 focus:ring-teal-400 focus:ring-offset-2"
+                        >
+                          Ver todas las oportunidades
+                        </button>
+                        <button
+                          onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
+                          className="px-7 py-3 bg-white/80 dark:bg-gray-900/80 border border-gray-200 dark:border-gray-700 text-teal-700 dark:text-teal-300 rounded-xl font-medium text-base shadow-sm hover:bg-gray-50 dark:hover:bg-gray-800 transition-all duration-150"
+                        >
+                          Ajustar búsqueda
+                        </button>
+                      </div>
+                    </motion.div>
+                  )}
                 </div>
 
-                {/* Loading State */}
-                {isLoading && (
-                  <div className="flex justify-center py-12">
-                    <div className="text-center">
-                      <div className="w-16 h-16 border-4 border-teal-500 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
-                      <p className="text-gray-600 dark:text-gray-400">Buscando los mejores resultados...</p>
+                {/* Columna derecha: Detalle ampliado de la publicación */}
+                {isSidebarOpen && selectedPublication && (
+                  <div className="hidden lg:block lg:w-1/2 lg:flex-shrink-0 relative">
+                    <div className="sticky top-[140px] h-fit max-h-[calc(100vh-160px)] overflow-y-auto bg-white dark:bg-gray-900 rounded-lg shadow-lg border border-gray-200 dark:border-gray-700">
+                      <PublicationDetailSidebar 
+                        publication={selectedPublication}
+                        isOpen={isDetailOpen}
+                        onClose={closePublicationDetail}
+                        onWhatsAppClick={handleWhatsAppClick}
+                        onShare={handleShare}
+                        onFavorite={handleFavorite}
+                      />
                     </div>
                   </div>
-                )}
-
-                {/* Results */}
-                {!isLoading && results.length > 0 && (
-                  <PublicationDetailContainer
-                    publications={publicationsData}
-                    viewMode={viewMode}
-                    onDetailStateChange={setIsSidebarOpen}
-                  />
-                )}
-
-                {/* No Results - UX/UI Expert Version */}
-                {!isLoading && results.length === 0 && hasSearched && (
-                  <motion.div
-                    initial={{ opacity: 0, scale: 0.98, y: 20 }}
-                    animate={{ opacity: 1, scale: 1, y: 0 }}
-                    className="flex flex-col items-center justify-center py-20"
-                  >
-                    {/* Icon with subtle animation */}
-                    <div className="relative w-28 h-28 mb-7 flex items-center justify-center">
-                      <div className="absolute inset-0 rounded-full bg-gradient-to-br from-teal-100/80 via-blue-100/60 to-gray-200 dark:from-gray-800 dark:via-gray-700 dark:to-gray-800 shadow-lg animate-pulse-slow" />
-                      <span className="relative z-10 text-5xl select-none" aria-label="Sin resultados">
-                        <svg width="56" height="56" viewBox="0 0 56 56" fill="none">
-                          <circle cx="28" cy="28" r="28" fill="url(#sadGradient)" />
-                          <g>
-                            <ellipse cx="28" cy="34" rx="8" ry="4" fill="#FBBF24" opacity="0.18"/>
-                            <circle cx="28" cy="26" r="12" fill="#FBBF24"/>
-                            <ellipse cx="24" cy="25" rx="1.5" ry="2" fill="#92400E"/>
-                            <ellipse cx="32" cy="25" rx="1.5" ry="2" fill="#92400E"/>
-                            <path d="M24 30c1.5 1.5 6.5 1.5 8 0" stroke="#92400E" strokeWidth="1.5" strokeLinecap="round"/>
-                          </g>
-                          <defs>
-                            <linearGradient id="sadGradient" x1="0" y1="0" x2="56" y2="56" gradientUnits="userSpaceOnUse">
-                              <stop stopColor="#F0FDFA"/>
-                              <stop offset="1" stopColor="#A7F3D0"/>
-                            </linearGradient>
-                          </defs>
-                        </svg>
-                      </span>
-                    </div>
-                    <h3 className="text-2xl font-bold text-gray-900 dark:text-white mb-2 tracking-tight">
-                      Sin coincidencias por ahora
-                    </h3>
-                    <p className="text-base text-gray-600 dark:text-gray-400 mb-6 max-w-md mx-auto">
-                      {currentQuery
-                        ? (
-                            <>
-                              No encontramos anuncios que coincidan con <span className="font-semibold text-teal-700 dark:text-teal-300">"{currentQuery}"</span>.
-                              <br />
-                              <span className="text-sm text-gray-500 dark:text-gray-500">
-                                Prueba ajustando tus filtros, usando palabras clave diferentes o explora todas las oportunidades disponibles.
-                              </span>
-                            </>
-                          )
-                        : (
-                            <>
-                              Actualmente no hay anuncios publicados en esta categoría o filtro.
-                              <br />
-                              <span className="text-sm text-gray-500 dark:text-gray-500">
-                                ¡Vuelve pronto o revisa otras categorías para encontrar lo que buscas!
-                              </span>
-                            </>
-                          )
-                      }
-                    </p>
-                    <div className="flex flex-col sm:flex-row gap-3 justify-center">
-                      <button
-                        onClick={() => {
-                          handleSearch('', {})
-                          clearAllFilters()
-                        }}
-                        className="px-7 py-3 bg-gradient-to-r from-teal-600 to-teal-500 hover:from-teal-700 hover:to-teal-600 text-white rounded-xl font-semibold text-base shadow-md hover:shadow-xl transition-all duration-150 focus:outline-none focus:ring-2 focus:ring-teal-400 focus:ring-offset-2"
-                      >
-                        Ver todas las oportunidades
-                      </button>
-                      <button
-                        onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}
-                        className="px-7 py-3 bg-white/80 dark:bg-gray-900/80 border border-gray-200 dark:border-gray-700 text-teal-700 dark:text-teal-300 rounded-xl font-medium text-base shadow-sm hover:bg-gray-50 dark:hover:bg-gray-800 transition-all duration-150"
-                      >
-                        Ajustar búsqueda
-                      </button>
-                    </div>
-                  </motion.div>
                 )}
               </div>
             )}
