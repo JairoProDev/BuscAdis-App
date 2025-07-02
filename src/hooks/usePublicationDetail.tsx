@@ -7,7 +7,7 @@ import React, {
   useCallback,
   useReducer,
 } from 'react'
-import { useRouter, usePathname } from 'next/navigation'
+import { useRouter, usePathname, useSearchParams } from 'next/navigation'
 import { generateSeoUrl } from '@/utils/url' // Asegúrate que esta ruta es correcta
 import useMediaQuery from './useMediaQuery' // Asegúrate que esta ruta es correcta
 import { PublicationData } from '@/types/publication' // Asegúrate que esta ruta es correcta
@@ -93,6 +93,7 @@ export function PublicationDetailProvider({
 }) {
   const router = useRouter()
   const pathname = usePathname()
+  const searchParams = useSearchParams()
   const isMobile = useMediaQuery('(max-width: 1023px)')
   const [state, dispatch] = useReducer(publicationDetailReducer, initialState)
 
@@ -105,22 +106,63 @@ export function PublicationDetailProvider({
       publication.subcategorySlug || undefined,
       publication.subSubcategorySlug || undefined
     )
+    console.log('🔗 Generated SEO URL:', seoUrl, 'for publication:', publication.title)
     return seoUrl
   }, [])
 
-  // Simplificado: Solo abrir/cerrar sin manipular URLs automáticamente
+  // Páginas donde permitimos manipulación de URLs
+  const allowedPages = ['/buscar', '/empleos', '/inmuebles', '/vehiculos', '/servicios', '/productos']
+  const isOnAllowedPage = pathname ? allowedPages.some(page => pathname === page || pathname.startsWith(page)) : false
+
+  // Sincronizar con query parameter al cargar la página
+  useEffect(() => {
+    if (!searchParams || !isOnAllowedPage) return
+    
+    const publicationId = searchParams.get('p')
+    console.log('🔗 URL Sync - pathname:', pathname, 'publicationId:', publicationId)
+    
+    if (publicationId && publications.length > 0) {
+      const publication = publications.find(p => p.id === publicationId)
+      console.log('🔗 Found publication:', publication?.title)
+      if (publication && !state.selectedPublication) {
+        dispatch({ type: 'SET_STATE_FROM_URL', payload: publication })
+      }
+    } else if (!publicationId && state.selectedPublication) {
+      dispatch({ type: 'SET_STATE_FROM_URL', payload: null })
+    }
+  }, [searchParams, publications, state.selectedPublication, pathname, isOnAllowedPage])
+
   const openPublicationDetail = useCallback((publication: PublicationData) => {
+    console.log('📖 Opening publication detail:', publication.title, 'on page:', pathname)
     dispatch({ type: 'OPEN_DETAIL', payload: publication })
-  }, [])
+    
+    // Actualizar URL en páginas permitidas
+    if (isOnAllowedPage) {
+      const currentUrl = new URL(window.location.href)
+      currentUrl.searchParams.set('p', publication.id)
+      console.log('🔗 Updating URL to:', currentUrl.toString())
+      window.history.replaceState(null, '', currentUrl.toString())
+    }
+  }, [pathname, isOnAllowedPage])
 
   const closePublicationDetail = useCallback(() => {
+    console.log('❌ Closing publication detail on page:', pathname)
     dispatch({ type: 'CLOSE_DETAIL' })
-  }, [])
+    
+    // Actualizar URL en páginas permitidas
+    if (isOnAllowedPage) {
+      const currentUrl = new URL(window.location.href)
+      currentUrl.searchParams.delete('p')
+      console.log('🔗 Removing URL param, new URL:', currentUrl.toString())
+      window.history.replaceState(null, '', currentUrl.toString())
+    }
+  }, [pathname, isOnAllowedPage])
 
   const handleWhatsAppClick = useCallback((publication: PublicationData) => {
     if (!publication.whatsapp) return
     const cleanPhone = publication.whatsapp.replace(/[^0-9]/g, '')
     const adUrl = `${window.location.origin}${generatePublicationUrl(publication)}`
+    console.log('📱 WhatsApp click - generated URL:', adUrl)
     const template = whatsAppMessageTemplates[publication.categorySlug] || whatsAppMessageTemplates.default
     const message = template(publication, adUrl)
     window.open(`https://wa.me/${cleanPhone}?text=${encodeURIComponent(message)}`, '_blank')
@@ -128,6 +170,7 @@ export function PublicationDetailProvider({
 
   const handleShare = useCallback((publication: PublicationData) => {
     const shareUrl = `${window.location.origin}${generatePublicationUrl(publication)}`
+    console.log('🔗 Share click - generated URL:', shareUrl)
     if (navigator.share) {
       navigator.share({
         title: `${publication.title} - BuscaDis`,
@@ -136,7 +179,9 @@ export function PublicationDetailProvider({
       }).catch(err => console.log('Sharing failed:', err))
     } else {
       // Fallback: copiar al portapapeles
-      navigator.clipboard?.writeText(shareUrl).catch(err => console.log('Copy failed:', err))
+      navigator.clipboard?.writeText(shareUrl).then(() => {
+        console.log('🔗 URL copied to clipboard')
+      }).catch(err => console.log('Copy failed:', err))
     }
   }, [generatePublicationUrl])
 

@@ -4,7 +4,7 @@
 
 /**
  * Genera una URL SEO-friendly para una publicación
- * @param id - ID de la publicación (MongoDB _id, no visible en URL)
+ * @param id - ID de la publicación (MongoDB _id, usado en la URL para routing)
  * @param title - Título de la publicación
  * @param publicationSlug - Slug único y SEO-friendly de la publicación (preferido sobre el ID en la URL visible)
  * @param category - Categoría de la publicación (opcional)
@@ -14,7 +14,7 @@
  * @returns URL SEO-friendly
  */
 export function generateSeoUrl(
-  id: string, // ID is only for data reference, not for URL display
+  id: string, // ID is used in URL for routing
   title: string,
   publicationSlug?: string, // Dedicated slug parameter
   category?: string,
@@ -22,46 +22,54 @@ export function generateSeoUrl(
   subsubcategory?: string,
   includeTitleInSlug: boolean = true // Whether to include title in the slug
 ): string {
-  if (!title && !publicationSlug) {
-    console.warn('generateSeoUrl: title and publicationSlug are both missing');
+  if (!id) {
+    console.warn('generateSeoUrl: id is missing');
     return '/'; // Return root or a default path
   }
 
   // Create a clean slug from the title
   const titleSlug = slugify(title);
   
-  // Use the provided publication slug if available, otherwise use title slug
-  const effectiveSlug = publicationSlug ? slugify(publicationSlug) : titleSlug;
-
   // Normalize category parts
   const normalizedCategory = category ? slugify(category) : '';
   const normalizedSubcategory = subcategory ? slugify(subcategory) : '';
   const normalizedSubsubcategory = subsubcategory ? slugify(subsubcategory) : '';
   
-  // Construir la URL: /category/subcategory/subsubcategory/effective-slug
+  // Construir la URL basada en rutas existentes
   let url = '';
   
-  if (normalizedCategory) {
-    url += `/${normalizedCategory}`;
+  // Para categorías específicas que tienen rutas dinámicas completas
+  if (normalizedCategory && ['empleos', 'inmuebles', 'vehiculos'].includes(normalizedCategory)) {
+    url = `/${normalizedCategory}`;
     
+    // Agregar subcategoría (requerida para estas rutas)
     if (normalizedSubcategory) {
       url += `/${normalizedSubcategory}`;
       
+      // Agregar sub-subcategoría si existe
       if (normalizedSubsubcategory) {
         url += `/${normalizedSubsubcategory}`;
+      } else {
+        // Si no hay subsubcategory, usar 'general' como default
+        url += `/general`;
       }
+    } else {
+      // Si no hay subcategory, usar defaults
+      url += `/general/general`;
     }
     
-    // Add the slug at the end
-    url += `/${effectiveSlug}`;
+    // Agregar ID al final (requerido para el routing dinámico)
+    url += `/${id}`;
   } else {
-    // Fallback if no category: /publicaciones/effective-slug
-    url = `/publicaciones/${effectiveSlug}`;
+    // Fallback para otras categorías: usar /anuncios/[id] que sí existe
+    url = `/anuncios/${id}`;
+    
+    // Opcionalmente agregar título como slug adicional
+    if (titleSlug) {
+      url += `/${titleSlug}`;
+    }
   }
   
-  // Remove trailing hyphens that might occur
-  url = url.replace(/-+$/, ''); 
-
   return url;
 }
 
