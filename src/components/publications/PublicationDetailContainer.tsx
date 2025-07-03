@@ -1,9 +1,9 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
+import { motion, AnimatePresence, PanInfo } from 'framer-motion';
 import { usePublicationDetail } from '@/hooks/usePublicationDetail';
 import PublicationDetailSidebar from './PublicationDetailSidebar';
-import PublicationDetailModal from './PublicationDetailModal';
 import PublicationCard from './PublicationCard';
 import { PublicationData } from '@/types/publication';
 
@@ -14,6 +14,169 @@ export interface PublicationDetailContainerProps {
   onDetailStateChange?: (isOpen: boolean) => void;
   renderSidebarInParent?: boolean;
 }
+
+// Unified Publication Detail Overlay Component
+const UnifiedPublicationDetail = ({
+  publication,
+  isOpen,
+  onClose,
+  onWhatsAppClick,
+  onShare,
+  onFavorite,
+  isMobile
+}: {
+  publication: PublicationData | null;
+  isOpen: boolean;
+  onClose: () => void;
+  onWhatsAppClick: (publication: PublicationData) => void;
+  onShare: (publication: PublicationData) => void;
+  onFavorite: (publication: PublicationData) => void;
+  isMobile: boolean;
+}) => {
+  const [dragY, setDragY] = useState(0);
+  const constraintsRef = useRef(null);
+
+  if (!publication) return null;
+
+  // Mobile bottom sheet animations
+  const mobileVariants = {
+    hidden: { 
+      y: '100%',
+      opacity: 0
+    },
+    visible: { 
+      y: 0,
+      opacity: 1,
+      transition: {
+        type: 'spring',
+        damping: 25,
+        stiffness: 300,
+        duration: 0.3
+      }
+    },
+    exit: { 
+      y: '100%',
+      opacity: 0,
+      transition: {
+        type: 'spring',
+        damping: 25,
+        stiffness: 300,
+        duration: 0.2
+      }
+    }
+  };
+
+  // Desktop sidebar animations
+  const desktopVariants = {
+    hidden: { 
+      x: '100%',
+      opacity: 0
+    },
+    visible: { 
+      x: 0,
+      opacity: 1,
+      transition: {
+        type: 'spring',
+        damping: 25,
+        stiffness: 300,
+        duration: 0.3
+      }
+    },
+    exit: { 
+      x: '100%',
+      opacity: 0,
+      transition: {
+        type: 'spring',
+        damping: 25,
+        stiffness: 300,
+        duration: 0.2
+      }
+    }
+  };
+
+  const handleDragEnd = (event: any, info: PanInfo) => {
+    if (isMobile && info.offset.y > 100) {
+      onClose();
+    }
+  };
+
+  if (isMobile) {
+    return (
+      <AnimatePresence>
+        {isOpen && (
+          <>
+            {/* Backdrop */}
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 0.5 }}
+              exit={{ opacity: 0 }}
+              className="fixed inset-0 bg-black z-40"
+              onClick={onClose}
+            />
+            
+            {/* Mobile Bottom Sheet */}
+            <motion.div
+              ref={constraintsRef}
+              initial="hidden"
+              animate="visible"
+              exit="exit"
+              variants={mobileVariants}
+              drag="y"
+              dragConstraints={{ top: 0, bottom: 0 }}
+              dragElastic={0.1}
+              onDragEnd={handleDragEnd}
+              className="fixed inset-x-0 bottom-0 z-50 bg-white dark:bg-gray-900 rounded-t-3xl shadow-2xl max-h-[85vh] overflow-hidden"
+              style={{
+                y: dragY
+              }}
+            >
+              {/* Drag Handle */}
+              <div className="w-full flex justify-center pt-3 pb-2">
+                <div className="w-12 h-1.5 bg-gray-300 dark:bg-gray-600 rounded-full" />
+              </div>
+              
+              {/* Content Container with Scroll */}
+              <div className="h-full overflow-y-auto pb-safe">
+                                 <PublicationDetailSidebar
+                   publication={publication}
+                   isOpen={isOpen}
+                   onClose={onClose}
+                   onWhatsAppClick={onWhatsAppClick}
+                   onShare={onShare}
+                   onFavorite={onFavorite}
+                 />
+              </div>
+            </motion.div>
+          </>
+        )}
+      </AnimatePresence>
+    );
+  }
+
+  // Desktop rendering - when renderSidebarInParent is false
+  return (
+    <AnimatePresence>
+      {isOpen && (
+        <motion.div
+          initial="hidden"
+          animate="visible"
+          exit="exit"
+          variants={desktopVariants}
+          className="w-full h-fit"
+        >
+          <PublicationDetailSidebar
+            publication={publication}
+            isOpen={isOpen}
+            onClose={onClose}
+            onWhatsAppClick={onWhatsAppClick}
+            onShare={onShare}
+            onFavorite={onFavorite}
+          />
+        </motion.div>
+      )}
+    </AnimatePresence>
+  );
+};
 
 export default function PublicationDetailContainer({
   publications,
@@ -51,13 +214,11 @@ export default function PublicationDetailContainer({
     onDetailStateChange?.(isDetailOpen);
   }, [isDetailOpen, onDetailStateChange]);
 
-  // Handle publication click - Simplificado
+  // Handle publication click
   const handlePublicationClick = (publication: PublicationData) => {
     if (isDetailOpen && selectedPublication?.id === publication.id) {
-      // Si está abierto el mismo aviso, cerrarlo
       closePublicationDetail();
     } else {
-      // Abrir el nuevo aviso (o cambiar al nuevo si hay uno diferente abierto)
       openPublicationDetail(publication);
     }
   };
@@ -77,24 +238,11 @@ export default function PublicationDetailContainer({
     return 'grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 md:gap-4';
   };
 
-  // Get container classes for the publications area
-  const getPublicationsContainerClasses = () => {
-    if (!isMobile && isDetailOpen) {
-      return 'w-full'; // Full width in its column
-    }
-    return 'w-full';
-  };
-
-  // Get main container classes
-  const getMainContainerClasses = () => {
-    return `relative w-full ${className}`;
-  };
-
   return (
     <>
-      {/* Publications Grid/List - siempre renderizado */}
-      <div className={getMainContainerClasses()}>
-        <div className={getPublicationsContainerClasses()}>
+      {/* Publications Grid/List */}
+      <div className={`relative w-full ${className}`}>
+        <div className="w-full">
           <div className={getGridClasses()}>
             {publications.map((publication, index) => (
               <PublicationCard
@@ -111,43 +259,29 @@ export default function PublicationDetailContainer({
         </div>
       </div>
 
-      {/* Mobile Sidebar - solo en móviles */}
-      {isMobile && isDetailOpen && selectedPublication && (
-        <div className="fixed inset-0 z-50 lg:hidden">
-          <PublicationDetailSidebar
-            publication={selectedPublication}
-            isOpen={isDetailOpen}
-            onClose={closePublicationDetail}
-            onWhatsAppClick={handleWhatsAppClick}
-            onShare={handleShare}
-            onFavorite={handleFavorite}
-          />
-        </div>
-      )}
-
-      {/* Desktop Sidebar - solo si NO se renderiza en el padre */}
-      {!renderSidebarInParent && !isMobile && isDetailOpen && selectedPublication && (
-        <div className="w-full h-fit">
-          <PublicationDetailSidebar
-            publication={selectedPublication}
-            isOpen={isDetailOpen}
-            onClose={closePublicationDetail}
-            onWhatsAppClick={handleWhatsAppClick}
-            onShare={handleShare}
-            onFavorite={handleFavorite}
-          />
-        </div>
-      )}
-
-      {/* Mobile Modal */}
+      {/* Unified Publication Detail - Mobile always renders as bottom sheet */}
       {isMobile && (
-        <PublicationDetailModal
+        <UnifiedPublicationDetail
           publication={selectedPublication}
           isOpen={isDetailOpen}
           onClose={closePublicationDetail}
           onWhatsAppClick={handleWhatsAppClick}
           onShare={handleShare}
           onFavorite={handleFavorite}
+          isMobile={true}
+        />
+      )}
+
+      {/* Desktop Detail - only when NOT rendered in parent */}
+      {!renderSidebarInParent && !isMobile && (
+        <UnifiedPublicationDetail
+          publication={selectedPublication}
+          isOpen={isDetailOpen}
+          onClose={closePublicationDetail}
+          onWhatsAppClick={handleWhatsAppClick}
+          onShare={handleShare}
+          onFavorite={handleFavorite}
+          isMobile={false}
         />
       )}
     </>

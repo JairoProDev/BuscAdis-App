@@ -917,6 +917,10 @@ function SearchPageContent({ publicationsData, results, setResults, isLoading, s
                           console.log('🔗 Navigating to:', categoryUrl)
                           router.push(categoryUrl)
                         }}
+                        onPublicationClick={(publication) => {
+                          console.log('🔍 Opening publication from category row:', publication.title)
+                          openPublicationDetail(publication)
+                        }}
                         showViewAll={true}
                       />
                     </motion.div>
