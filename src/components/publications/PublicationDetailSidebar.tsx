@@ -157,7 +157,7 @@ export default function PublicationDetailSidebar({
             className="relative h-full w-full bg-white dark:bg-slate-900 shadow-xl border border-gray-200 dark:border-slate-700 overflow-hidden rounded-lg"
           >
             {/* Header */}
-            <div className="flex items-center justify-between p-4 border-b border-gray-200 dark:border-slate-700 bg-white dark:bg-slate-900 sticky top-0 z-10">
+            <div className="flex items-center justify-between p-2 border-b border-gray-200 dark:border-slate-700 bg-white dark:bg-slate-900 sticky top-0 z-10">
               <div className="flex items-center gap-3">
                 <button
                   onClick={onClose}
@@ -198,7 +198,7 @@ export default function PublicationDetailSidebar({
             </div>
 
             {/* Content */}
-            <div className="h-full overflow-y-auto pb-20">
+            <div className="h-full overflow-y-auto">
               {/* Image Gallery */}
               <div className="relative aspect-video bg-gray-100 dark:bg-slate-800">
                 <Image
@@ -244,7 +244,7 @@ export default function PublicationDetailSidebar({
               </div>
 
               {/* Publication Info */}
-              <div className="p-4 md:p-6 space-y-4 md:space-y-6">
+              <div className="p-4 space-y-4 md:space-y-6">
                 {/* Title and Price */}
                 <div>
                   <h1 className="text-xl md:text-2xl font-bold text-gray-900 dark:text-white mb-2 md:mb-3 leading-tight">

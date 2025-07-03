@@ -1202,7 +1202,7 @@ function SearchPageContent({ publicationsData, results, setResults, isLoading, s
 
                 {/* Columna derecha: Detalle ampliado de la publicación */}
                 {isSidebarOpen && selectedPublication && (
-                  <div className="hidden lg:block lg:w-1/2 lg:flex-shrink-0 relative">
+                  <div className="hidden lg:block lg:w-1/2 lg:flex-shrink-0 sticky top-40">
                     <div className="sticky top-[140px] h-fit max-h-[calc(100vh-160px)] overflow-y-auto bg-white dark:bg-gray-900 rounded-lg shadow-lg border border-gray-200 dark:border-gray-700">
                       <PublicationDetailSidebar 
                         publication={selectedPublication}
