@@ -376,7 +376,6 @@ export default function Header() {
       <AdisChat 
         isOpen={showAdisChat} 
         onClose={() => setShowAdisChat(false)} 
-        variant="desktop" 
       />
 
       {showLocationSelector && (

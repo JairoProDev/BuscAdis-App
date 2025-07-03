@@ -47,7 +47,6 @@ export default function MobileNavigation() {
       <AdisChat 
         isOpen={showAdisChat} 
         onClose={() => setShowAdisChat(false)} 
-        variant="mobile" 
       />
     </>
   )
