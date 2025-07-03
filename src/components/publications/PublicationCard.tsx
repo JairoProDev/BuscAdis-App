@@ -598,29 +598,8 @@ export default function PublicationCard({
                     {formatDescription(publication.description)}
                   </p>
 
-                  {/* Información - diferenciada de los botones */}
-                  <div className="mb-3 mx-2 space-y-1.5 text-xs text-gray-500 bg-gray-50 dark:bg-gray-800/50 rounded-lg p-2">
-                    {/* Ubicación completa en una línea */}
-                    <div className="flex items-center location-element">
-                      <MapPinIcon className="w-3 h-3 mr-1 text-gray-400 flex-shrink-0" />
-                      <span className="truncate">{formatLocation(publication.location)}</span>
-                    </div>
-                    
-                    {/* Fecha y vistas */}
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center">
-                        <ClockIcon className="w-3 h-3 mr-1 text-gray-400" />
-                        <span>{formatExactDateTime(publication.createdAt)}</span>
-                      </div>
-                      <div className="flex items-center">
-                        <EyeIcon className="w-3 h-3 mr-1 text-gray-400" />
-                        <span>{publication.views || 0} vistas</span>
-                      </div>
-                    </div>
-                  </div>
-
                   {/* Footer de interacciones - Tres botones hermanos iguales */}
-                  <div className="border-t border-gray-200 dark:border-gray-700 pt-3 mt-auto">
+                  <div className="border-t border-gray-200 dark:border-gray-700 mt-auto">
                     <div className="grid grid-cols-3 gap-1 px-2">
                       {/* Guardar */}
                       <button
@@ -636,19 +615,6 @@ export default function PublicationCard({
                         )}
                         <span className="text-xs font-medium text-red-500 dark:text-red-400 hidden sm:block">
                           Guardar
-                        </span>
-                      </button>
-
-                      {/* Compartir */}
-                      <button
-                        onClick={handleShare}
-                        className="flex flex-col items-center justify-center gap-1 py-3 px-2 hover:bg-blue-50 dark:hover:bg-blue-900/20 rounded-lg transition-all duration-200 group"
-                        aria-label="Compartir"
-                        title="Compartir"
-                      >
-                        <CurvedShareIcon className="w-5 h-5 text-blue-500 dark:text-blue-400" />
-                        <span className="text-xs font-medium text-blue-500 dark:text-blue-400 hidden sm:block">
-                          Compartir
                         </span>
                       </button>
 
@@ -677,6 +643,20 @@ export default function PublicationCard({
                           Contactar
                         </span>
                       </button>
+                      
+                      {/* Compartir */}
+                      <button
+                        onClick={handleShare}
+                        className="flex flex-col items-center justify-center gap-1 py-3 px-2 hover:bg-blue-50 dark:hover:bg-blue-900/20 rounded-lg transition-all duration-200 group"
+                        aria-label="Compartir"
+                        title="Compartir"
+                      >
+                        <CurvedShareIcon className="w-5 h-5 text-blue-500 dark:text-blue-400" />
+                        <span className="text-xs font-medium text-blue-500 dark:text-blue-400 hidden sm:block">
+                          Compartir
+                        </span>
+                      </button>
+
                     </div>
                   </div>
                 </div>
