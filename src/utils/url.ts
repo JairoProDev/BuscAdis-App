@@ -39,7 +39,7 @@ export function generateSeoUrl(
   let url = '';
   
   // Para categorías específicas que tienen rutas dinámicas completas
-  if (normalizedCategory && ['empleos', 'inmuebles', 'vehiculos'].includes(normalizedCategory)) {
+  if (normalizedCategory && ['empleos', 'inmuebles', 'vehiculos', 'servicios', 'productos', 'eventos', 'negocios', 'comunidad'].includes(normalizedCategory)) {
     url = `/${normalizedCategory}`;
     
     // Agregar subcategoría (requerida para estas rutas)

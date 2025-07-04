@@ -25,19 +25,29 @@ interface ServicioDetailProps {
 export default function ServicioDetail({ publication }: ServicioDetailProps) {
   const [activeTab, setActiveTab] = useState('descripcion');
 
+  // Log temporal para depuración
+  if (typeof window !== 'undefined') {
+    // eslint-disable-next-line no-console
+    console.log('DEBUG ServicioDetail publication:', publication);
+  }
+
+  // Garantizar que attributes siempre exista como objeto
+  const attributes = (publication && (publication as any).attributes) ? (publication as any).attributes : {};
+
+  // Datos principales y secundarios con fallbacks robustos
   const servicioData = {
-    categoria: 'Mantenimiento', // From publication
-    duracion: '2-3 horas', // From publication attributes
-    experiencia: '5+ años', // From publication attributes
-    disponibilidad: 'Lunes a Sábado', // From publication attributes
-    modalidad: 'A domicilio', // From publication attributes
+    categoria: publication.subcategorySlug || 'Servicio',
+    duracion: attributes.duracion || 'A consultar',
+    experiencia: attributes.experiencia || 'A consultar',
+    disponibilidad: attributes.disponibilidad || 'A consultar',
+    modalidad: attributes.modalidad || 'A consultar',
     precio: publication.value || 0,
-    calificacion: 4.8,
-    trabajosCompletados: 150,
-    certificaciones: ['Técnico especializado', 'Garantía de servicio'],
-    serviciosIncluidos: ['Diagnóstico gratuito', 'Garantía 30 días', 'Materiales incluidos'],
-    herramientasPropias: true,
-    disponibilidadUrgente: true
+    calificacion: typeof attributes.calificacion === 'number' ? attributes.calificacion : 4.8, // mock si no existe
+    trabajosCompletados: typeof attributes.trabajosCompletados === 'number' ? attributes.trabajosCompletados : 150, // mock si no existe
+    certificaciones: Array.isArray(attributes.certificaciones) ? attributes.certificaciones : ['Técnico especializado', 'Garantía de servicio'],
+    serviciosIncluidos: Array.isArray(attributes.serviciosIncluidos) ? attributes.serviciosIncluidos : ['Diagnóstico gratuito', 'Garantía 30 días', 'Materiales incluidos'],
+    herramientasPropias: typeof attributes.herramientasPropias === 'boolean' ? attributes.herramientasPropias : true,
+    disponibilidadUrgente: typeof attributes.disponibilidadUrgente === 'boolean' ? attributes.disponibilidadUrgente : true
   };
 
   const formatPrice = (value: number) => {
