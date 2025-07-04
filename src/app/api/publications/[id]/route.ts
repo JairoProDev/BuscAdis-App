@@ -158,18 +158,24 @@ export async function GET(
       description: publication.description || '',
       price: publication.amount || publication.price || 0,
       currency: publication.currency || 'PEN',
-      categorySlug: publication.categorySlug || publication.category,
-      subcategorySlug: publication.subcategorySlug || publication.subcategory,
-      subSubcategorySlug: publication.subSubcategorySlug,
-      location: publication.location || {},
-      contact: publication.contact || {},
-      images: publication.images || [],
+      categorySlug: publication.categorySlug || publication.category || '',
+      subcategorySlug: publication.subcategorySlug || publication.subcategory || null,
+      subSubcategorySlug: publication.subSubcategorySlug || publication.subsubcategory || null,
+      location: typeof publication.location === 'string' ? { city: publication.location, country: 'Perú' } : (publication.location || { city: '', country: 'Perú' }),
+      contact: publication.contact || {
+        name: publication.contactName || '',
+        phone: publication.contactPhone || '',
+        email: publication.contactEmail || ''
+      },
+      images: Array.isArray(publication.images) ? publication.images : [],
+      status: publication.status || 'active',
+      premium: publication.premium || false,
+      createdAt: publication.createdAt || publication.created_at || new Date().toISOString(),
+      updatedAt: publication.updatedAt || publication.updated_at || publication.createdAt || new Date().toISOString(),
+      views: publication.views || 0,
+      featured: publication.featured || false,
       attributes: publication.attributes || {},
       isActive: publication.isActive !== false,
-      createdAt: publication.createdAt || new Date().toISOString(),
-      updatedAt: publication.updatedAt || publication.createdAt || new Date().toISOString(),
-      views: publication.views || 0,
-      favorites: publication.favorites || 0
     };
     
     return NextResponse.json({ publication: formattedPublication });

@@ -22,6 +22,7 @@ import {
 } from '@heroicons/react/24/outline';
 import { generateSeoUrl, slugify } from '@/utils/url';
 import RelatedPublications from '@/components/publication/RelatedPublications';
+import DedicatedPublicationPage from '@/components/publications/dedicated/DedicatedPublicationPage';
 
 // Renombrar la interfaz Publication para evitar conflictos
 interface PublicationData {
@@ -306,28 +307,42 @@ interface PageProps {
   }>;
 }
 
-export default async function InmuebleDetailPage({ params }: PageProps) {
-  const { id } = await params;
-  
-  // In a real implementation, you would fetch the publication data here
-  // For now, we'll create a mock publication to satisfy the component
-  const mockPublication: PublicationData = {
-    id: id,
-    title: "Inmueble de ejemplo",
-    description: "Descripción del inmueble",
-    price: 250000,
-    price_type: "sale",
-    images: [],
-    location: {
-      city: "Lima",
-      region: "Lima",
-      country: "Perú"
-    },
-    contact: {
-      whatsapp: "+51123456789"
-    },
-    created_at: new Date().toISOString()
-  };
+export default function InmuebleDetailPage({ params }: { params: any }) {
+  const [id, setId] = useState<string | null>(null);
+  const [publication, setPublication] = useState(null);
+  const [loading, setLoading] = useState(true);
 
-  return <InmuebleDetailPageContent publication={mockPublication} />;
+  // Desempaquetar params si es promesa
+  useEffect(() => {
+    let isMounted = true;
+    Promise.resolve(params).then((resolvedParams) => {
+      if (isMounted) setId(resolvedParams.id);
+    });
+    return () => { isMounted = false; };
+  }, [params]);
+
+  useEffect(() => {
+    if (!id) return;
+    const fetchPublication = async () => {
+      setLoading(true);
+      try {
+        const res = await fetch(`/api/publications/${id}`);
+        const data = await res.json();
+        setPublication(data.publication);
+      } catch (err) {
+        setPublication(null);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchPublication();
+  }, [id]);
+
+  if (loading) {
+    return <div className="flex items-center justify-center min-h-screen"><LoadingSpinner size="lg" /></div>;
+  }
+  if (!publication) {
+    return <div className="flex items-center justify-center min-h-screen">No se encontró la publicación.</div>;
+  }
+  return <DedicatedPublicationPage publication={publication} />;
 } 
