@@ -6,6 +6,8 @@ import { usePublicationDetail } from '@/hooks/usePublicationDetail';
 import PublicationDetailSidebar from './PublicationDetailSidebar';
 import PublicationCard from './PublicationCard';
 import { PublicationData } from '@/types/publication';
+import { WhatsAppIcon } from '@/components/icons';
+import { ShareIcon } from '@heroicons/react/24/outline';
 
 export interface PublicationDetailContainerProps {
   publications: PublicationData[];
@@ -125,10 +127,11 @@ const UnifiedPublicationDetail = ({
               dragConstraints={{ top: 0, bottom: 0 }}
               dragElastic={0.1}
               onDragEnd={handleDragEnd}
-              className="fixed inset-x-0 bottom-0 z-50 bg-white dark:bg-gray-900 rounded-t-3xl shadow-2xl max-h-[85vh] overflow-hidden"
+              className="fixed inset-0 z-50 bg-white dark:bg-gray-900 rounded-t-3xl shadow-2xl max-h-[100vh] h-full flex flex-col overflow-hidden"
               style={{
                 y: dragY
               }}
+              onClick={e => e.stopPropagation()}
             >
               {/* Drag Handle */}
               <div className="w-full flex justify-center pt-3 pb-2">
@@ -136,16 +139,41 @@ const UnifiedPublicationDetail = ({
               </div>
               
               {/* Content Container with Scroll */}
-              <div className="h-full overflow-y-auto pb-safe">
-                                 <PublicationDetailSidebar
-                   publication={publication}
-                   isOpen={isOpen}
-                   onClose={onClose}
-                   onWhatsAppClick={onWhatsAppClick}
-                   onShare={onShare}
-                   onFavorite={onFavorite}
-                 />
+              <div className="flex-1 overflow-y-auto pb-safe">
+                <PublicationDetailSidebar
+                  publication={publication}
+                  isOpen={isOpen}
+                  onClose={onClose}
+                  onWhatsAppClick={onWhatsAppClick}
+                  onShare={onShare}
+                  onFavorite={onFavorite}
+                />
               </div>
+
+            {/* Footer - Contact Actions */}
+            {publication && (
+              <div className="border-t border-gray-200 dark:border-slate-700 p-4 bg-white dark:bg-slate-900 space-y-3">
+                <div className="flex gap-3">
+                  {publication.whatsapp && (
+                    <button
+                      onClick={() => onWhatsAppClick(publication)}
+                      className="flex-1 flex items-center justify-center gap-2 bg-green-500 hover:bg-green-600 text-white py-3 px-4 rounded-lg font-medium transition-colors"
+                    >
+                      <WhatsAppIcon className="w-5 h-5" />
+                      <span>Contactar</span>
+                    </button>
+                  )}
+                  <button
+                    onClick={() => onShare(publication)}
+                    className="flex items-center justify-center gap-2 bg-blue-500 hover:bg-blue-600 text-white py-3 px-4 rounded-lg font-medium transition-colors"
+                  >
+                    <ShareIcon className="w-5 h-5" />
+                    <span>Compartir</span>
+                  </button>
+                </div>
+              </div>
+            )}
+
             </motion.div>
           </>
         )}
