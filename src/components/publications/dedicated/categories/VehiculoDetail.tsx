@@ -26,25 +26,42 @@ interface VehiculoDetailProps {
 export default function VehiculoDetail({ publication }: VehiculoDetailProps) {
   const [activeTab, setActiveTab] = useState('descripcion');
 
-  // Vehicle specific data structure
+  // Log temporal para depuración
+  if (typeof window !== 'undefined') {
+    // eslint-disable-next-line no-console
+    console.log('DEBUG VehiculoDetail publication:', publication);
+  }
+
+  // Garantizar que attributes siempre exista como objeto
+  const attributes = (publication && (publication as any).attributes) ? (publication as any).attributes : {};
+
+  // Función robusta para extraer y formatear el kilometraje
+  function getKilometraje(raw: any): string {
+    if (raw === undefined || raw === null) return 'A consultar';
+    const num = typeof raw === 'string' ? parseInt(raw.replace(/[^\d]/g, '')) : Number(raw);
+    if (isNaN(num) || num <= 0) return 'A consultar';
+    return `${num.toLocaleString()} km`;
+  }
+
+  // Datos principales y secundarios con fallbacks robustos
   const vehiculoData = {
-    año: 2020, // From publication attributes
-    kilometraje: 45000, // From publication attributes
-    combustible: 'Gasolina', // From publication attributes
-    transmision: 'Automática', // From publication attributes
-    color: 'Blanco', // From publication attributes
-    cilindrada: '1.6L', // From publication attributes
-    estado: 'Usado',
-    marca: 'Toyota', // From publication
-    modelo: 'Corolla', // From publication
-    version: 'XEI CVT', // From publication
+    año: attributes.ano || attributes.año || 'A consultar',
+    kilometraje: getKilometraje(attributes.kilometraje),
+    combustible: attributes.tipo_combustible || 'A consultar',
+    transmision: attributes.transmision || 'A consultar',
+    color: attributes.color || 'A consultar',
+    cilindrada: attributes.cilindrada_cc || 'A consultar',
+    estado: attributes.estado || 'A consultar',
+    marca: attributes.marca || publication.marca || 'A consultar',
+    modelo: attributes.modelo || publication.modelo || 'A consultar',
+    version: attributes.version || 'A consultar',
     precio: publication.value || 0,
-    negociable: true,
-    financiamiento: true,
-    documentos: ['SOAT vigente', 'Revisión técnica', 'Tarjeta de propiedad'],
-    extras: ['Aire acondicionado', 'Dirección hidráulica', 'Alarma', 'Radio MP3'],
-    mantenimiento: 'Al día',
-    accidentes: 'Sin accidentes'
+    negociable: typeof attributes.negociable === 'boolean' ? attributes.negociable : true,
+    financiamiento: typeof attributes.financiamiento === 'boolean' ? attributes.financiamiento : true,
+    documentos: Array.isArray(attributes.documentos) ? attributes.documentos : ['SOAT vigente', 'Revisión técnica', 'Tarjeta de propiedad'],
+    extras: Array.isArray(attributes.extras) ? attributes.extras : ['Aire acondicionado', 'Dirección hidráulica', 'Alarma', 'Radio MP3'],
+    mantenimiento: attributes.mantenimiento || 'Al día',
+    accidentes: attributes.accidentes || 'Sin accidentes'
   };
 
   const formatPrice = (value: number) => {
@@ -125,7 +142,7 @@ export default function VehiculoDetail({ publication }: VehiculoDetailProps) {
           <div className="text-sm text-gray-500 dark:text-gray-400">Año</div>
         </div>
         <div className="bg-white dark:bg-gray-800 rounded-xl p-4 text-center border border-gray-200 dark:border-gray-700">
-          <div className="text-2xl font-bold text-blue-600 dark:text-blue-400">{formatKilometraje(vehiculoData.kilometraje)}</div>
+          <div className="text-2xl font-bold text-blue-600 dark:text-blue-400">{vehiculoData.kilometraje}</div>
           <div className="text-sm text-gray-500 dark:text-gray-400">Kilometraje</div>
         </div>
         <div className="bg-white dark:bg-gray-800 rounded-xl p-4 text-center border border-gray-200 dark:border-gray-700">
