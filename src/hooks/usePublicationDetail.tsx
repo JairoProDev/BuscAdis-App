@@ -33,6 +33,7 @@ interface PublicationDetailContextValue extends PublicationDetailState {
   handleWhatsAppClick: (publication: PublicationData) => void
   handleShare: (publication: PublicationData) => void
   handleFavorite: (publication: PublicationData) => boolean
+  publications: PublicationData[]
 }
 
 const PublicationDetailContext = createContext<
@@ -207,7 +208,8 @@ export function PublicationDetailProvider({
     isMobile,
     handleWhatsAppClick,
     handleShare,
-    handleFavorite
+    handleFavorite,
+    publications
   }
 
   return (

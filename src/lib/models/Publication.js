@@ -19,6 +19,7 @@ const PublicationSchema = new mongoose.Schema({
   updatedAt: { type: Date, default: Date.now },
   // Campos para compatibilidad con el sistema existente
   id: { type: String },
+  _id: { type: String }, // Asegura que _id es string, no ObjectId
 });
 
 // Exportar el modelo

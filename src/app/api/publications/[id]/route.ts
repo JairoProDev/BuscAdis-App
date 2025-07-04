@@ -172,7 +172,7 @@ export async function GET(
       favorites: publication.favorites || 0
     };
     
-    return NextResponse.json(formattedPublication);
+    return NextResponse.json({ publication: formattedPublication });
   } catch (error) {
     console.error('Error fetching publication:', error);
     return NextResponse.json(

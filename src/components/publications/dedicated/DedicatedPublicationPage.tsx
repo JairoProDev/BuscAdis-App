@@ -27,6 +27,13 @@ import { formatDistanceToNow } from 'date-fns';
 import { es } from 'date-fns/locale';
 import { getDefaultImageByCategory } from '@/utils/image-helpers';
 import EmpleoDetail from './categories/EmpleoDetail';
+import InmuebleDetail from './categories/InmuebleDetail';
+import VehiculoDetail from './categories/VehiculoDetail';
+import ServicioDetail from './categories/ServicioDetail';
+import ProductoDetail from './categories/ProductoDetail';
+import EventoDetail from './categories/EventoDetail';
+import NegocioDetail from './categories/NegocioDetail';
+import ComunidadDetail from './categories/ComunidadDetail';
 
 interface DedicatedPublicationPageProps {
   publication: PublicationData;
@@ -345,31 +352,50 @@ export default function DedicatedPublicationPage({
 
               {/* Category-Specific Content */}
               <div className="mb-8">
-                {publication.categorySlug === 'empleos' ? (
-                  <EmpleoDetail publication={publication} />
-                ) : (
-                  /* Default Description for other categories */
-                  <div>
-                    <h2 className="text-xl font-semibold text-gray-900 dark:text-white mb-4">
-                      Descripción
-                    </h2>
-                    <div className="bg-white dark:bg-gray-800 rounded-xl p-6">
-                      <p className={`text-gray-700 dark:text-gray-300 leading-relaxed ${
-                        !showFullDescription && publication.description.length > 300 ? 'line-clamp-4' : ''
-                      }`}>
-                        {publication.description}
-                      </p>
-                      {publication.description.length > 300 && (
-                        <button
-                          onClick={() => setShowFullDescription(!showFullDescription)}
-                          className="text-teal-600 hover:text-teal-700 font-medium mt-2"
-                        >
-                          {showFullDescription ? 'Ver menos' : 'Ver más'}
-                        </button>
-                      )}
-                    </div>
-                  </div>
-                )}
+                {(() => {
+                  switch (publication.categorySlug) {
+                    case 'empleos':
+                      return <EmpleoDetail publication={publication} />;
+                    case 'inmuebles':
+                      return <InmuebleDetail publication={publication} />;
+                    case 'vehiculos':
+                      return <VehiculoDetail publication={publication} />;
+                    case 'servicios':
+                      return <ServicioDetail publication={publication} />;
+                    case 'productos':
+                      return <ProductoDetail publication={publication} />;
+                    case 'eventos':
+                      return <EventoDetail publication={publication} />;
+                    case 'negocios':
+                      return <NegocioDetail publication={publication} />;
+                    case 'comunidad':
+                      return <ComunidadDetail publication={publication} />;
+                    default:
+                      /* Default Description for unknown categories */
+                      return (
+                        <div>
+                          <h2 className="text-xl font-semibold text-gray-900 dark:text-white mb-4">
+                            Descripción
+                          </h2>
+                          <div className="bg-white dark:bg-gray-800 rounded-xl p-6">
+                            <p className={`text-gray-700 dark:text-gray-300 leading-relaxed ${
+                              !showFullDescription && publication.description.length > 300 ? 'line-clamp-4' : ''
+                            }`}>
+                              {publication.description}
+                            </p>
+                            {publication.description.length > 300 && (
+                              <button
+                                onClick={() => setShowFullDescription(!showFullDescription)}
+                                className="text-teal-600 hover:text-teal-700 font-medium mt-2"
+                              >
+                                {showFullDescription ? 'Ver menos' : 'Ver más'}
+                              </button>
+                            )}
+                          </div>
+                        </div>
+                      );
+                  }
+                })()}
               </div>
 
               {/* Related Publications */}

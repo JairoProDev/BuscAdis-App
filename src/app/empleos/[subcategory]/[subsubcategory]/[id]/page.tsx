@@ -22,33 +22,7 @@ import {
 } from '@heroicons/react/24/outline';
 import { slugify } from '@/utils/url';
 import RelatedPublications from '@/components/publication/RelatedPublications';
-
-interface PublicationData {
-  id: string;
-  title: string;
-  description: string;
-  price: number; // Puede representar salario o ser 0
-  price_type: string; // 'salary', 'negotiable', 'volunteer', etc.
-  images: string[]; // Puede ser el logo de la empresa
-  location: {
-    city: string;
-    region?: string;
-    country?: string;
-  };
-  contact: {
-    whatsapp?: string;
-    email?: string;
-    phone?: string;
-    name?: string; // Nombre de la empresa o contacto
-  };
-  created_at: string;
-  views?: number;
-  category?: string;
-  categorySlug?: string;
-  subcategory?: string;
-  subsubcategory?: string;
-  attributes?: Record<string, any>; // ej: tipo_contrato, nivel_experiencia, modalidad, etc.
-}
+import { PublicationData } from '@/types/publication';
 
 // Componente de contenido de detalle de empleo
 function EmpleoDetailPageContent({ publication: initialPublication }: { publication: PublicationData }) {
@@ -63,7 +37,7 @@ function EmpleoDetailPageContent({ publication: initialPublication }: { publicat
       try {
         const relatedData = await PublicationsService.getRelatedPublications(
           publication.id,
-          publication.categorySlug || publication.category || 'general'
+          publication.categorySlug || 'general'
         );
         setRelatedPublications(relatedData || []);
       } catch (err) {
@@ -111,14 +85,15 @@ function EmpleoDetailPageContent({ publication: initialPublication }: { publicat
   }
 
   const { 
-    title, description, price, price_type: priceType, images, 
-    location, contact, created_at: createdAt, views, attributes 
+    title, description, categorySlug, subcategorySlug, subSubcategorySlug, transactionType, value, currency, valueType, size, location, images, whatsapp, createdAt, views, featured, premium
   } = publication;
   const formattedDate = formatDate(createdAt);
   // Adaptar formato de precio para salarios
-  const formattedSalary = priceType === 'salary' ? formatPrice({ amount: price, currency: 'PEN' }) : (priceType === 'negotiable' ? 'A convenir' : 'No especificado');
+  const formattedSalary = value > 0 ? formatPrice({ amount: value, currency }) : (valueType === 'negotiable' ? 'A convenir' : 'No especificado');
   const city = location?.city || '';
-  const region = location?.region || '';
+  const province = location?.province || '';
+  const district = location?.district || '';
+  const country = location?.country || '';
   const companyLogo = images && images.length > 0 ? images[0] : '/images/company-placeholder.png';
 
   return (
@@ -142,13 +117,10 @@ function EmpleoDetailPageContent({ publication: initialPublication }: { publicat
               {/* Encabezado con logo (opcional) */}
               <div className="flex items-start gap-4 mb-4">
                 <div className="w-16 h-16 bg-gray-100 rounded-md flex-shrink-0 overflow-hidden">
-                  <Image src={companyLogo} alt={`Logo de ${contact.name || 'Empresa'}`} width={64} height={64} className="object-contain w-full h-full" />
+                  <Image src={companyLogo} alt={`Logo de la empresa`} width={64} height={64} className="object-contain w-full h-full" />
                 </div>
                 <div>
                   <h1 className="text-2xl md:text-3xl font-bold text-gray-900 mb-1">{title}</h1>
-                  {contact.name && (
-                    <p className="text-lg text-gray-600">{contact.name}</p>
-                  )}
                 </div>
               </div>
               
@@ -160,7 +132,7 @@ function EmpleoDetailPageContent({ publication: initialPublication }: { publicat
                   </div>
                   <div className="flex items-center">
                     <MapPinIcon className="w-4 h-4 mr-1" />
-                    <span>{city}{region ? `, ${region}` : ''}</span>
+                    <span>{district}{province ? `, ${province}` : ''}{city ? `, ${city}` : ''}{country ? `, ${country}` : ''}</span>
                   </div>
                   {views !== undefined && (
                     <div className="flex items-center">
@@ -179,25 +151,7 @@ function EmpleoDetailPageContent({ publication: initialPublication }: { publicat
                 <h2 className="text-xl font-semibold mb-2">Descripción del Puesto</h2>
                 <p>{description}</p>
               </div>
-              
-              {/* Requisitos y Detalles */}
-              {attributes && (
-                <div className="border-t pt-6">
-                  <h2 className="text-xl font-semibold mb-4">Detalles del Empleo</h2>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-x-6 gap-y-4 text-sm">
-                    {Object.entries(attributes).map(([key, value]) => (
-                      <div key={key} className="flex items-start">
-                        {key === 'tipo_contrato' && <BriefcaseIcon className="w-5 h-5 mr-2 text-blue-500 flex-shrink-0 mt-0.5" />}
-                        {key === 'modalidad' && <BuildingOfficeIcon className="w-5 h-5 mr-2 text-blue-500 flex-shrink-0 mt-0.5" />}
-                        {key === 'nivel_experiencia' && <AcademicCapIcon className="w-5 h-5 mr-2 text-blue-500 flex-shrink-0 mt-0.5" />}
-                        {/* Otros iconos */}
-                        <span className="font-medium text-gray-800 capitalize">{key.replace(/_/g, ' ')}:</span>
-                        <span className="ml-2 text-gray-600">{value}</span>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              )}
+              {/* Puedes agregar más detalles aquí si tienes atributos personalizados en PublicationData global */}
             </div>
           </div>
 
@@ -207,34 +161,16 @@ function EmpleoDetailPageContent({ publication: initialPublication }: { publicat
             <div className="bg-white rounded-lg shadow-sm p-6 border border-gray-100">
               <h2 className="text-xl font-semibold mb-4">Postular / Contactar</h2>
               <div className="space-y-3">
-                {/* Priorizar email o enlace de postulación si existe */}
-                {contact.email && (
+                {whatsapp && (
                   <a
-                    href={`mailto:${contact.email}?subject=Postulación para: ${encodeURIComponent(title)}`}
-                    className="flex items-center justify-center w-full bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white py-3 px-4 rounded-lg font-medium transition-all shadow-md"
-                  >
-                    <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" /></svg>
-                    Enviar Email / CV
-                  </a>
-                )}
-                {contact.whatsapp && !contact.email && (
-                  <a
-                    href={`https://wa.me/${contact.whatsapp.replace(/[^0-9]/g, '')}?text=${formatWhatsAppMessage()}`}
+                    href={`https://wa.me/${whatsapp.replace(/[^0-9]/g, '')}?text=${formatWhatsAppMessage()}`}
                     target="_blank" rel="noopener noreferrer"
                     className="flex items-center justify-center w-full bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white py-3 px-4 rounded-lg font-medium transition-all shadow-md"
                   >
                     <WhatsAppIcon className="w-5 h-5 mr-2" /> Contactar por WhatsApp
                   </a>
                 )}
-                {contact.phone && !contact.email && !contact.whatsapp && (
-                  <a
-                    href={`tel:${contact.phone}`}
-                    className="flex items-center justify-center w-full bg-gray-100 hover:bg-gray-200 text-gray-800 py-3 px-4 rounded-lg font-medium transition-all shadow-sm border border-gray-200"
-                  >
-                    <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" /></svg> Llamar
-                  </a>
-                )}
-                {!contact.email && !contact.whatsapp && !contact.phone && (
+                {!whatsapp && (
                   <p className="text-sm text-gray-500 text-center">No hay método de contacto directo disponible.</p>
                 )}
               </div>
@@ -259,44 +195,109 @@ function EmpleoDetailPageContent({ publication: initialPublication }: { publicat
 
         {/* Ofertas Relacionadas */}
         {relatedPublications.length > 0 && (
-          <RelatedPublications publications={relatedPublications} category="empleos" />
+          <RelatedPublications publications={relatedPublications} category={categorySlug} />
         )}
       </div>
     </div>
   );
 }
 
-// Main page component for Next.js 15 with async params
+// Main page component for Next.js 15 con fetch en cliente
 interface PageProps {
-  params: Promise<{
+  params: {
     subcategory: string;
     subsubcategory: string;
     id: string;
-  }>;
+  };
 }
 
-export default async function EmpleoDetailPage({ params }: PageProps) {
-  const { id } = await params;
-  
-  // In a real implementation, you would fetch the publication data here
-  // For now, we'll create a mock publication to satisfy the component
-  const mockPublication: PublicationData = {
-    id: id,
-    title: "Empleo de ejemplo",
-    description: "Descripción del empleo",
-    price: 0,
-    price_type: "negotiable",
-    images: [],
-    location: {
-      city: "Lima",
-      region: "Lima",
-      country: "Perú"
-    },
-    contact: {
-      email: "contacto@example.com"
-    },
-    created_at: new Date().toISOString()
-  };
+export default function EmpleoDetailPage({ params }: PageProps) {
+  const [id, setId] = useState<string | null>(null);
+  const [publication, setPublication] = useState<PublicationData | null>(null);
+  const [loading, setLoading] = useState(true);
 
-  return <EmpleoDetailPageContent publication={mockPublication} />;
+  // Desempaquetar params si es promesa
+  useEffect(() => {
+    let isMounted = true;
+    Promise.resolve(params).then((resolvedParams) => {
+      if (isMounted) setId(resolvedParams.id);
+    });
+    return () => { isMounted = false; };
+  }, [params]);
+
+  useEffect(() => {
+    if (!id) return;
+    const fetchPublication = async () => {
+      setLoading(true);
+      try {
+        const res = await fetch(`/api/publications/${id}`);
+        if (!res.ok) throw new Error('No se pudo cargar la publicación');
+        const data = await res.json();
+        // Adaptar el resultado para cumplir con PublicationData
+        const pub = data.publication;
+        // Parsear location string a objeto
+        let district = '';
+        let city = '';
+        let country = 'Perú';
+        if (typeof pub.location === 'string') {
+          const parts = pub.location.split(',').map((p: any) => (typeof p === 'string' ? p.trim() : ''));
+          if (parts.length === 2) {
+            district = parts[0];
+            city = parts[1];
+          } else if (parts.length === 1) {
+            city = parts[0];
+          }
+        }
+        const adapted: PublicationData = {
+          id: pub._id || id,
+          title: pub.title || '',
+          description: pub.description || '',
+          categorySlug: pub.categorySlug || '',
+          subcategorySlug: pub.subcategorySlug || null,
+          subSubcategorySlug: pub.subSubcategorySlug || null,
+          transactionType: pub.transactionType || 'venta',
+          value: pub.value || pub.price || 0,
+          currency: pub.currency || 'PEN',
+          valueType: pub.valueType || 'fixed',
+          size: pub.size || 0,
+          location: {
+            district,
+            province: '',
+            city,
+            country,
+          },
+          images: Array.isArray(pub.images) ? pub.images : [],
+          whatsapp: pub.contactPhone || '',
+          createdAt: typeof pub.createdAt === 'string' ? pub.createdAt : (pub.createdAt?.$date || new Date().toISOString()),
+          views: pub.views || 0,
+          featured: pub.featured || false,
+          premium: pub.premium || false,
+        };
+        setPublication(adapted);
+      } catch (err) {
+        setPublication(null);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchPublication();
+  }, [id]);
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <LoadingSpinner size="lg" />
+      </div>
+    );
+  }
+
+  if (!publication) {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <p className="text-gray-500">No se encontró la publicación.</p>
+      </div>
+    );
+  }
+
+  return <EmpleoDetailPageContent publication={publication} />;
 } 

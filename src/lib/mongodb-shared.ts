@@ -89,7 +89,12 @@ import { getBrowserMongoClient, mongoFetch } from './mongodb-browser';
 const isBrowser = typeof window !== 'undefined';
 
 // Export the appropriate client based on environment
-const getMongoClient = isBrowser ? getBrowserMongoClient : getServerMongoClient;
+export { mongoFetch };
 
-// Also export mongoFetch for direct API calls from browser
-export { mongoFetch, getMongoClient }; 
+export function getMongoClient() {
+  if (typeof window !== 'undefined') {
+    return getBrowserMongoClient;
+  } else {
+    return getServerMongoClient;
+  }
+} 

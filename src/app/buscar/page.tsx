@@ -424,13 +424,18 @@ function SearchPageContent({ publicationsData, results, setResults, isLoading, s
 
   // Convert SearchResult to PublicationData format
   const convertToPublicationData = (searchResult: SearchResult): PublicationData => {
-    const locationParts = searchResult.location.split(',').map(part => part.trim())
-    
+    let locationParts: string[] = [];
+    if (typeof searchResult.location === 'string') {
+      locationParts = searchResult.location.split(',').map(part => part.trim());
+    } else {
+      // fallback: si no es string, usar array vacío
+      locationParts = [];
+    }
     return {
       id: searchResult.id,
       title: searchResult.title,
       description: searchResult.description,
-      categorySlug: searchResult.category.toLowerCase(),
+      categorySlug: searchResult.category ? searchResult.category.toLowerCase() : 'general',
       subcategorySlug: null,
       subSubcategorySlug: null,
       transactionType: 'venta',
@@ -1237,13 +1242,18 @@ export default function BuscadorPage() {
 
   // Función para convertir resultados a PublicationData
   const convertToPublicationData = (searchResult: SearchResult): PublicationData => {
-    const locationParts = searchResult.location.split(',').map(part => part.trim())
-    
+    let locationParts: string[] = [];
+    if (typeof searchResult.location === 'string') {
+      locationParts = searchResult.location.split(',').map(part => part.trim());
+    } else {
+      // fallback: si no es string, usar array vacío
+      locationParts = [];
+    }
     return {
       id: searchResult.id,
       title: searchResult.title,
       description: searchResult.description,
-      categorySlug: searchResult.category.toLowerCase(),
+      categorySlug: searchResult.category ? searchResult.category.toLowerCase() : 'general',
       subcategorySlug: null,
       subSubcategorySlug: null,
       transactionType: 'venta',
