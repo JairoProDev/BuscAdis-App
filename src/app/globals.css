@@ -1163,12 +1163,7 @@ button[aria-label="Contactar por WhatsApp"] {
   min-width: 0 !important;
 }
 
-/* Adjusted modal styles for better visibility */
-[role="dialog"],
-.fixed.inset-0 {
-  z-index: 9999 !important;
-  pointer-events: auto !important;
-}
+
 
 /* Darker backdrop for better modal visibility */
 .fixed.inset-0 > .bg-black\/20,
@@ -1197,9 +1192,7 @@ button[aria-label="Contactar por WhatsApp"] {
   z-index: 10 !important;
 }
 
-.fixed.inset-0.z-50 {
-  z-index: 9999 !important;
-}
+
 
 .fixed.inset-0.z-50 > .fixed.inset-0.bg-black\/70 {
   pointer-events: none !important;
@@ -1214,14 +1207,6 @@ button[aria-label="Contactar por WhatsApp"] {
   z-index: 20 !important;
 }
 
-/* Garantizar que el modal está por encima de todo */
-.z-60 {
-  z-index: 9998 !important;
-}
-
-.z-70 {
-  z-index: 9999 !important;
-}
 
 /* Fix publication card height consistency */
 .publication-card {

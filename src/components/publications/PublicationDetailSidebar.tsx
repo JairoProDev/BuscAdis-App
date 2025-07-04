@@ -340,26 +340,35 @@ export default function PublicationDetailSidebar({
 
           {/* Footer - Contact Actions (solo desktop) */}
           {publication && (
-            <div className="hidden md:block border-t border-gray-200 dark:border-slate-700 p-4 bg-white dark:bg-slate-900 space-y-3">
-              <div className="flex gap-3">
-                {publication.whatsapp && (
-                  <button
-                    onClick={handleWhatsAppClick}
-                    className="flex-1 flex items-center justify-center gap-2 bg-green-500 hover:bg-green-600 text-white py-3 px-4 rounded-lg font-medium transition-colors"
-                  >
-                    <WhatsAppIcon className="w-5 h-5" />
-                    <span>Contactar</span>
-                  </button>
-                )}
+            <div className="hidden md:flex border-t border-gray-200 dark:border-slate-700 p-4 bg-white dark:bg-slate-900 gap-3 justify-between items-center z-10">
+              {publication.whatsapp && (
                 <button
-                  onClick={handleShare}
-                  className="flex items-center justify-center gap-2 bg-blue-500 hover:bg-blue-600 text-white py-3 px-4 rounded-lg font-medium transition-colors"
+                  onClick={handleWhatsAppClick}
+                  className="flex-1 flex items-center justify-center gap-2 bg-green-500 hover:bg-green-600 text-white py-3 px-2 rounded-lg font-semibold text-base shadow-md transition-all"
+                  title="Contactar por WhatsApp"
                 >
-                  <ShareIcon className="w-5 h-5" />
-                  <span>Compartir</span>
+                  <WhatsAppIcon className="w-6 h-6" />
+                  <span>Contactar</span>
                 </button>
-              </div>
-              {/* Puedes agregar aquí el botón de 'Ver página completa' si lo deseas */}
+              )}
+              <button
+                onClick={handleShare}
+                className="flex-1 flex items-center justify-center gap-2 bg-blue-500 hover:bg-blue-600 text-white py-3 px-2 rounded-lg font-semibold text-base shadow-md transition-all"
+                title="Compartir"
+              >
+                <ShareIcon className="w-6 h-6" />
+                <span>Compartir</span>
+              </button>
+              <button
+                onClick={() => window.location.href = `/anuncios/${publication.id}/${encodeURIComponent(publication.title)}`}
+                className="flex-1 flex items-center justify-center gap-2 bg-violet-600 hover:bg-violet-700 text-white py-3 px-2 rounded-lg font-semibold text-base shadow-md transition-all"
+                title="Ver página completa"
+              >
+                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" />
+                </svg>
+                <span>Ver página</span>
+              </button>
             </div>
           )}
 
