@@ -4,18 +4,63 @@ import React, { useState, useEffect, useRef } from 'react';
 import { ChevronLeft, ChevronRight, ArrowLeft } from 'lucide-react';
 import PublicationCard from '@/components/publications/PublicationCard';
 
-interface SubcategoryRow {
+// Nuevas interfaces para reemplazar 'any'
+export interface PublicationData {
+  id?: string;
+  _id?: string;
+  title?: string;
+  description?: string;
+  categorySlug?: string;
+  subcategory?: string;
+  subcategorySlug?: string;
+  subSubcategorySlug?: string;
+  transactionType?: string;
+  price?: number;
+  value?: number;
+  currency?: string;
+  valueType?: string;
+  size?: number;
+  location?: {
+    city?: string;
+    district?: string;
+    address?: string;
+  } | string;
+  contactPhone?: string;
+  contactEmail?: string;
+  contactName?: string;
+  contact?: {
+    phones?: string[];
+  };
+  images?: string[];
+  status?: string;
+  premium?: boolean;
+  whatsapp?: string;
+  createdAt?: string;
+  created_at?: string;
+  views?: number;
+}
+
+export interface SearchOptions {
+  category?: string;
+  subcategory?: string;
+  location?: string;
+  priceRange?: [number, number];
+  sortBy?: string;
+  filters?: Record<string, unknown>;
+}
+
+export interface SubcategoryRow {
   id: string;
   title: string;
   subtitle?: string;
   icon: string;
-  publications: any[];
+  publications: PublicationData[];
   maxItems: number;
 }
 
-interface SubcategoriesViewProps {
+export interface SubcategoriesViewProps {
   category: string;
-  onSearch: (query: string, options?: any) => void;
+  onSearch: (query: string, options?: SearchOptions) => void;
   onBack: () => void;
 }
 
@@ -110,7 +155,7 @@ const SubcategoriesView: React.FC<SubcategoriesViewProps> = ({ category, onSearc
   };
 
   // Adaptador robusto para trabajar con los datos reales de tu API
-  const adaptPublication = (publication: any) => ({
+  const adaptPublication = (publication: PublicationData) => ({
     id: publication.id || publication._id || 'unknown',
     title: publication.title || 'Sin título',
     description: publication.description || '',
@@ -233,7 +278,7 @@ const SubcategoriesView: React.FC<SubcategoriesViewProps> = ({ category, onSearc
 
 interface SubcategoryRowProps {
   row: SubcategoryRow;
-  onSearch: (query: string, options?: any) => void;
+  onSearch: (query: string, options?: SearchOptions) => void;
   category: string;
 }
 
@@ -280,41 +325,6 @@ const SubcategoryRowComponent: React.FC<SubcategoryRowProps> = ({ row, onSearch,
       viewType: 'normal'
     });
   };
-
-  // Adaptador robusto para trabajar con los datos reales de tu API
-  const adaptPublication = (publication: any) => ({
-    id: publication.id || publication._id || 'unknown',
-    title: publication.title || 'Sin título',
-    description: publication.description || '',
-    categorySlug: publication.categorySlug || 'general',
-    subcategorySlug: publication.subcategory || publication.subcategorySlug || null,
-    subSubcategorySlug: publication.subSubcategorySlug || null,
-    transactionType: publication.transactionType || 'venta',
-    value: publication.price || publication.value || 0,
-    currency: publication.currency || 'PEN',
-    valueType: publication.valueType || 'fijo',
-    size: publication.size || 1,
-    location: {
-      country: 'Perú',
-      province: 'Cusco',
-      city: publication.location?.city || publication.location || 'Cusco',
-      district: publication.location?.district || null,
-      address: publication.location?.address || null
-    },
-    contact: {
-      phones: publication.contactPhone ? [publication.contactPhone] : ['900000000'],
-      email: publication.contactEmail || null,
-      name: publication.contactName || null
-    },
-    images: (publication.images && Array.isArray(publication.images)) 
-      ? publication.images 
-      : ['/images/placeholder-image.jpg'],
-    status: publication.status || 'active',
-    premium: publication.premium || false,
-    whatsapp: publication.contact?.phones?.[0] || publication.whatsapp || '900000000',
-    createdAt: publication.createdAt || publication.created_at || new Date().toISOString(),
-    views: publication.views || 0
-  });
 
   return (
     <div className="mb-8">
@@ -369,7 +379,7 @@ const SubcategoryRowComponent: React.FC<SubcategoryRowProps> = ({ row, onSearch,
           className="flex gap-4 overflow-x-auto scrollbar-hide scroll-smooth px-4 sm:px-6"
           style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
         >
-          {row.publications.slice(0, row.maxItems).map((publication: any) => (
+          {row.publications.slice(0, row.maxItems).map((publication: PublicationData) => (
             <div key={publication.id || publication._id || Math.random()} className="flex-shrink-0 w-80">
               <PublicationCard 
                 publication={adaptPublication(publication)}

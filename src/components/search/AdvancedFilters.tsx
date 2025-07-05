@@ -13,15 +13,56 @@ import {
 import { filtersByCategory } from '@/data/filterConfig'
 import { FilterValue } from '@/types/filters'
 
+// Nuevas interfaces para reemplazar 'any'
+export interface FilterOption {
+  value: string | number;
+  label: string;
+  count?: number;
+}
+
+export interface RangeFilter {
+  id: string;
+  type: 'range';
+  label: string;
+  min: number;
+  max: number;
+  step: number;
+  format: (value: number) => string;
+}
+
+export interface SelectFilter {
+  id: string;
+  type: 'select';
+  label: string;
+  options: FilterOption[];
+}
+
+export interface MultiselectFilter {
+  id: string;
+  type: 'multiselect';
+  label: string;
+  options: FilterOption[];
+}
+
+export interface ToggleFilter {
+  id: string;
+  type: 'toggle';
+  label: string;
+}
+
+export type Filter = RangeFilter | SelectFilter | MultiselectFilter | ToggleFilter;
+
+export interface AdvancedFiltersProps {
+  category: keyof typeof filtersByCategory;
+  onFiltersChange: (filters: Record<string, FilterValue>) => void;
+  initialFilters?: Record<string, FilterValue>;
+}
+
 export default function AdvancedFilters({ 
   category,
   onFiltersChange,
   initialFilters = {}
-}: {
-  category: keyof typeof filtersByCategory
-  onFiltersChange: (filters: Record<string, FilterValue>) => void
-  initialFilters?: Record<string, FilterValue>
-}) {
+}: AdvancedFiltersProps) {
   const [isOpen, setIsOpen] = useState(false)
   const [activeFilters, setActiveFilters] = useState<Record<string, FilterValue>>(initialFilters)
   const [expandedSections, setExpandedSections] = useState<string[]>([])
@@ -48,7 +89,7 @@ export default function AdvancedFilters({
     setActiveFilters(filtersFromUrl)
   }, [searchParams])
 
-  const handleFilterChange = (filterId: string, value: any) => {
+  const handleFilterChange = (filterId: string, value: FilterValue) => {
     const newFilters = {
       ...activeFilters,
       [filterId]: value
@@ -72,7 +113,7 @@ export default function AdvancedFilters({
     )
   }
 
-  const renderFilter = (filter: any) => {
+  const renderFilter = (filter: Filter) => {
     switch (filter.type) {
       case 'range':
         return (
@@ -112,7 +153,7 @@ export default function AdvancedFilters({
                        focus:border-white/40 focus:ring-white/20"
             >
               <option value="">Todos</option>
-              {filter.options.map((option: any) => (
+              {filter.options.map((option: FilterOption) => (
                 <option key={option.value} value={option.value}>
                   {option.label}
                 </option>
@@ -128,7 +169,7 @@ export default function AdvancedFilters({
               {filter.label}
             </label>
             <div className="flex flex-wrap gap-2">
-              {filter.options.map((option: any) => {
+              {filter.options.map((option: FilterOption) => {
                 const filterValue = activeFilters[filter.id]
                 const isSelected = Array.isArray(filterValue) ? filterValue.includes(option.value) : false
                 return (
