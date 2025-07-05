@@ -9,6 +9,12 @@ import { MapPinIcon } from '@heroicons/react/24/outline'
 declare global {
   namespace google {
     namespace maps {
+      interface MapStyle {
+        featureType: string;
+        elementType: string;
+        stylers: Array<{ visibility: string }>;
+      }
+
       interface MapOptions {
         center: { lat: number; lng: number };
         zoom: number;
@@ -19,11 +25,27 @@ declare global {
         scrollwheel?: boolean;
         draggable?: boolean;
         clickableIcons?: boolean;
-        styles?: any[];
+        styles?: MapStyle[];
       }
+
+      interface MarkerOptions {
+        position: { lat: number; lng: number };
+        map: Map;
+        icon?: {
+          url: string;
+          scaledSize: Size;
+          anchor: Point;
+        };
+        optimized?: boolean;
+      }
+
+      interface MapEventHandler {
+        (e?: MapMouseEvent): void;
+      }
+
       class Map {
         constructor(element: HTMLElement, options: MapOptions);
-        addListener(event: string, handler: (e?: any) => void): void;
+        addListener(event: string, handler: MapEventHandler): void;
         setCenter(position: { lat: number; lng: number }): void;
         setZoom(zoom: number): void;
       }
@@ -35,7 +57,7 @@ declare global {
         lng(): number;
       }
       class Marker {
-        constructor(options: any);
+        constructor(options: MarkerOptions);
         addListener(event: string, handler: () => void): void;
         getPosition(): { lat(): number; lng(): number } | null;
         setPosition(position: { lat: number; lng: number }): void;
