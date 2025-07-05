@@ -31,7 +31,7 @@ export async function GET(
       'publications_comunidad'
     ]
     
-    let allPublications: any[] = []
+    const allPublications: any[] = []
     
     for (const collectionName of collections) {
       try {

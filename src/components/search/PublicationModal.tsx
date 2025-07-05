@@ -123,7 +123,7 @@ export default function PublicationModal({ publicationId, isOpen, onClose, initi
       });
       
       // Pass the category information to the service
-      let data = await PublicationsService.getPublicationById(cleanId);
+      const data = await PublicationsService.getPublicationById(cleanId);
       
       if (data) {
         const publicationWithContact: PublicationWithContact = {

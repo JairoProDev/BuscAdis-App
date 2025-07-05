@@ -27,7 +27,7 @@ export default function ServicioDetail({ publication }: ServicioDetailProps) {
 
   // Log temporal para depuración
   if (typeof window !== 'undefined') {
-    // eslint-disable-next-line no-console
+     
     console.log('DEBUG ServicioDetail publication:', publication);
   }
 

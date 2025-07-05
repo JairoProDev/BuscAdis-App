@@ -238,7 +238,7 @@ export default function EmpleoDetailPage({ params }: PageProps) {
         // Parsear location string a objeto
         let district = '';
         let city = '';
-        let country = 'Perú';
+        const country = 'Perú';
         if (typeof pub.location === 'string') {
           const parts = pub.location.split(',').map((p: any) => (typeof p === 'string' ? p.trim() : ''));
           if (parts.length === 2) {

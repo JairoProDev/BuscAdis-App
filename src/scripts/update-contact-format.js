@@ -143,7 +143,7 @@ async function updateContactFormat() {
           const formattedPhone = formatPhoneNumber(doc.contactPhone);
 
           // Initialize contact object if it doesn't exist
-          let updateObj = {};
+          const updateObj = {};
 
           if (!doc.contact) {
             updateObj["contact"] = {

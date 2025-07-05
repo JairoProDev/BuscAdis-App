@@ -28,7 +28,7 @@ export default function VehiculoDetail({ publication }: VehiculoDetailProps) {
 
   // Log temporal para depuración
   if (typeof window !== 'undefined') {
-    // eslint-disable-next-line no-console
+     
     console.log('DEBUG VehiculoDetail publication:', publication);
   }
 

@@ -8,7 +8,7 @@ const MONGODB_URI = process.env.MONGODB_URI!
 const MONGODB_DB = process.env.MONGODB_DB || 'buscadis'
 
 // Cache simple en memoria para sugerencias frecuentes
-let suggestionCache = new Map<string, any>()
+const suggestionCache = new Map<string, any>()
 const CACHE_DURATION = 30 * 60 * 1000 // 30 minutos
 
 let cachedClient: MongoClient | null = null

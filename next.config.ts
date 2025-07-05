@@ -6,7 +6,7 @@ const nextConfig: NextConfig = {
 
   // Temporarily disable ESLint during builds to allow build to pass
   eslint: { 
-    ignoreDuringBuilds: true 
+    ignoreDuringBuilds: false, 
   },
 
   // Enable TypeScript type checking during build

@@ -139,7 +139,7 @@ export default function PublicationCard({
     if (!description) return '';
     
     // Remover números de teléfono (patrones comunes)
-    let cleanDescription = description
+    const cleanDescription = description
       .replace(/(\+?51\s?)?9\d{8}/g, '') // Celulares peruanos
       .replace(/(\+?51\s?)?\d{2,3}[-\s]?\d{6,7}/g, '') // Teléfonos fijos peruanos
       .replace(/\b\d{9,12}\b/g, '') // Números largos

@@ -786,7 +786,7 @@ function SearchPageContent({ publicationsData, results, setResults, isLoading, s
       if (slug && slug.length > 0) {
         // Buscar el aviso en los resultados cargados
         const allPublications = results.map(convertToPublicationData);
-        let pub = allPublications.find(p => p.title.toLowerCase().replace(/\s+/g, '-') === slug);
+        const pub = allPublications.find(p => p.title.toLowerCase().replace(/\s+/g, '-') === slug);
         if (pub && (!selectedPublication || selectedPublication.id !== pub.id)) {
           openPublicationDetail(pub);
           setDeepLinkError(null);
