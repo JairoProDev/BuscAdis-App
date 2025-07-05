@@ -15,15 +15,17 @@ import { Input } from '@/components/ui/Input';
 import { Badge } from '@/components/ui/Badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/Tabs-adapter';
 
-interface LocationData {
+// Nuevas interfaces para reemplazar 'any'
+export interface LocationData {
   district?: string;
   city?: string;
   state?: string;
   country?: string;
+  province?: string;
   coordinates?: [number, number];
 }
 
-interface Publication {
+export interface Publication {
   id: string;
   title: string;
   description: string;
@@ -35,7 +37,7 @@ interface Publication {
   attributes?: Record<string, unknown>;
 }
 
-interface Magazine {
+export interface Magazine {
   _id: string;
   categoryId: string;
   pdfUrl: string;
@@ -45,32 +47,38 @@ interface Magazine {
   lastUpdated: string;
 }
 
-interface CategoryViewerProps {
+export interface PaginationProps {
+  currentPage: number;
+  maxPages: number;
+  onPageChange: (page: number) => void;
+}
+
+export interface CategoryViewerProps {
   categoryId: string;
 }
 
-interface MagazineHeaderProps {
+export interface MagazineHeaderProps {
   magazine: Magazine | null;
   isGenerating: boolean;
   onGenerate: () => void;
 }
 
-interface PublicationsGridProps {
+export interface PublicationsGridProps {
   publications: Publication[];
   onSelect: (publication: Publication) => void;
 }
 
-interface PublicationsListProps {
+export interface PublicationsListProps {
   publications: Publication[];
   onSelect: (publication: Publication) => void;
 }
 
-interface PublicationDetailProps {
+export interface PublicationDetailProps {
   publication: Publication;
   onBack: () => void;
 }
 
-interface ErrorStateProps {
+export interface ErrorStateProps {
   error: string;
   onRetry: () => void;
 }
@@ -550,7 +558,7 @@ function PublicationDetail({ publication, onBack }: PublicationDetailProps) {
               <Badge variant="outline" className="px-3 py-1">
                 <MapPin size={14} className="mr-1" />
                 {publication.location.district}
-                {(publication.location as any).province && `, ${(publication.location as any).province}`}
+                {publication.location?.province && `, ${publication.location.province}`}
               </Badge>
             )}
             
@@ -592,7 +600,7 @@ function PublicationDetail({ publication, onBack }: PublicationDetailProps) {
   );
 }
 
-function Pagination({ currentPage, maxPages, onPageChange }: any) {
+function Pagination({ currentPage, maxPages, onPageChange }: PaginationProps) {
   // Determinar qué páginas mostrar (lógica para mostrar páginas cercanas a la actual)
   const getPageNumbers = () => {
     const pages = [];
