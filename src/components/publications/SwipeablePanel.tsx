@@ -70,7 +70,7 @@ export default function SwipeablePanel({
     [0.5, 0.5, 0]
   )
   
-  const handleDragEnd = (_: any, info: { offset: { y: number }; velocity: { y: number } }) => {
+  const handleDragEnd = (_: MouseEvent | TouchEvent | PointerEvent, info: { offset: { y: number }; velocity: { y: number } }) => {
     const offset = info.offset.y
     const velocity = info.velocity.y
     

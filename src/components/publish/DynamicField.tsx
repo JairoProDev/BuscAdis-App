@@ -8,7 +8,7 @@ interface DynamicFieldProps {
   label: string;
   name: string;
   value: string | number;
-  onChange: (value: any) => void;
+  onChange: (value: string | number) => void;
   onBlur?: () => void;
   placeholder?: string;
   helperText?: string;
@@ -22,7 +22,7 @@ interface DynamicFieldProps {
     pattern?: RegExp;
     min?: number;
     max?: number;
-    customValidation?: (value: any) => boolean;
+    customValidation?: (value: string | number) => boolean;
   };
 }
 

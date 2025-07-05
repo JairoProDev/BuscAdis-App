@@ -29,7 +29,7 @@ export default function ContactInfo({
 }: ContactInfoProps) {
   const [showAvailability, setShowAvailability] = useState(false)
 
-  const handleChange = (field: keyof ContactInfoType, fieldValue: any) => {
+  const handleChange = (field: keyof ContactInfoType, fieldValue: string | boolean | { from: string; to: string; timezone: string } | undefined) => {
     onChange({
       ...value,
       [field]: fieldValue

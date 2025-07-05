@@ -56,7 +56,7 @@ export default function PublicationDetailModal({
   }, [publication?.id]);
 
   // Handle drag to close
-  const handleDragEnd = (event: any, info: PanInfo) => {
+  const handleDragEnd = (event: MouseEvent | TouchEvent | PointerEvent, info: PanInfo) => {
     if (info.offset.y > 100) {
       onClose();
     }

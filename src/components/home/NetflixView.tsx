@@ -3,8 +3,8 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { ChevronLeft, ChevronRight, Eye, MapPin, Star, Clock } from 'lucide-react';
 import { NetflixRow, AdRowItem } from '../../services/netflix-view.service';
-import { Publication } from '../../services/publication-netflix.service';
 import PublicationCard from '../publications/PublicationCard';
+import { Publication } from '@/types/publication';
 
 interface NetflixViewProps {
   rows: NetflixRow[];
@@ -84,6 +84,44 @@ const AdRow: React.FC<AdRowProps> = ({ row, onAdClick, onSeeAll }) => {
     }
   };
 
+  // Función para convertir AdRowItem a Publication
+  const convertAdRowItemToPublication = (ad: AdRowItem): Publication => ({
+    id: ad.id,
+    title: ad.title,
+    description: ad.description,
+    categorySlug: ad.category,
+    subcategorySlug: ad.subcategory,
+    subSubcategorySlug: undefined,
+    transactionType: 'venta',
+    amount: ad.price ? parseFloat(ad.price.replace(/[^\d.-]/g, '')) : null,
+    currency: 'PEN',
+    negotiable: false,
+    location: {
+      province: 'Cusco',
+      district: ad.location || 'Cusco',
+      address: ad.location || '',
+      referencePoint: ad.location || '',
+      coordinates: null
+    },
+    contact: {
+      phones: ['900000000'],
+      email: undefined,
+      name: undefined,
+      website: undefined
+    },
+    attributes: {
+      views: ad.views,
+      premium: ad.isPremium,
+      urgent: ad.isUrgent,
+      qualityScore: ad.metrics.qualityScore
+    },
+    images: ad.images,
+    status: 'active',
+    premium: ad.isPremium,
+    createdAt: ad.publishedDate,
+    updatedAt: ad.publishedDate
+  });
+
   if (row.data.length === 0) return null;
 
   return (
@@ -143,7 +181,7 @@ const AdRow: React.FC<AdRowProps> = ({ row, onAdClick, onSeeAll }) => {
             <div 
               key={publication.id || publication.title}
               className="flex-shrink-0 w-72"
-              onClick={() => onAdClick(publication as any)}
+              onClick={() => onAdClick(convertAdRowItemToPublication(publication))}
             >
               <PublicationCard 
                 publication={{
