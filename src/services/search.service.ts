@@ -17,7 +17,7 @@ interface SearchPublicationsParams {
 }
 
 interface SearchResults {
-    publications: any[];
+    publications: unknown[];
     total: number;
     pages: number;
 }

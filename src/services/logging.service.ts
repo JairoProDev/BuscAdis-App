@@ -20,7 +20,7 @@ export type LogLevel = 'debug' | 'info' | 'warn' | 'error';
 
 // Nuevas interfaces para reemplazar 'any'
 export interface LogContext {
-  [key: string]: string | number | boolean | null | undefined | LogContext | LogContext[];
+  [key: string]: string | number | boolean | null | undefined | LogContext | LogContext[] | unknown;
 }
 
 export interface APIContext {

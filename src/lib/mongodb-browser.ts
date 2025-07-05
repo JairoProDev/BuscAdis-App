@@ -19,7 +19,7 @@ interface MongoFetchOptions {
 }
 
 // Helper function to make API requests with better error handling
-export const mongoFetch = async (endpoint: string, options: MongoFetchOptions = {}): Promise<any> => {
+export const mongoFetch = async (endpoint: string, options: MongoFetchOptions = {}): Promise<unknown> => {
   try {
     const { queryParams, retries = MAX_RETRIES, ...fetchOptions } = options;
     

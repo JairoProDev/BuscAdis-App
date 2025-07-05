@@ -150,7 +150,7 @@ declare global {
     readonly actions: NotificationAction[];
     readonly badge: string;
     readonly body: string;
-    readonly data: any;
+    readonly data: unknown;
     readonly dir: NotificationDirection;
     readonly icon: string;
     readonly image: string;
@@ -165,10 +165,10 @@ declare global {
     
     close(): void;
     
-    onclick: ((this: Notification, ev: Event) => any) | null;
-    onclose: ((this: Notification, ev: Event) => any) | null;
-    onerror: ((this: Notification, ev: Event) => any) | null;
-    onshow: ((this: Notification, ev: Event) => any) | null;
+    onclick: ((this: Notification, ev: Event) => void) | null;
+    onclose: ((this: Notification, ev: Event) => void) | null;
+    onerror: ((this: Notification, ev: Event) => void) | null;
+    onshow: ((this: Notification, ev: Event) => void) | null;
   }
 
   declare var Notification: {

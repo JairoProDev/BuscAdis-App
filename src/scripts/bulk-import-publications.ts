@@ -47,20 +47,20 @@ interface LocationMapping {
 }
 
 interface ContactMapping {
-  phone?: string | ((row: any) => string)
-  whatsapp?: string | ((row: any) => string)
-  email?: string | ((row: any) => string)
+  phone?: string | ((row: unknown) => string)
+  whatsapp?: string | ((row: unknown) => string)
+  email?: string | ((row: unknown) => string)
 }
 
 interface PricingMapping {
-  price?: string | ((row: any) => number)
-  currency?: string | ((row: any) => string)
-  type?: string | ((row: any) => string)
+  price?: string | ((row: unknown) => number)
+  currency?: string | ((row: unknown) => string)
+  type?: string | ((row: unknown) => string)
 }
 
 interface MediaMapping {
-  images?: string | ((row: any) => string[])
-  mainImage?: string | ((row: any) => string)
+  images?: string | ((row: unknown) => string[])
+  mainImage?: string | ((row: unknown) => string)
 }
 
 interface ValidationConfig {
@@ -790,7 +790,7 @@ export async function importPublications(
   sourceFile: string,
   configType: keyof typeof PRESET_CONFIGS = 'BASIC_CSV',
   overrides?: Partial<ImportConfig>
-): Promise<any> {
+  ): Promise<unknown> {
   
   const baseConfig = PRESET_CONFIGS[configType]
   const config: ImportConfig = {

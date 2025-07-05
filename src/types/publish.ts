@@ -125,7 +125,7 @@ export interface Advertisement {
     validUntil: string
   }[]
   customFields?: {
-    [key: string]: any
+    [key: string]: unknown
   }
 }
 

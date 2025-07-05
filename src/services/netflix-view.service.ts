@@ -476,7 +476,7 @@ export class NetflixViewService {
   /**
    * Obtiene métricas de rendimiento de las filas
    */
-  async getRowMetrics(rowId: string): Promise<any> {
+  async getRowMetrics(rowId: string): Promise<unknown> {
     try {
       // Simulación de métricas
       return {

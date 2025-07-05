@@ -393,7 +393,7 @@ export interface MediaFile {
 }
 
 export interface AttributeValue {
-  value: any
+  value: string | number | boolean | Date | object | Array<unknown>
   type: 'string' | 'number' | 'boolean' | 'date' | 'array' | 'object'
   label?: string
   unit?: string

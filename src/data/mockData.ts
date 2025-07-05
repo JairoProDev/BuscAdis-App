@@ -2,8 +2,8 @@ import { CategoryId } from '@/types/marketplace'
 
 interface SectionData {
   title: string
-  categories: any[] // Temporalmente any hasta que definamos la estructura completa
-  adisos: any[] // Temporalmente any hasta que definamos la estructura completa
+  categories: unknown[] // Temporalmente unknown hasta que definamos la estructura completa
+  adisos: unknown[] // Temporalmente unknown hasta que definamos la estructura completa
 }
 
 type MockDataType = {

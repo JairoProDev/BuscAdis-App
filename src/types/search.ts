@@ -23,7 +23,7 @@ export interface SearchResult {
   category?: string
   subcategory?: string
   createdAt?: string
-  [key: string]: any
+  [key: string]: unknown
 }
 
 /**

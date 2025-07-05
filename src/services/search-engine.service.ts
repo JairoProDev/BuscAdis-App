@@ -440,7 +440,7 @@ class SupremeSearchEngine {
     return suggestions.filter(s => s.trim().length > text.length);
   }
 
-  private async generateFacets(query: SearchQuery): Promise<any> {
+  private async generateFacets(query: SearchQuery): Promise<unknown> {
     // Generar facetas dinámicas para filtros
     return {
       categories: [

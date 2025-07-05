@@ -33,7 +33,7 @@ export const MONGODB_ERRORS = {
 
 // MongoDB interfaces
 export interface PublicationDocument {
-  _id?: any;
+  _id?: string;
   id?: string;
   title: string;
   description: string;
@@ -42,8 +42,8 @@ export interface PublicationDocument {
   subSubcategorySlug?: string;
   price?: number;
   currency?: string;
-  location?: any;
-  contact?: any;
+  location?: unknown;
+  contact?: unknown;
   images?: string[];
   status?: string;
   createdAt?: Date;
@@ -58,14 +58,14 @@ export interface MongoClientInterface {
     category: string,
     page?: number,
     limit?: number,
-    filters?: Record<string, any>
-  ): Promise<{ publications: any[]; totalCount: number }>;
+    filters?: Record<string, unknown>
+  ): Promise<{ publications: unknown[]; totalCount: number }>;
   
-  fetchPublicationById(id: string, category: string): Promise<any>;
+  fetchPublicationById(id: string, category: string): Promise<unknown>;
   
-  fetchPublicationsByUser(userId: string): Promise<any[]>;
+  fetchPublicationsByUser(userId: string): Promise<unknown[]>;
   
-  createPublication(data: PublicationDocument): Promise<any>;
+  createPublication(data: PublicationDocument): Promise<unknown>;
   
   updatePublication(
     id: string,
