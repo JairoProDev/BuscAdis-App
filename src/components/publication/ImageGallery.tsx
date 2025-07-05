@@ -5,6 +5,12 @@ import { ChevronLeftIcon, ChevronRightIcon, XMarkIcon } from '@heroicons/react/2
 import { PublicationImage } from '@/types/publication';
 import { getOptimizedImageUrl } from '@/utils/image-helpers';
 
+// Nueva interfaz para reemplazar 'any'
+interface GalleryImage {
+  secureUrl?: string;
+  url?: string;
+}
+
 interface ImageGalleryProps {
   images: PublicationImage[];
   className?: string;
@@ -36,7 +42,7 @@ export function ImageGallery({ images, className = '' }: ImageGalleryProps) {
   
   // Obtener la imagen principal
   const mainImage = images[0];
-  const mainImageUrl = (mainImage as any)?.secureUrl || (mainImage as any)?.url || '';
+  const mainImageUrl = (mainImage as GalleryImage)?.secureUrl || (mainImage as GalleryImage)?.url || '';
   
   return (
     <>
@@ -77,7 +83,7 @@ export function ImageGallery({ images, className = '' }: ImageGalleryProps) {
                 `}
               >
                 <Image
-                  src={(image as any).secureUrl || (image as any).url}
+                  src={(image as GalleryImage).secureUrl || (image as GalleryImage).url}
                   alt={`Miniatura ${idx + 1}`}
                   className="object-cover"
                   fill
@@ -102,7 +108,7 @@ export function ImageGallery({ images, className = '' }: ImageGalleryProps) {
           <div className="relative h-[80vh] flex items-center justify-center">
             {/* Imagen actual - for lightbox, we'll keep using img to allow for zooming and better modal handling */}
             <img
-              src={(images[currentIndex] as any)?.secureUrl || (images[currentIndex] as any)?.url}
+              src={(images[currentIndex] as GalleryImage)?.secureUrl || (images[currentIndex] as GalleryImage)?.url}
               alt={`Imagen ${currentIndex + 1}`}
               className="max-h-full max-w-full object-contain"
             />

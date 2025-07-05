@@ -17,7 +17,37 @@ import {
     BellAlertIcon
 } from '@heroicons/react/24/outline';
 
-const tools = [
+// Nuevas interfaces para reemplazar 'any'
+export interface ChartDemoData {
+    type: 'chart';
+    data: number[];
+    colors: string[];
+}
+
+export interface ChatDemoData {
+    type: 'chat';
+    messages: string[];
+}
+
+export interface CalendarDemoData {
+    type: 'calendar';
+    events: string[];
+}
+
+export type DemoData = ChartDemoData | ChatDemoData | CalendarDemoData;
+
+export interface Tool {
+    id: string;
+    title: string;
+    description: string;
+    icon: React.ReactNode;
+    features: string[];
+    featureIcons: React.ReactNode[];
+    demo: DemoData;
+    gradient: string;
+}
+
+const tools: Tool[] = [
     {
         id: 'analytics',
         title: 'Analytics en Tiempo Real',
@@ -96,7 +126,7 @@ const tools = [
 ];
 
 export default function Tools() {
-    const [activeTool, setActiveTool] = useState(tools[0]);
+    const [activeTool, setActiveTool] = useState<Tool>(tools[0]);
     const [isPlaying, setIsPlaying] = useState(false);
     const [hoverState, setHoverState] = useState<string | null>(null);
     const [animationComplete, setAnimationComplete] = useState(false);
@@ -107,12 +137,12 @@ export default function Tools() {
         return () => clearTimeout(timer);
     }, [activeTool]);
 
-    const renderDemo = (tool: any) => {
+    const renderDemo = (tool: Tool) => {
         switch (tool.demo.type) {
             case 'chart':
                 return (
                     <div className="h-40 flex items-end justify-between gap-2 p-2">
-                        {tool.demo.data.map((value: any, index: number) => (
+                        {tool.demo.data.map((value: number, index: number) => (
                             <div key={index} className="relative flex flex-col items-center">
                                 <motion.div
                                     className={`w-10 sm:w-12 rounded-t-md bg-gradient-to-b ${tool.demo.colors[index % tool.demo.colors.length]}`}
@@ -146,7 +176,7 @@ export default function Tools() {
             case 'chat':
                 return (
                     <div className="space-y-3 p-1">
-                        {tool.demo.messages.map((message: any, index: number) => (
+                        {tool.demo.messages.map((message: string, index: number) => (
                             <motion.div
                                 key={index}
                                 className="bg-gradient-to-r from-slate-800/95 to-slate-900/95 p-3 rounded-lg border border-teal-500/30 backdrop-blur-sm text-cyan-100 shadow-lg relative overflow-hidden"
@@ -183,7 +213,7 @@ export default function Tools() {
             case 'calendar':
                 return (
                     <div className="grid grid-cols-2 gap-3">
-                        {tool.demo.events.map((event: any, index: number) => (
+                        {tool.demo.events.map((event: string, index: number) => (
                             <motion.div
                                 key={index}
                                 className="bg-gradient-to-r from-slate-800/90 to-slate-900/90 text-cyan-100 p-3 rounded-lg border border-teal-500/30 relative overflow-hidden group"
