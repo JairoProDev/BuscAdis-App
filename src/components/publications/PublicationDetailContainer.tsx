@@ -96,7 +96,7 @@ const UnifiedPublicationDetail = ({
     }
   };
 
-  const handleDragEnd = (event: any, info: PanInfo) => {
+  const handleDragEnd = (event: MouseEvent | TouchEvent | PointerEvent, info: PanInfo) => {
     if (isMobile && info.offset.y > 100) {
       onClose();
     }
