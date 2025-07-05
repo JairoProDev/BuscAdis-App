@@ -12,6 +12,66 @@
 
 import { Logger } from './logging.service';
 
+// Nuevas interfaces para reemplazar 'any'
+export interface PublicationData {
+  title: string;
+  description: string;
+  images?: string[];
+  category?: string;
+  price?: number;
+  location?: string;
+}
+
+export interface MarketAnalysisData {
+  category: string;
+  location?: string;
+  priceRange?: {
+    min: number;
+    max: number;
+  };
+  marketTrends?: string[];
+}
+
+export interface DemandAnalysisData {
+  category: string;
+  location?: string;
+  seasonality?: string;
+  marketConditions?: string;
+}
+
+export interface CompetitionAnalysisData {
+  category: string;
+  location?: string;
+  priceRange?: {
+    min: number;
+    max: number;
+  };
+  competitorCount?: number;
+}
+
+export interface UserContext {
+  userLocation?: string;
+  userHistory?: string[];
+  preferences?: Record<string, string | number | boolean>;
+  searchBehavior?: {
+    frequency: 'low' | 'medium' | 'high';
+    categories: string[];
+    priceRange?: {
+      min: number;
+      max: number;
+    };
+  };
+}
+
+export interface ContentPrompt {
+  category: string;
+  keywords: string[];
+  tone?: 'professional' | 'casual' | 'urgent';
+  length?: 'short' | 'medium' | 'long';
+  targetAudience?: string;
+  specialRequirements?: string[];
+}
+
 export interface AIAnalysisResult {
   category?: string;
   subcategory?: string;
@@ -58,13 +118,7 @@ class AIIntegrationService {
   /**
    * Análisis completo de publicación con IA
    */
-  async analyzePublication(data: {
-    title: string;
-    description: string;
-    images?: string[];
-    category?: string;
-    price?: number;
-  }): Promise<AIAnalysisResult> {
+  async analyzePublication(data: PublicationData): Promise<AIAnalysisResult> {
     try {
       Logger.info('AI analysis started', { title: data.title });
       
@@ -154,18 +208,21 @@ class AIIntegrationService {
   /**
    * Optimización automática de precios
    */
-  async optimizePrice(data: {
-    title: string;
-    description: string;
-    category: string;
-    currentPrice?: number;
-    location?: string;
-  }): Promise<PriceOptimizationResult> {
+  async optimizePrice(data: PublicationData): Promise<PriceOptimizationResult> {
     try {
       // Análisis de mercado con IA
-      const marketData = await this.analyzeMarket(data);
-      const demandAnalysis = await this.analyzeDemand(data);
-      const competitiveAnalysis = await this.analyzeCompetition(data);
+      const marketData = await this.analyzeMarket({
+        category: data.category || 'general',
+        location: data.location
+      });
+      const demandAnalysis = await this.analyzeDemand({
+        category: data.category || 'general',
+        location: data.location
+      });
+      const competitiveAnalysis = await this.analyzeCompetition({
+        category: data.category || 'general',
+        location: data.location
+      });
       
       const suggestedPrice = this.calculateOptimalPrice(marketData, demandAnalysis, competitiveAnalysis);
       
@@ -183,7 +240,7 @@ class AIIntegrationService {
     } catch (error) {
       Logger.error('Error in price optimization', { error });
       return {
-        suggestedPrice: data.currentPrice || 100,
+        suggestedPrice: data.price || 100,
         priceRange: { min: 80, max: 120 },
         marketComparison: 'No disponible',
         demandLevel: 'medium',
@@ -225,12 +282,7 @@ class AIIntegrationService {
   /**
    * Generación automática de contenido
    */
-  async generateContent(prompt: {
-    category: string;
-    keywords: string[];
-    tone?: 'professional' | 'casual' | 'urgent';
-    length?: 'short' | 'medium' | 'long';
-  }): Promise<{ title: string; description: string }> {
+  async generateContent(prompt: ContentPrompt): Promise<{ title: string; description: string }> {
     try {
       const aiPrompt = this.buildContentPrompt(prompt);
       const response = await this.callLLM(aiPrompt);
@@ -249,15 +301,11 @@ class AIIntegrationService {
   /**
    * Búsqueda semántica avanzada
    */
-  async semanticSearch(query: string, context?: {
-    userLocation?: string;
-    userHistory?: string[];
-    preferences?: Record<string, any>;
-  }): Promise<{
+  async semanticSearch(query: string, context?: UserContext): Promise<{
     expandedQuery: string;
     synonyms: string[];
     relatedTerms: string[];
-    suggestedFilters: Record<string, any>;
+    suggestedFilters: Record<string, string | number | boolean>;
   }> {
     try {
       const expandedQuery = await this.expandQuery(query, context);
@@ -334,14 +382,14 @@ class AIIntegrationService {
     return { sentiment, keywords, improvements };
   }
 
-  private async analyzePricing(data: any): Promise<{ suggestedPrice: number }> {
+  private async analyzePricing(data: PublicationData): Promise<{ suggestedPrice: number }> {
     // Análisis básico de precios
     // En producción, usaría ML para análisis de mercado
     const basePrice = data.price || 1000;
     return { suggestedPrice: basePrice };
   }
 
-  private async assessQuality(data: any): Promise<{ score: number; suggestions: string[] }> {
+  private async assessQuality(data: PublicationData): Promise<{ score: number; suggestions: string[] }> {
     let score = 50;
     const suggestions = [];
     
@@ -429,22 +477,30 @@ class AIIntegrationService {
     };
   }
 
-  private async analyzeMarket(data: any): Promise<{ comparison: string; samples: number }> {
+  private async analyzeMarket(data: MarketAnalysisData): Promise<{ comparison: string; samples: number }> {
     return {
       comparison: 'Precio competitivo en el mercado',
       samples: 50
     };
   }
 
-  private async analyzeDemand(data: any): Promise<{ level: 'low' | 'medium' | 'high' }> {
+  private async analyzeDemand(data: DemandAnalysisData): Promise<{ level: 'low' | 'medium' | 'high' }> {
     return { level: 'medium' };
   }
 
-  private async analyzeCompetition(data: any): Promise<any> {
-    return { competitorsCount: 25, averagePrice: 1000 };
+  private async analyzeCompetition(data: CompetitionAnalysisData): Promise<{
+    competitorCount: number;
+    averagePrice: number;
+    marketShare: number;
+  }> {
+    return { competitorCount: 25, averagePrice: 1000, marketShare: 0.1 };
   }
 
-  private calculateOptimalPrice(marketData: any, demandAnalysis: any, competitiveAnalysis: any): number {
+  private calculateOptimalPrice(
+    marketData: { comparison: string; samples: number },
+    demandAnalysis: { level: 'low' | 'medium' | 'high' },
+    competitiveAnalysis: { competitorCount: number; averagePrice: number; marketShare: number }
+  ): number {
     return competitiveAnalysis.averagePrice || 1000;
   }
 
@@ -454,7 +510,7 @@ class AIIntegrationService {
     return `[${to.toUpperCase()}] ${text}`;
   }
 
-  private buildContentPrompt(prompt: any): string {
+  private buildContentPrompt(prompt: ContentPrompt): string {
     return `Genera un anuncio para ${prompt.category} con las siguientes palabras clave: ${prompt.keywords.join(', ')}`;
   }
 
@@ -471,7 +527,7 @@ class AIIntegrationService {
     };
   }
 
-  private async expandQuery(query: string, context?: any): Promise<string> {
+  private async expandQuery(query: string, context?: UserContext): Promise<string> {
     return query + ' calidad premium';
   }
 
@@ -479,11 +535,11 @@ class AIIntegrationService {
     return ['sinónimo1', 'sinónimo2'];
   }
 
-  private async findRelatedTerms(query: string, context?: any): Promise<string[]> {
+  private async findRelatedTerms(query: string, context?: UserContext): Promise<string[]> {
     return ['término relacionado 1', 'término relacionado 2'];
   }
 
-  private async suggestFilters(query: string, context?: any): Promise<Record<string, any>> {
+  private async suggestFilters(query: string, context?: UserContext): Promise<Record<string, string | number | boolean>> {
     return {
       priceRange: 'medium',
       location: 'nearby'
