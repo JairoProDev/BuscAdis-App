@@ -3,9 +3,73 @@
  * This uses the real MongoDB driver and is only imported on the server
  */
 
-import { MongoClient, ObjectId } from 'mongodb';
+import { MongoClient, ObjectId, Db, Collection, Document } from 'mongodb';
 import { MongoClientInterface, PublicationDocument, COLLECTIONS } from './mongodb-shared';
 import { LoggingService } from '@/services/logging.service';
+
+// Nuevas interfaces para reemplazar 'any'
+export interface MongoDbDocument extends Document {
+  _id?: ObjectId;
+  createdAt?: Date;
+  updatedAt?: Date;
+}
+
+export interface PublicationFilters {
+  category?: string;
+  subcategory?: string;
+  location?: string;
+  priceMin?: number;
+  priceMax?: number;
+  search?: string;
+  status?: 'activo' | 'vencido' | 'historico';
+  premium?: boolean;
+  userId?: string;
+  [key: string]: string | number | boolean | undefined;
+}
+
+export interface MongoQueryOptions {
+  sort?: Record<string, 1 | -1>;
+  limit?: number;
+  skip?: number;
+  projection?: Record<string, 0 | 1>;
+  collation?: {
+    locale: string;
+    strength?: number;
+  };
+}
+
+export interface MongoUpdateData {
+  $set?: Record<string, unknown>;
+  $push?: Record<string, unknown>;
+  $pull?: Record<string, unknown>;
+  $inc?: Record<string, number>;
+  $unset?: Record<string, string>;
+  [key: string]: unknown;
+}
+
+export interface MongoQueryResult<T = MongoDbDocument> {
+  documents: T[];
+  totalCount: number;
+  hasMore: boolean;
+}
+
+export interface MongoInsertResult {
+  insertedId: ObjectId;
+  acknowledged: boolean;
+  insertedCount: number;
+}
+
+export interface MongoUpdateResult {
+  matchedCount: number;
+  modifiedCount: number;
+  upsertedCount: number;
+  acknowledged: boolean;
+}
+
+export interface MongoDeleteResult {
+  deletedCount: number;
+  acknowledged: boolean;
+}
 
 // MongoDB connection string from environment variables
 const MONGODB_URI = process.env.MONGODB_URI;
@@ -17,7 +81,7 @@ if (!MONGODB_URI) {
 
 // Create cached connection variable
 let cachedClient: MongoClient | null = null;
-let cachedDb: any = null;
+let cachedDb: Db | null = null;
 
 // Connection options with better timeouts and retries
 const connectionOptions = {
@@ -54,13 +118,13 @@ export const getServerMongoClient = async (): Promise<MongoClientInterface> => {
   }
 };
 
-function createServerMongoClient(client: MongoClient, db: any): MongoClientInterface {
+function createServerMongoClient(client: MongoClient, db: Db): MongoClientInterface {
   return {
     async fetchPublications(
       category: string,
       page = 1,
       limit = 20,
-      filters: Record<string, any> = {},
+      filters: PublicationFilters = {},
     ) {
       try {
         // Determine which collection to use based on category
@@ -112,7 +176,7 @@ function createServerMongoClient(client: MongoClient, db: any): MongoClientInter
     
     async fetchPublicationsByUser(userId: string) {
       try {
-        const allPublications: any[] = [];
+        const allPublications: PublicationDocument[] = [];
         
         // Search across all category collections
         for (const collectionName of Object.values(COLLECTIONS)) {
@@ -214,8 +278,8 @@ function getCollectionName(category: string): string {
   return categoryMap[category] || COLLECTIONS.PUBLICATIONS_INMUEBLES;
 }
 
-function buildQuery(filters: Record<string, any>): any {
-  const query: any = {};
+function buildQuery(filters: PublicationFilters): Record<string, unknown> {
+  const query: Record<string, unknown> = {};
   
   // Price range filter
   if (filters.minPrice !== undefined || filters.maxPrice !== undefined) {
@@ -282,9 +346,9 @@ export const getMongoClient = async (): Promise<MongoClient> => {
 // Query helper functions for API routes
 export const mongoDbQuery = async (
   collectionName: string, 
-  query: any = {}, 
-  options: any = {}
-): Promise<any[]> => {
+  query: Record<string, unknown> = {}, 
+  options: MongoQueryOptions = {}
+): Promise<MongoDbDocument[]> => {
   try {
     const client = await getMongoClient();
     const db = client.db(MONGODB_DB);
@@ -300,7 +364,7 @@ export const mongoDbQuery = async (
 export const mongoDbGetById = async (
   collectionName: string, 
   id: string
-): Promise<any | null> => {
+): Promise<MongoDbDocument | null> => {
   try {
     const client = await getMongoClient();
     const db = client.db(MONGODB_DB);
@@ -315,8 +379,8 @@ export const mongoDbGetById = async (
 
 export const mongoDbInsert = async (
   collectionName: string, 
-  document: any
-): Promise<any> => {
+  document: MongoDbDocument
+): Promise<MongoInsertResult> => {
   try {
     const client = await getMongoClient();
     const db = client.db(MONGODB_DB);
@@ -338,9 +402,9 @@ export const mongoDbInsert = async (
 
 export const mongoDbUpdate = async (
   collectionName: string, 
-  filter: any, 
-  update: any
-): Promise<any> => {
+  filter: Record<string, unknown>, 
+  update: MongoUpdateData
+): Promise<MongoUpdateResult> => {
   try {
     const client = await getMongoClient();
     const db = client.db(MONGODB_DB);
