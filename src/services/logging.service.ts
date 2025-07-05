@@ -18,19 +18,76 @@ import { toast } from 'react-hot-toast';
 
 export type LogLevel = 'debug' | 'info' | 'warn' | 'error';
 
+// Nuevas interfaces para reemplazar 'any'
+export interface LogContext {
+  [key: string]: string | number | boolean | null | undefined | LogContext | LogContext[];
+}
+
+export interface APIContext {
+  method: string;
+  url: string;
+  statusCode: number;
+  duration: number;
+  timestamp: string;
+  requestBody?: LogContext;
+  responseBody?: LogContext;
+  headers?: Record<string, string>;
+}
+
+export interface UserContext {
+  userId?: string;
+  action: string;
+  timestamp: string;
+  userAgent?: string;
+  url?: string;
+  sessionId?: string;
+  preferences?: LogContext;
+}
+
+export interface SearchContext {
+  query: string;
+  results: number;
+  duration: number;
+  filters?: LogContext;
+  category?: string;
+  location?: string;
+  sortBy?: string;
+}
+
+export interface BusinessMetricContext {
+  metric: string;
+  value: number;
+  unit?: string;
+  category?: string;
+  period?: string;
+  comparison?: {
+    previous: number;
+    change: number;
+    percentage: number;
+  };
+}
+
+export interface PerformanceContext {
+  operation: string;
+  duration: number;
+  memory?: number;
+  cpu?: number;
+  network?: {
+    bytesSent: number;
+    bytesReceived: number;
+  };
+}
+
 export interface LogEntry {
   timestamp: string;
   level: LogLevel;
   message: string;
-  context?: Record<string, any>;
+  context?: LogContext;
   source?: string;
   userId?: string;
   sessionId?: string;
   requestId?: string;
-  performance?: {
-    duration?: number;
-    memory?: number;
-  };
+  performance?: PerformanceContext;
   stack?: string;
 }
 
@@ -86,35 +143,35 @@ class LoggingService {
   /**
    * Log debug information (development only)
    */
-  debug(message: string, context?: Record<string, any>): void {
+  debug(message: string, context?: LogContext): void {
     this.log('debug', message, context);
   }
 
   /**
    * Log general information
    */
-  info(message: string, context?: Record<string, any>): void {
+  info(message: string, context?: LogContext): void {
     this.log('info', message, context);
   }
 
   /**
    * Log warnings
    */
-  warn(message: string, context?: Record<string, any>): void {
+  warn(message: string, context?: LogContext): void {
     this.log('warn', message, context);
   }
 
   /**
    * Log errors
    */
-  error(message: string, context?: Record<string, any>): void {
+  error(message: string, context?: LogContext): void {
     this.log('error', message, context);
   }
 
   /**
    * Log success messages
    */
-  success(message: string, context?: Record<string, any>): void {
+  success(message: string, context?: LogContext): void {
     this.log('info', message, context);
     
     // Show success toast in browser
@@ -126,7 +183,7 @@ class LoggingService {
   /**
    * Log performance timing
    */
-  performance(operation: string, duration: number, context?: Record<string, any>): void {
+  performance(operation: string, duration: number, context?: LogContext): void {
     this.log('info', `Performance: ${operation}`, {
       ...context,
       performance: {
@@ -149,7 +206,7 @@ class LoggingService {
   /**
    * End performance timing and log
    */
-  endTiming(operation: string, context?: Record<string, any>): number {
+  endTiming(operation: string, context?: LogContext): number {
     if (!this.config.enablePerformance) return 0;
     
     const startTime = this.performanceMarks.get(operation);
@@ -168,7 +225,7 @@ class LoggingService {
   /**
    * Log API requests
    */
-  apiRequest(method: string, url: string, statusCode: number, duration: number, context?: Record<string, any>): void {
+  apiRequest(method: string, url: string, statusCode: number, duration: number, context?: LogContext): void {
     const level = statusCode >= 400 ? 'error' : statusCode >= 300 ? 'warn' : 'info';
     
     this.log(level, `API ${method} ${url}`, {
@@ -186,7 +243,7 @@ class LoggingService {
   /**
    * Log user actions for analytics
    */
-  userAction(action: string, userId?: string, context?: Record<string, any>): void {
+  userAction(action: string, userId?: string, context?: LogContext): void {
     if (!this.config.enableAnalytics) return;
     
     this.log('info', `User action: ${action}`, {
@@ -204,7 +261,7 @@ class LoggingService {
   /**
    * Log search queries for optimization
    */
-  searchQuery(query: string, results: number, duration: number, context?: Record<string, any>): void {
+  searchQuery(query: string, results: number, duration: number, context?: LogContext): void {
     this.log('info', `Search: "${query}"`, {
       ...context,
       search: {
@@ -219,7 +276,7 @@ class LoggingService {
   /**
    * Log business metrics
    */
-  businessMetric(metric: string, value: number, unit?: string, context?: Record<string, any>): void {
+  businessMetric(metric: string, value: number, unit?: string, context?: LogContext): void {
     this.log('info', `Metric: ${metric}`, {
       ...context,
       metric: {
@@ -265,7 +322,7 @@ class LoggingService {
 
   // Métodos privados
 
-  private log(level: LogLevel, message: string, context?: Record<string, any>): void {
+  private log(level: LogLevel, message: string, context?: LogContext): void {
     // Filtrar por nivel
     if (this.LOG_LEVELS[level] < this.LOG_LEVELS[this.config.level]) {
       return;
@@ -304,7 +361,7 @@ class LoggingService {
     const timestamp = new Date(entry.timestamp).toLocaleTimeString();
     const prefix = `[${timestamp}] [${entry.level.toUpperCase()}]`;
     
-    const formatMessage = (msg: string, ctx?: Record<string, any>) => {
+    const formatMessage = (msg: string, ctx?: LogContext) => {
       if (!ctx || Object.keys(ctx).length === 0) {
         return msg;
       }
