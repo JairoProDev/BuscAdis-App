@@ -32,9 +32,89 @@ import {
 import Breadcrumbs from '../Breadcrumbs'
 import { getFiltersForCategory } from '@/utils/filterUtils'
 
+// Nuevas interfaces para reemplazar 'any'
+export interface SearchOptions {
+  category?: string;
+  subcategory?: string;
+  location?: string;
+  priceMin?: number;
+  priceMax?: number;
+  sortBy?: string;
+  limit?: number;
+  [key: string]: string | number | boolean | undefined;
+}
+
+export interface SearchFilters {
+  category?: string;
+  subcategory?: string;
+  location?: string;
+  priceRange?: [number, number];
+  status?: string;
+  premium?: boolean;
+  [key: string]: string | number | boolean | [number, number] | undefined;
+}
+
+export interface SearchResult {
+  id: string;
+  title: string;
+  category: string;
+  type: 'quick' | 'exhaustive';
+  description?: string;
+  price?: number;
+  location?: string;
+  image?: string;
+}
+
+export interface SearchResponse {
+  results: SearchResult[];
+  totalCount: number;
+}
+
+export interface FilterOption {
+  value: string;
+  label: string;
+  count?: number;
+}
+
+export interface Filter {
+  id: string;
+  label: string;
+  type: 'select' | 'multiselect' | 'range' | 'toggle';
+  options?: FilterOption[];
+  format?: (value: number) => string;
+}
+
+export interface CategoryItem {
+  id: string;
+  name: string;
+  slug: string;
+  icon?: React.ComponentType<{ className?: string }>;
+  subcategories?: CategoryItem[];
+}
+
+export interface VoiceRecognitionEvent {
+  results: Array<{
+    transcript: string;
+    confidence: number;
+  }>;
+}
+
+export interface VoiceRecognitionError {
+  error: string;
+  message: string;
+}
+
+export interface VoiceRecognition {
+  onresult: (event: VoiceRecognitionEvent) => void;
+  onerror: (event: VoiceRecognitionError) => void;
+  start: () => void;
+  stop: () => void;
+  abort: () => void;
+}
+
 interface SupremeSearchEngineProps {
-  onSearch?: (query: string, options?: Record<string, any>) => void
-  onFilterChange?: (filters: Record<string, any>) => void
+  onSearch?: (query: string, options?: SearchOptions) => void
+  onFilterChange?: (filters: SearchFilters) => void
   className?: string
   variant?: 'header' | 'page' | 'compact'
   showFilters?: boolean
@@ -52,7 +132,7 @@ interface SearchSuggestion {
 
 // API simulada para búsquedas en tiempo real
 const searchAPI = {
-  async getQuickResults(query: string, options: Record<string, any> = {}) {
+  async getQuickResults(query: string, options: SearchOptions = {}) {
     await new Promise(resolve => setTimeout(resolve, 300))
     return {
       results: Array(5).fill(null).map((_, i) => ({
@@ -65,7 +145,7 @@ const searchAPI = {
     }
   },
 
-  async getExhaustiveResults(query: string, options: Record<string, any> = {}) {
+  async getExhaustiveResults(query: string, options: SearchOptions = {}) {
     await new Promise(resolve => setTimeout(resolve, 1000))
     return {
       results: Array(50).fill(null).map((_, i) => ({
@@ -80,7 +160,7 @@ const searchAPI = {
 }
 
 // Mapa de iconos para cada categoría
-const categoryIcons: Record<string, React.ComponentType<any>> = {
+const categoryIcons: Record<string, React.ComponentType<{ className?: string }>> = {
   'empleos': JobsIcon,
   'inmuebles': RealEstateIcon,
   'vehiculos': VehicleIcon,
@@ -98,8 +178,8 @@ const InlineFilters = ({
   onFilterChange 
 }: { 
   category: string
-  activeFilters: Record<string, any>
-  onFilterChange: (filters: Record<string, any>) => void 
+  activeFilters: SearchFilters
+  onFilterChange: (filters: SearchFilters) => void 
 }) => {
   const [openFilter, setOpenFilter] = useState<string | null>(null)
   
@@ -107,7 +187,7 @@ const InlineFilters = ({
   
   if (!filters || filters.length === 0) return null
 
-  const handleFilterChange = (filterId: string, value: any) => {
+  const handleFilterChange = (filterId: string, value: string | number | boolean | [number, number]) => {
     const newFilters = { ...activeFilters }
     
     if (value === '' || value === null || value === undefined || 
@@ -120,14 +200,14 @@ const InlineFilters = ({
     onFilterChange(newFilters)
   }
 
-  const renderFilterButton = (filter: any) => {
+  const renderFilterButton = (filter: Filter) => {
     const isActive = activeFilters[filter.id] !== undefined
     const hasValue = activeFilters[filter.id]
     
     let displayValue = ''
     if (hasValue) {
       if (filter.type === 'select' && typeof hasValue === 'string') {
-        const option = filter.options?.find((o: any) => o.value === hasValue)
+        const option = filter.options?.find((o: FilterOption) => o.value === hasValue)
         displayValue = option ? option.label : hasValue
       } else if (filter.type === 'range' && Array.isArray(hasValue)) {
         displayValue = `${filter.format ? filter.format(hasValue[0]) : hasValue[0]} - ${filter.format ? filter.format(hasValue[1]) : hasValue[1]}`
@@ -177,7 +257,7 @@ const InlineFilters = ({
                   aria-label={filter.label}
                 >
                   <option value="">Todos</option>
-                  {filter.options?.map((option: any) => (
+                  {filter.options?.map((option: FilterOption) => (
                     <option key={option.value} value={option.value}>
                       {option.label}
                     </option>
@@ -190,7 +270,7 @@ const InlineFilters = ({
               <div className="space-y-2">
                 <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">{filter.label}</label>
                 <div className="max-h-40 overflow-y-auto space-y-1">
-                  {filter.options?.map((option: any) => {
+                  {filter.options?.map((option: FilterOption) => {
                     const isSelected = (activeFilters[filter.id] || []).includes(option.value)
                     return (
                       <label key={option.value} className="flex items-center space-x-2 cursor-pointer">
@@ -319,7 +399,7 @@ export default function SupremeSearchEngine({
   const [isFocused, setIsFocused] = useState(false)
   const [suggestions, setSuggestions] = useState<SearchSuggestion[]>([])
   const [isLoading, setIsLoading] = useState(false)
-  const [quickResults, setQuickResults] = useState<any[]>([])
+  const [quickResults, setQuickResults] = useState<SearchResult[]>([])
   const [showQuickResults, setShowQuickResults] = useState(false)
   
   // Estados para paneles activos
@@ -327,9 +407,9 @@ export default function SupremeSearchEngine({
   
   // Estados para categorías
   const [categorySelection, setCategorySelection] = useState({
-    category: null as any,
-    subcategory: null as any,
-    subsubcategory: null as any
+    category: null as string | null,
+    subcategory: null as string | null,
+    subsubcategory: null as string | null
   })
   const [categoryLevel, setCategoryLevel] = useState<'category' | 'subcategory' | 'subsubcategory'>('category')
 
@@ -343,7 +423,7 @@ export default function SupremeSearchEngine({
   const inputRef = useRef<HTMLInputElement>(null)
   const containerRef = useRef<HTMLDivElement>(null)
   const imageInputRef = useRef<HTMLInputElement>(null)
-  const recognition = useRef<any>(null)
+  const recognition = useRef<VoiceRecognition | null>(null)
 
   // Función de búsqueda rápida en tiempo real
   const debouncedQuickSearch = useCallback(
@@ -390,9 +470,9 @@ export default function SupremeSearchEngine({
         recognition.current.interimResults = true
         recognition.current.lang = 'es-ES'
 
-        recognition.current.onresult = (event: any) => {
+        recognition.current.onresult = (event: VoiceRecognitionEvent) => {
           const transcript = Array.from(event.results)
-            .map((result: any) => result[0].transcript)
+            .map((result: { transcript: string; confidence: number }) => result.transcript)
             .join('')
           setQuery(transcript)
         }
@@ -560,7 +640,7 @@ export default function SupremeSearchEngine({
     }
   }
 
-  const handleQuickResultClick = (result: any) => {
+  const handleQuickResultClick = (result: SearchResult) => {
     router.push(`/anuncios/${result.id}`)
   }
 
@@ -581,7 +661,7 @@ export default function SupremeSearchEngine({
     }
   }
 
-  const handleCategorySelect = (item: any, level: string) => {
+  const handleCategorySelect = (item: CategoryItem, level: string) => {
     const newSelection = { ...categorySelection }
     
     if (level === 'category') {
@@ -748,7 +828,7 @@ export default function SupremeSearchEngine({
         <div className="mt-3">
           <InlineFilters
             category={searchState.category}
-            activeFilters={searchState as Record<string, any>}
+                          activeFilters={searchState as SearchFilters}
             onFilterChange={onFilterChange || (() => {})}
           />
         </div>
@@ -778,7 +858,7 @@ export default function SupremeSearchEngine({
                     <div className="max-w-full">
                       <InlineFilters
                         category={searchState.category}
-                        activeFilters={searchState as Record<string, any>}
+                        activeFilters={searchState as SearchFilters}
                         onFilterChange={onFilterChange || (() => {})}
                       />
                     </div>
