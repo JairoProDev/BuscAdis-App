@@ -125,6 +125,73 @@ export interface PublicationResponse {
   };
 }
 
+// Nuevas interfaces para reemplazar 'any'
+export interface PublicationFilters {
+  category?: string;
+  subcategory?: string;
+  location?: string;
+  priceMin?: number;
+  priceMax?: number;
+  search?: string;
+  status?: 'activo' | 'vencido' | 'historico';
+  premium?: boolean;
+  limit?: number;
+  skip?: number;
+  sortBy?: 'recent' | 'price-asc' | 'price-desc' | 'views' | 'premium';
+  [key: string]: string | number | boolean | undefined;
+}
+
+export interface CreatePublicationData {
+  title: string;
+  description: string;
+  categorySlug: string;
+  subcategorySlug?: string;
+  subSubcategorySlug?: string;
+  transactionType: string;
+  value: number;
+  currency: string;
+  valueType: string;
+  size?: number;
+  location: {
+    country: string;
+    province: string;
+    city: string;
+    district?: string;
+    address?: string;
+    coordinates?: {
+      lat: number;
+      lng: number;
+    };
+  };
+  contact: {
+    phones: string[];
+    email?: string;
+    name?: string;
+    visible?: boolean;
+  };
+  images: string[];
+  status?: string;
+  premium?: boolean;
+}
+
+export interface UpdatePublicationData extends Partial<CreatePublicationData> {
+  _id?: string;
+  updatedAt?: string;
+  views?: number;
+  isActive?: boolean;
+  expirationDate?: string;
+  estado?: 'activo' | 'vencido' | 'historico';
+}
+
+export interface UserPublication extends Publication {
+  userId: string;
+  userProfile?: {
+    name: string;
+    email: string;
+    avatar?: string;
+  };
+}
+
 /**
  * Pure client-side service for interacting with publications via API endpoints
  */
@@ -432,7 +499,7 @@ export class PublicationsService {
     /**
      * Fetch all publications with optional filtering - Alternative method
      */
-    static async fetchPublications(options: any = {}) {
+    static async fetchPublications(options: PublicationFilters = {}) {
         try {
             // Build query params
             const params = new URLSearchParams();
@@ -459,7 +526,7 @@ export class PublicationsService {
     /**
      * Create a new publication
      */
-    static async createPublication(data: any) {
+    static async createPublication(data: CreatePublicationData) {
         try {
             const response = await fetch(this.ENDPOINTS.PUBLICATIONS, {
                 method: 'POST',
@@ -483,7 +550,7 @@ export class PublicationsService {
     /**
      * Update an existing publication
      */
-    static async updatePublication(id: string, data: any) {
+    static async updatePublication(id: string, data: UpdatePublicationData) {
         try {
             const response = await fetch(this.ENDPOINTS.PUBLICATION(id), {
                 method: 'PUT',
@@ -548,7 +615,7 @@ export class PublicationsService {
         }
     }
 
-    static async getPublicationsByUser(userId: string): Promise<any[]> {
+    static async getPublicationsByUser(userId: string): Promise<UserPublication[]> {
         try {
             const response = await fetch(this.ENDPOINTS.USER_PUBLICATIONS(userId));
             
@@ -563,7 +630,7 @@ export class PublicationsService {
         }
     }
 
-    static async getAllPublications(): Promise<any[]> {
+    static async getAllPublications(): Promise<Publication[]> {
         try {
             // Use the regular fetchPublications method with a high limit
             const result = await this.fetchPublications({ limit: 100 });

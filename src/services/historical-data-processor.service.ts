@@ -6,6 +6,111 @@
 import { HistoricalAdJSON, BulkImportAd, AITrainingData } from '../data/historical-ads-json-structure';
 import { HistoricalAdAnalysis, DATA_EXTRACTION_CONFIG } from '../data/historical-ads-analysis';
 
+// Nuevas interfaces para reemplazar 'any'
+export interface ContentAnalysis {
+  keywords: string[];
+  sentiment: 'positive' | 'neutral' | 'negative';
+  urgency: 'low' | 'medium' | 'high';
+  professionalism: number;
+  language: 'es' | 'qu' | 'en';
+  temporalAspects: {
+    hasDate: boolean;
+    hasTime: boolean;
+    isUrgent: boolean;
+    expirationDate?: string;
+  };
+}
+
+export interface ContactInfo {
+  phones: string[];
+  whatsapp: string[];
+  emails: string[];
+  name?: string;
+  businessName?: string;
+  personType: 'individual' | 'business' | 'unknown';
+  contactMethods: number;
+}
+
+export interface AdClassification {
+  category: string;
+  subcategory?: string;
+  type: 'sale' | 'rent' | 'service' | 'job' | 'wanted' | 'exchange';
+  confidence: number;
+  keywords: string[];
+}
+
+export interface LocationInfo {
+  country?: string;
+  province?: string;
+  city?: string;
+  district?: string;
+  address?: string;
+  coordinates?: {
+    lat: number;
+    lng: number;
+  };
+  specificity: number;
+}
+
+export interface PriceInfo {
+  amount?: number;
+  currency?: string;
+  type?: string;
+  range?: {
+    min: number;
+    max: number;
+  };
+  isNegotiable: boolean;
+}
+
+export interface CompetitionInfo {
+  competitors: number;
+  marketSaturation: 'low' | 'medium' | 'high';
+  averagePrice?: number;
+  priceRange?: {
+    min: number;
+    max: number;
+  };
+}
+
+export interface Predictions {
+  demandLevel: 'low' | 'medium' | 'high';
+  suggestedPrice?: number;
+  optimalPostingTime?: string;
+  targetAudience?: string[];
+  successProbability: number;
+}
+
+export interface ProcessingStats {
+  totalAds: number;
+  categories: Record<string, number>;
+  quality: {
+    average: number;
+    distribution: Record<string, number>;
+  };
+  contacts: {
+    withPhone: number;
+    withWhatsApp: number;
+    withEmail: number;
+    complete: number;
+  };
+  prices: {
+    average: number;
+    range: {
+      min: number;
+      max: number;
+    };
+    currencyDistribution: Record<string, number>;
+  };
+}
+
+export interface DuplicateDetection {
+  isDuplicate: boolean;
+  confidence: number;
+  similarAds: string[];
+  reason?: string;
+}
+
 export interface ProcessingResult {
   success: boolean;
   totalProcessed: number;
@@ -305,10 +410,7 @@ export class HistoricalDataProcessorService {
   /**
    * Analiza el contenido del anuncio
    */
-  private analyzeContent(text: string): {
-    keywords: string[];
-    analysis: any;
-  } {
+  private analyzeContent(text: string): ContentAnalysis {
     const words = text.toLowerCase().split(/\s+/);
     const keywords = this.extractKeywords(text);
     
@@ -342,7 +444,7 @@ export class HistoricalDataProcessorService {
   /**
    * Extrae información de contacto
    */
-  private extractContactInfo(text: string): any {
+  private extractContactInfo(text: string): ContactInfo {
     const phoneNumbers = this.extractPhoneNumbers(text);
     const whatsappNumbers = this.extractWhatsAppNumbers(text);
     const emails = this.extractEmails(text);
@@ -363,7 +465,7 @@ export class HistoricalDataProcessorService {
   /**
    * Genera características para entrenamiento de ML
    */
-  private generateTrainingFeatures(text: string, contentAnalysis: any): any {
+  private generateTrainingFeatures(text: string, contentAnalysis: ContentAnalysis): any {
     return {
       features: {
         text_length: text.length,
@@ -418,7 +520,7 @@ export class HistoricalDataProcessorService {
       .map(([word]) => word);
   }
 
-  private autoClassifyAd(text: string): any {
+  private autoClassifyAd(text: string): AdClassification {
     const categories = DATA_EXTRACTION_CONFIG.categorization.keywords;
     
     let bestCategory = 'productos';
@@ -511,7 +613,7 @@ export class HistoricalDataProcessorService {
   }
 
   // Métodos que retornan datos vacíos/por defecto
-  private getEmptyContactInfo(): any {
+  private getEmptyContactInfo(): ContactInfo {
     return {
       phoneNumbers: [],
       whatsappNumbers: [],
@@ -523,7 +625,7 @@ export class HistoricalDataProcessorService {
     };
   }
 
-  private getDefaultClassification(): any {
+  private getDefaultClassification(): AdClassification {
     return {
       category: 'productos',
       subcategory: 'varios',
@@ -543,7 +645,7 @@ export class HistoricalDataProcessorService {
     };
   }
 
-  private getEmptyCompetitionInfo(): any {
+  private getEmptyCompetitionInfo(): CompetitionInfo {
     return {
       competitors: [],
       uniqueSellingPoints: [],
@@ -556,7 +658,7 @@ export class HistoricalDataProcessorService {
     };
   }
 
-  private getEmptyPredictions(): any {
+  private getEmptyPredictions(): Predictions {
     return {
       expectedViews: 100,
       expectedResponses: 5,
@@ -647,7 +749,7 @@ export class HistoricalDataProcessorService {
   }
 
   // Métodos adicionales simplificados
-  private extractLocationInfo(text: string): any {
+  private extractLocationInfo(text: string): LocationInfo {
     const locations = text.match(/(av\.|avenida|jr\.|jirón|calle|ca\.|urb\.|urbanización|psj\.|pasaje)\s+[a-zA-Z0-9\s\-\.]+/gi) || [];
     
     return {
@@ -664,7 +766,7 @@ export class HistoricalDataProcessorService {
     };
   }
 
-  private extractPriceInfo(text: string): any[] {
+  private extractPriceInfo(text: string): PriceInfo[] {
     const priceMatches = text.match(/s\/\.?\s*(\d{1,3}(?:,\d{3})*(?:\.\d{2})?)/gi) || [];
     
     return priceMatches.map(match => ({
@@ -675,7 +777,7 @@ export class HistoricalDataProcessorService {
     }));
   }
 
-  private analyzeTemporalAspects(text: string): any {
+  private analyzeTemporalAspects(text: string): ContentAnalysis['temporalAspects'] {
     return {
       seasonality: 'year-round',
       timeReferences: [],
@@ -689,7 +791,7 @@ export class HistoricalDataProcessorService {
     };
   }
 
-  private generatePredictions(text: string, contentAnalysis: any): any {
+  private generatePredictions(text: string, contentAnalysis: ContentAnalysis): Predictions {
     const baseViews = Math.floor(Math.random() * 200) + 50;
     const qualityMultiplier = contentAnalysis.analysis.qualityScore / 100;
     
@@ -709,7 +811,7 @@ export class HistoricalDataProcessorService {
     return `${extractedData.title} ${extractedData.description}`.toLowerCase();
   }
 
-  private async detectDuplicates(text: string, id: string): Promise<any> {
+  private async detectDuplicates(text: string, id: string): Promise<DuplicateDetection> {
     // Placeholder para detección de duplicados
     return {
       isDuplicate: false,
@@ -807,7 +909,7 @@ export class HistoricalDataProcessorService {
   /**
    * Genera estadísticas del procesamiento
    */
-  generateStats(result: ProcessingResult): any {
+  generateStats(result: ProcessingResult): ProcessingStats {
     const totalAds = result.totalProcessed + result.totalDuplicates + result.totalErrors;
     
     return {
@@ -826,7 +928,7 @@ export class HistoricalDataProcessorService {
     };
   }
 
-  private getCategoryStats(ads: HistoricalAdJSON[]): any {
+  private getCategoryStats(ads: HistoricalAdJSON[]): Record<string, number> {
     const stats: { [key: string]: number } = {};
     ads.forEach(ad => {
       stats[ad.content.category] = (stats[ad.content.category] || 0) + 1;
@@ -834,7 +936,7 @@ export class HistoricalDataProcessorService {
     return stats;
   }
 
-  private getQualityStats(ads: HistoricalAdJSON[]): any {
+  private getQualityStats(ads: HistoricalAdJSON[]): ProcessingStats['quality'] {
     const scores = ads.map(ad => ad.analysis.qualityScore);
     return {
       promedio: scores.reduce((a, b) => a + b, 0) / scores.length,
@@ -844,7 +946,7 @@ export class HistoricalDataProcessorService {
     };
   }
 
-  private getContactStats(ads: HistoricalAdJSON[]): any {
+  private getContactStats(ads: HistoricalAdJSON[]): ProcessingStats['contacts'] {
     let conTelefono = 0;
     let conWhatsapp = 0;
     let conEmail = 0;
@@ -858,7 +960,7 @@ export class HistoricalDataProcessorService {
     return { conTelefono, conWhatsapp, conEmail };
   }
 
-  private getPriceStats(ads: HistoricalAdJSON[]): any {
+  private getPriceStats(ads: HistoricalAdJSON[]): ProcessingStats['prices'] {
     const prices = ads
       .filter(ad => ad.commercial.prices.length > 0)
       .map(ad => ad.commercial.prices[0].amount);
