@@ -5,6 +5,8 @@ import { useSearch } from '@/contexts/SearchContext'
 import { MagnifyingGlassIcon } from '@heroicons/react/24/outline'
 import LocationSelector from '../LocationSelector'
 import SimpleSelector from '../CategorySelector/SimpleSelector'
+import { useGoogleAnalytics } from '@/hooks/useGoogleAnalytics'
+import { ANALYTICS_CONFIG } from '@/config/analytics'
 
 interface SearchBarProps {
   onSearch?: (query: string, options?: Record<string, string>) => void
@@ -14,14 +16,27 @@ interface SearchBarProps {
 export default function SearchBar({ onSearch, className = '' }: SearchBarProps) {
   const { searchState, updateSearch } = useSearch()
   const [searchQuery, setSearchQuery] = useState(searchState.query || '')
+  const { trackSearch, trackUserAction } = useGoogleAnalytics()
 
   const handleSearch = () => {
-    if (onSearch) {
-      onSearch(searchQuery, {
-        category: searchState.category || '',
-        subcategory: searchState.subcategory || '',
-        subsubcategory: searchState.subSubcategory || ''
-      })
+    if (searchQuery.trim()) {
+      // Track search event
+      trackSearch(searchQuery, undefined)
+      
+      // Track user action
+      trackUserAction(
+        ANALYTICS_CONFIG.EVENTS.SEARCH_PERFORMED,
+        ANALYTICS_CONFIG.CATEGORIES.SEARCH,
+        searchQuery
+      )
+
+      if (onSearch) {
+        onSearch(searchQuery, {
+          category: searchState.category || '',
+          subcategory: searchState.subcategory || '',
+          subsubcategory: searchState.subSubcategory || ''
+        })
+      }
     }
   }
 

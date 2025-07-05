@@ -13,6 +13,9 @@ import { PublicationProvider } from '@/contexts/PublicationContext';
 import { SearchProvider } from '@/contexts/SearchContext';
 import { ReactNode } from 'react';
 import type { Metadata } from 'next';
+import GoogleAnalytics from '@/components/analytics/GoogleAnalytics';
+import PageViewTracker from '@/components/analytics/PageViewTracker';
+import { ANALYTICS_CONFIG } from '@/config/analytics';
 
 const inter = Inter({ subsets: ['latin'] });
 
@@ -25,6 +28,10 @@ export default function RootLayout({ children }: { children: ReactNode }) {
   return (
     <html lang="es" suppressHydrationWarning>
       <body className={`${inter.className} antialiased`}>
+        {/* Google Analytics */}
+        <GoogleAnalytics measurementId={ANALYTICS_CONFIG.GOOGLE_ANALYTICS_ID} />
+        <PageViewTracker />
+        
         <ThemeProvider>
           <SearchProvider>
             <PublicationProvider>
