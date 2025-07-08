@@ -1,6 +1,5 @@
 import React from 'react';
 import { motion } from 'framer-motion';
-import { FireIcon, GiftIcon } from '@heroicons/react/24/outline';
 import { Logger } from '@/services/logging.service';
 
 interface Achievement {

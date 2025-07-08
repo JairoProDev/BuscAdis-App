@@ -5,8 +5,6 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { formatPrice } from '@/utils/format';
 import { generateSeoUrl } from '@/utils/url';
-import { motion } from 'framer-motion';
-import { ChevronRightIcon } from '@heroicons/react/24/outline';
 
 interface PublicationData {
   id: string;
@@ -68,7 +66,6 @@ function RelatedPublicationCard({ publication, category }: { publication: Public
     price_type, 
     images, 
     location, 
-    created_at,
     subcategory,
     subsubcategory 
   } = publication;

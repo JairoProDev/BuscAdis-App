@@ -12,37 +12,31 @@ import {
 import { PublicationFormData } from '@/types/publication';
 
 interface LivePreviewProps {
-  ad: PublicationFormData;
-  quality: number;
-  achievements: {
-    completed: string[];
-    points: number;
-    badges: string[];
-  };
+  formData: PublicationFormData;
 }
 
-const LivePreview: React.FC<LivePreviewProps> = ({ ad, quality, achievements }) => {
+const LivePreview: React.FC<LivePreviewProps> = ({ formData }) => {
   // Validaciones defensivas para asegurar que todos los datos estén bien definidos
   const safeAd = {
-    title: ad?.title || '',
-    description: ad?.description || '',
-    categorySlug: ad?.categorySlug || '',
-    amount: ad?.amount || null,
-    negotiable: ad?.negotiable || false,
+    title: formData?.title || '',
+    description: formData?.description || '',
+    categorySlug: formData?.categorySlug || '',
+    amount: formData?.amount || null,
+    negotiable: formData?.negotiable || false,
     location: {
-      district: ad?.location?.district || '',
-      province: ad?.location?.province || ''
+      district: formData?.location?.district || '',
+      province: formData?.location?.province || ''
     },
     contact: {
-      phones: Array.isArray(ad?.contact?.phones) ? ad.contact.phones : ['']
+      phones: Array.isArray(formData?.contact?.phones) ? formData.contact.phones : ['']
     },
-    images: Array.isArray(ad?.images) ? ad.images : []
+    images: Array.isArray(formData?.images) ? formData.images : []
   };
 
   const safeAchievements = {
-    completed: Array.isArray(achievements?.completed) ? achievements.completed : [],
-    points: achievements?.points || 0,
-    badges: Array.isArray(achievements?.badges) ? achievements.badges : []
+    completed: [],
+    points: 0,
+    badges: []
   };
 
   const getCompletionItems = () => {
@@ -190,7 +184,7 @@ const LivePreview: React.FC<LivePreviewProps> = ({ ad, quality, achievements }) 
             
             {safeAchievements.badges.length > 0 && (
               <div className="mt-2 flex justify-center space-x-1">
-                {safeAchievements.badges.slice(0, 3).map((badge, index) => (
+                {safeAchievements.badges.slice(0, 3).map((badge: string, index: number) => (
                   <span key={index} className="text-lg">
                     {badge === 'oro' ? '🥇' : badge === 'plata' ? '🥈' : '🥉'}
                   </span>

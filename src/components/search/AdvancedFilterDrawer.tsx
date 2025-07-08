@@ -1,7 +1,6 @@
 'use client'
 
 import React, { useEffect, useState } from 'react'
-import { motion, AnimatePresence } from 'framer-motion'
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet'
 import { Button } from '@/components/ui/Button'
 import { AdjustmentsHorizontalIcon, XMarkIcon } from '@heroicons/react/24/outline'
@@ -11,7 +10,6 @@ import { FilterValue } from '@/types/filters'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/Tabs-adapter'
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion'
 import CategoryFilters from './CategoryFilters'
-import FilterSection from './FilterSection'
 import { useSearchParams } from 'next/navigation'
 
 interface AdvancedFilterDrawerProps {

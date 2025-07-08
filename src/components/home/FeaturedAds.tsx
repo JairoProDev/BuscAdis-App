@@ -1,9 +1,6 @@
 'use client'
 
 import React from 'react'
-import Link from 'next/link'
-import { formatPrice } from '@/lib/utils'
-import { timeAgo } from '@/lib/utils'
 import { useEffect, useState } from 'react'
 import { PublicationsService, Publication } from '@/services/publications.service'
 import AdisoCard from '@/components/AdisoCard'

@@ -4,7 +4,7 @@ import React, { useState, useCallback } from 'react'
 import { useDropzone } from 'react-dropzone'
 import { motion, AnimatePresence } from 'framer-motion'
 import Image from 'next/image'
-import { XMarkIcon, PhotoIcon, CloudArrowUpIcon } from '@heroicons/react/24/outline'
+import { XMarkIcon, PhotoIcon } from '@heroicons/react/24/outline'
 
 interface MediaUploaderProps {
   files: File[]

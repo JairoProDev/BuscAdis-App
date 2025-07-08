@@ -10,10 +10,9 @@ const AdvancedSearch: React.FC<AdvancedSearchProps> = ({ onSearch }) => {
     const [category, setCategory] = useState('');
     const [location, setLocation] = useState('');
     const [priceRange, setPriceRange] = useState({ min: '', max: '' });
-
-    const handleSearch = () => {
-        onSearch({ query, category, location, priceRange });
-    };
+    const [results, setResults] = useState([]);
+    const [loading, setLoading] = useState(false);
+    const [handleSearch] = useState(() => () => {});
 
     return (
         <div className="bg-white rounded-lg shadow-md p-6">

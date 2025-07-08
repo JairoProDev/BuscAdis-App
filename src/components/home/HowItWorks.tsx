@@ -2,9 +2,7 @@
 
 import React from 'react'
 import { motion } from 'framer-motion'
-import { useInView } from 'react-intersection-observer'
 import Container from '@/components/shared/Container';
-import { ArrowTopRightOnSquareIcon, BoltIcon, ChartBarIcon, ClockIcon, LockClosedIcon, UserGroupIcon } from '@heroicons/react/24/outline';
 
 const steps = [
     {

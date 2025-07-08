@@ -11,31 +11,6 @@ interface GeoCoordinates {
   lng?: number;
 }
 
-interface AdData {
-  title?: string;
-  description?: string;
-  amount?: number | null;
-  currency?: string;
-  negotiable?: boolean;
-  categorySlug?: string;
-  subcategorySlug?: string;
-  subSubcategorySlug?: string;
-  images?: string[];
-  location?: {
-    district?: string;
-    province?: string;
-    address?: string;
-    referencePoint?: string;
-    coordinates?: GeoCoordinates | null;
-  };
-  contact?: {
-    phones?: string[];
-    email?: string;
-    name?: string;
-    website?: string;
-  };
-}
-
 interface AdPreviewProps {
   ad: PublicationFormData;
   quality: number;
