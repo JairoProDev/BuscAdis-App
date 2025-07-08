@@ -24,6 +24,7 @@ import LocationSelector from '@/components/search/LocationSelector';
 import LanguageSelectorMenuItem from '@/components/ui/LanguageSelectorMenuItem';
 import NavigationMenu from './NavigationMenu';
 import AdisChat from './AdisChat';
+import Image from 'next/image';
 
 interface User {
   id: string;
@@ -163,9 +164,11 @@ export default function Header() {
   const UserAvatar = () => (
     <div className="flex items-center gap-2">
       {user?.avatarUrl ? (
-        <img 
+        <Image 
           src={user.avatarUrl} 
           alt={`Avatar de ${user.firstName || user.full_name || 'Usuario'}`}
+          width={32}
+          height={32}
           className="w-8 h-8 rounded-full object-cover border-2 border-slate-200 dark:border-slate-600"
         />
       ) : (

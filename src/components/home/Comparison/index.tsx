@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import Container from '@/components/shared/Container';
+import Image from 'next/image';
 
 const features = [
   {
@@ -268,7 +269,7 @@ export default function Comparison() {
               className="h-full"
             >
               <div className="text-2xl lg:text-3xl font-bold text-white mb-4 flex items-center justify-center gap-3">
-                <img src="/logo.png" alt="BuscAdis" className="h-8" />
+                <Image src="/logo.png" alt="BuscAdis" width={32} height={32} className="h-8" />
                 <span className="text-transparent bg-clip-text bg-gradient-to-r from-teal-300 to-cyan-300">BuscAdis</span>
               </div>
               <div className="relative group h-full perspective">

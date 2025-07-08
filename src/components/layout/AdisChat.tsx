@@ -20,6 +20,7 @@ import {
 } from '@heroicons/react/24/outline'
 import { categoriesList } from '@/data/categories-data'
 import { PublicationsService, Publication } from '@/services/publications.service'
+import Image from 'next/image'
 
 // ============================================================================
 // 1. TYPES & INTERFACES (Centralized & Clear)
@@ -276,7 +277,7 @@ const ResultsScreen: FC<{
         <div className='space-y-4'>
           {ads.map((ad) => (
             <div key={ad._id} className='bg-slate-50 dark:bg-slate-800 rounded-xl p-4 flex gap-4 items-center'>
-              <img src={ad.images?.[0] || '/images/no-image.png'} alt={ad.title} className='w-16 h-16 object-cover rounded-lg' />
+              <Image src={ad.images?.[0] || '/images/no-image.png'} alt={ad.title} width={64} height={64} className='w-16 h-16 object-cover rounded-lg' />
               <div className='flex-1'>
                 <h5 className='font-semibold text-slate-900 dark:text-white'>{ad.title}</h5>
                 <p className='text-sm text-slate-600 dark:text-slate-400 line-clamp-2'>{ad.description}</p>

@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useSearch } from '@/contexts/SearchContext'
 import { ChevronDownIcon } from '@heroicons/react/24/outline'
+import Image from 'next/image'
 
 // Implementación propia de debounce
 function debounce<T extends (...args: any[]) => any>(func: T, wait: number): T & { cancel: () => void } {
@@ -662,13 +663,13 @@ export default function RealTimeSearchEngine({
                           onClick={() => handleResultSelect(result)}
                           className="w-full text-left p-3 hover:bg-gray-50 dark:hover:bg-gray-700 rounded-lg transition-colors flex items-start gap-3"
                         >
-                          <img
+                          <Image
                             src={result.image}
                             alt={result.title}
+                            width={48}
+                            height={48}
                             className="w-12 h-12 object-cover rounded-lg flex-shrink-0"
-                            onError={(e) => {
-                              (e.target as HTMLImageElement).src = '/images/placeholder-image.jpg'
-                            }}
+                            // onError no soportado por next/image
                           />
                           <div className="flex-1 min-w-0">
                             <h4 className="text-sm font-medium text-gray-900 dark:text-white truncate">
@@ -834,13 +835,13 @@ export default function RealTimeSearchEngine({
                           onClick={() => handleResultSelect(result)}
                           className="w-full text-left p-3 hover:bg-gray-50 dark:hover:bg-gray-700 rounded-lg transition-colors flex items-start gap-3"
                         >
-                          <img
+                          <Image
                             src={result.image}
                             alt={result.title}
+                            width={48}
+                            height={48}
                             className="w-12 h-12 object-cover rounded-lg flex-shrink-0"
-                            onError={(e) => {
-                              (e.target as HTMLImageElement).src = '/images/placeholder-image.jpg'
-                            }}
+                            // onError no soportado por next/image
                           />
                           <div className="flex-1 min-w-0">
                             <h4 className="text-sm font-medium text-gray-900 dark:text-white truncate">

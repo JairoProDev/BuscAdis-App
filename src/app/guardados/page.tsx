@@ -6,6 +6,7 @@ import { Publication } from '@/components/search/SearchResults';
 import LoadingSpinner from '@/components/ui/LoadingSpinner';
 import { Logger } from '@/services/logging.service';
 import { useRouter } from 'next/navigation';
+import Image from 'next/image';
 
 // Simple version that doesn't directly import MongoDB
 const SavedPage = () => {
@@ -115,9 +116,11 @@ const SavedPage = () => {
         {savedItems.map(item => (
           <div key={item.id} className="bg-white rounded-lg shadow overflow-hidden animate-fade-in-up">
             <div className="relative h-48">
-              <img
+              <Image
                 src={item.images?.[0] || '/images/placeholder-buscadis.jpg'}
                 alt={item.title}
+                width={400}
+                height={192}
                 className="w-full h-full object-cover"
               />
             </div>

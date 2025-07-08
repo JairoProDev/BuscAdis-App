@@ -107,9 +107,11 @@ export function ImageGallery({ images, className = '' }: ImageGalleryProps) {
         <DialogContent className="max-w-4xl p-0 bg-black/95 border-none">
           <div className="relative h-[80vh] flex items-center justify-center">
             {/* Imagen actual - for lightbox, we'll keep using img to allow for zooming and better modal handling */}
-            <img
+            <Image
               src={(images[currentIndex] as GalleryImage)?.secureUrl || (images[currentIndex] as GalleryImage)?.url}
               alt={`Imagen ${currentIndex + 1}`}
+              width={800}
+              height={600}
               className="max-h-full max-w-full object-contain"
             />
             

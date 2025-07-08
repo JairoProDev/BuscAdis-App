@@ -4,6 +4,7 @@ import { CloudinaryService, CloudinaryUploadResult } from '@/services/cloudinary
 import { XCircleIcon, PhotoIcon, ArrowUpTrayIcon, CheckCircleIcon } from '@heroicons/react/24/outline';
 import { Spinner } from '@/components/ui/Spinner';
 import { Logger } from '@/services/logging.service';
+import Image from 'next/image';
 
 export interface ImageUploaderProps {
   onImagesUploaded: (images: CloudinaryUploadResult[]) => void;
@@ -161,9 +162,11 @@ export function ImageUploader({
           <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-2">
             {uploadedImages.map((image, index) => (
               <div key={image.publicId} className="relative group">
-                <img
+                <Image
                   src={image.secureUrl}
                   alt={`Uploaded ${index + 1}`}
+                  width={96}
+                  height={96}
                   className="h-24 w-full object-cover rounded"
                 />
                 <button

@@ -9,6 +9,7 @@ import LoadingSpinner from '@/components/ui/LoadingSpinner';
 import { formatDistance } from 'date-fns';
 import { es } from 'date-fns/locale';
 import { DocumentTextIcon, PhotoIcon } from '@heroicons/react/24/outline';
+import Image from 'next/image';
 
 export default function MyPublicationsPage() {
   const { user } = useAuth();
@@ -125,9 +126,11 @@ export default function MyPublicationsPage() {
                       <div className="flex items-center">
                         <div className="h-10 w-10 flex-shrink-0">
                           {publication.media && publication.media.length > 0 ? (
-                            <img 
+                            <Image 
                               src={publication.media[0]} 
                               alt={publication.title}
+                              width={40}
+                              height={40}
                               className="h-10 w-10 rounded-md object-cover" 
                             />
                           ) : (

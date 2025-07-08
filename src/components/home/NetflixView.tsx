@@ -5,6 +5,7 @@ import { ChevronLeft, ChevronRight, Eye, MapPin, Star, Clock } from 'lucide-reac
 import { NetflixRow, AdRowItem } from '../../services/netflix-view.service';
 import PublicationCard from '../publications/PublicationCard';
 import { Publication } from '@/types/publication';
+import Image from 'next/image';
 
 interface NetflixViewProps {
   rows: NetflixRow[];
@@ -255,9 +256,11 @@ const AdCard: React.FC<AdCardProps> = ({ ad, onClick }) => {
         {/* Image */}
         <div className="relative h-48 bg-gray-200 dark:bg-gray-700">
           {ad.images.length > 0 && !imageError ? (
-            <img
+            <Image
               src={ad.images[0]}
               alt={ad.title}
+              width={288}
+              height={192}
               className="w-full h-full object-cover"
               onError={() => setImageError(true)}
             />

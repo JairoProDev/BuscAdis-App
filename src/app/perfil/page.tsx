@@ -7,6 +7,7 @@ import { ProfileService } from '@/services/profile.service';
 import { BuscadisAvatarIcon } from '@/components/icons/BuscadisAvatarIcon';
 import { useAchievements } from '@/services/achievements.service';
 import { safeLocalStorageSet } from '@/utils/safeJSON';
+import Image from 'next/image';
 
 // Íconos de Heroicons
 import {
@@ -593,7 +594,7 @@ export default function PerfilPage() {
       <div id="profile-card" className="flex items-center gap-8 mb-8">
         <div className="relative group">
           {formData.avatarUrl ? (
-            <img src={formData.avatarUrl} alt="Avatar" className="w-32 h-32 rounded-full object-cover ring-4 ring-teal-300 shadow-lg" />
+            <Image src={formData.avatarUrl} alt="Avatar" width={128} height={128} className="w-32 h-32 rounded-full object-cover ring-4 ring-teal-300 shadow-lg" />
           ) : (
             <BuscadisAvatarIcon className="w-32 h-32 rounded-full ring-4 ring-teal-300 shadow-lg bg-white" />
           )}
@@ -916,7 +917,7 @@ export default function PerfilPage() {
                     {item.preview === 'generic' ? (
                       <DocumentTextIcon className="w-12 h-12 text-slate-400" />
                     ) : (
-                      <img src={item.preview} alt="Preview" className="w-full h-20 object-cover rounded" />
+                      <Image src={item.preview} alt="Preview" width={80} height={80} className="w-full h-20 object-cover rounded" />
                     )}
                     <span className="text-xs text-slate-300 mt-1 truncate w-full text-center">{item.file.name}</span>
                     <button 
@@ -951,7 +952,7 @@ export default function PerfilPage() {
                     {item.preview === 'generic' ? (
                       <DocumentTextIcon className="w-12 h-12 text-slate-400" />
                     ) : (
-                      <img src={item.preview} alt="Preview" className="w-full h-20 object-cover rounded" />
+                      <Image src={item.preview} alt="Preview" width={80} height={80} className="w-full h-20 object-cover rounded" />
                     )}
                     <span className="text-xs text-slate-300 mt-1 truncate w-full text-center">{item.file.name}</span>
                     <button 
