@@ -5,7 +5,7 @@ import { useEffect } from 'react'
 // Conditionally import gsap if available
 let gsap: any = null;
 try {
-  gsap = require('gsap').gsap;
+  gsap = import('gsap').then(module => module.gsap);
 } catch (error) {
   // gsap not available, hook will be disabled
 }

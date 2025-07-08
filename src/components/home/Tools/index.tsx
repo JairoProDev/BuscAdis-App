@@ -60,10 +60,10 @@ const tools: Tool[] = [
             'Métricas de conversión'
         ],
         featureIcons: [
-            <CursorArrowRaysIcon className="w-4 h-4" />,
-            <PresentationChartLineIcon className="w-4 h-4" />,
-            <DocumentTextIcon className="w-4 h-4" />,
-            <ChartBarIcon className="w-4 h-4" />
+            <CursorArrowRaysIcon key="cursor" className="w-4 h-4" />,
+            <PresentationChartLineIcon key="chart" className="w-4 h-4" />,
+            <DocumentTextIcon key="document" className="w-4 h-4" />,
+            <ChartBarIcon key="bar" className="w-4 h-4" />
         ],
         demo: {
             type: 'chart',
@@ -84,10 +84,10 @@ const tools: Tool[] = [
             'Precios recomendados'
         ],
         featureIcons: [
-            <SparklesIcon className="w-4 h-4" />,
-            <DocumentTextIcon className="w-4 h-4" />,
-            <CommandLineIcon className="w-4 h-4" />,
-            <ChartBarIcon className="w-4 h-4" />
+            <SparklesIcon key="sparkles" className="w-4 h-4" />,
+            <DocumentTextIcon key="document" className="w-4 h-4" />,
+            <CommandLineIcon key="command" className="w-4 h-4" />,
+            <ChartBarIcon key="bar" className="w-4 h-4" />
         ],
         demo: {
             type: 'chat',
@@ -112,10 +112,10 @@ const tools: Tool[] = [
             'Notificaciones inteligentes'
         ],
         featureIcons: [
-            <CalendarDaysIcon className="w-4 h-4" />,
-            <ArrowPathIcon className="w-4 h-4" />,
-            <ChatBubbleLeftRightIcon className="w-4 h-4" />,
-            <BellAlertIcon className="w-4 h-4" />
+            <CalendarDaysIcon key="calendar" className="w-4 h-4" />,
+            <ArrowPathIcon key="arrow" className="w-4 h-4" />,
+            <ChatBubbleLeftRightIcon key="chat" className="w-4 h-4" />,
+            <BellAlertIcon key="bell" className="w-4 h-4" />
         ],
         demo: {
             type: 'calendar',

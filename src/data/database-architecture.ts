@@ -572,8 +572,10 @@ export const SHARDING_STRATEGY = {
   }
 }
 
-export default {
+const DatabaseArchitecture = {
   DATABASE_COLLECTIONS,
   DATABASE_INDEXES,
   SHARDING_STRATEGY
-} 
+}
+
+export default DatabaseArchitecture 

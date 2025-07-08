@@ -4,7 +4,7 @@ import { useState } from 'react'
 import { usePathname, useRouter } from 'next/navigation'
 import { motion } from 'framer-motion'
 import { HomeIcon, SearchNavIcon, MegaphoneIcon } from '@/components/icons'
-import { NewspaperIcon, SparklesIcon, MagnifyingGlassIcon } from '@heroicons/react/24/outline'
+import { NewspaperIcon, SparklesIcon } from '@heroicons/react/24/outline'
 
 interface NavigationMenuProps {
   variant?: 'mobile' | 'desktop'

@@ -17,9 +17,9 @@ export default function MobileNavigation() {
     return scrollY.on('change', (latest) => {
       const direction = latest > lastScrollY ? 'down' : 'up'
       if (direction === 'down' && latest > 150) { 
-        isVisible && setIsVisible(false) 
+        if (isVisible) setIsVisible(false) 
       } else { 
-        !isVisible && setIsVisible(true) 
+        if (!isVisible) setIsVisible(true) 
       }
       setLastScrollY(latest)
     })

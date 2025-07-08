@@ -6,7 +6,6 @@ import { usePathname, useRouter } from 'next/navigation'; // Importar useRouter
 import {
   UserCircleIcon,
   ArrowLeftOnRectangleIcon, // Para Logout
-  BookmarkIcon, // Para Guardados
   ChatBubbleOvalLeftEllipsisIcon, // Para Mensajes
   BellIcon, // Para Notificaciones
   Cog6ToothIcon, // Un ícono genérico para "Mi Perfil" o "Configuración" si UserCircle se usa en el botón
@@ -15,7 +14,6 @@ import {
   UserIcon,
   ArrowRightOnRectangleIcon,
   UserPlusIcon,
-  GlobeAltIcon,
   HeartIcon,
   SpeakerWaveIcon,
 } from '@heroicons/react/24/outline';
@@ -62,7 +60,7 @@ export default function Header() {
   const [isMounted, setIsMounted] = useState(false);
   const [showLocationSelector, setShowLocationSelector] = useState(false);
   const [selectedLocation, setSelectedLocation] = useState<LocationData>({});
-  const pathname = usePathname();
+  // const pathname = usePathname(); // Removed unused variable
   const router = useRouter(); // Inicializar useRouter
 
   const userMenuRef = useRef<HTMLDivElement>(null);

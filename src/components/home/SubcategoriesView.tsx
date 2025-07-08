@@ -70,7 +70,7 @@ const SubcategoriesView: React.FC<SubcategoriesViewProps> = ({ category, onSearc
 
   useEffect(() => {
     loadSubcategoriesData();
-  }, [category]);
+  }, [category, loadSubcategoriesData]);
 
   const loadSubcategoriesData = async () => {
     try {
@@ -147,15 +147,15 @@ const SubcategoriesView: React.FC<SubcategoriesViewProps> = ({ category, onSearc
       }
 
       setRows(subcategoryRows);
-    } catch (error) {
-      console.error('Error cargando subcategorías:', error);
+    } catch {
+      console.error('Error cargando subcategorías');
     } finally {
       setIsLoading(false);
     }
   };
 
   // Adaptador robusto para trabajar con los datos reales de tu API
-  const adaptPublication = (publication: PublicationData) => ({
+  // const adaptPublication = (publication: PublicationData) => ({
     id: publication.id || publication._id || 'unknown',
     title: publication.title || 'Sin título',
     description: publication.description || '',
@@ -187,7 +187,7 @@ const SubcategoriesView: React.FC<SubcategoriesViewProps> = ({ category, onSearc
     whatsapp: publication.contact?.phones?.[0] || publication.whatsapp || '900000000',
     createdAt: publication.createdAt || publication.created_at || new Date().toISOString(),
     views: publication.views || 0
-  });
+  // });
 
   const getCategoryTitle = (categorySlug: string) => {
     const titles: Record<string, string> = {

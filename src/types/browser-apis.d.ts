@@ -39,7 +39,7 @@ declare global {
     stop(): void;
   }
 
-  declare var SpeechRecognition: {
+  declare const SpeechRecognition: {
     prototype: SpeechRecognition;
     new(): SpeechRecognition;
   };
@@ -171,7 +171,7 @@ declare global {
     onshow: ((this: Notification, ev: Event) => void) | null;
   }
 
-  declare var Notification: {
+  declare const Notification: {
     prototype: Notification;
     new(title: string, options?: NotificationOptions): Notification;
     readonly permission: NotificationPermission;
@@ -205,7 +205,7 @@ declare global {
     unobserve(target: Element): void;
   }
 
-  declare var IntersectionObserver: {
+  declare const IntersectionObserver: {
     prototype: IntersectionObserver;
     new(callback: IntersectionObserverCallback, options?: IntersectionObserverInit): IntersectionObserver;
   };

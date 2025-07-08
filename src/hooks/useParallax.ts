@@ -6,8 +6,8 @@ import { useEffect, useRef } from 'react'
 let gsap: any = null;
 let ScrollTrigger: any = null;
 try {
-  gsap = require('gsap').gsap;
-  ScrollTrigger = require('gsap/ScrollTrigger').ScrollTrigger;
+  gsap = import('gsap').then(module => module.gsap);
+  ScrollTrigger = import('gsap/ScrollTrigger').then(module => module.ScrollTrigger);
   if (gsap && ScrollTrigger) {
     gsap.registerPlugin(ScrollTrigger);
   }

@@ -178,7 +178,7 @@ export default function MobileDetailsSheet({
                 // Only allow dragging from the handle
                 e.currentTarget.setPointerCapture(e.pointerId)
                 if (sheetRef.current) {
-                  // @ts-ignore
+                  // @ts-expect-error
                   sheetRef.current.__dragHandlers?.onPointerDown(e)
                 }
               }}

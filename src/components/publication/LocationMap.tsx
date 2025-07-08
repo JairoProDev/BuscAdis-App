@@ -7,8 +7,8 @@ import { MapPinIcon } from '@heroicons/react/24/outline'
 
 // Temporary Google Maps type declarations for build
 declare global {
-  namespace google {
-    namespace maps {
+  interface Google {
+    maps: {
       interface MapStyle {
         featureType: string;
         elementType: string;
@@ -69,6 +69,10 @@ declare global {
         constructor(x: number, y: number);
       }
     }
+  }
+  
+  interface Window {
+    google: Google;
   }
 }
 

@@ -76,13 +76,13 @@ export const mongoFetch = async (endpoint: string, options: MongoFetchOptions = 
           }
           
           const error = new Error(`API error: ${response.status} ${response.statusText}`);
-          // @ts-ignore - add extra properties
+          // @ts-expect-error - add extra properties
           error.status = response.status;
-          // @ts-ignore
+          // @ts-expect-error
           error.statusText = response.statusText;
-          // @ts-ignore
+          // @ts-expect-error
           error.data = errorData;
-          // @ts-ignore
+          // @ts-expect-error
           error.originalText = errorText;
           
           // Log detailed error info
