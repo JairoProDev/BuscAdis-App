@@ -33,8 +33,6 @@ export default function SubcategoryPage({ params }: SubcategoryPageProps) {
 }
 
 function SubcategoryPageContent({ params }: SubcategoryPageProps) {
-  const [category, setCategory] = React.useState<string | null>(null)
-  const [subcategory, setSubcategory] = React.useState<string | null>(null)
   const [isValid, setIsValid] = React.useState<boolean | null>(null)
 
   React.useEffect(() => {
@@ -51,8 +49,6 @@ function SubcategoryPageContent({ params }: SubcategoryPageProps) {
         return
       }
       
-      setCategory(categoryId)
-      setSubcategory(subcategoryId)
       setIsValid(true)
     }
     

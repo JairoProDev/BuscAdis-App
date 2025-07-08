@@ -5,7 +5,7 @@ import Link from 'next/link';
 import { Publication } from '@/components/search/SearchResults';
 import LoadingSpinner from '@/components/ui/LoadingSpinner';
 import { Logger } from '@/services/logging.service';
-import { useRouter } from 'next/navigation';
+
 import Image from 'next/image';
 
 // Simple version that doesn't directly import MongoDB
@@ -13,7 +13,6 @@ const SavedPage = () => {
   const [savedItems, setSavedItems] = useState<Publication[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const router = useRouter();
 
   useEffect(() => {
     const loadSaved = async () => {

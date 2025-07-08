@@ -123,7 +123,7 @@ export default function PublicationDetailWithTitlePage() {
           if (response.ok) {
             const relatedData = await response.json();
             if (relatedData.publications) {
-              setRelatedPublications(relatedData.publications.map((pub: any) => ({
+              setRelatedPublications(relatedData.publications.map((pub: unknown) => ({
                 id: pub.id || pub._id,
                 title: pub.title,
                 description: pub.description,
@@ -145,8 +145,8 @@ export default function PublicationDetailWithTitlePage() {
               })));
             }
           }
-        } catch (err) {
-          console.warn('Could not fetch related publications:', err);
+        } catch {
+          console.warn('Could not fetch related publications');
         }
 
         setLoading(false);

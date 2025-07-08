@@ -205,16 +205,6 @@ export default function PublicarPage() {
     subSubcategorySlug?: string | null;
   };
 
-  type PriceData = {
-    amount: number | null;
-    currency: string;
-    negotiable: boolean;
-  };
-
-  type LocationData = PublicationLocation;
-
-  type ContactData = PublicationContact;
-
   // Validación de pasos - Definido primero para evitar el error de inicialización
   const validateStep = useCallback((currentStep: StepValue): boolean => {
     const errors: string[] = [];
@@ -332,9 +322,9 @@ export default function PublicarPage() {
     }
     
     Logger.info('Categoría seleccionada', slugs);
-  }, [updateAd, validateStep, setStep, step, categoriesList]);
+  }, [updateAd, validateStep, setStep, step]);
 
-  const handlePriceChange = useCallback((priceData: any) => {
+  const handlePriceChange = useCallback((priceData: unknown) => {
     updateAd({
       amount: priceData.amount,
       currency: priceData.currency as 'PEN' | 'USD' || 'PEN',
@@ -342,7 +332,7 @@ export default function PublicarPage() {
     });
   }, [updateAd]);
 
-  const handleLocationChange = useCallback((locationData: any) => {
+  const handleLocationChange = useCallback((locationData: unknown) => {
     // Asegurarse de que los datos de ubicación tienen la estructura correcta
     updateAd({
       location: {
@@ -358,7 +348,7 @@ export default function PublicarPage() {
     });
   }, [updateAd]);
 
-  const handleContactChange = useCallback((contactData: any) => {
+  const handleContactChange = useCallback((contactData: unknown) => {
     updateAd({
       contact: {
         phones: contactData.phones || [],

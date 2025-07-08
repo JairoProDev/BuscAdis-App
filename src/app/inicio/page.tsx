@@ -10,7 +10,7 @@ import Stats from '@/components/home/Stats';
 import Comparison from '@/components/home/Comparison';
 import CallToAction from '@/components/home/CallToAction';
 import LoadingState from '@/components/ui/LoadingState';
-import CategoriesSection from '@/components/home/CategoriesSection';
+
 import FeaturedListingsSection from '@/components/home/FeaturedListingsSection';
 import BenefitsSection from '@/components/home/BenefitsSection';
 

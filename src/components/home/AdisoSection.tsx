@@ -1,12 +1,9 @@
 'use client'
 
-import { motion } from 'framer-motion'
-import { CategoryId, Adiso } from '@/types/marketplace'
-import FeaturedAds from './FeaturedAds'
+import { CategoryId } from '@/types/marketplace'
 import { useEffect, useState } from 'react'
 import { PublicationsService, Publication } from '@/services/publications.service'
 import AdisoCard from '@/components/AdisoCard'
-import LoadingState from '@/components/ui/LoadingState'
 import ErrorMessage from '@/components/ui/ErrorMessage'
 
 interface AdisoSectionProps {

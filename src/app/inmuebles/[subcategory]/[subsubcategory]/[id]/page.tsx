@@ -2,7 +2,6 @@
 
 import { useState, useEffect } from 'react';
 import { useParams, useRouter } from 'next/navigation';
-import Image from 'next/image';
 import { PublicationsService } from '@/services/publications.service';
 import { formatDate } from '@/utils/date';
 import { formatPrice } from '@/utils/format';
@@ -16,13 +15,11 @@ import {
   MapPinIcon,
   CalendarIcon,
   EyeIcon,
+  Squares2X2Icon,
   HomeIcon,
-  KeyIcon,
-  Squares2X2Icon
+  KeyIcon
 } from '@heroicons/react/24/outline';
-import { generateSeoUrl, slugify } from '@/utils/url';
 import RelatedPublications from '@/components/publication/RelatedPublications';
-import DedicatedPublicationPage from '@/components/publications/dedicated/DedicatedPublicationPage';
 
 // Renombrar la interfaz Publication para evitar conflictos
 interface PublicationData {
@@ -55,15 +52,8 @@ interface PublicationData {
 // El componente que renderiza el contenido de la página de detalle
 function InmuebleDetailPageContent({ publication: initialPublication }: { publication: PublicationData }) {
   const router = useRouter();
-  const params = useParams();
-  const [publication, setPublication] = useState<PublicationData | null>(initialPublication);
+  const [publication] = useState<PublicationData | null>(initialPublication);
   const [relatedPublications, setRelatedPublications] = useState<PublicationData[]>([]);
-
-  // Extraer parámetros de la URL por si fueran necesarios (aunque ya los tenemos de publication)
-  const categorySlug = params?.category as string; // Corregido: debe ser `category`, no `subcategory`
-  const subcategorySlug = params?.subcategory as string;
-  const subsubcategorySlug = params?.subsubcategory as string;
-  const id = params?.id as string;
 
   // Fetch related publications
   useEffect(() => {
@@ -122,7 +112,7 @@ function InmuebleDetailPageContent({ publication: initialPublication }: { public
 
   // Extraer datos para facilitar el acceso
   const { 
-    title, description, price, price_type: priceType, images, 
+    title, description, price, images, 
     location, contact, created_at: createdAt, views, attributes 
   } = publication;
 
@@ -299,15 +289,7 @@ function InmuebleDetailPageContent({ publication: initialPublication }: { public
 }
 
 // Main page component for Next.js 15 with async params
-interface PageProps {
-  params: Promise<{
-    subcategory: string;
-    subsubcategory: string;
-    id: string;
-  }>;
-}
-
-export default function InmuebleDetailPage({ params }: { params: any }) {
+export default function InmuebleDetailPage({ params }: { params: unknown }) {
   const [id, setId] = useState<string | null>(null);
   const [publication, setPublication] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -329,7 +311,7 @@ export default function InmuebleDetailPage({ params }: { params: any }) {
         const res = await fetch(`/api/publications/${id}`);
         const data = await res.json();
         setPublication(data.publication);
-      } catch (err) {
+      } catch {
         setPublication(null);
       } finally {
         setLoading(false);

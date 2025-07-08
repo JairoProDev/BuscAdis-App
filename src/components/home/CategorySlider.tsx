@@ -2,15 +2,13 @@
 
 import React from 'react';
 import Link from 'next/link';
-import { useState, useEffect } from 'react';
-import LoadingSpinner from '@/components/ui/LoadingSpinner';
 
 // Importar iconos específicos
 import { 
   BriefcaseIcon, HomeIcon, TruckIcon
 } from '@heroicons/react/24/outline';
 
-const iconMap: Record<string, React.ComponentType<any>> = {
+const iconMap: Record<string, React.ComponentType<{ className?: string }>> = {
   'Empleos': BriefcaseIcon,
   'Inmuebles': HomeIcon,
   'Vehículos': TruckIcon,

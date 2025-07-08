@@ -2,9 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
-import { PublicationsService } from '@/services/publications.service';
 import LoadingSpinner from '@/components/ui/LoadingSpinner';
-import { generateSeoUrl } from '@/utils/url';
 import DedicatedPublicationPage from '@/components/publications/dedicated/DedicatedPublicationPage';
 
 export default function PublicationDetailPage() {
@@ -16,9 +14,6 @@ export default function PublicationDetailPage() {
   const [error, setError] = useState('');
   
   // Extract parameters from the URL
-  const categorySlugParam = params?.category as string;
-  const subcategorySlugParam = params?.subcategory as string;
-  const subsubcategorySlugParam = params?.subsubcategory as string;
   const id = params?.id as string;
   
   useEffect(() => {
@@ -58,7 +53,7 @@ export default function PublicationDetailPage() {
     
     fetchPublication();
     return () => { isMounted = false; };
-  }, [id, categorySlugParam]);
+  }, [id]);
   
   if (loading) {
     return (

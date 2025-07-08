@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react';
 import { useAuth } from '@/features/auth/hooks/useAuth';
 import { PublicationsService } from '@/services/publications.service';
 import Link from 'next/link';
-import { PencilIcon, TrashIcon, EyeIcon, ArrowPathIcon, PlusIcon } from '@heroicons/react/24/outline';
+import { PencilIcon, TrashIcon, EyeIcon, PlusIcon } from '@heroicons/react/24/outline';
 import LoadingSpinner from '@/components/ui/LoadingSpinner';
 import { formatDistance } from 'date-fns';
 import { es } from 'date-fns/locale';
@@ -13,7 +13,7 @@ import Image from 'next/image';
 
 export default function MyPublicationsPage() {
   const { user } = useAuth();
-  const [publications, setPublications] = useState<any[]>([]);
+  const [publications, setPublications] = useState<unknown[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [deleteConfirm, setDeleteConfirm] = useState<string | null>(null);

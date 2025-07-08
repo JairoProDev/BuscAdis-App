@@ -32,7 +32,6 @@ export default function CategoryPage({ params }: CategoryPageProps) {
 }
 
 function CategoryPageContent({ params }: CategoryPageProps) {
-  const [category, setCategory] = React.useState<string | null>(null)
   const [isValid, setIsValid] = React.useState<boolean | null>(null)
 
   React.useEffect(() => {
@@ -48,7 +47,6 @@ function CategoryPageContent({ params }: CategoryPageProps) {
         return
       }
       
-      setCategory(categoryId)
       setIsValid(true)
     }
     

@@ -458,7 +458,7 @@ export default function PerfilPage() {
     const points = achievementsStore.totalPoints + (formData.progress || 0);
     setFormData(prev => ({ ...prev, points }));
     safeLocalStorageSet('profile_points', points);
-  }, [achievementsStore.totalPoints, formData.progress]);
+  }, [achievementsStore.totalPoints, formData.progress, setFormData]);
 
   // Handle portfolio file upload
   const handlePortfolioUpload = (e: ChangeEvent<HTMLInputElement>) => {
