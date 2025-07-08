@@ -6,8 +6,8 @@ import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
 import { 
   Download, RefreshCw, Search, Calendar, MapPin, 
-  DollarSign, Clock, Info, ChevronLeft, ChevronRight, 
-  Eye, Grid3X3, List
+  DollarSign, Info, ChevronLeft, ChevronRight, 
+  Grid3X3, List
 } from 'lucide-react';
 import { Button } from '@/components/ui/Button';
 import { Skeleton } from '@/components/ui/Skeleton';
@@ -192,14 +192,14 @@ export default function MagazineCategoryViewer({ categoryId }: CategoryViewerPro
   };
   
   // Funciones auxiliares
-  const formatDate = (dateString: string) => {
-    if (!dateString) return '';
-    try {
-      return format(new Date(dateString), "d 'de' MMMM, yyyy", { locale: es });
-    } catch (e) {
-      return dateString;
-    }
-  };
+  // const formatDate = (dateString: string) => {
+  //   if (!dateString) return '';
+  //   try {
+  //     return format(new Date(dateString), "d 'de' MMMM, yyyy", { locale: es });
+  //   } catch (e) {
+  //     return dateString;
+  //   }
+  // };
   
   const getPagination = () => {
     const paginatedPublications = filteredPublications.slice(
@@ -209,15 +209,15 @@ export default function MagazineCategoryViewer({ categoryId }: CategoryViewerPro
     return paginatedPublications;
   };
   
-  const formatPrice = (price?: number, currency?: string) => {
-    if (!price) return 'Consultar precio';
-    const formatter = new Intl.NumberFormat('es-PE', {
-      style: 'currency',
-      currency: currency || 'PEN',
-      maximumFractionDigits: 0
-    });
-    return formatter.format(price);
-  };
+  // const formatPrice = (price?: number, currency?: string) => {
+  //   if (!price) return 'Consultar precio';
+  //   const formatter = new Intl.NumberFormat('es-PE', {
+  //     style: 'currency',
+  //     currency: currency || 'PEN',
+  //     maximumFractionDigits: 0
+  //   });
+  //   return formatter.format(price);
+  // };
   
   // Renderizado de componentes
   if (isLoading) {
@@ -355,7 +355,7 @@ function MagazineHeader({ magazine, isGenerating, onGenerate }: MagazineHeaderPr
     if (!dateString) return 'No disponible';
     try {
       return format(new Date(dateString), "d 'de' MMMM, yyyy", { locale: es });
-    } catch (e) {
+    } catch {
       return dateString;
     }
   };
@@ -514,7 +514,7 @@ function PublicationDetail({ publication, onBack }: PublicationDetailProps) {
     if (!dateString) return '';
     try {
       return format(new Date(dateString), "d 'de' MMMM, yyyy", { locale: es });
-    } catch (e) {
+    } catch {
       return dateString;
     }
   };

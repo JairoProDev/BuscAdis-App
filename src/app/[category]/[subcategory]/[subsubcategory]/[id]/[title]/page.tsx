@@ -34,8 +34,8 @@ export default function PublicationDetailWithTitlePage() {
     publicationData.title,
     undefined,
     publicationData.categorySlug,
-    publicationData.subcategorySlug,
-    publicationData.subSubcategorySlug,
+    publicationData.subcategorySlug || undefined,
+    publicationData.subSubcategorySlug || undefined,
     true
   ) : '';
 
@@ -60,29 +60,32 @@ export default function PublicationDetailWithTitlePage() {
 
         // Convert to PublicationData format
         const publicationData: PublicationData = {
-          id: publication.id,
+          id: publication._id || id,
           title: publication.title || 'Sin título',
           description: publication.description || '',
-          categorySlug: publication.categorySlug || publication.category || categorySlugParam,
-          subcategorySlug: publication.subcategorySlug || publication.subcategory || subcategorySlugParam || null,
-          subSubcategorySlug: publication.subSubcategorySlug || publication.subsubcategory || subsubcategorySlugParam || null,
+          categorySlug: publication.categorySlug || categorySlugParam,
+          subcategorySlug: publication.subcategorySlug || subcategorySlugParam || null,
+          subSubcategorySlug: publication.subSubcategorySlug || subsubcategorySlugParam || null,
           transactionType: publication.transactionType || 'venta',
-          value: publication.price || publication.amount || publication.value || 0,
+          value: publication.value || 0,
           currency: publication.currency || 'PEN',
           valueType: 'fixed',
           size: 0,
-          location: publication.location || {
+          location: publication.location ? {
+            district: publication.location.district || '',
+            province: publication.location.province || '',
+            city: publication.location.city || '',
+            country: publication.location.country || 'Perú',
+          } : {
             district: '',
             province: '',
             city: 'Lima',
             country: 'Perú'
           },
           images: publication.images || [],
-          whatsapp: publication.whatsapp || publication.contact?.phone || '51987654321',
+          whatsapp: publication.contact?.phones?.[0] || '51987654321',
           createdAt: publication.createdAt || new Date().toISOString(),
           views: publication.views || 0,
-          featured: publication.featured || false,
-          premium: publication.premium || false,
         };
         
         // Validar que la URL actual coincida con la URL canónica
@@ -91,8 +94,8 @@ export default function PublicationDetailWithTitlePage() {
           publicationData.title,
           undefined,
           publicationData.categorySlug,
-          publicationData.subcategorySlug,
-          publicationData.subSubcategorySlug,
+          publicationData.subcategorySlug || undefined,
+          publicationData.subSubcategorySlug || undefined,
           true // Incluir el título
         );
 

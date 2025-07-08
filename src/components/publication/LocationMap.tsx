@@ -9,13 +9,13 @@ import { MapPinIcon } from '@heroicons/react/24/outline'
 declare global {
   interface Google {
     maps: {
-      interface MapStyle {
+      MapStyle: {
         featureType: string;
         elementType: string;
         stylers: Array<{ visibility: string }>;
       }
 
-      interface MapOptions {
+      MapOptions: {
         center: { lat: number; lng: number };
         zoom: number;
         mapTypeControl?: boolean;
@@ -25,49 +25,51 @@ declare global {
         scrollwheel?: boolean;
         draggable?: boolean;
         clickableIcons?: boolean;
-        styles?: MapStyle[];
+        styles?: Google['maps']['MapStyle'][];
       }
 
-      interface MarkerOptions {
+      MarkerOptions: {
         position: { lat: number; lng: number };
-        map: Map;
+        map: Google['maps']['Map'];
         icon?: {
           url: string;
-          scaledSize: Size;
-          anchor: Point;
+          scaledSize: Google['maps']['Size'];
+          anchor: Google['maps']['Point'];
         };
         optimized?: boolean;
       }
 
-      interface MapEventHandler {
-        (e?: MapMouseEvent): void;
-      }
+      MapEventHandler: (e?: Google['maps']['MapMouseEvent']) => void;
 
-      class Map {
-        constructor(element: HTMLElement, options: MapOptions);
-        addListener(event: string, handler: MapEventHandler): void;
-        setCenter(position: { lat: number; lng: number }): void;
-        setZoom(zoom: number): void;
-      }
-      interface MapMouseEvent {
-        latLng: LatLng;
-      }
-      class LatLng {
-        lat(): number;
-        lng(): number;
-      }
-      class Marker {
-        constructor(options: MarkerOptions);
-        addListener(event: string, handler: () => void): void;
-        getPosition(): { lat(): number; lng(): number } | null;
-        setPosition(position: { lat: number; lng: number }): void;
-      }
-      class Size {
-        constructor(width: number, height: number);
-      }
-      class Point {
-        constructor(x: number, y: number);
-      }
+      Map: {
+        new(element: HTMLElement, options: Google['maps']['MapOptions']): {
+          addListener(event: string, handler: Google['maps']['MapEventHandler']): void;
+          setCenter(position: { lat: number; lng: number }): void;
+          setZoom(zoom: number): void;
+        };
+      };
+      MapMouseEvent: {
+        latLng: Google['maps']['LatLng'];
+      };
+      LatLng: {
+        new(lat: number, lng: number): {
+          lat(): number;
+          lng(): number;
+        };
+      };
+      Marker: {
+        new(options: Google['maps']['MarkerOptions']): {
+          addListener(event: string, handler: () => void): void;
+          getPosition(): { lat(): number; lng(): number } | null;
+          setPosition(position: { lat: number; lng: number }): void;
+        };
+      };
+      Size: {
+        new(width: number, height: number): any;
+      };
+      Point: {
+        new(x: number, y: number): any;
+      };
     }
   }
   
@@ -129,7 +131,7 @@ export default function LocationMap({
     
     loader.load()
       .then((google) => {
-        const mapOptions: google.maps.MapOptions = {
+        const mapOptions: Google['maps']['MapOptions'] = {
           center: { lat, lng },
           zoom,
           mapTypeControl: false,
@@ -148,7 +150,7 @@ export default function LocationMap({
           ]
         }
         
-        const map = new google.maps.Map(mapRef.current!, mapOptions)
+        const map = new (google.maps.Map as any)(mapRef.current!, mapOptions)
         
         // Add a marker at the location
         const markerSvg = `
@@ -163,13 +165,13 @@ export default function LocationMap({
         // Convert SVG to URL
         const svgUrl = 'data:image/svg+xml;charset=UTF-8,' + encodeURIComponent(markerSvg)
         
-        new google.maps.Marker({
+        new (google.maps.Marker as any)({
           position: { lat, lng },
           map,
           icon: {
             url: svgUrl,
-            scaledSize: new google.maps.Size(36, 36),
-            anchor: new google.maps.Point(18, 36),
+            scaledSize: new (google.maps.Size as any)(36, 36),
+            anchor: new (google.maps.Point as any)(18, 36),
           },
           optimized: true
         })

@@ -1,20 +1,19 @@
 // src\app\buscar\page.tsx
 'use client'
 
-import React, { Suspense, useState, useEffect, useCallback, useRef } from 'react'
+import React, { useState, useEffect, useCallback, useRef } from 'react'
 import { useSearchParams, usePathname, useRouter } from 'next/navigation'
 import { motion } from 'framer-motion'
 import { 
   Squares2X2Icon, 
   ListBulletIcon, 
-  ChevronDownIcon,
-  FunnelIcon 
+  ChevronDownIcon
 } from '@heroicons/react/24/outline'
 import RealTimeSearchEngine from '@/components/search/RealTimeSearchEngine'
-import EnhancedSearchInput from '@/components/search/EnhancedSearchInput'
-import SearchFilters from '@/components/search/SearchFilters'
-import PublicationCard from '@/components/publications/PublicationCard'
-import CategorySelector from '@/components/search/CategorySelector'
+// import EnhancedSearchInput from '@/components/search/EnhancedSearchInput'
+// import SearchFilters from '@/components/search/SearchFilters'
+// import PublicationCard from '@/components/publications/PublicationCard'
+// import CategorySelector from '@/components/search/CategorySelector'
 import ContentRow from '@/components/search/ContentRow'
 import { parseCategoryUrl, getSubcategories, generateCategoryUrl } from '@/lib/categories'
 import { filtersByCategory } from '@/data/filterConfig'
@@ -409,7 +408,7 @@ function SearchPageContent({ publicationsData, results, setResults, isLoading, s
     { id: 'comunidad', name: 'Comunidad', description: 'Conexiones locales' }
   ]
 
-  const [deepLinkError, setDeepLinkError] = useState<string | null>(null);
+  // const [deepLinkError, setDeepLinkError] = useState<string | null>(null);
 
   // Hook del contexto de publicación
   const {
@@ -789,7 +788,7 @@ function SearchPageContent({ publicationsData, results, setResults, isLoading, s
         const pub = allPublications.find(p => p.title.toLowerCase().replace(/\s+/g, '-') === slug);
         if (pub && (!selectedPublication || selectedPublication.id !== pub.id)) {
           openPublicationDetail(pub);
-          setDeepLinkError(null);
+          // setDeepLinkError(null);
         } else if (!pub) {
           // Try to fetch from API
           try {
@@ -799,16 +798,16 @@ function SearchPageContent({ publicationsData, results, setResults, isLoading, s
               if (data && data.publication) {
                 const pubData = convertToPublicationData(data.publication);
                 openPublicationDetail(pubData);
-                setDeepLinkError(null);
+                // setDeepLinkError(null);
               } else {
-                setDeepLinkError('Publicación no encontrada');
+                // setDeepLinkError('Publicación no encontrada');
               }
             } else {
-              setDeepLinkError('Error al cargar la publicación');
+              // setDeepLinkError('Error al cargar la publicación');
             }
           } catch (error) {
             console.error('Error fetching publication:', error);
-            setDeepLinkError('Error al cargar la publicación');
+            // setDeepLinkError('Error al cargar la publicación');
           }
         }
       }
