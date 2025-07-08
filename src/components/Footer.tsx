@@ -1,3 +1,5 @@
+import Link from 'next/link';
+
 export default function Footer() {
   return (
     <footer className="bg-primary-800 text-white py-12">
@@ -13,26 +15,26 @@ export default function Footer() {
           <div>
             <h4 className="text-lg font-semibold mb-4">Enlaces Rápidos</h4>
             <ul className="space-y-2">
-              <li><a href="/buscar" className="hover:text-primary-200">Buscar Adisos</a></li>
-              <li><a href="/publicar" className="hover:text-primary-200">Publicar Adiso</a></li>
-              <li><a href="/categorias" className="hover:text-primary-200">Categorías</a></li>
+              <li><Link href="/buscar" className="hover:text-primary-200">Buscar Adisos</Link></li>
+              <li><Link href="/publicar" className="hover:text-primary-200">Publicar Adiso</Link></li>
+              <li><Link href="/categorias" className="hover:text-primary-200">Categorías</Link></li>
             </ul>
           </div>
           
           <div>
             <h4 className="text-lg font-semibold mb-4">Soporte</h4>
             <ul className="space-y-2">
-              <li><a href="/ayuda" className="hover:text-primary-200">Centro de Ayuda</a></li>
-              <li><a href="/contacto" className="hover:text-primary-200">Contacto</a></li>
-              <li><a href="/faq" className="hover:text-primary-200">Preguntas Frecuentes</a></li>
+              <li><Link href="/ayuda" className="hover:text-primary-200">Centro de Ayuda</Link></li>
+              <li><Link href="/contacto" className="hover:text-primary-200">Contacto</Link></li>
+              <li><Link href="/faq" className="hover:text-primary-200">Preguntas Frecuentes</Link></li>
             </ul>
           </div>
           
           <div>
             <h4 className="text-lg font-semibold mb-4">Legal</h4>
             <ul className="space-y-2">
-              <li><a href="/terminos" className="hover:text-primary-200">Términos y Condiciones</a></li>
-              <li><a href="/privacidad" className="hover:text-primary-200">Política de Privacidad</a></li>
+              <li><Link href="/terminos" className="hover:text-primary-200">Términos y Condiciones</Link></li>
+              <li><Link href="/privacidad" className="hover:text-primary-200">Política de Privacidad</Link></li>
             </ul>
           </div>
         </div>

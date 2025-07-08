@@ -21,6 +21,7 @@ import {
 import { categoriesList } from '@/data/categories-data'
 import { PublicationsService, Publication } from '@/services/publications.service'
 import Image from 'next/image'
+import Link from 'next/link'
 
 // ============================================================================
 // 1. TYPES & INTERFACES (Centralized & Clear)
@@ -286,7 +287,7 @@ const ResultsScreen: FC<{
                   {ad.value ? ` • S/ ${ad.value}` : ''}
                 </div>
               </div>
-              <a href={`/anuncio/${ad._id}`} target='_blank' rel="noopener noreferrer" className='ml-2 px-3 py-1.5 bg-gradient-to-r from-teal-500 to-cyan-500 text-white rounded-full text-xs'>Ver</a>
+              <Link href={`/anuncio/${ad._id}`} target='_blank' rel="noopener noreferrer" className='ml-2 px-3 py-1.5 bg-gradient-to-r from-teal-500 to-cyan-500 text-white rounded-full text-xs'>Ver</Link>
             </div>
           ))}
         </div>

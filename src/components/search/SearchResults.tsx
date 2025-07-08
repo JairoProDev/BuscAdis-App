@@ -15,6 +15,7 @@ import Image from 'next/image'
 import { generateSeoUrl } from '@/utils/url'
 import { toast } from 'react-hot-toast'
 import { BookmarkOutline } from '@/components/icons/Bookmark'
+import Link from 'next/link'
 
 export interface Publication {
   id: string
@@ -281,7 +282,7 @@ export default function SearchResults({
           hasImages ? 'col-span-1' : 'col-span-1'
         }`}
       >
-        <a
+        <Link
           href={seoUrl}
           className="block w-full h-full"
           onClick={(e) => handlePublicationClick(publication, e)}
@@ -404,7 +405,7 @@ export default function SearchResults({
               })()}
             </div>
           </div>
-        </a>
+        </Link>
       </motion.div>
     );
   };
@@ -485,7 +486,7 @@ export default function SearchResults({
         transition={{ duration: 0.3, delay: index * 0.05 }}
         className="relative w-full list-view-item group" // Added group for group-hover effects
       >
-        <a
+        <Link
           href={seoUrl}
           className="block w-full"
           onClick={(e) => handlePublicationClick(publication, e)}
@@ -644,7 +645,7 @@ export default function SearchResults({
               </div>
             </div>
           </div>
-        </a>
+        </Link>
       </motion.div>
     )
   }
