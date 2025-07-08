@@ -1,8 +1,9 @@
 'use client'
 
+import React from 'react'
 import { useState, useEffect } from 'react'
 import { motion } from 'framer-motion'
-import { PriceInfo, PriceSelectorProps } from '@/types/publish'
+import { PriceSelectorProps } from '@/types/publish'
 import { CurrencyDollarIcon } from '@heroicons/react/24/outline'
 
 const priceTypes = [
@@ -104,54 +105,4 @@ export default function PriceSelector({ value, onChange }: PriceSelectorProps) {
                 ${currency.code === c.code
                   ? 'border-primary-500 bg-primary-50 text-primary-700'
                   : 'border-primary-100 hover:border-primary-300 text-primary-600'
-                }`}
-            >
-              {c.code}
-            </button>
-          ))}
-        </div>
-      </div>
-
-      {/* Price Type Selector */}
-      <div className="grid grid-cols-3 gap-3">
-        {priceTypes.map((type) => (
-          <button
-            key={type.id}
-            type="button"
-            onClick={() => handleTypeChange(type)}
-            className={`px-4 py-3 rounded-xl border-2 transition-all text-center
-              ${priceType.id === type.id
-                ? 'border-primary-500 bg-primary-50 text-primary-700'
-                : 'border-primary-100 hover:border-primary-300 text-primary-600'
-              }`}
-          >
-            {type.name}
-          </button>
-        ))}
-      </div>
-
-      {/* Preview */}
-      {amount && (
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          className="p-4 bg-primary-50 rounded-xl"
-        >
-          <div className="flex items-start gap-3">
-            <div className="w-8 h-8 rounded-lg bg-primary-100 p-1.5">
-              <CurrencyDollarIcon className="w-full h-full text-primary-600" />
-            </div>
-            <div>
-              <h4 className="font-medium text-primary-900">
-                {currency.symbol}{parseFloat(amount).toLocaleString()}
-              </h4>
-              <p className="text-sm text-primary-600">
-                {priceType.name} • {currency.name}
-              </p>
-            </div>
-          </div>
-        </motion.div>
-      )}
-    </div>
-  );
-} 
+                }`

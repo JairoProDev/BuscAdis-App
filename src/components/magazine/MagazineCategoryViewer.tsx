@@ -7,7 +7,7 @@ import { es } from 'date-fns/locale';
 import { 
   Download, RefreshCw, Search, Calendar, MapPin, 
   DollarSign, Info, ChevronLeft, ChevronRight, 
-  Grid3X3, List
+  Grid3X3, List, ClockIcon
 } from 'lucide-react';
 import { Button } from '@/components/ui/Button';
 import { Skeleton } from '@/components/ui/Skeleton';
@@ -495,7 +495,7 @@ function PublicationsList({ publications, onSelect }: PublicationsListProps) {
               
               {pub.createdAt && (
                 <span className="text-gray-500 text-sm flex items-center">
-                  <Clock size={14} className="mr-1" />
+                  <ClockIcon className="h-4 w-4 mr-1" />
                   {format(new Date(pub.createdAt), 'dd/MM/yyyy')}
                 </span>
               )}
@@ -732,7 +732,7 @@ function NoResultsState({ query }: { query: string }) {
       </h3>
       {query && (
         <p className="text-gray-500 max-w-md mx-auto">
-          No hay anuncios que coincidan con "<span className="font-medium">{query}</span>".
+          No hay anuncios que coincidan con &ldquo;{query}&rdquo;.
           Intenta con otra búsqueda.
         </p>
       )}

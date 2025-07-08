@@ -2,8 +2,7 @@
 'use client';
 
 import React, { useState, useCallback, useEffect } from 'react';
-import { PhoneIcon, EnvelopeIcon, UserIcon, GlobeAltIcon } from '@heroicons/react/24/outline';
-import { Logger } from '@/services/logging.service'; // Asumiendo que existe
+import { EnvelopeIcon, UserIcon, GlobeAltIcon } from '@heroicons/react/24/outline';
 import { Publication } from '@/types/publication'; // Importa la interfaz final
 import { PhoneInput } from 'react-international-phone'; // Usa la librería si está disponible
 import 'react-international-phone/style.css'; // Estilos para PhoneInput

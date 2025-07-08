@@ -7,9 +7,7 @@ import {
   MapPinIcon,
   CurrencyDollarIcon,
   CalendarIcon,
-  ClockIcon,
   CogIcon,
-  SparklesIcon,
   ShieldCheckIcon,
   WrenchScrewdriverIcon,
   DocumentTextIcon,
@@ -33,10 +31,10 @@ export default function VehiculoDetail({ publication }: VehiculoDetailProps) {
   }
 
   // Garantizar que attributes siempre exista como objeto
-  const attributes = (publication && (publication as any).attributes) ? (publication as any).attributes : {};
+  const attributes = (publication && (publication as Record<string, unknown>).attributes) ? (publication as Record<string, unknown>).attributes : {};
 
   // Función robusta para extraer y formatear el kilometraje
-  function getKilometraje(raw: any): string {
+  function getKilometraje(raw: unknown): string {
     if (raw === undefined || raw === null) return 'A consultar';
     const num = typeof raw === 'string' ? parseInt(raw.replace(/[^\d]/g, '')) : Number(raw);
     if (isNaN(num) || num <= 0) return 'A consultar';
@@ -75,10 +73,6 @@ export default function VehiculoDetail({ publication }: VehiculoDetailProps) {
     } catch {
       return 'Hace algunos días';
     }
-  };
-
-  const formatKilometraje = (km: number) => {
-    return `${km.toLocaleString()} km`;
   };
 
   const tabs = [

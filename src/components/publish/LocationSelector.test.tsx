@@ -14,13 +14,9 @@ jest.mock('@/services/logging.service', () => ({
 }));
 
 describe('LocationSelector', () => {
-  const mockDispatch = jest.fn();
-  const mockState = {
-    formData: {
-      location: '',
-      latitude: 0,
-      longitude: 0,
-    },
+  const mockStore = {
+    getState: () => ({}),
+    dispatch: jest.fn()
   };
 
   beforeEach(() => {

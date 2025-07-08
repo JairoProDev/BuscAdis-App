@@ -3,6 +3,7 @@
 import React from 'react';
 import MediaUploader from './MediaUploader';
 import { Publication } from '@/types/publication';
+import { usePublication } from '@/contexts/PublicationContext';
 
 interface MediaStepProps {
   images: string[];
@@ -11,6 +12,7 @@ interface MediaStepProps {
 }
 
 const MediaStep: React.FC<MediaStepProps> = ({ images, onImagesChange, formData }) => {
+  const { dispatch } = usePublication();
   return (
     <div className="space-y-6">
       <div>

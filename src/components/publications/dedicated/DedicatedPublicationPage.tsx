@@ -1,25 +1,8 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { motion } from 'framer-motion';
-import Head from 'next/head';
-import Image from 'next/image';
-import Link from 'next/link';
-import { 
-  ArrowLeftIcon,
-  ShareIcon,
-  HeartIcon,
-  MapPinIcon,
-  CalendarIcon,
-  EyeIcon,
-  PhoneIcon,
-  ChatBubbleLeftRightIcon,
-  StarIcon,
-  ShieldCheckIcon,
-  ChevronLeftIcon,
-  ChevronRightIcon
-} from '@heroicons/react/24/outline';
+import { HeartIcon, ShareIcon, EyeIcon, MapPinIcon } from '@heroicons/react/24/outline';
 import { HeartIcon as HeartSolidIcon } from '@heroicons/react/24/solid';
 import { WhatsAppIcon } from '@/components/icons';
 import { PublicationData } from '@/types/publication';
@@ -210,7 +193,7 @@ export default function DedicatedPublicationPage({
           text: publication.description,
           url: window.location.href
         });
-      } catch (err) {
+      } catch {
         console.log('Share cancelled');
       }
     } else {

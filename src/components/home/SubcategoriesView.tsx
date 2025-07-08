@@ -148,8 +148,7 @@ const SubcategoriesView: React.FC<SubcategoriesViewProps> = ({ category, onSearc
 
       setRows(subcategoryRows);
     } catch {
-      console.error('Error cargando subcategorías');
-    } finally {
+      console.error('Error loading subcategories data');
       setIsLoading(false);
     }
   };

@@ -7,8 +7,7 @@ import {
   MapPinIcon, 
   PhoneIcon, 
   TagIcon,
-  CalendarIcon,
-  StarIcon
+  CalendarIcon
 } from '@heroicons/react/24/outline';
 import { PublicationFormData } from '@/types/publication';
 
@@ -40,19 +39,10 @@ const LivePreview: React.FC<LivePreviewProps> = ({ ad, quality, achievements }) 
     images: Array.isArray(ad?.images) ? ad.images : []
   };
 
-  const safeQuality = typeof quality === 'number' ? quality : 0;
-  
   const safeAchievements = {
     completed: Array.isArray(achievements?.completed) ? achievements.completed : [],
     points: achievements?.points || 0,
     badges: Array.isArray(achievements?.badges) ? achievements.badges : []
-  };
-
-  const getQualityColor = (quality: number) => {
-    if (quality >= 80) return 'text-green-600';
-    if (quality >= 60) return 'text-blue-600';
-    if (quality >= 40) return 'text-yellow-600';
-    return 'text-gray-600';
   };
 
   const getCompletionItems = () => {
@@ -71,7 +61,6 @@ const LivePreview: React.FC<LivePreviewProps> = ({ ad, quality, achievements }) 
   const completionItems = getCompletionItems();
   const completedCount = completionItems.filter(item => item.completed).length;
   const totalItems = completionItems.length;
-  const completionPercentage = (completedCount / totalItems) * 100;
 
   return (
     <div className="space-y-4">

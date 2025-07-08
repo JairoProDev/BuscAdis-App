@@ -7,10 +7,7 @@ import {
   MapPinIcon,
   CurrencyDollarIcon,
   CalendarIcon,
-  ClockIcon,
   StarIcon,
-  UserIcon,
-  PhoneIcon,
   CheckBadgeIcon,
   DocumentTextIcon
 } from '@heroicons/react/24/outline';
@@ -32,7 +29,7 @@ export default function ServicioDetail({ publication }: ServicioDetailProps) {
   }
 
   // Garantizar que attributes siempre exista como objeto
-  const attributes = (publication && (publication as any).attributes) ? (publication as any).attributes : {};
+  const attributes = (publication && (publication as Record<string, unknown>).attributes) ? (publication as Record<string, unknown>).attributes : {};
 
   // Datos principales y secundarios con fallbacks robustos
   const servicioData = {

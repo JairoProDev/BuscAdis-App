@@ -163,9 +163,9 @@ export default function PublicationGrid({
       animate={{ opacity: 1 }}
       transition={{ duration: 0.3 }}
     >
-      {publications.map((publication, index) => (
+      {publications.map((publication) => (
         <PublicationCard
-          key={`${viewMode}-${publication.id}`}
+          key={publication.id}
           publication={convertToPublicationData(publication)}
           onPublicationClick={onPublicationClick ? () => onPublicationClick(publication) : undefined}
           viewMode={viewMode}

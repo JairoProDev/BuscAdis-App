@@ -10,13 +10,10 @@ import {
   MapPinIcon,
   ClockIcon,
   EyeIcon,
-  PhoneIcon,
-  ChatBubbleLeftRightIcon,
   ChevronLeftIcon,
   ChevronRightIcon,
   StarIcon,
   ShieldCheckIcon,
-  UserIcon,
   CalendarIcon,
   CurrencyDollarIcon
 } from '@heroicons/react/24/outline';

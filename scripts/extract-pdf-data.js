@@ -234,7 +234,7 @@ class PDFExtractor {
     console.log('   🔍 Extrayendo avisos del texto...');
     
     // Dividir texto en posibles avisos
-    let sections = this.splitTextIntoSections(text);
+    const sections = this.splitTextIntoSections(text);
     
     // Procesar cada sección
     const ads = [];

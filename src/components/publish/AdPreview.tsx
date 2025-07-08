@@ -1,12 +1,9 @@
 'use client'
 
 import React from 'react'
-import Image from 'next/image'
-import { MapPinIcon, PhoneIcon, EnvelopeIcon, TagIcon, CalendarIcon, StarIcon, EyeIcon } from '@heroicons/react/24/outline'
-import formatUtils from '@/utils/format'
-import { getClassificationNames } from '@/data/categories-data'
 import { motion } from 'framer-motion'
-import { PublicationFormData } from '@/types/publication'
+import { formatPrice } from '@/utils/format'
+import { MapPinIcon, PhoneIcon, EnvelopeIcon, TagIcon, CalendarIcon, StarIcon, EyeIcon } from '@heroicons/react/24/outline'
 
 // Definición del tipo de datos para el anuncio
 interface GeoCoordinates {
@@ -53,11 +50,6 @@ const AdPreview: React.FC<AdPreviewProps> = ({ ad, quality }) => {
       </div>
     );
   }
-
-  const formatPrice = (amount: number | null | undefined) => {
-    if (!amount) return 'Precio a consultar';
-    return `S/. ${amount.toLocaleString()}`;
-  };
 
   const getQualityBadge = (quality: number) => {
     if (quality >= 80) return { text: 'Excelente', color: 'bg-green-100 dark:bg-green-900/30 text-green-800 dark:text-green-300' };
@@ -141,7 +133,11 @@ const AdPreview: React.FC<AdPreviewProps> = ({ ad, quality }) => {
 
             <div className="text-right">
               <div className="text-2xl font-bold text-blue-600 dark:text-blue-400 mb-1">
-                {formatPrice(ad.amount)}
+                {formatPrice({ 
+                  amount: ad.amount, 
+                  currency: ad.currency || 'PEN', 
+                  negotiable: ad.negotiable 
+                })}
               </div>
               {ad.negotiable && (
                 <span className="text-sm text-green-600 dark:text-green-400 font-medium">Negociable</span>

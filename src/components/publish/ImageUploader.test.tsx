@@ -23,10 +23,9 @@ jest.mock('@/services/image.service', () => ({
 }));
 
 describe('ImageUploader', () => {
-  const mockDispatch = jest.fn();
-  const mockState = {
-    images: [],
-    imageUrls: [],
+  const mockStore = {
+    getState: () => ({}),
+    dispatch: jest.fn()
   };
 
   beforeEach(() => {

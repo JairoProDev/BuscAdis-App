@@ -7,15 +7,9 @@ import {
   MapPinIcon,
   CurrencyDollarIcon,
   CalendarIcon,
-  BuildingOfficeIcon,
-  SparklesIcon,
-  CameraIcon,
   RectangleGroupIcon,
   UserIcon,
   PhoneIcon,
-  EyeIcon,
-  HeartIcon,
-  ShareIcon
 } from '@heroicons/react/24/outline';
 import { PublicationData } from '@/types/publication';
 import { formatDistanceToNow } from 'date-fns';

@@ -38,7 +38,7 @@ export default function MagazineForm() {
         setStatus('idle')
         setMessage('')
       }, 5000)
-    } catch (error) {
+    } catch {
       setStatus('error')
       setMessage('Hubo un error. Por favor, intenta nuevamente.')
       

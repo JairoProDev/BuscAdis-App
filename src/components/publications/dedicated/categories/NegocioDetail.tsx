@@ -8,7 +8,6 @@ import {
   CurrencyDollarIcon,
   CalendarIcon,
   ChartBarIcon,
-  UserGroupIcon,
   DocumentTextIcon,
   PhoneIcon,
   BanknotesIcon,

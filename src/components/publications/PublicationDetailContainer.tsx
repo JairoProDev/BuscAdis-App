@@ -35,7 +35,7 @@ const UnifiedPublicationDetail = ({
   onFavorite: (publication: PublicationData) => void;
   isMobile: boolean;
 }) => {
-  const [dragY, setDragY] = useState(0);
+  const [dragY] = useState(0);
   const constraintsRef = useRef(null);
 
   if (!publication) return null;
@@ -282,7 +282,7 @@ export default function PublicationDetailContainer({
       <div className={`relative w-full ${className}`}>
         <div className="w-full">
           <div className={getGridClasses()}>
-            {publications.map((publication, index) => (
+            {publications.map((publication) => (
               <PublicationCard
                 key={publication.id}
                 publication={publication}

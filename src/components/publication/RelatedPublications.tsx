@@ -4,9 +4,9 @@ import React from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { formatPrice } from '@/utils/format';
-import { formatDate, timeAgo } from '@/utils/date';
 import { generateSeoUrl } from '@/utils/url';
-import { Skeleton } from '@/components/ui/Skeleton';
+import { motion } from 'framer-motion';
+import { ChevronRightIcon } from '@heroicons/react/24/outline';
 
 interface PublicationData {
   id: string;
@@ -114,7 +114,7 @@ function RelatedPublicationCard({ publication, category }: { publication: Public
             </p>
             
             <p className="text-xs text-gray-500">
-              {timeAgo(created_at)}
+              {/* timeAgo(created_at) */}
             </p>
           </div>
           

@@ -6,7 +6,6 @@ import {
   UserGroupIcon,
   MapPinIcon,
   CalendarIcon,
-  ChatBubbleLeftRightIcon,
   HeartIcon,
   SparklesIcon,
   DocumentTextIcon,

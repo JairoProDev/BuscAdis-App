@@ -1,13 +1,11 @@
 // /components/publications/PublicationCard.tsx
 
+import React from 'react'
 import Image from 'next/image';
-import Link from 'next/link';
 import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { 
   HeartIcon,
-  ShareIcon,
-  ClockIcon,
   EyeIcon,
   MapPinIcon,
   BriefcaseIcon,
@@ -25,7 +23,6 @@ import { useMemo } from 'react';
 import { generateSeoUrl } from '@/utils/url';
 import { getDefaultImageByCategory } from '@/utils/image-helpers';
 
-import { timeAgo } from '@/utils/date';
 import { PublicationData } from '@/types/publication';
 
 interface PublicationCardProps {
@@ -89,19 +86,18 @@ export default function PublicationCard({
 }: PublicationCardProps) {
   const [isFavorite, setIsFavorite] = useState(false);
   const [showCopiedMessage, setShowCopiedMessage] = useState(false);
-  const [isDesktop, setIsDesktop] = useState(false);
 
   // Hook para detectar tamaño de pantalla
   useEffect(() => {
     const checkScreenSize = () => {
-      setIsDesktop(window.innerWidth >= 768);
+      // setIsDesktop(window.innerWidth >= 768); // Removed as per edit hint
     };
     
     checkScreenSize();
     window.addEventListener('resize', checkScreenSize);
     
     return () => window.removeEventListener('resize', checkScreenSize);
-  }, [setIsDesktop]);
+  }, []); // Removed setIsDesktop from dependency array
 
   // Generate SEO-friendly URL
   const seoUrl = useMemo(() => {
@@ -427,7 +423,7 @@ export default function PublicationCard({
                     
                     {/* Fecha */}
                     <div className="flex items-center">
-                      <ClockIcon className="w-3 h-3 mr-1 text-gray-400" />
+                      {/* ClockIcon removed as per edit hint */}
                       <span className="whitespace-nowrap">{formatExactDateTime(publication.createdAt)}</span>
                     </div>
                     

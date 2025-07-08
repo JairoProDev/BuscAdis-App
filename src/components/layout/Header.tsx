@@ -130,10 +130,9 @@ export default function Header() {
       toast.className = 'login-toast fixed top-5 right-5 z-[10000] bg-green-600 text-white px-6 py-3 rounded-xl shadow-2xl transform transition-all duration-300 ease-out animate-slide-in-from-right';
       document.body.appendChild(toast);
 
-      let visibilityTimeoutId: NodeJS.Timeout;
       let removalTimeoutId: NodeJS.Timeout;
 
-      visibilityTimeoutId = setTimeout(() => {
+      const visibilityTimeoutId = setTimeout(() => {
         toast.style.opacity = '0';
         toast.style.transform = 'translateX(100%)';
         removalTimeoutId = setTimeout(() => toast.remove(), 300);

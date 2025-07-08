@@ -5,7 +5,6 @@ import Image from "next/image";
 import { motion } from "framer-motion";
 import { useInView } from "react-intersection-observer";
 import { benefits } from "@/lib/homeMockData";
-import BenefitItem from "./BenefitItem"; // Importa el item individual
 import { SparklesIcon, RocketLaunchIcon, ShieldCheckIcon, ChatBubbleBottomCenterTextIcon, BoltIcon, WrenchScrewdriverIcon } from "@heroicons/react/24/outline";
 
 // Iconos para cada beneficio

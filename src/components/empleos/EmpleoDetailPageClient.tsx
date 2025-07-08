@@ -77,8 +77,9 @@ export default function EmpleoDetailPageClient({ id }: EmpleoDetailPageClientPro
           premium: pub.premium || false,
         };
         setPublication(adapted);
-      } catch (err) {
-        setPublication(null);
+      } catch {
+        console.error('Error fetching empleo:', error);
+        setError('Error al cargar el empleo');
       } finally {
         setLoading(false);
       }

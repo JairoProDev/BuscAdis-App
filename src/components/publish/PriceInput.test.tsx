@@ -14,12 +14,9 @@ jest.mock('@/services/logging.service', () => ({
 }));
 
 describe('PriceInput', () => {
-  const mockDispatch = jest.fn();
-  const mockState = {
-    formData: {
-      price: '',
-      currency: 'EUR',
-    },
+  const mockStore = {
+    getState: () => ({}),
+    dispatch: jest.fn()
   };
 
   beforeEach(() => {

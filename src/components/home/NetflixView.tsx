@@ -5,7 +5,6 @@ import { ChevronLeft, ChevronRight } from 'lucide-react';
 import { NetflixRow, AdRowItem } from '../../services/netflix-view.service';
 import PublicationCard from '../publications/PublicationCard';
 import { Publication } from '@/types/publication';
-import Image from 'next/image';
 
 interface NetflixViewProps {
   rows: NetflixRow[];

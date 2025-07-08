@@ -2,7 +2,6 @@
 
 import { useState, useRef, useEffect } from 'react';
 import { motion, useInView } from 'framer-motion';
-import Container from '@/components/shared/Container';
 import { ArrowRightIcon, ArrowPathIcon, BookmarkIcon, MapIcon, BellIcon, UserIcon } from '@heroicons/react/24/outline';
 // import { Orb } from '@/components/ui/animations/Orb'; // Component not found, commented out
 

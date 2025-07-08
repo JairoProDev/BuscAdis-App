@@ -1,6 +1,5 @@
 import React from 'react';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
-import { act } from 'react-dom/test-utils';
 import CategorySelector from './CategorySelector';
 import { PublicationProvider } from '../../contexts/PublicationContext';
 import { categoryService } from '../../services/api';

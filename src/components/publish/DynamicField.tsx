@@ -41,7 +41,6 @@ export default function DynamicField({
   options,
   validation
 }: DynamicFieldProps) {
-  const [isFocused, setIsFocused] = useState(false);
   const [isDirty, setIsDirty] = useState(false);
   const [localError, setLocalError] = useState<string>('');
   const [isValid, setIsValid] = useState(false);
@@ -121,14 +120,12 @@ export default function DynamicField({
   };
 
   const handleBlur = () => {
-    setIsFocused(false);
     setIsDirty(true);
     validateField();
     onBlur?.();
   };
 
   const handleFocus = () => {
-    setIsFocused(true);
     Logger.debug(`Campo ${name} enfocado`);
   };
 
