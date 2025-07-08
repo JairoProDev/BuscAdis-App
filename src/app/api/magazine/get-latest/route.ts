@@ -15,9 +15,9 @@ export async function GET() {
     
     // Transform to the expected interface
     const formattedMagazines = magazines.map(magazine => ({
-      _id: magazine._id.toString(),
+      _id: magazine._id?.toString() || '',
       pdfUrl: magazine.pdfUrl,
-      fileId: magazine.fileId.toString(),
+      fileId: magazine.fileId?.toString() || '',
       publicationCount: magazine.publicationCount,
       createdAt: magazine.createdAt,
       filename: magazine.filename

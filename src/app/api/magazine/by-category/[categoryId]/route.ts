@@ -48,7 +48,7 @@ export async function GET(
     
     // Procesar las publicaciones para enviar al cliente
     const processedPublications = recentPublications.map(pub => ({
-      id: pub._id.toString(),
+      id: pub._id?.toString() || '',
       title: pub.title,
       description: pub.description,
       price: pub.amount,
@@ -66,10 +66,10 @@ export async function GET(
       const magazine = latestMagazine[0];
       return NextResponse.json({ 
         magazine: {
-          _id: magazine._id.toString(),
+          _id: magazine._id?.toString() || '',
           categoryId: magazine.categoryId,
           pdfUrl: magazine.pdfUrl,
-          fileId: magazine.fileId.toString(),
+          fileId: magazine.fileId?.toString() || '',
           publicationCount: magazine.publicationCount,
           createdAt: magazine.createdAt,
           lastUpdated: magazine.lastUpdated || magazine.createdAt,

@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server'
-import { mongoDbQuery } from '@/lib/mongodb-server'
+import { getMongoClient } from '@/lib/mongodb-server'
 
 export const dynamic = 'force-dynamic' // Disable caching to ensure data is always fresh
 export const runtime = 'nodejs' // Mark as server-side only
@@ -21,11 +21,15 @@ export async function GET() {
     // Get counts for each category
     const countPromises = categoryCollections.map(async (collection) => {
       try {
-        // Use MongoDB's countDocuments() via a raw query
-        const result = await mongoDbQuery(collection, {}, { count: true });
+        // Use MongoDB's countDocuments() directly
+        const client = await getMongoClient();
+        const db = client.db(process.env.MONGODB_DB || 'buscadis');
+        const mongoCollection = db.collection(collection);
+        const count = await mongoCollection.countDocuments({});
+        
         return {
           id: collection.replace('publications_', ''),
-          count: typeof result === 'number' ? result : (Array.isArray(result) ? result.length : 0)
+          count: count
         }
       } catch (err) {
         console.error(`Error counting for collection ${collection}:`, err)
