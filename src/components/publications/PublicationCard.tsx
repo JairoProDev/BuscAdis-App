@@ -24,7 +24,7 @@ import { WhatsAppIcon } from '@/components/icons';
 import { useMemo } from 'react';
 import { generateSeoUrl } from '@/utils/url';
 import { getDefaultImageByCategory } from '@/utils/image-helpers';
-import { Clock, MapPin, Phone } from 'lucide-react';
+
 import { timeAgo } from '@/utils/date';
 import { PublicationData } from '@/types/publication';
 
@@ -101,7 +101,7 @@ export default function PublicationCard({
     window.addEventListener('resize', checkScreenSize);
     
     return () => window.removeEventListener('resize', checkScreenSize);
-  }, []);
+  }, [setIsDesktop]);
 
   // Generate SEO-friendly URL
   const seoUrl = useMemo(() => {

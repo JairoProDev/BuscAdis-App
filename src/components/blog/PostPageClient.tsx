@@ -3,16 +3,15 @@
 import { useState, useEffect } from 'react'
 import Image from 'next/image'
 import Link from 'next/link'
-import { motion, AnimatePresence } from 'framer-motion'
+import { motion } from 'framer-motion'
 import { Post } from '@/types/blog'
-import { formatDate, timeAgo } from '@/utils/dates'
+import { formatDate } from '@/utils/dates'
 import PostCard from '@/components/blog/PostCard'
 import MagazineForm from '@/components/blog/MagazineForm'
 import { 
   ClockIcon, 
   EyeIcon, 
   HeartIcon, 
-  ChatBubbleLeftIcon, 
   ShareIcon,
   BookmarkIcon,
   ArrowLeftIcon,

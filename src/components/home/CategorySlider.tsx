@@ -17,8 +17,6 @@ const iconMap: Record<string, React.ComponentType<any>> = {
 };
 
 export default function CategorySlider() {
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState('');
 
   // Datos estáticos para pruebas
   const categories = {
@@ -33,13 +31,7 @@ export default function CategorySlider() {
     }
   };
 
-  if (loading) {
-    return <LoadingSpinner />;
-  }
 
-  if (error) {
-    return <div className="text-red-500">{error}</div>;
-  }
 
   return (
     <div className="py-8">

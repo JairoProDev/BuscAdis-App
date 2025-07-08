@@ -9,7 +9,6 @@ import {
   ClockIcon, 
   EyeIcon, 
   HeartIcon, 
-  ChatBubbleLeftIcon, 
   ShareIcon, 
   BookmarkIcon 
 } from '@heroicons/react/24/outline'

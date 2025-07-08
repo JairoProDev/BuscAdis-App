@@ -11,7 +11,7 @@ const PublicationsList = () => {
       try {
         const data = await PublicationsService.getPublications();
         setPublications(data.publications);
-      } catch (err) {
+      } catch {
         setError('Error al cargar los anuncios');
       } finally {
         setLoading(false);

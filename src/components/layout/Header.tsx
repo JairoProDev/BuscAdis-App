@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { useState, useEffect, useRef, useCallback } from 'react';
-import { usePathname, useRouter } from 'next/navigation'; // Importar useRouter
+import { useRouter } from 'next/navigation'; // Importar useRouter
 import {
   UserCircleIcon,
   ArrowLeftOnRectangleIcon, // Para Logout
@@ -228,8 +228,8 @@ export default function Header() {
   const menuItemClasses = "flex w-full items-center gap-3 px-3.5 py-2.5 text-sm text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-700/80 rounded-md transition-colors duration-150 focus:outline-none focus-visible:bg-slate-100 dark:focus-visible:bg-slate-700/80 focus-visible:ring-1 focus-visible:ring-teal-500";
   const menuItemIconClasses = "w-5 h-5 flex-shrink-0 text-slate-500 dark:text-slate-400"; // flex-shrink-0 para evitar que el icono se encoja
 
-  const handleLocationSelect = (location: LocationData) => {
-    setSelectedLocation(location);
+  const handleLocationSelect = (selection: unknown) => {
+    setSelectedLocation(selection as LocationData);
     setShowLocationSelector(false);
   };
 
@@ -401,7 +401,7 @@ export default function Header() {
         <LocationSelector
           onClose={() => setShowLocationSelector(false)}
           onLocationSelect={handleLocationSelect}
-          initialSelection={selectedLocation}
+          initialSelection={selectedLocation as any}
         />
       )}
     </header>

@@ -6,7 +6,6 @@ import Image from 'next/image';
 import { PublicationsService } from '@/services/publications.service';
 import { formatDate } from '@/utils/date';
 import { formatPrice } from '@/utils/format';
-import { Carousel } from '@/components/ui/Carousel';
 import { WhatsAppIcon } from '@/components/icons';
 import LoadingSpinner from '@/components/ui/LoadingSpinner';
 import { 
@@ -15,12 +14,8 @@ import {
   ArrowLeftIcon,
   MapPinIcon,
   CalendarIcon,
-  EyeIcon,
-  BriefcaseIcon,
-  BuildingOfficeIcon,
-  AcademicCapIcon
+  EyeIcon
 } from '@heroicons/react/24/outline';
-import { slugify } from '@/utils/url';
 import RelatedPublications from '@/components/publication/RelatedPublications';
 import { PublicationData } from '@/types/publication';
 
@@ -154,7 +149,7 @@ export default function EmpleoDetailPageClient({ id }: EmpleoDetailPageClientPro
   }
 
   const { 
-    title, description, categorySlug, subcategorySlug, subSubcategorySlug, transactionType, value, currency, valueType, size, location, images, whatsapp, createdAt, views, featured, premium
+    title, description, categorySlug, value, currency, valueType, location, images, whatsapp, createdAt, views
   } = publication;
   const formattedDate = formatDate(createdAt);
   // Adaptar formato de precio para salarios

@@ -46,7 +46,7 @@ interface SearchResult {
 }
 
 interface RealTimeSearchEngineProps {
-  onSearch?: (query: string, filters?: Record<string, any>) => void;
+  onSearch?: (query: string, filters?: Record<string, unknown>) => void;
   onResultSelect?: (result: SearchResult) => void;
   placeholder?: string;
   showFilters?: boolean;
@@ -263,7 +263,7 @@ export default function RealTimeSearchEngine({
 
     document.addEventListener('mousedown', handleClickOutside)
     return () => document.removeEventListener('mousedown', handleClickOutside)
-  }, [])
+  }, [setShowSuggestions, setIsInputFocused])
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value

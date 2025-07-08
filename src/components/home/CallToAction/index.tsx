@@ -158,7 +158,7 @@ export default function CallToAction() {
                 { label: 'Transacciones', value: '24,500+', icon: <SparklesIcon className="h-5 w-5 text-cyan-300" /> },
                 { label: 'Satisfacción', value: '98%', icon: <SparklesIcon className="h-5 w-5 text-teal-300" /> },
                 { label: 'Tiempo promedio', value: '2 días', icon: <ArrowTrendingUpIcon className="h-5 w-5 text-cyan-300" /> },
-              ].map((stat, index) => (
+              ].map((stat) => (
                 <motion.div
                   key={stat.label}
                   className="relative group"

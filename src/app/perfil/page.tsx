@@ -11,7 +11,6 @@ import Image from 'next/image';
 
 // Íconos de Heroicons
 import {
-  // UserCircleIcon as UserAvatarIcon, // Renombrado para claridad
   PencilSquareIcon, // Para botón de editar
   CheckCircleIcon, // Para éxito
   ExclamationTriangleIcon, // Para errores o advertencias

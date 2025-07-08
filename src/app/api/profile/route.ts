@@ -36,7 +36,7 @@ export async function POST(request: Request) {
         badges: data.badges ?? existingProfile.badges,
         points: data.points ?? existingProfile.points,
         progress: data.progress ?? existingProfile.progress,
-        updatedAt: new Date().toISOString()
+        updatedAt: new Date()
       };
       await mongoDbUpdate('profiles', data.userId, updateData);
       return NextResponse.json({ ...existingProfile, ...updateData });
@@ -57,8 +57,8 @@ export async function POST(request: Request) {
         badges: data.badges || [],
         points: data.points || 0,
         progress: data.progress || 0,
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString()
+        createdAt: new Date(),
+        updatedAt: new Date()
       };
       await mongoDbInsert('profiles', newProfile);
       return NextResponse.json(newProfile);

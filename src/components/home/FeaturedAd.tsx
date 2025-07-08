@@ -11,15 +11,11 @@ import { SparklesIcon, MapPinIcon, ClockIcon } from '@heroicons/react/24/outline
 
 const FeaturedAd = () => {
     const [currentIndex, setCurrentIndex] = useState(0);
-    // Establecemos la dirección siempre a 'right'
-    const [direction, setDirection] = useState<'left' | 'right'>('right');
 
     useEffect(() => {
         const interval = setInterval(() => {
             setCurrentIndex((prevIndex) => {
                 const nextIndex = (prevIndex + 1) % featuredAds.length;
-                // Mantenemos la dirección siempre a 'right'
-                setDirection('right');
                 return nextIndex;
             });
         }, 5000);

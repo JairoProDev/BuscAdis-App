@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useEffect, useRef } from 'react';
-import { ChevronLeft, ChevronRight, Eye, MapPin, Star, Clock } from 'lucide-react';
+import { ChevronLeft, ChevronRight } from 'lucide-react';
 import { NetflixRow, AdRowItem } from '../../services/netflix-view.service';
 import PublicationCard from '../publications/PublicationCard';
 import { Publication } from '@/types/publication';
@@ -55,7 +55,7 @@ const AdRow: React.FC<AdRowProps> = ({ row, onAdClick, onSeeAll }) => {
 
   useEffect(() => {
     checkScrollButtons();
-  }, [row.data]);
+  }, [row.data, checkScrollButtons]);
 
   const scroll = (direction: 'left' | 'right') => {
     const container = scrollContainerRef.current;
