@@ -20,6 +20,7 @@ import {
   KeyIcon
 } from '@heroicons/react/24/outline';
 import RelatedPublications from '@/components/publication/RelatedPublications';
+import DedicatedPublicationPage from '@/components/publications/dedicated/DedicatedPublicationPage';
 
 // Renombrar la interfaz Publication para evitar conflictos
 interface PublicationData {
