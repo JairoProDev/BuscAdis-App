@@ -9,6 +9,7 @@ interface PublicationProgressProps {
   currentStep: number;
   totalSteps: number;
   onStepClick?: (step: number) => void;
+  completedFields?: { [key: string]: boolean }; // Nuevo prop opcional
 }
 
 const PublicationProgress: React.FC<PublicationProgressProps> = ({ 
@@ -16,7 +17,8 @@ const PublicationProgress: React.FC<PublicationProgressProps> = ({
   stepNames, 
   currentStep, 
   totalSteps,
-  onStepClick 
+  onStepClick,
+  completedFields
 }) => {
   return (
     <div className="mb-8">
@@ -39,7 +41,9 @@ const PublicationProgress: React.FC<PublicationProgressProps> = ({
       <div className="hidden md:flex justify-between">
         {stepNames.map((step, index) => {
           const stepNumber = index + 1;
-          const isCompleted = stepNumber < currentStep;
+          const isCompleted = completedFields
+            ? Object.values(completedFields)[index]
+            : stepNumber < currentStep;
           const isCurrent = stepNumber === currentStep;
           
           return (

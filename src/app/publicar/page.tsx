@@ -198,6 +198,16 @@ export default function PublicarPage() {
     return Math.min(100, quality);
   }, [ad]);
 
+  // Calcula los campos completados para el progreso visual
+  const completedFields = useMemo(() => {
+    const category = !!ad.categorySlug && !!ad.subcategorySlug;
+    const details = !!ad.title && ad.title.length >= 10 && !!ad.description && ad.description.length >= 30;
+    const images = Array.isArray(ad.images) && ad.images.length >= 2;
+    const contact = !!ad.contact?.phones?.[0];
+    const publish = category && details && images && contact;
+    return { category, details, images, contact, publish };
+  }, [ad]);
+
   // Definir tipos para los datos que pasan a los componentes
   type ClassificationData = {
     categorySlug: string;
@@ -272,9 +282,9 @@ export default function PublicarPage() {
   }, [step]);
 
   // Actualizar anuncio y logros
-  const updateAd = useCallback((newAdData: Partial<PublicationFormData>) => {
+  const updateAd = useCallback((newAdData: Partial<PublicationFormData> | ((prev: PublicationFormData) => PublicationFormData)) => {
     setAd(prevAd => {
-      const updatedAd = {...prevAd, ...newAdData};
+      const updatedAd = typeof newAdData === 'function' ? newAdData(prevAd) : { ...prevAd, ...newAdData };
       updateAchievements(updatedAd);
       return updatedAd;
     });
@@ -283,15 +293,16 @@ export default function PublicarPage() {
   // Handlers de cambios
   const handleSimpleInputChange = useCallback((e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
-    updateAd({ [name]: value });
+    updateAd((prev: PublicationFormData) => ({ ...prev, [name]: value }));
   }, [updateAd]);
 
   const handleClassificationChange = useCallback((slugs: ClassificationData) => {
-    updateAd({
+    updateAd((prev: PublicationFormData) => ({
+      ...prev,
       categorySlug: slugs.categorySlug,
       subcategorySlug: slugs.subcategorySlug,
       subSubcategorySlug: slugs.subSubcategorySlug || '',
-    });
+    }));
     
     // Si se ha completado la selección completa (categoría, subcategoría y subSubcategoría), avanzar automáticamente
     if (slugs.categorySlug && slugs.subcategorySlug && slugs.subSubcategorySlug) {
@@ -324,17 +335,18 @@ export default function PublicarPage() {
     Logger.info('Categoría seleccionada', slugs);
   }, [updateAd, validateStep, setStep, step]);
 
-  const handlePriceChange = useCallback((priceData: unknown) => {
-    updateAd({
+  const handlePriceChange = useCallback((priceData: any) => {
+    updateAd((prev: PublicationFormData) => ({
+      ...prev,
       amount: priceData.amount,
       currency: priceData.currency as 'PEN' | 'USD' || 'PEN',
       negotiable: priceData.negotiable || false,
-    });
+    }));
   }, [updateAd]);
 
-  const handleLocationChange = useCallback((locationData: unknown) => {
-    // Asegurarse de que los datos de ubicación tienen la estructura correcta
-    updateAd({
+  const handleLocationChange = useCallback((locationData: any) => {
+    updateAd((prev: PublicationFormData) => ({
+      ...prev,
       location: {
         province: locationData.province || 'Cusco',
         district: locationData.district || '',
@@ -345,24 +357,26 @@ export default function PublicarPage() {
           lng: locationData.coordinates.lng
         } : undefined,
       }
-    });
+    }));
   }, [updateAd]);
 
-  const handleContactChange = useCallback((contactData: unknown) => {
-    updateAd({
+  const handleContactChange = useCallback((contactData: any) => {
+    updateAd((prev: PublicationFormData) => ({
+      ...prev,
       contact: {
         phones: contactData.phones || [],
         email: contactData.email || '',
         name: contactData.name || '',
         website: contactData.website || '',
       }
-    });
+    }));
   }, [updateAd]);
 
   const handleImagesChange = useCallback((imageUrls: string[]) => {
-    updateAd({
+    updateAd((prev: PublicationFormData) => ({
+      ...prev,
       images: imageUrls
-    });
+    }));
   }, [updateAd]);
 
   // Submit final
@@ -574,7 +588,16 @@ export default function PublicarPage() {
             currentStep={step}
             totalSteps={Object.keys(STEPS).length}
             onStepClick={(targetStep) => setStep(targetStep as StepValue)}
+            completedFields={completedFields}
           />
+          {/* Barra de progreso visual extra */}
+          <div className="relative w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2.5 mt-2">
+            <div
+              className={`h-2.5 rounded-full transition-all duration-500 ${progress === 100 ? 'bg-green-500' : 'bg-gradient-to-r from-primary-400 to-primary-600 dark:from-primary-500 dark:to-primary-700'}`}
+              style={{ width: `${progress}%` }}
+            />
+            <span className="absolute right-2 top-[-18px] text-xs font-semibold text-gray-700 dark:text-gray-300">{Math.round(progress)}%</span>
+          </div>
         </div>
 
         <div className="flex flex-col lg:flex-row gap-6">
@@ -669,7 +692,7 @@ export default function PublicarPage() {
                   </span>
                   <span className="text-xs text-gray-500 dark:text-gray-400">Actualización automática</span>
                 </h3>
-                <LivePreview ad={ad} quality={adQuality} achievements={achievements} />
+                <LivePreview formData={ad} />
               </div>
               
               <div className="bg-white dark:bg-gray-800 shadow-lg rounded-xl p-5 border border-gray-200 dark:border-gray-700">

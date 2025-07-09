@@ -56,6 +56,9 @@ const LivePreview: React.FC<LivePreviewProps> = ({ formData }) => {
   const completedCount = completionItems.filter(item => item.completed).length;
   const totalItems = completionItems.length;
 
+  // Mostrar nombre de categoría si está disponible
+  const categoryName = formData?.categoryName || safeAd.categorySlug;
+
   return (
     <div className="space-y-4">
       {/* Header de preview */}
@@ -111,10 +114,10 @@ const LivePreview: React.FC<LivePreviewProps> = ({ formData }) => {
 
           {/* Metadatos */}
           <div className="flex flex-wrap gap-2 text-xs text-gray-500 dark:text-gray-400">
-            {safeAd.categorySlug && (
+            {categoryName && (
               <span className="flex items-center bg-gray-200 dark:bg-gray-600 px-2 py-1 rounded">
                 <TagIcon className="w-3 h-3 mr-1" />
-                {safeAd.categorySlug}
+                {categoryName}
               </span>
             )}
             
@@ -130,6 +133,15 @@ const LivePreview: React.FC<LivePreviewProps> = ({ formData }) => {
               Hoy
             </span>
           </div>
+
+          {/* Imágenes */}
+          {safeAd.images && safeAd.images.length > 0 && (
+            <div className="mt-3 grid grid-cols-3 gap-2">
+              {safeAd.images.slice(0, 3).map((img: string, idx: number) => (
+                <img key={idx} src={img} alt={`Imagen ${idx + 1}`} className="rounded object-cover h-16 w-full" />
+              ))}
+            </div>
+          )}
 
           {/* Contacto */}
           {safeAd.contact?.phones?.[0] && (
