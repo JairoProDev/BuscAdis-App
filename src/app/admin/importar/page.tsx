@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { parsePublicationsFromText, preparePublicationForAPI } from '@/utils/publicationParser';
 import { PublicationsService } from '@/services/publications.service';
+import LoadingSpinner from '@/components/ui/LoadingSpinner';
 
 interface Publication {
   title: string;

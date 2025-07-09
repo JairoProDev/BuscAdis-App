@@ -1,43 +1,29 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
-import { PublicationsService } from '@/services/publications.service';
-import LoadingSpinner from '@/components/ui/LoadingSpinner';
-import { generateSeoUrl } from '@/utils/url';
-import DedicatedPublicationPage from '@/components/publications/dedicated/DedicatedPublicationPage';
-import { PublicationData } from '@/types/publication';
 import Head from 'next/head';
+import LoadingSpinner from '@/components/ui/LoadingSpinner';
+import DedicatedPublicationPage from '@/components/publications/dedicated/DedicatedPublicationPage';
+import PublicationSEO from '@/components/seo/PublicationSEO';
+import ErrorSEO from '@/components/seo/ErrorSEO';
+import { PublicationData } from '@/types/publication';
 
-/**
- * Página de detalle de publicación con título en la URL (Optimizada para SEO)
- * Esta es la página principal que se indexa en Google y se comparte en redes sociales
- */
 export default function PublicationDetailWithTitlePage() {
   const params = useParams();
   const router = useRouter();
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState('');
   const [publicationData, setPublicationData] = useState<PublicationData | null>(null);
   const [relatedPublications, setRelatedPublications] = useState<PublicationData[]>([]);
-  
-  // Extraer parámetros de la URL
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [canonicalUrl, setCanonicalUrl] = useState<string>('');
+
+  // Extract parameters from the URL
   const categorySlugParam = params?.category as string;
   const subcategorySlugParam = params?.subcategory as string;
   const subsubcategorySlugParam = params?.subsubcategory as string;
   const id = params?.id as string;
   const titleSlugParam = params?.title as string;
-
-  // Generate canonical URL for SEO
-  const canonicalUrl = publicationData ? generateSeoUrl(
-    publicationData.id,
-    publicationData.title,
-    undefined,
-    publicationData.categorySlug,
-    publicationData.subcategorySlug || undefined,
-    publicationData.subSubcategorySlug || undefined,
-    true
-  ) : '';
 
   useEffect(() => {
     const fetchAndValidatePublication = async () => {
@@ -46,60 +32,26 @@ export default function PublicationDetailWithTitlePage() {
         setLoading(false);
         return;
       }
-      
+
       try {
         setLoading(true);
         setError('');
-        
+
         // Fetch publication data
-        const publication = await PublicationsService.getPublicationById(id);
-        
-        if (!publication) {
+        const res = await fetch(`/api/publications/${id}`);
+        const data = await res.json();
+
+        if (!data.publication) {
           throw new Error('Publicación no encontrada');
         }
 
-        // Convert to PublicationData format
-        const publicationData: PublicationData = {
-          id: publication._id || id,
-          title: publication.title || 'Sin título',
-          description: publication.description || '',
-          categorySlug: publication.categorySlug || categorySlugParam,
-          subcategorySlug: publication.subcategorySlug || subcategorySlugParam || null,
-          subSubcategorySlug: publication.subSubcategorySlug || subsubcategorySlugParam || null,
-          transactionType: publication.transactionType || 'venta',
-          value: publication.value || 0,
-          currency: publication.currency || 'PEN',
-          valueType: 'fixed',
-          size: 0,
-          location: publication.location ? {
-            district: publication.location.district || '',
-            province: publication.location.province || '',
-            city: publication.location.city || '',
-            country: publication.location.country || 'Perú',
-          } : {
-            district: '',
-            province: '',
-            city: 'Lima',
-            country: 'Perú'
-          },
-          images: publication.images || [],
-          whatsapp: publication.contact?.phones?.[0] || '51987654321',
-          createdAt: publication.createdAt || new Date().toISOString(),
-          views: publication.views || 0,
-        };
-        
-        // Validar que la URL actual coincida con la URL canónica
-        const correctUrl = generateSeoUrl(
-          publicationData.id,
-          publicationData.title,
-          undefined,
-          publicationData.categorySlug,
-          publicationData.subcategorySlug || undefined,
-          publicationData.subSubcategorySlug || undefined,
-          true // Incluir el título
-        );
+        const publicationData = data.publication;
 
-        // Current path from params
+        // Generate canonical URL for SEO
+        const correctUrl = `/${publicationData.categorySlug}/${publicationData.subcategorySlug || 'general'}/${publicationData.subSubcategorySlug || 'general'}/${publicationData.id}/${encodeURIComponent(publicationData.title.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-+|-+$/g, ''))}`;
+        setCanonicalUrl(correctUrl);
+
+        // URL validation and redirect for SEO
         let currentPath = `/${categorySlugParam}`;
         if (subcategorySlugParam && subcategorySlugParam !== 'general') currentPath += `/${subcategorySlugParam}`;
         if (subsubcategorySlugParam && subsubcategorySlugParam !== 'general') currentPath += `/${subsubcategorySlugParam}`;
@@ -110,14 +62,14 @@ export default function PublicationDetailWithTitlePage() {
 
         if (normalizedCurrentPath !== normalizedCorrectUrl) {
           console.log(`Redirecting from ${normalizedCurrentPath} to correct SEO URL: ${correctUrl}`);
-          router.replace(correctUrl); // Redirect to the canonical URL
+          router.replace(correctUrl);
           return;
         }
 
         // Set publication data
         setPublicationData(publicationData);
 
-        // Fetch related publications
+        // Fetch related publications for better SEO and UX
         try {
           const response = await fetch(`/api/publications/related?category=${publicationData.categorySlug}&id=${id}&limit=4`);
           if (response.ok) {
@@ -194,21 +146,30 @@ export default function PublicationDetailWithTitlePage() {
     console.log('Favorite toggled');
   };
 
+
+
   if (loading) {
     return (
-      <div className="flex items-center justify-center min-h-screen">
-        <LoadingSpinner size="lg" />
-      </div>
+      <>
+        <Head>
+          <title>Cargando... | BuscAdis</title>
+          <meta name="robots" content="noindex" />
+        </Head>
+        <div className="flex items-center justify-center min-h-screen">
+          <LoadingSpinner size="lg" />
+        </div>
+      </>
     );
   }
   
   if (error || !publicationData) {
     return (
       <>
-        <Head>
-          <title>Publicación no encontrada | BuscAdis</title>
-          <meta name="robots" content="noindex" />
-        </Head>
+        <ErrorSEO 
+          title="Publicación no encontrada"
+          description="La publicación que buscas no existe o ha sido eliminada."
+          errorCode="404"
+        />
         <div className="container mx-auto py-16 px-4 min-h-screen">
           <div className="bg-red-50 border border-red-100 rounded-xl p-8 text-center max-w-md mx-auto">
             <h1 className="text-2xl font-bold text-red-700 mb-4">Publicación no encontrada</h1>
@@ -235,60 +196,14 @@ export default function PublicationDetailWithTitlePage() {
 
   return (
     <>
-      {/* SEO Meta Tags */}
-      <Head>
-        <title>{publicationData.title} | BuscAdis</title>
-        <meta name="description" content={publicationData.description} />
-        <meta name="keywords" content={`${publicationData.categorySlug}, ${publicationData.title}, ${publicationData.location?.city || 'Perú'}, BuscAdis`} />
-        
-        {/* Open Graph */}
-        <meta property="og:title" content={publicationData.title} />
-        <meta property="og:description" content={publicationData.description} />
-        <meta property="og:image" content={publicationData.images?.[0] || '/images/buscadis-og-image.jpg'} />
-        <meta property="og:url" content={typeof window !== 'undefined' ? window.location.href : ''} />
-        <meta property="og:type" content="website" />
-        <meta property="og:site_name" content="BuscAdis" />
-        
-        {/* Twitter */}
-        <meta name="twitter:card" content="summary_large_image" />
-        <meta name="twitter:title" content={publicationData.title} />
-        <meta name="twitter:description" content={publicationData.description} />
-        <meta name="twitter:image" content={publicationData.images?.[0] || '/images/buscadis-og-image.jpg'} />
-        
-        {/* Canonical URL */}
-        <link rel="canonical" href={typeof window !== 'undefined' ? canonicalUrl : ''} />
-        
-        {/* Structured Data */}
-        <script
-          type="application/ld+json"
-          dangerouslySetInnerHTML={{
-            __html: JSON.stringify({
-              "@context": "https://schema.org",
-              "@type": publicationData.categorySlug === 'empleos' ? 'JobPosting' : 'Product',
-              "name": publicationData.title,
-              "description": publicationData.description,
-              "image": publicationData.images?.[0],
-              "url": typeof window !== 'undefined' ? window.location.href : '',
-              "datePosted": publicationData.createdAt,
-              "offers": {
-                "@type": "Offer",
-                "price": publicationData.value,
-                "priceCurrency": publicationData.currency
-              },
-              ...(publicationData.categorySlug === 'empleos' && {
-                "hiringOrganization": {
-                  "@type": "Organization",
-                  "name": "BuscAdis"
-                },
-                "jobLocation": {
-                  "@type": "Place",
-                  "address": `${publicationData.location?.district || ''}, ${publicationData.location?.province || ''}, ${publicationData.location?.city || 'Perú'}`
-                }
-              })
-            })
-          }}
+      {/* Advanced SEO Component */}
+      {publicationData && (
+        <PublicationSEO 
+          publication={publicationData}
+          canonicalUrl={canonicalUrl}
+          relatedPublications={relatedPublications}
         />
-      </Head>
+      )}
 
       <DedicatedPublicationPage
         publication={publicationData}

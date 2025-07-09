@@ -325,9 +325,13 @@ export interface PublicationData {
   images: string[];
   whatsapp: string;
   createdAt: string;
+  updatedAt?: string;
   views: number;
   featured?: boolean;
   premium?: boolean;
+  attributes?: {
+    [key: string]: any;
+  };
 }
 
 /**
