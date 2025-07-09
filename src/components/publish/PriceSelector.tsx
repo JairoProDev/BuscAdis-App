@@ -105,4 +105,31 @@ export default function PriceSelector({ value, onChange }: PriceSelectorProps) {
                 ${currency.code === c.code
                   ? 'border-primary-500 bg-primary-50 text-primary-700'
                   : 'border-primary-100 hover:border-primary-300 text-primary-600'
-                }`
+                }`}
+            >
+              {c.code}
+            </button>
+          ))}
+        </div>
+      </div>
+
+      {/* Price Type Selector */}
+      <div className="grid grid-cols-3 gap-2">
+        {priceTypes.map((type) => (
+          <button
+            key={type.id}
+            type="button"
+            onClick={() => handleTypeChange(type)}
+            className={`px-4 py-3 rounded-xl border-2 transition-all text-center
+              ${priceType.id === type.id
+                ? 'border-primary-500 bg-primary-50 text-primary-700'
+                : 'border-primary-100 hover:border-primary-300 text-primary-600'
+              }`}
+          >
+            {type.name}
+          </button>
+        ))}
+      </div>
+    </div>
+  );
+}

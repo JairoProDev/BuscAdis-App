@@ -290,42 +290,54 @@ function InmuebleDetailPageContent({ publication: initialPublication }: { public
 }
 
 // Main page component for Next.js 15 with async params
-export default function InmuebleDetailPage({ params }: { params: unknown }) {
-  const [id, setId] = useState<string | null>(null);
-  const [publication, setPublication] = useState(null);
+export default function InmuebleDetailPage({ params }: { params: Promise<{ id: string; subcategory: string; subsubcategory: string }> }) {
+  const [publication, setPublication] = useState<PublicationData | null>(null);
   const [loading, setLoading] = useState(true);
-
-  // Desempaquetar params si es promesa
-  useEffect(() => {
-    let isMounted = true;
-    Promise.resolve(params).then((resolvedParams) => {
-      if (isMounted) setId(resolvedParams.id);
-    });
-    return () => { isMounted = false; };
-  }, [params]);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    if (!id) return;
     const fetchPublication = async () => {
-      setLoading(true);
       try {
-        const res = await fetch(`/api/publications/${id}`);
-        const data = await res.json();
-        setPublication(data.publication);
-      } catch {
-        setPublication(null);
+        const resolvedParams = await params;
+        const { id } = resolvedParams;
+        
+        // Fetch publication data
+        const publicationData = await PublicationsService.getPublicationById(id);
+        
+        if (publicationData) {
+          setPublication(publicationData);
+        } else {
+          setError('Publicación no encontrada');
+        }
+      } catch (err) {
+        console.error('Error fetching publication:', err);
+        setError('Error al cargar la publicación');
       } finally {
         setLoading(false);
       }
     };
+
     fetchPublication();
-  }, [id]);
+  }, [params]);
 
   if (loading) {
-    return <div className="flex items-center justify-center min-h-screen"><LoadingSpinner size="lg" /></div>;
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <LoadingSpinner size="lg" />
+      </div>
+    );
   }
-  if (!publication) {
-    return <div className="flex items-center justify-center min-h-screen">No se encontró la publicación.</div>;
+
+  if (error || !publication) {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <div className="text-center">
+          <h1 className="text-2xl font-bold text-gray-900 mb-4">Error</h1>
+          <p className="text-gray-600">{error || 'Publicación no encontrada'}</p>
+        </div>
+      </div>
+    );
   }
-  return <DedicatedPublicationPage publication={publication} />;
+
+  return <InmuebleDetailPageContent publication={publication} />;
 } 

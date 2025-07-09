@@ -1,59 +1,65 @@
-import { NextResponse } from 'next/server'
-import type { Post } from '@/types/blog'
-import { getServerMongoClient } from '@/lib/mongodb-server'
-
-// Aquí implementaremos la conexión con la base de datos
-const mockPosts: Post[] = [
-  // Datos de ejemplo
-]
+import { NextRequest, NextResponse } from 'next/server';
+import { getServerMongoClient } from '@/lib/mongodb-server';
 
 export async function GET(
-  request: Request,
-  context: { params: Promise<{ slug: string }> }
+  request: NextRequest,
+  { params }: { params: Promise<{ slug: string }> }
 ) {
   try {
-    const params = await context.params
-    const { slug } = params
+    const { slug } = await params;
+    const { searchParams } = new URL(request.url);
+    const includeContent = searchParams.get('includeContent') === 'true';
+
+    const client = await getServerMongoClient();
+    const db = client.db(process.env.MONGODB_DB);
+    const collection = db.collection('blog_posts');
+
+    // Build query
+    const query: { slug: string; published?: boolean } = { slug };
     
-    // TODO: Fix MongoDB client usage
-    // const { client, db } = await getServerMongoClient()
-    // const postsCollection = db.collection('posts')
-    // const post = await postsCollection.findOne({ slug })
-    // await client.close()
-    
-    // For now, return a mock post to avoid build errors
-    const post = mockPosts.find(p => p.slug === slug)
-    
+    // Only include published posts unless explicitly requested
+    if (!includeContent) {
+      query.published = true;
+    }
+
+    const post = await collection.findOne(query);
+
     if (!post) {
       return NextResponse.json(
         { error: 'Post not found' },
         { status: 404 }
-      )
+      );
     }
-    
-    // Incrementar vistas
-    post.views += 1
 
-    // Encontrar posts relacionados
-    const relatedPosts = mockPosts
-      .filter(p => 
-        p.id !== post.id && (
-          p.category.id === post.category.id ||
-          p.tags.some(t => post.tags.some(pt => pt.id === t.id))
-        )
-      )
-      .slice(0, 3)
+    // Increment view count
+    await collection.updateOne(
+      { _id: post._id },
+      { $inc: { viewCount: 1 } }
+    );
 
     return NextResponse.json({
-      ...post,
-      relatedPosts
-    })
+      post: {
+        id: post._id.toString(),
+        title: post.title,
+        slug: post.slug,
+        excerpt: post.excerpt,
+        content: includeContent ? post.content : undefined,
+        author: post.author,
+        publishedAt: post.publishedAt,
+        updatedAt: post.updatedAt,
+        tags: post.tags || [],
+        category: post.category,
+        viewCount: (post.viewCount || 0) + 1,
+        featuredImage: post.featuredImage
+      }
+    });
+
   } catch (error) {
-    console.error('Error fetching post:', error)
+    console.error('Error fetching blog post:', error);
     return NextResponse.json(
       { error: 'Internal server error' },
       { status: 500 }
-    )
+    );
   }
 }
 

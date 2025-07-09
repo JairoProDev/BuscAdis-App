@@ -1,112 +1,132 @@
 import { NextResponse } from 'next/server'
-import type { Magazine } from '@/types/blog'
-
-// Aquí implementaremos la conexión con la base de datos
-const subscribers: Magazine[] = []
+import { getServerMongoClient } from '@/lib/mongodb-server'
 
 export async function POST(request: Request) {
   try {
-    const { email, name, preferences } = await request.json()
+    const { email, name, preferences } = await request.json();
 
-    // Validar email
-    if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+    if (!email || !email.includes('@')) {
       return NextResponse.json(
-        { error: 'Email inválido' },
+        { error: 'Valid email is required' },
         { status: 400 }
-      )
+      );
     }
 
-    // Verificar si ya está suscrito
-    const existingSubscriber = subscribers.find(s => s.email === email)
-    if (existingSubscriber) {
+    const client = await getServerMongoClient();
+    const db = client.db(process.env.MONGODB_DB);
+    const collection = db.collection('newsletter_subscribers');
+
+    // Check if already subscribed
+    const existing = await collection.findOne({ email: email.toLowerCase() });
+    if (existing) {
       return NextResponse.json(
-        { error: 'Este email ya está suscrito' },
-        { status: 400 }
-      )
+        { error: 'Email already subscribed' },
+        { status: 409 }
+      );
     }
 
-    // Crear nuevo suscriptor
-    const newSubscriber: Magazine = {
-      id: Date.now().toString(),
-      email,
-      name,
-      subscribedAt: new Date().toISOString(),
-      preferences: preferences || {
-        categories: [],
-        frequency: 'weekly'
-      },
+    // Add subscriber
+    const subscriber = {
+      email: email.toLowerCase(),
+      name: name || '',
+      preferences: preferences || {},
+      subscribedAt: new Date(),
       status: 'active'
-    }
+    };
 
-    // Aquí implementaremos el guardado en la base de datos
-    subscribers.push(newSubscriber)
+    await collection.insertOne(subscriber);
 
-    // Aquí implementaremos el envío del email de confirmación
-    
     return NextResponse.json({
-      message: 'Suscripción exitosa',
-      subscriber: newSubscriber
-    })
-  } catch (error) {
+      success: true,
+      message: 'Successfully subscribed to newsletter'
+    });
+
+  } catch {
     return NextResponse.json(
-      { error: 'Error al procesar la suscripción' },
+      { error: 'Internal server error' },
       { status: 500 }
-    )
+    );
   }
 }
 
 export async function PUT(request: Request) {
   try {
-    const { email, preferences } = await request.json()
-    const subscriber = subscribers.find(s => s.email === email)
+    const { email, preferences } = await request.json();
 
-    if (!subscriber) {
+    if (!email) {
       return NextResponse.json(
-        { error: 'Suscriptor no encontrado' },
-        { status: 404 }
-      )
+        { error: 'Email is required' },
+        { status: 400 }
+      );
     }
 
-    // Actualizar preferencias
-    subscriber.preferences = {
-      ...subscriber.preferences,
-      ...preferences
+    const client = await getServerMongoClient();
+    const db = client.db(process.env.MONGODB_DB);
+    const collection = db.collection('newsletter_subscribers');
+
+    const result = await collection.updateOne(
+      { email: email.toLowerCase() },
+      { 
+        $set: { 
+          preferences: preferences || {},
+          updatedAt: new Date()
+        }
+      }
+    );
+
+    if (result.matchedCount === 0) {
+      return NextResponse.json(
+        { error: 'Subscriber not found' },
+        { status: 404 }
+      );
     }
 
     return NextResponse.json({
-      message: 'Preferencias actualizadas',
-      subscriber
-    })
-  } catch (error) {
+      success: true,
+      message: 'Preferences updated successfully'
+    });
+
+  } catch {
     return NextResponse.json(
-      { error: 'Error al actualizar preferencias' },
+      { error: 'Internal server error' },
       { status: 500 }
-    )
+    );
   }
 }
 
 export async function DELETE(request: Request) {
   try {
-    const { email } = await request.json()
-    const subscriber = subscribers.find(s => s.email === email)
+    const { email } = await request.json();
 
-    if (!subscriber) {
+    if (!email) {
       return NextResponse.json(
-        { error: 'Suscriptor no encontrado' },
-        { status: 404 }
-      )
+        { error: 'Email is required' },
+        { status: 400 }
+      );
     }
 
-    // Actualizar estado a unsubscribed
-    subscriber.status = 'unsubscribed'
+    const client = await getServerMongoClient();
+    const db = client.db(process.env.MONGODB_DB);
+    const collection = db.collection('newsletter_subscribers');
+
+    const result = await collection.deleteOne({ email: email.toLowerCase() });
+
+    if (result.deletedCount === 0) {
+      return NextResponse.json(
+        { error: 'Subscriber not found' },
+        { status: 404 }
+      );
+    }
 
     return NextResponse.json({
-      message: 'Suscripción cancelada exitosamente'
-    })
-  } catch (error) {
+      success: true,
+      message: 'Successfully unsubscribed'
+    });
+
+  } catch {
     return NextResponse.json(
-      { error: 'Error al cancelar suscripción' },
+      { error: 'Internal server error' },
       { status: 500 }
-    )
+    );
   }
 } 

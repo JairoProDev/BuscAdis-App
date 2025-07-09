@@ -33,11 +33,13 @@ export async function POST(request: NextRequest) {
 
 export async function DELETE(request: NextRequest) {
   try {
-    const { publicationId } = await request.json();
-    
-    if (!publicationId) {
+    const { searchParams } = new URL(request.url);
+    const publicationId = searchParams.get('publicationId');
+    const userId = searchParams.get('userId');
+
+    if (!publicationId || !userId) {
       return NextResponse.json(
-        { error: 'Publication ID is required' },
+        { error: 'Publication ID and User ID are required' },
         { status: 400 }
       );
     }

@@ -33,60 +33,104 @@ async function connectToDatabase() {
 
 export async function POST(request: Request) {
   try {
-    const { query, category, resultsCount, timestamp, userAgent, location } = await request.json()
+    const body = await request.json();
+    const { query, filters, userId, sessionId } = body;
 
-    if (!query?.trim()) {
-      return NextResponse.json({ error: 'Query is required' }, { status: 400 })
+    // Validate required fields
+    if (!query) {
+      return NextResponse.json({ error: 'Query is required' }, { status: 400 });
     }
 
-    const { db } = await connectToDatabase()
-    const searchAnalytics = db.collection('search_analytics')
+    // Create search analytics entry
+    const searchAnalytics = {
+      query: query.toLowerCase().trim(),
+      filters: filters || {},
+      userId: userId || null,
+      sessionId: sessionId || null,
+      timestamp: new Date(),
+      userAgent: request.headers.get('user-agent') || '',
+      ipAddress: request.headers.get('x-forwarded-for') || request.headers.get('x-real-ip') || '',
+    };
 
-    // Guardar la búsqueda
-    const searchRecord = {
-      query: query.trim().toLowerCase(),
-      originalQuery: query.trim(),
-      category: category || null,
-      resultsCount: resultsCount || 0,
-      timestamp: new Date(timestamp || Date.now()),
-      userAgent,
-      location,
-      sessionId: generateSessionId(userAgent, timestamp),
-      date: new Date().toISOString().split('T')[0], // YYYY-MM-DD para agregaciones
-      hour: new Date().getHours(),
-      dayOfWeek: new Date().getDay()
-    }
+    // Insert into database
+    const client = await getServerMongoClient();
+    const db = client.db(process.env.MONGODB_DB);
+    const collection = db.collection('search_analytics');
 
-    await searchAnalytics.insertOne(searchRecord)
+    await collection.insertOne(searchAnalytics);
 
-    // Actualizar contadores de tendencias
-    const trends = db.collection('search_trends')
-    await trends.updateOne(
-      { 
-        query: query.trim().toLowerCase(),
-        date: searchRecord.date 
-      },
-      { 
-        $inc: { count: 1 },
-        $set: { 
-          lastSearched: new Date(),
-          originalQuery: query.trim()
-        }
-      },
-      { upsert: true }
-    )
+    // Get search suggestions based on query
+    const suggestions = await getSearchSuggestions(query);
 
-    return NextResponse.json({ 
-      success: true, 
-      message: 'Search tracked successfully' 
-    })
+    return NextResponse.json({
+      success: true,
+      suggestions,
+      analytics: {
+        query: searchAnalytics.query,
+        timestamp: searchAnalytics.timestamp,
+      }
+    });
 
   } catch (error) {
-    console.error('Error tracking search:', error)
+    console.error('Search analytics error:', error);
     return NextResponse.json(
-      { error: 'Internal server error' }, 
+      { error: 'Internal server error' },
       { status: 500 }
-    )
+    );
+  }
+}
+
+async function getSearchSuggestions(query: string) {
+  try {
+    const client = await getServerMongoClient();
+    const db = client.db(process.env.MONGODB_DB);
+    
+    // Search across multiple collections
+    const collections = ['inmuebles', 'vehiculos', 'empleos', 'servicios', 'productos', 'eventos'];
+    const suggestions: Array<{ text: string; type: string; count: number }> = [];
+
+    for (const collectionName of collections) {
+      const collection = db.collection(collectionName);
+      
+      // Search in title and description fields
+      const results = await collection.find({
+        $or: [
+          { title: { $regex: query, $options: 'i' } },
+          { description: { $regex: query, $options: 'i' } },
+          { tags: { $in: [new RegExp(query, 'i')] } }
+        ]
+      }).limit(5).toArray();
+
+      results.forEach((item: { title?: string; description?: string; _id: string }) => {
+        const text = item.title || item.description || '';
+        if (text) {
+          suggestions.push({
+            text: text.substring(0, 100),
+            type: collectionName,
+            count: 1
+          });
+        }
+      });
+    }
+
+    // Group and count suggestions
+    const groupedSuggestions = suggestions.reduce((acc: Record<string, { text: string; type: string; count: number }>, suggestion) => {
+      const key = suggestion.text.toLowerCase();
+      if (acc[key]) {
+        acc[key].count += suggestion.count;
+      } else {
+        acc[key] = suggestion;
+      }
+      return acc;
+    }, {});
+
+    return Object.values(groupedSuggestions)
+      .sort((a, b) => b.count - a.count)
+      .slice(0, 10);
+
+  } catch (error) {
+    console.error('Error getting search suggestions:', error);
+    return [];
   }
 }
 

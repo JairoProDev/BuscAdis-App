@@ -15,7 +15,7 @@ import StepNavigation from '@/components/publish/StepNavigation';
 import SuccessMessage from '@/components/publish/SuccessMessage';
 import PublishAchievements from '@/components/publish/PublishAchievements';
 import { StarIcon, FireIcon, CheckIcon } from '@heroicons/react/24/solid';
-import { PublicationFormData, PublicationLocation, PublicationContact } from '@/types/publication';
+import { PublicationFormData, PublicationContact } from '@/types/publication';
 import { Logger } from '@/services/logging.service';
 import { categoriesList } from '@/data/categories-data';
 
