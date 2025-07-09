@@ -9,7 +9,8 @@ import {
   CalendarIcon,
   StarIcon,
   CheckBadgeIcon,
-  DocumentTextIcon
+  DocumentTextIcon,
+  PhoneIcon
 } from '@heroicons/react/24/outline';
 import { PublicationData } from '@/types/publication';
 import { formatDistanceToNow } from 'date-fns';

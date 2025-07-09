@@ -37,7 +37,7 @@ export default function PublicationDetailPage() {
         if (isMounted) setPublication(data.publication);
         
         // Fetch related publications
-        const relatedRes = await fetch(`/api/publications/related?category=${data.publication.categorySlug || categorySlugParam}&excludeId=${id}&limit=6`);
+        const relatedRes = await fetch(`/api/publications/related?category=${data.publication.categorySlug}&excludeId=${id}&limit=6`);
         if (relatedRes.ok) {
           const relatedData = await relatedRes.json();
           if (isMounted) setRelatedPublications(relatedData.publications || []);

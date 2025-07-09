@@ -123,7 +123,7 @@ export default function PublicationDetailWithTitlePage() {
           if (response.ok) {
             const relatedData = await response.json();
             if (relatedData.publications) {
-              setRelatedPublications(relatedData.publications.map((pub: unknown) => ({
+              setRelatedPublications(relatedData.publications.map((pub: any) => ({
                 id: pub.id || pub._id,
                 title: pub.title,
                 description: pub.description,

@@ -8,7 +8,8 @@ import {
   DocumentTextIcon,
   PhoneIcon,
   TicketIcon,
-  StarIcon
+  StarIcon,
+  CurrencyDollarIcon
 } from '@heroicons/react/24/outline';
 import { PublicationData } from '@/types/publication';
 import { formatDistanceToNow, format } from 'date-fns';
@@ -69,7 +70,7 @@ export default function EventoDetail({ publication }: EventoDetailProps) {
       >
         <div className="flex items-start gap-4">
           <div className="bg-pink-600 p-3 rounded-xl">
-            {/* MusicalNoteIcon removed */}
+            <CalendarIcon className="w-6 h-6 text-white" />
           </div>
           <div className="flex-1">
             <div className="flex items-center gap-2 mb-2">
@@ -93,7 +94,7 @@ export default function EventoDetail({ publication }: EventoDetailProps) {
                 {eventoData.horaInicio} - {eventoData.horaFin}
               </span>
               <span className="flex items-center gap-1">
-                {/* CurrencyDollarIcon removed */}
+                <CurrencyDollarIcon className="w-4 h-4" />
                 {formatPrice(eventoData.precio)}
               </span>
             </div>
@@ -254,7 +255,7 @@ export default function EventoDetail({ publication }: EventoDetailProps) {
               <h4 className="font-semibold text-gray-900 dark:text-white">Información de Contacto</h4>
               <div className="bg-gray-50 dark:bg-gray-700 rounded-lg p-4">
                 <div className="flex items-center gap-3">
-                  {/* PhoneIcon removed */}
+                  <PhoneIcon className="w-5 h-5 text-green-600" />
                   <div>
                     <p className="text-sm text-gray-500 dark:text-gray-400">WhatsApp</p>
                     <p className="font-medium text-gray-900 dark:text-white">{publication.whatsapp}</p>
