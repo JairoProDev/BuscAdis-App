@@ -1178,7 +1178,7 @@ export default function SupremeSearchEngine({
                   ? 'grid-cols-1 sm:grid-cols-2 lg:grid-cols-4' 
                   : 'grid-cols-1 sm:grid-cols-2 lg:grid-cols-3'
               }`}>
-                {getCategoryDataForLevel(categoryLevel).map((item: any) => {
+                {getCategoryDataForLevel(categoryLevel).map((item: CategoryItem) => {
                   const IconComponent = categoryLevel === 'category' ? categoryIcons[item.id] : null
                   
                   return (

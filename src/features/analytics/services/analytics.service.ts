@@ -11,7 +11,7 @@ export class AnalyticsService {
   static async trackSearch(data: {
     userId?: string;
     query: string;
-    filters: any;
+    filters: Record<string, unknown>;
     resultsCount: number;
     sessionId: string;
   }) {

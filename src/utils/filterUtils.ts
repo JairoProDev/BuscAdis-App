@@ -46,7 +46,7 @@ export function findFilterById(category: string, filterId: string): FilterOption
  * @param value El valor actual del filtro
  * @returns true si el filtro está activo (tiene un valor no predeterminado)
  */
-export function isFilterActive(filter: FilterOption, value: any): boolean {
+export function isFilterActive(filter: FilterOption, value: unknown): boolean {
   if (value === undefined || value === null) {
     return false
   }

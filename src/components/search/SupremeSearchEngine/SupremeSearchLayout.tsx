@@ -14,13 +14,13 @@ export default function SupremeSearchLayout({
   className = ''
 }: SupremeSearchLayoutProps) {
   const { searchState, updateSearch } = useSearch()
-  const [results, setResults] = useState<any[]>([])
+  const [results, setResults] = useState<Record<string, unknown>[]>([])
   const [isLoading, setIsLoading] = useState(false)
   const [totalCount, setTotalCount] = useState(0)
   const [viewMode, setViewMode] = useState<'grid' | 'list' | 'map'>('grid')
   const [hasSearched, setHasSearched] = useState(false)
 
-  const handleSearch = useCallback(async (query: string, options: Record<string, any> = {}) => {
+  const handleSearch = useCallback(async (query: string, options: Record<string, unknown> = {}) => {
     setIsLoading(true)
     setHasSearched(true)
     
@@ -46,7 +46,7 @@ export default function SupremeSearchLayout({
       }
       
       // Adaptar resultados de la API al formato esperado
-      const adaptedResults = response.publications.map((pub: any, i: number) => ({
+      const adaptedResults = response.publications.map((pub: Record<string, unknown>, i: number) => ({
         id: pub._id || `result-${Date.now()}-${i}`,
         title: pub.title || 'Sin título',
         description: pub.description || '',
@@ -79,7 +79,7 @@ export default function SupremeSearchLayout({
     }
   }, [])
 
-  const handleFilterChange = useCallback((filters: Record<string, any>) => {
+  const handleFilterChange = useCallback((filters: Record<string, unknown>) => {
     // Si ya hay una búsqueda activa, aplicar filtros
     if (hasSearched && searchState.query) {
       handleSearch(searchState.query, {

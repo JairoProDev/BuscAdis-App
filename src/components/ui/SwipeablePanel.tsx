@@ -62,11 +62,11 @@ export default function SwipeablePanel({
   }, [isOpen, onClose])
 
   // Handle drag and swipe gestures
-  const onDragStart = (_: any, info: PanInfo) => {
+  const onDragStart = (_: unknown, info: PanInfo) => {
     dragStartY.current = info.point.y
   }
 
-  const onDragEnd = (_: any, info: PanInfo) => {
+  const onDragEnd = (_: unknown, info: PanInfo) => {
     const dragEndY = info.point.y
     const dragDiff = dragEndY - dragStartY.current
     

@@ -50,7 +50,7 @@ export interface SEOData {
   title: string;
   description: string;
   keywords: string[];
-  schema: Record<string, any>;
+  schema: Record<string, unknown>;
 }
 
 export interface RegionalConfiguration {
@@ -528,7 +528,7 @@ export function getCategoriesForRegion(region: string, phase: string): Marketpla
 }
 
 // Función para obtener configuración regional
-export function getRegionalConfig(region: string): any {
+export function getRegionalConfig(region: string): Record<string, unknown> {
   return MARKETPLACE_CONFIG.regionalDefaults[region as keyof typeof MARKETPLACE_CONFIG.regionalDefaults] || 
          MARKETPLACE_CONFIG.regionalDefaults['PE'];
 } 

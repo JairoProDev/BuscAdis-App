@@ -108,7 +108,7 @@ async function getSearchSuggestions(query: string): Promise<SearchSuggestion[]> 
         ]
       }).limit(5).toArray();
 
-      results.forEach((item: { title?: string; description?: string; _id: string }) => {
+      results.forEach((item: { title?: string; description?: string; _id: import('mongodb').ObjectId }) => {
         const text = item.title || item.description || '';
         if (text) {
           suggestions.push({

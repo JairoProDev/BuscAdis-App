@@ -173,7 +173,7 @@ export default function SearchBar({
       
       setIsRecording(true);
       
-      recognition.onresult = (event: any) => {
+      recognition.onresult = (event: SpeechRecognitionEvent) => {
         const transcript = event.results[0][0].transcript;
         setSearchTerm(transcript);
         setRecognizedText(transcript);
@@ -185,7 +185,7 @@ export default function SearchBar({
         }, 500);
       };
       
-      recognition.onerror = (event: any) => {
+      recognition.onerror = (event: SpeechRecognitionErrorEvent) => {
         console.error('Speech recognition error:', event.error);
         setIsRecording(false);
         alert(`Error de reconocimiento de voz: ${event.error}`);

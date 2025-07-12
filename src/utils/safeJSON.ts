@@ -22,7 +22,7 @@ export function safeJSONParse<T>(str: string | null | undefined, fallback: T): T
  * @param fallback - The fallback string to return if stringification fails
  * @returns The stringified JSON or the fallback string
  */
-export function safeJSONStringify(value: any, fallback: string = '[]'): string {
+export function safeJSONStringify(value: unknown, fallback: string = '[]'): string {
   try {
     return JSON.stringify(value);
   } catch (error) {
@@ -38,7 +38,7 @@ export function safeJSONStringify(value: any, fallback: string = '[]'): string {
  * @param value - The value to store
  * @returns true if successful, false otherwise
  */
-export function safeLocalStorageSet(key: string, value: any): boolean {
+export function safeLocalStorageSet(key: string, value: unknown): boolean {
   try {
     localStorage.setItem(key, safeJSONStringify(value));
     return true;

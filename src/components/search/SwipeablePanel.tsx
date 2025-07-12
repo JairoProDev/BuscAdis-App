@@ -107,11 +107,11 @@ export default function SwipeablePanel({
     controls.start({ y: '100%' })
   }
   
-  const handleDragStart = (_: any, info: PanInfo) => {
+  const handleDragStart = (_: unknown, info: PanInfo) => {
     dragStartY.current = info.point.y
   }
   
-  const handleDragEnd = (_: any, info: PanInfo) => {
+  const handleDragEnd = (_: unknown, info: PanInfo) => {
     const dragEndY = info.point.y
     const dragDistance = dragEndY - dragStartY.current
     

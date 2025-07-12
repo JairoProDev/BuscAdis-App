@@ -6,7 +6,7 @@ interface AuthPromptProps {
   message?: string;
   onClose?: () => void;
   redirectUrl?: string; // Opcional: para redirección después de la autenticación
-  publishData?: any; // Opcional: para datos a enviar después de la autenticación
+  publishData?: Record<string, unknown>; // Opcional: para datos a enviar después de la autenticación
   isOpen: boolean; // Controla si el modal está abierto
 }
 

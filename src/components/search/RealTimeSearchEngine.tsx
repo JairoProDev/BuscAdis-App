@@ -8,7 +8,7 @@ import { ChevronDownIcon } from '@heroicons/react/24/outline'
 import Image from 'next/image'
 
 // Implementación propia de debounce
-function debounce<T extends (...args: any[]) => any>(func: T, wait: number): T & { cancel: () => void } {
+function debounce<T extends (...args: unknown[]) => unknown>(func: T, wait: number): T & { cancel: () => void } {
   let timeout: NodeJS.Timeout | null = null
   
   const debounced = ((...args: Parameters<T>) => {
@@ -212,7 +212,7 @@ export default function RealTimeSearchEngine({
           const quickRes = await fetch(`/api/publications?query=${encodeURIComponent(query)}&category=${selectedCategory}&limit=5`)
           const quickData = await quickRes.json()
           
-          const formattedResults = (quickData.publications || []).map((pub: any) => ({
+          const formattedResults = (quickData.publications || []).map((pub: { id: string; title: string; description: string; category: string; price: number; location: string; image: string }) => ({
             id: pub._id || pub.id,
             title: pub.title || 'Sin título',
             description: pub.description || '',
@@ -351,7 +351,7 @@ export default function RealTimeSearchEngine({
   // Estados para reconocimiento de voz
   const [isListening, setIsListening] = useState(false)
   const [voiceError, setVoiceError] = useState('')
-  const recognitionRef = useRef<any>(null)
+  const recognitionRef = useRef<SpeechRecognition | null>(null)
   
   // Estado para historial de búsqueda
   const [searchHistory, setSearchHistory] = useState<string[]>([])
@@ -388,14 +388,14 @@ export default function RealTimeSearchEngine({
         setVoiceError('');
       };
 
-      recognitionRef.current.onresult = (event: any) => {
+      recognitionRef.current.onresult = (event: SpeechRecognitionEvent) => {
         const transcript = event.results[0][0].transcript;
         setInputValue(transcript);
         performSearch(transcript);
         setIsListening(false);
       };
 
-      recognitionRef.current.onerror = (event: any) => {
+      recognitionRef.current.onerror = (event: SpeechRecognitionErrorEvent) => {
         setIsListening(false);
         if (event.error === 'no-speech') {
           setVoiceError('No se detectó habla. Intenta de nuevo.');

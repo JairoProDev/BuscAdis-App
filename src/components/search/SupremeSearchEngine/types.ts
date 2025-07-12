@@ -38,7 +38,7 @@ export interface SearchQuery {
     max?: number
     currency?: string
   }
-  filters?: Record<string, any>
+  filters?: Record<string, unknown>
   sortBy?: 'relevance' | 'date' | 'price_asc' | 'price_desc' | 'distance' | 'views'
   page?: number
   limit?: number
@@ -72,7 +72,7 @@ export interface SearchSuggestion {
   categoryId?: string
   subcategoryId?: string
   score?: number
-  icon?: React.ComponentType<any>
+  icon?: React.ComponentType<{ className?: string }>
 }
 
 export interface VoiceSearchOptions {

@@ -92,7 +92,7 @@ export interface PublicationBulkData {
     quality?: number // Score de calidad 0-100
     completeness?: number // Qué tan completo está el anuncio
     trustScore?: number // Score de confianza
-    extractedFeatures?: Record<string, any> // Features extraídas por IA
+    extractedFeatures?: Record<string, unknown> // Features extraídas por IA
   }
   
   // Usuario (si está disponible)
@@ -325,7 +325,7 @@ export interface PublicationDocument {
     metaDescription?: string
     keywords: string[]
     canonicalUrl?: string
-    structuredData?: Record<string, any>
+    structuredData?: Record<string, unknown>
   }
   
   // Timestamps y tracking
@@ -344,7 +344,7 @@ export interface PublicationDocument {
     source: string
     importId?: string
     externalId?: string
-    migrationData?: Record<string, any>
+    migrationData?: Record<string, unknown>
     indexedAt?: Date
     lastProcessedAt?: Date
   }
@@ -459,7 +459,7 @@ export interface NewsfeedItem {
   relevanceFactors: RelevanceFactor[]
   
   // Personalización
-  personalizedContent?: Record<string, any>
+  personalizedContent?: Record<string, unknown>
   
   // Control de freshness
   createdAt: Date

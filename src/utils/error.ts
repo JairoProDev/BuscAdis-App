@@ -9,7 +9,7 @@ export class AppError extends Error {
   }
 }
 
-export const handleApiError = (error: any) => {
+export const handleApiError = (error: unknown) => {
   console.error('API Error:', error);
 
   if (error instanceof AppError) {

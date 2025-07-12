@@ -15,7 +15,7 @@ interface SearchOptions {
 
 interface StickySearchContainerProps {
   onSearch?: (query: string, options?: SearchOptions) => void
-  onFilterChange?: (filters: Record<string, any>) => void
+  onFilterChange?: (filters: Record<string, unknown>) => void
   className?: string
 }
 

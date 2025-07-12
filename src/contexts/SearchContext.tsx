@@ -29,7 +29,7 @@ interface SearchState {
   subSubcategory: string;
   location: string;
   fullLocation: LocationState;
-  filters: Record<string, any>;
+  filters: Record<string, unknown>;
   suggestions: SearchSuggestion[];
   recentSearches: SearchSuggestion[];
 }

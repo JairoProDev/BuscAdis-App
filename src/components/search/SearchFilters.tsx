@@ -11,7 +11,7 @@ interface SearchFiltersProps {
   selectedCategory?: string
   selectedSubcategory?: string
   selectedSubSubcategory?: string
-  onFilterChange?: (filters: Record<string, any>) => void
+  onFilterChange?: (filters: Record<string, unknown>) => void
   onClearFilters?: () => void
   compact?: boolean
   className?: string
@@ -27,7 +27,7 @@ export default function SearchFilters({
   className = ''
 }: SearchFiltersProps) {
   const [showFilters, setShowFilters] = useState(false)
-  const [appliedFilters, setAppliedFilters] = useState<Record<string, any>>({})
+  const [appliedFilters, setAppliedFilters] = useState<Record<string, unknown>>({})
   const [expandedSections, setExpandedSections] = useState<Record<string, boolean>>({})
 
   // Get filters for the current category
@@ -37,7 +37,7 @@ export default function SearchFilters({
   // Count applied filters
   const appliedFilterCount = Object.keys(appliedFilters).length
 
-  const handleFilterChange = useCallback((filterId: string, value: any) => {
+  const handleFilterChange = useCallback((filterId: string, value: unknown) => {
     const newFilters = { ...appliedFilters }
     
     if (value === null || value === undefined || value === '' || 

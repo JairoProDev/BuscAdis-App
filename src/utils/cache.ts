@@ -1,6 +1,6 @@
 export class Cache {
   private static instance: Cache;
-  private cache: Map<string, { data: any; timestamp: number }>;
+  private cache: Map<string, { data: unknown; timestamp: number }>;
   private readonly TTL: number = 5 * 60 * 1000; // 5 minutos
 
   private constructor() {
@@ -14,14 +14,14 @@ export class Cache {
     return Cache.instance;
   }
 
-  set(key: string, data: any): void {
+  set(key: string, data: unknown): void {
     this.cache.set(key, {
       data,
       timestamp: Date.now()
     });
   }
 
-  get(key: string): any | null {
+  get(key: string): unknown | null {
     const item = this.cache.get(key);
     if (!item) return null;
 
