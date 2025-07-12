@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server'
-import { MongoClient } from 'mongodb'
+import { MongoClient, Db } from 'mongodb'
+import type { CachedDatabase } from '@/types/api'
 
 export const dynamic = 'force-dynamic'
 export const runtime = 'nodejs'
@@ -8,11 +9,11 @@ const MONGODB_URI = process.env.MONGODB_URI!
 const MONGODB_DB = process.env.MONGODB_DB || 'buscadis'
 
 // Cache simple en memoria para sugerencias frecuentes
-const suggestionCache = new Map<string, any>()
+const suggestionCache = new Map<string, { data: Suggestion[]; timestamp: number }>()
 const CACHE_DURATION = 30 * 60 * 1000 // 30 minutos
 
 let cachedClient: MongoClient | null = null
-let cachedDb: any = null
+let cachedDb: Db | null = null
 
 interface Suggestion {
   id: string;
@@ -24,7 +25,7 @@ interface Suggestion {
   examples?: string[];
 }
 
-async function connectToDatabase() {
+async function connectToDatabase(): Promise<CachedDatabase> {
   if (cachedClient && cachedDb) {
     return { client: cachedClient, db: cachedDb }
   }
@@ -140,7 +141,7 @@ export async function GET(request: Request) {
         .limit(3)
         .toArray()
 
-        suggestions.push(...popularSearches.map((item: any): Suggestion => ({
+        suggestions.push(...popularSearches.map((item: { _id: string; originalQuery?: string; query: string; count: number }): Suggestion => ({
           id: `popular-${item._id}`,
           text: item.originalQuery || item.query,
           type: 'trending',

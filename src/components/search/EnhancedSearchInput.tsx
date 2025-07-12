@@ -51,7 +51,7 @@ export default function EnhancedSearchInput({
   const searchContainerRef = useRef<HTMLDivElement>(null);
   const [isListening, setIsListening] = useState(false);
   const [voiceError, setVoiceError] = useState('');
-  const recognitionRef = useRef<any>(null);
+  const recognitionRef = useRef<SpeechRecognition | null>(null);
   
   // Focus input on mount if autoFocus is true
   useEffect(() => {
@@ -148,14 +148,14 @@ export default function EnhancedSearchInput({
         setVoiceError('');
       };
 
-      recognitionRef.current.onresult = (event: any) => {
+      recognitionRef.current.onresult = (event: SpeechRecognitionEvent) => {
         const transcript = event.results[0][0].transcript;
         setSearchTerm(transcript);
         onSearch(transcript, null);
         setIsListening(false);
       };
 
-      recognitionRef.current.onerror = (event: any) => {
+      recognitionRef.current.onerror = (event: SpeechRecognitionErrorEvent) => {
         setIsListening(false);
         if (event.error === 'no-speech') {
           setVoiceError('No se detectó habla. Intenta de nuevo.');

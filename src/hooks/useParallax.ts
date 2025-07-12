@@ -3,8 +3,8 @@
 import { useEffect, useRef } from 'react'
 
 // Conditionally import gsap if available
-let gsap: any = null;
-let ScrollTrigger: any = null;
+let gsap: typeof import('gsap').gsap | null = null;
+let ScrollTrigger: typeof import('gsap/ScrollTrigger').ScrollTrigger | null = null;
 try {
   gsap = import('gsap').then(module => module.gsap);
   ScrollTrigger = import('gsap/ScrollTrigger').then(module => module.ScrollTrigger);
@@ -62,7 +62,7 @@ export function useParallax(options: ParallaxOptions = {}) {
         trigger: element,
         start: 'top top',
         end: 'bottom bottom',
-        onUpdate: (self: any) => {
+        onUpdate: (self: { progress: number }) => {
           const progress = self.progress
           const distance = 100 * progress * speed
           const transform = direction === 'vertical'
@@ -108,7 +108,7 @@ export function useParallaxImage(speed: number = 0.3) {
           start: 'top bottom',
           end: 'bottom top',
           scrub: true,
-          onUpdate: (self: any) => {
+          onUpdate: (self: { progress: number }) => {
             const progress = self.progress
             const distance = 100 * progress * speed
             const transform = `translateY(${distance}px)`

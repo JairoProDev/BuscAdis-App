@@ -14,7 +14,7 @@ cloudinary.config({
  * @param options Opciones de carga
  * @returns Promesa con el resultado de la carga
  */
-async function uploadToCloudinary(buffer: Buffer, options: any = {}) {
+async function uploadToCloudinary(buffer: Buffer, options: Record<string, unknown> = {}) {
   return new Promise((resolve, reject) => {
     const uploadOptions = {
       resource_type: 'auto',

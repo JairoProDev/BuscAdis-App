@@ -2,9 +2,10 @@ import { useState, useEffect, useCallback } from 'react';
 import { AuthService } from '../services/auth.service';
 import { useRouter } from 'next/navigation';
 import { AuthResponse } from '../features/auth/types/auth.types';
+import type { AuthUser } from '@/types/api';
 
 export function useAuth() {
-    const [user, setUser] = useState<any | null>(null); // User type is now 'any'
+    const [user, setUser] = useState<AuthUser | null>(null);
     const [loading, setLoading] = useState(true);
     const router = useRouter();
 
@@ -30,10 +31,10 @@ export function useAuth() {
         return () => clearInterval(intervalId);
     }, [checkSession]);
 
-    const login = async (credentials: any) => {
+    const login = async (credentials: { email: string; password: string }) => {
         setLoading(true);
         try {
-            const result = await AuthService.login(credentials) as any;
+            const result = await AuthService.login(credentials) as AuthResponse;
             if (result.error) {
                 return { success: false, message: result.error };
             }

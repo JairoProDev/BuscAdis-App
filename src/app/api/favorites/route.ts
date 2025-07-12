@@ -1,11 +1,13 @@
 import { NextRequest, NextResponse } from 'next/server';
+import type { FavoriteRequest, FavoriteResponse, FavoritesListResponse } from '@/types/api';
 
 // TODO: En producción, integrar con la base de datos real
 // Temporalmente usamos localStorage en el cliente y esta API para compatibilidad
 
 export async function POST(request: NextRequest) {
   try {
-    const { publicationId } = await request.json();
+    const body: FavoriteRequest = await request.json();
+    const { publicationId } = body;
     
     if (!publicationId) {
       return NextResponse.json(
@@ -18,10 +20,12 @@ export async function POST(request: NextRequest) {
     // const userId = await getUserFromSession(request);
     // await addToFavorites(userId, publicationId);
 
-    return NextResponse.json(
-      { message: 'Added to favorites', publicationId },
-      { status: 200 }
-    );
+    const response: FavoriteResponse = {
+      message: 'Added to favorites',
+      publicationId
+    };
+
+    return NextResponse.json(response, { status: 200 });
   } catch (error) {
     console.error('Error adding to favorites:', error);
     return NextResponse.json(
@@ -48,10 +52,12 @@ export async function DELETE(request: NextRequest) {
     // const userId = await getUserFromSession(request);
     // await removeFromFavorites(userId, publicationId);
 
-    return NextResponse.json(
-      { message: 'Removed from favorites', publicationId },
-      { status: 200 }
-    );
+    const response: FavoriteResponse = {
+      message: 'Removed from favorites',
+      publicationId
+    };
+
+    return NextResponse.json(response, { status: 200 });
   } catch (error) {
     console.error('Error removing from favorites:', error);
     return NextResponse.json(
@@ -61,7 +67,7 @@ export async function DELETE(request: NextRequest) {
   }
 }
 
-export async function GET(request: NextRequest) {
+export async function GET() {
   try {
     // TODO: Integrar con la base de datos de usuarios y favoritos
     // const userId = await getUserFromSession(request);
@@ -69,10 +75,9 @@ export async function GET(request: NextRequest) {
 
     const favorites: string[] = []; // Placeholder
 
-    return NextResponse.json(
-      { favorites },
-      { status: 200 }
-    );
+    const response: FavoritesListResponse = { favorites };
+
+    return NextResponse.json(response, { status: 200 });
   } catch (error) {
     console.error('Error getting favorites:', error);
     return NextResponse.json(

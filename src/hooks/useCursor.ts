@@ -3,7 +3,7 @@
 import { useEffect } from 'react'
 
 // Conditionally import gsap if available
-let gsap: any = null;
+let gsap: typeof import('gsap').gsap | null = null;
 try {
   gsap = import('gsap').then(module => module.gsap);
 } catch (error) {

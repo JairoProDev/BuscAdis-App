@@ -70,7 +70,7 @@ export async function PUT(
   try {
     const params = await context.params
     const { slug } = params
-    const body = await request.json()
+    const body: Record<string, unknown> = await request.json()
     
     // TODO: Fix MongoDB client usage
     // const { client, db } = await getServerMongoClient()

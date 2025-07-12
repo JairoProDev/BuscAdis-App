@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server'
-import { MongoClient } from 'mongodb'
+import { MongoClient, Db } from 'mongodb'
 import { getMongoClient } from '@/lib/mongodb-server'
+import type { SearchAnalytics, SearchSuggestion, TrendingSearch, CachedDatabase } from '@/types/api'
 
 export const dynamic = 'force-dynamic'
 export const runtime = 'nodejs'
@@ -9,9 +10,9 @@ const MONGODB_URI = process.env.MONGODB_URI!
 const MONGODB_DB = process.env.MONGODB_DB || 'buscadis'
 
 let cachedClient: MongoClient | null = null
-let cachedDb: any = null
+let cachedDb: Db | null = null
 
-async function connectToDatabase() {
+async function connectToDatabase(): Promise<CachedDatabase> {
   if (cachedClient && cachedDb) {
     return { client: cachedClient, db: cachedDb }
   }
@@ -34,7 +35,12 @@ async function connectToDatabase() {
 
 export async function POST(request: Request) {
   try {
-    const body = await request.json();
+    const body: {
+      query: string;
+      filters?: Record<string, unknown>;
+      userId?: string;
+      sessionId?: string;
+    } = await request.json();
     const { query, filters, userId, sessionId } = body;
 
     // Validate required fields
@@ -43,7 +49,7 @@ export async function POST(request: Request) {
     }
 
     // Create search analytics entry
-    const searchAnalytics = {
+    const searchAnalytics: SearchAnalytics = {
       query: query.toLowerCase().trim(),
       filters: filters || {},
       userId: userId || null,
@@ -81,14 +87,14 @@ export async function POST(request: Request) {
   }
 }
 
-async function getSearchSuggestions(query: string) {
+async function getSearchSuggestions(query: string): Promise<SearchSuggestion[]> {
   try {
     const client = await getMongoClient();
     const db = client.db(process.env.MONGODB_DB);
     
     // Search across multiple collections
     const collections = ['inmuebles', 'vehiculos', 'empleos', 'servicios', 'productos', 'eventos'];
-    const suggestions: Array<{ text: string; type: string; count: number }> = [];
+    const suggestions: SearchSuggestion[] = [];
 
     for (const collectionName of collections) {
       const collection = db.collection(collectionName);
@@ -102,7 +108,7 @@ async function getSearchSuggestions(query: string) {
         ]
       }).limit(5).toArray();
 
-      results.forEach((item: { title?: string; description?: string; _id: any }) => {
+      results.forEach((item: { title?: string; description?: string; _id: string }) => {
         const text = item.title || item.description || '';
         if (text) {
           suggestions.push({
@@ -115,7 +121,7 @@ async function getSearchSuggestions(query: string) {
     }
 
     // Group and count suggestions
-    const groupedSuggestions = suggestions.reduce((acc: Record<string, { text: string; type: string; count: number }>, suggestion) => {
+    const groupedSuggestions = suggestions.reduce((acc: Record<string, SearchSuggestion>, suggestion) => {
       const key = suggestion.text.toLowerCase();
       if (acc[key]) {
         acc[key].count += suggestion.count;
@@ -152,7 +158,7 @@ export async function GET(request: Request) {
     const startDateStr = startDate.toISOString().split('T')[0]
 
     // Query para obtener trending searches
-    const query: any = {
+    const query: Record<string, unknown> = {
       date: { $gte: startDateStr },
       count: { $gte: 2 } // Mínimo 2 búsquedas para ser trending
     }

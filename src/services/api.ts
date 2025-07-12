@@ -221,7 +221,7 @@ export const userService = {
   },
 
   // Actualizar perfil del usuario
-  async updateProfile(updates: Partial<any>) {
+  async updateProfile(updates: Partial<Record<string, unknown>>) {
     try {
       const { data } = await api.put('/users/me', updates);
       Logger.info('Perfil actualizado exitosamente');

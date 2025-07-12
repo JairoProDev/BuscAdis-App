@@ -4,8 +4,8 @@ import { useCallback } from 'react';
 
 declare global {
   interface Window {
-    gtag: (...args: any[]) => void;
-    dataLayer: any[];
+    gtag: (...args: (string | Record<string, unknown>)[]) => void;
+    dataLayer: unknown[];
   }
 }
 

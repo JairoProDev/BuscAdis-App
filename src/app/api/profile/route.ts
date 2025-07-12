@@ -63,10 +63,11 @@ export async function POST(request: Request) {
       await mongoDbInsert('profiles', newProfile);
       return NextResponse.json(newProfile);
     }
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('Error in profile API:', error)
+    const errorMessage = error instanceof Error ? error.message : 'Unknown error';
     return NextResponse.json(
-      { error: `Error en el servidor: ${error.message}` },
+      { error: `Error en el servidor: ${errorMessage}` },
       { status: 500 }
     )
   }

@@ -19,6 +19,7 @@ interface PostCardProps {
   post: Post
   featured?: boolean
   index?: number
+  compact?: boolean
 }
 
 export default function PostCard({ post, featured = false, index = 0 }: PostCardProps) {
