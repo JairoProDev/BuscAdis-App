@@ -2,7 +2,7 @@
 
 import React, { useState, useCallback, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { PublicationsService } from '@/services/publications.service';
+import { PublicationsService, CreatePublicationData } from '@/services/publications.service';
 import CategorySelector from '@/components/publish/CategorySelector';
 import LocationSelector from '@/components/publish/LocationSelector';
 import PriceInput from '@/components/publish/PriceInput';
@@ -392,10 +392,38 @@ export default function PublicarPage() {
       // Debug: Ver qué datos se están enviando
       console.log('🚀 Datos del anuncio a enviar:', ad);
       
-      // Preparar datos finales
-      const finalAdData = { ...ad };
-      if (!finalAdData.subSubcategorySlug) delete finalAdData.subSubcategorySlug;
-      if (finalAdData.images?.length === 0) delete finalAdData.images;
+      // Preparar datos finales para CreatePublicationData
+      const finalAdData: CreatePublicationData = {
+        title: ad.title || '',
+        description: ad.description || '',
+        categorySlug: ad.categorySlug || '',
+        subcategorySlug: ad.subcategorySlug,
+        subSubcategorySlug: ad.subSubcategorySlug,
+        transactionType: ad.transactionType || 'venta',
+        value: ad.amount ?? 0,
+        currency: ad.currency || 'PEN',
+        valueType: 'total', // Valor por defecto
+        location: {
+          country: 'PE',
+          province: ad.location?.province || '',
+          city: ad.location?.district || '',
+          district: ad.location?.district,
+          address: ad.location?.address,
+          coordinates: ad.location?.coordinates ? {
+            lat: ad.location.coordinates.lat,
+            lng: ad.location.coordinates.lng
+          } : undefined
+        },
+        contact: {
+          phones: ad.contact?.phones || [],
+          email: ad.contact?.email,
+          name: ad.contact?.name,
+          visible: true
+        },
+        images: ad.images || [],
+        status: 'active',
+        premium: ad.premium || false
+      };
 
       console.log('🚀 Datos finales procesados:', finalAdData);
 

@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { getServerMongoClient } from '@/lib/mongodb-server';
+import { getMongoClient } from '@/lib/mongodb-server';
 
 export async function GET(
   request: NextRequest,
@@ -10,7 +10,7 @@ export async function GET(
     const { searchParams } = new URL(request.url);
     const includeContent = searchParams.get('includeContent') === 'true';
 
-    const client = await getServerMongoClient();
+    const client = await getMongoClient();
     const db = client.db(process.env.MONGODB_DB);
     const collection = db.collection('blog_posts');
 

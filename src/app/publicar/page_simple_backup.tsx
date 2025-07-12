@@ -225,12 +225,28 @@ export default function PublicarPage() {
         title: ad.title || '',
         description: ad.description || '',
         categorySlug: ad.categorySlug || 'productos',
-        price: ad.amount || 0,
-        location: ad.location?.district ? 
-          `${ad.location.district}, ${ad.location.province || 'Cusco'}` : 
-          'Cusco',
-        contactName: ad.contact?.name || 'Usuario',
-        contactPhone: ad.contact?.phones?.[0] || '',
+        transactionType: 'venta',
+        value: ad.amount || 0,
+        valueType: 'total',
+        currency: 'PEN',
+        images: ad.images || [],
+        location: {
+          country: 'PE',
+          province: ad.location?.province || 'Cusco',
+          city: ad.location?.district || 'Cusco',
+          district: ad.location?.district,
+          address: ad.location?.address,
+          coordinates: ad.location?.coordinates ? {
+            lat: ad.location.coordinates.lat,
+            lng: ad.location.coordinates.lng
+          } : undefined
+        },
+        contact: {
+          name: ad.contact?.name || 'Usuario',
+          phones: ad.contact?.phones || [],
+          email: ad.contact?.email,
+          visible: true
+        },
         status: 'active'
       });
 
@@ -797,9 +813,7 @@ export default function PublicarPage() {
               {/* Live Preview */}
               {!success && (
                 <LivePreview
-                  ad={ad}
-                  quality={adQuality}
-                  achievements={achievements}
+                  formData={ad}
                 />
               )}
 

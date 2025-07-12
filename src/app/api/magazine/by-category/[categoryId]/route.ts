@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { getServerMongoClient } from '@/lib/mongodb-server';
+import { getMongoClient } from '@/lib/mongodb-server';
 
 export async function GET(
   request: NextRequest,
@@ -12,7 +12,7 @@ export async function GET(
     const limit = parseInt(searchParams.get('limit') || '10');
     const skip = (page - 1) * limit;
 
-    const client = await getServerMongoClient();
+    const client = await getMongoClient();
     const db = client.db(process.env.MONGODB_DB);
     const collection = db.collection('magazine_articles');
 

@@ -11,8 +11,8 @@ export default function ConfirmarPage() {
   const searchParams = useSearchParams()
   const [isLoading, setIsLoading] = useState(false)
 
-  const token = searchParams.get('token')
-  const email = searchParams.get('email')
+  const token = searchParams?.get('token')
+  const email = searchParams?.get('email')
 
   const handleConfirmEmail = async () => {
     if (!token || !email) {

@@ -1,5 +1,5 @@
 import { NextResponse } from 'next/server'
-import { getServerMongoClient } from '@/lib/mongodb-server'
+import { getMongoClient } from '@/lib/mongodb-server'
 
 export async function POST(request: Request) {
   try {
@@ -12,7 +12,7 @@ export async function POST(request: Request) {
       );
     }
 
-    const client = await getServerMongoClient();
+    const client = await getMongoClient();
     const db = client.db(process.env.MONGODB_DB);
     const collection = db.collection('newsletter_subscribers');
 
@@ -60,7 +60,7 @@ export async function PUT(request: Request) {
       );
     }
 
-    const client = await getServerMongoClient();
+    const client = await getMongoClient();
     const db = client.db(process.env.MONGODB_DB);
     const collection = db.collection('newsletter_subscribers');
 
@@ -105,7 +105,7 @@ export async function DELETE(request: Request) {
       );
     }
 
-    const client = await getServerMongoClient();
+    const client = await getMongoClient();
     const db = client.db(process.env.MONGODB_DB);
     const collection = db.collection('newsletter_subscribers');
 

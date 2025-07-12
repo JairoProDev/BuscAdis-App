@@ -2,6 +2,7 @@
 
 import React, { useEffect, useState } from 'react';
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import { Publication } from '@/components/search/SearchResults';
 import LoadingSpinner from '@/components/ui/LoadingSpinner';
 import { Logger } from '@/services/logging.service';

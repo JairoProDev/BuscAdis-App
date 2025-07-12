@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { useParams, useRouter } from 'next/navigation';
-import { PublicationsService } from '@/services/publications.service';
+import { PublicationsService, Publication } from '@/services/publications.service';
 import { formatDate } from '@/utils/date';
 import { formatPrice } from '@/utils/format';
 import { Carousel } from '@/components/ui/Carousel';
@@ -48,6 +48,36 @@ interface PublicationData {
   subcategory?: string;
   subsubcategory?: string;
   attributes?: Record<string, any>;
+}
+
+// Función para mapear de Publication a PublicationData
+function mapPublicationToPublicationData(pub: Publication): PublicationData {
+  return {
+    id: pub._id,
+    title: pub.title,
+    description: pub.description,
+    price: pub.value,
+    price_type: pub.valueType,
+    images: pub.images,
+    location: {
+      city: pub.location.city,
+      region: pub.location.province,
+      country: pub.location.country,
+    },
+    contact: {
+      whatsapp: pub.contact.phones?.[0] || '',
+      email: pub.contact.email,
+      phone: pub.contact.phones?.[0],
+      name: pub.contact.name,
+    },
+    created_at: pub.createdAt,
+    views: pub.views,
+    category: pub.categorySlug,
+    categorySlug: pub.categorySlug,
+    subcategory: pub.subcategorySlug,
+    subsubcategory: pub.subSubcategorySlug,
+    attributes: pub.size ? { area: pub.size } : undefined,
+  };
 }
 
 // El componente que renderiza el contenido de la página de detalle
@@ -305,7 +335,8 @@ export default function InmuebleDetailPage({ params }: { params: Promise<{ id: s
         const publicationData = await PublicationsService.getPublicationById(id);
         
         if (publicationData) {
-          setPublication(publicationData);
+          const mappedData = mapPublicationToPublicationData(publicationData);
+          setPublication(mappedData);
         } else {
           setError('Publicación no encontrada');
         }

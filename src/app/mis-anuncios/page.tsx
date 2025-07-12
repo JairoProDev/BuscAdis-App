@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { useAuth } from '@/features/auth/hooks/useAuth';
-import { PublicationsService } from '@/services/publications.service';
+import { PublicationsService, UserPublication } from '@/services/publications.service';
 import Link from 'next/link';
 import { PencilIcon, TrashIcon, EyeIcon, PlusIcon } from '@heroicons/react/24/outline';
 import LoadingSpinner from '@/components/ui/LoadingSpinner';
@@ -13,7 +13,7 @@ import Image from 'next/image';
 
 export default function MyPublicationsPage() {
   const { user } = useAuth();
-  const [publications, setPublications] = useState<unknown[]>([]);
+  const [publications, setPublications] = useState<UserPublication[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [deleteConfirm, setDeleteConfirm] = useState<string | null>(null);
@@ -40,7 +40,7 @@ export default function MyPublicationsPage() {
   const handleDeletePublication = async (id: string) => {
     try {
       await PublicationsService.deletePublication(id);
-      setPublications(publications.filter(publication => publication.id !== id));
+      setPublications(publications.filter(publication => publication._id !== id));
       setDeleteConfirm(null);
     } catch (err) {
       console.error('Error deleting publication:', err);
@@ -121,13 +121,13 @@ export default function MyPublicationsPage() {
               </thead>
               <tbody className="bg-white divide-y divide-gray-200">
                 {publications.map((publication) => (
-                  <tr key={publication.id} className="hover:bg-gray-50">
+                  <tr key={publication._id} className="hover:bg-gray-50">
                     <td className="px-6 py-4 whitespace-nowrap">
                       <div className="flex items-center">
                         <div className="h-10 w-10 flex-shrink-0">
-                          {publication.media && publication.media.length > 0 ? (
+                          {publication.images && publication.images.length > 0 ? (
                             <Image 
-                              src={publication.media[0]} 
+                              src={publication.images[0]} 
                               alt={publication.title}
                               width={40}
                               height={40}
@@ -144,7 +144,7 @@ export default function MyPublicationsPage() {
                             {publication.title}
                           </div>
                           <div className="text-sm text-gray-500">
-                            {publication.category}
+                            {publication.categorySlug}
                           </div>
                         </div>
                       </div>
@@ -167,21 +167,21 @@ export default function MyPublicationsPage() {
                     <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                       <div className="flex space-x-2 justify-end">
                         <Link
-                          href={`/anuncios/${publication.id}`}
+                          href={`/anuncios/${publication._id}`}
                           className="text-primary-600 hover:text-primary-900"
                           title="Ver anuncio"
                         >
                           <EyeIcon className="h-5 w-5" />
                         </Link>
                         <Link
-                          href={`/mis-anuncios/editar/${publication.id}`}
+                          href={`/mis-anuncios/editar/${publication._id}`}
                           className="text-indigo-600 hover:text-indigo-900"
                           title="Editar anuncio"
                         >
                           <PencilIcon className="h-5 w-5" />
                         </Link>
                         <button
-                          onClick={() => setDeleteConfirm(publication.id)}
+                          onClick={() => setDeleteConfirm(publication._id)}
                           className="text-red-600 hover:text-red-900"
                           title="Eliminar anuncio"
                         >

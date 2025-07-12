@@ -324,9 +324,9 @@ export default function PostPageClient({ slug }: PostPageClientProps) {
                         {post.author.bio || 'Autor del blog de BuscAdis'}
                       </p>
                       <div className="flex items-center gap-4 text-sm text-slate-500">
-                        <span>{post.author.postsCount || 0} artículos</span>
+                        <span>Autor de BuscAdis</span>
                         <span>•</span>
-                        <span>Miembro desde {formatDate(post.author.joinedAt || new Date().toISOString())}</span>
+                        <span>Experto en el mercado</span>
                       </div>
                     </div>
                   </div>

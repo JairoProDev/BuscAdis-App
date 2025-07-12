@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server'
 import { MongoClient } from 'mongodb'
+import { getMongoClient } from '@/lib/mongodb-server'
 
 export const dynamic = 'force-dynamic'
 export const runtime = 'nodejs'
@@ -53,7 +54,7 @@ export async function POST(request: Request) {
     };
 
     // Insert into database
-    const client = await getServerMongoClient();
+    const client = await getMongoClient();
     const db = client.db(process.env.MONGODB_DB);
     const collection = db.collection('search_analytics');
 
@@ -82,7 +83,7 @@ export async function POST(request: Request) {
 
 async function getSearchSuggestions(query: string) {
   try {
-    const client = await getServerMongoClient();
+    const client = await getMongoClient();
     const db = client.db(process.env.MONGODB_DB);
     
     // Search across multiple collections
@@ -101,7 +102,7 @@ async function getSearchSuggestions(query: string) {
         ]
       }).limit(5).toArray();
 
-      results.forEach((item: { title?: string; description?: string; _id: string }) => {
+      results.forEach((item: { title?: string; description?: string; _id: any }) => {
         const text = item.title || item.description || '';
         if (text) {
           suggestions.push({

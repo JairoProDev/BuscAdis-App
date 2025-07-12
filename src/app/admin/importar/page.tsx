@@ -4,6 +4,7 @@ import { useState } from 'react';
 import { parsePublicationsFromText, preparePublicationForAPI } from '@/utils/publicationParser';
 import { PublicationsService } from '@/services/publications.service';
 import LoadingSpinner from '@/components/ui/LoadingSpinner';
+import { PublicationInput } from '@/types/publication';
 
 interface Publication {
   title: string;
@@ -30,7 +31,7 @@ interface ImportResult {
 
 export default function ImportPublicationsPage() {
   const [rawText, setRawText] = useState('');
-  const [parsedPublications, setParsedPublications] = useState<any[]>([]);
+  const [parsedPublications, setParsedPublications] = useState<Publication[]>([]);
   const [importing, setImporting] = useState(false);
   const [importResult, setImportResult] = useState<ImportResult | null>(null);
   const [step, setStep] = useState(1);
@@ -43,7 +44,19 @@ export default function ImportPublicationsPage() {
     }
 
     try {
-      const publications = parsePublicationsFromText(rawText);
+      const publicationInputs = parsePublicationsFromText(rawText);
+      // Convertir PublicationInput[] a Publication[]
+      const publications: Publication[] = publicationInputs.map(input => ({
+        title: input.title,
+        category: input.category,
+        subcategory: input.subcategory || '',
+        price: input.price,
+        price_type: input.currency || 'PEN',
+        contact: {
+          phone: input.contactPhone,
+          email: input.contactEmail
+        }
+      }));
       setParsedPublications(publications);
       setStep(2);
     } catch (error) {
@@ -72,8 +85,29 @@ export default function ImportPublicationsPage() {
       // Importar cada publicación
       for (const publication of parsedPublications) {
         try {
+          // Convertir Publication a PublicationInput para preparePublicationForAPI
+          const publicationInput: PublicationInput = {
+            title: publication.title,
+            description: publication.title, // Usar título como descripción por defecto
+            category: publication.category,
+            subcategory: publication.subcategory,
+            price: publication.price,
+            currency: publication.price_type,
+            location: {
+              province: 'Lima', // Valor por defecto
+              district: '',
+              address: '',
+              referencePoint: '',
+              coordinates: null
+            },
+            contactName: publication.contact.phone || 'No especificado',
+            contactEmail: publication.contact.email,
+            contactPhone: publication.contact.phone || '',
+            images: []
+          };
+          
           // Preparar datos para la API
-          const apiData = preparePublicationForAPI(publication);
+          const apiData = preparePublicationForAPI(publicationInput);
           
           // Enviar a la API
           await PublicationsService.createPublication(apiData);

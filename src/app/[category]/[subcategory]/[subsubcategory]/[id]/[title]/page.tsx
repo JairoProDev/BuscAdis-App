@@ -75,7 +75,26 @@ export default function PublicationDetailWithTitlePage() {
           if (response.ok) {
             const relatedData = await response.json();
             if (relatedData.publications) {
-              setRelatedPublications(relatedData.publications.map((pub: any) => ({
+              setRelatedPublications(relatedData.publications.map((pub: {
+                id?: string;
+                _id?: string;
+                title: string;
+                description: string;
+                categorySlug?: string;
+                category?: string;
+                subcategorySlug?: string;
+                subSubcategorySlug?: string;
+                price?: number;
+                amount?: number;
+                currency?: string;
+                location?: string;
+                images?: string[];
+                whatsapp?: string;
+                createdAt?: string;
+                views?: number;
+                featured?: boolean;
+                premium?: boolean;
+              }) => ({
                 id: pub.id || pub._id,
                 title: pub.title,
                 description: pub.description,
@@ -103,8 +122,8 @@ export default function PublicationDetailWithTitlePage() {
 
         setLoading(false);
         
-      } catch (err) {
-        console.error('Error al cargar la publicación:', err);
+      } catch (e) {
+        console.error('Error al cargar la publicación:', e);
         setError('No se pudo encontrar la publicación solicitada.');
         setLoading(false);
       }
@@ -131,7 +150,7 @@ export default function PublicationDetailWithTitlePage() {
           text: publicationData.description,
           url: window.location.href
         });
-      } catch (err) {
+      } catch {
         console.log('Share cancelled');
       }
     } else if (publicationData) {
