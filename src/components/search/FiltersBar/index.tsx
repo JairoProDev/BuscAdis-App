@@ -17,20 +17,22 @@ interface Filter {
   options?: Array<{ value: string; label: string }>
 }
 
+import type { FilterValue } from '@/types/filters'
+
 interface FiltersBarProps {
-  onFilterChange?: (filters: Record<string, any>) => void
+  onFilterChange?: (filters: Record<string, FilterValue>) => void
   className?: string
 }
 
 export default function FiltersBar({ onFilterChange, className = '' }: FiltersBarProps) {
   const { searchState } = useSearch()
-  const [activeFilters, setActiveFilters] = useState<Record<string, any>>({})
+  const [activeFilters, setActiveFilters] = useState<Record<string, FilterValue>>({})
   const [openFilter, setOpenFilter] = useState<string | null>(null)
 
   // Get filters for current category
   const categoryFilters = searchState.category ? filtersByCategory[searchState.category as keyof typeof filtersByCategory] : null
 
-  const handleFilterChange = (filterId: string, value: any) => {
+  const handleFilterChange = (filterId: string, value: FilterValue) => {
     const newFilters = { ...activeFilters, [filterId]: value }
     setActiveFilters(newFilters)
     if (onFilterChange) {
@@ -117,7 +119,7 @@ export default function FiltersBar({ onFilterChange, className = '' }: FiltersBa
                                 if (e.target.checked) {
                                   handleFilterChange(filter.id, [...currentValues, option.value])
                                 } else {
-                                  handleFilterChange(filter.id, currentValues.filter((v: any) => v !== option.value))
+                                  handleFilterChange(filter.id, currentValues.filter((v: string) => v !== option.value))
                                 }
                               }}
                               className="text-blue-600"

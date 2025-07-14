@@ -1,8 +1,9 @@
 // src/components/search/MapComponent.tsx
 import React from 'react';
+import type { PublicationDocument } from '@/types/api';
 
 interface MapComponentProps {
-    publications: any[];
+    publications: PublicationDocument[];
 }
 
 const MapComponent: React.FC<MapComponentProps> = ({ publications }) => {

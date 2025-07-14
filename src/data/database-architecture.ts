@@ -83,7 +83,7 @@ export interface PublicationBulkData {
   }
   
   // Datos específicos por categoría (completamente dinámico)
-  categoryData?: Record<string, any>
+  categoryData?: Record<string, unknown>
   
   // Metadatos para IA/ML
   aiMetadata?: {

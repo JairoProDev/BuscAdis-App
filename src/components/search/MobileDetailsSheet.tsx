@@ -71,7 +71,7 @@ export default function MobileDetailsSheet({
     }
   }
   
-  const handleDragEnd = (_: any, info: PanInfo) => {
+  const handleDragEnd = (_: unknown, info: PanInfo) => {
     const velocity = info.velocity.y
     const offset = info.offset.y
     

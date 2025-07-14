@@ -150,6 +150,9 @@ export async function GET(request: Request) {
     const limit = parseInt(searchParams.get('limit') || '10')
 
     const { db } = await connectToDatabase()
+    if (!db) {
+      throw new Error('Failed to connect to database')
+    }
     const trends = db.collection('search_trends')
 
     // Calcular fecha de inicio
