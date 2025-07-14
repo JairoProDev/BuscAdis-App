@@ -7,16 +7,16 @@ export const runtime = 'nodejs' // Mark as server-side only
 // Debug flag
 const DEBUG = true;
 
-function logDebug(message: string, data?: any) {
+function logDebug(message: string, data?: unknown) {
   if (DEBUG) {
     console.log(`[Related Publications API Debug] ${message}`, data ? data : '');
   }
 }
 
-function logError(message: string, error: any) {
+function logError(message: string, error: unknown) {
   console.error(`[Related Publications API Error] ${message}:`, error);
-  if (error?.stack) {
-    console.error('Stack:', error.stack);
+  if (error && typeof error === 'object' && 'stack' in error) {
+    console.error('Stack:', (error as Error).stack);
   }
 }
 
@@ -61,7 +61,7 @@ export async function GET(request: Request) {
     const collectionName = CATEGORY_COLLECTIONS[category];
     
     // Crear la consulta para excluir la publicación actual
-    const query: Record<string, any> = {};
+    const query: Record<string, unknown> = {};
     if (excludeId) {
       query.id = { $ne: excludeId };
     }

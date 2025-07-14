@@ -202,7 +202,7 @@ export async function GET(request: Request) {
               { $limit: 2 }
             ]).toArray()
 
-            suggestions.push(...publicationSuggestions.map((item: any): Suggestion => ({
+            suggestions.push(...publicationSuggestions.map((item: { _id: string; count: number; examples: string[] }): Suggestion => ({
               id: `word-${item._id}`,
               text: item._id,
               type: 'ai',

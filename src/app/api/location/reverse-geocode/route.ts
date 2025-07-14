@@ -1,5 +1,16 @@
 import { NextRequest, NextResponse } from 'next/server';
 
+interface LocationComponent {
+    name: string;
+    id: string | null;
+}
+
+interface GoogleAddressComponent {
+    long_name: string;
+    short_name: string;
+    types: string[];
+}
+
 const GOOGLE_MAPS_API_KEY = process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY;
 const REVERSE_GEOCODE_URL = 'https://maps.googleapis.com/maps/api/geocode/json';
 
@@ -41,7 +52,7 @@ export async function GET(request: NextRequest) {
             return NextResponse.json({ error: 'No location found for the provided coordinates' }, { status: 404 });
         }
 
-        const location: Record<string, any> = {
+        const location: Record<string, LocationComponent | null> = {
             country: null,
             department: null,
             province: null,
@@ -49,7 +60,7 @@ export async function GET(request: NextRequest) {
         };
 
         // Extraemos los componentes de la dirección y los mapeamos a nuestra estructura
-        result.address_components.forEach((component: any) => {
+        result.address_components.forEach((component: GoogleAddressComponent) => {
             const componentType = component.types[0];
             if (componentMap[componentType]) {
                 const ourType = componentMap[componentType];

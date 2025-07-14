@@ -6,12 +6,13 @@ import LoadingSpinner from "@/components/ui/LoadingSpinner";
 import VehiculoDetail from "@/components/publications/dedicated/categories/VehiculoDetail";
 import { WhatsAppIcon } from '@/components/icons';
 import { ShareIcon, FlagIcon } from '@heroicons/react/24/outline';
+import type { PublicationDocument } from '@/types/api';
 
 export default function VehiculoDetailPage() {
   const params = useParams();
   const router = useRouter();
   const { id } = params as { id: string };
-  const [publication, setPublication] = useState<any>(null);
+  const [publication, setPublication] = useState<PublicationDocument | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(false);
 

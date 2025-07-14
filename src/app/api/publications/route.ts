@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server'
-import { MongoClient } from 'mongodb'
+import { MongoClient, Db } from 'mongodb'
 import { Logger } from '@/services/logging.service'
+import type { PublicationDocument } from '@/types/api'
 
 export const dynamic = 'force-dynamic'
 export const runtime = 'nodejs'
@@ -23,7 +24,7 @@ const CATEGORY_COLLECTIONS = {
 
 // Cache de conexión
 let cachedClient: MongoClient | null = null
-let cachedDb: any = null
+let cachedDb: Db | null = null
 
 async function connectToDatabase() {
   if (cachedClient && cachedDb) {
@@ -70,12 +71,12 @@ export async function GET(request: Request) {
     // Conectar a la base de datos
     const { db } = await connectToDatabase()
 
-    let allPublications: any[] = []
+    let allPublications: PublicationDocument[] = []
     let totalCount = 0
 
     // Construir query de filtros
     const buildQuery = () => {
-      const query: any = {}
+      const query: Record<string, unknown> = {}
       
       // Filtro por estado
       if (status) {
@@ -139,7 +140,7 @@ export async function GET(request: Request) {
           const publications = await collection.find(mongoQuery).toArray()
           
           // Agregar categoría a cada publicación
-          return publications.map((pub: any) => ({
+          return publications.map((pub: PublicationDocument) => ({
             ...pub,
             categorySlug: cat,
             category: cat

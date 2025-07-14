@@ -43,7 +43,7 @@ export default function EmpleoDetailPageClient({ id }: EmpleoDetailPageClientPro
         let city = '';
         const country = 'Perú';
         if (typeof pub.location === 'string') {
-          const parts = pub.location.split(',').map((p: any) => (typeof p === 'string' ? p.trim() : ''));
+          const parts = pub.location.split(',').map((p: unknown) => (typeof p === 'string' ? p.trim() : ''));
           if (parts.length === 2) {
             district = parts[0];
             city = parts[1];

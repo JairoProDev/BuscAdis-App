@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server'
 import { mongoDbQuery } from '@/lib/mongodb-server'
+import type { PublicationDocument } from '@/types/api'
 
 export const dynamic = 'force-dynamic' // Disable caching to ensure data is always fresh
 export const runtime = 'nodejs' // Mark as server-side only
@@ -31,7 +32,7 @@ export async function GET(
       'publications_comunidad'
     ]
     
-    const allPublications: any[] = []
+    const allPublications: PublicationDocument[] = []
     
     for (const collectionName of collections) {
       try {
@@ -47,7 +48,7 @@ export async function GET(
         
         // Add category information to each publication
         const category = collectionName.replace('publications_', '')
-        const categorizedPublications = publications.map((pub: any) => ({
+        const categorizedPublications = publications.map((pub: PublicationDocument) => ({
           ...pub,
           id: pub._id.toString(),
           category: category,

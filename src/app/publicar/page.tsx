@@ -335,16 +335,40 @@ export default function PublicarPage() {
     Logger.info('Categoría seleccionada', slugs);
   }, [updateAd, validateStep, setStep, step]);
 
-  const handlePriceChange = useCallback((priceData: any) => {
+  interface PriceData {
+    amount: number | null;
+    currency: 'PEN' | 'USD';
+    negotiable: boolean;
+  }
+
+  interface LocationData {
+    province?: string;
+    district?: string;
+    address?: string;
+    referencePoint?: string;
+    coordinates?: {
+      lat: number;
+      lng: number;
+    };
+  }
+
+  interface ContactData {
+    phones?: string[];
+    email?: string;
+    name?: string;
+    website?: string;
+  }
+
+  const handlePriceChange = useCallback((priceData: PriceData) => {
     updateAd((prev: PublicationFormData) => ({
       ...prev,
       amount: priceData.amount,
-      currency: priceData.currency as 'PEN' | 'USD' || 'PEN',
+      currency: priceData.currency || 'PEN',
       negotiable: priceData.negotiable || false,
     }));
   }, [updateAd]);
 
-  const handleLocationChange = useCallback((locationData: any) => {
+  const handleLocationChange = useCallback((locationData: LocationData) => {
     updateAd((prev: PublicationFormData) => ({
       ...prev,
       location: {
@@ -360,7 +384,7 @@ export default function PublicarPage() {
     }));
   }, [updateAd]);
 
-  const handleContactChange = useCallback((contactData: any) => {
+  const handleContactChange = useCallback((contactData: ContactData) => {
     updateAd((prev: PublicationFormData) => ({
       ...prev,
       contact: {
