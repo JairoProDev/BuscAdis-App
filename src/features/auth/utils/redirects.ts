@@ -1,4 +1,6 @@
-export const handlePostAuthRedirect = (router: any, searchParams: any) => {
+import type { NextRouter } from 'next/router';
+
+export const handlePostAuthRedirect = (router: NextRouter, searchParams: URLSearchParams) => {
   const redirect = searchParams.get('redirect');
   const data = searchParams.get('data');
   

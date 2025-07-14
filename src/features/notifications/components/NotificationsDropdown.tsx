@@ -5,8 +5,16 @@ import { useAuth } from '@/features/auth/hooks/useAuth';
 import { NotificationsService } from '../services/notifications.service';
 import { BellIcon } from '@heroicons/react/24/outline';
 
+interface Notification {
+  id: string;
+  title: string;
+  message: string;
+  read: boolean;
+  created_at: string;
+}
+
 export default function NotificationsDropdown() {
-  const [notifications, setNotifications] = useState<any[]>([]);
+  const [notifications, setNotifications] = useState<Notification[]>([]);
   const [unreadCount, setUnreadCount] = useState(0);
   const [isOpen, setIsOpen] = useState(false);
   const { user } = useAuth();
@@ -21,7 +29,7 @@ export default function NotificationsDropdown() {
     try {
       const data = await NotificationsService.getNotifications(user!.id);
       setNotifications(data);
-      setUnreadCount(data.filter((n: any) => !n.read).length);
+      setUnreadCount(data.filter((n: Notification) => !n.read).length);
     } catch (error) {
       console.error('Error loading notifications:', error);
     }
@@ -30,7 +38,7 @@ export default function NotificationsDropdown() {
   const handleMarkAsRead = async (notificationId: string) => {
     try {
       await NotificationsService.markAsRead(notificationId);
-      setNotifications(notifications.map((n: any) => 
+      setNotifications(notifications.map((n: Notification) => 
         n.id === notificationId ? { ...n, read: true } : n
       ));
       setUnreadCount(Math.max(0, unreadCount - 1));
@@ -42,7 +50,7 @@ export default function NotificationsDropdown() {
   const handleMarkAllAsRead = async () => {
     try {
       await NotificationsService.markAllAsRead(user!.id);
-      setNotifications(notifications.map((n: any) => ({ ...n, read: true })));
+      setNotifications(notifications.map((n: Notification) => ({ ...n, read: true })));
       setUnreadCount(0);
     } catch (error) {
       console.error('Error marking all notifications as read:', error);
@@ -83,7 +91,7 @@ export default function NotificationsDropdown() {
                 No tienes notificaciones
               </div>
             ) : (
-              notifications.map((notification: any) => (
+              notifications.map((notification: Notification) => (
                 <div
                   key={notification.id}
                   className={`px-4 py-3 hover:bg-gray-50 cursor-pointer ${

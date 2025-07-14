@@ -6,14 +6,33 @@ import { MessagesService } from '../services/messages.service';
 import { PaperAirplaneIcon } from '@heroicons/react/24/solid';
 // AWS SDK removed due to missing dependency
 
+interface User {
+  id: string;
+  full_name: string;
+  email?: string;
+}
+
+interface Publication {
+  id: string;
+  title: string;
+  description?: string;
+}
+
+interface Message {
+  id: string;
+  content: string;
+  sender_id: string;
+  created_at: string;
+}
+
 interface ChatProps {
   conversationId: string;
-  otherUser: any;
-  publication: any;
+  otherUser: User;
+  publication: Publication;
 }
 
 export default function Chat({ conversationId, otherUser, publication }: ChatProps) {
-  const [messages, setMessages] = useState<any[]>([]);
+  const [messages, setMessages] = useState<Message[]>([]);
   const [newMessage, setNewMessage] = useState('');
   const { user } = useAuth();
   const messagesEndRef = useRef<HTMLDivElement>(null);
@@ -72,7 +91,7 @@ export default function Chat({ conversationId, otherUser, publication }: ChatPro
       </div>
 
       <div className="flex-1 overflow-y-auto p-4 space-y-4">
-        {messages.map((message: any) => (
+        {messages.map((message: Message) => (
           <div
             key={message.id}
             className={`flex ${

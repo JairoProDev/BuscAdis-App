@@ -17,7 +17,7 @@ export class UserPublicationsService {
     }
   }
 
-  static async updatePublication(publicationId: string, updates: any) {
+  static async updatePublication(publicationId: string, updates: Record<string, unknown>) {
     try {
       const publications = await this.getCollection();
       const updateData = {

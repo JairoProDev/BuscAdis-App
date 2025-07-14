@@ -519,4 +519,7 @@ export interface AuditLog {
   details: Record<string, unknown>;
   ipAddress: string;
   userAgent: string;
-} 
+}
+
+// Re-export PublicationDocument from database architecture
+export type { PublicationDocument } from '@/data/database-architecture'; 

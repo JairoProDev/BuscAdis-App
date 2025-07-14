@@ -16,7 +16,7 @@ export class UserPublicationsService {
     }
   }
 
-  static async updatePublication(publicationId: string, updates: any) {
+  static async updatePublication(publicationId: string, updates: Record<string, unknown>) {
     try {
       const data = await mongoDbUpdate(
         'publications',

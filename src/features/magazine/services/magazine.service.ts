@@ -65,7 +65,7 @@ export async function getMagazineHistory(): Promise<MagazineMetadata[]> {
     );
     
     // Transform to the expected interface
-    return magazines.map((magazine: any) => ({
+    return magazines.map((magazine: Record<string, unknown>) => ({
       _id: magazine._id.toString(),
       pdfUrl: magazine.pdfUrl,
       fileId: magazine.fileId.toString(),

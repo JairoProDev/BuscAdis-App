@@ -20,7 +20,7 @@ export class SearchService {
       const publications = await this.getCollection();
       
       // Build filter object
-      const filter: Record<string, any> = { 
+      const filter: Record<string, unknown> = { 
         // Default filter for active publications
         status: "active"
       };
