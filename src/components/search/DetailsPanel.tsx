@@ -29,14 +29,14 @@ export interface Publication {
     email?: string
     rating?: number
   }
-  attributes?: Record<string, any>
+  attributes?: Record<string, unknown>
   category?: string
   subcategory?: string
   coordinates?: {
     lat: number;
     lng: number;
   }
-  [key: string]: any
+  [key: string]: unknown
 }
 
 interface DetailsPanelProps {

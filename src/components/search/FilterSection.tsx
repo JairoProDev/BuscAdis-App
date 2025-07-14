@@ -24,8 +24,8 @@ interface FilterSectionProps {
   min?: number
   max?: number
   step?: number
-  value: any
-  onChange: (value: any) => void
+  value: FilterValue
+  onChange: (value: FilterValue) => void
   onApply?: () => void
   className?: string
   activeFilters?: FilterValue

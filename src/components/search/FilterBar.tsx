@@ -2,8 +2,14 @@
 import React, { useState } from 'react';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/Select';
 
+interface FilterOptions {
+    category?: string;
+    location?: string;
+    sortBy?: string;
+}
+
 interface FilterBarProps {
-    onFilterChange: (filters: any) => void;
+    onFilterChange: (filters: FilterOptions) => void;
 }
 
 const FilterBar: React.FC<FilterBarProps> = ({ onFilterChange }) => {

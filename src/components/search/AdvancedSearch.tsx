@@ -1,8 +1,18 @@
 // src/components/search/AdvancedSearch.tsx
 import React, { useState } from 'react';
 
+interface SearchFilters {
+  query?: string;
+  category?: string;
+  location?: string;
+  priceRange?: {
+    min: string;
+    max: string;
+  };
+}
+
 interface AdvancedSearchProps {
-    onSearch: (filters: any) => void;
+    onSearch: (filters: SearchFilters) => void;
 }
 
 const AdvancedSearch: React.FC<AdvancedSearchProps> = ({ onSearch }) => {
