@@ -4,17 +4,19 @@ import React, { useState, useEffect, useRef } from 'react';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 import PublicationCard from '@/components/publications/PublicationCard';
 
+import type { PublicationDocument } from '@/types/api';
+
 interface ExplorationRow {
   id: string;
   title: string;
   subtitle?: string;
   icon: string;
-  publications: any[];
+  publications: PublicationDocument[];
   maxItems: number;
 }
 
 interface ExplorationViewProps {
-  onSearch: (query: string, options?: any) => void;
+  onSearch: (query: string, options?: Record<string, unknown>) => void;
 }
 
 const ExplorationView: React.FC<ExplorationViewProps> = ({ onSearch }) => {
@@ -162,7 +164,7 @@ const ExplorationView: React.FC<ExplorationViewProps> = ({ onSearch }) => {
 
 interface ExplorationRowProps {
   row: ExplorationRow;
-  onSearch: (query: string, options?: any) => void;
+  onSearch: (query: string, options?: Record<string, unknown>) => void;
 }
 
 const ExplorationRowComponent: React.FC<ExplorationRowProps> = ({ row, onSearch }) => {
@@ -207,7 +209,7 @@ const ExplorationRowComponent: React.FC<ExplorationRowProps> = ({ row, onSearch 
   };
 
   // Adaptador robusto para trabajar con los datos reales de tu API
-  const adaptPublication = (publication: any) => ({
+  const adaptPublication = (publication: PublicationDocument) => ({
     id: publication.id || publication._id || 'unknown',
     title: publication.title || 'Sin título',
     description: publication.description || '',
@@ -294,7 +296,7 @@ const ExplorationRowComponent: React.FC<ExplorationRowProps> = ({ row, onSearch 
           className="flex gap-4 overflow-x-auto scrollbar-hide scroll-smooth px-4 sm:px-6"
           style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
         >
-          {row.publications.slice(0, row.maxItems).map((publication: any) => (
+          {row.publications.slice(0, row.maxItems).map((publication: PublicationDocument) => (
             <div key={publication.id || publication._id || Math.random()} className="flex-shrink-0 w-80">
               <PublicationCard 
                 publication={adaptPublication(publication)}

@@ -65,10 +65,16 @@ declare global {
         };
       };
       Size: {
-        new(width: number, height: number): any;
+        new(width: number, height: number): {
+          width: number;
+          height: number;
+        };
       };
       Point: {
-        new(x: number, y: number): any;
+        new(x: number, y: number): {
+          x: number;
+          y: number;
+        };
       };
     }
   }
@@ -150,7 +156,7 @@ export default function LocationMap({
           ]
         }
         
-        const map = new (google.maps.Map as any)(mapRef.current!, mapOptions)
+        const map = new google.maps.Map(mapRef.current!, mapOptions)
         
         // Add a marker at the location
         const markerSvg = `
@@ -165,13 +171,13 @@ export default function LocationMap({
         // Convert SVG to URL
         const svgUrl = 'data:image/svg+xml;charset=UTF-8,' + encodeURIComponent(markerSvg)
         
-        new (google.maps.Marker as any)({
+        new google.maps.Marker({
           position: { lat, lng },
           map,
           icon: {
             url: svgUrl,
-            scaledSize: new (google.maps.Size as any)(36, 36),
-            anchor: new (google.maps.Point as any)(18, 36),
+            scaledSize: new google.maps.Size(36, 36),
+            anchor: new google.maps.Point(18, 36),
           },
           optimized: true
         })

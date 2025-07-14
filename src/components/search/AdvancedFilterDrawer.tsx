@@ -14,10 +14,10 @@ import { useSearchParams } from 'next/navigation'
 
 interface AdvancedFilterDrawerProps {
   selectedCategory?: string
-  initialFilters?: Record<string, any>
+  initialFilters?: Record<string, FilterValue>
   categories: Array<{id: string, name: string}>
   onCategoryChange: (category: {id: string, name: string} | null) => void
-  onFilterChange: (filters: Record<string, any>) => void
+  onFilterChange: (filters: Record<string, FilterValue>) => void
   filterCount: number
 }
 
@@ -49,7 +49,7 @@ export default function AdvancedFilterDrawer({
     )
   }
 
-  const handleFilterChange = (filterId: string, value: any) => {
+  const handleFilterChange = (filterId: string, value: FilterValue) => {
     const newFilters = { ...activeFilters }
     
     if (value === '' || value === null || value === undefined || 

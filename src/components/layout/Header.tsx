@@ -400,7 +400,7 @@ export default function Header() {
         <LocationSelector
           onClose={() => setShowLocationSelector(false)}
           onLocationSelect={handleLocationSelect}
-          initialSelection={selectedLocation as any}
+          initialSelection={selectedLocation as LocationData}
         />
       )}
     </header>
