@@ -30,15 +30,15 @@ export default function ServicioDetail({ publication }: ServicioDetailProps) {
   }
 
   // Garantizar que attributes siempre exista como objeto
-  const attributes = (publication && (publication as any).attributes) ? (publication as any).attributes : {};
+  const attributes: Record<string, unknown> = (publication && (publication as { attributes?: Record<string, unknown> }).attributes) || {};
 
   // Datos principales y secundarios con fallbacks robustos
   const servicioData = {
     categoria: publication.subcategorySlug || 'Servicio',
-    duracion: attributes.duracion || 'A consultar',
-    experiencia: attributes.experiencia || 'A consultar',
-    disponibilidad: attributes.disponibilidad || 'A consultar',
-    modalidad: attributes.modalidad || 'A consultar',
+    duracion: attributes.duracion ?? 'A consultar',
+    experiencia: attributes.experiencia ?? 'A consultar',
+    disponibilidad: attributes.disponibilidad ?? 'A consultar',
+    modalidad: attributes.modalidad ?? 'A consultar',
     precio: publication.value || 0,
     calificacion: typeof attributes.calificacion === 'number' ? attributes.calificacion : 4.8, // mock si no existe
     trabajosCompletados: typeof attributes.trabajosCompletados === 'number' ? attributes.trabajosCompletados : 150, // mock si no existe
@@ -208,7 +208,7 @@ export default function ServicioDetail({ publication }: ServicioDetailProps) {
               <div>
                 <h4 className="font-semibold text-gray-900 dark:text-white mb-4">Experiencia y Certificaciones</h4>
                 <div className="space-y-4">
-                  {servicioData.certificaciones.map((cert, index) => (
+                  {servicioData.certificaciones.map((cert: string, index: number) => (
                     <div key={index} className="flex items-center gap-3 bg-green-50 dark:bg-green-900/20 rounded-lg p-3">
                       <CheckBadgeIcon className="w-5 h-5 text-green-600" />
                       <span className="text-green-800 dark:text-green-300">{cert}</span>

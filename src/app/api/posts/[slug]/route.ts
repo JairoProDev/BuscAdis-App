@@ -65,7 +65,7 @@ export async function GET(
 
 export async function PUT(
   request: Request,
-  context: { params: Promise<{ slug: string }> }
+  { params }: { params: Promise<{ slug: string }> }
 ) {
   try {
     const body: Record<string, unknown> = await request.json()
@@ -102,7 +102,7 @@ export async function PUT(
 
 export async function DELETE(
   request: Request,
-  context: { params: Promise<{ slug: string }> }
+  { params }: { params: Promise<{ slug: string }> }
 ) {
   try {
     

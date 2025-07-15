@@ -2,7 +2,6 @@ import { NextResponse } from 'next/server';
 import { MongoClient, Db } from 'mongodb'
 import { Logger } from '@/services/logging.service'
 import type { SortDirection } from 'mongodb';
-import { getPublicationModel } from '@/lib/models/Publication';
 
 export const dynamic = 'force-dynamic'
 export const runtime = 'nodejs'
