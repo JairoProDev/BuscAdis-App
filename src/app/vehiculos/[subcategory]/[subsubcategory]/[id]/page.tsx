@@ -7,6 +7,7 @@ import VehiculoDetail from "@/components/publications/dedicated/categories/Vehic
 import { WhatsAppIcon } from '@/components/icons';
 import { ShareIcon, FlagIcon } from '@heroicons/react/24/outline';
 import type { PublicationDocument } from '@/types/api';
+import { normalizePublicationData } from '@/utils/publications';
 
 export default function VehiculoDetailPage() {
   const params = useParams();
@@ -60,6 +61,9 @@ export default function VehiculoDetailPage() {
     return <div className="flex items-center justify-center min-h-screen">No se encontró la publicación.</div>;
   }
 
+  // Adapt publication to PublicationData
+  const normalizedPublication = normalizePublicationData(publication);
+
   const { contact = {} } = publication;
 
   return (
@@ -76,7 +80,7 @@ export default function VehiculoDetailPage() {
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           {/* Columna principal */}
           <div className="lg:col-span-2 space-y-6">
-            <VehiculoDetail publication={publication} />
+            <VehiculoDetail publication={normalizedPublication} />
           </div>
           {/* Panel lateral derecho */}
           <div className="lg:col-span-1 space-y-6">
