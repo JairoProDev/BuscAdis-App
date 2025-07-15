@@ -27,7 +27,7 @@ export interface LocationData {
   reference?: string;
   coordinates?: {
     lat: number;
-    lon: number;
+    lng: number;
   };
 }
 

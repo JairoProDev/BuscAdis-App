@@ -565,7 +565,7 @@ export default function PublicarPage() {
                     province: ad.location?.province || '',
                     coordinates: ad.location?.coordinates ? {
                       lat: ad.location.coordinates.lat,
-                      lon: ad.location.coordinates.lng
+                      lng: ad.location.coordinates.lng
                     } : undefined
                   }}
                   onChange={handleLocationChange}

@@ -13,7 +13,7 @@ interface MediaItem {
 interface Location {
     district?: { id: string; name: string };
     region?: { id: string; name: string };
-    coordinates?: { lat: number; lon: number } | null;
+    coordinates?: { lat: number; lng: number } | null;
     city?: string;
     country?: string;
 }
