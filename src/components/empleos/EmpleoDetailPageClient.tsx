@@ -17,7 +17,7 @@ import {
   EyeIcon
 } from '@heroicons/react/24/outline';
 import RelatedPublications from '@/components/publication/RelatedPublications';
-import { PublicationData } from '@/types/publication';
+import { PublicationData as EmploymentPublicationData } from '@/types/publication';
 
 interface EmpleoDetailPageClientProps {
   id: string;
@@ -25,9 +25,9 @@ interface EmpleoDetailPageClientProps {
 
 export default function EmpleoDetailPageClient({ id }: EmpleoDetailPageClientProps) {
   const router = useRouter();
-  const [publication, setPublication] = useState<PublicationData | null>(null);
+  const [publication, setPublication] = useState<EmploymentPublicationData | null>(null);
   const [loading, setLoading] = useState(true);
-  const [relatedPublications, setRelatedPublications] = useState<PublicationData[]>([]);
+  const [relatedPublications, setRelatedPublications] = useState<any[]>([]);
 
   useEffect(() => {
     const fetchPublication = async () => {
@@ -51,7 +51,7 @@ export default function EmpleoDetailPageClient({ id }: EmpleoDetailPageClientPro
             city = parts[0];
           }
         }
-        const adapted: PublicationData = {
+        const adapted: EmploymentPublicationData = {
           id: pub._id || id,
           title: pub.title || '',
           description: pub.description || '',
@@ -77,9 +77,9 @@ export default function EmpleoDetailPageClient({ id }: EmpleoDetailPageClientPro
           premium: pub.premium || false,
         };
         setPublication(adapted);
-      } catch {
+      } catch (error) {
         console.error('Error fetching empleo:', error);
-        setError('Error al cargar el empleo');
+        // setError('Error al cargar el empleo'); // This line was removed
       } finally {
         setLoading(false);
       }
@@ -96,7 +96,22 @@ export default function EmpleoDetailPageClient({ id }: EmpleoDetailPageClientPro
           publication.id,
           publication.categorySlug || 'general'
         );
-        setRelatedPublications(relatedData || []);
+        // Adapt the related publications to the expected shape
+        const adaptedRelated = (relatedData || []).map((pub: any) => ({
+          id: pub._id || pub.id || '',
+          title: pub.title || '',
+          price: pub.price ?? pub.value ?? 0,
+          price_type: pub.price_type || pub.valueType || 'fixed',
+          images: Array.isArray(pub.images) ? pub.images : [],
+          location: typeof pub.location === 'object' && pub.location !== null
+            ? { city: pub.location.city || '', region: pub.location.province || pub.location.region || '' }
+            : { city: pub.location || '', region: '' },
+          created_at: pub.created_at || pub.createdAt || '',
+          category: pub.categorySlug || pub.category || '',
+          subcategory: pub.subcategorySlug || pub.subcategory || '',
+          subsubcategory: pub.subSubcategorySlug || pub.subsubcategory || '',
+        }));
+        setRelatedPublications(adaptedRelated);
       } catch (err) {
         console.error('Error al obtener ofertas relacionadas:', err);
       }

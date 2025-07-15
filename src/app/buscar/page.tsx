@@ -458,8 +458,8 @@ function SearchPageContent({ publicationsData, results, setResults, isLoading, s
     }
   }
 
-  const handleSearch = useCallback(async (query: string, filters: Record<string, FilterValue> = {}) => {
-    console.log('🔍 handleSearch called with:', { query, filters, selectedCategory })
+  const handleSearch = useCallback(async (query: string, typedFilters?: Record<string, unknown>) => {
+    console.log('🔍 handleSearch called with:', { query, typedFilters, selectedCategory })
     
     setIsLoading(true)
     setHasSearched(true)
@@ -471,10 +471,10 @@ function SearchPageContent({ publicationsData, results, setResults, isLoading, s
       }
       
       if (query.trim()) searchParams.query = query
-      if (filters.category && filters.category !== 'all') searchParams.category = String(filters.category)
-      if (filters.subcategory) searchParams.subcategory = String(filters.subcategory)
-      if (filters.subsubcategory) searchParams.subsubcategory = String(filters.subsubcategory)
-      if (filters.location) searchParams.location = String(filters.location)
+      if (typedFilters?.category && typedFilters.category !== 'all') searchParams.category = String(typedFilters.category)
+      if (typedFilters?.subcategory) searchParams.subcategory = String(typedFilters.subcategory)
+      if (typedFilters?.subsubcategory) searchParams.subsubcategory = String(typedFilters.subsubcategory)
+      if (typedFilters?.location) searchParams.location = String(typedFilters.location)
       
       // Add active filters to search params
       Object.entries(activeFilters).forEach(([key, value]) => {
@@ -501,7 +501,7 @@ function SearchPageContent({ publicationsData, results, setResults, isLoading, s
           ? `${(pub.location as Record<string, string>).district || (pub.location as Record<string, string>).province || (pub.location as Record<string, string>).city || 'Sin ubicación'}` 
           : pub.location || 'Sin ubicación',
         category: pub.categorySlug || pub.category || 'general',
-        image: pub.images?.[0] || '/images/placeholder-image.jpg',
+        image: Array.isArray(pub.images) && typeof pub.images[0] === 'string' ? pub.images[0] : '/images/placeholder-image.jpg',
         createdAt: pub.createdAt || pub.created_at || new Date().toISOString(), // Fecha real de MongoDB
         views: pub.views || Math.floor(Math.random() * 500) + 50,
         premium: pub.premium || false,
@@ -610,7 +610,7 @@ function SearchPageContent({ publicationsData, results, setResults, isLoading, s
           category: categoryId,
           price: pub.price || pub.amount || 0,
           location: `${(pub.location as Record<string, string>)?.district || ''}, ${(pub.location as Record<string, string>)?.province || ''}`.replace(/^,\s*/, '') || 'Sin ubicación',
-          image: pub.images?.[0] || '/images/placeholder-image.jpg',
+          image: Array.isArray(pub.images) && typeof pub.images[0] === 'string' ? pub.images[0] : '/images/placeholder-image.jpg',
           createdAt: pub.createdAt || new Date().toISOString(),
           views: pub.views || 0,
           featured: pub.featured || false,
@@ -705,7 +705,7 @@ function SearchPageContent({ publicationsData, results, setResults, isLoading, s
                 ? `${(pub.location as Record<string, string>).district || (pub.location as Record<string, string>).province || (pub.location as Record<string, string>).city || 'Sin ubicación'}` 
                 : pub.location || 'Sin ubicación',
               category: pub.categorySlug || pub.category || 'general',
-              image: pub.images?.[0] || '/images/placeholder-image.jpg',
+              image: Array.isArray(pub.images) && typeof pub.images[0] === 'string' ? pub.images[0] : '/images/placeholder-image.jpg',
               createdAt: pub.createdAt || pub.created_at || new Date().toISOString(),
               views: pub.views || Math.floor(Math.random() * 500) + 50,
               premium: pub.premium || false,
@@ -847,7 +847,7 @@ function SearchPageContent({ publicationsData, results, setResults, isLoading, s
                     label="Subcategoría"
                     value={selectedSubcategory}
                     options={getSubcategories(selectedCategory).map(sub => ({ value: sub.id, label: sub.name }))}
-                    onChange={(value) => handleSubcategoryChange(value || '')}
+                    onChange={(value) => handleSubcategoryChange(typeof value === 'string' ? value : '')}
                     placeholder="Todas las subcategorías"
                   />
                 </div>

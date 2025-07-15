@@ -72,7 +72,7 @@ export async function GET(request: Request) {
     // Conectar a la base de datos
     const { db } = await connectToDatabase()
 
-    let allPublications: PublicationDocument[] = []
+    let allPublications: Record<string, any>[] = []
     let totalCount = 0
 
     // Construir query de filtros
@@ -128,7 +128,7 @@ export async function GET(request: Request) {
         collection.countDocuments(mongoQuery)
       ])
       
-      allPublications = (publications as unknown[]).map(pub => ({ ...pub }))
+      allPublications = (publications as unknown[]).filter(pub => typeof pub === 'object' && pub !== null).map(pub => ({ ...pub })) as Record<string, any>[];
       totalCount = total
       
       Logger.debug(`Found ${publications.length} publications in ${collectionName}`)
@@ -141,11 +141,13 @@ export async function GET(request: Request) {
           const publications = await collection.find(mongoQuery).toArray()
           
           // Agregar categoría a cada publicación
-          return (publications as unknown[]).map(pub => ({
-            ...pub,
-            categorySlug: cat,
-            category: cat
-          }))
+          return (publications as unknown[])
+            .filter(pub => typeof pub === 'object' && pub !== null)
+            .map(pub => ({
+              ...pub,
+              categorySlug: cat,
+              category: cat
+            }))
         } catch (error) {
           Logger.warn(`Error searching in ${collectionName}`, { error })
           return []
@@ -153,7 +155,7 @@ export async function GET(request: Request) {
       })
       
       const results = await Promise.all(searchPromises)
-      const combinedPublications = results.flat()
+      const combinedPublications = results.flat() as Record<string, any>[];
       
       // Ordenar todos los resultados
       combinedPublications.sort((a, b) => {
@@ -173,14 +175,13 @@ export async function GET(request: Request) {
       // Aplicar paginación
       totalCount = combinedPublications.length
       const skip = (page - 1) * limit
-      allPublications = combinedPublications.slice(skip, skip + limit)
+      allPublications = combinedPublications.filter(pub => typeof pub === 'object' && pub !== null).slice(skip, skip + limit)
       
       Logger.debug(`Found ${allPublications.length} publications across all categories`)
     }
 
     // Formatear datos para el frontend
-    const formattedPublications = allPublications.map(pub => {
-      const p = pub as Record<string, unknown>;
+    const formattedPublications = allPublications.map(p => {
       return {
         ...p,
         id: p._id?.toString() || p.id,

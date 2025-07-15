@@ -4,7 +4,9 @@ import React, { useState, useEffect, useRef } from 'react';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 import PublicationCard from '@/components/publications/PublicationCard';
 
-import type { PublicationDocument } from '@/types/api';
+import type { PublicationDocument as BasePublicationDocument } from '@/types/api';
+
+type PublicationDocument = BasePublicationDocument & { id?: string };
 
 interface ExplorationRow {
   id: string;
@@ -213,34 +215,32 @@ const ExplorationRowComponent: React.FC<ExplorationRowProps> = ({ row, onSearch 
     id: publication.id || publication._id || 'unknown',
     title: publication.title || 'Sin título',
     description: publication.description || '',
-    categorySlug: publication.categorySlug || 'general',
-    subcategorySlug: publication.subcategory || publication.subcategorySlug || null,
-    subSubcategorySlug: publication.subSubcategorySlug || null,
-    transactionType: publication.transactionType || 'venta',
-    value: publication.price || publication.value || 0,
-    currency: publication.currency || 'PEN',
-    valueType: publication.valueType || 'fijo',
-    size: publication.size || 1,
+    categorySlug: publication.category?.slug || 'general',
+    subcategorySlug: publication.subcategory?.slug || null,
+    subSubcategorySlug: publication.subsubcategory?.slug || null,
+    transactionType: publication.pricing?.type || 'venta',
+    value: publication.pricing?.amount ?? 0,
+    currency: publication.pricing?.currency || 'PEN',
+    valueType: publication.pricing?.type || 'fixed',
+    size: 1, // Not present, set default
     location: {
-      country: 'Perú',
-      province: 'Cusco',
-      city: publication.location?.city || publication.location || 'Cusco',
-      district: publication.location?.district || null,
-      address: publication.location?.address || null
+      country: publication.location?.country || 'Perú',
+      province: publication.location?.region || 'Cusco',
+      city: publication.location?.city || 'Cusco',
+      district: publication.location?.district || '',
+      address: publication.location?.address || ''
     },
     contact: {
-      phones: publication.contactPhone ? [publication.contactPhone] : ['900000000'],
-      email: publication.contactEmail || null,
-      name: publication.contactName || null
+      phones: publication.contact?.methods?.filter(m => m.type === 'phone' || m.type === 'whatsapp').map(m => m.value) || [],
+      email: publication.contact?.methods?.find(m => m.type === 'email')?.value || null,
+      name: publication.userProfile?.displayName || null
     },
-    images: (publication.images && Array.isArray(publication.images)) 
-      ? publication.images 
-      : ['/images/placeholder-image.jpg'],
-    status: publication.status || 'active',
-    premium: publication.premium || false,
-    whatsapp: publication.contact?.phones?.[0] || publication.whatsapp || '900000000',
-    createdAt: publication.createdAt || publication.created_at || new Date().toISOString(),
-    views: publication.views || 0
+    images: publication.media?.images?.map(img => img.url) || ['/images/placeholder-image.jpg'],
+    status: publication.status?.current || 'active',
+    premium: publication.status?.visibility === 'premium' || false,
+    whatsapp: publication.contact?.methods?.find(m => m.type === 'whatsapp')?.value || '',
+    createdAt: publication.timestamps?.createdAt?.toString() || new Date().toISOString(),
+    views: publication.engagement?.views || 0
   });
 
   return (

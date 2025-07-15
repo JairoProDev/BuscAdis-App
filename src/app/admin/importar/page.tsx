@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { parsePublicationsFromText, preparePublicationForAPI } from '@/utils/publicationParser';
+import { parsePublicationsFromText } from '@/utils/publicationParser';
 import { PublicationsService } from '@/services/publications.service';
 import LoadingSpinner from '@/components/ui/LoadingSpinner';
 import { PublicationInput } from '@/types/publication';
