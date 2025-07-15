@@ -44,8 +44,7 @@ export default function OldAnuncioRedirect() {
           undefined, // publicationSlug
           publication.categorySlug || 'general',
           publication.subcategorySlug || '',
-          publication.subSubcategorySlug || '',
-          true // Incluir el título en la URL
+          publication.subSubcategorySlug || ''
         );
         
         console.log(`Redirecting legacy /anuncios/${publicationId} to: ${correctUrl}`);
