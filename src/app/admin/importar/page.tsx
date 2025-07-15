@@ -5,6 +5,7 @@ import { parsePublicationsFromText, preparePublicationForAPI } from '@/utils/pub
 import { PublicationsService } from '@/services/publications.service';
 import LoadingSpinner from '@/components/ui/LoadingSpinner';
 import { PublicationInput } from '@/types/publication';
+import { CreatePublicationData } from '@/types/publication';
 
 interface Publication {
   title: string;
@@ -106,10 +107,35 @@ export default function ImportPublicationsPage() {
             images: []
           };
           
-          // Preparar datos para la API
-          const apiData = preparePublicationForAPI(publicationInput);
-          
-          // Enviar a la API
+          // Mapear a CreatePublicationData
+          const apiData: CreatePublicationData = {
+            title: publicationInput.title,
+            description: publicationInput.description,
+            categorySlug: publication.category || '',
+            subcategorySlug: publication.subcategory || '',
+            subSubcategorySlug: publication.subsubcategory || '',
+            transactionType: 'venta', // O deducir según lógica
+            value: publicationInput.price || 0,
+            currency: publicationInput.currency || 'PEN',
+            valueType: 'fixed', // O deducir según lógica
+            location: {
+              country: 'Perú',
+              province: publicationInput.location.province || '',
+              city: publicationInput.location.city || '',
+              district: publicationInput.location.district || '',
+              address: publicationInput.location.address || '',
+              coordinates: publicationInput.location.coordinates || undefined,
+            },
+            contact: {
+              phones: [publicationInput.contactPhone].filter(Boolean),
+              email: publicationInput.contactEmail,
+              name: publicationInput.contactName,
+              visible: true,
+            },
+            images: [],
+            status: 'active',
+            premium: false,
+          };
           await PublicationsService.createPublication(apiData);
           
           // Incrementar contador de éxito

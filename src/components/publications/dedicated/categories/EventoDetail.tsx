@@ -12,7 +12,7 @@ import {
   CurrencyDollarIcon
 } from '@heroicons/react/24/outline';
 import { PublicationData } from '@/types/publication';
-import { format, format } from 'date-fns';
+import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
 
 interface EventoDetailProps {

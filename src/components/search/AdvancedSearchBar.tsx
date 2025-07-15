@@ -2,21 +2,16 @@
 
 import { useState, useRef, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { Mic, Camera, ChevronDown, X, Search } from 'lucide-react'
+import { ChevronDown, X, Search } from 'lucide-react'
 import { Tab } from '@headlessui/react'
-import Image from 'next/image'
-import Link from 'next/link'
 import CategorySelector from './CategorySelector'
 import { 
   FireIcon,
-  SparklesIcon,
   ArrowTrendingUpIcon,
   ClockIcon,
   MagnifyingGlassIcon
 } from '@heroicons/react/24/outline'
-import { categories } from '@/data/mockCategories'
 import useMediaQuery from '@/hooks/useMediaQuery'
-import { Category, Subcategory, SubSubcategory } from './CategorySelector/types'
 
 interface SearchHistoryItem {
   text: string
@@ -176,46 +171,6 @@ export default function AdvancedSearchBar({
   }, [selectedSubSubcategory])
   
   // Manejadores de eventos
-  const handleVoiceSearch = () => {
-    if ('webkitSpeechRecognition' in window || 'SpeechRecognition' in window) {
-      setIsRecording(!isRecording)
-      
-      // Simulación de reconocimiento de voz
-      if (!isRecording) {
-        setTimeout(() => {
-          const simulatedText = "departamentos en alquiler"
-          setSearchTerm(simulatedText)
-          setIsRecording(false)
-          
-          // Auto-submit después de reconocimiento
-          setTimeout(() => {
-            handleSearch(simulatedText)
-          }, 1000)
-        }, 2000)
-      }
-    } else {
-      alert("Lo sentimos, tu navegador no soporta reconocimiento de voz")
-    }
-  }
-
-  const handleImageSearch = () => {
-    // Simular carga de imagen para búsqueda
-    const fileInput = document.createElement('input')
-    fileInput.type = 'file'
-    fileInput.accept = 'image/*'
-    fileInput.click()
-    
-    fileInput.onchange = () => {
-      if (fileInput.files && fileInput.files[0]) {
-        // Simular procesamiento y búsqueda con la imagen
-        setTimeout(() => {
-          setSearchTerm("búsqueda por imagen")
-          handleSearch("búsqueda por imagen", { type: 'image' })
-        }, 1000)
-      }
-    }
-  }
-  
   const handleSearch = (query: string, options: any = {}) => {
     // Construir opciones completas con categorías seleccionadas
     const searchOptions = {

@@ -1,7 +1,7 @@
 'use client'
 
 import { useSearch } from '@/contexts/SearchContext'
-import { categoriesList, getClassificationNames } from '@/data/categories-data'
+import { getClassificationNames } from '@/data/categories-data'
 import { ChevronRightIcon, HomeIcon } from '@heroicons/react/24/outline'
 import Link from 'next/link'
 

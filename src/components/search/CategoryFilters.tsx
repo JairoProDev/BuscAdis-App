@@ -10,18 +10,12 @@ interface Category {
 
 interface CategoryFiltersProps {
   selectedCategory: Category | null
-  selectedType: string | null
   onSelectCategory: (category: Category | null) => void
-  onSelectType: (type: string | null) => void
-  onFilterChange: (filters: Record<string, unknown>) => void
 }
 
 export default function CategoryFilters({
   selectedCategory,
-  selectedType,
-  onSelectCategory,
-  onSelectType,
-  onFilterChange
+  onSelectCategory
 }: CategoryFiltersProps) {
   // Lista simplificada de categorías
   const categories: Category[] = [

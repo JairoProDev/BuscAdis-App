@@ -4,7 +4,6 @@ import React from 'react';
 import Image from 'next/image';
 import { cn } from '@/lib/utils';
 import { Category, SubSubcategory, Subcategory } from '../types';
-import { getCategoryColor } from '../utils';
 import { motion } from 'framer-motion';
 
 export type CategoryCardVariant = 'square' | 'horizontal';
