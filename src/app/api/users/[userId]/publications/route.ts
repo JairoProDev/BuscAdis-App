@@ -48,10 +48,10 @@ export async function GET(
         
         // Add category information to each publication
         const category = collectionName.replace('publications_', '')
-        const categorizedPublications = publications.map((pub: PublicationDocument) => ({
-          ...pub,
-          id: pub._id.toString(),
-          category: category,
+        const categorizedPublications = publications.map((pub) => ({
+          ...(pub as unknown as PublicationDocument),
+          id: pub._id?.toString?.() ?? '',
+          categoryString: category, // don't overwrite the object 'category' if it exists
           collection: collectionName
         }))
         
@@ -64,7 +64,7 @@ export async function GET(
     
     // Sort all publications by creation date
     allPublications.sort((a, b) => 
-      new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+      new Date((a as any)?.createdAt ?? 0).getTime() - new Date((b as any)?.createdAt ?? 0).getTime()
     )
     
     return NextResponse.json({

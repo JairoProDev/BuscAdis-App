@@ -17,7 +17,7 @@ cloudinary.config({
 async function uploadToCloudinary(buffer: Buffer, options: Record<string, unknown> = {}) {
   return new Promise((resolve, reject) => {
     const uploadOptions = {
-      resource_type: 'auto',
+      resource_type: 'auto' as const,
       folder: 'buscadis',
       ...options
     };

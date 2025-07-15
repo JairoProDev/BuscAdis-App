@@ -9,7 +9,7 @@ const MONGODB_URI = process.env.MONGODB_URI!
 const MONGODB_DB = process.env.MONGODB_DB || 'buscadis'
 
 // Cache simple en memoria para sugerencias frecuentes
-const suggestionCache = new Map<string, { data: Suggestion[]; timestamp: number }>()
+const suggestionCache = new Map<string, { data: { suggestions: Suggestion[]; query: string; category: string; hasMore: boolean }; timestamp: number }>()
 const CACHE_DURATION = 30 * 60 * 1000 // 30 minutos
 
 let cachedClient: MongoClient | null = null
@@ -131,6 +131,10 @@ export async function GET(request: Request) {
       try {
         const { db } = await connectToDatabase()
         
+        if (!db) {
+          throw new Error('Database connection failed')
+        }
+        
         // 1. Sugerencias de búsquedas populares/recientes
         const trends = db.collection('search_trends')
         const popularSearches = await trends.find({
@@ -141,7 +145,7 @@ export async function GET(request: Request) {
         .limit(3)
         .toArray()
 
-        suggestions.push(...popularSearches.map((item: { _id: string; originalQuery?: string; query: string; count: number }): Suggestion => ({
+        suggestions.push(...popularSearches.map((item: any): Suggestion => ({
           id: `popular-${item._id}`,
           text: item.originalQuery || item.query,
           type: 'trending',
@@ -202,7 +206,7 @@ export async function GET(request: Request) {
               { $limit: 2 }
             ]).toArray()
 
-            suggestions.push(...publicationSuggestions.map((item: { _id: string; count: number; examples: string[] }): Suggestion => ({
+            suggestions.push(...publicationSuggestions.map((item: any): Suggestion => ({
               id: `word-${item._id}`,
               text: item._id,
               type: 'ai',
