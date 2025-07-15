@@ -64,7 +64,7 @@ export async function GET(
     
     // Sort all publications by creation date
     allPublications.sort((a, b) => 
-      new Date((a as any)?.createdAt ?? 0).getTime() - new Date((b as any)?.createdAt ?? 0).getTime()
+      new Date((a as { createdAt?: string | Date })?.createdAt ?? 0).getTime() - new Date((b as { createdAt?: string | Date })?.createdAt ?? 0).getTime()
     )
     
     return NextResponse.json({

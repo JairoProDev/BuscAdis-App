@@ -259,7 +259,7 @@ async function importWithCustomValidation() {
     const categories = result.results
       .filter(r => r.success && r.publication)
       .reduce((acc: Record<string, unknown>, r: Record<string, unknown>) => {
-        const cat = (r.publication as any)?.category.name || 'Sin categoría'
+        const cat = (r.publication as { category?: { name?: string } })?.category?.name || 'Sin categoría'
         acc[cat] = (acc[cat] || 0) + 1
         return acc
       }, {})

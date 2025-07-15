@@ -128,7 +128,7 @@ export async function GET(request: Request) {
         collection.countDocuments(mongoQuery)
       ])
       
-      allPublications = (publications as any[]).map(pub => ({ ...pub }))
+      allPublications = (publications as unknown[]).map(pub => ({ ...pub }))
       totalCount = total
       
       Logger.debug(`Found ${publications.length} publications in ${collectionName}`)
@@ -141,7 +141,7 @@ export async function GET(request: Request) {
           const publications = await collection.find(mongoQuery).toArray()
           
           // Agregar categoría a cada publicación
-          return (publications as any[]).map(pub => ({
+          return (publications as unknown[]).map(pub => ({
             ...pub,
             categorySlug: cat,
             category: cat
@@ -180,7 +180,7 @@ export async function GET(request: Request) {
 
     // Formatear datos para el frontend
     const formattedPublications = allPublications.map(pub => {
-      const p = pub as any;
+      const p = pub as Record<string, unknown>;
       return {
         ...p,
         id: p._id?.toString() || p.id,

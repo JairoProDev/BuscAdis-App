@@ -153,7 +153,7 @@ export async function GET(
     
     // Format the publication for frontend consumption
     const formattedPublication = {
-      id: (publication as any)?._id?.toString() || (publication as any)?.id || id,
+      id: (publication as { _id?: { toString?: () => string }, id?: string })?._id?.toString() || (publication as { id?: string })?.id || id,
       title: publication.title || 'Sin título',
       description: publication.description || '',
       price: publication.amount || publication.price || 0,
