@@ -335,7 +335,7 @@ export default function PerfilPage() {
       const updatedProfile = await ProfileService.createOrUpdateProfile({
         ...formData,
         interests,
-        socialLinks,
+        socialLinks: socialLinks.map(link => link.url),
         points: 100, // Ejemplo: calcular puntos reales
         badges: [], // Ejemplo: calcular badges reales
         progress: formData.progress || 0, // Ejemplo: calcular progreso real
