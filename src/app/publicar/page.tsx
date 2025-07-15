@@ -336,9 +336,9 @@ export default function PublicarPage() {
   }, [updateAd, validateStep, setStep, step]);
 
   interface PriceData {
-    amount: number | null;
-    currency: 'PEN' | 'USD';
-    negotiable: boolean;
+    amount?: number | null;
+    currency?: 'PEN' | 'USD' | null;
+    negotiable?: boolean | null;
   }
 
   interface LocationData {
@@ -362,9 +362,9 @@ export default function PublicarPage() {
   const handlePriceChange = useCallback((priceData: PriceData) => {
     updateAd((prev: PublicationFormData) => ({
       ...prev,
-      amount: priceData.amount,
-      currency: priceData.currency || 'PEN',
-      negotiable: priceData.negotiable || false,
+      amount: priceData.amount ?? null,
+      currency: priceData.currency ?? 'PEN',
+      negotiable: priceData.negotiable ?? false,
     }));
   }, [updateAd]);
 
