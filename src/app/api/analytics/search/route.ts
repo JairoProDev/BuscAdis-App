@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server'
 import { MongoClient, Db } from 'mongodb'
 import { getMongoClient } from '@/lib/mongodb-server'
-import type { SearchAnalytics, SearchSuggestion, TrendingSearch, CachedDatabase } from '@/types/api'
+import type { SearchAnalytics, SearchSuggestion, CachedDatabase } from '@/types/api'
 
 export const dynamic = 'force-dynamic'
 export const runtime = 'nodejs'
@@ -145,7 +145,6 @@ async function getSearchSuggestions(query: string): Promise<SearchSuggestion[]> 
 export async function GET(request: Request) {
   try {
     const { searchParams } = new URL(request.url)
-    const category = searchParams.get('category')
     const days = parseInt(searchParams.get('days') || '7')
     const limit = parseInt(searchParams.get('limit') || '10')
 
@@ -205,16 +204,4 @@ export async function GET(request: Request) {
       { status: 500 }
     )
   }
-}
-
-function generateSessionId(userAgent: string, timestamp: string): string {
-  const date = new Date(timestamp || Date.now())
-  const dayStart = new Date(date.getFullYear(), date.getMonth(), date.getDate())
-  
-  // Simple hash for session ID (día + userAgent simplificado)
-  const hash = btoa(userAgent?.slice(0, 50) + dayStart.getTime())
-    .replace(/[^a-zA-Z0-9]/g, '')
-    .slice(0, 16)
-  
-  return hash
 } 

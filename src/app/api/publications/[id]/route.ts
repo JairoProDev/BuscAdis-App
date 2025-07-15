@@ -1,5 +1,4 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { mongoDbGetById } from '@/lib/mongodb-server'
 import dbConnect from '@/lib/dbConnect'
 import { getPublicationModel } from '@/lib/models/Publication'
 
@@ -17,56 +16,6 @@ interface Publication {
   subcategory?: string;
   subsubcategory?: string;
   [key: string]: unknown; // Allow for other properties with unknown type instead of any
-}
-
-// Mapeo de categorías a colecciones
-const CATEGORY_COLLECTIONS: Record<string, string> = {
-  empleos: 'publications_empleos',
-  inmuebles: 'publications_inmuebles',
-  vehiculos: 'publications_vehiculos',
-  servicios: 'publications_servicios',
-  productos: 'publications_productos',
-  eventos: 'publications_eventos',
-  negocios: 'publications_negocios',
-  comunidad: 'publications_comunidad',
-};
-
-// Categorías válidas
-type ValidCategory = keyof typeof CATEGORY_COLLECTIONS;
-
-// Fallback publication for development environment
-const FALLBACK_PUBLICATION: Publication = {
-  title: "Publicación de ejemplo",
-  description: "Esta es una publicación de ejemplo que se muestra cuando no se encuentra la publicación solicitada (solo en desarrollo).",
-  price: 0,
-  currency: "PEN",
-  categorySlug: "productos",
-  location: { city: "Lima", region: "Lima" },
-  contactName: "Usuario de Prueba",
-  contactPhone: "51999888777",
-  status: "active",
-  createdAt: new Date().toISOString(),
-  images: ["/images/placeholder-buscadis.jpg"],
-  premium: true,
-  verified: true,
-  subcategorySlug: "ejemplo",
-  subSubcategorySlug: "muestra"
-};
-
-// Determine which collection to use based on ID or category
-function getCollectionFromId(id: string): string {
-  // Simple heuristic: check if ID has category prefix
-  if (id.startsWith('inmuebles_')) return 'inmuebles';
-  if (id.startsWith('vehiculos_')) return 'vehiculos';
-  if (id.startsWith('empleos_')) return 'empleos';
-  if (id.startsWith('servicios_')) return 'servicios';
-  if (id.startsWith('productos_')) return 'productos';
-  if (id.startsWith('eventos_')) return 'eventos';
-  if (id.startsWith('negocios_')) return 'negocios';
-  if (id.startsWith('comunidad_')) return 'comunidad';
-  
-  // Default to inmuebles if no prefix found
-  return 'inmuebles';
 }
 
 // Helper function to search across all collections
