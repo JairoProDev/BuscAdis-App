@@ -83,7 +83,7 @@ export async function PUT(
     // await client.close()
     
     // For now, return mock response
-    const updatedPost = { ...body, slug, updatedAt: new Date() }
+    const updatedPost = { ...body, updatedAt: new Date() }
     
     if (!updatedPost) {
       return NextResponse.json(

@@ -162,13 +162,13 @@ export async function GET(request: Request) {
       combinedPublications.sort((a, b) => {
         switch (sortBy) {
           case 'price_asc':
-            return (a.price ?? 0) - (b.price ?? 0)
+            return Number(a.price ?? 0) - Number(b.price ?? 0)
           case 'price_desc':
-            return (b.price ?? 0) - (a.price ?? 0)
+            return Number(b.price ?? 0) - Number(a.price ?? 0)
           case 'recent':
           default:
-            const dateA = new Date(a.createdAt ?? a.created_at ?? 0)
-            const dateB = new Date(b.createdAt ?? b.created_at ?? 0)
+            const dateA = new Date(String(a.createdAt ?? a.created_at ?? ''))
+            const dateB = new Date(String(b.createdAt ?? b.created_at ?? ''))
             return dateB.getTime() - dateA.getTime()
         }
       })

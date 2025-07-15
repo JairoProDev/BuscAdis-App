@@ -10,7 +10,7 @@ import { Logger } from '@/services/logging.service';
 import Image from 'next/image';
 
 // Simple version that doesn't directly import MongoDB
-// const SavedPage = () => {
+const SavedPage = () => {
   const [savedItems, setSavedItems] = useState<Publication[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
