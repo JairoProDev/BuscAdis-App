@@ -8,9 +8,9 @@ let DeleteObjectCommand: typeof DeleteObjectCommandType | null = null;
 let getSignedUrl: typeof getSignedUrlType | null = null;
 
 try {
-  // eslint-disable-next-line @typescript-eslint/no-var-requires
+   
   const s3Module = require('@aws-sdk/client-s3');
-  // eslint-disable-next-line @typescript-eslint/no-var-requires
+   
   const presignerModule = require('@aws-sdk/s3-request-presigner');
   S3Client = s3Module.S3Client;
   PutObjectCommand = s3Module.PutObjectCommand;

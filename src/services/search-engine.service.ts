@@ -185,13 +185,12 @@ class SupremeSearchEngine {
         Logger.info('Voice search started');
       };
       
-      recognition.onresult = async (event: any) => {
+      recognition.onresult = async (event: SpeechRecognitionEvent) => {
         // Use the correct type for event
         // @ts-expect-error: SpeechRecognitionEvent is not always available in all TS environments
-        const speechEvent = event as SpeechRecognitionEvent;
-        const transcript = speechEvent.results[speechEvent.results.length - 1][0].transcript;
+        const transcript = event.results[event.results.length - 1][0].transcript;
         
-        if (speechEvent.results[speechEvent.results.length - 1].isFinal) {
+        if (event.results[event.results.length - 1].isFinal) {
           Logger.info('Voice search transcript', { transcript });
           
           try {
@@ -534,8 +533,8 @@ export const searchEngine = SupremeSearchEngine.getInstance();
 // Declaraciones para TypeScript
 declare global {
   interface Window {
-    SpeechRecognition: any;
-    webkitSpeechRecognition: any;
+    SpeechRecognition: typeof window.SpeechRecognition | undefined;
+    webkitSpeechRecognition: typeof window.webkitSpeechRecognition | undefined;
   }
 } 
 

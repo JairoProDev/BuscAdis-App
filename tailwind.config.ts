@@ -183,7 +183,7 @@ const config: Config = {
   		fontFamily: {
   			sans: ['var(--font-sans)', ...fontFamily.sans],
   		},
-      typography: (theme: any) => ({
+      typography: (theme: unknown) => ({
         DEFAULT: {
           css: {
             'code::before': {

@@ -330,7 +330,7 @@ export interface PublicationData {
   featured?: boolean;
   premium?: boolean;
   attributes?: {
-    [key: string]: any;
+    [key: string]: unknown;
   };
 }
 

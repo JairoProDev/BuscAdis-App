@@ -143,7 +143,7 @@ export const mongoFetch = async (endpoint: string, options: MongoFetchOptions = 
 export const getBrowserMongoClient = () => {
   return {
     // Find documents in a collection
-    find: async (collection: string, query: any = {}, options: any = {}) => {
+    find: async (collection: string, query: unknown = {}, options: unknown = {}) => {
       try {
         Logger.debug(`Finding documents in ${collection}`, { query, options });
         
@@ -190,7 +190,7 @@ export const getBrowserMongoClient = () => {
     },
     
     // Insert a document
-    insertOne: async (collection: string, document: any) => {
+    insertOne: async (collection: string, document: unknown) => {
       try {
         Logger.debug(`Inserting document into ${collection}`);
         
@@ -207,7 +207,7 @@ export const getBrowserMongoClient = () => {
     },
     
     // Update a document
-    updateOne: async (collection: string, id: string, update: any) => {
+    updateOne: async (collection: string, id: string, update: unknown) => {
       try {
         Logger.debug(`Updating document ${id} in ${collection}`);
         

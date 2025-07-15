@@ -95,13 +95,13 @@ export const useFormStore = create<FormState>()(
       setNestedField: (path, value) => {
         Logger.debug(`Actualizando campo anidado: ${path.join('.')}`);
         set(state => {
-          const updateDeep = (obj: any, pathArr: string[], val: unknown): any => {
+          const updateDeep = (obj: Record<string, unknown>, pathArr: string[], val: unknown): unknown => {
             if (pathArr.length === 1) {
               return { ...obj, [pathArr[0]]: val };
             }
             return {
               ...obj,
-              [pathArr[0]]: updateDeep(obj[pathArr[0]], pathArr.slice(1), val)
+              [pathArr[0]]: updateDeep(obj[pathArr[0]] as Record<string, unknown>, pathArr.slice(1), val)
             };
           };
           const updated = updateDeep(state, path, value);
