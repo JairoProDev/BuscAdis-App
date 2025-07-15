@@ -138,41 +138,6 @@ export default function DedicatedPublicationPage({
     }
   };
 
-  // Generate structured data for SEO
-  const generateStructuredData = () => {
-    const baseData = {
-      "@context": "https://schema.org",
-      "@type": publication.categorySlug === 'empleos' ? 'JobPosting' : 'Product',
-      "name": publication.title,
-      "description": publication.description,
-      "image": images[0],
-      "url": typeof window !== 'undefined' ? window.location.href : '',
-      "datePosted": publication.createdAt,
-      "offers": {
-        "@type": "Offer",
-        "price": publication.value || 0,
-        "priceCurrency": publication.currency || 'PEN'
-      }
-    };
-
-    if (publication.categorySlug === 'empleos') {
-      return {
-        ...baseData,
-        "@type": "JobPosting",
-        "hiringOrganization": {
-          "@type": "Organization",
-          "name": "BuscAdis"
-        },
-        "jobLocation": {
-          "@type": "Place",
-          "address": formatLocation(publication.location)
-        }
-      };
-    }
-
-    return baseData;
-  };
-
   // Handle image navigation
   const nextImage = () => {
     setCurrentImageIndex((prev) => (prev + 1) % images.length);

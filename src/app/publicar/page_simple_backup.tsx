@@ -10,7 +10,7 @@ import PublishAchievements from '@/components/publish/PublishAchievements';
 import AdPreview from '@/components/publish/AdPreview';
 import LivePreview from '@/components/publish/LivePreview';
 import { StarIcon, FireIcon, CheckIcon } from '@heroicons/react/24/solid';
-import { PublicationFormData, PublicationLocation, PublicationContact } from '@/types/publication';
+import { PublicationFormData } from '@/types/publication';
 import { Logger } from '@/services/logging.service';
 
 // Definir los pasos

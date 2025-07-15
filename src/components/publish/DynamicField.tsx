@@ -49,7 +49,7 @@ export default function DynamicField({
     if (isDirty) {
       validateField();
     }
-  }, [value]);
+  }, [value, isDirty, validateField]);
 
   const validateField = () => {
     if (!validation) return true;

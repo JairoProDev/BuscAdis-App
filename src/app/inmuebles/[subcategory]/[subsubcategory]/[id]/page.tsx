@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { useParams, useRouter } from 'next/navigation';
+import { useRouter } from 'next/navigation';
 import { PublicationsService, Publication } from '@/services/publications.service';
 import { formatDate } from '@/utils/date';
 import { formatPrice } from '@/utils/format';

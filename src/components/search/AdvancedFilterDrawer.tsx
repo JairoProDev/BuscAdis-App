@@ -34,34 +34,10 @@ export default function AdvancedFilterDrawer({
   const [expandedSections, setExpandedSections] = useState<string[]>([])
   const [activeFilters, setActiveFilters] = useState<Record<string, FilterValue>>(initialFilters)
 
-  const searchParams = useSearchParams()
-
   useEffect(() => {
     // Update local state when external filters change
     setActiveFilters(initialFilters)
   }, [initialFilters])
-
-  const toggleSection = (section: string) => {
-    setExpandedSections(prev => 
-      prev.includes(section)
-        ? prev.filter(s => s !== section)
-        : [...prev, section]
-    )
-  }
-
-  const handleFilterChange = (filterId: string, value: FilterValue) => {
-    const newFilters = { ...activeFilters }
-    
-    if (value === '' || value === null || value === undefined || 
-        (Array.isArray(value) && value.length === 0)) {
-      delete newFilters[filterId]
-    } else {
-      newFilters[filterId] = value
-    }
-    
-    setActiveFilters(newFilters)
-    onFilterChange(newFilters)
-  }
 
   const clearFilters = () => {
     setActiveFilters({})

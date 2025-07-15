@@ -14,11 +14,6 @@ jest.mock('@/services/logging.service', () => ({
 }));
 
 describe('LocationSelector', () => {
-  const mockStore = {
-    getState: () => ({}),
-    dispatch: jest.fn()
-  };
-
   beforeEach(() => {
     jest.clearAllMocks();
   });

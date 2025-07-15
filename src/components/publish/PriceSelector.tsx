@@ -2,9 +2,7 @@
 
 import React from 'react'
 import { useState, useEffect } from 'react'
-import { motion } from 'framer-motion'
 import { PriceSelectorProps } from '@/types/publish'
-import { CurrencyDollarIcon } from '@heroicons/react/24/outline'
 
 const priceTypes = [
   { id: 'fixed', name: 'Precio fijo' },

@@ -390,7 +390,7 @@ export default function PerfilPage() {
     reader.readAsDataURL(file);
   };
 
-  // Fix useEffect for progress calculation to avoid infinite loop
+  // Fix useEffect dependency warning by including 'formData.progress' in the dependency array
   useEffect(() => {
     const calculateProgress = () => {
       let filled = 0;
@@ -450,7 +450,8 @@ export default function PerfilPage() {
     verificationPreviews.length,
     formData.verified, 
     formData.badges, 
-    achievementsStore
+    achievementsStore,
+    formData.progress
   ]);
 
   // 6. Points system: update points on actions, sync to localStorage, and backend on logout

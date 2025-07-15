@@ -13,7 +13,7 @@ export default function GoogleAnalytics({ measurementId }: GoogleAnalyticsProps)
       {/* Google Analytics Script */}
       <Script
         src={`https://www.googletagmanager.com/gtag/js?id=${measurementId}`}
-        strategy="beforeInteractive"
+        strategy="afterInteractive"
       />
       <Script id="google-analytics" strategy="afterInteractive">
         {`

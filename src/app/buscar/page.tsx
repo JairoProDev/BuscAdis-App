@@ -667,7 +667,7 @@ function SearchPageContent({ publicationsData, results, setResults, isLoading, s
       setSelectedSubSubcategory('')
       setActiveFilters({})
     }
-  }, [currentPathname]) // Solo depende del pathname
+  }, [currentPathname, selectedCategory, selectedSubcategory, selectedSubSubcategory])
 
   // Realizar búsqueda automática cuando cambie la categoría desde URL
   useEffect(() => {

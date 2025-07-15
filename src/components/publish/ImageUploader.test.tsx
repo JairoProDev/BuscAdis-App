@@ -23,11 +23,6 @@ jest.mock('@/services/image.service', () => ({
 }));
 
 describe('ImageUploader', () => {
-  const mockStore = {
-    getState: () => ({}),
-    dispatch: jest.fn()
-  };
-
   beforeEach(() => {
     jest.clearAllMocks();
     // Mock successful image optimization
