@@ -18,7 +18,6 @@ import { toast } from 'react-hot-toast';
 
 export type LogLevel = 'debug' | 'info' | 'warn' | 'error';
 
-// Nuevas interfaces para reemplazar 'any'
 export interface LogContext {
   [key: string]: string | number | boolean | null | undefined | LogContext | LogContext[] | unknown;
 }
@@ -521,14 +520,10 @@ class LoggingService {
   }
 
   private getMemoryUsage(): number {
-    if (typeof process !== 'undefined' && process.memoryUsage) {
-      return process.memoryUsage().heapUsed;
-    }
-    
     if (typeof performance !== 'undefined' && 'memory' in performance) {
-      return (performance as any).memory.usedJSHeapSize;
+      // @ts-expect-error: memory is not in the standard Performance type
+      return performance.memory.usedJSHeapSize;
     }
-    
     return 0;
   }
 }

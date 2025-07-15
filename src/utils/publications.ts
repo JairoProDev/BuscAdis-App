@@ -73,33 +73,33 @@ export function validatePublicationData(publication: Partial<PublicationData>): 
 /**
  * Normalizes publication data to ensure consistency
  */
-export function normalizePublicationData(publication: any): PublicationData {
+export function normalizePublicationData(publication: unknown): PublicationData {
   return {
-    id: publication._id || publication.id,
-    title: publication.title || 'Sin título',
-    description: publication.description || '',
-    categorySlug: publication.categorySlug || publication.category || 'general',
-    subcategorySlug: publication.subcategorySlug || publication.subcategory || null,
-    subSubcategorySlug: publication.subSubcategorySlug || publication.subsubcategory || null,
-    transactionType: publication.transactionType || 'venta',
-    value: publication.value || publication.price || publication.amount || 0,
-    currency: publication.currency || 'PEN',
-    valueType: publication.valueType || 'fixed',
-    size: publication.size || 0,
-    location: normalizeLocationData(publication.location),
-    images: Array.isArray(publication.images) ? publication.images : [],
-    whatsapp: publication.whatsapp || publication.contact?.phones?.[0] || '',
-    createdAt: publication.createdAt || new Date().toISOString(),
-    views: publication.views || 0,
-    featured: publication.featured || false,
-    premium: publication.premium || false,
+    id: (publication as Record<string, unknown>)?._id || (publication as Record<string, unknown>)?.id,
+    title: (publication as Record<string, unknown>)?.title || 'Sin título',
+    description: (publication as Record<string, unknown>)?.description || '',
+    categorySlug: (publication as Record<string, unknown>)?.categorySlug || (publication as Record<string, unknown>)?.category || 'general',
+    subcategorySlug: (publication as Record<string, unknown>)?.subcategorySlug || (publication as Record<string, unknown>)?.subcategory || null,
+    subSubcategorySlug: (publication as Record<string, unknown>)?.subSubcategorySlug || (publication as Record<string, unknown>)?.subsubcategory || null,
+    transactionType: (publication as Record<string, unknown>)?.transactionType || 'venta',
+    value: (publication as Record<string, unknown>)?.value || (publication as Record<string, unknown>)?.price || (publication as Record<string, unknown>)?.amount || 0,
+    currency: (publication as Record<string, unknown>)?.currency || 'PEN',
+    valueType: (publication as Record<string, unknown>)?.valueType || 'fixed',
+    size: (publication as Record<string, unknown>)?.size || 0,
+    location: normalizeLocationData(publication),
+    images: Array.isArray((publication as Record<string, unknown>)?.images) ? (publication as Record<string, unknown>)?.images : [],
+    whatsapp: (publication as Record<string, unknown>)?.whatsapp || (publication as Record<string, unknown>)?.contact?.phones?.[0] || '',
+    createdAt: (publication as Record<string, unknown>)?.createdAt || new Date().toISOString(),
+    views: (publication as Record<string, unknown>)?.views || 0,
+    featured: (publication as Record<string, unknown>)?.featured || false,
+    premium: (publication as Record<string, unknown>)?.premium || false,
   };
 }
 
 /**
  * Normalizes location data to ensure consistent structure
  */
-function normalizeLocationData(location: any): PublicationData['location'] {
+function normalizeLocationData(location: unknown): PublicationData['location'] {
   if (typeof location === 'string') {
     const parts = location.split(',').map(part => part.trim());
     return {
@@ -112,11 +112,11 @@ function normalizeLocationData(location: any): PublicationData['location'] {
   
   if (typeof location === 'object' && location !== null) {
     return {
-      reference: location.reference,
-      district: location.district || '',
-      province: location.province || '',
-      city: location.city || 'Cusco',
-      country: location.country || 'Perú'
+      reference: (location as Record<string, unknown>)?.reference,
+      district: (location as Record<string, unknown>)?.district || '',
+      province: (location as Record<string, unknown>)?.province || '',
+      city: (location as Record<string, unknown>)?.city || 'Cusco',
+      country: (location as Record<string, unknown>)?.country || 'Perú'
     };
   }
   
@@ -131,7 +131,7 @@ function normalizeLocationData(location: any): PublicationData['location'] {
 /**
  * Checks if a publication has valid images
  */
-export function hasValidImages(publication: PublicationData | any): boolean {
+export function hasValidImages(publication: PublicationData | unknown): boolean {
   if (!publication?.images || !Array.isArray(publication.images)) {
     return false;
   }
@@ -190,7 +190,7 @@ export class PublicationError extends Error {
  * Safe getter for publication properties with fallbacks
  */
 export function getPublicationProperty<T>(
-  publication: any,
+  publication: Record<string, unknown>,
   property: string,
   fallback: T
 ): T {
