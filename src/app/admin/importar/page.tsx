@@ -52,7 +52,7 @@ export default function ImportPublicationsPage() {
         title: input.title,
         category: input.category,
         subcategory: input.subcategory || '',
-        subsubcategory: (input as any).subsubcategory || '',
+        subsubcategory: (input as PublicationInput & { subsubcategory?: string }).subsubcategory || '',
         price: input.price,
         price_type: input.currency || 'PEN',
         contact: {

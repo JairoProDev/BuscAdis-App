@@ -1,8 +1,9 @@
-import { NextResponse } from 'next/server'
+import { NextRequest, NextResponse } from 'next/server';
 import { MongoClient, Db } from 'mongodb'
 import { Logger } from '@/services/logging.service'
-import type { PublicationDocument } from '@/types/api'
 import type { SortDirection } from 'mongodb';
+import dbConnect from '@/lib/dbConnect';
+import { getPublicationModel } from '@/lib/models/Publication';
 
 export const dynamic = 'force-dynamic'
 export const runtime = 'nodejs'
@@ -128,7 +129,7 @@ export async function GET(request: Request) {
         collection.countDocuments(mongoQuery)
       ])
       
-      allPublications = (publications as unknown[]).filter(pub => typeof pub === 'object' && pub !== null).map(pub => ({ ...pub })) as Record<string, any>[];
+      allPublications = (publications as unknown[]).filter(pub => typeof pub === 'object' && pub !== null).map(pub => ({ ...pub })) as Record<string, unknown>[];
       totalCount = total
       
       Logger.debug(`Found ${publications.length} publications in ${collectionName}`)
@@ -155,7 +156,7 @@ export async function GET(request: Request) {
       })
       
       const results = await Promise.all(searchPromises)
-      const combinedPublications = results.flat() as Record<string, any>[];
+      const combinedPublications = results.flat() as Record<string, unknown>[];
       
       // Ordenar todos los resultados
       combinedPublications.sort((a, b) => {

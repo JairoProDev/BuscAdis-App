@@ -21,6 +21,7 @@ import {
 import { ThemeToggle } from '@/components/theme';
 import BuscadisLogo from '@/components/icons/BuscadisLogo';
 import LocationSelector from '@/components/search/LocationSelector';
+import type { Selection } from '@/components/search/LocationSelector';
 import LanguageSelectorMenuItem from '@/components/ui/LanguageSelectorMenuItem';
 import NavigationMenu from './NavigationMenu';
 import AdisChat from './AdisChat';
@@ -232,6 +233,16 @@ export default function Header() {
     setShowLocationSelector(false);
   };
 
+  const convertLocationDataToSelection = (locationData: LocationData): Partial<Selection> => {
+    return {
+      continent: locationData.continent ? { id: 'sa', name: locationData.continent.name } : null,
+      country: locationData.country ? { id: 'pe', name: locationData.country.name } : null,
+      department: locationData.department ? { id: 'cusco', name: locationData.department.name } : null,
+      province: locationData.province ? { id: 'cusco', name: locationData.province.name } : null,
+      district: locationData.district ? { id: 'cusco', name: locationData.district.name } : null,
+    };
+  };
+
   const getLocationDisplayName = () => {
     if (!selectedLocation || Object.keys(selectedLocation).length === 0) {
       return 'Perú'; // Default
@@ -400,7 +411,7 @@ export default function Header() {
         <LocationSelector
           onClose={() => setShowLocationSelector(false)}
           onLocationSelect={handleLocationSelect}
-          initialSelection={selectedLocation as LocationData}
+          initialSelection={convertLocationDataToSelection(selectedLocation)}
         />
       )}
     </header>

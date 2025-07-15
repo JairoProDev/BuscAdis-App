@@ -359,7 +359,6 @@ function SearchPageContent({ publicationsData, results, setResults, isLoading, s
   hasSearched: boolean;
   setHasSearched: React.Dispatch<React.SetStateAction<boolean>>;
 }) {
-  const searchParams = useSearchParams()
   const currentPathname = usePathname()
   const router = useRouter()
   

@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { ChevronDownIcon, Squares2X2Icon, BriefcaseIcon } from '@heroicons/react/24/outline'
+import { ChevronDownIcon, Squares2X2Icon } from '@heroicons/react/24/outline'
 import { useRouter, usePathname } from 'next/navigation'
 import { 
   categoriesList, 
@@ -10,10 +10,7 @@ import {
   getSubcategories, 
   getSubSubcategories,
   generateCategoryUrl,
-  parseCategoryUrl,
-  type Category,
-  type Subcategory,
-  type SubSubcategory
+  parseCategoryUrl
 } from '@/lib/categories'
 
 interface CategorySelectorProps {
@@ -39,7 +36,7 @@ export default function CategorySelector({
   onSubSubcategoryChange,
   variant = 'dropdown',
   showIcon = true,
-  showCounts = false,
+  // showCounts = false, // Unused variable
   className = '',
   enableRouting = true
 }: CategorySelectorProps) {

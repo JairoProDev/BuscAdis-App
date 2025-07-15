@@ -2,10 +2,8 @@
 
 import AuthLayout from '@/features/auth/components/AuthLayout';
 import LoginForm from '@/features/auth/components/LoginForm';
-import { useRouter } from 'next/navigation';
 
 export default function LoginPage() {
-    const router = useRouter();
 
     return (
         <AuthLayout 

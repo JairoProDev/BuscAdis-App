@@ -12,7 +12,6 @@ import {
   SelectValue 
 } from '@/components/ui/Select'
 import { Switch } from '@/components/ui/switch'
-import { Label } from '@/components/ui/label'
 import { ChevronDownIcon, ChevronUpIcon } from '@heroicons/react/24/outline'
 import { FilterSelectOption, FilterType, FilterValue } from '@/types/filters'
 
@@ -43,7 +42,7 @@ export default function FilterSection({
   onChange,
   onApply,
   className = '',
-  activeFilters,
+  // activeFilters, // Unused variable
 }: FilterSectionProps) {
   const [isOpen, setIsOpen] = useState(false)
   

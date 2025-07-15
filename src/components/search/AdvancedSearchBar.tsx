@@ -11,7 +11,6 @@ import {
   ClockIcon,
   MagnifyingGlassIcon
 } from '@heroicons/react/24/outline'
-import useMediaQuery from '@/hooks/useMediaQuery'
 
 interface SearchHistoryItem {
   text: string
@@ -86,7 +85,6 @@ export default function AdvancedSearchBar({
   const [filteredSuggestions, setFilteredSuggestions] = useState<Suggestion[]>(SUGGESTIONS)
   const [recentSearches, setRecentSearches] = useState<SearchHistoryItem[]>([])
   const [trendingSearches, setTrendingSearches] = useState<Suggestion[]>([])
-  const [isRecording, setIsRecording] = useState(false)
   
   // Estados para las categorías seleccionadas
   const [activeCategory, setActiveCategory] = useState<string | undefined>(selectedCategory)
@@ -97,9 +95,6 @@ export default function AdvancedSearchBar({
   const inputRef = useRef<HTMLInputElement>(null)
   const suggestionsRef = useRef<HTMLDivElement>(null)
   const searchBarRef = useRef<HTMLDivElement>(null)
-  
-  // Media queries
-  const isMd = useMediaQuery('(min-width: 768px)')
   
   // Cargar datos iniciales
   useEffect(() => {
@@ -303,7 +298,6 @@ export default function AdvancedSearchBar({
                       onFocus={() => setIsFocused(true)}
                       placeholder="¿Qué buscas?"
                       className="w-full bg-transparent border-0 p-0 focus:ring-0 focus:outline-none text-slate-900 dark:text-white placeholder-slate-400"
-                      disabled={isRecording}
                     />
                     {searchTerm && (
                       <button

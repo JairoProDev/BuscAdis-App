@@ -13,9 +13,9 @@ interface FilterBarProps {
 }
 
 const FilterBar: React.FC<FilterBarProps> = ({ onFilterChange }) => {
-    const [selectedCategory, setSelectedCategory] = useState<string>('');
-    const [selectedLocation, setSelectedLocation] = useState<string>('');
-    const [sortBy, setSortBy] = useState<string>('');
+    const [, setSelectedCategory] = useState<string>('');
+    const [, setSelectedLocation] = useState<string>('');
+    const [, setSortBy] = useState<string>('');
 
     const handleCategoryChange = (value: string) => {
         setSelectedCategory(value);

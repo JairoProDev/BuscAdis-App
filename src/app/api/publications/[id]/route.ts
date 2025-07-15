@@ -36,7 +36,7 @@ async function findPublicationInAllCollections(publicationId: string) {
       if (publication) {
         return { publication, category };
       }
-    } catch (error) {
+    } catch {
       console.log(`No publication found in ${category} collection`);
       continue;
     }

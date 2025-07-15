@@ -145,7 +145,7 @@ export default function Tools() {
                         {tool.demo.data.map((value: number, index: number) => (
                             <div key={index} className="relative flex flex-col items-center">
                                 <motion.div
-                                    className={`w-10 sm:w-12 rounded-t-md bg-gradient-to-b ${tool.demo.colors[index % tool.demo.colors.length]}`}
+                                    className={`w-10 sm:w-12 rounded-t-md bg-gradient-to-b ${tool.demo.type === 'chart' ? tool.demo.colors[index % tool.demo.colors.length] : 'from-teal-500 to-cyan-400'}`}
                                     initial={{ height: 0 }}
                                     animate={{ height: isPlaying ? `${value}%` : 0 }}
                                     transition={{

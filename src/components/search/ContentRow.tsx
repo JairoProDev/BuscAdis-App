@@ -49,7 +49,7 @@ export default function ContentRow({
   description,
   publications,
   onViewAll,
-  categoryId,
+  // categoryId, // Unused variable
   isLoading = false,
   showViewAll = true,
   onPublicationClick

@@ -47,6 +47,7 @@ export interface SearchOptions {
   priceRange?: [number, number];
   sortBy?: string;
   filters?: Record<string, unknown>;
+  viewType?: string;
 }
 
 export interface SubcategoryRow {
@@ -154,39 +155,39 @@ const SubcategoriesView: React.FC<SubcategoriesViewProps> = ({ category, onSearc
   };
 
   // Adaptador robusto para trabajar con los datos reales de tu API
-  // const adaptPublication = (publication: PublicationData) => ({
-  //   id: publication.id || publication._id || 'unknown',
-  //   title: publication.title || 'Sin título',
-  //   description: publication.description || '',
-  //   categorySlug: publication.categorySlug || 'general',
-  //   subcategorySlug: publication.subcategory || publication.subcategorySlug || null,
-  //   subSubcategorySlug: publication.subSubcategorySlug || null,
-  //   transactionType: publication.transactionType || 'venta',
-  //   value: publication.price || publication.value || 0,
-  //   currency: publication.currency || 'PEN',
-  //   valueType: publication.valueType || 'fijo',
-  //   size: publication.size || 1,
-  //   location: {
-  //     country: 'Perú',
-  //     province: 'Cusco',
-  //     city: publication.location?.city || publication.location || 'Cusco',
-  //     district: publication.location?.district || null,
-  //     address: publication.location?.address || null
-  //   },
-  //   contact: {
-  //     phones: publication.contactPhone ? [publication.contactPhone] : ['900000000'],
-  //     email: publication.contactEmail || null,
-  //     name: publication.contactName || null
-  //   },
-  //   images: (publication.images && Array.isArray(publication.images)) 
-  //     ? publication.images 
-  //     : ['/images/placeholder-image.jpg'],
-  //   status: publication.status || 'active',
-  //   premium: publication.premium || false,
-  //   whatsapp: publication.contact?.phones?.[0] || publication.whatsapp || '900000000',
-  //   createdAt: publication.createdAt || publication.created_at || new Date().toISOString(),
-  //   views: publication.views || 0
-  // });
+  const adaptPublication = (publication: PublicationData) => ({
+    id: publication.id || publication._id || 'unknown',
+    title: publication.title || 'Sin título',
+    description: publication.description || '',
+    categorySlug: publication.categorySlug || 'general',
+    subcategorySlug: publication.subcategory || publication.subcategorySlug || null,
+    subSubcategorySlug: publication.subSubcategorySlug || null,
+    transactionType: publication.transactionType || 'venta',
+    value: publication.price || publication.value || 0,
+    currency: publication.currency || 'PEN',
+    valueType: publication.valueType || 'fijo',
+    size: publication.size || 1,
+    location: {
+      country: 'Perú',
+      province: 'Cusco',
+      city: typeof publication.location === 'object' ? publication.location?.city || 'Cusco' : publication.location || 'Cusco',
+      district: typeof publication.location === 'object' ? publication.location?.district || '' : '',
+      address: typeof publication.location === 'object' ? publication.location?.address || '' : ''
+    },
+    contact: {
+      phones: publication.contactPhone ? [publication.contactPhone] : ['900000000'],
+      email: publication.contactEmail || null,
+      name: publication.contactName || null
+    },
+    images: (publication.images && Array.isArray(publication.images)) 
+      ? publication.images 
+      : ['/images/placeholder-image.jpg'],
+    status: publication.status || 'active',
+    premium: publication.premium || false,
+    whatsapp: publication.contact?.phones?.[0] || publication.whatsapp || '900000000',
+    createdAt: publication.createdAt || publication.created_at || new Date().toISOString(),
+    views: publication.views || 0
+  });
 
   const getCategoryTitle = (categorySlug: string) => {
     const titles: Record<string, string> = {

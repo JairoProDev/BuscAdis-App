@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useState, useCallback, useMemo } from 'react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion } from 'framer-motion';
 import { PublicationsService } from '@/services/publications.service';
 import PublicationProgress from '@/components/publish/PublicationProgress';
 import StepNavigation from '@/components/publish/StepNavigation';

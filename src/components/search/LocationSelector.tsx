@@ -23,7 +23,7 @@ type GeoData = {
 
 const geoData: GeoData = rawGeoData;
 
-type Selection = {
+export type Selection = {
   continent: Location | null;
   country: Location | null;
   department: Location | null;

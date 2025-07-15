@@ -3,12 +3,11 @@ import { Button } from '@/components/ui/Button'
 import { Input } from '@/components/ui/Input'
 import { Slider } from '@/components/ui/slider'
 import { Checkbox } from '@/components/ui/Checkbox'
-import { CategoryFilters, FilterValue } from '@/types/search'
+import { FilterValue } from '@/types/search'
 import { cn } from '@/lib/utils'
 import { getFiltersForCategory, findFilterById, isFilterActive } from '@/utils/filterUtils'
 import { X, ChevronDown } from 'lucide-react'
 import { Switch } from '@/components/ui/switch'
-import { Badge } from '@/components/ui/Badge'
 import { createPortal } from 'react-dom'
 
 // Importaciones de tipos

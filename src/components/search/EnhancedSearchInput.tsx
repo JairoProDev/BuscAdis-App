@@ -1,11 +1,10 @@
 'use client';
 
 import { useState, useRef, useEffect } from 'react';
-import { Search, X, Mic, Camera, Sparkles, MicOff, Loader2, AlertCircle, CheckCircle } from 'lucide-react';
+import { Search, X, Mic, Camera, AlertCircle, CheckCircle } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import SearchSuggestions from './SearchSuggestions';
 import { cn } from '@/lib/utils';
-import { Button } from '@/components/ui/Button';
 
 interface EnhancedSearchInputProps {
   initialValue?: string;
@@ -50,7 +49,7 @@ export default function EnhancedSearchInput({
   const imageInputRef = useRef<HTMLInputElement>(null);
   const searchContainerRef = useRef<HTMLDivElement>(null);
   const [isListening, setIsListening] = useState(false);
-  const [voiceError, setVoiceError] = useState('');
+  // const [voiceError, setVoiceError] = useState(''); // Unused variable
   const recognitionRef = useRef<SpeechRecognition | null>(null);
   
   // Focus input on mount if autoFocus is true
@@ -157,13 +156,7 @@ export default function EnhancedSearchInput({
 
       recognitionRef.current.onerror = (event: SpeechRecognitionErrorEvent) => {
         setIsListening(false);
-        if (event.error === 'no-speech') {
-          setVoiceError('No se detectó habla. Intenta de nuevo.');
-        } else if (event.error === 'not-allowed') {
-          setVoiceError('Permisos de micrófono denegados');
-        } else {
-          setVoiceError(`Error: ${event.error}`);
-        }
+        // Error handling removed for unused variable
       };
 
       recognitionRef.current.onend = () => {
@@ -171,8 +164,8 @@ export default function EnhancedSearchInput({
       };
 
       recognitionRef.current.start();
-    } catch (error) {
-      setVoiceError('Error iniciando reconocimiento de voz');
+    } catch {
+      // setVoiceError('Error iniciando reconocimiento de voz'); // Unused variable
       setIsListening(false);
     }
   };

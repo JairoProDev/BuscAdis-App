@@ -15,14 +15,7 @@ interface AdvancedSearchProps {
     onSearch: (filters: SearchFilters) => void;
 }
 
-const AdvancedSearch: React.FC<AdvancedSearchProps> = ({ onSearch }) => {
-    const [query, setQuery] = useState('');
-    const [category, setCategory] = useState('');
-    const [location, setLocation] = useState('');
-    const [priceRange, setPriceRange] = useState({ min: '', max: '' });
-    const [results, setResults] = useState([]);
-    const [loading, setLoading] = useState(false);
-    const [handleSearch] = useState(() => () => {});
+const AdvancedSearch: React.FC<AdvancedSearchProps> = () => {
 
     return (
         <div className="bg-white rounded-lg shadow-md p-6">

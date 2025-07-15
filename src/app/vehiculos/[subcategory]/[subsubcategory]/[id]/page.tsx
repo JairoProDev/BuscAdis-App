@@ -38,7 +38,7 @@ export default function VehiculoDetailPage() {
           text: publication.description || 'Mira este vehículo en BuscaDis',
           url: window.location.href
         });
-      } catch (err) {
+      } catch {
         // ignore
       }
     } else {
