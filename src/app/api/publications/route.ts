@@ -1,8 +1,7 @@
-import { NextRequest, NextResponse } from 'next/server';
+import { NextResponse } from 'next/server';
 import { MongoClient, Db } from 'mongodb'
 import { Logger } from '@/services/logging.service'
 import type { SortDirection } from 'mongodb';
-import dbConnect from '@/lib/dbConnect';
 import { getPublicationModel } from '@/lib/models/Publication';
 
 export const dynamic = 'force-dynamic'

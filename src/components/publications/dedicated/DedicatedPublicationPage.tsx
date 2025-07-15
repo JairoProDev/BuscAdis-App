@@ -382,30 +382,16 @@ export default function DedicatedPublicationPage({
                   Información de contacto
                 </h3>
                 
-                {publication.contact?.phones && publication.contact.phones.length > 0 && (
+                {publication.whatsapp && (
                   <div className="space-y-3">
-                    {publication.contact.phones.map((phone, index) => (
-                      <div key={index} className="flex items-center gap-3">
-                        <div className="w-10 h-10 bg-teal-100 dark:bg-teal-900/20 rounded-lg flex items-center justify-center">
-                          <ChatBubbleLeftRightIcon className="w-5 h-5 text-teal-600" />
-                        </div>
-                        <div className="flex-1">
-                          <p className="text-sm text-gray-500">Teléfono {index + 1}</p>
-                          <p className="font-medium text-gray-900 dark:text-white">{phone}</p>
-                        </div>
+                    <div className="flex items-center gap-3">
+                      <div className="w-10 h-10 bg-teal-100 dark:bg-teal-900/20 rounded-lg flex items-center justify-center">
+                        <ChatBubbleLeftRightIcon className="w-5 h-5 text-teal-600" />
                       </div>
-                    ))}
-                  </div>
-                )}
-
-                {publication.contact?.email && (
-                  <div className="flex items-center gap-3 mt-4">
-                    <div className="w-10 h-10 bg-blue-100 dark:bg-blue-900/20 rounded-lg flex items-center justify-center">
-                      <ChatBubbleLeftRightIcon className="w-5 h-5 text-blue-600" />
-                    </div>
-                    <div className="flex-1">
-                      <p className="text-sm text-gray-500">Email</p>
-                      <p className="font-medium text-gray-900 dark:text-white">{publication.contact.email}</p>
+                      <div className="flex-1">
+                        <p className="text-sm text-gray-500">WhatsApp</p>
+                        <p className="font-medium text-gray-900 dark:text-white">{publication.whatsapp}</p>
+                      </div>
                     </div>
                   </div>
                 )}

@@ -83,7 +83,7 @@ export function ImageGallery({ images, className = '' }: ImageGalleryProps) {
                 `}
               >
                 <Image
-                  src={(image as GalleryImage).secureUrl || (image as GalleryImage).url}
+                  src={(image as GalleryImage).secureUrl || (image as GalleryImage).url || '/placeholder-image.jpg'}
                   alt={`Miniatura ${idx + 1}`}
                   className="object-cover"
                   fill
@@ -108,7 +108,7 @@ export function ImageGallery({ images, className = '' }: ImageGalleryProps) {
           <div className="relative h-[80vh] flex items-center justify-center">
             {/* Imagen actual - for lightbox, we'll keep using img to allow for zooming and better modal handling */}
             <Image
-              src={(images[currentIndex] as GalleryImage)?.secureUrl || (images[currentIndex] as GalleryImage)?.url}
+              src={(images[currentIndex] as GalleryImage)?.secureUrl || (images[currentIndex] as GalleryImage)?.url || '/placeholder-image.jpg'}
               alt={`Imagen ${currentIndex + 1}`}
               width={800}
               height={600}

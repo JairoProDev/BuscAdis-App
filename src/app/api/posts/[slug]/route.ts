@@ -68,8 +68,6 @@ export async function PUT(
   context: { params: Promise<{ slug: string }> }
 ) {
   try {
-    const params = await context.params
-    // const { slug } = params // Unused variable
     const body: Record<string, unknown> = await request.json()
     
     // TODO: Fix MongoDB client usage
@@ -107,8 +105,6 @@ export async function DELETE(
   context: { params: Promise<{ slug: string }> }
 ) {
   try {
-    const params = await context.params
-    // const { slug } = params // Unused variable
     
     // TODO: Fix MongoDB client usage
     // const { client, db } = await getServerMongoClient()

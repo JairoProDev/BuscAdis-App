@@ -10,7 +10,6 @@ import { FilterValue } from '@/types/filters'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/Tabs-adapter'
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion'
 import CategoryFilters from './CategoryFilters'
-import { useSearchParams } from 'next/navigation'
 
 interface AdvancedFilterDrawerProps {
   selectedCategory?: string

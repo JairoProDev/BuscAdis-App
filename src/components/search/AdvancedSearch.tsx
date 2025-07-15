@@ -1,5 +1,5 @@
 // src/components/search/AdvancedSearch.tsx
-import React, { useState } from 'react';
+import React from 'react';
 
 interface SearchFilters {
   query?: string;

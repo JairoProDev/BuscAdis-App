@@ -177,7 +177,7 @@ const SubcategoriesView: React.FC<SubcategoriesViewProps> = ({ category, onSearc
               maxItems: 8
             });
           }
-        } catch (error) {
+        } catch {
           console.log(`No publications available for ${category}/${subcategory.slug}`);
         }
       }

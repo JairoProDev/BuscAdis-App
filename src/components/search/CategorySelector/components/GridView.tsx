@@ -4,7 +4,6 @@ import React from 'react';
 import { motion } from 'framer-motion';
 import { Category } from '../types';
 import { CategoryCard } from './CategoryCard';
-import { StarIcon } from '@heroicons/react/24/outline';
 import { getCategoryImage } from '../utils';
 
 interface GridViewProps {
