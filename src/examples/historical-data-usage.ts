@@ -71,7 +71,7 @@ export class AutocompletadoInteligente {
   /**
    * Sugiere información basada en el número de teléfono del usuario
    */
-  sugerirPorTelefono(telefono: string): any {
+  sugerirPorTelefono(telefono: string): Record<string, unknown> {
     console.log(`🔍 Buscando historial para teléfono: ${telefono}`);
     
     const anunciosAnteriores = this.datosHistoricos.filter(ad => 
@@ -104,7 +104,7 @@ export class AutocompletadoInteligente {
   /**
    * Sugiere título y descripción basado en la categoría
    */
-  sugerirContenido(categoria: string, subcategoria: string): any {
+  sugerirContenido(categoria: string, subcategoria: string): Record<string, unknown> {
     console.log(`💡 Generando sugerencias para: ${categoria} -> ${subcategoria}`);
     
     const anunciosSimilares = this.datosHistoricos.filter(ad => 
@@ -160,7 +160,7 @@ export class AutocompletadoInteligente {
     return Array.from(ubicaciones).slice(0, 5);
   }
 
-  private analizarRangosPrecios(anuncios: HistoricalAdJSON[]): any {
+  private analizarRangosPrecios(anuncios: HistoricalAdJSON[]): Record<string, number> | null {
     const precios = anuncios
       .filter(ad => ad.commercial.prices.length > 0)
       .map(ad => ad.commercial.prices[0].amount);
@@ -202,7 +202,7 @@ export class AutocompletadoInteligente {
       .map(([palabra]) => palabra);
   }
 
-  private analizarPreciosComunes(anuncios: HistoricalAdJSON[]): any {
+  private analizarPreciosComunes(anuncios: HistoricalAdJSON[]): Record<string, number> | null {
     const precios = anuncios
       .filter(ad => ad.commercial.prices.length > 0)
       .map(ad => ad.commercial.prices[0].amount);
@@ -231,7 +231,7 @@ export class AnalizadorMercado {
   /**
    * Analiza tendencias de mercado por categoría
    */
-  analizarTendencias(): any {
+  analizarTendencias(): Record<string, unknown> {
     console.log('📊 Analizando tendencias de mercado...');
 
     const tendencias = {
@@ -248,7 +248,7 @@ export class AnalizadorMercado {
   /**
    * Identifica oportunidades de mercado
    */
-  identificarOportunidades(): any {
+  identificarOportunidades(): Record<string, unknown> {
     console.log('🎯 Identificando oportunidades de mercado...');
 
     const oportunidades = {
@@ -261,7 +261,7 @@ export class AnalizadorMercado {
     return oportunidades;
   }
 
-  private analizarPorCategoria(): any {
+  private analizarPorCategoria(): Record<string, unknown> {
     const stats: { [key: string]: any } = {};
     
     this.datosHistoricos.forEach(ad => {
@@ -303,7 +303,7 @@ export class AnalizadorMercado {
     return stats;
   }
 
-  private analizarPorUbicacion(): any {
+  private analizarPorUbicacion(): Record<string, unknown> {
     const ubicaciones: { [key: string]: any } = {};
     
     this.datosHistoricos.forEach(ad => {
@@ -343,7 +343,7 @@ export class AnalizadorMercado {
     return ubicaciones;
   }
 
-  private analizarPorPrecio(): any {
+  private analizarPorPrecio(): Record<string, unknown> {
     const precios = this.datosHistoricos
       .filter(ad => ad.commercial.prices.length > 0)
       .map(ad => ad.commercial.prices[0].amount);
@@ -372,7 +372,7 @@ export class AnalizadorMercado {
     };
   }
 
-  private analizarPorTiempo(): any {
+  private analizarPorTiempo(): Record<string, unknown> {
     const porMes: { [key: string]: number } = {};
     
     this.datosHistoricos.forEach(ad => {
@@ -391,7 +391,7 @@ export class AnalizadorMercado {
     };
   }
 
-  private analizarCompetidores(): any {
+  private analizarCompetidores(): Record<string, unknown> {
     // Analizar números de teléfono más frecuentes
     const telefonos: { [key: string]: number } = {};
     
@@ -437,7 +437,7 @@ export class AnalizadorMercado {
     return zonasConPocaOferta;
   }
 
-  private encontrarNichosPremium(): any[] {
+  private encontrarNichosPremium(): unknown[] {
     return this.datosHistoricos
       .filter(ad => ad.commercial.prices.length > 0 && ad.commercial.prices[0].amount > 2000)
       .reduce((nichos: any[], ad) => {
@@ -493,7 +493,7 @@ export class AnalizadorMercado {
     return 'Estable';
   }
 
-  private calcularConcentracionMercado(competidores: any[]): string {
+  private calcularConcentracionMercado(competidores: unknown[]): string {
     const top3 = competidores.slice(0, 3);
     const porcentajeTop3 = top3.reduce((sum, comp) => sum + parseFloat(comp.porcentajeDelMercado), 0);
     
@@ -514,7 +514,7 @@ export class RecomendadorPersonalizado {
   /**
    * Recomienda anuncios basado en el historial del usuario
    */
-  recomendarAnuncios(perfilUsuario: any): HistoricalAdJSON[] {
+  recomendarAnuncios(perfilUsuario: unknown): HistoricalAdJSON[] {
     console.log('🎯 Generando recomendaciones personalizadas...');
 
     let anunciosRecomendados = [...this.datosHistoricos];
@@ -556,7 +556,7 @@ export class RecomendadorPersonalizado {
     return anunciosRecomendados.slice(0, 10);
   }
 
-  private calcularScoreRelevancia(anuncio: HistoricalAdJSON, perfil: any): number {
+  private calcularScoreRelevancia(anuncio: HistoricalAdJSON, perfil: unknown): number {
     let score = 0;
 
     // Puntuación base por calidad

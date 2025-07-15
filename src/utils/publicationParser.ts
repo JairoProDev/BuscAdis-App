@@ -120,7 +120,12 @@ export function parsePublicationsFromText(text: string): PublicationInput[] {
  * @param publication Publicación estructurada
  * @returns Datos listos para enviar a la API
  */
-export function preparePublicationForAPI(publication: PublicationInput): any {
+export interface PublicationApiPayload extends PublicationInput {
+  created_at: string;
+  status: string;
+}
+
+export function preparePublicationForAPI(publication: PublicationInput): PublicationApiPayload {
   // Ajustar formato según requisitos de la API
   return {
     ...publication,

@@ -40,6 +40,7 @@ interface SearchResult {
 
 type ViewMode = 'grid' | 'list'
 type SortOption = 'recent' | 'price-asc' | 'price-desc' | 'views' | 'distance'
+type FilterValue = string | number | boolean | null | undefined;
 
 const sortOptions = [
   { value: 'recent', label: 'Más recientes', icon: '🕒' },
@@ -125,8 +126,8 @@ const FilterSelector = ({
   onFilterChange 
 }: {
   filter: FilterOption
-  value: any
-  onFilterChange: (filterId: string, value: any) => void
+  value: FilterValue
+  onFilterChange: (filterId: string, value: FilterValue) => void
 }) => {
   const [isOpen, setIsOpen] = useState(false)
   const buttonRef = useRef<HTMLButtonElement>(null)
@@ -135,7 +136,7 @@ const FilterSelector = ({
     setIsOpen(false)
   }, [])
 
-  const handleFilterSelect = useCallback((optionValue: any) => {
+  const handleFilterSelect = useCallback((optionValue: FilterValue) => {
     onFilterChange(filter.id, optionValue)
     setIsOpen(false)
   }, [filter.id, onFilterChange])
@@ -266,9 +267,9 @@ const EnhancedFilterSelector = ({
   placeholder
 }: {
   label: string
-  value: any
+  value: FilterValue
   options: Array<{value: string, label: string}>
-  onChange: (value: string | null) => void
+  onChange: (value: FilterValue) => void
   placeholder: string
 }) => {
   const [isOpen, setIsOpen] = useState(false)
@@ -280,7 +281,7 @@ const EnhancedFilterSelector = ({
     setIsOpen(false)
   }, [])
 
-  const handleOptionSelect = useCallback((optionValue: string | null) => {
+  const handleOptionSelect = useCallback((optionValue: FilterValue) => {
     onChange(optionValue)
     setIsOpen(false)
   }, [onChange])
@@ -384,7 +385,7 @@ function SearchPageContent({ publicationsData, results, setResults, isLoading, s
     }
     return ''
   })
-  const [activeFilters, setActiveFilters] = useState<Record<string, any>>({})
+  const [activeFilters, setActiveFilters] = useState<Record<string, FilterValue>>({})
   const [viewMode, setViewMode] = useState<ViewMode>('grid')
   const [sortBy, setSortBy] = useState<SortOption>('recent')
   const [sortDropdownOpen, setSortDropdownOpen] = useState(false)
@@ -457,7 +458,7 @@ function SearchPageContent({ publicationsData, results, setResults, isLoading, s
     }
   }
 
-  const handleSearch = useCallback(async (query: string, filters: Record<string, any> = {}) => {
+  const handleSearch = useCallback(async (query: string, filters: Record<string, FilterValue> = {}) => {
     console.log('🔍 handleSearch called with:', { query, filters, selectedCategory })
     
     setIsLoading(true)
@@ -470,10 +471,10 @@ function SearchPageContent({ publicationsData, results, setResults, isLoading, s
       }
       
       if (query.trim()) searchParams.query = query
-      if (filters.category && filters.category !== 'all') searchParams.category = filters.category
-      if (filters.subcategory) searchParams.subcategory = filters.subcategory
-      if (filters.subsubcategory) searchParams.subsubcategory = filters.subsubcategory
-      if (filters.location) searchParams.location = filters.location
+      if (filters.category && filters.category !== 'all') searchParams.category = String(filters.category)
+      if (filters.subcategory) searchParams.subcategory = String(filters.subcategory)
+      if (filters.subsubcategory) searchParams.subsubcategory = String(filters.subsubcategory)
+      if (filters.location) searchParams.location = String(filters.location)
       
       // Add active filters to search params
       Object.entries(activeFilters).forEach(([key, value]) => {
@@ -491,13 +492,13 @@ function SearchPageContent({ publicationsData, results, setResults, isLoading, s
       }
       
       // Adaptar resultados de la API al formato esperado
-      const adaptedResults: SearchResult[] = data.publications.map((pub: any) => ({
+      const adaptedResults: SearchResult[] = data.publications.map((pub: Record<string, unknown>) => ({
         id: pub._id || pub.id || `result-${Date.now()}-${Math.random()}`,
         title: pub.title || 'Sin título',
         description: pub.description || '',
         price: pub.price || pub.amount || 0,
         location: typeof pub.location === 'object' 
-          ? `${pub.location.district || pub.location.province || pub.location.city || 'Sin ubicación'}` 
+          ? `${(pub.location as Record<string, string>).district || (pub.location as Record<string, string>).province || (pub.location as Record<string, string>).city || 'Sin ubicación'}` 
           : pub.location || 'Sin ubicación',
         category: pub.categorySlug || pub.category || 'general',
         image: pub.images?.[0] || '/images/placeholder-image.jpg',
@@ -571,7 +572,7 @@ function SearchPageContent({ publicationsData, results, setResults, isLoading, s
     })
   }, [currentQuery, selectedCategory, handleSearch, router])
 
-  const handleFiltersChange = useCallback((filters: Record<string, any>) => {
+  const handleFiltersChange = useCallback((filters: Record<string, FilterValue>) => {
     setActiveFilters(filters)
     
     handleSearch(currentQuery, {
@@ -602,13 +603,13 @@ function SearchPageContent({ publicationsData, results, setResults, isLoading, s
       const data = await response.json()
       
       if (data.publications) {
-        const formattedResults = data.publications.map((pub: any) => ({
+        const formattedResults = data.publications.map((pub: Record<string, unknown>) => ({
           id: pub._id || pub.id,
           title: pub.title || 'Sin título',
           description: pub.description || '',
           category: categoryId,
           price: pub.price || pub.amount || 0,
-          location: `${pub.location?.district || ''}, ${pub.location?.province || ''}`.replace(/^,\s*/, '') || 'Sin ubicación',
+          location: `${(pub.location as Record<string, string>)?.district || ''}, ${(pub.location as Record<string, string>)?.province || ''}`.replace(/^,\s*/, '') || 'Sin ubicación',
           image: pub.images?.[0] || '/images/placeholder-image.jpg',
           createdAt: pub.createdAt || new Date().toISOString(),
           views: pub.views || 0,
@@ -695,13 +696,13 @@ function SearchPageContent({ publicationsData, results, setResults, isLoading, s
           const data = await response.json()
           
           if (data.publications) {
-            const adaptedResults: SearchResult[] = data.publications.map((pub: any) => ({
+            const adaptedResults: SearchResult[] = data.publications.map((pub: Record<string, unknown>) => ({
               id: pub._id || pub.id || `result-${Date.now()}-${Math.random()}`,
               title: pub.title || 'Sin título',
               description: pub.description || '',
               price: pub.price || pub.amount || 0,
               location: typeof pub.location === 'object' 
-                ? `${pub.location.district || pub.location.province || pub.location.city || 'Sin ubicación'}` 
+                ? `${(pub.location as Record<string, string>).district || (pub.location as Record<string, string>).province || (pub.location as Record<string, string>).city || 'Sin ubicación'}` 
                 : pub.location || 'Sin ubicación',
               category: pub.categorySlug || pub.category || 'general',
               image: pub.images?.[0] || '/images/placeholder-image.jpg',

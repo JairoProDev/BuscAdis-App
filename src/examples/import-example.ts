@@ -62,20 +62,20 @@ async function importFromText() {
     
     // Mapeo personalizado para texto
     mapping: {
-      title: (row: any) => {
+      title: (row: Record<string, unknown>) => {
         // Primer línea como título
-        const lines = row.rawText.split('\n')
+        const lines = (row.rawText as string).split('\n')
         return lines[0] || 'Sin título'
       },
       
-      description: (row: any) => {
+      description: (row: Record<string, unknown>) => {
         // Todo el texto como descripción
-        return row.rawText
+        return (row.rawText as string)
       },
       
-      category: (row: any) => {
+      category: (row: Record<string, unknown>) => {
         // Detectar categoría automáticamente del texto
-        const text = row.rawText.toLowerCase()
+        const text = (row.rawText as string).toLowerCase()
         if (text.includes('casa') || text.includes('departamento')) return 'inmuebles'
         if (text.includes('auto') || text.includes('carro')) return 'vehiculos'
         if (text.includes('trabajo') || text.includes('empleo')) return 'empleos'
@@ -83,9 +83,9 @@ async function importFromText() {
       },
       
       location: {
-        city: (row: any) => {
+        city: (row: Record<string, unknown>) => {
           // Extraer ciudad del texto
-          const text = row.rawText.toLowerCase()
+          const text = (row.rawText as string).toLowerCase()
           if (text.includes('cusco')) return 'Cusco'
           if (text.includes('lima')) return 'Lima'
           if (text.includes('arequipa')) return 'Arequipa'
@@ -96,26 +96,26 @@ async function importFromText() {
       },
       
       contact: {
-        phone: (row: any) => {
+        phone: (row: Record<string, unknown>) => {
           // Extraer teléfono con regex
           const phoneRegex = /(\+?51)?[\s-]?9\d{8}/g
-          const matches = row.rawText.match(phoneRegex)
+          const matches = (row.rawText as string).match(phoneRegex)
           return matches ? matches[0] : undefined
         },
         
-        email: (row: any) => {
+        email: (row: Record<string, unknown>) => {
           // Extraer email con regex
           const emailRegex = /\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,}\b/g
-          const matches = row.rawText.match(emailRegex)
+          const matches = (row.rawText as string).match(emailRegex)
           return matches ? matches[0] : undefined
         }
       },
       
       pricing: {
-        price: (row: any) => {
+        price: (row: Record<string, unknown>) => {
           // Extraer precio con regex
           const priceRegex = /S\/?\s?(\d{1,3}(?:,\d{3})*(?:\.\d{2})?)/g
-          const matches = row.rawText.match(priceRegex)
+          const matches = (row.rawText as string).match(priceRegex)
           if (matches) {
             const price = matches[0].replace(/S\/?\s?/, '').replace(/,/g, '')
             return parseFloat(price)
@@ -258,8 +258,8 @@ async function importWithCustomValidation() {
   if (result.results) {
     const categories = result.results
       .filter(r => r.success && r.publication)
-      .reduce((acc: any, r) => {
-        const cat = r.publication?.category.name || 'Sin categoría'
+      .reduce((acc: Record<string, unknown>, r: Record<string, unknown>) => {
+        const cat = (r.publication as any)?.category.name || 'Sin categoría'
         acc[cat] = (acc[cat] || 0) + 1
         return acc
       }, {})
