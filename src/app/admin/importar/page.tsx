@@ -5,12 +5,13 @@ import { parsePublicationsFromText, preparePublicationForAPI } from '@/utils/pub
 import { PublicationsService } from '@/services/publications.service';
 import LoadingSpinner from '@/components/ui/LoadingSpinner';
 import { PublicationInput } from '@/types/publication';
-import { CreatePublicationData } from '@/types/publication';
+import { CreatePublicationData } from '@/services/publications.service';
 
 interface Publication {
   title: string;
   category: string;
   subcategory?: string;
+  subsubcategory?: string;
   price: number;
   price_type: string;
   contact: {
@@ -51,6 +52,7 @@ export default function ImportPublicationsPage() {
         title: input.title,
         category: input.category,
         subcategory: input.subcategory || '',
+        subsubcategory: (input as any).subsubcategory || '',
         price: input.price,
         price_type: input.currency || 'PEN',
         contact: {
@@ -121,7 +123,7 @@ export default function ImportPublicationsPage() {
             location: {
               country: 'Perú',
               province: publicationInput.location.province || '',
-              city: publicationInput.location.city || '',
+              city: '',
               district: publicationInput.location.district || '',
               address: publicationInput.location.address || '',
               coordinates: publicationInput.location.coordinates || undefined,
