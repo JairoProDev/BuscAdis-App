@@ -1,8 +1,4 @@
 import { AuthService } from '@/features/auth/services/auth.service';
-import { Logger } from '@/services/logging.service';
-
-// Check if we're in browser environment
-const isBrowser = typeof window !== 'undefined';
 
 interface ProfileData {
   fullName?: string;

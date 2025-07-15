@@ -20,7 +20,7 @@ export function useTheme() {
         // If no theme is stored, use light theme
         localStorage.setItem('theme', 'light')
       }
-    } catch (error) {
+    } catch {
       // Fallback if localStorage is not available
       console.warn('localStorage not available, using light theme')
     }

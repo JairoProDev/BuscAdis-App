@@ -1,7 +1,7 @@
 /**
  * Utilidades para analizar y estructurar datos de publicaciones
  */
-import { MainCategory, classifyPublication, PublicationInput } from '@/types/publication';
+import { classifyPublication, PublicationInput } from '@/types/publication';
 
 /**
  * Analiza texto plano de anuncios y los convierte en objetos estructurados
@@ -31,14 +31,6 @@ export function parsePublicationsFromText(text: string): PublicationInput[] {
     
     if (priceMatch) {
       price = parseFloat(priceMatch[1].replace(/,/g, ''));
-    }
-    
-    // Extraer tipo de precio
-    let priceType: 'fixed' | 'negotiable' | 'free' | 'exchange' = 'fixed';
-    if (adText.toLowerCase().includes('negociable') || adText.toLowerCase().includes('a tratar')) {
-      priceType = 'negotiable';
-    } else if (adText.toLowerCase().includes('gratis') || adText.toLowerCase().includes('gratuito')) {
-      priceType = 'free';
     }
     
     // Extraer contacto

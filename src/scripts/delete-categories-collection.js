@@ -1,6 +1,5 @@
 // Script para eliminar la colección de categorías en MongoDB
 const { MongoClient } = require("mongodb");
-require("dotenv").config();
 
 async function deleteCategories() {
   // Usar la URI de conexión directamente desde dbConnect.js

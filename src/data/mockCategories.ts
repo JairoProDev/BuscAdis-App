@@ -1,15 +1,3 @@
-import {
-  JobsIcon,
-  RealEstateIcon,
-  VehicleIcon,
-  ServicesIcon,
-  ProductsIcon,
-  EventsIcon,
-  EducationIcon,
-  TourismIcon,
-  PetsIcon
-} from '@/components/icons/categories'
-
 // Estructura de datos para categorías
 export interface MockCategory {
   id: string;

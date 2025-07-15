@@ -6,7 +6,7 @@ import { useEffect } from 'react'
 let gsap: typeof import('gsap').gsap | null = null;
 try {
   gsap = import('gsap').then(module => module.gsap);
-} catch (error) {
+} catch {
   // gsap not available, hook will be disabled
 }
 

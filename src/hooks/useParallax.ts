@@ -11,7 +11,7 @@ try {
   if (gsap && ScrollTrigger) {
     gsap.registerPlugin(ScrollTrigger);
   }
-} catch (error) {
+} catch {
   // gsap not available, hook will be disabled
 }
 

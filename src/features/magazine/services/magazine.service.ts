@@ -1,5 +1,5 @@
 import { Publication } from '@/types/publications';
-import { mongoDbQuery, mongoDbInsert } from '@/lib/mongodb-server';
+import { mongoDbQuery } from '@/lib/mongodb-server';
 
 // Type for the Magazine metadata
 export interface MagazineMetadata {

@@ -1,6 +1,5 @@
 'use client'
 
-import { useEffect, useState } from 'react'
 import Toast from './Toast'
 
 interface ToastProps {

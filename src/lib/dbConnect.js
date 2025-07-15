@@ -25,13 +25,6 @@ const CONNECTION_STATES = {
 };
 
 async function dbConnect() {
-  const logConnectionState = () => {
-    const state = mongoose.connection.readyState;
-    Logger.debug(
-      `MongoDB Connection state: ${CONNECTION_STATES[state]} (${state})`
-    );
-  };
-
   // Use cached connection if available
   if (cached.conn) {
     return cached.conn;

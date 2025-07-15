@@ -12,7 +12,6 @@
  *    node src/scripts/update-contact-format.js
  */
 
-require("dotenv").config();
 const { MongoClient } = require("mongodb");
 
 // MongoDB connection URI from environment

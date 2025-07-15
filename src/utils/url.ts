@@ -10,7 +10,6 @@
  * @param category - Categoría de la publicación (opcional)
  * @param subcategory - Subcategoría de la publicación (opcional)
  * @param subsubcategory - Sub-subcategoría de la publicación (opcional)
- * @param includeTitleInSlug - Si el slug ya contiene el título o si se debe añadir aparte (opcional, por defecto true asumiendo slug no tiene título)
  * @returns URL SEO-friendly
  */
 export function generateSeoUrl(
@@ -20,7 +19,6 @@ export function generateSeoUrl(
   category?: string,
   subcategory?: string,
   subsubcategory?: string,
-  includeTitleInSlug: boolean = true // Whether to include title in the slug
 ): string {
   if (!id) {
     console.warn('generateSeoUrl: id is missing');

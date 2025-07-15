@@ -1,5 +1,4 @@
 // Tipos para servicios y utilidades
-import type { PublicationData, SearchRequest, SearchResponse, ValidationResult } from './api';
 
 // Tipos para servicios de API
 export interface ApiServiceConfig {

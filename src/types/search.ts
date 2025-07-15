@@ -1,4 +1,4 @@
-import type { FiltersByCategory, FilterValue, FilterOption } from './filters'
+import type { FilterValue, FilterOption } from './filters'
 
 /**
  * Tipo de categoría válido según las keys de filtersByCategory.

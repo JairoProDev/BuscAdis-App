@@ -3,7 +3,7 @@
  * BuscaDis - Organización de anuncios en filas categorizadas
  */
 
-import { Publication } from './publication-netflix.service';
+import { LoggingService } from './logging.service';
 
 export interface NetflixRow {
   id: string;
@@ -43,8 +43,6 @@ export interface AdRowItem {
     qualityScore: number;              // Puntuación de calidad
   };
 }
-
-import { LoggingService } from './logging.service';
 
 export class NetflixViewService {
   private logger = LoggingService.getInstance();

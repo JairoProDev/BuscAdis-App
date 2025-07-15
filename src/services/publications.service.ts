@@ -1,9 +1,4 @@
-import { v4 as uuidv4 } from 'uuid';
-import { AuthService } from '@/features/auth/services/auth.service';
 import { Logger } from '@/services/logging.service';
-
-// Check if we're in browser environment
-const isBrowser = typeof window !== 'undefined';
 
 interface MediaItem {
     url: string;
@@ -34,17 +29,6 @@ export interface QuickPublicationData {
     location?: Location;
     price?: Price;
     priceType?: string;
-}
-
-interface PublicationParams {
-    category?: string;
-    query?: string;
-    minPrice?: number;
-    maxPrice?: number;
-    location?: string;
-    sortBy?: string;
-    page: number;
-    limit?: number;
 }
 
 // Interfaces

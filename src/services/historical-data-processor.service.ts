@@ -4,7 +4,7 @@
  */
 
 import { HistoricalAdJSON, BulkImportAd, AITrainingData } from '../data/historical-ads-json-structure';
-import { HistoricalAdAnalysis, DATA_EXTRACTION_CONFIG } from '../data/historical-ads-analysis';
+import { DATA_EXTRACTION_CONFIG } from '../data/historical-ads-analysis';
 
 // Nuevas interfaces para reemplazar 'any'
 export interface ContentAnalysis {

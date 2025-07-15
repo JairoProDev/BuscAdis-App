@@ -11,18 +11,6 @@
 // Importar desde el sistema unificado de categorías
 import { categoriesList, getCategoriesWithIcons } from '@/lib/categories';
 
-// Type for static categories (simplified)
-interface StaticCategoryItem {
-  id: string;
-  name: string;
-  slug: string;
-  description: string;
-  icon: string; // Icon name as string
-  gradient: string;
-  imageUrl: string;
-  count?: number; // Keep optional count for type compatibility if needed elsewhere
-}
-
 // Interface for category counts (no longer used here)
 // interface CategoryCount {
 //   id: string;

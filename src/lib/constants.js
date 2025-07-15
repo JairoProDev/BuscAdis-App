@@ -3,18 +3,6 @@
  * Constantes utilizadas en la aplicación de Buscadis
  */
 
-import {
-  BriefcaseIcon,
-  HomeIcon,
-  TruckIcon,
-  WrenchIcon,
-  ShoppingBagIcon,
-  GlobeAltIcon,
-  CalendarIcon,
-  AcademicCapIcon,
-  HeartIcon
-} from '@heroicons/react/24/outline';
-
 // Importar desde el sistema unificado de categorías
 import { getCategoriesWithIcons } from './categories';
 

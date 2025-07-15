@@ -3,7 +3,6 @@
 import { useState, useEffect, useRef } from 'react';
 import { useAuth } from '@/features/auth/hooks/useAuth';
 import { MessagesService } from '../services/messages.service';
-import { PaperAirplaneIcon } from '@heroicons/react/24/solid';
 // AWS SDK removed due to missing dependency
 
 interface User {

@@ -4,10 +4,9 @@
  */
 
 import fs from 'fs'
-import path from 'path'
 import { MongoClient } from 'mongodb'
 import { Logger } from '@/services/logging.service'
-import { BulkPublicationImport, PublicationBulkData, PublicationDocument } from '@/data/database-architecture'
+import { PublicationBulkData, PublicationDocument } from '@/data/database-architecture'
 
 // =============================================================================
 // 1. CONFIGURACIÓN DEL IMPORTADOR

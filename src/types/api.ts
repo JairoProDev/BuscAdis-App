@@ -1,5 +1,5 @@
 // Tipos para APIs y servicios
-import { Db, Collection, Document } from 'mongodb';
+import { Db, Document } from 'mongodb';
 
 // Tipos base para respuestas de API
 export interface ApiResponse<T = unknown> {

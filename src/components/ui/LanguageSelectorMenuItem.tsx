@@ -48,7 +48,6 @@ export default function LanguageSelectorMenuItem({
   useEffect(() => {
     if (showLanguageSubmenu && buttonRef.current) {
       const buttonRect = buttonRef.current.getBoundingClientRect();
-      const submenuWidth = 256; // w-64 = 16rem = 256px
       
       // Position to the left of the button
       setSubmenuPosition({

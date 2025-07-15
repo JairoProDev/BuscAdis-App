@@ -3,7 +3,7 @@
  * This uses the real MongoDB driver and is only imported on the server
  */
 
-import { MongoClient, ObjectId, Db, Collection, Document } from 'mongodb';
+import { MongoClient, ObjectId, Db, Document } from 'mongodb';
 import { MongoClientInterface, PublicationDocument, COLLECTIONS } from './mongodb-shared';
 import { LoggingService } from '@/services/logging.service';
 
