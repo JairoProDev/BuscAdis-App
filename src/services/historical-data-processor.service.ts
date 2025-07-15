@@ -335,7 +335,7 @@ export class HistoricalDataProcessorService {
         
         commercial: {
           type: classification.type,
-          adSize: (rawAd.adSize as any) || 'pequeño',
+          adSize: (rawAd.adSize as string) || 'pequeño',
           estimatedCost: rawAd.estimatedCost || this.estimateCost(rawAd.adSize || 'pequeño'),
           duration: 3, // Típicamente 3 días en revistas
           prices: priceInfo
@@ -465,7 +465,7 @@ export class HistoricalDataProcessorService {
   /**
    * Genera características para entrenamiento de ML
    */
-  private generateTrainingFeatures(text: string, contentAnalysis: ContentAnalysis): any {
+  private generateTrainingFeatures(text: string, contentAnalysis: ContentAnalysis): TrainingFeatures {
     return {
       features: {
         text_length: text.length,
@@ -807,7 +807,7 @@ export class HistoricalDataProcessorService {
     };
   }
 
-  private generateSearchableText(originalText: string, extractedData: any): string {
+  private generateSearchableText(originalText: string, extractedData: ExtractedDataBasic): string {
     return `${extractedData.title} ${extractedData.description}`.toLowerCase();
   }
 

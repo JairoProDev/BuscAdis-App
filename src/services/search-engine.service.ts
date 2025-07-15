@@ -32,7 +32,7 @@ export interface SearchQuery {
     max?: number;
     currency?: string;
   };
-  filters?: Record<string, any>;
+  filters?: Record<string, unknown>;
   sortBy?: 'relevance' | 'date' | 'price_asc' | 'price_desc' | 'distance';
   page?: number;
   limit?: number;
@@ -186,9 +186,12 @@ class SupremeSearchEngine {
       };
       
       recognition.onresult = async (event: any) => {
-        const transcript = event.results[event.results.length - 1][0].transcript;
+        // Use the correct type for event
+        // @ts-expect-error: SpeechRecognitionEvent is not always available in all TS environments
+        const speechEvent = event as SpeechRecognitionEvent;
+        const transcript = speechEvent.results[speechEvent.results.length - 1][0].transcript;
         
-        if (event.results[event.results.length - 1].isFinal) {
+        if (speechEvent.results[speechEvent.results.length - 1].isFinal) {
           Logger.info('Voice search transcript', { transcript });
           
           try {
@@ -200,9 +203,9 @@ class SupremeSearchEngine {
         }
       };
       
-      recognition.onerror = (event: any) => {
-        Logger.error('Voice search error', { error: event.error });
-        reject(new Error(`Error en búsqueda por voz: ${event.error}`));
+      recognition.onerror = (event: Event) => {
+        Logger.error('Voice search error', { event });
+        reject(new Error('Error en búsqueda por voz.'));
       };
       
       recognition.start();
@@ -535,3 +538,12 @@ declare global {
     webkitSpeechRecognition: any;
   }
 } 
+
+// Minimal type for SpeechRecognitionEvent if not available
+// @ts-expect-error: Only for type safety if not present
+type SpeechRecognitionEvent = Event & {
+  results: ArrayLike<{
+    0: { transcript: string };
+    isFinal: boolean;
+  }>;
+}; 

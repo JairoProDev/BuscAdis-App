@@ -51,7 +51,7 @@ export class ProfileService {
     }
   }
 
-  static async createOrUpdateProfile(user: any) {
+  static async createOrUpdateProfile(user: ProfileData) {
     try {
       const currentUser = await AuthService.getCurrentUser();
       if (!currentUser) {

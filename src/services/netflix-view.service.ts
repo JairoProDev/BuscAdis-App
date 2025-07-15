@@ -18,7 +18,7 @@ export interface NetflixRow {
     totalCount: number;                // Total de items disponibles
     lastUpdated: Date;
     category?: string;
-    filters?: any;
+    filters?: Record<string, unknown>;
   };
 }
 

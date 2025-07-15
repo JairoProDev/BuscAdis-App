@@ -44,8 +44,8 @@ export interface FormData {
 }
 
 interface FormState extends FormData {
-  setField: (field: keyof FormData, value: any) => void;
-  setNestedField: (path: string[], value: any) => void;
+  setField: <T extends keyof FormData>(field: T, value: FormData[T]) => void;
+  setNestedField: (path: string[], value: unknown) => void;
   validateField: (field: string) => boolean;
   validateAll: () => boolean;
   setStep: (step: number) => void;
@@ -95,15 +95,18 @@ export const useFormStore = create<FormState>()(
       setNestedField: (path, value) => {
         Logger.debug(`Actualizando campo anidado: ${path.join('.')}`);
         set(state => {
-          const current = { ...state } as any;
-          let currentObj = current;
-          for (let i = 0; i < path.length - 1; i++) {
-            currentObj[path[i]] = { ...currentObj[path[i]] };
-            currentObj = currentObj[path[i]];
-          }
-          currentObj[path[path.length - 1]] = value;
+          const updateDeep = (obj: any, pathArr: string[], val: unknown): any => {
+            if (pathArr.length === 1) {
+              return { ...obj, [pathArr[0]]: val };
+            }
+            return {
+              ...obj,
+              [pathArr[0]]: updateDeep(obj[pathArr[0]], pathArr.slice(1), val)
+            };
+          };
+          const updated = updateDeep(state, path, value);
           return {
-            ...current,
+            ...updated,
             lastSaved: new Date()
           };
         });

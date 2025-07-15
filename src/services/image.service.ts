@@ -1,13 +1,17 @@
 // Conditional AWS SDK imports
-let S3Client: any = null;
-let PutObjectCommand: any = null;
-let DeleteObjectCommand: any = null;
-let getSignedUrl: any = null;
+import type { S3Client as S3ClientType, PutObjectCommand as PutObjectCommandType, DeleteObjectCommand as DeleteObjectCommandType } from '@aws-sdk/client-s3';
+import type { getSignedUrl as getSignedUrlType } from '@aws-sdk/s3-request-presigner';
+
+let S3Client: typeof S3ClientType | null = null;
+let PutObjectCommand: typeof PutObjectCommandType | null = null;
+let DeleteObjectCommand: typeof DeleteObjectCommandType | null = null;
+let getSignedUrl: typeof getSignedUrlType | null = null;
 
 try {
+  // eslint-disable-next-line @typescript-eslint/no-var-requires
   const s3Module = require('@aws-sdk/client-s3');
+  // eslint-disable-next-line @typescript-eslint/no-var-requires
   const presignerModule = require('@aws-sdk/s3-request-presigner');
-  
   S3Client = s3Module.S3Client;
   PutObjectCommand = s3Module.PutObjectCommand;
   DeleteObjectCommand = s3Module.DeleteObjectCommand;

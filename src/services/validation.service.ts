@@ -5,12 +5,12 @@ interface ValidationResult {
   errors: string[];
 }
 
-interface ValidationRules {
+interface ValidationRules<T = unknown> {
   required?: boolean;
   minLength?: number;
   maxLength?: number;
   pattern?: RegExp;
-  custom?: (value: any) => boolean;
+  custom?: (value: T) => boolean;
 }
 
 export class ValidationService {
@@ -132,7 +132,7 @@ export class ValidationService {
     };
   }
 
-  static validateCategory(category: any): ValidationResult {
+  static validateCategory<T extends { id?: string }>(category: T): ValidationResult {
     const errors: string[] = [];
     
     if (!category || !category.id) {
@@ -146,7 +146,7 @@ export class ValidationService {
     };
   }
 
-  static validateField(value: any, rules: ValidationRules): ValidationResult {
+  static validateField<T = unknown>(value: T, rules: ValidationRules<T>): ValidationResult {
     const errors: string[] = [];
 
     if (rules.required && (!value || (typeof value === 'string' && !value.trim()))) {

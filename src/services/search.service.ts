@@ -48,7 +48,7 @@ export class SearchService {
             console.log("Filters received:", params); // Log of received filters
             
             // Build filter object
-            const filter: Record<string, any> = { 
+            const filter: Record<string, unknown> = { 
                 // Default to active listings
                 status: "active"
             };
@@ -108,7 +108,7 @@ export class SearchService {
             const skip = (page - 1) * limit;
             const items = await publications
                 .find(filter)
-                .sort(sortOptions as any)
+                .sort(sortOptions)
                 .skip(skip)
                 .limit(limit)
                 .toArray();
