@@ -7,8 +7,8 @@ let clientPromise: Promise<MongoClient>;
 if (process.env.NODE_ENV === 'development') {
   // In development mode, use a global variable to preserve the value
   // across module reloads caused by HMR (Hot Module Replacement).
-  if (!(global as any)._mongoClientPromise) {
-    (global as any)._mongoClientPromise = getServerMongoClient().then(client => {
+  if (!(global as Record<string, unknown>)._mongoClientPromise) {
+    (global as Record<string, unknown>)._mongoClientPromise = getServerMongoClient().then(client => {
       // Return a mock MongoClient for compatibility
       return {
         db: () => ({
@@ -21,10 +21,10 @@ if (process.env.NODE_ENV === 'development') {
             countDocuments: () => Promise.resolve(0)
           })
         })
-      } as any;
+      } as MongoClient;
     });
   }
-  clientPromise = (global as any)._mongoClientPromise;
+  clientPromise = (global as Record<string, unknown>)._mongoClientPromise as Promise<MongoClient>;
 } else {
   // In production mode, it's best to not use a global variable.
   clientPromise = getServerMongoClient().then(client => {
@@ -39,7 +39,7 @@ if (process.env.NODE_ENV === 'development') {
           countDocuments: () => Promise.resolve(0)
         })
       })
-    } as any;
+    } as MongoClient;
   });
 }
 

@@ -45,7 +45,11 @@ export const parseCategoryUrl = (pathname: string): {
   
   if (!category) return {};
   
-  const result: any = { categoryId };
+  const result: {
+    categoryId: string;
+    subcategoryId?: string;
+    subSubcategoryId?: string;
+  } = { categoryId };
   
   if (parts.length >= 2) {
     const subcategoryId = parts[1];

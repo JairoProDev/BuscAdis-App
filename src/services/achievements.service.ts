@@ -16,8 +16,8 @@ interface AchievementProgress {
 interface AchievementStore extends AchievementProgress {
   unlockAchievement: (id: string) => void;
   checkImageUpload: (imageCount: number) => void;
-  checkFormCompletion: (fields: Record<string, any>) => void;
-  checkLocationAdded: (location: any) => void;
+  checkFormCompletion: (fields: Record<string, unknown>) => void;
+  checkLocationAdded: (location: Record<string, unknown>) => void;
   checkDescription: (description: string) => void;
   resetProgress: () => void;
 }
@@ -106,7 +106,7 @@ export const useAchievements = create<AchievementStore>()(
         Logger.debug(`Verificando logros de imágenes: ${imageCount} imágenes`);
       },
 
-      checkFormCompletion: (fields: Record<string, any>) => {
+      checkFormCompletion: (fields: Record<string, unknown>) => {
         const requiredFields = [
           'title',
           'description',
@@ -126,7 +126,7 @@ export const useAchievements = create<AchievementStore>()(
         }
       },
 
-      checkLocationAdded: (location: any) => {
+      checkLocationAdded: (location: Record<string, unknown>) => {
         if (
           location &&
           typeof location === 'object' &&

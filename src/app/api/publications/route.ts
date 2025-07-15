@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server'
 import { MongoClient, Db } from 'mongodb'
 import { Logger } from '@/services/logging.service'
 import type { PublicationDocument } from '@/types/api'
+import type { SortDirection } from 'mongodb';
 
 export const dynamic = 'force-dynamic'
 export const runtime = 'nodejs'
@@ -100,8 +101,8 @@ export async function GET(request: Request) {
       // Filtro por precio
       if (minPrice || maxPrice) {
         query.price = {}
-        if (minPrice) query.price.$gte = parseFloat(minPrice)
-        if (maxPrice) query.price.$lte = parseFloat(maxPrice)
+        if (minPrice) (query.price as Record<string, unknown>).$gte = parseFloat(minPrice)
+        if (maxPrice) (query.price as Record<string, unknown>).$lte = parseFloat(maxPrice)
       }
       
       return query
@@ -127,7 +128,7 @@ export async function GET(request: Request) {
         collection.countDocuments(mongoQuery)
       ])
       
-      allPublications = publications
+      allPublications = (publications as any[]).map(pub => ({ ...pub }))
       totalCount = total
       
       Logger.debug(`Found ${publications.length} publications in ${collectionName}`)
@@ -140,7 +141,7 @@ export async function GET(request: Request) {
           const publications = await collection.find(mongoQuery).toArray()
           
           // Agregar categoría a cada publicación
-          return publications.map((pub: PublicationDocument) => ({
+          return (publications as any[]).map(pub => ({
             ...pub,
             categorySlug: cat,
             category: cat
@@ -158,13 +159,13 @@ export async function GET(request: Request) {
       combinedPublications.sort((a, b) => {
         switch (sortBy) {
           case 'price_asc':
-            return (a.price || 0) - (b.price || 0)
+            return (a.price ?? 0) - (b.price ?? 0)
           case 'price_desc':
-            return (b.price || 0) - (a.price || 0)
+            return (b.price ?? 0) - (a.price ?? 0)
           case 'recent':
           default:
-            const dateA = new Date(a.createdAt || a.created_at || 0)
-            const dateB = new Date(b.createdAt || b.created_at || 0)
+            const dateA = new Date(a.createdAt ?? a.created_at ?? 0)
+            const dateB = new Date(b.createdAt ?? b.created_at ?? 0)
             return dateB.getTime() - dateA.getTime()
         }
       })
@@ -178,26 +179,29 @@ export async function GET(request: Request) {
     }
 
     // Formatear datos para el frontend
-    const formattedPublications = allPublications.map(pub => ({
-      ...pub,
-      id: pub._id?.toString() || pub.id,
-      _id: pub._id?.toString(),
-      location: pub.location?.district || pub.location?.province || pub.location || 'Cusco',
-      fullLocation: pub.location,
-      price: pub.amount || pub.price || 0,
-      amount: pub.amount || pub.price || 0,
-      images: pub.images && pub.images.length > 0 ? pub.images : ['/images/placeholder-image.jpg'],
-      currency: pub.currency || 'PEN',
-      status: pub.status || 'active',
-      createdAt: pub.createdAt || pub.created_at || new Date().toISOString(),
-      subcategory: pub.subcategorySlug || pub.subcategory,
-      subsubcategory: pub.subSubcategorySlug || pub.subsubcategory,
-      contactName: pub.contact?.name || 'Contacto',
-      contactPhone: pub.contact?.phones?.[0] || '',
-      district: pub.location?.district || '',
-      province: pub.location?.province || '',
-      negotiable: pub.negotiable || false
-    }))
+    const formattedPublications = allPublications.map(pub => {
+      const p = pub as any;
+      return {
+        ...p,
+        id: p._id?.toString() || p.id,
+        _id: p._id?.toString(),
+        location: p.location?.district || p.location?.province || p.location || 'Cusco',
+        fullLocation: p.location,
+        price: p.amount ?? p.price ?? 0,
+        amount: p.amount ?? p.price ?? 0,
+        images: Array.isArray(p.images) && p.images.length > 0 ? p.images : ['/images/placeholder-image.jpg'],
+        currency: p.currency || 'PEN',
+        status: p.status || 'active',
+        createdAt: p.createdAt || p.created_at || new Date().toISOString(),
+        subcategory: p.subcategorySlug || p.subcategory,
+        subsubcategory: p.subSubcategorySlug || p.subsubcategory,
+        contactName: p.contact?.name || 'Contacto',
+        contactPhone: p.contact?.phones?.[0] || '',
+        district: p.location?.district || '',
+        province: p.location?.province || '',
+        negotiable: p.negotiable || false
+      }
+    })
 
     Logger.info(`Returning ${formattedPublications.length} publications`, { 
       total: totalCount, 
@@ -320,14 +324,14 @@ function generateObjectId() {
 }
 
 // Función auxiliar para opciones de ordenamiento
-function getSortOptions(sortBy: string) {
+function getSortOptions(sortBy: string): { [key: string]: SortDirection } {
   switch (sortBy) {
     case 'price_asc':
-      return { price: 1 }
+      return { price: 1 as SortDirection };
     case 'price_desc':
-      return { price: -1 }
+      return { price: -1 as SortDirection };
     case 'recent':
     default:
-      return { createdAt: -1 }
+      return { createdAt: -1 as SortDirection };
   }
 } 

@@ -255,9 +255,9 @@ class AIIntegrationService {
   async translateContent(content: {
     title: string;
     description: string;
-  }, targetLanguages: string[] = ['en', 'pt', 'fr']): Promise<Record<string, any>> {
+  }, targetLanguages: string[] = ['en', 'pt', 'fr']): Promise<Record<string, unknown>> {
     try {
-      const translations: Record<string, any> = {};
+      const translations: Record<string, unknown> = {};
       
       for (const lang of targetLanguages) {
         const [titleTranslation, descriptionTranslation] = await Promise.all([
