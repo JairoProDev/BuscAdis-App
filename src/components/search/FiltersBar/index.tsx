@@ -5,18 +5,6 @@ import { useSearch } from '@/contexts/SearchContext'
 import { filtersByCategory } from '@/data/filterConfig'
 import { ChevronDownIcon, XMarkIcon } from '@heroicons/react/24/outline'
 
-// Define Filter interface locally to avoid type conflicts
-interface Filter {
-  id: string
-  type: string
-  label: string
-  min?: number
-  max?: number
-  step?: number
-  format?: (value: number) => string
-  options?: Array<{ value: string; label: string }>
-}
-
 import type { FilterValue } from '@/types/filters'
 
 interface FiltersBarProps {

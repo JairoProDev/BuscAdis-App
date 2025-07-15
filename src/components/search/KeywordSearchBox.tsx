@@ -34,10 +34,8 @@ export default function KeywordSearchBox({
   isMobile = false,
 }: KeywordSearchBoxProps) {
   const router = useRouter();
-  const [searchValue, setSearchValue] = useState(initialValue);
   
   const handleSearch = (query: string) => {
-    setSearchValue(query);
     
     if (onSearch) {
       // If onSearch prop is provided, call it

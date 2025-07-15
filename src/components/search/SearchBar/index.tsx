@@ -3,7 +3,6 @@
 import { useState, useEffect } from 'react'
 import { useSearch } from '@/contexts/SearchContext'
 import { MagnifyingGlassIcon } from '@heroicons/react/24/outline'
-import LocationSelector from '../LocationSelector'
 import SimpleSelector from '../CategorySelector/SimpleSelector'
 import { useGoogleAnalytics } from '@/hooks/useGoogleAnalytics'
 import { ANALYTICS_CONFIG } from '@/config/analytics'

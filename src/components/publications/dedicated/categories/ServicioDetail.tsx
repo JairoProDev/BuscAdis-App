@@ -30,7 +30,7 @@ export default function ServicioDetail({ publication }: ServicioDetailProps) {
   }
 
   // Garantizar que attributes siempre exista como objeto
-  const attributes = (publication && (publication as Record<string, unknown>).attributes) ? (publication as Record<string, unknown>).attributes : {};
+  const attributes = (publication && (publication as any).attributes) ? (publication as any).attributes : {};
 
   // Datos principales y secundarios con fallbacks robustos
   const servicioData = {
@@ -174,7 +174,7 @@ export default function ServicioDetail({ publication }: ServicioDetailProps) {
               <div className="bg-purple-50 dark:bg-purple-900/20 rounded-lg p-4">
                 <h5 className="font-medium text-purple-900 dark:text-purple-300 mb-2">🔧 Servicios incluidos</h5>
                 <div className="space-y-2">
-                  {servicioData.serviciosIncluidos.map((servicio, index) => (
+                  {servicioData.serviciosIncluidos.map((servicio: string, index: number) => (
                     <div key={index} className="flex items-center gap-2">
                       <CheckBadgeIcon className="w-4 h-4 text-green-600" />
                       <span className="text-sm text-purple-800 dark:text-purple-200">{servicio}</span>

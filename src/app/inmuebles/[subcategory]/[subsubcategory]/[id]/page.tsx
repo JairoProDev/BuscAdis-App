@@ -277,4 +277,97 @@ function InmuebleDetailPageContent({ publication: initialPublication }: { public
                 {/* Botón de Email (si existe) */}
                 {contact.email && (
                   <a
-                    href={`mailto:${contact.email}`
+                    href={`mailto:${contact.email}`}
+                    className="flex items-center justify-center w-full bg-gray-100 hover:bg-gray-200 text-gray-800 py-3 px-4 rounded-lg font-medium transition-all shadow-sm border border-gray-200"
+                  >
+                    <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
+                    </svg>
+                    Enviar Email
+                  </a>
+                )}
+              </div>
+            </div>
+
+            {/* Acciones */}
+            <div className="bg-white rounded-lg shadow-sm p-6 border border-gray-100 space-y-3">
+              <button
+                onClick={handleShare}
+                className="flex items-center justify-center w-full bg-gray-100 hover:bg-gray-200 text-gray-800 py-3 px-4 rounded-lg font-medium transition-all shadow-sm border border-gray-200"
+              >
+                <ShareIcon className="w-5 h-5 mr-2" />
+                Compartir
+              </button>
+              <button
+                // onClick={handleReport} // Implementar lógica de reporte
+                className="flex items-center justify-center w-full bg-red-50 hover:bg-red-100 text-red-700 py-3 px-4 rounded-lg font-medium transition-all shadow-sm border border-red-100"
+              >
+                <FlagIcon className="w-5 h-5 mr-2" />
+                Reportar Aviso
+              </button>
+            </div>
+          </div>
+        </div>
+
+        {/* Avisos Relacionados */}
+        {relatedPublications.length > 0 && (
+          <RelatedPublications publications={relatedPublications} category="inmuebles" />
+        )}
+      </div>
+    </div>
+  );
+}
+
+// Main page component for Next.js 15 with async params
+export default function InmuebleDetailPage({ params }: { params: Promise<{ id: string; subcategory: string; subsubcategory: string }> }) {
+  const [publication, setPublication] = useState<PublicationData | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    const fetchPublication = async () => {
+      try {
+        const resolvedParams = await params;
+        const { id } = resolvedParams;
+        
+        // Fetch publication data
+        const publicationData = await PublicationsService.getPublicationById(id);
+        
+        if (publicationData) {
+          const mappedData = mapPublicationToPublicationData(publicationData);
+          setPublication(mappedData);
+        } else {
+          setError('Publicación no encontrada');
+        }
+      } catch (err) {
+        console.error('Error fetching publication:', err);
+        setError('Error al cargar la publicación');
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchPublication();
+  }, [params]);
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <LoadingSpinner size="lg" />
+      </div>
+    );
+  }
+
+  if (error || !publication) {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <div className="text-center">
+          <h1 className="text-2xl font-bold text-gray-900 mb-4">Error</h1>
+          <p className="text-gray-600">{error || 'Publicación no encontrada'}</p>
+        </div>
+      </div>
+    );
+  }
+
+  return <InmuebleDetailPageContent publication={publication} />;
+}

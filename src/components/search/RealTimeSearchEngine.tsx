@@ -185,7 +185,7 @@ export default function RealTimeSearchEngine({
   onSubcategoryChange
 }: RealTimeSearchEngineProps) {
   const router = useRouter()
-  const { searchState, updateSearch, addRecentSearch, trackSearch } = useSearch()
+  const { addRecentSearch, trackSearch } = useSearch()
   
   const [inputValue, setInputValue] = useState('')
   const [isInputFocused, setIsInputFocused] = useState(false)
@@ -350,7 +350,6 @@ export default function RealTimeSearchEngine({
 
   // Estados para reconocimiento de voz
   const [isListening, setIsListening] = useState(false)
-  const [voiceError, setVoiceError] = useState('')
   const recognitionRef = useRef<SpeechRecognition | null>(null)
   
   // Estado para historial de búsqueda

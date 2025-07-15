@@ -5,9 +5,6 @@ import { motion, AnimatePresence } from 'framer-motion'
 import { Mic as MicOutline, Camera as CameraOutline } from 'lucide-react'
 import { 
   MagnifyingGlassIcon, 
-  AdjustmentsHorizontalIcon,
-  FireIcon,
-  SparklesIcon,
   ArrowTrendingUpIcon
 } from '@heroicons/react/24/outline'
 import { 

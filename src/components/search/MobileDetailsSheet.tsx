@@ -58,19 +58,6 @@ export default function MobileDetailsSheet({
     }
   }, [isOpen, controls])
   
-  const getSheetYPosition = (state: 'closed' | 'half' | 'full') => {
-    switch (state) {
-      case 'closed':
-        return windowHeight
-      case 'half':
-        return windowHeight * 0.5
-      case 'full':
-        return 0
-      default:
-        return windowHeight * 0.5
-    }
-  }
-  
   const handleDragEnd = (_: unknown, info: PanInfo) => {
     const velocity = info.velocity.y
     const offset = info.offset.y

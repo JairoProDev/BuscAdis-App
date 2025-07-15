@@ -10,11 +10,6 @@ import {
   PhoneIcon,
   ArrowDownTrayIcon,
   CheckCircleIcon,
-  ChevronLeftIcon,
-  HeartIcon,
-  FlagIcon as ReportIcon,
-  EyeIcon,
-  ClockIcon
 } from '@heroicons/react/24/outline';
 import { PublicationsService } from '@/services/publications.service';
 import { formatDate } from '@/utils/date';
@@ -30,9 +25,6 @@ import { toPng } from 'html-to-image';
 import { getDefaultImageByCategory } from '@/utils/image-helpers';
 import PublicationModalStyles from './PublicationModalStyles';
 import { Publication, PublicationContact } from '@/types/publication';
-import { Button } from '@/components/ui/Button';
-import { formatDistanceToNow } from 'date-fns';
-import { es } from 'date-fns/locale';
 
 // Create the PublicationWithContact type locally
 interface PublicationWithContact extends Publication {
