@@ -189,7 +189,7 @@ export async function GET(request: Request) {
         fullLocation: (p as { location?: unknown }).location,
         price: (p as { amount?: number, price?: number }).amount ?? (p as { price?: number }).price ?? 0,
         amount: (p as { amount?: number, price?: number }).amount ?? (p as { price?: number }).price ?? 0,
-        images: Array.isArray((p as { images?: unknown[] }).images) && (p as { images?: unknown[] }).images.length > 0 ? (p as { images: string[] }).images : ['/images/placeholder-image.jpg'],
+        images: Array.isArray((p as { images?: unknown[] }).images) && ((p as { images?: unknown[] }).images?.length ?? 0) > 0 ? (p as { images: string[] }).images : ['/images/placeholder-image.jpg'],
         currency: (p as { currency?: string }).currency || 'PEN',
         status: (p as { status?: string }).status || 'active',
         createdAt: (p as { createdAt?: string, created_at?: string }).createdAt || (p as { created_at?: string }).created_at || new Date().toISOString(),

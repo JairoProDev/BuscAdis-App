@@ -64,70 +64,44 @@ export async function GET(
 }
 
 export async function PUT(
-  request: Request,
-  { params }: { params: Promise<{ slug: string }> }
+  request: Request
 ) {
   try {
     const body: Record<string, unknown> = await request.json();
-    
-    // TODO: Fix MongoDB client usage
-    // const { client, db } = await getServerMongoClient()
-    // const postsCollection = db.collection('posts')
-    // const updatedPost = await postsCollection.findOneAndUpdate(
-    //   { slug },
-    //   { $set: { ...body, updatedAt: new Date() } },
-    //   { returnDocument: 'after' }
-    // )
-    // await client.close()
-    
-    // For now, return mock response
-    const updatedPost = { ...body, updatedAt: new Date() }
-    
+    // TODO: Implement update logic
+    const updatedPost = { ...body, updatedAt: new Date() };
     if (!updatedPost) {
       return NextResponse.json(
         { error: 'Post not found' },
         { status: 404 }
-      )
+      );
     }
-    
-    return NextResponse.json(updatedPost)
+    return NextResponse.json(updatedPost);
   } catch (error) {
-    console.error('Error updating post:', error)
+    console.error('Error updating post:', error);
     return NextResponse.json(
       { error: 'Internal server error' },
       { status: 500 }
-    )
+    );
   }
 }
 
-export async function DELETE(
-  request: Request,
-  { params }: { params: Promise<{ slug: string }> }
-) {
+export async function DELETE() {
   try {
-    
-    // TODO: Fix MongoDB client usage
-    // const { client, db } = await getServerMongoClient()
-    // const postsCollection = db.collection('posts')
-    // const result = await postsCollection.deleteOne({ slug })
-    // await client.close()
-    
-    // For now, return mock response
-    const result = { deletedCount: 1 }
-    
+    // TODO: Implement delete logic
+    const result = { deletedCount: 1 };
     if (result.deletedCount === 0) {
       return NextResponse.json(
         { error: 'Post not found' },
         { status: 404 }
-      )
+      );
     }
-    
-    return NextResponse.json({ message: 'Post deleted successfully' })
+    return NextResponse.json({ message: 'Post deleted successfully' });
   } catch (error) {
-    console.error('Error deleting post:', error)
+    console.error('Error deleting post:', error);
     return NextResponse.json(
       { error: 'Internal server error' },
       { status: 500 }
-    )
+    );
   }
 } 
