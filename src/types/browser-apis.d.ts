@@ -6,8 +6,8 @@
 // Web Speech API
 declare global {
   interface Window {
-    SpeechRecognition: any;
-    webkitSpeechRecognition: any;
+    SpeechRecognition: unknown;
+    webkitSpeechRecognition: unknown;
     SpeechSynthesis: typeof SpeechSynthesis;
     speechSynthesis: SpeechSynthesis;
   }
@@ -21,17 +21,17 @@ declare global {
     serviceURI: string;
     
     // Events
-    onaudioend: ((this: SpeechRecognition, ev: Event) => any) | null;
-    onaudiostart: ((this: SpeechRecognition, ev: Event) => any) | null;
-    onend: ((this: SpeechRecognition, ev: Event) => any) | null;
-    onerror: ((this: SpeechRecognition, ev: SpeechRecognitionErrorEvent) => any) | null;
-    onnomatch: ((this: SpeechRecognition, ev: SpeechRecognitionEvent) => any) | null;
-    onresult: ((this: SpeechRecognition, ev: SpeechRecognitionEvent) => any) | null;
-    onsoundend: ((this: SpeechRecognition, ev: Event) => any) | null;
-    onsoundstart: ((this: SpeechRecognition, ev: Event) => any) | null;
-    onspeechend: ((this: SpeechRecognition, ev: Event) => any) | null;
-    onspeechstart: ((this: SpeechRecognition, ev: Event) => any) | null;
-    onstart: ((this: SpeechRecognition, ev: Event) => any) | null;
+    onaudioend: ((this: SpeechRecognition, ev: Event) => unknown) | null;
+    onaudiostart: ((this: SpeechRecognition, ev: Event) => unknown) | null;
+    onend: ((this: SpeechRecognition, ev: Event) => unknown) | null;
+    onerror: ((this: SpeechRecognition, ev: SpeechRecognitionErrorEvent) => unknown) | null;
+    onnomatch: ((this: SpeechRecognition, ev: SpeechRecognitionEvent) => unknown) | null;
+    onresult: ((this: SpeechRecognition, ev: SpeechRecognitionEvent) => unknown) | null;
+    onsoundend: ((this: SpeechRecognition, ev: Event) => unknown) | null;
+    onsoundstart: ((this: SpeechRecognition, ev: Event) => unknown) | null;
+    onspeechend: ((this: SpeechRecognition, ev: Event) => unknown) | null;
+    onspeechstart: ((this: SpeechRecognition, ev: Event) => unknown) | null;
+    onstart: ((this: SpeechRecognition, ev: Event) => unknown) | null;
     
     // Methods
     abort(): void;
@@ -117,7 +117,7 @@ declare global {
 // Web Workers
 declare global {
   interface Worker {
-    postMessage(message: any, transfer?: Transferable[]): void;
+    postMessage(message: unknown, transfer?: Transferable[]): void;
     terminate(): void;
     onmessage: ((this: Worker, ev: MessageEvent) => any) | null;
     onerror: ((this: Worker, ev: ErrorEvent) => any) | null;
@@ -129,7 +129,7 @@ declare global {
   interface IDBFactory {
     open(name: string, version?: number): IDBOpenDBRequest;
     deleteDatabase(name: string): IDBOpenDBRequest;
-    cmp(first: any, second: any): number;
+    cmp(first: unknown, second: unknown): number;
   }
 
   interface IDBDatabase extends EventTarget {
