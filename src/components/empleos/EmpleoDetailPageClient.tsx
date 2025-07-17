@@ -27,7 +27,7 @@ export default function EmpleoDetailPageClient({ id }: EmpleoDetailPageClientPro
   const router = useRouter();
   const [publication, setPublication] = useState<EmploymentPublicationData | null>(null);
   const [loading, setLoading] = useState(true);
-  const [relatedPublications, setRelatedPublications] = useState<any[]>([]);
+  const [relatedPublications, setRelatedPublications] = useState<EmploymentPublicationData[]>([]);
 
   useEffect(() => {
     const fetchPublication = async () => {
@@ -97,20 +97,28 @@ export default function EmpleoDetailPageClient({ id }: EmpleoDetailPageClientPro
           publication.categorySlug || 'general'
         );
         // Adapt the related publications to the expected shape
-        const adaptedRelated = (relatedData || []).map((pub: any) => ({
-          id: pub._id || pub.id || '',
-          title: pub.title || '',
-          price: pub.price ?? pub.value ?? 0,
-          price_type: pub.price_type || pub.valueType || 'fixed',
-          images: Array.isArray(pub.images) ? pub.images : [],
-          location: typeof pub.location === 'object' && pub.location !== null
-            ? { city: pub.location.city || '', region: pub.location.province || pub.location.region || '' }
-            : { city: pub.location || '', region: '' },
-          created_at: pub.created_at || pub.createdAt || '',
-          category: pub.categorySlug || pub.category || '',
-          subcategory: pub.subcategorySlug || pub.subcategory || '',
-          subsubcategory: pub.subSubcategorySlug || pub.subsubcategory || '',
-        }));
+        const adaptedRelated = (relatedData || []).map((pub: Record<string, unknown>) => {
+          let city = '';
+          let region = '';
+          if (typeof pub.location === 'object' && pub.location !== null && 'city' in pub.location) {
+            city = (pub.location as { city?: string }).city || '';
+            region = (pub.location as { province?: string; region?: string }).province || (pub.location as { region?: string }).region || '';
+          } else if (typeof pub.location === 'string') {
+            city = pub.location;
+          }
+          return {
+            id: pub._id || pub.id || '',
+            title: pub.title || '',
+            price: pub.price ?? pub.value ?? 0,
+            price_type: pub.price_type || pub.valueType || 'fixed',
+            images: Array.isArray(pub.images) ? pub.images : [],
+            location: { city, region },
+            created_at: pub.created_at || pub.createdAt || '',
+            category: pub.categorySlug || pub.category || '',
+            subcategory: pub.subcategorySlug || pub.subcategory || '',
+            subsubcategory: pub.subSubcategorySlug || pub.subsubcategory || '',
+          };
+        });
         setRelatedPublications(adaptedRelated);
       } catch (err) {
         console.error('Error al obtener ofertas relacionadas:', err);
