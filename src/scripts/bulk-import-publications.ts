@@ -23,10 +23,10 @@ interface ImportConfig {
 
 interface FieldMapping {
   // Mapeo de campos del archivo fuente a la estructura de BuscAdis
-  title: string | ((row: any) => string)
-  description: string | ((row: any) => string)
-  category: string | ((row: any) => string)
-  subcategory?: string | ((row: any) => string)
+  title: string | ((row: Record<string, unknown>) => string)
+  description: string | ((row: Record<string, unknown>) => string)
+  category: string | ((row: Record<string, unknown>) => string)
+  subcategory?: string | ((row: Record<string, unknown>) => string)
   location?: LocationMapping
   contact?: ContactMapping
   pricing?: PricingMapping
@@ -35,37 +35,37 @@ interface FieldMapping {
 }
 
 interface LocationMapping {
-  country?: string | ((row: any) => string)
-  region?: string | ((row: any) => string)
-  city?: string | ((row: any) => string)
-  address?: string | ((row: any) => string)
+  country?: string | ((row: Record<string, unknown>) => string)
+  region?: string | ((row: Record<string, unknown>) => string)
+  city?: string | ((row: Record<string, unknown>) => string)
+  address?: string | ((row: Record<string, unknown>) => string)
   coordinates?: {
-    lat: string | ((row: any) => number)
-    lng: string | ((row: any) => number)
+    lat: string | ((row: Record<string, unknown>) => number)
+    lng: string | ((row: Record<string, unknown>) => number)
   }
 }
 
 interface ContactMapping {
-  phone?: string | ((row: unknown) => string)
-  whatsapp?: string | ((row: unknown) => string)
-  email?: string | ((row: unknown) => string)
+  phone?: string | ((row: Record<string, unknown>) => string)
+  whatsapp?: string | ((row: Record<string, unknown>) => string)
+  email?: string | ((row: Record<string, unknown>) => string)
 }
 
 interface PricingMapping {
-  price?: string | ((row: unknown) => number)
-  currency?: string | ((row: unknown) => string)
-  type?: string | ((row: unknown) => string)
+  price?: string | ((row: Record<string, unknown>) => number)
+  currency?: string | ((row: Record<string, unknown>) => string)
+  type?: string | ((row: Record<string, unknown>) => string)
 }
 
 interface MediaMapping {
-  images?: string | ((row: unknown) => string[])
-  mainImage?: string | ((row: unknown) => string)
+  images?: string | ((row: Record<string, unknown>) => string[])
+  mainImage?: string | ((row: Record<string, unknown>) => string)
 }
 
 interface ValidationConfig {
   strictMode: boolean
   requiredFields: string[]
-  customValidators?: Record<string, (value: any) => boolean>
+  customValidators?: Record<string, (value: unknown) => boolean>
 }
 
 interface ProcessingConfig {
@@ -161,7 +161,7 @@ export class BulkPublicationImporter {
   }
   
   // Cargar datos del archivo fuente
-  private async loadSourceData(): Promise<any[]> {
+  private async loadSourceData(): Promise<Record<string, unknown>[]> {
     const filePath = this.config.sourceFile
     
     if (!fs.existsSync(filePath)) {
@@ -186,13 +186,13 @@ export class BulkPublicationImporter {
   }
   
   // Parser para CSV
-  private parseCSV(content: string): any[] {
+  private parseCSV(content: string): Record<string, unknown>[] {
     const lines = content.split('\n').filter(line => line.trim())
     const headers = lines[0].split(',').map(h => h.trim().replace(/"/g, ''))
     
     return lines.slice(1).map(line => {
       const values = line.split(',').map(v => v.trim().replace(/"/g, ''))
-      const row: any = {}
+      const row: Record<string, unknown> = {}
       
       headers.forEach((header, index) => {
         row[header] = values[index] || ''
@@ -203,7 +203,7 @@ export class BulkPublicationImporter {
   }
   
   // Parser para TXT (asume formato específico)
-  private parseTXT(content: string): any[] {
+  private parseTXT(content: string): Record<string, unknown>[] {
     // Implementar parser personalizado según el formato de texto
     // Ejemplo: cada publicación separada por líneas vacías
     const publications = content.split('\n\n').filter(p => p.trim())
@@ -215,7 +215,7 @@ export class BulkPublicationImporter {
         title: lines[0] || '',
         description: lines.slice(1).join(' ').trim(),
         rawText: pub
-      }
+      } as Record<string, unknown>
     })
   }
   
@@ -234,7 +234,7 @@ export class BulkPublicationImporter {
   }
   
   // Procesar un lote de datos
-  private async processBatch(batch: any[], startIndex: number): Promise<ImportResult[]> {
+  private async processBatch(batch: Record<string, unknown>[], startIndex: number): Promise<ImportResult[]> {
     const results: ImportResult[] = []
     
     for (let i = 0; i < batch.length; i++) {
@@ -292,42 +292,42 @@ export class BulkPublicationImporter {
   }
   
   // Mapear campos del archivo fuente a estructura de BuscAdis
-  private async mapFields(rowData: any): Promise<PublicationBulkData> {
+  private async mapFields(rowData: Record<string, unknown>): Promise<PublicationBulkData> {
     const mapping = this.config.mapping
     
     const mapped: PublicationBulkData = {
-      title: this.extractField(rowData, mapping.title),
-      description: this.extractField(rowData, mapping.description),
-      category: this.extractField(rowData, mapping.category),
-      subcategory: mapping.subcategory ? this.extractField(rowData, mapping.subcategory) : undefined,
+      title: this.extractField(rowData, mapping.title) as string,
+      description: this.extractField(rowData, mapping.description) as string,
+      category: this.extractField(rowData, mapping.category) as string,
+      subcategory: mapping.subcategory ? this.extractField(rowData, mapping.subcategory) as string : undefined,
       
       location: {
-        country: mapping.location?.country ? this.extractField(rowData, mapping.location.country) : 'Peru',
-        region: mapping.location?.region ? this.extractField(rowData, mapping.location.region) : 'Cusco',
-        city: mapping.location?.city ? this.extractField(rowData, mapping.location.city) : 'Cusco',
-        district: mapping.location?.address ? this.extractField(rowData, mapping.location.address) : undefined,
+        country: mapping.location?.country ? this.extractField(rowData, mapping.location.country) as string : 'Peru',
+        region: mapping.location?.region ? this.extractField(rowData, mapping.location.region) as string : 'Cusco',
+        city: mapping.location?.city ? this.extractField(rowData, mapping.location.city) as string : 'Cusco',
+        district: mapping.location?.address ? this.extractField(rowData, mapping.location.address) as string : undefined,
         coordinates: mapping.location?.coordinates ? {
-          lat: this.extractField(rowData, mapping.location.coordinates.lat),
-          lng: this.extractField(rowData, mapping.location.coordinates.lng)
+          lat: this.extractField(rowData, mapping.location.coordinates.lat) as number,
+          lng: this.extractField(rowData, mapping.location.coordinates.lng) as number
         } : undefined,
         timezone: 'America/Lima'
       },
       
       contact: {
-        phones: mapping.contact?.phone ? [this.extractField(rowData, mapping.contact.phone)] : undefined,
-        whatsapp: mapping.contact?.whatsapp ? [this.extractField(rowData, mapping.contact.whatsapp)] : undefined,
-        email: mapping.contact?.email ? [this.extractField(rowData, mapping.contact.email)] : undefined
+        phones: mapping.contact?.phone ? [this.extractField(rowData, mapping.contact.phone) as string] : undefined,
+        whatsapp: mapping.contact?.whatsapp ? [this.extractField(rowData, mapping.contact.whatsapp) as string] : undefined,
+        email: mapping.contact?.email ? [this.extractField(rowData, mapping.contact.email) as string] : undefined
       },
       
       pricing: mapping.pricing ? {
-        price: mapping.pricing.price ? this.extractField(rowData, mapping.pricing.price) : undefined,
-        currency: mapping.pricing.currency ? this.extractField(rowData, mapping.pricing.currency) : 'PEN',
-        type: mapping.pricing.type ? this.extractField(rowData, mapping.pricing.type) : 'fixed'
+        price: mapping.pricing.price ? this.extractField(rowData, mapping.pricing.price) as number : undefined,
+        currency: mapping.pricing.currency ? this.extractField(rowData, mapping.pricing.currency) as string : 'PEN',
+        type: mapping.pricing.type ? this.extractField(rowData, mapping.pricing.type) as any : 'fixed'
       } : undefined,
       
       media: mapping.media ? {
-        images: mapping.media.images ? this.extractField(rowData, mapping.media.images) : undefined,
-        mainImage: mapping.media.mainImage ? this.extractField(rowData, mapping.media.mainImage) : undefined
+        images: mapping.media.images ? this.extractField(rowData, mapping.media.images) as string[] : undefined,
+        mainImage: mapping.media.mainImage ? this.extractField(rowData, mapping.media.mainImage) as string : undefined
       } : undefined,
       
       metadata: {
@@ -343,7 +343,7 @@ export class BulkPublicationImporter {
   }
   
   // Extraer campo usando mapping
-  private extractField(rowData: any, fieldMapping: string | ((row: any) => any)): any {
+  private extractField(rowData: Record<string, unknown>, fieldMapping: string | ((row: Record<string, unknown>) => unknown)): unknown {
     if (typeof fieldMapping === 'function') {
       return fieldMapping(rowData)
     } else {
@@ -590,8 +590,8 @@ export class BulkPublicationImporter {
     return region.substring(0, 3).toUpperCase()
   }
   
-  private buildContactMethods(contact: any): any[] {
-    const methods: any[] = []
+  private buildContactMethods(contact: PublicationBulkData['contact']): Array<{ type: string; value: string; verified: boolean; primary?: boolean }> {
+    const methods: Array<{ type: string; value: string; verified: boolean; primary?: boolean }> = []
     
     if (contact.phones) {
       contact.phones.forEach((phone: string) => {
@@ -704,7 +704,7 @@ interface ImportResult {
   publicationId?: string
   publication?: PublicationDocument
   error?: string
-  originalData: any
+  originalData: Record<string, unknown>
 }
 
 // =============================================================================
