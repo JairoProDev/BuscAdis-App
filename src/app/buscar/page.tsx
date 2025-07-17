@@ -17,7 +17,7 @@ import RealTimeSearchEngine from '@/components/search/RealTimeSearchEngine'
 import ContentRow from '@/components/search/ContentRow'
 import { parseCategoryUrl, getSubcategories, generateCategoryUrl } from '@/lib/categories'
 import { filtersByCategory } from '@/data/filterConfig'
-import type { FilterOption } from '@/types/filters'
+// import type { FilterOption } from '@/types/filters'
 import { createPortal } from 'react-dom'
 import { PublicationData } from '@/types/publication'
 import PublicationDetailContainer from '@/components/publications/PublicationDetailContainer'
@@ -50,217 +50,8 @@ const sortOptions = [
   { value: 'distance', label: 'Más cercanos', icon: '📍' }
 ]
 
-// Componente simple para selector de subcategorías
-const SubcategorySelector = ({ 
-  selectedCategory, 
-  selectedSubcategory, 
-  onSubcategoryChange 
-}: {
-  selectedCategory: string
-  selectedSubcategory: string
-  onSubcategoryChange: (subcategory: string) => void
-}) => {
-  const [isOpen, setIsOpen] = useState(false)
-  const buttonRef = useRef<HTMLButtonElement>(null)
-  const subcategories = getSubcategories(selectedCategory)
-  
-  const handleClose = useCallback(() => {
-    setIsOpen(false)
-  }, [])
-
-  const handleSubcategorySelect = useCallback((subcategoryId: string) => {
-    onSubcategoryChange(subcategoryId)
-    setIsOpen(false)
-  }, [onSubcategoryChange])
-  
-  if (!subcategories.length) return null
-  
-  return (
-    <div className="relative">
-      <button
-        ref={buttonRef}
-        onClick={() => setIsOpen(!isOpen)}
-        className="flex items-center gap-2 px-3 py-2 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg hover:border-teal-500 focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-teal-500 transition-colors shadow-sm text-sm"
-      >
-        <span className="text-sm font-medium text-gray-700 dark:text-gray-300">
-          {selectedSubcategory ? subcategories.find(sub => sub.id === selectedSubcategory)?.name : 'Subcategoría'}
-        </span>
-        <ChevronDownIcon 
-          className={`w-4 h-4 text-gray-500 transition-transform ${isOpen ? 'rotate-180' : ''}`} 
-        />
-      </button>
-
-      <DropdownPortal 
-        isOpen={isOpen}
-        buttonRef={buttonRef.current}
-        onClose={handleClose}
-      >
-        <button
-          onClick={() => handleSubcategorySelect('')}
-          className="w-full flex items-start px-4 py-2 text-sm text-left hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors text-gray-700 dark:text-gray-300"
-        >
-          Todas las subcategorías
-        </button>
-        {subcategories.map((subcategory) => (
-          <button
-            key={subcategory.id}
-            onClick={() => handleSubcategorySelect(subcategory.id)}
-            className={`w-full flex items-start px-4 py-2 text-sm text-left hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors ${
-              selectedSubcategory === subcategory.id 
-                ? 'bg-teal-50 dark:bg-teal-900/20 text-teal-700 dark:text-teal-300' 
-                : 'text-gray-700 dark:text-gray-300'
-            }`}
-          >
-            {subcategory.name}
-          </button>
-        ))}
-      </DropdownPortal>
-    </div>
-  )
-}
-
-// Componente para selector individual de filtros
-const FilterSelector = ({ 
-  filter, 
-  value, 
-  onFilterChange 
-}: {
-  filter: FilterOption
-  value: FilterValue
-  onFilterChange: (filterId: string, value: FilterValue) => void
-}) => {
-  const [isOpen, setIsOpen] = useState(false)
-  const buttonRef = useRef<HTMLButtonElement>(null)
-
-  const handleClose = useCallback(() => {
-    setIsOpen(false)
-  }, [])
-
-  const handleFilterSelect = useCallback((optionValue: FilterValue) => {
-    onFilterChange(filter.id, optionValue)
-    setIsOpen(false)
-  }, [filter.id, onFilterChange])
-
-  if (filter.type === 'select') {
-    const selectedOption = filter.options?.find(option => option.value === value)
-    
-    return (
-      <div className="relative">
-        <button
-          ref={buttonRef}
-          onClick={() => setIsOpen(!isOpen)}
-          className="flex items-center gap-2 px-3 py-2 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg hover:border-teal-500 focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-teal-500 transition-colors shadow-sm text-sm"
-        >
-          <span className="text-sm font-medium text-gray-700 dark:text-gray-300">
-            {selectedOption ? selectedOption.label : filter.label}
-          </span>
-          <ChevronDownIcon 
-            className={`w-4 h-4 text-gray-500 transition-transform ${isOpen ? 'rotate-180' : ''}`} 
-          />
-        </button>
-
-        <DropdownPortal 
-          isOpen={isOpen}
-          buttonRef={buttonRef.current}
-          onClose={handleClose}
-        >
-          <button
-            onClick={() => handleFilterSelect(null)}
-            className="w-full flex items-start px-4 py-2 text-sm text-left hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors text-gray-700 dark:text-gray-300"
-          >
-            Cualquier {filter.label.toLowerCase()}
-          </button>
-          {filter.options?.map((option) => (
-            <button
-              key={option.value}
-              onClick={() => handleFilterSelect(option.value)}
-              className={`w-full flex items-start px-4 py-2 text-sm text-left hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors ${
-                value === option.value 
-                  ? 'bg-teal-50 dark:bg-teal-900/20 text-teal-700 dark:text-teal-300' 
-                  : 'text-gray-700 dark:text-gray-300'
-              }`}
-            >
-              {option.label}
-            </button>
-          ))}
-        </DropdownPortal>
-      </div>
-    )
-  }
-
-  // Para otros tipos de filtros, devolver null por ahora
-  return null
-}
-
-// Custom hook para manejar positioning de dropdowns
-const useDropdownPosition = (buttonRef: HTMLButtonElement | null, isOpen: boolean) => {
-  const [position, setPosition] = useState({ top: 0, left: 0 })
-
-  useEffect(() => {
-    if (!buttonRef || !isOpen) return
-
-    const updatePosition = () => {
-      const rect = buttonRef.getBoundingClientRect()
-      setPosition({
-        top: rect.bottom,
-        left: rect.left
-      })
-    }
-
-    updatePosition()
-    window.addEventListener('scroll', updatePosition)
-    window.addEventListener('resize', updatePosition)
-
-    return () => {
-      window.removeEventListener('scroll', updatePosition)
-      window.removeEventListener('resize', updatePosition)
-    }
-  }, [buttonRef, isOpen])
-
-  return position
-}
-
-// Componente Dropdown Portal - Solución profesional
-const DropdownPortal = ({ 
-  isOpen, 
-  buttonRef, 
-  onClose, 
-  children 
-}: {
-  isOpen: boolean
-  buttonRef: HTMLButtonElement | null
-  onClose: () => void
-  children: React.ReactNode
-}) => {
-  const position = useDropdownPosition(buttonRef, isOpen)
-
-  if (!isOpen || typeof window === 'undefined') return null
-
-  return createPortal(
-    <>
-      {/* Backdrop para cerrar al hacer click fuera */}
-      <div 
-        className="fixed inset-0 z-[100000]" 
-        onClick={onClose}
-      />
-      {/* Dropdown content */}
-      <div 
-        className="fixed w-56 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-600 rounded-lg shadow-xl max-h-64 overflow-y-auto z-[100001]"
-        style={{ 
-          top: `${position.top}px`,
-          left: `${position.left}px`
-        }}
-      >
-        {children}
-      </div>
-    </>,
-    document.body
-  )
-}
-
 // Componente mejorado que fusiona selector + chip cuando está activo
 const EnhancedFilterSelector = ({ 
-  label,
   value, 
   options,
   onChange,
@@ -345,6 +136,72 @@ const EnhancedFilterSelector = ({
         ))}
       </DropdownPortal>
     </div>
+  )
+}
+
+// Custom hook para manejar positioning de dropdowns
+const useDropdownPosition = (buttonRef: HTMLButtonElement | null, isOpen: boolean) => {
+  const [position, setPosition] = useState({ top: 0, left: 0 })
+
+  useEffect(() => {
+    if (!buttonRef || !isOpen) return
+
+    const updatePosition = () => {
+      const rect = buttonRef.getBoundingClientRect()
+      setPosition({
+        top: rect.bottom,
+        left: rect.left
+      })
+    }
+
+    updatePosition()
+    window.addEventListener('scroll', updatePosition)
+    window.addEventListener('resize', updatePosition)
+
+    return () => {
+      window.removeEventListener('scroll', updatePosition)
+      window.removeEventListener('resize', updatePosition)
+    }
+  }, [buttonRef, isOpen])
+
+  return position
+}
+
+// Componente Dropdown Portal - Solución profesional
+const DropdownPortal = ({ 
+  isOpen, 
+  buttonRef, 
+  onClose, 
+  children 
+}: {
+  isOpen: boolean
+  buttonRef: HTMLButtonElement | null
+  onClose: () => void
+  children: React.ReactNode
+}) => {
+  const position = useDropdownPosition(buttonRef, isOpen)
+
+  if (!isOpen || typeof window === 'undefined') return null
+
+  return createPortal(
+    <>
+      {/* Backdrop para cerrar al hacer click fuera */}
+      <div 
+        className="fixed inset-0 z-[100000]" 
+        onClick={onClose}
+      />
+      {/* Dropdown content */}
+      <div 
+        className="fixed w-56 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-600 rounded-lg shadow-xl max-h-64 overflow-y-auto z-[100001]"
+        style={{ 
+          top: `${position.top}px`,
+          left: `${position.left}px`
+        }}
+      >
+        {children}
+      </div>
+    </>,
+    document.body
   )
 }
 
@@ -519,7 +376,7 @@ function SearchPageContent({ publicationsData, results, setResults, isLoading, s
     } finally {
       setIsLoading(false)
     }
-  }, [sortBy, activeFilters])
+  }, [sortBy, activeFilters, selectedCategory, setIsLoading, setHasSearched, setCurrentQuery, setResults, setTotalCount])
 
   const handleCategoryChange = useCallback((category: string) => {
     console.log('📂 Category changed to:', category)
@@ -543,7 +400,7 @@ function SearchPageContent({ publicationsData, results, setResults, isLoading, s
     handleSearch(currentQuery, {
       category: category === 'all' ? undefined : category
     })
-  }, [currentQuery, handleSearch, router])
+  }, [currentQuery, handleSearch, router, setSelectedCategory, setSelectedSubcategory, setSelectedSubSubcategory, setActiveFilters, setLastSearchCategory])
 
   const handleSubcategoryChange = useCallback((subcategory: string) => {
     setSelectedSubcategory(subcategory)
@@ -569,7 +426,7 @@ function SearchPageContent({ publicationsData, results, setResults, isLoading, s
       category: selectedCategory === 'all' ? undefined : selectedCategory,
       subcategory: subcategory || undefined
     })
-  }, [currentQuery, selectedCategory, handleSearch, router])
+  }, [currentQuery, selectedCategory, handleSearch, router, setSelectedSubcategory, setSelectedSubSubcategory, setActiveFilters, setLastSearchCategory])
 
   const handleFiltersChange = useCallback((filters: Record<string, FilterValue>) => {
     setActiveFilters(filters)
@@ -580,7 +437,7 @@ function SearchPageContent({ publicationsData, results, setResults, isLoading, s
       subsubcategory: selectedSubSubcategory || undefined,
       ...filters
     })
-  }, [currentQuery, selectedCategory, selectedSubcategory, selectedSubSubcategory, handleSearch])
+  }, [currentQuery, selectedCategory, selectedSubcategory, selectedSubSubcategory, handleSearch, setActiveFilters])
 
   const handleSortChange = useCallback((newSort: SortOption) => {
     setSortBy(newSort)
@@ -591,7 +448,7 @@ function SearchPageContent({ publicationsData, results, setResults, isLoading, s
       subcategory: selectedSubcategory || undefined,
       subsubcategory: selectedSubSubcategory || undefined
     })
-  }, [currentQuery, selectedCategory, selectedSubcategory, selectedSubSubcategory, handleSearch])
+  }, [currentQuery, selectedCategory, selectedSubcategory, selectedSubSubcategory, handleSearch, setSortBy, setSortDropdownOpen])
 
   // Función para cargar publicaciones por categoría (Time To Value = 0)
   const loadCategoryData = useCallback(async (categoryId: string) => {
@@ -630,7 +487,7 @@ function SearchPageContent({ publicationsData, results, setResults, isLoading, s
     } finally {
       setCategoryLoading(prev => ({ ...prev, [categoryId]: false }))
     }
-  }, [])
+  }, [setCategoryLoading, setCategoryRows])
 
   // Sincronizar estado con cambios en la URL (navegación back/forward)
   useEffect(() => {
@@ -666,7 +523,7 @@ function SearchPageContent({ publicationsData, results, setResults, isLoading, s
       setSelectedSubSubcategory('')
       setActiveFilters({})
     }
-  }, [currentPathname, selectedCategory, selectedSubcategory, selectedSubSubcategory])
+  }, [currentPathname, selectedCategory, selectedSubcategory, selectedSubSubcategory, setSelectedCategory, setSelectedSubcategory, setSelectedSubSubcategory, setActiveFilters, setHasSearched])
 
   // Realizar búsqueda automática cuando cambie la categoría desde URL
   useEffect(() => {
@@ -727,7 +584,7 @@ function SearchPageContent({ publicationsData, results, setResults, isLoading, s
       
       searchDirectly()
     }
-  }, [selectedCategory, selectedSubcategory, selectedSubSubcategory, hasSearched, sortBy, lastSearchCategory])
+  }, [selectedCategory, selectedSubcategory, selectedSubSubcategory, hasSearched, sortBy, lastSearchCategory, setIsLoading, setResults, setTotalCount, currentQuery])
 
   // Cargar todas las categorías al montar el componente (Time To Value = 0)
   useEffect(() => {
@@ -1169,7 +1026,7 @@ function SearchPageContent({ publicationsData, results, setResults, isLoading, s
                         {currentQuery
                           ? (
                               <>
-                                No encontramos anuncios que coincidan con <span className="font-semibold text-teal-700 dark:text-teal-300">"{currentQuery}"</span>.
+                                No encontramos anuncios que coincidan con <span className="font-semibold text-teal-700 dark:text-teal-300">&quot;{currentQuery}&quot;</span>.
                                 <br />
                                 <span className="text-sm text-gray-500 dark:text-gray-500">
                                   Prueba ajustando tus filtros, usando palabras clave diferentes o explora todas las oportunidades disponibles.
