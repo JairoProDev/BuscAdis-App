@@ -71,7 +71,7 @@ export async function GET(request: Request) {
     // Conectar a la base de datos
     const { db } = await connectToDatabase()
 
-    let allPublications: Record<string, any>[] = []
+    let allPublications: Record<string, unknown>[] = []
     let totalCount = 0
 
     // Construir query de filtros
@@ -127,7 +127,7 @@ export async function GET(request: Request) {
         collection.countDocuments(mongoQuery)
       ])
       
-      allPublications = (publications as unknown[]).filter(pub => typeof pub === 'object' && pub !== null).map(pub => ({ ...pub })) as Record<string, unknown>[];
+      allPublications = (publications as Record<string, unknown>[]).filter(pub => typeof pub === 'object' && pub !== null).map(pub => ({ ...pub })) as Record<string, unknown>[];
       totalCount = total
       
       Logger.debug(`Found ${publications.length} publications in ${collectionName}`)
@@ -140,7 +140,7 @@ export async function GET(request: Request) {
           const publications = await collection.find(mongoQuery).toArray()
           
           // Agregar categoría a cada publicación
-          return (publications as unknown[])
+          return (publications as Record<string, unknown>[])
             .filter(pub => typeof pub === 'object' && pub !== null)
             .map(pub => ({
               ...pub,
@@ -183,23 +183,23 @@ export async function GET(request: Request) {
     const formattedPublications = allPublications.map(p => {
       return {
         ...p,
-        id: p._id?.toString() || p.id,
-        _id: p._id?.toString(),
-        location: p.location?.district || p.location?.province || p.location || 'Cusco',
-        fullLocation: p.location,
-        price: p.amount ?? p.price ?? 0,
-        amount: p.amount ?? p.price ?? 0,
-        images: Array.isArray(p.images) && p.images.length > 0 ? p.images : ['/images/placeholder-image.jpg'],
-        currency: p.currency || 'PEN',
-        status: p.status || 'active',
-        createdAt: p.createdAt || p.created_at || new Date().toISOString(),
-        subcategory: p.subcategorySlug || p.subcategory,
-        subsubcategory: p.subSubcategorySlug || p.subsubcategory,
-        contactName: p.contact?.name || 'Contacto',
-        contactPhone: p.contact?.phones?.[0] || '',
-        district: p.location?.district || '',
-        province: p.location?.province || '',
-        negotiable: p.negotiable || false
+        id: (p as { _id?: { toString: () => string }, id?: string })._id?.toString() || (p as { id?: string }).id,
+        _id: (p as { _id?: { toString: () => string } })._id?.toString(),
+        location: (p as { location?: { district?: string, province?: string } }).location?.district || (p as { location?: { province?: string } }).location?.province || (p as { location?: string }).location || 'Cusco',
+        fullLocation: (p as { location?: unknown }).location,
+        price: (p as { amount?: number, price?: number }).amount ?? (p as { price?: number }).price ?? 0,
+        amount: (p as { amount?: number, price?: number }).amount ?? (p as { price?: number }).price ?? 0,
+        images: Array.isArray((p as { images?: unknown[] }).images) && (p as { images?: unknown[] }).images.length > 0 ? (p as { images: string[] }).images : ['/images/placeholder-image.jpg'],
+        currency: (p as { currency?: string }).currency || 'PEN',
+        status: (p as { status?: string }).status || 'active',
+        createdAt: (p as { createdAt?: string, created_at?: string }).createdAt || (p as { created_at?: string }).created_at || new Date().toISOString(),
+        subcategory: (p as { subcategorySlug?: string, subcategory?: string }).subcategorySlug || (p as { subcategory?: string }).subcategory,
+        subsubcategory: (p as { subSubcategorySlug?: string, subsubcategory?: string }).subSubcategorySlug || (p as { subsubcategory?: string }).subsubcategory,
+        contactName: (p as { contact?: { name?: string } }).contact?.name || 'Contacto',
+        contactPhone: (p as { contact?: { phones?: string[] } }).contact?.phones?.[0] || '',
+        district: (p as { location?: { district?: string } }).location?.district || '',
+        province: (p as { location?: { province?: string } }).location?.province || '',
+        negotiable: (p as { negotiable?: boolean }).negotiable || false
       }
     })
 

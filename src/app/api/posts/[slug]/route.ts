@@ -68,7 +68,7 @@ export async function PUT(
   { params }: { params: Promise<{ slug: string }> }
 ) {
   try {
-    const body: Record<string, unknown> = await request.json()
+    const body: Record<string, unknown> = await request.json();
     
     // TODO: Fix MongoDB client usage
     // const { client, db } = await getServerMongoClient()

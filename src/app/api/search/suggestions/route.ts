@@ -145,12 +145,12 @@ export async function GET(request: Request) {
         .limit(3)
         .toArray()
 
-        suggestions.push(...popularSearches.map((item: any): Suggestion => ({
-          id: `popular-${item._id}`,
-          text: item.originalQuery || item.query,
+        suggestions.push(...popularSearches.map((item: Record<string, unknown>): Suggestion => ({
+          id: `popular-${item._id as string}`,
+          text: (item.originalQuery as string) || (item.query as string),
           type: 'trending',
-          score: item.count,
-          count: item.count
+          score: item.count as number,
+          count: item.count as number
         })))
 
         // 2. Sugerencias de títulos de publicaciones existentes
@@ -206,13 +206,13 @@ export async function GET(request: Request) {
               { $limit: 2 }
             ]).toArray()
 
-            suggestions.push(...publicationSuggestions.map((item: any): Suggestion => ({
-              id: `word-${item._id}`,
-              text: item._id,
+            suggestions.push(...publicationSuggestions.map((item: Record<string, unknown>): Suggestion => ({
+              id: `word-${item._id as string}`,
+              text: item._id as string,
               type: 'ai',
-              score: item.count,
+              score: item.count as number,
               category: collectionName.replace('publications_', ''),
-              examples: item.examples.slice(0, 2)
+              examples: (item.examples as string[]).slice(0, 2)
             })))
 
           } catch (err) {

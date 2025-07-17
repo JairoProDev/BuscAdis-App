@@ -5,19 +5,6 @@ import { getPublicationModel } from '@/lib/models/Publication'
 export const dynamic = 'force-dynamic' // Disable caching to ensure data is always fresh
 export const runtime = 'nodejs' // Mark as server-side only
 
-// Define Publication interface
-interface Publication {
-  id?: string;
-  _id?: string;
-  categorySlug?: string; // Database field name
-  subcategorySlug?: string; // Database field name
-  subSubcategorySlug?: string; // Database field name
-  // For backward compatibility
-  subcategory?: string;
-  subsubcategory?: string;
-  [key: string]: unknown; // Allow for other properties with unknown type instead of any
-}
-
 // Helper function to search across all collections
 async function findPublicationInAllCollections(publicationId: string) {
   const categories = ['inmuebles', 'vehiculos', 'empleos', 'servicios', 'productos', 'eventos', 'negocios', 'comunidad'];
