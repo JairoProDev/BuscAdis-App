@@ -4,6 +4,7 @@ import { ImageService, ProcessedImage } from '@/services/image.service';
 import { Logger } from '@/services/logging.service';
 import { PhotoIcon, XMarkIcon, ArrowPathIcon } from '@heroicons/react/24/outline';
 import { CheckCircleIcon } from '@heroicons/react/24/solid';
+import Image from 'next/image';
 
 interface ImageUploaderProps {
   onImagesChange: (images: ProcessedImage[]) => void;
@@ -188,10 +189,11 @@ export const ImageUploader: React.FC<ImageUploaderProps> = ({
                 exit={{ opacity: 0, scale: 0.8 }}
                 className="relative aspect-square rounded-lg overflow-hidden group"
               >
-                <img
+                <Image
                   src={image.preview}
                   alt={`Vista previa ${index + 1}`}
-                  className="w-full h-full object-cover"
+                  layout="fill"
+                  objectFit="cover"
                 />
                 <div className="absolute inset-0 bg-black bg-opacity-0 group-hover:bg-opacity-40 transition-all duration-200">
                   <button

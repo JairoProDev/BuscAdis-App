@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { ExclamationCircleIcon, CheckCircleIcon } from '@heroicons/react/24/outline';
 import { Logger } from '@/services/logging.service';
@@ -45,7 +45,7 @@ export default function DynamicField({
   const [localError, setLocalError] = useState<string>('');
   const [isValid, setIsValid] = useState(false);
 
-  const validateField = () => {
+  const validateField = useCallback(() => {
     if (!validation) return true;
 
     if (required && (!value || (typeof value === 'string' && !value.trim()))) {
@@ -105,7 +105,7 @@ export default function DynamicField({
     setIsValid(true);
     Logger.debug(`Campo ${name} validado correctamente`);
     return true;
-  };
+  }, [validation, required, value, name]);
 
   useEffect(() => {
     if (isDirty) {

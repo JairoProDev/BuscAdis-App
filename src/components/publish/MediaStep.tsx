@@ -5,10 +5,10 @@ import { motion } from 'framer-motion'
 import { PhotoIcon, XMarkIcon, ArrowUpTrayIcon } from '@heroicons/react/24/outline'
 import { MediaStepProps } from '@/types/publish'
 import { Button } from '@/components/ui/Button'
+import Image from 'next/image';
 
 export default function MediaStep({ onNext, onBack, formData, updateFormData }: MediaStepProps) {
   const [dragActive, setDragActive] = useState(false)
-  const [uploading, setUploading] = useState(false)
 
   const handleDrag = useCallback((e: React.DragEvent) => {
     e.preventDefault()
@@ -109,9 +109,11 @@ export default function MediaStep({ onNext, onBack, formData, updateFormData }: 
           <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
             {formData.images.map((image, index) => (
               <div key={index} className="relative group">
-                <img
+                <Image
                   src={URL.createObjectURL(image)}
                   alt={`Preview ${index + 1}`}
+                  width={128}
+                  height={128}
                   className="w-full h-32 object-cover rounded-lg"
                 />
                 <button
@@ -132,8 +134,8 @@ export default function MediaStep({ onNext, onBack, formData, updateFormData }: 
         <Button variant="outline" onClick={onBack}>
           Atrás
         </Button>
-        <Button onClick={onNext} disabled={uploading}>
-          {uploading ? 'Subiendo...' : 'Siguiente'}
+        <Button onClick={onNext} disabled={false}>
+          {false ? 'Subiendo...' : 'Siguiente'}
         </Button>
       </div>
     </motion.div>

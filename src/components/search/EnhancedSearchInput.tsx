@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useRef, useEffect } from 'react';
-import { Search, X, Mic, Camera, AlertCircle, CheckCircle } from 'lucide-react';
+import { Search, X, Mic, Camera, AlertCircle, CheckCircle, MicOff } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import SearchSuggestions from './SearchSuggestions';
 import { cn } from '@/lib/utils';

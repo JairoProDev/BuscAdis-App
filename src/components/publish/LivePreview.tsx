@@ -57,7 +57,7 @@ const LivePreview: React.FC<LivePreviewProps> = ({ formData }) => {
   const totalItems = completionItems.length;
 
   // Mostrar nombre de categoría si está disponible
-  const categoryName = formData?.categoryName || safeAd.categorySlug;
+  const categoryName = safeAd.categorySlug;
 
   return (
     <div className="space-y-4">
@@ -142,11 +142,9 @@ const LivePreview: React.FC<LivePreviewProps> = ({ formData }) => {
                   key={idx}
                   src={img}
                   alt={`Imagen ${idx + 1}`}
-                  className="rounded object-cover h-16 w-full"
                   width={128}
-                  height={64}
-                  style={{ objectFit: 'cover' }}
-                  loading="lazy"
+                  height={128}
+                  className="rounded-lg object-cover"
                 />
               ))}
             </div>
