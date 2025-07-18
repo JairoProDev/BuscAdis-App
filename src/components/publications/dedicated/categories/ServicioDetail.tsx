@@ -35,10 +35,10 @@ export default function ServicioDetail({ publication }: ServicioDetailProps) {
   // Datos principales y secundarios con fallbacks robustos
   const servicioData = {
     categoria: publication.subcategorySlug || 'Servicio',
-    duracion: attributes.duracion ?? 'A consultar',
-    experiencia: attributes.experiencia ?? 'A consultar',
-    disponibilidad: attributes.disponibilidad ?? 'A consultar',
-    modalidad: attributes.modalidad ?? 'A consultar',
+    duracion: typeof attributes.duracion === 'string' ? attributes.duracion : 'A consultar',
+    experiencia: typeof attributes.experiencia === 'string' ? attributes.experiencia : 'A consultar',
+    disponibilidad: typeof attributes.disponibilidad === 'string' ? attributes.disponibilidad : 'A consultar',
+    modalidad: typeof attributes.modalidad === 'string' ? attributes.modalidad : 'A consultar',
     precio: publication.value || 0,
     calificacion: typeof attributes.calificacion === 'number' ? attributes.calificacion : 4.8, // mock si no existe
     trabajosCompletados: typeof attributes.trabajosCompletados === 'number' ? attributes.trabajosCompletados : 150, // mock si no existe
