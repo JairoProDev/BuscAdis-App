@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useRef, useEffect } from 'react';
-import { Search, X, Mic, Camera, AlertCircle, CheckCircle, MicOff } from 'lucide-react';
+import { Search, X, Mic, Camera, AlertCircle, CheckCircle } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import SearchSuggestions from './SearchSuggestions';
 import { cn } from '@/lib/utils';
@@ -49,7 +49,7 @@ export default function EnhancedSearchInput({
   const imageInputRef = useRef<HTMLInputElement>(null);
   const searchContainerRef = useRef<HTMLDivElement>(null);
   const [isListening, setIsListening] = useState(false);
-  // const [voiceError, setVoiceError] = useState(''); // Unused variable
+  const [voiceError, setVoiceError] = useState<string | null>(null);
   const recognitionRef = useRef<SpeechRecognition | null>(null);
   
   // Focus input on mount if autoFocus is true
@@ -144,7 +144,7 @@ export default function EnhancedSearchInput({
 
       recognitionRef.current.onstart = () => {
         setIsListening(true);
-        setVoiceError('');
+        setVoiceError(null); // Clear previous errors
       };
 
       recognitionRef.current.onresult = (event: SpeechRecognitionEvent) => {
@@ -156,7 +156,7 @@ export default function EnhancedSearchInput({
 
       recognitionRef.current.onerror = (event: SpeechRecognitionErrorEvent) => {
         setIsListening(false);
-        // Error handling removed for unused variable
+        setVoiceError('Error en el reconocimiento de voz: ' + event.error);
       };
 
       recognitionRef.current.onend = () => {
@@ -164,8 +164,8 @@ export default function EnhancedSearchInput({
       };
 
       recognitionRef.current.start();
-    } catch {
-      // setVoiceError('Error iniciando reconocimiento de voz'); // Unused variable
+    } catch (error) {
+      setVoiceError('Error iniciando reconocimiento de voz: ' + error);
       setIsListening(false);
     }
   };

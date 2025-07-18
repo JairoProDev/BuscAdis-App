@@ -8,7 +8,6 @@ import {
   MagnifyingGlassIcon,
   MicrophoneIcon,
   CameraIcon,
-  SparklesIcon,
   XMarkIcon,
   ClockIcon,
   FireIcon,
@@ -397,7 +396,6 @@ export default function SupremeSearchEngine({
   // Estados principales
   const [query, setQuery] = useState(searchState.query || '')
   const [isFocused, setIsFocused] = useState(false)
-  const [suggestions, setSuggestions] = useState<SearchSuggestion[]>([])
   const [isLoading, setIsLoading] = useState(false)
   const [quickResults, setQuickResults] = useState<SearchResult[]>([])
   const [showQuickResults, setShowQuickResults] = useState(false)
@@ -416,7 +414,6 @@ export default function SupremeSearchEngine({
   // Estados para funciones avanzadas
   const [isRecording, setIsRecording] = useState(false)
   const [isAiThinking, setIsAiThinking] = useState(false)
-  const [selectedImage, setSelectedImage] = useState<File | null>(null)
   const [showMobileFilters, setShowMobileFilters] = useState(false)
 
   // Referencias
@@ -515,7 +512,7 @@ export default function SupremeSearchEngine({
         }))
       ]
 
-      setSuggestions(suggestionsList)
+      // setSuggestions(suggestionsList) // This line was removed as per the edit hint
     }
 
     loadSuggestions()
@@ -582,7 +579,7 @@ export default function SupremeSearchEngine({
   const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0]
     if (file) {
-      setSelectedImage(file)
+      // setSelectedImage(file) // This line was removed as per the edit hint
       console.log('Imagen seleccionada:', file.name)
     }
   }
@@ -653,14 +650,6 @@ export default function SupremeSearchEngine({
     setActivePanel(activePanel === 'category' ? null : 'category')
   }
 
-  const handleFiltersClick = () => {
-    if (window.innerWidth < 768) {
-      setShowMobileFilters(true)
-    } else {
-      setActivePanel(activePanel === 'filters' ? null : 'filters')
-    }
-  }
-
   const handleCategorySelect = (item: CategoryItem, level: string) => {
     const newSelection = { ...categorySelection }
     
@@ -698,13 +687,6 @@ export default function SupremeSearchEngine({
     if (categorySelection.subcategory) return categorySelection.subcategory.name
     if (categorySelection.category) return categorySelection.category.name
     return 'Todas las categorías'
-  }
-
-  const getLocationDisplay = () => {
-    if (searchState.fullLocation?.district) return searchState.fullLocation.district.name
-    if (searchState.fullLocation?.province) return searchState.fullLocation.province.name
-    if (searchState.fullLocation?.department) return searchState.fullLocation.department.name
-    return 'Toda ubicación'
   }
 
   // Variantes de diseño según el contexto

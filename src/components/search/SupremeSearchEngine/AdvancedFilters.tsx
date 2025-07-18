@@ -5,10 +5,8 @@ import { motion, AnimatePresence } from 'framer-motion'
 import { useSearch } from '@/contexts/SearchContext'
 import { filtersByCategory } from '@/data/filterConfig'
 import { 
-  AdjustmentsHorizontalIcon,
   XMarkIcon,
-  FunnelIcon,
-  CheckIcon
+  FunnelIcon
 } from '@heroicons/react/24/outline'
 
 interface AdvancedFiltersProps {
@@ -96,17 +94,6 @@ export default function AdvancedFilters({
     
     if (onFilterChange) {
       onFilterChange(newFilters)
-    }
-  }
-
-  const removeFilter = (filterId: string) => {
-    handleFilterChange(filterId, undefined)
-  }
-
-  const clearAllFilters = () => {
-    setActiveFilters({})
-    if (onFilterChange) {
-      onFilterChange({})
     }
   }
 

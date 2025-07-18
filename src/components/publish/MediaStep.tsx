@@ -3,11 +3,15 @@
 import React, { useState, useCallback } from 'react'
 import { motion } from 'framer-motion'
 import { PhotoIcon, XMarkIcon, ArrowUpTrayIcon } from '@heroicons/react/24/outline'
-import { MediaStepProps } from '@/types/publish'
 import { Button } from '@/components/ui/Button'
 import Image from 'next/image';
 
-export default function MediaStep({ onNext, onBack, formData, updateFormData }: MediaStepProps) {
+export default function MediaStep({ onNext, onBack, formData, updateFormData }: {
+  onNext: () => void;
+  onBack: () => void;
+  formData: { images?: (File | string)[] };
+  updateFormData: (data: { images?: (File | string)[] }) => void;
+}) {
   const [dragActive, setDragActive] = useState(false)
 
   const handleDrag = useCallback((e: React.DragEvent) => {
@@ -110,7 +114,7 @@ export default function MediaStep({ onNext, onBack, formData, updateFormData }: 
             {formData.images.map((image, index) => (
               <div key={index} className="relative group">
                 <Image
-                  src={URL.createObjectURL(image)}
+                  src={typeof image === 'string' ? image : URL.createObjectURL(image)}
                   alt={`Preview ${index + 1}`}
                   width={128}
                   height={128}

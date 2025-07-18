@@ -13,7 +13,7 @@ interface SupremeSearchLayoutProps {
 export default function SupremeSearchLayout({
   className = ''
 }: SupremeSearchLayoutProps) {
-  const { searchState, updateSearch } = useSearch()
+  const { searchState } = useSearch()
   const [results, setResults] = useState<Record<string, unknown>[]>([])
   const [isLoading, setIsLoading] = useState(false)
   const [totalCount, setTotalCount] = useState(0)
@@ -110,7 +110,7 @@ export default function SupremeSearchLayout({
         handleSearch('', {})
       }
     }
-  }, []) // Solo ejecutar una vez al montar
+  }, [searchState.category, searchState.subcategory, searchState.location, handleSearch])
 
   const handleSortChange = useCallback((sort: string) => {
     // Simular ordenamiento

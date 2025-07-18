@@ -1,9 +1,8 @@
 'use client'
 
-import { useState, useEffect, useRef, MouseEvent } from 'react'
-import { motion, AnimatePresence } from 'framer-motion'
-import { Search, TrendingUp, Clock, Sparkles, X, Tag, Filter, MapPin, Star, Flame } from 'lucide-react'
-import Image from 'next/image'
+import { useState, useEffect, useRef } from 'react'
+import { motion } from 'framer-motion'
+import { Search, TrendingUp, Clock, Tag, Filter, MapPin, Star, Flame } from 'lucide-react'
 
 interface SearchSuggestionsProps {
   searchTerm: string
