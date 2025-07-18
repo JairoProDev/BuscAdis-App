@@ -10,7 +10,7 @@ import {
   CalendarIcon
 } from '@heroicons/react/24/outline';
 import { PublicationFormData } from '@/types/publication';
-
+import Image from 'next/image';
 interface LivePreviewProps {
   formData: PublicationFormData;
 }
@@ -138,7 +138,16 @@ const LivePreview: React.FC<LivePreviewProps> = ({ formData }) => {
           {safeAd.images && safeAd.images.length > 0 && (
             <div className="mt-3 grid grid-cols-3 gap-2">
               {safeAd.images.slice(0, 3).map((img: string, idx: number) => (
-                <img key={idx} src={img} alt={`Imagen ${idx + 1}`} className="rounded object-cover h-16 w-full" />
+                <Image
+                  key={idx}
+                  src={img}
+                  alt={`Imagen ${idx + 1}`}
+                  className="rounded object-cover h-16 w-full"
+                  width={128}
+                  height={64}
+                  style={{ objectFit: 'cover' }}
+                  loading="lazy"
+                />
               ))}
             </div>
           )}

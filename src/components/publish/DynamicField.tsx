@@ -45,12 +45,6 @@ export default function DynamicField({
   const [localError, setLocalError] = useState<string>('');
   const [isValid, setIsValid] = useState(false);
 
-  useEffect(() => {
-    if (isDirty) {
-      validateField();
-    }
-  }, [value, isDirty, validateField]);
-
   const validateField = () => {
     if (!validation) return true;
 
@@ -112,6 +106,12 @@ export default function DynamicField({
     Logger.debug(`Campo ${name} validado correctamente`);
     return true;
   };
+
+  useEffect(() => {
+    if (isDirty) {
+      validateField();
+    }
+  }, [value, isDirty, validateField]);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     const newValue = type === 'number' ? parseFloat(e.target.value) : e.target.value;
