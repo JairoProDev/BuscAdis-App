@@ -4,6 +4,7 @@ import React from 'react'
 import { motion } from 'framer-motion'
 import { formatPrice } from '@/utils/format'
 import { MapPinIcon, PhoneIcon, EnvelopeIcon, TagIcon, CalendarIcon, StarIcon, EyeIcon } from '@heroicons/react/24/outline'
+import { PublicationFormData } from '@/types/publication';
 
 interface AdPreviewProps {
   ad: PublicationFormData;
