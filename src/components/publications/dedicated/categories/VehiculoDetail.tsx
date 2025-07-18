@@ -31,7 +31,7 @@ export default function VehiculoDetail({ publication }: VehiculoDetailProps) {
   }
 
   // Garantizar que attributes siempre exista como objeto
-  const attributes = (publication && (publication as Record<string, unknown>).attributes) ? (publication as Record<string, unknown>).attributes : {};
+  const attributes = (typeof publication === 'object' && publication && typeof (publication as any).attributes === 'object' && (publication as any).attributes !== null) ? (publication as any).attributes : {};
 
   // Función robusta para extraer y formatear el kilometraje
   function getKilometraje(raw: unknown): string {
@@ -50,8 +50,8 @@ export default function VehiculoDetail({ publication }: VehiculoDetailProps) {
     color: attributes.color || 'A consultar',
     cilindrada: attributes.cilindrada_cc || 'A consultar',
     estado: attributes.estado || 'A consultar',
-    marca: attributes.marca || publication.marca || 'A consultar',
-    modelo: attributes.modelo || publication.modelo || 'A consultar',
+    marca: attributes.marca || 'A consultar',
+    modelo: attributes.modelo || 'A consultar',
     version: attributes.version || 'A consultar',
     precio: publication.value || 0,
     negociable: typeof attributes.negociable === 'boolean' ? attributes.negociable : true,
@@ -275,7 +275,7 @@ export default function VehiculoDetail({ publication }: VehiculoDetailProps) {
               <div>
                 <h4 className="font-semibold text-gray-900 dark:text-white mb-3">Equipamiento</h4>
                 <div className="space-y-2">
-                  {vehiculoData.extras.map((extra, index) => (
+                  {vehiculoData.extras.map((extra: string, index: number) => (
                     <div key={index} className="flex items-center gap-2">
                       <div className="w-2 h-2 bg-red-500 rounded-full"></div>
                       <span className="text-sm text-gray-700 dark:text-gray-300">{extra}</span>
@@ -311,7 +311,7 @@ export default function VehiculoDetail({ publication }: VehiculoDetailProps) {
               <div>
                 <h4 className="font-semibold text-gray-900 dark:text-white mb-3">Documentación</h4>
                 <div className="space-y-2">
-                  {vehiculoData.documentos.map((documento, index) => (
+                  {vehiculoData.documentos.map((documento: string, index: number) => (
                     <div key={index} className="flex items-center gap-2">
                       <div className="w-2 h-2 bg-green-500 rounded-full"></div>
                       <span className="text-sm text-gray-700 dark:text-gray-300">{documento}</span>
