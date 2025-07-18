@@ -104,7 +104,7 @@ const AdPreview: React.FC<AdPreviewProps> = ({ ad, quality }) => {
             <div className="text-right">
               <div className="text-2xl font-bold text-blue-600 dark:text-blue-400 mb-1">
                 {formatPrice({ 
-                  amount: ad.amount, 
+                  amount: ad.amount ?? null, 
                   currency: ad.currency || 'PEN', 
                   negotiable: ad.negotiable 
                 })}

@@ -234,8 +234,9 @@ export default function ContactInfo({
                   id="time-from"
                   value={value.availableHours?.from || '09:00'}
                   onChange={(e) => handleChange('availableHours', {
-                    ...value.availableHours,
-                    from: e.target.value
+                    from: e.target.value,
+                    to: value.availableHours?.to || '18:00',
+                    timezone: value.availableHours?.timezone || 'America/Bogota',
                   })}
                   className="w-full px-4 py-2 bg-white rounded-xl border-2 border-primary-100 focus:border-primary-500 focus:ring-2 focus:ring-primary-500/20 transition-all"
                 >
@@ -254,8 +255,9 @@ export default function ContactInfo({
                   id="time-to"
                   value={value.availableHours?.to || '18:00'}
                   onChange={(e) => handleChange('availableHours', {
-                    ...value.availableHours,
-                    to: e.target.value
+                    from: value.availableHours?.from || '09:00',
+                    to: e.target.value,
+                    timezone: value.availableHours?.timezone || 'America/Bogota',
                   })}
                   className="w-full px-4 py-2 bg-white rounded-xl border-2 border-primary-100 focus:border-primary-500 focus:ring-2 focus:ring-primary-500/20 transition-all"
                 >
@@ -276,8 +278,9 @@ export default function ContactInfo({
                 id="timezone"
                 value={value.availableHours?.timezone || 'America/Bogota'}
                 onChange={(e) => handleChange('availableHours', {
-                  ...value.availableHours,
-                  timezone: e.target.value
+                  from: value.availableHours?.from || '09:00',
+                  to: value.availableHours?.to || '18:00',
+                  timezone: e.target.value,
                 })}
                 className="w-full px-4 py-2 bg-white rounded-xl border-2 border-primary-100 focus:border-primary-500 focus:ring-2 focus:ring-primary-500/20 transition-all"
               >
