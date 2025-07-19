@@ -6,13 +6,11 @@ import Head from 'next/head';
 interface ErrorSEOProps {
   title?: string;
   description?: string;
-  errorCode?: string;
 }
 
 export default function ErrorSEO({ 
   title = "Página no encontrada", 
   description = "La página que buscas no existe o ha sido movida.",
-  errorCode = "404"
 }: ErrorSEOProps) {
   
   return (

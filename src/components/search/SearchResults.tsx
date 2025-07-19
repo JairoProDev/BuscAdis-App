@@ -143,9 +143,9 @@ export default function SearchResults({
   loading: initialLoading,
   highlightNew = true,
   showInteractionButtons = true,
+  showMap = false,
   activeCategory,
   viewType = 'grid',
-  onPublicationClick
 }: SearchResultsProps) {
   // Estado para interacciones del usuario (guardados)
   const [savedItems, setSavedItems] = useState<Set<string>>(new Set())

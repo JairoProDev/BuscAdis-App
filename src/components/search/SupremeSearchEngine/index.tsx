@@ -497,21 +497,6 @@ export default function SupremeSearchEngine({
         'Celular Samsung'
       ]
 
-      const suggestionsList: SearchSuggestion[] = [
-        ...recentSearches.slice(0, 3).map((search: string, i: number) => ({
-          id: `recent-${i}`,
-          text: search,
-          type: 'recent' as const,
-          icon: ClockIcon
-        })),
-        ...mockTrending.map((trend, i) => ({
-          id: `trending-${i}`,
-          text: trend,
-          type: 'trending' as const,
-          icon: FireIcon
-        }))
-      ]
-
       // setSuggestions(suggestionsList) // This line was removed as per the edit hint
     }
 
@@ -1049,7 +1034,7 @@ export default function SupremeSearchEngine({
                     <div className="flex items-center gap-2 mb-3">
                       <MagnifyingGlassIcon className="h-4 w-4 text-blue-500" />
                       <span className="text-sm font-medium text-slate-600 dark:text-slate-300">
-                        Sugerencias para "{query}"
+                        Sugerencias para &quot;{query}&quot;
                       </span>
                     </div>
                     <div className="space-y-1">
@@ -1160,7 +1145,7 @@ export default function SupremeSearchEngine({
                   ? 'grid-cols-1 sm:grid-cols-2 lg:grid-cols-4' 
                   : 'grid-cols-1 sm:grid-cols-2 lg:grid-cols-3'
               }`}>
-                {getCategoryDataForLevel(categoryLevel).map((item: CategoryItem) => {
+                {getCategoryDataForLevel(categoryLevel).map((item: CategoryItem, _) => {
                   const IconComponent = categoryLevel === 'category' ? categoryIcons[item.id] : null
                   
                   return (

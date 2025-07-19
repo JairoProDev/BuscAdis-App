@@ -10,10 +10,8 @@ import {
 } from '@heroicons/react/24/outline'
 
 interface AdvancedFiltersProps {
-  onFilterChange?: (filters: Record<string, unknown>) => void
-  onClose?: () => void
-  isMobile?: boolean
-  className?: string
+  onFilterChange: (filters: Record<string, unknown>) => void;
+  className?: string;
 }
 
 interface ActiveFilter {
@@ -25,14 +23,11 @@ interface ActiveFilter {
 
 export default function AdvancedFilters({
   onFilterChange,
-  onClose,
-  isMobile = false,
   className = ''
 }: AdvancedFiltersProps) {
   const { searchState } = useSearch()
   const [isOpen, setIsOpen] = useState(false)
   const [activeFilters, setActiveFilters] = useState<Record<string, unknown>>({})
-  const [activeFiltersList, setActiveFiltersList] = useState<ActiveFilter[]>([])
 
   // Get filters for current category
   const categoryFilters = searchState.category ? 
@@ -41,7 +36,6 @@ export default function AdvancedFilters({
   // Update active filters list when filters change
   useEffect(() => {
     if (!categoryFilters) {
-      setActiveFiltersList([])
       return
     }
 
@@ -77,7 +71,6 @@ export default function AdvancedFilters({
       }
     })
 
-    setActiveFiltersList(filtersList)
   }, [activeFilters, categoryFilters])
 
   const handleFilterChange = (filterId: string, value: unknown) => {

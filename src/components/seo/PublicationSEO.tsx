@@ -7,13 +7,11 @@ import { PublicationData } from '@/types/publication';
 interface PublicationSEOProps {
   publication: PublicationData;
   canonicalUrl: string;
-  relatedPublications?: PublicationData[];
 }
 
 export default function PublicationSEO({ 
   publication, 
-  canonicalUrl, 
-  relatedPublications = [] 
+  canonicalUrl
 }: PublicationSEOProps) {
   
   // Helper function to get category display name

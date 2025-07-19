@@ -209,7 +209,7 @@ export default function SearchSuggestions({
   const randomizedAiSuggestions = getRandomizedAiSuggestions();
   
   // Add AI suggestions to all items
-  const displayItems = [...allItems, ...randomizedAiSuggestions];
+  // const displayItems = [...allItems, ...randomizedAiSuggestions];
   
   // Quick filters
   const quickFilters = [

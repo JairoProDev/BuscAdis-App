@@ -2,14 +2,12 @@
 
 import { useState, useRef, useEffect } from 'react';
 import { Search, X, Mic, MicOff, Camera, AlertCircle, CheckCircle } from 'lucide-react';
-import { MagnifyingGlassIcon, MicrophoneIcon } from '@heroicons/react/24/outline';
 import { motion, AnimatePresence } from 'framer-motion';
 import SearchSuggestions from './SearchSuggestions';
 import { cn } from '@/lib/utils';
 
 interface EnhancedSearchInputProps {
   initialValue?: string;
-  placeholder?: string;
   appearance?: 'light' | 'dark';
   onSearch: (query: string, selectedImage?: File | null) => void;
   className?: string;
@@ -21,12 +19,10 @@ interface EnhancedSearchInputProps {
   showAiAssist?: boolean;
   onFocusChange?: (isFocused: boolean) => void;
   compactSuggestions?: boolean;
-  isMobile?: boolean;
 }
 
 export default function EnhancedSearchInput({
   initialValue = '',
-  placeholder = '¿Qué buscas?',
   appearance = 'dark',
   onSearch,
   className = '',
@@ -38,7 +34,6 @@ export default function EnhancedSearchInput({
   showAiAssist = true,
   onFocusChange,
   compactSuggestions = true,
-  isMobile = false,
 }: EnhancedSearchInputProps) {
   const [searchTerm, setSearchTerm] = useState(initialValue);
   const [showSuggestionsPanel, setShowSuggestionsPanel] = useState(false);
@@ -678,7 +673,4 @@ export default function EnhancedSearchInput({
       )}
     </div>
   );
-}
-
-// Helper types should be moved to a separate file, e.g., 'src/types/speech.d.ts'
-// For now, removing them to fix the build 
+} 

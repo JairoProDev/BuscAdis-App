@@ -176,13 +176,11 @@ const CompactCategorySelector = ({
 export default function RealTimeSearchEngine({
   onSearch,
   onResultSelect,
-  placeholder = "¿Qué estás buscando?",
+  placeholder = '¿Qué estás buscando?',
   showFilters = true,
-  variant = 'page',
-  selectedCategory = 'all',
-  selectedSubcategory = '',
+  variant = 'header',
+  selectedCategory,
   onCategoryChange,
-  onSubcategoryChange
 }: RealTimeSearchEngineProps) {
   const router = useRouter()
   const { addRecentSearch, trackSearch } = useSearch()
@@ -223,10 +221,9 @@ export default function RealTimeSearchEngine({
           }))
           
           setQuickResults(formattedResults)
-        } catch (error) {
-          console.error('Error in real-time search:', error)
-          setSuggestions([])
-          setQuickResults([])
+        } catch {
+          console.error('Error fetching search results');
+          setResults([]);
         } finally {
           setIsLoading(false)
         }
@@ -437,14 +434,14 @@ export default function RealTimeSearchEngine({
       }`}>
         
         {/* Selector de categoría compacto */}
-        {showFilters && variant !== 'compact' && onCategoryChange && onSubcategoryChange && (
+        {showFilters && variant !== 'compact' && onCategoryChange && (
           <>
             <div className="flex-shrink-0 pl-3">
               <CompactCategorySelector
                 selectedCategory={selectedCategory}
-                selectedSubcategory={selectedSubcategory}
+                selectedSubcategory={''} // This prop is removed, so pass an empty string or remove the component if not needed
                 onCategoryChange={onCategoryChange}
-                onSubcategoryChange={onSubcategoryChange}
+                onSubcategoryChange={() => {}} // This prop is removed, so pass an empty function
               />
             </div>
             <div className="w-px h-6 bg-gray-300 dark:bg-gray-600"></div>

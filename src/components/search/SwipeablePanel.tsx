@@ -45,7 +45,6 @@ export default function SwipeablePanel({
   const controls = useAnimation()
   const containerRef = useRef<HTMLDivElement>(null)
   const [currentSnapPoint, setCurrentSnapPoint] = useState<PanelState>(initialState)
-  const [contentHeight, setContentHeight] = useState<number>(0)
   const [windowHeight, setWindowHeight] = useState<number>(0)
   const dragStartY = useRef<number>(0)
   
@@ -66,7 +65,7 @@ export default function SwipeablePanel({
   // Track content height
   useEffect(() => {
     if (containerRef.current) {
-      setContentHeight(containerRef.current.scrollHeight)
+      // setContentHeight(containerRef.current.scrollHeight)
     }
   }, [children, isOpen])
   

@@ -1,7 +1,6 @@
 'use client'
 
 import { useState, useEffect, type ReactNode } from 'react'
-import { useSearch } from '@/contexts/SearchContext'
 import StickySearchContainer from './StickySearchContainer'
 import ResultsContainer from './ResultsContainer'
 import type { Publication as CorePublication } from '@/types/publications'
@@ -17,7 +16,7 @@ interface SearchLayoutProps {
     onFilterChange?: (filters: Record<string, FilterValue>) => void
     totalResults?: number
     onPublicationClick?: (publication: CorePublication, e: React.MouseEvent<HTMLAnchorElement>) => void
-    children?: ReactNode
+    children?: React.ReactNode
     className?: string
     useEnhancedSearch?: boolean
 }

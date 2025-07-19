@@ -9,8 +9,6 @@ import type { FilterOption } from '@/types/filters'
 
 interface SearchFiltersProps {
   selectedCategory?: string
-  selectedSubcategory?: string
-  selectedSubSubcategory?: string
   onFilterChange?: (filters: Record<string, unknown>) => void
   onClearFilters?: () => void
   compact?: boolean
@@ -19,8 +17,6 @@ interface SearchFiltersProps {
 
 export default function SearchFilters({
   selectedCategory,
-  selectedSubcategory,
-  selectedSubSubcategory,
   onFilterChange,
   onClearFilters,
   compact = false,

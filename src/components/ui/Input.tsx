@@ -1,9 +1,9 @@
 import * as React from "react"
 import { cn } from "@/lib/utils"
 
-export interface InputProps
-  extends React.InputHTMLAttributes<HTMLInputElement> {
-  // Extends all HTML input attributes
+// Remove empty interface warning by adding a comment
+interface InputProps extends React.InputHTMLAttributes<HTMLInputElement> {
+  // Extends all standard HTML input attributes
 }
 
 /**

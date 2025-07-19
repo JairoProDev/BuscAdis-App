@@ -81,8 +81,9 @@ export default function SearchBar({
   
   const inputRef = useRef<HTMLInputElement>(null)
   const suggestionsRef = useRef<HTMLDivElement>(null)
-  const isMd = useMediaQuery('(min-width: 768px)')
-  const searchBarSize = isMobile ? 'compact' : 'full'
+  // Remove unused variables
+  // const isMd = useMediaQuery('(min-width: 768px)');
+  // const searchBarSize = isMd ? 'lg' : 'md';
 
   useEffect(() => {
     // Cargar búsquedas recientes del localStorage
