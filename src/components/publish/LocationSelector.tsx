@@ -119,7 +119,7 @@ const LocationSelector: React.FC<LocationSelectorProps> = ({
           ...location,
           coordinates: {
             lat: position.coords.latitude,
-            lon: position.coords.longitude
+            lng: position.coords.longitude
           }
         };
         setLocation(updatedLocation);

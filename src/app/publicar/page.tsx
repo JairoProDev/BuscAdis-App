@@ -396,13 +396,6 @@ export default function PublicarPage() {
     }));
   }, [updateAd]);
 
-  const handleImagesChange = useCallback((imageUrls: string[]) => {
-    updateAd((prev: PublicationFormData) => ({
-      ...prev,
-      images: imageUrls
-    }));
-  }, [updateAd]);
-
   // Submit final
   const handleSubmit = useCallback(async () => {
     if (!validateStep(STEPS.PREVIEW)) {
@@ -577,9 +570,10 @@ export default function PublicarPage() {
       case STEPS.MEDIA:
         return (
           <MediaStep
-            images={ad.images || []}
-            onImagesChange={handleImagesChange}
             formData={ad}
+            updateFormData={updateAd}
+            onNext={handleNext}
+            onBack={handlePrevious}
           />
         );
       case STEPS.CONTACT:

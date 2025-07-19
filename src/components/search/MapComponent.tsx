@@ -6,7 +6,7 @@ interface MapComponentProps {
     publications: PublicationDocument[];
 }
 
-const MapComponent: React.FC<MapComponentProps> = ({ publications }) => {
+const MapComponent: React.FC<MapComponentProps> = () => {
     // Implementa aquí la lógica del mapa interactivo
     return (
         <div className="mt-8">

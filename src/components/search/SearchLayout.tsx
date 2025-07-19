@@ -22,7 +22,6 @@ interface SearchLayoutProps {
     useEnhancedSearch?: boolean
 }
 
-type ViewMode = 'grid' | 'list';
 // END OF SECTION THAT SHOULD NOT BE DELETED
 
 export default function SearchLayout({
@@ -35,7 +34,6 @@ export default function SearchLayout({
     children,
     className = '',
 }: SearchLayoutProps) {
-    const { searchState } = useSearch()
     const [results, setResults] = useState<CorePublication[]>(initialResults)
 
     // Update results when initialResults change

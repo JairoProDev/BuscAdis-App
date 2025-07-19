@@ -193,7 +193,7 @@ const LocationSelector = ({ onClose, onLocationSelect, initialSelection = {} }: 
     setGeolocationStatus('loading');
     
     try {
-      const position = await new Promise<GeolocationPosition>((resolve, reject) => {
+      await new Promise<GeolocationPosition>((resolve, reject) => {
         navigator.geolocation.getCurrentPosition(resolve, reject, {
           enableHighAccuracy: true,
           timeout: 10000,
@@ -201,8 +201,6 @@ const LocationSelector = ({ onClose, onLocationSelect, initialSelection = {} }: 
         });
       });
 
-      const { latitude, longitude } = position.coords;
-      
       // Simple reverse geocoding logic for Peru
       // In a real app, you'd use a geocoding service
       const estimatedLocation: Selection = {

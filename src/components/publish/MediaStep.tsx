@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useState, useCallback } from 'react'
+import React, { useState, useEffect } from 'react'
 import { motion } from 'framer-motion'
 import { PhotoIcon, XMarkIcon, ArrowUpTrayIcon } from '@heroicons/react/24/outline'
 import { Button } from '@/components/ui/Button'
@@ -9,12 +9,37 @@ import Image from 'next/image';
 export default function MediaStep({ onNext, onBack, formData, updateFormData }: {
   onNext: () => void;
   onBack: () => void;
-  formData: { images?: (File | string)[] };
-  updateFormData: (data: { images?: (File | string)[] }) => void;
+  formData: { images?: string[] };
+  updateFormData: (data: Partial<{ images?: string[] }>) => void;
 }) {
+  // Local state for images (File | string)[]
+  const [localImages, setLocalImages] = useState<(File | string)[]>(formData.images || []);
+
+  useEffect(() => {
+    // If formData.images changes externally, sync localImages
+    setLocalImages(formData.images || []);
+  }, [formData.images]);
+
+  // When uploading, update localImages, but only call updateFormData with string[] URLs after upload
+  const handleImageUpload = (files: File[]) => {
+    const newImages = [...localImages, ...files];
+    setLocalImages(newImages);
+    // Do not call updateFormData here; only after upload
+  };
+
+  // When removing an image, update localImages and, if it's a string (URL), update main state
+  const handleRemoveImage = (index: number) => {
+    const updatedImages = localImages.filter((_, i) => i !== index);
+    setLocalImages(updatedImages);
+    // If all are URLs, update main state
+    if (updatedImages.every(img => typeof img === 'string')) {
+      updateFormData({ images: updatedImages as string[] });
+    }
+  };
+
   const [dragActive, setDragActive] = useState(false)
 
-  const handleDrag = useCallback((e: React.DragEvent) => {
+  const handleDrag = (e: React.DragEvent) => {
     e.preventDefault()
     e.stopPropagation()
     if (e.type === 'dragenter' || e.type === 'dragover') {
@@ -22,17 +47,17 @@ export default function MediaStep({ onNext, onBack, formData, updateFormData }: 
     } else if (e.type === 'dragleave') {
       setDragActive(false)
     }
-  }, [])
+  }
 
-  const handleDrop = useCallback((e: React.DragEvent) => {
+  const handleDrop = (e: React.DragEvent) => {
     e.preventDefault()
     e.stopPropagation()
     setDragActive(false)
 
     if (e.dataTransfer.files && e.dataTransfer.files[0]) {
-      handleFiles(e.dataTransfer.files)
+      handleImageUpload(Array.from(e.dataTransfer.files))
     }
-  }, [])
+  }
 
   const handleFiles = (files: FileList) => {
     const newImages = Array.from(files).filter(file => 
@@ -40,14 +65,8 @@ export default function MediaStep({ onNext, onBack, formData, updateFormData }: 
     )
 
     if (newImages.length > 0) {
-      const updatedImages = [...(formData.images || []), ...newImages]
-      updateFormData({ ...formData, images: updatedImages })
+      handleImageUpload(newImages)
     }
-  }
-
-  const removeImage = (index: number) => {
-    const updatedImages = formData.images?.filter((_, i) => i !== index) || []
-    updateFormData({ ...formData, images: updatedImages })
   }
 
   const handleFileInput = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -105,13 +124,13 @@ export default function MediaStep({ onNext, onBack, formData, updateFormData }: 
       </div>
 
       {/* Image Preview */}
-      {formData.images && formData.images.length > 0 && (
+      {localImages && localImages.length > 0 && (
         <div className="space-y-4">
           <h3 className="text-lg font-medium text-gray-900">
-            Imágenes ({formData.images.length})
+            Imágenes ({localImages.length})
           </h3>
           <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-            {formData.images.map((image, index) => (
+            {localImages.map((image, index) => (
               <div key={index} className="relative group">
                 <Image
                   src={typeof image === 'string' ? image : URL.createObjectURL(image)}
@@ -122,7 +141,7 @@ export default function MediaStep({ onNext, onBack, formData, updateFormData }: 
                 />
                 <button
                   type="button"
-                  onClick={() => removeImage(index)}
+                  onClick={() => handleRemoveImage(index)}
                   className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full w-6 h-6 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
                 >
                   <XMarkIcon className="h-4 w-4" />

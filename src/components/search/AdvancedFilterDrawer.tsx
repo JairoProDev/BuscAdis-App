@@ -96,10 +96,7 @@ export default function AdvancedFilterDrawer({
           <TabsContent value="categories" className="p-4 max-h-[calc(100vh-7rem)] overflow-y-auto">
             <CategoryFilters
               selectedCategory={selectedCategory ? { id: selectedCategory, name: categories.find(c => c.id === selectedCategory)?.name || '' } : null}
-              selectedType={null}
               onSelectCategory={handleCategoryChange}
-              onSelectType={() => {}}
-              onFilterChange={() => {}}
             />
           </TabsContent>
           

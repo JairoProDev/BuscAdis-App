@@ -11,7 +11,7 @@ import {
   AdjustmentsHorizontalIcon,
 } from '@heroicons/react/24/outline'
 import { filtersByCategory } from '@/data/filterConfig'
-import { FilterValue } from '@/types/filters'
+import { FilterUnion, FilterValue } from '@/types/filters';
 
 // Nuevas interfaces para reemplazar 'any'
 export interface FilterOption {
@@ -113,7 +113,7 @@ export default function AdvancedFilters({
     )
   }
 
-  const renderFilter = (filter: Filter) => {
+  const renderFilter = (filter: FilterUnion) => {
     switch (filter.type) {
       case 'range':
         return (

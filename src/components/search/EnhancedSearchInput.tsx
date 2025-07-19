@@ -1,7 +1,8 @@
 'use client';
 
 import { useState, useRef, useEffect } from 'react';
-import { Search, X, Mic, Camera, AlertCircle, CheckCircle } from 'lucide-react';
+import { Search, X, Mic, MicOff, Camera, AlertCircle, CheckCircle } from 'lucide-react';
+import { MagnifyingGlassIcon, MicrophoneIcon } from '@heroicons/react/24/outline';
 import { motion, AnimatePresence } from 'framer-motion';
 import SearchSuggestions from './SearchSuggestions';
 import { cn } from '@/lib/utils';
@@ -128,53 +129,27 @@ export default function EnhancedSearchInput({
   };
   
   const startVoiceSearch = () => {
-    if (!('webkitSpeechRecognition' in window) && !('SpeechRecognition' in window)) {
-      setVoiceError('Reconocimiento de voz no disponible');
-      return;
-    }
-
+    if (!recognitionRef.current) return;
+    
     try {
-      const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-      recognitionRef.current = new SpeechRecognition();
-      
-      recognitionRef.current.lang = 'es-PE';
-      recognitionRef.current.interimResults = false;
-      recognitionRef.current.maxAlternatives = 1;
-      recognitionRef.current.continuous = false;
-
-      recognitionRef.current.onstart = () => {
-        setIsListening(true);
-        setVoiceError(null); // Clear previous errors
-      };
-
-      recognitionRef.current.onresult = (event: SpeechRecognitionEvent) => {
-        const transcript = event.results[0][0].transcript;
-        setSearchTerm(transcript);
-        onSearch(transcript, null);
-        setIsListening(false);
-      };
-
-      recognitionRef.current.onerror = (event: SpeechRecognitionErrorEvent) => {
-        setIsListening(false);
-        setVoiceError('Error en el reconocimiento de voz: ' + event.error);
-      };
-
-      recognitionRef.current.onend = () => {
-        setIsListening(false);
-      };
-
       recognitionRef.current.start();
+      setIsListening(true);
+      setVoiceError('');
     } catch (error) {
-      setVoiceError('Error iniciando reconocimiento de voz: ' + error);
-      setIsListening(false);
+      console.error('Error starting voice recognition:', error);
+      setVoiceError('No se pudo iniciar el reconocimiento de voz');
     }
   };
 
   const stopVoiceSearch = () => {
-    if (recognitionRef.current) {
+    if (!recognitionRef.current) return;
+    
+    try {
       recognitionRef.current.stop();
+      setIsListening(false);
+    } catch (error) {
+      console.error('Error stopping voice recognition:', error);
     }
-    setIsListening(false);
   };
   
   const handleImageSearch = () => {
@@ -437,7 +412,7 @@ export default function EnhancedSearchInput({
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
               onFocus={() => setShowSuggestionsPanel(true)}
-              placeholder={isListening ? "🎤 Escuchando tu voz..." : placeholder}
+              placeholder="¿Qué estás buscando?"
               aria-label="Campo de búsqueda"
               className={cn(
                 'w-full px-4 py-4 bg-transparent border-0',
@@ -697,7 +672,7 @@ export default function EnhancedSearchInput({
           <div className="flex items-center gap-2">
             <CheckCircle className="h-5 w-5 flex-shrink-0" />
             <span className="font-medium">¡Búsqueda por voz exitosa!</span>
-            <span>"{searchTerm}"</span>
+            <span>&quot;{searchTerm}&quot;</span>
           </div>
         </motion.div>
       )}

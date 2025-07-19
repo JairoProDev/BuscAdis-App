@@ -168,7 +168,7 @@ export default function PublicationModal({ publicationId, isOpen, onClose, initi
             const parsed = JSON.parse(phoneString);
             phonesData = Array.isArray(parsed) ? parsed : [phoneString];
             console.log("Parsed phones data from string:", phonesData);
-          } catch (err) {
+          } catch (_) {
             // Si no es JSON válido, tratarlo como un solo número
             phonesData = [phoneString];
           }

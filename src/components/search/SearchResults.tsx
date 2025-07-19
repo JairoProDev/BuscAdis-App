@@ -101,22 +101,6 @@ function formatRelativeTime(dateString: string): string {
   return date.toLocaleDateString('es-PE', { day: 'numeric', month: 'short' })
 }
 
-// Helper function to get category-specific default image
-const getDefaultImageForCategory = (categorySlug?: string): string => {
-  switch (categorySlug) {
-    case 'vehiculos': return '/images/placeholder/vehiculos.jpg';
-    case 'inmuebles': return '/images/placeholder/inmuebles.jpg';
-    case 'empleos': return '/images/placeholder/empleos.jpg';
-    case 'servicios': return '/images/placeholder/servicios.jpg';
-    case 'productos': return '/images/placeholder/productos.jpg';
-    case 'eventos': return '/images/placeholder/eventos.jpg';
-    case 'negocios': return '/images/placeholder/negocios.jpg';
-    case 'comunidad': return '/images/placeholder/comunidad.jpg';
-    // Add more cases as needed
-    default: return '/images/placeholder-buscadis.jpg'; // Generic fallback
-  }
-};
-
 // Format full location with all available fields
 const formatFullLocation = (location: Publication['location']): string => {
   if (!location) return 'Ubicación no especificada';

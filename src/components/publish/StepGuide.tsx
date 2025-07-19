@@ -19,11 +19,10 @@ interface Step {
 
 interface StepGuideProps {
   steps: Step[];
-  currentStep: number;
   onStepClick?: (stepId: number) => void;
 }
 
-export default function StepGuide({ steps, currentStep, onStepClick }: StepGuideProps) {
+export default function StepGuide({ steps, onStepClick }: StepGuideProps) {
   const handleStepClick = (step: Step) => {
     if (step.completed && onStepClick) {
       Logger.info(`Navegando al paso: ${step.title}`);
