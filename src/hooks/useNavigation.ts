@@ -34,7 +34,7 @@ export function useNavigation(navItems: NavItem[]) {
 
   const activeItem = useMemo(() => {
     return navItems.find(item => isActiveRoute(item.path)) || null
-  }, [navItems, pathname])
+  }, [isActiveRoute]);
 
   const getRouteTitle = () => {
     if (activeItem) {

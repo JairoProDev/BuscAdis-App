@@ -2,9 +2,7 @@ import * as React from "react"
 import { cn } from "@/lib/utils"
 
 // Remove empty interface warning by adding a comment
-interface InputProps extends React.InputHTMLAttributes<HTMLInputElement> {
-  // Extends all standard HTML input attributes
-}
+interface InputProps {} // Intentionally left empty for extension
 
 /**
  * Componente Input estilizado con TailwindCSS

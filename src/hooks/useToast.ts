@@ -15,6 +15,11 @@ interface Toast extends ToastProps {
 export default function useToast() {
   const [toasts, setToasts] = useState<Toast[]>([])
 
+  // Eliminar un toast específico
+  const removeToast = useCallback((id: string) => {
+    setToasts(prev => prev.filter(toast => toast.id !== id))
+  }, [])
+
   // Mostrar un nuevo toast
   const showToast = useCallback((props: ToastProps) => {
     const id = Math.random().toString(36).substring(2, 9)
@@ -34,12 +39,7 @@ export default function useToast() {
     }, toast.duration)
 
     return id
-  }, [])
-
-  // Eliminar un toast específico
-  const removeToast = useCallback((id: string) => {
-    setToasts(prev => prev.filter(toast => toast.id !== id))
-  }, [])
+  }, [removeToast])
 
   return {
     toasts,

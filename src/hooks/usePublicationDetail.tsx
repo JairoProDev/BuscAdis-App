@@ -92,7 +92,6 @@ export function PublicationDetailProvider({
   children: React.ReactNode
   publications: PublicationData[]
 }) {
-  const router = useRouter()
   const pathname = usePathname()
   const searchParams = useSearchParams()
   const isMobile = useMediaQuery('(max-width: 1023px)')

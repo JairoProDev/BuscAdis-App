@@ -20,10 +20,8 @@ export default function NotificationsDropdown() {
   const { user } = useAuth();
 
   useEffect(() => {
-    if (user) {
-      loadNotifications();
-    }
-  }, [user]);
+    loadNotifications();
+  }, [loadNotifications]);
 
   const loadNotifications = async () => {
     try {
