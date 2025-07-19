@@ -12,7 +12,7 @@
  *    node src/scripts/update-contact-format.js
  */
 
-const { MongoClient } = require("mongodb");
+import { MongoClient } from "mongodb";
 
 // MongoDB connection URI from environment
 const MONGODB_URI =

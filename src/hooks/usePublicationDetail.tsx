@@ -7,7 +7,7 @@ import React, {
   useCallback,
   useReducer,
 } from 'react'
-import { useRouter, usePathname, useSearchParams } from 'next/navigation'
+import { usePathname, useSearchParams } from 'next/navigation'
 import { generateSeoUrl } from '@/utils/url' // Asegúrate que esta ruta es correcta
 import useMediaQuery from './useMediaQuery' // Asegúrate que esta ruta es correcta
 import { PublicationData } from '@/types/publication' // Asegúrate que esta ruta es correcta

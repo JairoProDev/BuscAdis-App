@@ -93,7 +93,7 @@ export default function SwipeablePanel({
   }, [currentSnapPoint, onStateChange])
   
   // Move panel based on current snap point
-  const snapToPoint = (point: PanelState) => {
+  const snapToPoint = useCallback((point: PanelState) => {
     if (point === 'min') {
       controls.start({ y: `${100 - snapPoints.min}%` })
     } else if (point === 'mid' || point === 'half') {
@@ -103,15 +103,7 @@ export default function SwipeablePanel({
       controls.start({ y: `${100 - snapPoints.max}%` })
     }
     setCurrentSnapPoint(point)
-  }
-  
-  const showPanel = useCallback((point: PanelState = 'mid') => {
-    snapToPoint(point)
-  }, [snapToPoint]);
-  
-  const hidePanel = useCallback(() => {
-    controls.start({ y: '100%' })
-  }, [controls]);
+  }, [controls, snapPoints]);
   
   const handleDragStart = (_: unknown, info: PanInfo) => {
     dragStartY.current = info.point.y

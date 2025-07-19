@@ -1,15 +1,11 @@
 import * as React from "react"
 import { cn } from "@/lib/utils"
 
-// Remove empty interface warning by adding a comment
-interface InputProps extends React.InputHTMLAttributes<HTMLInputElement> {
-  // Extends all standard HTML input attributes
-}
-
+// Remove empty interface warning by adding a comment or property if needed
 /**
  * Componente Input estilizado con TailwindCSS
  */
-const Input = React.forwardRef<HTMLInputElement, InputProps>(
+const Input = React.forwardRef<HTMLInputElement, React.InputHTMLAttributes<HTMLInputElement>>(
   ({ className, type, ...props }, ref) => {
     return (
       <input

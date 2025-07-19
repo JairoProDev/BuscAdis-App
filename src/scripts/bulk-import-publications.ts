@@ -322,7 +322,7 @@ export class BulkPublicationImporter {
       pricing: mapping.pricing ? {
         price: mapping.pricing.price ? this.extractField(rowData, mapping.pricing.price) as number : undefined,
         currency: mapping.pricing.currency ? this.extractField(rowData, mapping.pricing.currency) as string : 'PEN',
-        type: mapping.pricing.type ? this.extractField(rowData, mapping.pricing.type) as any : 'fixed'
+        type: mapping.pricing.type ? this.extractField(rowData, mapping.pricing.type) as unknown : 'fixed'
       } : undefined,
       
       media: mapping.media ? {
@@ -375,7 +375,7 @@ export class BulkPublicationImporter {
     // Validaciones personalizadas
     if (this.config.validation.customValidators) {
       for (const [field, validator] of Object.entries(this.config.validation.customValidators)) {
-        const value = (data as any)[field]
+        const value = (data as unknown as Record<string, unknown>)[field]
         if (!validator(value)) {
           errors.push(`Validación personalizada fallida para campo: ${field}`)
         }
@@ -463,7 +463,7 @@ export class BulkPublicationImporter {
       },
       
       pricing: data.pricing ? {
-        type: data.pricing.type as any,
+        type: data.pricing.type as unknown,
         amount: data.pricing.price,
         currency: data.pricing.currency
       } : undefined,

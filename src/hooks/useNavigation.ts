@@ -33,8 +33,8 @@ export function useNavigation(navItems: NavItem[]) {
   }
 
   const activeItem = useMemo(() => {
-    return navItems.find(item => isActiveRoute(item.path)) || null
-  }, [isActiveRoute]);
+    return navItems.find(item => isActiveRoute(item.path)) || null;
+  }, [navItems, isActiveRoute]);
 
   const getRouteTitle = () => {
     if (activeItem) {

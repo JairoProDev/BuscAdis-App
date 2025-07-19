@@ -5,11 +5,10 @@
  */
 
 // Import MongoDB
-const { MongoClient, ServerApiVersion } = require("mongodb");
-const { faker } = require("@faker-js/faker/locale/es");
-const dotenv = require("dotenv");
-const path = require("path");
-const fs = require("fs");
+import { MongoClient, ServerApiVersion } from "mongodb";
+import { faker } from "@faker-js/faker/locale/es";
+import dotenv from "dotenv";
+import path from "path";
 
 // Load environment variables
 dotenv.config({ path: path.resolve(process.cwd(), ".env.local") });

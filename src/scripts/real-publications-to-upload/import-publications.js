@@ -10,11 +10,11 @@
  *   --validate-only: Solo valida el formato del archivo sin importar
  */
 
-const { MongoClient, ServerApiVersion } = require("mongodb");
-const dotenv = require("dotenv");
-const path = require("path");
-const fs = require("fs");
-const readline = require("readline");
+import { MongoClient, ServerApiVersion } from "mongodb";
+import dotenv from "dotenv";
+import path from "path";
+import fs from "fs";
+import readline from "readline";
 
 // Cargar variables de entorno
 dotenv.config({ path: path.resolve(process.cwd(), ".env.local") });

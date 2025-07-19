@@ -218,26 +218,14 @@ class SupremeSearchEngine {
     try {
       Logger.info('Image search initiated', { hasFile: !!options.file, hasUrl: !!options.url });
       
-      let imageData: string;
-      
-      if (options.file) {
-        imageData = await this.fileToBase64(options.file);
-      } else if (options.url) {
-        imageData = options.url;
-      } else {
-        throw new Error('Se requiere una imagen (archivo o URL)');
-      }
-      
-      // 1. Extraer texto de la imagen (OCR)
       let extractedText = '';
       if (options.extractText) {
-        extractedText = await this.extractTextFromImage(imageData);
+        extractedText = await this.extractTextFromImage(options.file || options.url || '');
       }
       
-      // 2. Buscar imágenes similares usando IA
       let similarProducts: string[] = [];
       if (options.findSimilar) {
-        similarProducts = await this.findSimilarImages(imageData);
+        similarProducts = await this.findSimilarImages(options.file || options.url || '');
       }
       
       // 3. Combinar resultados de texto y similitud visual

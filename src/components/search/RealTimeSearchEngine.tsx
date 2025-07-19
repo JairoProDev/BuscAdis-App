@@ -192,44 +192,41 @@ export default function RealTimeSearchEngine({
   const containerRef = useRef<HTMLDivElement>(null)
 
   // Búsqueda en tiempo real con debounce
-  const debouncedSearch = useCallback(
-    debounce(async (query: string) => {
-      if (query.length >= 2) {
-        setIsLoading(true)
-        try {
-          // Obtener sugerencias
-          const suggestionsRes = await fetch(`/api/search/suggestions?q=${encodeURIComponent(query)}&category=${selectedCategory}&limit=6`)
-          const suggestionsData = await suggestionsRes.json()
-          setSuggestions(suggestionsData.suggestions || [])
+  const debouncedSearch = debounce(async (query: string) => {
+    if (query.length >= 2) {
+      setIsLoading(true)
+      try {
+        // Obtener sugerencias
+        const suggestionsRes = await fetch(`/api/search/suggestions?q=${encodeURIComponent(query)}&category=${selectedCategory}&limit=6`)
+        const suggestionsData = await suggestionsRes.json()
+        setSuggestions(suggestionsData.suggestions || [])
 
-          // Obtener resultados rápidos
-          const quickRes = await fetch(`/api/publications?query=${encodeURIComponent(query)}&category=${selectedCategory}&limit=5`)
-          const quickData = await quickRes.json()
-          
-          const formattedResults = (quickData.publications || []).map((pub: { id: string; title: string; description: string; category: string; price: number; location: string; image: string }) => ({
-            id: pub._id || pub.id,
-            title: pub.title || 'Sin título',
-            description: pub.description || '',
-            category: pub.categorySlug || pub.category || 'general',
-            price: pub.price || pub.amount || 0,
-            location: pub.location || 'Sin ubicación',
-            image: pub.images?.[0] || '/images/placeholder-image.jpg'
-          }))
-          
-          setQuickResults(formattedResults)
-        } catch {
-          console.error('Error fetching search results');
-          setResults([]);
-        } finally {
-          setIsLoading(false)
-        }
-      } else {
-        setSuggestions([])
-        setQuickResults([])
+        // Obtener resultados rápidos
+        const quickRes = await fetch(`/api/publications?query=${encodeURIComponent(query)}&category=${selectedCategory}&limit=5`)
+        const quickData = await quickRes.json()
+        
+        const formattedResults = (quickData.publications || []).map((pub: { id: string; title: string; description: string; category: string; price: number; location: string; image: string }) => ({
+          id: pub._id || pub.id,
+          title: pub.title || 'Sin título',
+          description: pub.description || '',
+          category: pub.categorySlug || pub.category || 'general',
+          price: pub.price || pub.amount || 0,
+          location: pub.location || 'Sin ubicación',
+          image: pub.images?.[0] || '/images/placeholder-image.jpg'
+        }))
+        
+        setQuickResults(formattedResults)
+      } catch {
+        console.error('Error fetching search results');
+        setResults([]);
+      } finally {
+        setIsLoading(false)
       }
-    }, 300),
-    [selectedCategory]
-  )
+    } else {
+      setSuggestions([])
+      setQuickResults([])
+    }
+  }, 300);
 
   // Efecto para búsqueda en tiempo real
   useEffect(() => {

@@ -33,7 +33,7 @@ describe('LoggingService', () => {
 
     it('logs info message with details', () => {
       const message = 'Test info message';
-      const details = { test: true };
+      const details: unknown = { test: true };
       Logger.info(message, { details });
 
       expect(consoleInfoSpy).toHaveBeenCalledWith(
@@ -74,7 +74,7 @@ describe('LoggingService', () => {
 
     it('logs error message with error object', () => {
       const message = 'Test error message';
-      const error = new Error('Test error');
+      const error: unknown = new Error('Test error');
       Logger.error(message, { details: error });
 
       expect(consoleErrorSpy).toHaveBeenCalledWith(
@@ -88,7 +88,7 @@ describe('LoggingService', () => {
     it('logs error message with component and details', () => {
       const message = 'Test error message';
       const component = 'TestComponent';
-      const details = { error: 'Test error' };
+      const details: unknown = { error: 'Test error' };
       Logger.error(message, { component, details });
 
       expect(consoleErrorSpy).toHaveBeenCalledWith(
@@ -116,7 +116,7 @@ describe('LoggingService', () => {
 
     it('logs success message with details', () => {
       const message = 'Test success message';
-      const details = { success: true };
+      const details: unknown = { success: true };
       Logger.success(message, { details });
 
       expect(consoleInfoSpy).toHaveBeenCalledWith(
@@ -143,7 +143,7 @@ describe('LoggingService', () => {
 
     it('logs warning message with details', () => {
       const message = 'Test warning message';
-      const details = { warning: true };
+      const details: unknown = { warning: true };
       Logger.warn(message, { details });
 
       expect(consoleWarnSpy).toHaveBeenCalledWith(
@@ -170,7 +170,7 @@ describe('LoggingService', () => {
 
     it('logs debug message with details', () => {
       const message = 'Test debug message';
-      const details = { debug: true };
+      const details: unknown = { debug: true };
       Logger.debug(message, { details });
 
       expect(consoleDebugSpy).toHaveBeenCalledWith(
@@ -200,8 +200,8 @@ describe('LoggingService', () => {
   describe('error handling', () => {
     it('handles circular references in details', () => {
       const message = 'Test message';
-      const circularObj: any = { a: 1 };
-      circularObj.self = circularObj;
+      const circularObj: unknown = { a: 1 };
+      (circularObj as any).self = circularObj;
 
       Logger.info(message, { details: circularObj });
 

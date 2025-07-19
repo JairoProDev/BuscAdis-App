@@ -27,7 +27,7 @@ export default function NotificationsDropdown() {
     } catch (error) {
       console.error('Error loading notifications:', error);
     }
-  }, []);
+  }, [user]);
 
   useEffect(() => {
     loadNotifications();

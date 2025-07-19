@@ -138,7 +138,7 @@ export default function LanguageSelectorMenuItem({
       }
       
       return true;
-    } catch (error) {
+    } catch {
       return false;
     }
   };

@@ -82,9 +82,6 @@ export function parsePublicationsFromText(text: string): PublicationInput[] {
     // Clasificar la publicación
     const classification = classifyPublication(title, adText);
     
-    // Generar un ID temporal único
-    const tempId = `temp_${Math.random().toString(36).substring(2, 10)}`;
-    
     // Crear el objeto de publicación
     const publication: PublicationInput = {
       title,

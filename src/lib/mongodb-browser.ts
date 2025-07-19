@@ -71,18 +71,18 @@ export const mongoFetch = async (endpoint: string, options: MongoFetchOptions = 
           
           try {
             errorData = JSON.parse(errorText);
-          } catch (e) {
+          } catch {
             // Not JSON, keep as text
           }
           
           const error = new Error(`API error: ${response.status} ${response.statusText}`);
           // @ts-expect-error - add extra properties
           error.status = response.status;
-          // @ts-expect-error
+          // @ts-expect-error - add extra properties
           error.statusText = response.statusText;
-          // @ts-expect-error
+          // @ts-expect-error - add extra properties
           error.data = errorData;
-          // @ts-expect-error
+          // @ts-expect-error - add extra properties
           error.originalText = errorText;
           
           // Log detailed error info

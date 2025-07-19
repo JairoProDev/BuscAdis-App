@@ -70,23 +70,28 @@ async function main() {
   if (typeof process !== 'undefined' && process.argv.length > 2) {
     const filePath = process.argv[2];
     // Leer archivo de texto
-    const fs = require('fs');
-    const text = fs.readFileSync(filePath, 'utf8');
-    
-    console.log(`Importando publicaciones desde archivo: ${filePath}`);
-    const result = await importPublicationsFromText(text);
-    
-    console.log('Resultado de la importación:');
-    console.log(`- Éxito: ${result.success ? 'Sí' : 'No'}`);
-    console.log(`- Publicaciones importadas: ${result.imported}`);
-    console.log(`- Errores: ${result.errors.length}`);
-    
-    if (result.errors.length > 0) {
-      console.log('Detalles de errores:');
-      result.errors.forEach((err, i) => {
-        console.log(`  ${i+1}. ${err.publication}: ${err.error}`);
+    import('fs').then(({ readFileSync }) => {
+      const text = readFileSync(filePath, 'utf8');
+      
+      console.log(`Importando publicaciones desde archivo: ${filePath}`);
+      importPublicationsFromText(text).then(result => {
+        console.log('Resultado de la importación:');
+        console.log(`- Éxito: ${result.success ? 'Sí' : 'No'}`);
+        console.log(`- Publicaciones importadas: ${result.imported}`);
+        console.log(`- Errores: ${result.errors.length}`);
+        
+        if (result.errors.length > 0) {
+          console.log('Detalles de errores:');
+          result.errors.forEach((err, i) => {
+            console.log(`  ${i+1}. ${err.publication}: ${err.error}`);
+          });
+        }
+      }).catch(error => {
+        console.error('Error al leer el archivo o procesar la importación:', error);
       });
-    }
+    }).catch(error => {
+      console.error('Error al importar el módulo "fs":', error);
+    });
   } else {
     console.error('Debe proporcionar la ruta al archivo de texto');
     console.log('Uso: ts-node importPublications.ts ruta/al/archivo.txt');

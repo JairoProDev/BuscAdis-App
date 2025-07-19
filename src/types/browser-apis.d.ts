@@ -119,8 +119,8 @@ declare global {
   interface Worker {
     postMessage(message: unknown, transfer?: Transferable[]): void;
     terminate(): void;
-    onmessage: ((this: Worker, ev: MessageEvent) => any) | null;
-    onerror: ((this: Worker, ev: ErrorEvent) => any) | null;
+    onmessage: ((this: Worker, ev: MessageEvent) => unknown) | null;
+    onerror: ((this: Worker, ev: ErrorEvent) => unknown) | null;
   }
 }
 
@@ -239,7 +239,7 @@ declare global {
     getType(type: string): Promise<Blob>;
   }
 
-  declare var ClipboardItem: {
+  declare const ClipboardItem: {
     prototype: ClipboardItem;
     new(items: Record<string, string | Blob | Promise<string | Blob>>): ClipboardItem;
   };

@@ -11,8 +11,8 @@
  *    node src/scripts/db-field-migration.js
  */
 
-require("dotenv").config();
-const { MongoClient } = require("mongodb");
+import "dotenv";
+import { MongoClient } from "mongodb";
 
 // MongoDB connection URI from environment
 const MONGODB_URI =
