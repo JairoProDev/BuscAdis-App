@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect, type ReactNode } from 'react'
+import { useState, useEffect } from 'react'
 import StickySearchContainer from './StickySearchContainer'
 import ResultsContainer from './ResultsContainer'
 import type { Publication as CorePublication } from '@/types/publications'

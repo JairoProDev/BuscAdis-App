@@ -61,7 +61,7 @@ export default function SwipeablePanel({
     } else {
       springY.set(0)
     }
-  }, [panelState, panelHeight, springY, onClose])
+  }, [panelState, panelHeight, springY, onClose, y])
   
   // Transform opacity based on y position
   const backdropOpacity = useTransform(

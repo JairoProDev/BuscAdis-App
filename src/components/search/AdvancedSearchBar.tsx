@@ -31,7 +31,7 @@ interface Suggestion {
 
 interface AdvancedSearchBarProps {
   initialValue?: string
-  onSearch: (query: string, options?: any) => void
+  onSearch: (query: string, options?: Record<string, unknown>) => void
   selectedCategory?: string
   selectedSubcategory?: string
   selectedSubSubcategory?: string
@@ -166,7 +166,7 @@ export default function AdvancedSearchBar({
   }, [selectedSubSubcategory])
   
   // Manejadores de eventos
-  const handleSearch = (query: string, options: any = {}) => {
+  const handleSearch = (query: string, options: Record<string, unknown> = {}) => {
     // Construir opciones completas con categorías seleccionadas
     const searchOptions = {
       ...options,
@@ -451,7 +451,7 @@ export default function AdvancedSearchBar({
                   {searchTerm ? (
                     <>
                       <MagnifyingGlassIcon className="h-4 w-4 mr-1" />
-                      Resultados para "{searchTerm}"
+                      Resultados para &quot;{searchTerm}&quot;
                     </>
                   ) : (
                     <>

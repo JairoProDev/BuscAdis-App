@@ -143,7 +143,7 @@ export default function SearchResults({
   loading: initialLoading,
   highlightNew = true,
   showInteractionButtons = true,
-  showMap = false,
+
   activeCategory,
   viewType = 'grid',
 }: SearchResultsProps) {

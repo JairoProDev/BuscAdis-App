@@ -150,7 +150,7 @@ export default function LocationInput({
       //   google.maps.event.clearInstanceListeners(markerInstance)
       // }
     }
-  }, [mapLoaded, mapContainerId, coordinates, address, onLocationChange])
+  }, [mapLoaded, mapContainerId, coordinates, address, onLocationChange, reverseGeocode])
   
   // Geocode when address changes
   useEffect(() => {
@@ -210,7 +210,7 @@ export default function LocationInput({
     }
     
     performGeocoding()
-  }, [debouncedAddress, map, marker, address, onLocationChange])
+  }, [debouncedAddress, map, marker, address, onLocationChange, reverseGeocode])
   
   // Reverse geocode to get address from coordinates
   const reverseGeocode = async (coords: LocationCoordinates) => {

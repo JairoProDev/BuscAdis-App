@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import Image from 'next/image';
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
@@ -100,6 +100,31 @@ export default function MagazineCategoryViewer({ categoryId }: CategoryViewerPro
   const itemsPerPage = 12;
   const maxPages = Math.ceil(filteredPublications.length / itemsPerPage);
   
+  // Funciones principales
+  const loadMagazineData = useCallback(async () => {
+    try {
+      setIsLoading(true);
+      setError(null);
+      
+      const response = await fetch(`/api/magazine/by-category/${categoryId}`);
+      
+      if (!response.ok) {
+        throw new Error('Error al cargar la revista');
+      }
+      
+      const data = await response.json();
+      
+      setMagazine(data.magazine);
+      setPublications(data.publications || []);
+      setFilteredPublications(data.publications || []);
+    } catch (err) {
+      console.error('Error loading magazine data:', err);
+      setError('No se pudo cargar la revista. Intenta más tarde.');
+    } finally {
+      setIsLoading(false);
+    }
+  }, [categoryId]);
+  
   // Cargar datos iniciales
   useEffect(() => {
     loadMagazineData();
@@ -123,31 +148,6 @@ export default function MagazineCategoryViewer({ categoryId }: CategoryViewerPro
     }
     setCurrentPage(1);
   }, [searchQuery, publications]);
-  
-  // Funciones principales
-  const loadMagazineData = async () => {
-    try {
-      setIsLoading(true);
-      setError(null);
-      
-      const response = await fetch(`/api/magazine/by-category/${categoryId}`);
-      
-      if (!response.ok) {
-        throw new Error('Error al cargar la revista');
-      }
-      
-      const data = await response.json();
-      
-      setMagazine(data.magazine);
-      setPublications(data.publications || []);
-      setFilteredPublications(data.publications || []);
-    } catch (err) {
-      console.error('Error loading magazine data:', err);
-      setError('No se pudo cargar la revista. Intenta más tarde.');
-    } finally {
-      setIsLoading(false);
-    }
-  };
   
   const handleGenerateMagazine = async () => {
     try {

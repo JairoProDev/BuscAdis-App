@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { ChevronLeft, ChevronRight, ArrowLeft } from 'lucide-react';
 import PublicationCard from '@/components/publications/PublicationCard';
 
@@ -104,11 +104,7 @@ const SubcategoriesView: React.FC<SubcategoriesViewProps> = ({ category, onSearc
   const [rows, setRows] = useState<SubcategoryRow[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
-  useEffect(() => {
-    loadSubcategoriesData();
-  }, [loadSubcategoriesData]);
-
-  const loadSubcategoriesData = async () => {
+  const loadSubcategoriesData = useCallback(async () => {
     try {
       setIsLoading(true);
       
@@ -187,7 +183,11 @@ const SubcategoriesView: React.FC<SubcategoriesViewProps> = ({ category, onSearc
       console.error('Error loading subcategories data');
       setIsLoading(false);
     }
-  };
+  }, [category]);
+
+  useEffect(() => {
+    loadSubcategoriesData();
+  }, [loadSubcategoriesData]);
 
   const getCategoryTitle = (categorySlug: string) => {
     const titles: Record<string, string> = {

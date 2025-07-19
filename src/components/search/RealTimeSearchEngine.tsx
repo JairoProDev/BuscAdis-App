@@ -60,14 +60,10 @@ interface RealTimeSearchEngineProps {
 // Componente CompactCategorySelector interno mejorado
 const CompactCategorySelector = ({ 
   selectedCategory, 
-  selectedSubcategory, 
-  onCategoryChange, 
-  onSubcategoryChange 
+  onCategoryChange
 }: {
   selectedCategory: string
-  selectedSubcategory: string
   onCategoryChange: (category: string) => void
-  onSubcategoryChange: (subcategory: string) => void
 }) => {
   const [isOpen, setIsOpen] = useState(false)
   

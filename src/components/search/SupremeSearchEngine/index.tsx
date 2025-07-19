@@ -488,16 +488,7 @@ export default function SupremeSearchEngine({
   // Cargar sugerencias
   useEffect(() => {
     const loadSuggestions = () => {
-      const recentSearches = JSON.parse(localStorage.getItem('recentSearches') || '[]')
-      const mockTrending = [
-        'Casa en venta Lima',
-        'Departamento alquiler',
-        'Auto usado Toyota',
-        'Trabajo remoto',
-        'Celular Samsung'
-      ]
-
-      // setSuggestions(suggestionsList) // This line was removed as per the edit hint
+      // Load suggestions logic here if needed
     }
 
     loadSuggestions()

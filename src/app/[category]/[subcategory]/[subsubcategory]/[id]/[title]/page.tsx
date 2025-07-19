@@ -187,7 +187,6 @@ export default function PublicationDetailWithTitlePage() {
         <ErrorSEO 
           title="Publicación no encontrada"
           description="La publicación que buscas no existe o ha sido eliminada."
-          errorCode="404"
         />
         <div className="container mx-auto py-16 px-4 min-h-screen">
           <div className="bg-red-50 border border-red-100 rounded-xl p-8 text-center max-w-md mx-auto">
