@@ -1,7 +1,7 @@
 /// <reference types="@types/google.maps" />
 'use client'
 
-import { useState, useEffect, useMemo } from 'react'
+import { useState, useEffect, useMemo, useCallback } from 'react'
 import { useDebounce } from '@/hooks/useDebounce'
 import { Loader } from '@googlemaps/js-api-loader'
 import { geocodeAddress, LocationCoordinates } from '@/utils/maps'
@@ -96,7 +96,7 @@ export default function LocationInput({
           onLocationChange({ address, coordinates: newCoords })
           
           // Reverse geocode to get address
-          reverseGeocode(newCoords)
+          reverseGeocode(newCoords.lat, newCoords.lng)
         }
       })
     }
@@ -127,7 +127,7 @@ export default function LocationInput({
               onLocationChange({ address, coordinates: newCoords })
               
               // Reverse geocode to get address
-              reverseGeocode(newCoords)
+              reverseGeocode(newCoords.lat, newCoords.lng)
             }
           })
         }
@@ -136,7 +136,7 @@ export default function LocationInput({
         onLocationChange({ address, coordinates: newCoords })
         
         // Reverse geocode to get address
-        reverseGeocode(newCoords)
+        reverseGeocode(newCoords.lat, newCoords.lng)
       }
     })
     
@@ -191,7 +191,7 @@ export default function LocationInput({
                   onLocationChange({ address, coordinates: newCoords })
                   
                   // Reverse geocode to get address
-                  reverseGeocode(newCoords)
+                  reverseGeocode(newCoords.lat, newCoords.lng)
                 }
               })
               
@@ -213,7 +213,7 @@ export default function LocationInput({
   }, [debouncedAddress, map, marker, address, onLocationChange, reverseGeocode])
   
   // Reverse geocode to get address from coordinates
-  const reverseGeocode = async (coords: LocationCoordinates) => {
+  const reverseGeocode = useCallback(async (lat: number, lng: number) => {
     const apiKey = process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY
     
     if (!apiKey) {
@@ -223,7 +223,7 @@ export default function LocationInput({
     
     try {
       const response = await fetch(
-        `https://maps.googleapis.com/maps/api/geocode/json?latlng=${coords.lat},${coords.lng}&key=${apiKey}`
+        `https://maps.googleapis.com/maps/api/geocode/json?latlng=${lat},${lng}&key=${apiKey}`
       )
       
       if (!response.ok) {
@@ -235,12 +235,12 @@ export default function LocationInput({
       if (data.status === 'OK' && data.results && data.results.length > 0) {
         const formattedAddress = data.results[0].formatted_address
         setAddress(formattedAddress)
-        onLocationChange({ address: formattedAddress, coordinates: coords })
+        onLocationChange({ address: formattedAddress, coordinates: { lat, lng } })
       }
     } catch (error) {
       console.error('Reverse geocoding error:', error)
     }
-  }
+  }, [onLocationChange]);
   
   return (
     <div className={cn("space-y-2", className)}>
@@ -288,7 +288,7 @@ export default function LocationInput({
                   }
                   
                   // Reverse geocode to get address
-                  reverseGeocode(coords)
+                  reverseGeocode(coords.lat, coords.lng)
                 },
                 (err) => {
                   console.error('Error getting location:', err)

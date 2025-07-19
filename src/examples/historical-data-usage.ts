@@ -262,7 +262,7 @@ export class AnalizadorMercado {
   }
 
   private analizarPorCategoria(): Record<string, unknown> {
-    const stats: { [key: string]: any } = {};
+    const stats: { [key: string]: unknown } = {};
     
     this.datosHistoricos.forEach(ad => {
       const categoria = ad.content.category;
@@ -304,7 +304,7 @@ export class AnalizadorMercado {
   }
 
   private analizarPorUbicacion(): Record<string, unknown> {
-    const ubicaciones: { [key: string]: any } = {};
+    const ubicaciones: { [key: string]: unknown } = {};
     
     this.datosHistoricos.forEach(ad => {
       ad.location.explicit.districts.forEach(distrito => {
@@ -428,7 +428,7 @@ export class AnalizadorMercado {
     const zonasConPocaOferta: string[] = [];
     const ubicaciones = this.analizarPorUbicacion();
     
-    Object.entries(ubicaciones).forEach(([zona, data]: [string, any]) => {
+    Object.entries(ubicaciones).forEach(([zona, data]: [string, unknown]) => {
       if (data.cantidad < 5) { // Menos de 5 anuncios
         zonasConPocaOferta.push(zona);
       }
@@ -440,7 +440,7 @@ export class AnalizadorMercado {
   private encontrarNichosPremium(): unknown[] {
     return this.datosHistoricos
       .filter(ad => ad.commercial.prices.length > 0 && ad.commercial.prices[0].amount > 2000)
-      .reduce((nichos: any[], ad) => {
+      .reduce((nichos: unknown[], ad) => {
         const nicho = `${ad.content.category}-${ad.content.subcategory}`;
         const existente = nichos.find(n => n.nicho === nicho);
         

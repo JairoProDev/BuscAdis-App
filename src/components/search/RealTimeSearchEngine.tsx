@@ -403,7 +403,7 @@ export default function RealTimeSearchEngine({
       };
 
       recognitionRef.current.start();
-    } catch (error) {
+    } catch {
       setVoiceError('Error iniciando reconocimiento de voz');
       setIsListening(false);
     }

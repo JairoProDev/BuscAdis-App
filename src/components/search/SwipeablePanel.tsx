@@ -76,7 +76,7 @@ export default function SwipeablePanel({
     } else {
       hidePanel()
     }
-  }, [isOpen, initialState])
+  }, [isOpen, initialState, hidePanel, showPanel])
   
   // Notify when snap point changes
   useEffect(() => {

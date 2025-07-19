@@ -1001,7 +1001,7 @@ export default function SupremeSearchEngine({
                       </span>
                     </div>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
-                      {quickResults.slice(0, 4).map((result, index) => (
+                      {quickResults.slice(0, 4).map((result) => (
                         <button
                           key={result.id}
                           onClick={() => handleQuickResultClick(result)}
@@ -1136,7 +1136,7 @@ export default function SupremeSearchEngine({
                   ? 'grid-cols-1 sm:grid-cols-2 lg:grid-cols-4' 
                   : 'grid-cols-1 sm:grid-cols-2 lg:grid-cols-3'
               }`}>
-                {getCategoryDataForLevel(categoryLevel).map((item: CategoryItem, _) => {
+                {getCategoryDataForLevel(categoryLevel).map((item: CategoryItem) => {
                   const IconComponent = categoryLevel === 'category' ? categoryIcons[item.id] : null
                   
                   return (

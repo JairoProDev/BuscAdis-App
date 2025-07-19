@@ -15,15 +15,6 @@ if (!cached) {
   cached = global.mongoose = { conn: null, promise: null };
 }
 
-// Connection states mapping for better logging
-const CONNECTION_STATES = {
-  0: "disconnected",
-  1: "connected",
-  2: "connecting",
-  3: "disconnecting",
-  99: "uninitialized",
-};
-
 async function dbConnect() {
   // Use cached connection if available
   if (cached.conn) {

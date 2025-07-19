@@ -7,6 +7,7 @@ import { PublicationData } from '@/types/publication';
 interface PublicationSEOProps {
   publication: PublicationData;
   canonicalUrl: string;
+  relatedPublications?: PublicationData[];
 }
 
 export default function PublicationSEO({ 

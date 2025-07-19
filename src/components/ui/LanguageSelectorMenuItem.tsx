@@ -128,7 +128,7 @@ export default function LanguageSelectorMenuItem({
                 node.textContent = translatedText;
               }
             }
-          } catch (error) {
+          } catch {
             // Error silencioso para evitar spam en consola
           }
           
@@ -164,8 +164,8 @@ export default function LanguageSelectorMenuItem({
         document.documentElement.setAttribute('lang', language.code);
       }
       
-    } catch (error) {
-      console.error('Error durante la traducción:', error);
+    } catch {
+      console.error('Error durante la traducción');
     } finally {
       setIsTranslating(false);
     }
