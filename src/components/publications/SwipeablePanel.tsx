@@ -47,7 +47,7 @@ export default function SwipeablePanel({
         y.set(windowHeight - handleHeight)
       }
     }
-  }, [isOpen, initialState])
+  }, [isOpen, initialState, y])
   
   // Update y when panelState changes
   useEffect(() => {

@@ -221,14 +221,14 @@ function InmuebleDetailPageContent({ publication: initialPublication }: { public
                     {attributes.bedrooms && (
                       <div className="flex items-center text-gray-600">
                         <HomeIcon className="w-4 h-4 mr-2 text-blue-500" />
-                        <span>Habitaciones: {attributes.bedrooms}</span>
+                        <span>Habitaciones: {String(attributes.bedrooms)}</span>
                       </div>
                     )}
                     {attributes.bathrooms && (
                       <div className="flex items-center text-gray-600">
                         {/* Icono para baños (puedes añadir uno) */}
                         <KeyIcon className="w-4 h-4 mr-2 text-blue-500" /> 
-                        <span>Baños: {attributes.bathrooms}</span>
+                        <span>Baños: {String(attributes.bathrooms)}</span>
                       </div>
                     )}
                     {/* Agrega más atributos aquí si existen */}

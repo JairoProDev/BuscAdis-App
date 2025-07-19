@@ -12,7 +12,7 @@ import { PublicationsService } from '@/services/publications.service';
 export async function importPublicationsFromText(rawText: string): Promise<{
   success: boolean;
   imported: number;
-  errors: any[];
+  errors: unknown[];
 }> {
   try {
     // Parsear el texto a objetos estructurados
@@ -23,7 +23,7 @@ export async function importPublicationsFromText(rawText: string): Promise<{
     const result = {
       success: true,
       imported: 0,
-      errors: [] as any[]
+      errors: [] as unknown[]
     };
     
     // Importar cada publicación
@@ -45,7 +45,7 @@ export async function importPublicationsFromText(rawText: string): Promise<{
         result.errors.push({
           publication: publication.title,
           error: error instanceof Error ? error.message : String(error)
-        });
+        } as unknown);
       }
     }
     

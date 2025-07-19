@@ -1,5 +1,5 @@
 import { usePathname } from 'next/navigation'
-import { useMemo } from 'react'
+import { useMemo, useCallback } from 'react'
 
 export interface NavItem {
   id: string
@@ -12,7 +12,7 @@ export interface NavItem {
 export function useNavigation(navItems: NavItem[]) {
   const pathname = usePathname()
 
-  const isActiveRoute = (path: string) => {
+  const isActiveRoute = useCallback((path: string) => {
     // Página principal (buscar) puede estar en / o /buscar
     if (path === '/buscar') {
       return pathname === '/' || pathname === '/buscar'
@@ -30,7 +30,7 @@ export function useNavigation(navItems: NavItem[]) {
     
     // Para otras rutas, verificar si la ruta actual empieza con el path
     return pathname?.startsWith(path)
-  }
+  }, [pathname])
 
   const activeItem = useMemo(() => {
     return navItems.find(item => isActiveRoute(item.path)) || null;

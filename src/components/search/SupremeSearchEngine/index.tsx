@@ -423,30 +423,27 @@ export default function SupremeSearchEngine({
   const recognition = useRef<VoiceRecognition | null>(null)
 
   // Función de búsqueda rápida en tiempo real
-  const debouncedQuickSearch = useCallback(
-    debounce(async (searchQuery: string) => {
-      if (searchQuery.length < 2) {
-        setQuickResults([])
-        setShowQuickResults(false)
-        return
-      }
+  const debouncedQuickSearch = debounce(async (searchQuery: string) => {
+    if (searchQuery.length < 2) {
+      setQuickResults([])
+      setShowQuickResults(false)
+      return
+    }
 
-      setIsLoading(true)
-      try {
-        const response = await searchAPI.getQuickResults(searchQuery, {
-          category: searchState.category,
-          location: searchState.location
-        })
-        setQuickResults(response.results)
-        setShowQuickResults(true)
-      } catch (error) {
-        console.error('Error in quick search:', error)
-      } finally {
-        setIsLoading(false)
-      }
-    }, 300),
-    [searchState.category, searchState.location]
-  )
+    setIsLoading(true)
+    try {
+      const response = await searchAPI.getQuickResults(searchQuery, {
+        category: searchState.category,
+        location: searchState.location
+      })
+      setQuickResults(response.results)
+      setShowQuickResults(true)
+    } catch (error) {
+      console.error('Error in quick search:', error)
+    } finally {
+      setIsLoading(false)
+    }
+  }, 300)
 
   // Efecto para búsqueda en tiempo real
   useEffect(() => {

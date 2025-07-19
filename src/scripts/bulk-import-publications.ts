@@ -322,7 +322,7 @@ export class BulkPublicationImporter {
       pricing: mapping.pricing ? {
         price: mapping.pricing.price ? this.extractField(rowData, mapping.pricing.price) as number : undefined,
         currency: mapping.pricing.currency ? this.extractField(rowData, mapping.pricing.currency) as string : 'PEN',
-        type: mapping.pricing.type ? this.extractField(rowData, mapping.pricing.type) as unknown : 'fixed'
+        type: mapping.pricing.type ? this.extractField(rowData, mapping.pricing.type) as 'fixed' | 'negotiable' | 'range' | 'hourly' | 'monthly' | 'free' | 'exchange' : 'fixed'
       } : undefined,
       
       media: mapping.media ? {
@@ -756,8 +756,8 @@ export const PRESET_CONFIGS = {
   PLAIN_TEXT: {
     sourceFormat: 'txt' as const,
     mapping: {
-      title: (row: any) => row.title || row.rawText.split('\n')[0],
-      description: (row: any) => row.description || row.rawText,
+      title: (row: Record<string, unknown>) => (row.title as string) || (row.rawText as string).split('\n')[0],
+      description: (row: Record<string, unknown>) => (row.description as string) || (row.rawText as string),
       category: () => 'General'
     },
     validation: {
