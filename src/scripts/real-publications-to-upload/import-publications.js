@@ -164,23 +164,23 @@ function validarPublicacion(publication) {
  * @param {Object} publication - Objeto de publicación a preparar
  * @returns {Object} - Publicación preparada para inserción
  */
-function prepararPublicacionParaInsercion(publication) {
-  const ahora = new Date().toISOString();
+// function prepararPublicacionParaInsercion(publication) {
+//   const ahora = new Date().toISOString();
 
-  // Añadir campos de fecha si no existen
-  return {
-    ...publication,
-    status: publication.status || "active",
-    created_at: publication.created_at || ahora,
-    updated_at: publication.updated_at || ahora,
-    // Asegurarse de que el ID sea una cadena
-    id: String(publication.id),
-    // Si no hay imágenes, inicializar como array vacío
-    images: publication.images || [],
-    // Si no hay subcategoría, usar un valor por defecto
-    subcategory: publication.subcategory || "general",
-  };
-}
+//   // Añadir campos de fecha si no existen
+//   return {
+//     ...publication,
+//     status: publication.status || "active",
+//     created_at: publication.created_at || ahora,
+//     updated_at: publication.updated_at || ahora,
+//     // Asegurarse de que el ID sea una cadena
+//     id: String(publication.id),
+//     // Si no hay imágenes, inicializar como array vacío
+//     images: publication.images || [],
+//     // Si no hay subcategoría, usar un valor por defecto
+//     subcategory: publication.subcategory || "general",
+//   };
+// }
 
 /**
  * Función principal para importar publicaciones

@@ -113,52 +113,51 @@ export const useFormStore = create<FormState>()(
       },
 
       validateField: (field) => {
-        const state = get();
         let isValid = true;
         const errors: string[] = [];
 
         switch (field) {
           case 'title':
-            const titleValidation = ValidationService.validateTitle(state.title);
+            const titleValidation = ValidationService.validateTitle(get().title);
             isValid = titleValidation.isValid;
             errors.push(...titleValidation.errors);
             break;
 
           case 'description':
-            const descValidation = ValidationService.validateDescription(state.description);
+            const descValidation = ValidationService.validateDescription(get().description);
             isValid = descValidation.isValid;
             errors.push(...descValidation.errors);
             break;
 
           case 'price':
-            const priceValidation = ValidationService.validatePrice(state.price.amount);
+            const priceValidation = ValidationService.validatePrice(get().price.amount);
             isValid = priceValidation.isValid;
             errors.push(...priceValidation.errors);
             break;
 
           case 'whatsapp':
-            const whatsappValidation = ValidationService.validateWhatsApp(state.contact.whatsapp);
+            const whatsappValidation = ValidationService.validateWhatsApp(get().contact.whatsapp);
             isValid = whatsappValidation.isValid;
             errors.push(...whatsappValidation.errors);
             break;
 
           case 'location':
             const locationValidation = ValidationService.validateLocation(
-              state.location.city,
-              state.location.country
+              get().location.city,
+              get().location.country
             );
             isValid = locationValidation.isValid;
             errors.push(...locationValidation.errors);
             break;
 
           case 'media':
-            const mediaValidation = ValidationService.validateMedia(state.media);
+            const mediaValidation = ValidationService.validateMedia(get().media);
             isValid = mediaValidation.isValid;
             errors.push(...mediaValidation.errors);
             break;
 
           case 'category':
-            const categoryValidation = ValidationService.validateCategory(state.category);
+            const categoryValidation = ValidationService.validateCategory(get().category);
             isValid = categoryValidation.isValid;
             errors.push(...categoryValidation.errors);
             break;

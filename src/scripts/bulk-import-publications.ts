@@ -672,7 +672,7 @@ export class BulkPublicationImporter {
     const continent = publication.location.continent.replace(' ', '').toLowerCase()
     const collectionName = `publications_${continent}`
     
-    await (this.db as any).collection(collectionName).insertOne(publication)
+    await (this.db as unknown as { collection: (name: string) => { insertOne: (doc: unknown) => Promise<unknown> } }).collection(collectionName).insertOne(publication)
   }
   
   // Generar archivo JSON de salida
