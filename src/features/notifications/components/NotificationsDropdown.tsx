@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useAuth } from '@/features/auth/hooks/useAuth';
 import { NotificationsService } from '../services/notifications.service';
 import { BellIcon } from '@heroicons/react/24/outline';
@@ -19,11 +19,7 @@ export default function NotificationsDropdown() {
   const [isOpen, setIsOpen] = useState(false);
   const { user } = useAuth();
 
-  useEffect(() => {
-    loadNotifications();
-  }, [loadNotifications]);
-
-  const loadNotifications = async () => {
+  const loadNotifications = useCallback(async () => {
     try {
       const data = await NotificationsService.getNotifications(user!.id);
       setNotifications(data);
@@ -31,7 +27,11 @@ export default function NotificationsDropdown() {
     } catch (error) {
       console.error('Error loading notifications:', error);
     }
-  };
+  }, []);
+
+  useEffect(() => {
+    loadNotifications();
+  }, [loadNotifications]);
 
   const handleMarkAsRead = async (notificationId: string) => {
     try {

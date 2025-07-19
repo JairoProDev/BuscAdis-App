@@ -625,10 +625,12 @@ export async function ejecutarEjemplosCompletos() {
   };
 }
 
-export default {
+const historicalDataUsage = {
   ejemploProcesarDatosHistoricos,
   AutocompletadoInteligente,
   AnalizadorMercado,
   RecomendadorPersonalizado,
   ejecutarEjemplosCompletos
-}; 
+};
+
+export default historicalDataUsage; 

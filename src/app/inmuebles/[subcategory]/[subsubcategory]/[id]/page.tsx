@@ -215,7 +215,7 @@ function InmuebleDetailPageContent({ publication: initialPublication }: { public
                     {attributes.area && (
                       <div className="flex items-center text-gray-600">
                         <Squares2X2Icon className="w-4 h-4 mr-2 text-blue-500" />
-                        <span>Área: {attributes.area} m²</span>
+                        <span>Área: {String(attributes.area)} m²</span>
                       </div>
                     )}
                     {attributes.bedrooms && (

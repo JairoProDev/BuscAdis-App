@@ -322,7 +322,7 @@ async function importWithMonitoring() {
   const sampleData = generateSampleData()
   
   // Guardar en archivo temporal
-  const fs = require('fs')
+  import fs from 'fs'
   const tempFile = './temp/sample_data.json'
   fs.writeFileSync(tempFile, JSON.stringify(sampleData, null, 2))
   
@@ -448,11 +448,13 @@ if (require.main === module) {
     })
 }
 
-export default {
+const importExample = {
   importFromCSV,
   importFromText,
   importWithCustomValidation,
   importWithMonitoring,
   generateSampleData,
   runImportExamples
-} 
+}
+
+export default importExample 

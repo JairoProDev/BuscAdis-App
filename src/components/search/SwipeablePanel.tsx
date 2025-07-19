@@ -1,6 +1,6 @@
 'use client'
 
-import { useRef, useState, useEffect } from 'react'
+import { useRef, useState, useEffect, useCallback } from 'react'
 import { motion, PanInfo, useAnimation } from 'framer-motion'
 import { ChevronDownIcon, XMarkIcon } from '@heroicons/react/24/outline'
 import { cn } from '@/lib/utils'
@@ -72,11 +72,18 @@ export default function SwipeablePanel({
   // Move panel to correct position when opened/closed
   useEffect(() => {
     if (isOpen) {
-      showPanel(initialState)
+      if (initialState === 'min') {
+        controls.start({ y: `${100 - snapPoints.min}%` })
+      } else if (initialState === 'mid' || initialState === 'half') {
+        controls.start({ y: `${100 - snapPoints.mid}%` })
+      } else if (initialState === 'max') {
+        controls.start({ y: `${100 - snapPoints.max}%` })
+      }
+      setCurrentSnapPoint(initialState)
     } else {
-      hidePanel()
+      controls.start({ y: '100%' })
     }
-  }, [isOpen, initialState, hidePanel, showPanel])
+  }, [isOpen, initialState, controls, snapPoints])
   
   // Notify when snap point changes
   useEffect(() => {
@@ -98,13 +105,13 @@ export default function SwipeablePanel({
     setCurrentSnapPoint(point)
   }
   
-  const showPanel = (point: PanelState = 'mid') => {
+  const showPanel = useCallback((point: PanelState = 'mid') => {
     snapToPoint(point)
-  }
+  }, [snapToPoint]);
   
-  const hidePanel = () => {
+  const hidePanel = useCallback(() => {
     controls.start({ y: '100%' })
-  }
+  }, [controls]);
   
   const handleDragStart = (_: unknown, info: PanInfo) => {
     dragStartY.current = info.point.y
