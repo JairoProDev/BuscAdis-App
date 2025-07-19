@@ -133,7 +133,7 @@ export default function SearchSuggestions({
     
     document.addEventListener('keydown', handleKeyDown)
     return () => document.removeEventListener('keydown', handleKeyDown)
-  }, [suggestions, trendingSearches, searchHistory, highlightedIndex, onSelectSuggestion])
+  }, [suggestions, trendingSearches, searchHistory, highlightedIndex, onSelectSuggestion, aiSuggestions])
   
   // Auto-scroll to highlighted item
   useEffect(() => {

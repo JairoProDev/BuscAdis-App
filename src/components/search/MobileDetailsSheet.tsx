@@ -164,8 +164,8 @@ export default function MobileDetailsSheet({
               onPointerDown={(e) => {
                 // Only allow dragging from the handle
                 e.currentTarget.setPointerCapture(e.pointerId)
+                // @ts-expect-error: This is necessary because the type is not compatible with the expected type in this context.
                 if (sheetRef.current) {
-                  // @ts-expect-error
                   sheetRef.current.__dragHandlers?.onPointerDown(e)
                 }
               }}

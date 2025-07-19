@@ -106,7 +106,7 @@ const SubcategoriesView: React.FC<SubcategoriesViewProps> = ({ category, onSearc
 
   useEffect(() => {
     loadSubcategoriesData();
-  }, [category]);
+  }, [loadSubcategoriesData]);
 
   const loadSubcategoriesData = async () => {
     try {

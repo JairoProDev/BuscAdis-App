@@ -12,7 +12,6 @@ import {
   FireIcon as FireSolid 
 } from '@heroicons/react/24/solid'
 import { categories } from '@/data/mockCategories'
-import useMediaQuery from '@/hooks/useMediaQuery'
 
 interface Suggestion {
   text: string

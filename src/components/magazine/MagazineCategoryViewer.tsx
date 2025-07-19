@@ -103,7 +103,7 @@ export default function MagazineCategoryViewer({ categoryId }: CategoryViewerPro
   // Cargar datos iniciales
   useEffect(() => {
     loadMagazineData();
-  }, [categoryId]);
+  }, [loadMagazineData]);
   
   // Filtrar publicaciones cuando cambia la búsqueda
   useEffect(() => {

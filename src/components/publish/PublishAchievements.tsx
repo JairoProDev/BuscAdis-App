@@ -210,9 +210,9 @@ const PublishAchievements: React.FC<PublishAchievementsProps> = ({
           Próximos Objetivos
         </h3>
         <ul className="space-y-1 text-sm text-blue-800">
-          <li>🎯 Publica 5 anuncios para desbloquear "Vendedor Activo" (+100 pts)</li>
-          <li>📈 Recibe 10 vistas para desbloquear "Popular" (+50 pts)</li>
-          <li>💬 Responde 3 mensajes para desbloquear "Comunicativo" (+30 pts)</li>
+          <li>🎯 Publica 5 anuncios para desbloquear &quot;Vendedor Activo&quot; (+100 pts)</li>
+          <li>📈 Recibe 10 vistas para desbloquear &quot;Popular&quot; (+50 pts)</li>
+          <li>💬 Responde 3 mensajes para desbloquear &quot;Comunicativo&quot; (+30 pts)</li>
         </ul>
       </div>
 

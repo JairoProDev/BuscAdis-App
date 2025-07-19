@@ -31,7 +31,7 @@ export default function VehiculoDetail({ publication }: VehiculoDetailProps) {
   }
 
   // Garantizar que attributes siempre exista como objeto
-  const attributes = (typeof publication === 'object' && publication && typeof (publication as any).attributes === 'object' && (publication as any).attributes !== null) ? (publication as any).attributes : {};
+  const attributes = (typeof publication === 'object' && publication && typeof (publication as unknown as { attributes: unknown }).attributes === 'object' && (publication as unknown as { attributes: unknown }).attributes !== null) ? (publication as unknown as { attributes: unknown }).attributes : {};
 
   // Función robusta para extraer y formatear el kilometraje
   function getKilometraje(raw: unknown): string {

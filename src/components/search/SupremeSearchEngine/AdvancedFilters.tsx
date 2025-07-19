@@ -180,7 +180,7 @@ export default function AdvancedFilters({
                               title={`Seleccionar ${filter.label}`}
                             >
                               <option value="">Seleccionar {filter.label.toLowerCase()}</option>
-                              {filter.options?.map((option: any) => (
+                              {filter.options?.map((option: { value: unknown; label: string }) => (
                                 <option key={option.value} value={option.value}>
                                   {option.label}
                                 </option>
@@ -190,7 +190,7 @@ export default function AdvancedFilters({
 
                           {filter.type === 'multiselect' && (
                             <div className="space-y-2 max-h-40 overflow-y-auto">
-                              {filter.options?.map((option: any) => {
+                              {filter.options?.map((option: { value: unknown; label: string }) => {
                                 const value = activeFilters[filter.id]
                                 const isSelected = Array.isArray(value) && value.includes(option.value)
                                 return (
