@@ -92,7 +92,7 @@ interface OutputConfig {
 export class BulkPublicationImporter {
   private config: ImportConfig
   private client: MongoClient | null = null
-  private db: any = null
+  private db: unknown = null
   
   constructor(config: ImportConfig) {
     this.config = config
@@ -139,7 +139,7 @@ export class BulkPublicationImporter {
       
       // 5. Cerrar conexión a base de datos
       if (this.client) {
-        await this.client.close()
+        await (this.client as MongoClient).close()
       }
       
       const successCount = results.filter(r => r.success).length
@@ -227,8 +227,8 @@ export class BulkPublicationImporter {
     }
     
     this.client = new MongoClient(mongoUri)
-    await this.client.connect()
-    this.db = this.client.db(process.env.MONGODB_DB || 'buscadis')
+    await (this.client as MongoClient).connect()
+    this.db = (this.client as MongoClient).db(process.env.MONGODB_DB || 'buscadis')
     
     Logger.info('🔗 Conectado a MongoDB')
   }
@@ -672,7 +672,7 @@ export class BulkPublicationImporter {
     const continent = publication.location.continent.replace(' ', '').toLowerCase()
     const collectionName = `publications_${continent}`
     
-    await this.db.collection(collectionName).insertOne(publication)
+    await (this.db as any).collection(collectionName).insertOne(publication)
   }
   
   // Generar archivo JSON de salida

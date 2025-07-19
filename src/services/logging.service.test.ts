@@ -201,7 +201,7 @@ describe('LoggingService', () => {
     it('handles circular references in details', () => {
       const message = 'Test message';
       const circularObj: unknown = { a: 1 };
-      (circularObj as any).self = circularObj;
+      (circularObj as unknown as { self: unknown }).self = circularObj;
 
       Logger.info(message, { details: circularObj });
 
