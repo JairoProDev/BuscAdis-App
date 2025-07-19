@@ -46,7 +46,7 @@ interface PublicationData {
   categorySlug?: string;
   subcategory?: string;
   subsubcategory?: string;
-  attributes?: Record<string, unknown>;
+  attributes?: Record<string, string | number | boolean>;
 }
 
 // Función para mapear de Publication a PublicationData

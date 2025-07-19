@@ -43,23 +43,23 @@ export default function VehiculoDetail({ publication }: VehiculoDetailProps) {
 
   // Datos principales y secundarios con fallbacks robustos
   const vehiculoData = {
-    año: attributes.ano || attributes.año || 'A consultar',
-    kilometraje: getKilometraje(attributes.kilometraje),
-    combustible: attributes.tipo_combustible || 'A consultar',
-    transmision: attributes.transmision || 'A consultar',
-    color: attributes.color || 'A consultar',
-    cilindrada: attributes.cilindrada_cc || 'A consultar',
-    estado: attributes.estado || 'A consultar',
-    marca: attributes.marca || 'A consultar',
-    modelo: attributes.modelo || 'A consultar',
-    version: attributes.version || 'A consultar',
+    año: (attributes as any).ano || (attributes as any).año || 'A consultar',
+    kilometraje: getKilometraje((attributes as any).kilometraje),
+    combustible: (attributes as any).tipo_combustible || 'A consultar',
+    transmision: (attributes as any).transmision || 'A consultar',
+    color: (attributes as any).color || 'A consultar',
+    cilindrada: (attributes as any).cilindrada_cc || 'A consultar',
+    estado: (attributes as any).estado || 'A consultar',
+    marca: (attributes as any).marca || 'A consultar',
+    modelo: (attributes as any).modelo || 'A consultar',
+    version: (attributes as any).version || 'A consultar',
     precio: publication.value || 0,
-    negociable: typeof attributes.negociable === 'boolean' ? attributes.negociable : true,
-    financiamiento: typeof attributes.financiamiento === 'boolean' ? attributes.financiamiento : true,
-    documentos: Array.isArray(attributes.documentos) ? attributes.documentos : ['SOAT vigente', 'Revisión técnica', 'Tarjeta de propiedad'],
-    extras: Array.isArray(attributes.extras) ? attributes.extras : ['Aire acondicionado', 'Dirección hidráulica', 'Alarma', 'Radio MP3'],
-    mantenimiento: attributes.mantenimiento || 'Al día',
-    accidentes: attributes.accidentes || 'Sin accidentes'
+    negociable: typeof (attributes as any).negociable === 'boolean' ? (attributes as any).negociable : true,
+    financiamiento: typeof (attributes as any).financiamiento === 'boolean' ? (attributes as any).financiamiento : true,
+    documentos: Array.isArray((attributes as any).documentos) ? (attributes as any).documentos : ['SOAT vigente', 'Revisión técnica', 'Tarjeta de propiedad'],
+    extras: Array.isArray((attributes as any).extras) ? (attributes as any).extras : ['Aire acondicionado', 'Dirección hidráulica', 'Alarma', 'Radio MP3'],
+    mantenimiento: (attributes as any).mantenimiento || 'Al día',
+    accidentes: (attributes as any).accidentes || 'Sin accidentes'
   };
 
   const formatPrice = (value: number) => {

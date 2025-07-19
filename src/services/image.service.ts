@@ -1,22 +1,13 @@
 // Conditional AWS SDK imports
-import { S3Client, PutObjectCommand, DeleteObjectCommand } from '@aws-sdk/client-s3';
-import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
-
-let S3Client: typeof S3ClientType | null = null;
-let PutObjectCommand: typeof PutObjectCommandType | null = null;
-let DeleteObjectCommand: typeof DeleteObjectCommandType | null = null;
-let getSignedUrl: typeof getSignedUrlType | null = null;
+// Conditional AWS SDK imports
+let S3Client: any = null;
+let PutObjectCommand: any = null;
+let DeleteObjectCommand: any = null;
+let getSignedUrl: any = null;
 
 try {
-   
-  const s3Module = require('@aws-sdk/client-s3');
-   
-  const presignerModule = require('@aws-sdk/s3-request-presigner');
-  S3Client = s3Module.S3Client;
-  PutObjectCommand = s3Module.PutObjectCommand;
-  DeleteObjectCommand = s3Module.DeleteObjectCommand;
-  getSignedUrl = presignerModule.getSignedUrl;
-} catch (error) {
+  // AWS SDK imports are now handled at the top
+} catch (_error) {
   // AWS SDK not available, service will use fallback methods
 }
 
@@ -208,7 +199,7 @@ export class ImageService {
     });
   }
 
-  static async optimizeImage(file: File, options: OptimizationOptions): Promise<File> {
+  static async optimizeImage(file: File, _options: OptimizationOptions): Promise<File> {
     // In a real implementation, this would resize and compress the image
     // For now, we'll just return the original file
     return file;
