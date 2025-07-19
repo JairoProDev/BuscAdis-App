@@ -1,6 +1,6 @@
 // Conditional AWS SDK imports
-import type { S3Client as S3ClientType, PutObjectCommand as PutObjectCommandType, DeleteObjectCommand as DeleteObjectCommandType } from '@aws-sdk/client-s3';
-import type { getSignedUrl as getSignedUrlType } from '@aws-sdk/s3-request-presigner';
+import { S3Client, PutObjectCommand, DeleteObjectCommand } from '@aws-sdk/client-s3';
+import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
 
 let S3Client: typeof S3ClientType | null = null;
 let PutObjectCommand: typeof PutObjectCommandType | null = null;

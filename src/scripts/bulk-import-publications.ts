@@ -394,13 +394,13 @@ export class BulkPublicationImporter {
       // Extraer keywords con IA
       data.aiMetadata = {
         ...data.aiMetadata,
-        tags: await this.extractKeywords(data.title + ' ' + data.description)
+        tags: await this.extractKeywords()
       }
     }
     
     if (this.config.processing.detectLanguage) {
       // Detectar idioma
-      const language = await this.detectLanguage(data.description)
+      const language = await this.detectLanguage()
       data.metadata.language = language
     }
   }
@@ -653,13 +653,12 @@ export class BulkPublicationImporter {
   }
   
   // Métodos de IA (placeholder - implementar con servicios reales)
-  private async extractKeywords(text: string): Promise<string[]> {
+  private async extractKeywords(): Promise<string[]> {
     // Implementar extracción de keywords con IA
-    const words = text.toLowerCase().split(' ')
-    return words.filter(word => word.length > 3).slice(0, 10)
+    return []
   }
   
-  private async detectLanguage(text: string): Promise<string> {
+  private async detectLanguage(): Promise<string> {
     // Implementar detección de idioma
     return 'es' // Por defecto español
   }

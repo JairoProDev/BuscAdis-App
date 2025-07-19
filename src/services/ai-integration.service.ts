@@ -463,7 +463,7 @@ class AIIntegrationService {
     };
   }
 
-  private async moderateImages(_images: string[]): Promise<{
+  private async moderateImages(images: string[]): Promise<{
     isAppropriate: boolean;
     issues: string[];
     confidence?: number;
@@ -477,18 +477,18 @@ class AIIntegrationService {
     };
   }
 
-  private async analyzeMarket(_data: MarketAnalysisData): Promise<{ comparison: string; samples: number }> {
+  private async analyzeMarket(data: MarketAnalysisData): Promise<{ comparison: string; samples: number }> {
     return {
       comparison: 'Precio competitivo en el mercado',
       samples: 50
     };
   }
 
-  private async analyzeDemand(_data: DemandAnalysisData): Promise<{ level: 'low' | 'medium' | 'high' }> {
+  private async analyzeDemand(data: DemandAnalysisData): Promise<{ level: 'low' | 'medium' | 'high' }> {
     return { level: 'medium' };
   }
 
-  private async analyzeCompetition(_data: CompetitionAnalysisData): Promise<{
+  private async analyzeCompetition(data: CompetitionAnalysisData): Promise<{
     competitorCount: number;
     averagePrice: number;
     marketShare: number;
@@ -510,8 +510,8 @@ class AIIntegrationService {
     return `[${to.toUpperCase()}] ${text}`;
   }
 
-  private buildContentPrompt(_prompt: ContentPrompt): string {
-    return `Genera un anuncio para ${_prompt.category} con las siguientes palabras clave: ${_prompt.keywords.join(', ')}`;
+  private buildContentPrompt(prompt: ContentPrompt): string {
+    return `Genera un anuncio para ${prompt.category} con las siguientes palabras clave: ${prompt.keywords.join(', ')}`;
   }
 
   private async callLLM(prompt: string): Promise<string> {
@@ -527,19 +527,19 @@ class AIIntegrationService {
     };
   }
 
-  private async expandQuery(_query: string, _context?: UserContext): Promise<string> {
-    return _query + ' calidad premium';
+  private async expandQuery(query: string, context?: UserContext): Promise<string> {
+    return query + ' calidad premium';
   }
 
-  private async findSynonyms(_query: string): Promise<string[]> {
+  private async findSynonyms(query: string): Promise<string[]> {
     return ['sinónimo1', 'sinónimo2'];
   }
 
-  private async findRelatedTerms(_query: string, _context?: UserContext): Promise<string[]> {
+  private async findRelatedTerms(query: string, context?: UserContext): Promise<string[]> {
     return ['término relacionado 1', 'término relacionado 2'];
   }
 
-  private async suggestFilters(_query: string, _context?: UserContext): Promise<Record<string, string | number | boolean>> {
+  private async suggestFilters(query: string, context?: UserContext): Promise<Record<string, string | number | boolean>> {
     return {
       priceRange: 'medium',
       location: 'nearby'

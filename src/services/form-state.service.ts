@@ -179,7 +179,6 @@ export const useFormStore = create<FormState>()(
       },
 
       validateAll: () => {
-        const state = get();
         const fields = [
           'title',
           'description',
