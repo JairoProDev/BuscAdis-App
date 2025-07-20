@@ -1,7 +1,7 @@
 // src/components/layout/MobileNavigation.tsx
 'use client'
 
-import { useState, useEffect } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import { motion } from 'framer-motion'
 import { useScroll } from 'framer-motion'
 import NavigationMenu from './NavigationMenu'
@@ -11,19 +11,19 @@ export default function MobileNavigation() {
   const [isVisible, setIsVisible] = useState(true)
   const [showAdisChat, setShowAdisChat] = useState(false)
   const { scrollY } = useScroll()
-  const [lastScrollY, setLastScrollY] = useState(0)
+  const lastScrollYRef = useRef(0)
 
   useEffect(() => {
     return scrollY.on('change', (latest) => {
-      const direction = latest > lastScrollY ? 'down' : 'up'
+      const direction = latest > lastScrollYRef.current ? 'down' : 'up'
       if (direction === 'down' && latest > 150) { 
         if (isVisible) setIsVisible(false) 
       } else { 
         if (!isVisible) setIsVisible(true) 
       }
-      setLastScrollY(latest)
+      lastScrollYRef.current = latest
     })
-  }, [scrollY, lastScrollY, isVisible])
+  }, [scrollY, isVisible])
 
   return (
     <>

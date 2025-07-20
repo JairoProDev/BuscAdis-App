@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useState, useEffect, useRef } from 'react'
+import React, { useState, useEffect, useRef, useCallback, useMemo } from 'react'
 import { useRouter } from 'next/navigation'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useSearch } from '@/contexts/SearchContext'
@@ -192,43 +192,46 @@ export default function RealTimeSearchEngine({
   const containerRef = useRef<HTMLDivElement>(null)
 
   // Búsqueda en tiempo real con debounce
-  const debouncedSearch = debounce(async (...args: unknown[]) => {
-    const query = args[0] as string;
-    if (query.length >= 2) {
-      setIsLoading(true)
-      try {
-        // Obtener sugerencias
-        const suggestionsRes = await fetch(`/api/search/suggestions?q=${encodeURIComponent(query)}&category=${selectedCategory}&limit=6`)
-        const suggestionsData = await suggestionsRes.json()
-        setSuggestions(suggestionsData.suggestions || [])
+  const debouncedSearch = useMemo(
+    () => debounce(async (...args: unknown[]) => {
+      const query = args[0] as string;
+      if (query.length >= 2) {
+        setIsLoading(true)
+        try {
+          // Obtener sugerencias
+          const suggestionsRes = await fetch(`/api/search/suggestions?q=${encodeURIComponent(query)}&category=${selectedCategory}&limit=6`)
+          const suggestionsData = await suggestionsRes.json()
+          setSuggestions(suggestionsData.suggestions || [])
 
-        // Obtener resultados rápidos
-        const quickRes = await fetch(`/api/publications?query=${encodeURIComponent(query)}&category=${selectedCategory}&limit=5`)
-        const quickData = await quickRes.json()
-        
-        const formattedResults = (quickData.publications || []).map((pub: { id: string; title: string; description: string; category: string; price: number; location: string; image: string; _id?: string; categorySlug?: string; amount?: number; images?: string[] }) => ({
-          id: pub._id || pub.id,
-          title: pub.title || 'Sin título',
-          description: pub.description || '',
-          category: pub.categorySlug || pub.category || 'general',
-          price: pub.price || pub.amount || 0,
-          location: pub.location || 'Sin ubicación',
-          image: pub.images?.[0] || '/images/placeholder-image.jpg'
-        }))
-        
-        setQuickResults(formattedResults)
-      } catch {
-        console.error('Error fetching search results');
-        setQuickResults([]);
-        setSuggestions([]);
-      } finally {
-        setIsLoading(false)
+          // Obtener resultados rápidos
+          const quickRes = await fetch(`/api/publications?query=${encodeURIComponent(query)}&category=${selectedCategory}&limit=5`)
+          const quickData = await quickRes.json()
+          
+          const formattedResults = (quickData.publications || []).map((pub: { id: string; title: string; description: string; category: string; price: number; location: string; image: string; _id?: string; categorySlug?: string; amount?: number; images?: string[] }) => ({
+            id: pub._id || pub.id,
+            title: pub.title || 'Sin título',
+            description: pub.description || '',
+            category: pub.categorySlug || pub.category || 'general',
+            price: pub.price || pub.amount || 0,
+            location: pub.location || 'Sin ubicación',
+            image: pub.images?.[0] || '/images/placeholder-image.jpg'
+          }))
+          
+          setQuickResults(formattedResults)
+        } catch {
+          console.error('Error fetching search results');
+          setQuickResults([]);
+          setSuggestions([]);
+        } finally {
+          setIsLoading(false)
+        }
+      } else {
+        setSuggestions([])
+        setQuickResults([])
       }
-    } else {
-      setSuggestions([])
-      setQuickResults([])
-    }
-  }, 300);
+    }, 300),
+    [selectedCategory]
+  );
 
   // Efecto para búsqueda en tiempo real
   useEffect(() => {
@@ -255,7 +258,7 @@ export default function RealTimeSearchEngine({
 
     document.addEventListener('mousedown', handleClickOutside)
     return () => document.removeEventListener('mousedown', handleClickOutside)
-  }, [setShowSuggestions, setIsInputFocused])
+  }, []) // Remove setter functions from dependencies
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const value = e.target.value

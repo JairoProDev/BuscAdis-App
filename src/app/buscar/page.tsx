@@ -142,17 +142,34 @@ const EnhancedFilterSelector = ({
 // Custom hook para manejar positioning de dropdowns
 const useDropdownPosition = (buttonRef: HTMLButtonElement | null, isOpen: boolean) => {
   const [position, setPosition] = useState({ top: 0, left: 0 })
+  const buttonRefRef = useRef(buttonRef)
+  buttonRefRef.current = buttonRef
+
+  const updatePosition = useCallback(() => {
+    if (!buttonRefRef.current) return
+    
+    const rect = buttonRefRef.current.getBoundingClientRect()
+    const spaceBelow = window.innerHeight - rect.bottom
+    const spaceAbove = rect.top
+    
+    let top = rect.bottom + window.scrollY + 8
+    let left = rect.left + window.scrollX
+    
+    // Ajustar si no hay espacio abajo
+    if (spaceBelow < 200 && spaceAbove > 200) {
+      top = rect.top + window.scrollY - 8
+    }
+    
+    // Ajustar horizontalmente si se sale de la pantalla
+    if (left + 224 > window.innerWidth) {
+      left = window.innerWidth - 224 - 16
+    }
+    
+    setPosition({ top, left })
+  }, [])
 
   useEffect(() => {
     if (!buttonRef || !isOpen) return
-
-    const updatePosition = () => {
-      const rect = buttonRef.getBoundingClientRect()
-      setPosition({
-        top: rect.bottom,
-        left: rect.left
-      })
-    }
 
     updatePosition()
     window.addEventListener('scroll', updatePosition)
@@ -162,7 +179,7 @@ const useDropdownPosition = (buttonRef: HTMLButtonElement | null, isOpen: boolea
       window.removeEventListener('scroll', updatePosition)
       window.removeEventListener('resize', updatePosition)
     }
-  }, [buttonRef, isOpen])
+  }, [isOpen, updatePosition, buttonRef]) // Include buttonRef in dependencies
 
   return position
 }
@@ -487,7 +504,7 @@ function SearchPageContent({ publicationsData, results, setResults, isLoading, s
     } finally {
       setCategoryLoading(prev => ({ ...prev, [categoryId]: false }))
     }
-  }, [setCategoryLoading, setCategoryRows])
+  }, []) // Remove setter functions from dependencies
 
   // Sincronizar estado con cambios en la URL (navegación back/forward)
   useEffect(() => {

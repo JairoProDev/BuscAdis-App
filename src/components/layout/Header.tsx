@@ -54,6 +54,68 @@ interface LocationData {
   };
 }
 
+// Move nested components outside to fix ESLint warning
+const UserAvatar = ({ user }: { user: User | null }) => (
+  <div className="flex items-center gap-2">
+    {user?.avatarUrl ? (
+      <Image 
+        src={user.avatarUrl} 
+        alt={`Avatar de ${user.firstName || user.full_name || 'Usuario'}`}
+        width={32}
+        height={32}
+        className="w-8 h-8 rounded-full object-cover border-2 border-slate-200 dark:border-slate-600"
+      />
+    ) : (
+      <UserCircleIcon className="w-8 h-8 text-slate-600 dark:text-slate-300" />
+    )}
+    <span className="text-sm font-medium text-slate-700 dark:text-slate-200 hidden lg:block">
+      {user?.firstName || user?.full_name?.split(' ')[0] || user?.email?.split('@')[0] || 'Usuario'}
+    </span>
+  </div>
+);
+
+const AuthDropdown = () => {
+  const [showAuthMenu, setShowAuthMenu] = useState(false);
+
+  return (
+    <div className="relative">
+      <button
+        onClick={() => setShowAuthMenu(!showAuthMenu)}
+        className="flex items-center gap-1 px-2.5 py-1.5 rounded-lg bg-gradient-to-r from-teal-500 to-cyan-500 text-white text-sm font-medium hover:from-teal-600 hover:to-cyan-600 transition-colors shadow-sm focus:outline-none focus-visible:ring-2 focus-visible:ring-teal-500 focus-visible:ring-offset-1"
+        aria-label="Opciones de autenticación"
+        aria-expanded={showAuthMenu ? "true" : "false"}
+      >
+        <UserIcon className="w-4 h-4" />
+        <span className="hidden sm:inline">Cuenta</span>
+        <ChevronDownIcon className={`w-4 h-4 transition-transform ${showAuthMenu ? 'rotate-180' : ''}`} />
+      </button>
+
+      {showAuthMenu && (
+        <div className="absolute right-0 mt-2 w-48 origin-top-right bg-white dark:bg-slate-800 rounded-xl shadow-xl border border-slate-200 dark:border-slate-700 overflow-hidden z-50">
+          <div className="py-1">
+            <Link
+              href="/login"
+              className="flex items-center gap-3 px-4 py-3 text-sm text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-700/50 transition-colors"
+              onClick={() => setShowAuthMenu(false)}
+            >
+              <ArrowRightOnRectangleIcon className="w-4 h-4" />
+              Iniciar sesión
+            </Link>
+            <Link
+              href="/register"
+              className="flex items-center gap-3 px-4 py-3 text-sm text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-700/50 transition-colors border-t border-slate-100 dark:border-slate-700"
+              onClick={() => setShowAuthMenu(false)}
+            >
+              <UserPlusIcon className="w-4 h-4" />
+              Registrarse
+            </Link>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+};
+
 export default function Header() {
   const [showUserMenu, setShowUserMenu] = useState(false);
   const [showAdisChat, setShowAdisChat] = useState(false);
@@ -94,7 +156,7 @@ export default function Header() {
     syncAuth();
     window.addEventListener('storage', syncAuth);
     return () => window.removeEventListener('storage', syncAuth);
-  }, [syncAuth]);
+  }, [syncAuth]); // Include syncAuth in dependencies since it's memoized
 
   useEffect(() => {
     if (!showUserMenu) return;
@@ -161,68 +223,6 @@ export default function Header() {
   const toggleUserMenu = () => {
     setShowUserMenu(prev => !prev);
   };
-  const UserAvatar = () => (
-    <div className="flex items-center gap-2">
-      {user?.avatarUrl ? (
-        <Image 
-          src={user.avatarUrl} 
-          alt={`Avatar de ${user.firstName || user.full_name || 'Usuario'}`}
-          width={32}
-          height={32}
-          className="w-8 h-8 rounded-full object-cover border-2 border-slate-200 dark:border-slate-600"
-        />
-      ) : (
-        <UserCircleIcon className="w-8 h-8 text-slate-600 dark:text-slate-300" />
-      )}
-      <span className="text-sm font-medium text-slate-700 dark:text-slate-200 hidden lg:block">
-        {user?.firstName || user?.full_name?.split(' ')[0] || user?.email?.split('@')[0] || 'Usuario'}
-      </span>
-    </div>
-  );
-
-  const AuthDropdown = () => {
-    const [showAuthMenu, setShowAuthMenu] = useState(false);
-
-    return (
-      <div className="relative">
-        <button
-          onClick={() => setShowAuthMenu(!showAuthMenu)}
-          className="flex items-center gap-1 px-2.5 py-1.5 rounded-lg bg-gradient-to-r from-teal-500 to-cyan-500 text-white text-sm font-medium hover:from-teal-600 hover:to-cyan-600 transition-colors shadow-sm focus:outline-none focus-visible:ring-2 focus-visible:ring-teal-500 focus-visible:ring-offset-1"
-          aria-label="Opciones de autenticación"
-          aria-expanded={showAuthMenu ? "true" : "false"}
-        >
-          <UserIcon className="w-4 h-4" />
-          <span className="hidden sm:inline">Cuenta</span>
-          <ChevronDownIcon className={`w-4 h-4 transition-transform ${showAuthMenu ? 'rotate-180' : ''}`} />
-        </button>
-
-        {showAuthMenu && (
-          <div className="absolute right-0 mt-2 w-48 origin-top-right bg-white dark:bg-slate-800 rounded-xl shadow-xl border border-slate-200 dark:border-slate-700 overflow-hidden z-50">
-            <div className="py-1">
-              <Link
-                href="/login"
-                className="flex items-center gap-3 px-4 py-3 text-sm text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-700/50 transition-colors"
-                onClick={() => setShowAuthMenu(false)}
-              >
-                <ArrowRightOnRectangleIcon className="w-4 h-4" />
-                Iniciar sesión
-              </Link>
-              <Link
-                href="/register"
-                className="flex items-center gap-3 px-4 py-3 text-sm text-slate-700 dark:text-slate-200 hover:bg-slate-50 dark:hover:bg-slate-700/50 transition-colors border-t border-slate-100 dark:border-slate-700"
-                onClick={() => setShowAuthMenu(false)}
-              >
-                <UserPlusIcon className="w-4 h-4" />
-                Registrarse
-              </Link>
-            </div>
-          </div>
-        )}
-      </div>
-    );
-  };
-
-
 
   // Estilos para los items del menú desplegable (CORREGIDO)
   const menuItemClasses = "flex w-full items-center gap-3 px-3.5 py-2.5 text-sm text-slate-700 dark:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-700/80 rounded-md transition-colors duration-150 focus:outline-none focus-visible:bg-slate-100 dark:focus-visible:bg-slate-700/80 focus-visible:ring-1 focus-visible:ring-teal-500";
@@ -275,7 +275,7 @@ export default function Header() {
         aria-controls="user-menu-dropdown"
         title="Abrir menú de usuario"
       >
-        <UserAvatar />
+        <UserAvatar user={user} />
         <ChevronDownIcon className={`w-5 h-5 text-slate-500 dark:text-slate-400 transition-transform duration-200 group-hover:text-teal-500 dark:group-hover:text-teal-400 ${showUserMenu ? 'rotate-180' : ''}`} aria-hidden="true" />
       </button>
 

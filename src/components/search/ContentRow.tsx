@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useState, useRef } from 'react'
+import React, { useState, useRef, useCallback, useEffect } from 'react'
 import { motion } from 'framer-motion'
 import { ChevronLeftIcon, ChevronRightIcon, ArrowRightIcon } from '@heroicons/react/24/outline'
 import PublicationCard from '@/components/publications/PublicationCard'
@@ -58,13 +58,27 @@ export default function ContentRow({
   const [canScrollRight, setCanScrollRight] = useState(true)
   const scrollContainerRef = useRef<HTMLDivElement>(null)
 
-  const handleScroll = () => {
+  const handleScroll = useCallback(() => {
     if (scrollContainerRef.current) {
       const { scrollLeft, scrollWidth, clientWidth } = scrollContainerRef.current
       setCanScrollLeft(scrollLeft > 0)
       setCanScrollRight(scrollLeft < scrollWidth - clientWidth - 10)
     }
-  }
+  }, [])
+
+  // Set up scroll listener when component mounts
+  useEffect(() => {
+    const scrollContainer = scrollContainerRef.current
+    if (scrollContainer) {
+      scrollContainer.addEventListener('scroll', handleScroll)
+      // Initial check
+      handleScroll()
+      
+      return () => {
+        scrollContainer.removeEventListener('scroll', handleScroll)
+      }
+    }
+  }, [handleScroll])
 
   const scrollLeft = () => {
     if (scrollContainerRef.current) {
@@ -155,7 +169,6 @@ export default function ContentRow({
         {/* Content Container */}
         <div
           ref={scrollContainerRef}
-          onScroll={handleScroll}
           className="flex gap-3 lg:gap-4 overflow-x-auto scrollbar-hide pb-2 scroll-smooth snap-x snap-mandatory"
           style={{
             scrollbarWidth: 'none',

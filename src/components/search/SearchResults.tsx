@@ -644,7 +644,7 @@ export default function SearchResults({
         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
           {Array.from({ length: 6 }).map((_, index) => (
             <div
-              key={index}
+              key={`skeleton-${index}`}
               className="relative rounded-xl overflow-hidden shadow-lg bg-slate-800/90 backdrop-blur-sm border border-slate-700/50 animate-pulse"
             >
               {/* Shimmer effect for image */}

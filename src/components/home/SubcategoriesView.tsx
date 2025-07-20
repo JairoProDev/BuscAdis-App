@@ -287,7 +287,7 @@ const SubcategoryRowComponent: React.FC<SubcategoryRowProps> = ({ row, onSearch,
   const [canScrollLeft, setCanScrollLeft] = useState(false);
   const [canScrollRight, setCanScrollRight] = useState(true);
 
-  const checkScrollButtons = () => {
+  const checkScrollButtons = useCallback(() => {
     const container = scrollContainerRef.current;
     if (container) {
       setCanScrollLeft(container.scrollLeft > 0);
@@ -295,11 +295,20 @@ const SubcategoryRowComponent: React.FC<SubcategoryRowProps> = ({ row, onSearch,
         container.scrollLeft < container.scrollWidth - container.clientWidth
       );
     }
-  };
+  }, []);
 
   useEffect(() => {
-    checkScrollButtons();
-  }, [row.publications]);
+    const scrollContainer = scrollContainerRef.current;
+    if (scrollContainer) {
+      scrollContainer.addEventListener('scroll', checkScrollButtons);
+      // Initial check
+      checkScrollButtons();
+      
+      return () => {
+        scrollContainer.removeEventListener('scroll', checkScrollButtons);
+      }
+    }
+  }, [checkScrollButtons, row.publications]);
 
   const scroll = (direction: 'left' | 'right') => {
     const container = scrollContainerRef.current;

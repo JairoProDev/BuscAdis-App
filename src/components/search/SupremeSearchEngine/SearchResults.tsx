@@ -48,6 +48,202 @@ interface SearchResultsProps {
 // Mock data simplificado - solo para desarrollo
 const mockResults: SearchResult[] = []
 
+// Move ResultCard component outside to fix ESLint warning
+const ResultCard = ({ 
+  result, 
+  index, 
+  viewMode, 
+  favorites, 
+  toggleFavorite, 
+  getCategoryStyle, 
+  formatPrice, 
+  formatTimeAgo, 
+  createWhatsAppMessage 
+}: { 
+  result: SearchResult; 
+  index: number; 
+  viewMode: 'grid' | 'list' | 'map'; 
+  favorites: Set<string>; 
+  toggleFavorite: (id: string) => void; 
+  getCategoryStyle: (category: string) => { bgClass: string; icon: React.ReactNode; name: string }; 
+  formatPrice: (price: number) => string; 
+  formatTimeAgo: (dateString: string) => string; 
+  createWhatsAppMessage: (category: string, title: string, resultId: string) => string; 
+}) => {
+  const isGridView = viewMode === 'grid'
+  const isFav = favorites.has(result.id) || result.isFavorite
+  const isPremium = result.isPremium || result.isPromoted
+  const categoryStyle = getCategoryStyle(result.category)
+
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ delay: index * 0.05 }}
+      className={`group relative bg-white dark:bg-gray-800 rounded-2xl overflow-hidden publication-card-hover smooth-transition cursor-pointer ${
+        isGridView ? 'flex flex-col' : 'flex flex-row h-40'
+      } ${
+        isPremium 
+          ? 'publication-card-premium shadow-lg shadow-cyan-400/25' 
+          : 'shadow-md hover:shadow-xl border border-gray-100 dark:border-gray-700'
+      }`}
+      onClick={() => {
+        // Navegar al detalle del anuncio
+        console.log('Navigating to:', result.id)
+      }}
+    >
+      {/* Destacado Border - Borde celeste sólido con esquinas redondeadas */}
+      {isPremium && (
+        <div className="absolute inset-0 rounded-2xl bg-gradient-to-r from-cyan-400 to-teal-500 p-[2px] pointer-events-none">
+          <div className="w-full h-full bg-white dark:bg-gray-800 rounded-2xl" />
+        </div>
+      )}
+      {/* Destacado Badge */}
+      {isPremium && (
+        <div className="absolute top-3 left-3 z-30">
+          <div className="flex items-center bg-gradient-to-r from-cyan-500 to-teal-500 text-white px-2 py-1 rounded-full text-xs font-bold shadow-lg">
+            <span className="mr-1">⭐</span>
+            DESTACADO
+          </div>
+        </div>
+      )}
+
+      {/* Favorite Button */}
+      <button
+        onClick={(e) => {
+          e.stopPropagation()
+          e.preventDefault()
+          toggleFavorite(result.id)
+        }}
+        className="absolute top-3 right-3 z-30 p-2 bg-white/90 dark:bg-gray-800/90 backdrop-blur-sm rounded-full shadow-lg opacity-0 group-hover:opacity-100 transition-all duration-300 hover:scale-110"
+        aria-label={isFav ? 'Quitar de favoritos' : 'Agregar a favoritos'}
+      >
+        {isFav ? (
+          <HeartSolidIcon className="h-4 w-4 text-red-500" />
+        ) : (
+          <HeartIcon className="h-4 w-4 text-gray-600 dark:text-gray-300" />
+        )}
+      </button>
+
+      {/* Image Container */}
+      <div className={`relative ${isGridView ? 'aspect-[4/3]' : 'w-36 h-full'} flex-shrink-0 overflow-hidden z-10`}>
+        <Image
+          src={result.image}
+          alt={result.title}
+          fill
+          className="object-cover transition-transform duration-500 group-hover:scale-110"
+          onError={(e) => {
+            const target = e.target as HTMLImageElement
+            target.src = '/images/placeholder/default.jpg'
+          }}
+        />
+        
+        {/* Gradient Overlay */}
+        <div className="absolute inset-0 bg-gradient-to-t from-black/20 via-transparent to-transparent" />
+        
+        {/* Views Badge */}
+        <div className="absolute bottom-2 right-2 bg-black/60 backdrop-blur-sm text-white text-xs px-2 py-1 rounded-full flex items-center gap-1">
+          <EyeIcon className="h-3 w-3" />
+          <span>{result.views}</span>
+        </div>
+
+        {/* Price Tag - Solo en grid view */}
+        {result.price && isGridView && (
+          <div className="absolute bottom-2 left-2 bg-green-600 text-white font-bold px-3 py-1.5 rounded-full text-sm shadow-lg">
+            {formatPrice(result.price)}
+          </div>
+        )}
+      </div>
+
+      {/* Content */}
+      <div className={`flex-1 p-4 ${isGridView ? '' : 'flex flex-col justify-between'} relative z-10`}>
+        {/* Title and Price */}
+        <div className="mb-2">
+          <h3 className="font-bold text-gray-900 dark:text-white text-base line-clamp-2 mb-1 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">
+            {result.title}
+          </h3>
+          
+          {result.price && (
+            <div className="text-xl font-bold text-green-600 dark:text-green-400">
+              {formatPrice(result.price)}
+            </div>
+          )}
+        </div>
+
+        {/* Description */}
+        <p className="text-gray-600 dark:text-gray-300 text-sm line-clamp-2 mb-3 leading-relaxed">
+          {result.description}
+        </p>
+
+        {/* Metadata */}
+        <div className="space-y-2 mt-auto">
+          {/* Location and Time */}
+          <div className="flex items-center justify-between text-sm text-gray-500 dark:text-gray-400">
+            <div className="flex items-center gap-1 flex-1 min-w-0">
+              <MapPinIcon className="h-4 w-4 flex-shrink-0 text-gray-400" />
+              <span className="truncate">{result.location}</span>
+            </div>
+            <div className="flex items-center gap-1 ml-2">
+              <ClockIcon className="h-4 w-4 flex-shrink-0 text-gray-400" />
+              <span className="whitespace-nowrap">{formatTimeAgo(result.publishedAt)}</span>
+            </div>
+          </div>
+
+          {/* Action Buttons - PERFECTO: Espaciado correcto, botones personalizados */}
+          <div className="flex items-center justify-between gap-3 pt-4 px-1 mt-auto border-t border-gray-100 dark:border-gray-700 min-h-[48px]">
+            {/* Category Badge - Con icono monocromático y colores personalizados */}
+            <span className={`flex items-center gap-1.5 px-2 py-1 text-xs rounded-full font-medium capitalize flex-shrink-0 ${categoryStyle.bgClass}`}>
+              {categoryStyle.icon}
+              <span className="hidden md:inline whitespace-nowrap">{categoryStyle.name}</span>
+            </span>
+
+            {/* Share Button - En el centro */}
+            <button 
+              onClick={(e) => {
+                e.stopPropagation()
+                // Compartir con Web Share API o copiar al portapapeles
+                if (navigator.share) {
+                  navigator.share({
+                    title: result.title,
+                    text: result.description,
+                    url: window.location.href + '/' + result.id
+                  })
+                } else {
+                  // Fallback: copiar al portapapeles
+                  navigator.clipboard.writeText(window.location.href + '/' + result.id)
+                  alert('Enlace copiado al portapapeles')
+                }
+              }}
+              className="flex p-2 text-gray-400 hover:text-blue-600 dark:hover:text-blue-400 transition-colors flex-shrink-0 hover:bg-blue-50 dark:hover:bg-blue-900/20 rounded-full"
+              title="Compartir"
+            >
+              <ShareIcon className="h-4 w-4" />
+            </button>
+
+            {/* Contact Button - Uniforme con mensaje personalizado */}
+            <button 
+              onClick={(e) => {
+                e.stopPropagation()
+                const phone = '51987654321'
+                const message = createWhatsAppMessage(result.category, result.title, result.id)
+                window.open(`https://wa.me/${phone}?text=${message}`, '_blank')
+              }}
+              className="flex items-center gap-1.5 px-3 py-1.5 bg-green-600 hover:bg-green-700 text-white text-xs font-medium rounded-full transition-colors flex-shrink-0"
+              title="Contactar por WhatsApp"
+            >
+              <PhoneIcon className="h-3 w-3" />
+              <span className="whitespace-nowrap">Contactar</span>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      {/* Hover Effects */}
+      <div className="absolute inset-0 bg-gradient-to-t from-transparent via-transparent to-blue-500/5 opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none" />
+    </motion.div>
+  )
+}
+
 export default function SearchResults({
   results = mockResults,
   isLoading = false,
@@ -217,181 +413,6 @@ export default function SearchResults({
     )
   }
 
-  const ResultCard = ({ result, index }: { result: SearchResult; index: number }) => {
-    const isGridView = viewMode === 'grid'
-    const isFav = favorites.has(result.id) || result.isFavorite
-    const isPremium = result.isPremium || result.isPromoted
-    const categoryStyle = getCategoryStyle(result.category)
-
-    return (
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: index * 0.05 }}
-        className={`group relative bg-white dark:bg-gray-800 rounded-2xl overflow-hidden publication-card-hover smooth-transition cursor-pointer ${
-          isGridView ? 'flex flex-col' : 'flex flex-row h-40'
-        } ${
-          isPremium 
-            ? 'publication-card-premium shadow-lg shadow-cyan-400/25' 
-            : 'shadow-md hover:shadow-xl border border-gray-100 dark:border-gray-700'
-        }`}
-        onClick={() => {
-          // Navegar al detalle del anuncio
-          console.log('Navigating to:', result.id)
-        }}
-      >
-        {/* Destacado Border - Borde celeste sólido con esquinas redondeadas */}
-        {isPremium && (
-          <div className="absolute inset-0 rounded-2xl bg-gradient-to-r from-cyan-400 to-teal-500 p-[2px] pointer-events-none">
-            <div className="w-full h-full bg-white dark:bg-gray-800 rounded-2xl" />
-          </div>
-        )}
-        {/* Destacado Badge */}
-        {isPremium && (
-          <div className="absolute top-3 left-3 z-30">
-            <div className="flex items-center bg-gradient-to-r from-cyan-500 to-teal-500 text-white px-2 py-1 rounded-full text-xs font-bold shadow-lg">
-              <span className="mr-1">⭐</span>
-              DESTACADO
-            </div>
-          </div>
-        )}
-
-        {/* Favorite Button */}
-        <button
-          onClick={(e) => {
-            e.stopPropagation()
-            e.preventDefault()
-            toggleFavorite(result.id)
-          }}
-          className="absolute top-3 right-3 z-30 p-2 bg-white/90 dark:bg-gray-800/90 backdrop-blur-sm rounded-full shadow-lg opacity-0 group-hover:opacity-100 transition-all duration-300 hover:scale-110"
-          aria-label={isFav ? 'Quitar de favoritos' : 'Agregar a favoritos'}
-        >
-          {isFav ? (
-            <HeartSolidIcon className="h-4 w-4 text-red-500" />
-          ) : (
-            <HeartIcon className="h-4 w-4 text-gray-600 dark:text-gray-300" />
-          )}
-        </button>
-
-        {/* Image Container */}
-        <div className={`relative ${isGridView ? 'aspect-[4/3]' : 'w-36 h-full'} flex-shrink-0 overflow-hidden z-10`}>
-          <Image
-            src={result.image}
-            alt={result.title}
-            fill
-            className="object-cover transition-transform duration-500 group-hover:scale-110"
-            onError={(e) => {
-              const target = e.target as HTMLImageElement
-              target.src = '/images/placeholder/default.jpg'
-            }}
-          />
-          
-          {/* Gradient Overlay */}
-          <div className="absolute inset-0 bg-gradient-to-t from-black/20 via-transparent to-transparent" />
-          
-          {/* Views Badge */}
-          <div className="absolute bottom-2 right-2 bg-black/60 backdrop-blur-sm text-white text-xs px-2 py-1 rounded-full flex items-center gap-1">
-            <EyeIcon className="h-3 w-3" />
-            <span>{result.views}</span>
-          </div>
-
-          {/* Price Tag - Solo en grid view */}
-          {result.price && isGridView && (
-            <div className="absolute bottom-2 left-2 bg-green-600 text-white font-bold px-3 py-1.5 rounded-full text-sm shadow-lg">
-              {formatPrice(result.price)}
-            </div>
-          )}
-        </div>
-
-        {/* Content */}
-        <div className={`flex-1 p-4 ${isGridView ? '' : 'flex flex-col justify-between'} relative z-10`}>
-          {/* Title and Price */}
-          <div className="mb-2">
-            <h3 className="font-bold text-gray-900 dark:text-white text-base line-clamp-2 mb-1 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">
-              {result.title}
-            </h3>
-            
-            {result.price && (
-              <div className="text-xl font-bold text-green-600 dark:text-green-400">
-                {formatPrice(result.price)}
-              </div>
-            )}
-          </div>
-
-          {/* Description */}
-          <p className="text-gray-600 dark:text-gray-300 text-sm line-clamp-2 mb-3 leading-relaxed">
-            {result.description}
-          </p>
-
-          {/* Metadata */}
-          <div className="space-y-2 mt-auto">
-            {/* Location and Time */}
-            <div className="flex items-center justify-between text-sm text-gray-500 dark:text-gray-400">
-              <div className="flex items-center gap-1 flex-1 min-w-0">
-                <MapPinIcon className="h-4 w-4 flex-shrink-0 text-gray-400" />
-                <span className="truncate">{result.location}</span>
-              </div>
-              <div className="flex items-center gap-1 ml-2">
-                <ClockIcon className="h-4 w-4 flex-shrink-0 text-gray-400" />
-                <span className="whitespace-nowrap">{formatTimeAgo(result.publishedAt)}</span>
-              </div>
-            </div>
-
-            {/* Action Buttons - PERFECTO: Espaciado correcto, botones personalizados */}
-            <div className="flex items-center justify-between gap-3 pt-4 px-1 mt-auto border-t border-gray-100 dark:border-gray-700 min-h-[48px]">
-              {/* Category Badge - Con icono monocromático y colores personalizados */}
-              <span className={`flex items-center gap-1.5 px-2 py-1 text-xs rounded-full font-medium capitalize flex-shrink-0 ${categoryStyle.bgClass}`}>
-                {categoryStyle.icon}
-                <span className="hidden md:inline whitespace-nowrap">{categoryStyle.name}</span>
-              </span>
-
-              {/* Share Button - En el centro */}
-              <button 
-                onClick={(e) => {
-                  e.stopPropagation()
-                  // Compartir con Web Share API o copiar al portapapeles
-                  if (navigator.share) {
-                    navigator.share({
-                      title: result.title,
-                      text: result.description,
-                      url: window.location.href + '/' + result.id
-                    })
-                  } else {
-                    // Fallback: copiar al portapapeles
-                    navigator.clipboard.writeText(window.location.href + '/' + result.id)
-                    alert('Enlace copiado al portapapeles')
-                  }
-                }}
-                className="flex p-2 text-gray-400 hover:text-blue-600 dark:hover:text-blue-400 transition-colors flex-shrink-0 hover:bg-blue-50 dark:hover:bg-blue-900/20 rounded-full"
-                title="Compartir"
-              >
-                <ShareIcon className="h-4 w-4" />
-              </button>
-
-              {/* Contact Button - Uniforme con mensaje personalizado */}
-              <button 
-                onClick={(e) => {
-                  e.stopPropagation()
-                  const phone = '51987654321'
-                  const message = createWhatsAppMessage(result.category, result.title, result.id)
-                  window.open(`https://wa.me/${phone}?text=${message}`, '_blank')
-                }}
-                className="flex items-center gap-1.5 px-3 py-1.5 bg-green-600 hover:bg-green-700 text-white text-xs font-medium rounded-full transition-colors flex-shrink-0"
-                title="Contactar por WhatsApp"
-              >
-                <PhoneIcon className="h-3 w-3" />
-                <span className="whitespace-nowrap">Contactar</span>
-              </button>
-            </div>
-          </div>
-        </div>
-
-        {/* Hover Effects */}
-        <div className="absolute inset-0 bg-gradient-to-t from-transparent via-transparent to-blue-500/5 opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none" />
-      </motion.div>
-    )
-  }
-
   return (
     <div className={`space-y-6 ${className}`}>
       {/* Header */}
@@ -506,7 +527,18 @@ export default function SearchResults({
               }`}
             >
               {results.map((result, index) => (
-                <ResultCard key={result.id} result={result} index={index} />
+                <ResultCard 
+                  key={result.id} 
+                  result={result} 
+                  index={index} 
+                  viewMode={viewMode} 
+                  favorites={favorites} 
+                  toggleFavorite={toggleFavorite} 
+                  getCategoryStyle={getCategoryStyle} 
+                  formatPrice={formatPrice} 
+                  formatTimeAgo={formatTimeAgo} 
+                  createWhatsAppMessage={createWhatsAppMessage} 
+                />
               ))}
             </motion.div>
           </AnimatePresence>

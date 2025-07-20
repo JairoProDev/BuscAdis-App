@@ -7,6 +7,10 @@
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
+    "type-check": "tsc --noEmit",
+    "pre-build": "npm run type-check && npm run lint",
+    "check-all": "npm run type-check && npm run lint && npm run build",
+    "import": "node src/scripts/importPublications.ts",
     "seed": "node src/scripts/seed-publications.js",
     "seed:force": "node src/scripts/seed-publications.js --force",
     "build:all-errors": "__NEXT_TEST_MODE=true next build"

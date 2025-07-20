@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useState, useEffect, useRef } from 'react'
+import React, { useState, useEffect, useRef, useCallback, useMemo } from 'react'
 import { useRouter } from 'next/navigation'
 import { motion, AnimatePresence } from 'framer-motion'
 import { useSearch } from '@/contexts/SearchContext'
@@ -438,27 +438,30 @@ export default function SupremeSearchEngine({
   const recognition = useRef<VoiceRecognition | null>(null)
 
   // Función de búsqueda rápida en tiempo real
-  const debouncedQuickSearch = debounce(async (searchQuery: string) => {
-    if (searchQuery.length < 2) {
-      setQuickResults([])
-      setShowQuickResults(false)
-      return
-    }
+  const debouncedQuickSearch = useMemo(
+    () => debounce(async (searchQuery: string) => {
+      if (searchQuery.length < 2) {
+        setQuickResults([])
+        setShowQuickResults(false)
+        return
+      }
 
-    setIsLoading(true)
-    try {
-      const response = await searchAPI.getQuickResults(searchQuery, {
-        category: searchState.category,
-        location: searchState.location
-      })
-      setQuickResults(response.results as SearchResult[])
-      setShowQuickResults(true)
-    } catch (error) {
-      console.error('Error in quick search:', error)
-    } finally {
-      setIsLoading(false)
-    }
-  }, 300)
+      setIsLoading(true)
+      try {
+        const response = await searchAPI.getQuickResults(searchQuery, {
+          category: searchState.category,
+          location: searchState.location
+        })
+        setQuickResults(response.results as SearchResult[])
+        setShowQuickResults(true)
+      } catch (error) {
+        console.error('Error in quick search:', error)
+      } finally {
+        setIsLoading(false)
+      }
+    }, 300),
+    [searchState.category, searchState.location]
+  )
 
   // Efecto para búsqueda en tiempo real
   useEffect(() => {

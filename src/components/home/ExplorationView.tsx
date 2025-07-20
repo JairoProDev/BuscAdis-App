@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 import PublicationCard from '@/components/publications/PublicationCard';
 
@@ -174,7 +174,7 @@ const ExplorationRowComponent: React.FC<ExplorationRowProps> = ({ row, onSearch 
   const [canScrollLeft, setCanScrollLeft] = useState(false);
   const [canScrollRight, setCanScrollRight] = useState(true);
 
-  const checkScrollButtons = () => {
+  const checkScrollButtons = useCallback(() => {
     const container = scrollContainerRef.current;
     if (container) {
       setCanScrollLeft(container.scrollLeft > 0);
@@ -182,11 +182,20 @@ const ExplorationRowComponent: React.FC<ExplorationRowProps> = ({ row, onSearch 
         container.scrollLeft < container.scrollWidth - container.clientWidth
       );
     }
-  };
+  }, []);
 
   useEffect(() => {
-    checkScrollButtons();
-  }, [row.publications]);
+    const scrollContainer = scrollContainerRef.current;
+    if (scrollContainer) {
+      scrollContainer.addEventListener('scroll', checkScrollButtons);
+      // Initial check
+      checkScrollButtons();
+      
+      return () => {
+        scrollContainer.removeEventListener('scroll', checkScrollButtons);
+      }
+    }
+  }, [checkScrollButtons, row.publications]);
 
   const scroll = (direction: 'left' | 'right') => {
     const container = scrollContainerRef.current;

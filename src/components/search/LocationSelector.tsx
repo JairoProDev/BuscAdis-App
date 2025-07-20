@@ -60,6 +60,152 @@ type GeolocationStatus = 'idle' | 'loading' | 'success' | 'error';
 
 // --- MAIN COMPONENT ---
 
+// Move nested components outside to fix ESLint warning
+const LocationHeader = ({ 
+  level, 
+  handleBack, 
+  handleClose, 
+  getTitle 
+}: { 
+  level: Level; 
+  handleBack: () => void; 
+  handleClose: () => void; 
+  getTitle: () => string; 
+}) => (
+  <div className="flex items-center justify-between p-6 border-b border-slate-200 dark:border-slate-700">
+    <div className="flex items-center gap-3">
+      {level !== 'continent' && (
+        <button
+          onClick={handleBack}
+          className="p-2 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-full transition-colors"
+          aria-label="Volver"
+        >
+          <ChevronLeftIcon className="w-5 h-5 text-slate-600 dark:text-slate-300" />
+        </button>
+      )}
+      <h2 className="text-xl font-semibold text-slate-800 dark:text-slate-100">
+        {getTitle()}
+      </h2>
+    </div>
+    <button
+      onClick={handleClose}
+      className="p-2 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-full transition-colors"
+      aria-label="Cerrar"
+    >
+      <XMarkIcon className="w-6 h-6 text-slate-500 dark:text-slate-400" />
+    </button>
+  </div>
+);
+
+const LocationBreadcrumbs = ({ 
+  selection, 
+  level, 
+  handleBreadcrumbClick 
+}: { 
+  selection: Selection; 
+  level: Level; 
+  handleBreadcrumbClick: (index: number) => void; 
+}) => (
+  <div className="px-6 py-3 bg-slate-50 dark:bg-slate-800/50 border-b border-slate-200 dark:border-slate-700">
+    <div className="flex items-center space-x-2 text-sm">
+      {HIERARCHY.map((h, index) => {
+        const item = selection[h];
+        const isActive = h === level;
+        const isCompleted = item !== null;
+        
+        if (!isCompleted && !isActive) return null;
+        
+        return (
+          <Fragment key={h}>
+            {index > 0 && (
+              <span className="text-slate-400 dark:text-slate-500">/</span>
+            )}
+            <button
+              onClick={() => handleBreadcrumbClick(index)}
+              className={`px-2 py-1 rounded transition-colors ${
+                isActive 
+                  ? 'text-teal-600 dark:text-teal-400 bg-teal-50 dark:bg-teal-900/20' 
+                  : 'text-slate-600 dark:text-slate-300 hover:text-teal-600 dark:hover:text-teal-400'
+              }`}
+            >
+              {item?.name || LEVEL_NAMES[h]}
+            </button>
+          </Fragment>
+        );
+      })}
+    </div>
+  </div>
+);
+
+const LocationQuickPicks = ({ 
+  level, 
+  selection, 
+  geolocationStatus, 
+  handleGeolocation, 
+  handleSelect 
+}: { 
+  level: Level; 
+  selection: Selection; 
+  geolocationStatus: GeolocationStatus; 
+  handleGeolocation: () => void; 
+  handleSelect: (item: Location) => void; 
+}) => (
+  <div className="px-6 py-4 bg-gradient-to-r from-teal-50 to-cyan-50 dark:from-teal-900/10 dark:to-cyan-900/10 border-b border-slate-200 dark:border-slate-700">
+    <div className="flex flex-col gap-3">
+      {/* Geolocation Button */}
+      <button
+        onClick={handleGeolocation}
+        disabled={geolocationStatus === 'loading'}
+        className="flex items-center gap-3 p-3 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl hover:bg-slate-50 dark:hover:bg-slate-700/50 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed group"
+      >
+        {geolocationStatus === 'loading' ? (
+          <ArrowPathIcon className="w-5 h-5 text-teal-500 animate-spin" />
+        ) : geolocationStatus === 'success' ? (
+          <CheckIcon className="w-5 h-5 text-green-500" />
+        ) : (
+          <MapPinIcon className="w-5 h-5 text-teal-500 group-hover:text-teal-600" />
+        )}
+        <div className="text-left">
+          <div className="font-medium text-slate-800 dark:text-slate-100">
+            {geolocationStatus === 'loading' && 'Detectando ubicación...'}
+            {geolocationStatus === 'success' && 'Ubicación detectada'}
+            {geolocationStatus === 'error' && 'Error al detectar ubicación'}
+            {geolocationStatus === 'idle' && 'Usar mi ubicación actual'}
+          </div>
+          {geolocationStatus === 'idle' && (
+            <div className="text-sm text-slate-500 dark:text-slate-400">
+              Detectar automáticamente tu ubicación
+            </div>
+          )}
+        </div>
+      </button>
+
+      {/* Quick Access - Peru Departments */}
+      {level === 'department' && selection.country?.id === 'pe' && (
+        <div className="grid grid-cols-2 gap-2">
+          {[
+            { id: 'cusco', name: 'Cusco' },
+            { id: 'lima', name: 'Lima' },
+            { id: 'arequipa', name: 'Arequipa' },
+            { id: 'piura', name: 'Piura' }
+          ].map((dept) => (
+            <button
+              key={dept.id}
+              onClick={() => handleSelect(dept)}
+              className="flex items-center gap-2 p-2.5 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg hover:bg-teal-50 dark:hover:bg-teal-900/20 hover:border-teal-300 dark:hover:border-teal-600 transition-all duration-200 text-left"
+            >
+              <GlobeAmericasIcon className="w-4 h-4 text-slate-500 dark:text-slate-400" />
+              <span className="text-sm font-medium text-slate-700 dark:text-slate-200">
+                {dept.name}
+              </span>
+            </button>
+          ))}
+        </div>
+      )}
+    </div>
+  </div>
+);
+
 const LocationSelector = ({ onClose, onLocationSelect, initialSelection = {} }: LocationSelectorProps) => {
   const [selection, setSelection] = useState<Selection>({
     continent: null, country: null, department: null, province: null, district: null,
@@ -239,121 +385,6 @@ const LocationSelector = ({ onClose, onLocationSelect, initialSelection = {} }: 
     return titles[level] || 'Selecciona una ubicación';
   };
 
-  const Header = () => (
-    <div className="flex items-center justify-between p-6 border-b border-slate-200 dark:border-slate-700">
-      <div className="flex items-center gap-3">
-        {level !== 'continent' && (
-          <button
-            onClick={handleBack}
-            className="p-2 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-full transition-colors"
-            aria-label="Volver"
-          >
-            <ChevronLeftIcon className="w-5 h-5 text-slate-600 dark:text-slate-300" />
-          </button>
-        )}
-        <h2 className="text-xl font-semibold text-slate-800 dark:text-slate-100">
-          {getTitle()}
-        </h2>
-      </div>
-      <button
-        onClick={handleClose}
-        className="p-2 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-full transition-colors"
-        aria-label="Cerrar"
-      >
-        <XMarkIcon className="w-6 h-6 text-slate-500 dark:text-slate-400" />
-      </button>
-    </div>
-  );
-
-  const Breadcrumbs = () => (
-    <div className="px-6 py-3 bg-slate-50 dark:bg-slate-800/50 border-b border-slate-200 dark:border-slate-700">
-      <div className="flex items-center space-x-2 text-sm">
-        {HIERARCHY.map((h, index) => {
-          const item = selection[h];
-          const isActive = h === level;
-          const isCompleted = item !== null;
-          
-          if (!isCompleted && !isActive) return null;
-          
-          return (
-            <Fragment key={h}>
-              {index > 0 && (
-                <span className="text-slate-400 dark:text-slate-500">/</span>
-              )}
-              <button
-                onClick={() => handleBreadcrumbClick(index)}
-                className={`px-2 py-1 rounded transition-colors ${
-                  isActive 
-                    ? 'text-teal-600 dark:text-teal-400 bg-teal-50 dark:bg-teal-900/20' 
-                    : 'text-slate-600 dark:text-slate-300 hover:text-teal-600 dark:hover:text-teal-400'
-                }`}
-              >
-                {item?.name || LEVEL_NAMES[h]}
-              </button>
-            </Fragment>
-          );
-        })}
-      </div>
-    </div>
-  );
-
-  const QuickPicks = () => (
-    <div className="px-6 py-4 bg-gradient-to-r from-teal-50 to-cyan-50 dark:from-teal-900/10 dark:to-cyan-900/10 border-b border-slate-200 dark:border-slate-700">
-      <div className="flex flex-col gap-3">
-        {/* Geolocation Button */}
-        <button
-          onClick={handleGeolocation}
-          disabled={geolocationStatus === 'loading'}
-          className="flex items-center gap-3 p-3 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl hover:bg-slate-50 dark:hover:bg-slate-700/50 transition-all duration-200 disabled:opacity-50 disabled:cursor-not-allowed group"
-        >
-          {geolocationStatus === 'loading' ? (
-            <ArrowPathIcon className="w-5 h-5 text-teal-500 animate-spin" />
-          ) : geolocationStatus === 'success' ? (
-            <CheckIcon className="w-5 h-5 text-green-500" />
-          ) : (
-            <MapPinIcon className="w-5 h-5 text-teal-500 group-hover:text-teal-600" />
-          )}
-          <div className="text-left">
-            <div className="font-medium text-slate-800 dark:text-slate-100">
-              {geolocationStatus === 'loading' && 'Detectando ubicación...'}
-              {geolocationStatus === 'success' && 'Ubicación detectada'}
-              {geolocationStatus === 'error' && 'Error al detectar ubicación'}
-              {geolocationStatus === 'idle' && 'Usar mi ubicación actual'}
-            </div>
-            {geolocationStatus === 'idle' && (
-              <div className="text-sm text-slate-500 dark:text-slate-400">
-                Detectar automáticamente tu ubicación
-              </div>
-            )}
-          </div>
-        </button>
-
-        {/* Quick Access - Peru Departments */}
-        {level === 'department' && selection.country?.id === 'pe' && (
-          <div className="grid grid-cols-2 gap-2">
-            {[
-              { id: 'cusco', name: 'Cusco' },
-              { id: 'lima', name: 'Lima' },
-              { id: 'arequipa', name: 'Arequipa' },
-              { id: 'piura', name: 'Piura' }
-            ].map((dept) => (
-              <button
-                key={dept.id}
-                onClick={() => handleSelect(dept)}
-                className="flex items-center gap-2 p-2.5 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg hover:bg-teal-50 dark:hover:bg-teal-900/20 hover:border-teal-300 dark:hover:border-teal-600 transition-all duration-200 text-left"
-              >
-                <GlobeAmericasIcon className="w-4 h-4 text-slate-500 dark:text-slate-400" />
-                <span className="text-sm font-medium text-slate-700 dark:text-slate-200">
-                  {dept.name}
-                </span>
-              </button>
-            ))}
-          </div>
-        )}
-      </div>
-    </div>
-  );
-
   return (
     <Transition appear show={isOpen} as={Fragment}>
       <Dialog as="div" className="relative z-[1001]" onClose={handleClose}>
@@ -381,9 +412,24 @@ const LocationSelector = ({ onClose, onLocationSelect, initialSelection = {} }: 
               leaveTo="opacity-0 scale-95"
             >
               <Dialog.Panel className="w-full max-w-md transform overflow-hidden rounded-2xl bg-white dark:bg-slate-900 shadow-2xl transition-all">
-                <Header />
-                <Breadcrumbs />
-                <QuickPicks />
+                <LocationHeader 
+                  level={level} 
+                  handleBack={handleBack} 
+                  handleClose={handleClose} 
+                  getTitle={getTitle} 
+                />
+                <LocationBreadcrumbs 
+                  selection={selection} 
+                  level={level} 
+                  handleBreadcrumbClick={handleBreadcrumbClick} 
+                />
+                <LocationQuickPicks 
+                  level={level} 
+                  selection={selection} 
+                  geolocationStatus={geolocationStatus} 
+                  handleGeolocation={handleGeolocation} 
+                  handleSelect={handleSelect} 
+                />
                 
                 {/* Search Bar */}
                 <div className="p-6 border-b border-slate-200 dark:border-slate-700">

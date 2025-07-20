@@ -24,11 +24,24 @@ const eslintConfig = [
       "@next/next/no-img-element": "warn",
       "react/jsx-key": "warn",
       "react/jsx-no-undef": "warn",
-      "react-hooks/exhaustive-deps": "warn",
+      "react-hooks/exhaustive-deps": "error", // Cambiar a error para detectar problemas de dependencias
       "prefer-const": "warn",
       "no-var": "warn",
       "import/no-anonymous-default-export": "warn",
-      "@typescript-eslint/no-unused-expressions": "warn"
+      "@typescript-eslint/no-unused-expressions": "warn",
+      
+      // Reglas adicionales para detectar bucles infinitos
+      "react-hooks/rules-of-hooks": "error",
+      "react/no-array-index-key": "warn",
+      "react/no-unstable-nested-components": "warn",
+      
+      // Reglas para detectar setState en useEffect sin dependencias
+      "react-hooks/exhaustive-deps": [
+        "error",
+        {
+          "additionalHooks": "(useRecoilCallback|useRecoilTransaction_UNSTABLE)"
+        }
+      ]
     }
   }
 ];
