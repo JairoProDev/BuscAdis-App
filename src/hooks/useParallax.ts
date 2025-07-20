@@ -2,12 +2,34 @@
 
 import { useEffect, useRef } from 'react'
 
+// Define GSAP types
+interface GSAP {
+  to: (target: HTMLElement, vars: {
+    transform?: string;
+    ease?: string;
+    duration?: number;
+  }) => void;
+  fromTo: (target: HTMLElement, fromVars: Record<string, unknown>, toVars: Record<string, unknown>) => {
+    kill: () => void;
+  };
+  registerPlugin: (plugin: unknown) => void;
+}
+
+interface ScrollTrigger {
+  create: (config: {
+    trigger: HTMLElement;
+    start: string;
+    end: string;
+    onUpdate: (self: { progress: number }) => void;
+  }) => void;
+}
+
 // Conditionally import gsap if available
-let gsap: any = null;
-let ScrollTrigger: any = null;
+let gsap: GSAP | null = null;
+let ScrollTrigger: ScrollTrigger | null = null;
 try {
-  gsap = require('gsap');
-  ScrollTrigger = require('gsap/ScrollTrigger').ScrollTrigger;
+  gsap = require('gsap') as GSAP;
+  ScrollTrigger = require('gsap/ScrollTrigger').ScrollTrigger as ScrollTrigger;
   if (gsap && ScrollTrigger) {
     gsap.registerPlugin(ScrollTrigger);
   }

@@ -187,7 +187,7 @@ function createServerMongoClient(client: MongoClient, db: Db): MongoClientInterf
               .sort({ createdAt: -1 })
               .toArray();
             
-            allPublications.push(...(publications as any[]));
+            allPublications.push(...(publications as MongoDbDocument[]));
           } catch (err) {
             LoggingService.getInstance().error(`Error fetching from ${collectionName}`, { error: err instanceof Error ? err.message : String(err), userId });
           }
@@ -195,7 +195,7 @@ function createServerMongoClient(client: MongoClient, db: Db): MongoClientInterf
         
         // Sort by creation date
         allPublications.sort((a, b) => 
-          new Date(b.createdAt as any).getTime() - new Date(a.createdAt as any).getTime()
+          new Date(b.createdAt as Date).getTime() - new Date(a.createdAt as Date).getTime()
         );
         
         return allPublications;
@@ -283,9 +283,9 @@ function buildQuery(filters: PublicationFilters): Record<string, unknown> {
   
   // Price range filter
   if (filters.minPrice !== undefined || filters.maxPrice !== undefined) {
-    (query.price as any) = {};
-    if (filters.minPrice !== undefined) (query.price as any).$gte = filters.minPrice;
-    if (filters.maxPrice !== undefined) (query.price as any).$lte = filters.maxPrice;
+    query.price = {};
+    if (filters.minPrice !== undefined) (query.price as Record<string, number>).$gte = filters.minPrice;
+    if (filters.maxPrice !== undefined) (query.price as Record<string, number>).$lte = filters.maxPrice;
   }
   
   // Location filter

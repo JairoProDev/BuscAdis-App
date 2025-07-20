@@ -8,11 +8,19 @@ import { isEqual } from 'lodash'
 
 type FilterValue = string | number | boolean | (string | number)[] | null;
 
+interface SearchOptions {
+  category?: string;
+  location?: string;
+  filters?: Record<string, unknown>;
+  type?: string;
+  subType?: string;
+}
+
 // THIS SECTION DEFINES THE PROPS AND VIEWMODE, IT SHOULD NOT BE DELETED
 interface SearchLayoutProps {
     initialResults?: CorePublication[]
     loading?: boolean
-    onSearch?: (query: string, options?: Record<string, unknown>) => void
+    onSearch?: (query: string, options?: SearchOptions) => void
     onFilterChange?: (filters: Record<string, FilterValue>) => void
     totalResults?: number
     onPublicationClick?: (publication: CorePublication, e: React.MouseEvent<HTMLAnchorElement>) => void
@@ -43,9 +51,9 @@ export default function SearchLayout({
     }, [initialResults, results])
 
     // Handle search from the search bar
-    const handleSearch = (query: string, options: Record<string, unknown> = {}) => {
+    const handleSearch = (query: string, options: SearchOptions = {}) => {
         if (onSearch) {
-            onSearch(query, options as any)
+            onSearch(query, options)
         }
     }
 
@@ -60,7 +68,7 @@ export default function SearchLayout({
         <div className={`min-h-screen bg-gray-50 ${className}`}>
             {/* Sticky Search Container */}
             <StickySearchContainer 
-                onSearch={handleSearch as any}
+                onSearch={handleSearch}
                 onFilterChange={handleFilterChange}
             />
 

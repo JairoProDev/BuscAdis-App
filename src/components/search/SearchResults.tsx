@@ -415,9 +415,9 @@ export default function SearchResults({
     }
 
     // Ensure we have the correct category levels
-    const categorySlug = publication.categorySlug || '';
-    const subcategorySlug = publication.subcategory || publication.subcategorySlug || '';
-    const subsubcategorySlug = publication.subsubcategory || publication.subSubcategorySlug || '';
+    // const categorySlug = publication.categorySlug || '';
+    // const subcategorySlug = publication.subcategory || publication.subcategorySlug || '';
+    // const subsubcategorySlug = publication.subsubcategory || publication.subSubcategorySlug || '';
 
     // Generate SEO-friendly URL with all category levels
     const seoUrl = generateSeoUrl(

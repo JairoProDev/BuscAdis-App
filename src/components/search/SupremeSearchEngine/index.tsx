@@ -211,7 +211,7 @@ const InlineFilters = ({
         const option = filter.options?.find((o: FilterOption) => o.value === hasValue)
         displayValue = option ? option.label : hasValue
       } else if (filter.type === 'range' && Array.isArray(hasValue)) {
-        displayValue = `${filter.format ? filter.format(hasValue[0]) : hasValue[0]} - ${filter.format ? filter.format(hasValue[1]) : hasValue[1]}`
+        displayValue = `${filter.format ? filter.format(Number(hasValue[0])) : hasValue[0]} - ${filter.format ? filter.format(Number(hasValue[1])) : hasValue[1]}`
       } else if (filter.type === 'multiselect' && Array.isArray(hasValue)) {
         displayValue = `${hasValue.length} seleccionados`
       } else if (filter.type === 'toggle') {
@@ -280,11 +280,12 @@ const InlineFilters = ({
                           type="checkbox"
                           checked={isSelected}
                           onChange={(e) => {
-                            const currentValues = Array.isArray(filterValue) ? filterValue : []
+                            const filterValue = activeFilters[filter.id]
+                            const currentValues = Array.isArray(filterValue) ? filterValue as string[] : []
                             const newValues = e.target.checked
                               ? [...currentValues, option.value]
-                              : currentValues.filter((v: unknown) => v !== option.value)
-                            handleFilterChange(filter.id, newValues as string[])
+                              : currentValues.filter((v: string) => v !== option.value)
+                            handleFilterChange(filter.id, newValues)
                           }}
                           className="rounded"
                         />
@@ -313,7 +314,7 @@ const InlineFilters = ({
                       const filterValue = activeFilters[filter.id]
                       const defaultValue = [filter.min || 0, filter.max || 100]
                       const currentRange = Array.isArray(filterValue) ? filterValue : defaultValue
-                      handleFilterChange(filter.id, [parseInt(e.target.value) || filter.min || 0, (currentRange[1] as number) || filter.max || 100])
+                      handleFilterChange(filter.id, [parseInt(e.target.value) || filter.min || 0, Number(currentRange[1]) || filter.max || 100])
                     }}
                     className="w-20 px-2 py-1 border border-gray-300 dark:border-slate-600 rounded text-sm"
                   />
@@ -331,7 +332,7 @@ const InlineFilters = ({
                       const filterValue = activeFilters[filter.id]
                       const defaultValue = [filter.min || 0, filter.max || 100]
                       const currentRange = Array.isArray(filterValue) ? filterValue : defaultValue
-                      handleFilterChange(filter.id, [currentRange[0], parseInt(e.target.value) || filter.max || 100])
+                      handleFilterChange(filter.id, [Number(currentRange[0]), parseInt(e.target.value) || filter.max || 100])
                     }}
                     className="w-20 px-2 py-1 border border-gray-300 dark:border-slate-600 rounded text-sm"
                   />
@@ -399,6 +400,11 @@ const InlineFilters = ({
     </div>
   )
 }
+
+// Helper function to convert SearchFilters to Record<string, unknown>
+const convertFiltersForAdvancedFilters = (filters: SearchFilters): Record<string, unknown> => {
+  return filters as Record<string, unknown>;
+};
 
 export default function SupremeSearchEngine({
   onSearch,
@@ -1285,7 +1291,7 @@ export default function SupremeSearchEngine({
             className="absolute top-full mt-2 w-full bg-white dark:bg-slate-800 rounded-xl shadow-xl border border-slate-200 dark:border-slate-700 z-50"
           >
             <AdvancedFilters
-              onFilterChange={onFilterChange as (filters: Record<string, unknown>) => void}
+              onFilterChange={onFilterChange ? (filters: Record<string, unknown>) => onFilterChange(filters as SearchFilters) : () => {}}
               onClose={() => setActivePanel(null)}
             />
           </motion.div>
@@ -1325,7 +1331,7 @@ export default function SupremeSearchEngine({
               
               <div className="p-4">
                 <AdvancedFilters
-                  onFilterChange={onFilterChange as (filters: Record<string, unknown>) => void}
+                  onFilterChange={onFilterChange ? (filters: Record<string, unknown>) => onFilterChange(filters as SearchFilters) : () => {}}
                   onClose={() => setShowMobileFilters(false)}
                   isMobile={true}
                 />

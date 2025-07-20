@@ -4,26 +4,33 @@
 import { parsePublicationsFromText, preparePublicationForAPI } from '@/utils/publicationParser';
 import { PublicationsService } from '@/services/publications.service';
 
+interface ImportError {
+  publication: string;
+  error: string;
+}
+
+interface ImportResult {
+  success: boolean;
+  imported: number;
+  errors: ImportError[];
+}
+
 /**
  * Importa anuncios desde texto plano a la base de datos
  * @param rawText Texto plano con anuncios
  * @returns Resultado de la importación
  */
-export async function importPublicationsFromText(rawText: string): Promise<{
-  success: boolean;
-  imported: number;
-  errors: unknown[];
-}> {
+export async function importPublicationsFromText(rawText: string): Promise<ImportResult> {
   try {
     // Parsear el texto a objetos estructurados
     const publications = parsePublicationsFromText(rawText);
     console.log(`Se encontraron ${publications.length} publicaciones para importar`);
     
     // Resultado de la operación
-    const result = {
+    const result: ImportResult = {
       success: true,
       imported: 0,
-      errors: [] as unknown[]
+      errors: []
     };
     
     // Importar cada publicación
@@ -33,7 +40,7 @@ export async function importPublicationsFromText(rawText: string): Promise<{
         const apiData = preparePublicationForAPI(publication);
         
         // Enviar a la API
-        await PublicationsService.createPublication(apiData as any);
+        await PublicationsService.createPublication(apiData);
         
         // Incrementar contador de éxito
         result.imported++;
@@ -45,7 +52,7 @@ export async function importPublicationsFromText(rawText: string): Promise<{
         result.errors.push({
           publication: publication.title,
           error: error instanceof Error ? error.message : String(error)
-        } as unknown);
+        });
       }
     }
     
@@ -58,7 +65,10 @@ export async function importPublicationsFromText(rawText: string): Promise<{
     return {
       success: false,
       imported: 0,
-      errors: [error instanceof Error ? error.message : String(error)]
+      errors: [{
+        publication: 'General',
+        error: error instanceof Error ? error.message : String(error)
+      }]
     };
   }
 }
@@ -82,7 +92,7 @@ async function main() {
         
         if (result.errors.length > 0) {
           console.log('Detalles de errores:');
-          result.errors.forEach((err: any, i) => {
+          result.errors.forEach((err: ImportError, i) => {
             console.log(`  ${i+1}. ${err.publication}: ${err.error}`);
           });
         }

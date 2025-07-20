@@ -195,7 +195,7 @@ export function getPublicationProperty<T>(
   fallback: T
 ): T {
   try {
-    return publication?.[property] ?? fallback;
+    return (publication?.[property] as T) ?? fallback;
   } catch (error) {
     console.warn(`Error accessing property ${property} on publication:`, error);
     return fallback;

@@ -7,6 +7,22 @@
 
 import { Logger } from '@/services/logging.service';
 
+interface ApiResponse {
+  publications?: unknown[];
+  total?: number;
+  pages?: number;
+  page?: number;
+  error?: string;
+  errorFriendly?: string;
+}
+
+interface ApiError extends Error {
+  status?: number;
+  statusText?: string;
+  data?: unknown;
+  originalText?: string;
+}
+
 // Maximum retries for fetch operations
 const MAX_RETRIES = 2;
 
@@ -60,7 +76,7 @@ export const mongoFetch = async (endpoint: string, options: MongoFetchOptions = 
         }
         
         const response = await fetch(url, {
-          ...(fetchOptions as any),
+          ...fetchOptions,
           headers,
         });
         
@@ -75,14 +91,10 @@ export const mongoFetch = async (endpoint: string, options: MongoFetchOptions = 
             // Not JSON, keep as text
           }
           
-          const error = new Error(`API error: ${response.status} ${response.statusText}`);
-          // @ts-expect-error - add extra properties
+          const error = new Error(`API error: ${response.status} ${response.statusText}`) as ApiError;
           error.status = response.status;
-          // @ts-expect-error - add extra properties
           error.statusText = response.statusText;
-          // @ts-expect-error - add extra properties
           error.data = errorData;
-          // @ts-expect-error - add extra properties
           error.originalText = errorText;
           
           // Log detailed error info
@@ -155,9 +167,9 @@ export const getBrowserMongoClient = () => {
           },
         });
         
-        if (!(response as any).publications && (response as any).error) {
-          Logger.error(`Error finding documents in ${collection}`, { error: (response as any).error });
-          throw new Error((response as any).errorFriendly || (response as any).error);
+        if (!(response as ApiResponse).publications && (response as ApiResponse).error) {
+          Logger.error(`Error finding documents in ${collection}`, { error: (response as ApiResponse).error });
+          throw new Error((response as ApiResponse).errorFriendly || (response as ApiResponse).error);
         }
         
         return response;

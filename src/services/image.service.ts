@@ -81,7 +81,7 @@ export class ImageService {
       const key = `${currentUser.id}/${uuidv4()}`;
       
       // Placeholder para AWS S3 (deshabilitado)
-      const _command: AWSCommand = {} as AWSCommand;
+      // const _command: AWSCommand = {} as AWSCommand;
       const signedUrl = null; // Placeholder
       
       // Construir la URL de CloudFront para la imagen
@@ -158,8 +158,8 @@ export class ImageService {
         throw new Error('No tienes permiso para eliminar esta imagen');
       }
       
-      const _command: AWSCommand = {} as AWSCommand;
-      const _client: AWSClient = {} as AWSClient;
+      // const _command: AWSCommand = {} as AWSCommand;
+      // const _client: AWSClient = {} as AWSClient;
       
       // await client.send(command); // Deshabilitado
       return { success: true };

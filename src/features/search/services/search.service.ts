@@ -1,5 +1,19 @@
 import clientPromise from '@/lib/mongodb';
 
+interface MongoSearchFilter {
+  status?: string;
+  $or?: Array<{
+    title?: { $regex: string; $options: string };
+    description?: { $regex: string; $options: string };
+    location?: { $regex: string; $options: string };
+  }>;
+  categorySlug?: string;
+  price?: {
+    $gte?: number;
+    $lte?: number;
+  };
+}
+
 export class SearchService {
   private static async getCollection() {
     const client = await clientPromise;
@@ -20,13 +34,13 @@ export class SearchService {
       const publications = await this.getCollection();
       
       // Build filter object
-      const filter: Record<string, unknown> = { 
+      const filter: MongoSearchFilter = { 
         // Default filter for active publications
         status: "active"
       };
       
       if (params.query) {
-        (filter as any).$or = [
+        filter.$or = [
           { title: { $regex: params.query, $options: 'i' } },
           { description: { $regex: params.query, $options: 'i' } }
         ];
@@ -37,20 +51,20 @@ export class SearchService {
       }
       
       if (params.location) {
-        if (!(filter as any).$or) (filter as any).$or = [];
-        (filter as any).$or.push(
+        if (!filter.$or) filter.$or = [];
+        filter.$or.push(
           { location: { $regex: params.location, $options: 'i' } }
         );
       }
       
       if (params.minPrice) {
-        (filter as any).price = (filter as any).price || {};
-        (filter as any).price.$gte = Number(params.minPrice);
+        filter.price = filter.price || {};
+        filter.price.$gte = Number(params.minPrice);
       }
       
       if (params.maxPrice) {
-        (filter as any).price = (filter as any).price || {};
-        (filter as any).price.$lte = Number(params.maxPrice);
+        filter.price = filter.price || {};
+        filter.price.$lte = Number(params.maxPrice);
       }
       
       // Count total matching documents

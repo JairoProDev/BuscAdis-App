@@ -13,6 +13,14 @@ interface Notification {
   created_at: string;
 }
 
+interface NotificationDocument {
+  _id: { toString: () => string };
+  title?: string;
+  message?: string;
+  read?: boolean;
+  created_at?: string;
+}
+
 export default function NotificationsDropdown() {
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const [unreadCount, setUnreadCount] = useState(0);
@@ -22,7 +30,7 @@ export default function NotificationsDropdown() {
   const loadNotifications = useCallback(async () => {
     try {
       const data = await NotificationsService.getNotifications(user!.id);
-      const notificationsData = data.map((doc: any) => ({
+      const notificationsData = data.map((doc: NotificationDocument) => ({
         id: doc._id.toString(),
         title: doc.title || '',
         message: doc.message || '',

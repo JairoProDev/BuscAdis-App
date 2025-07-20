@@ -22,6 +22,25 @@ interface SearchResults {
     pages: number;
 }
 
+interface MongoFilter {
+    status?: string;
+    $or?: Array<{
+        title?: { $regex: string; $options: string };
+        description?: { $regex: string; $options: string };
+        location?: { $regex: string; $options: string };
+    }>;
+    categorySlug?: string;
+    price?: {
+        $gte?: number;
+        $lte?: number;
+    };
+}
+
+interface SortOptions {
+    createdAt?: number;
+    price?: number;
+}
+
 export class SearchService {
     private static async getCollection(category?: string) {
         const client = await clientPromise;
@@ -48,7 +67,7 @@ export class SearchService {
             console.log("Filters received:", params); // Log of received filters
             
             // Build filter object
-            const filter: Record<string, unknown> = { 
+            const filter: MongoFilter = { 
                 // Default to active listings
                 status: "active"
             };
@@ -65,27 +84,27 @@ export class SearchService {
             }
             
             if (params.location) {
-                if (!(filter.$or as any)) (filter.$or as any) = [];
-                (filter.$or as any).push(
+                if (!filter.$or) filter.$or = [];
+                filter.$or.push(
                     { location: { $regex: params.location, $options: 'i' } }
                 );
             }
             
             if (params.minPrice) {
-                (filter.price as any) = (filter.price as any) || {};
-                (filter.price as any).$gte = Number(params.minPrice);
+                filter.price = filter.price || {};
+                filter.price.$gte = Number(params.minPrice);
             }
             
             if (params.maxPrice) {
-                (filter.price as any) = (filter.price as any) || {};
-                (filter.price as any).$lte = Number(params.maxPrice);
+                filter.price = filter.price || {};
+                filter.price.$lte = Number(params.maxPrice);
             }
             
             // Count total matching documents
             const total = await publications.countDocuments(filter);
             
             // Set up sort options
-            let sortOptions: any = { createdAt: -1 }; // Default: newest first
+            let sortOptions: SortOptions = { createdAt: -1 }; // Default: newest first
             
             if (params.sortBy) {
                 switch (params.sortBy) {

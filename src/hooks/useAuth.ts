@@ -4,6 +4,11 @@ import { useRouter } from 'next/navigation';
 import { AuthResponse } from '../features/auth/types/auth.types';
 import type { AuthUser } from '@/types/api';
 
+interface LoginCredentials {
+  email: string;
+  password: string;
+}
+
 export function useAuth() {
     const [user, setUser] = useState<AuthUser | null>(null);
     const [loading, setLoading] = useState(true);
@@ -31,7 +36,7 @@ export function useAuth() {
         return () => clearInterval(intervalId);
     }, [checkSession]);
 
-    const login = async (credentials: { email: string; password: string } | any) => {
+    const login = async (credentials: LoginCredentials) => {
         setLoading(true);
         try {
             const result = await AuthService.login(credentials) as AuthResponse;

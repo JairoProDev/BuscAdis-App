@@ -104,9 +104,9 @@ export const useFormStore = create<FormState>()(
               [pathArr[0]]: updateDeep(obj[pathArr[0]] as Record<string, unknown>, pathArr.slice(1), val)
             };
           };
-          const updated = updateDeep(state as unknown as Record<string, unknown>, path, value);
+          const updated = updateDeep(state as Record<string, unknown>, path, value);
           return {
-            ...(updated as any),
+            ...(updated as FormData),
             lastSaved: new Date()
           };
         });
@@ -157,7 +157,7 @@ export const useFormStore = create<FormState>()(
             break;
 
           case 'category':
-            const categoryValidation = ValidationService.validateCategory(get().category as any);
+            const categoryValidation = ValidationService.validateCategory(get().category as Record<string, unknown>);
             isValid = categoryValidation.isValid;
             errors.push(...categoryValidation.errors);
             break;

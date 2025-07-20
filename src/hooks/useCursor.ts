@@ -2,10 +2,20 @@
 
 import { useEffect } from 'react'
 
+// Define GSAP types
+interface GSAP {
+  to: (target: HTMLElement, vars: {
+    x?: number;
+    y?: number;
+    duration?: number;
+    ease?: string;
+  }) => void;
+}
+
 // Conditionally import gsap if available
-let gsap: any = null;
+let gsap: GSAP | null = null;
 try {
-  gsap = require('gsap');
+  gsap = require('gsap') as GSAP;
 } catch {
   // gsap not available, hook will be disabled
 }

@@ -11,6 +11,8 @@ import {
 
 interface AdvancedFiltersProps {
   onFilterChange: (filters: Record<string, unknown>) => void;
+  onClose?: () => void;
+  isMobile?: boolean;
   className?: string;
 }
 
@@ -23,6 +25,8 @@ interface ActiveFilter {
 
 export default function AdvancedFilters({
   onFilterChange,
+  onClose,
+  isMobile = false,
   className = ''
 }: AdvancedFiltersProps) {
   const { searchState } = useSearch()
@@ -111,7 +115,10 @@ export default function AdvancedFilters({
           <>
             <div 
               className="fixed inset-0 z-40" 
-              onClick={() => setIsOpen(false)}
+              onClick={() => {
+                setIsOpen(false);
+                onClose?.();
+              }}
             />
             
             <motion.div
@@ -125,7 +132,10 @@ export default function AdvancedFilters({
                   {categoryFilters.title}
                 </h3>
                 <button
-                  onClick={() => setIsOpen(false)}
+                  onClick={() => {
+                    setIsOpen(false);
+                    onClose?.();
+                  }}
                   className="p-1 hover:bg-gray-100 dark:hover:bg-gray-700 rounded-full transition-colors"
                   aria-label="Cerrar filtros"
                   title="Cerrar filtros"
