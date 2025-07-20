@@ -269,7 +269,7 @@ export default function Testimonials() {
                       <div className="flex text-cyan-300">
                         {[...Array(5)].map((_, i) => (
                           <StarIcon 
-                            key={`star-${testimonial.id}-${i}`} 
+                            key={`star-${testimonial.id}-${Math.random().toString(36).substr(2, 9)}-${Date.now()}`} 
                             className={`w-4 h-4 ${i < testimonial.rating ? 'text-teal-400' : 'text-slate-700'}`}
                           />
                         ))}
