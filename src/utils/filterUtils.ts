@@ -1,5 +1,5 @@
 import { filtersByCategory } from '@/data/filterConfig'
-import type { FilterOption, Filter } from '@/types/filters'
+import type { FilterOption } from '@/types/filters'
 
 /**
  * Obtiene todos los filtros disponibles para una categoría específica.
@@ -8,14 +8,14 @@ import type { FilterOption, Filter } from '@/types/filters'
  * @param category Categoría para la que obtener filtros
  * @returns Array de opciones de filtro
  */
-export function getFiltersForCategory(category: string): Filter[] {
+export function getFiltersForCategory(category: string): FilterOption[] {
   // Si la categoría no existe en la configuración, devolver array vacío
   if (!category || !filtersByCategory[category]) {
     return []
   }
   
   // Extraer todas las secciones y aplanar sus filtros
-  const filters: Filter[] = []
+  const filters: FilterOption[] = []
   const categoryConfig = filtersByCategory[category]
   
   for (const section of categoryConfig.sections) {

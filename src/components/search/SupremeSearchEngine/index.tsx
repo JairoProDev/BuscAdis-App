@@ -50,7 +50,7 @@ export interface SearchFilters {
   priceRange?: [number, number];
   status?: string;
   premium?: boolean;
-  [key: string]: string | number | boolean | [number, number] | undefined;
+  [key: string]: string | number | boolean | [number, number] | string[] | undefined;
 }
 
 export interface SearchResult {
@@ -313,7 +313,7 @@ const InlineFilters = ({
                       const filterValue = activeFilters[filter.id]
                       const defaultValue = [filter.min || 0, filter.max || 100]
                       const currentRange = Array.isArray(filterValue) ? filterValue : defaultValue
-                      handleFilterChange(filter.id, [parseInt(e.target.value) || filter.min || 0, currentRange[1] || filter.max || 100])
+                      handleFilterChange(filter.id, [parseInt(e.target.value) || filter.min || 0, (currentRange[1] as number) || filter.max || 100])
                     }}
                     className="w-20 px-2 py-1 border border-gray-300 dark:border-slate-600 rounded text-sm"
                   />

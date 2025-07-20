@@ -3,9 +3,9 @@
 import { useEffect } from 'react'
 
 // Conditionally import gsap if available
-let gsap: typeof import('gsap').gsap | null = null;
+let gsap: any = null;
 try {
-  gsap = import('gsap').then(module => module.gsap);
+  gsap = require('gsap');
 } catch {
   // gsap not available, hook will be disabled
 }

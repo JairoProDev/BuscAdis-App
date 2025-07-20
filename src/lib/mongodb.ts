@@ -21,7 +21,7 @@ if (process.env.NODE_ENV === 'development') {
             countDocuments: () => Promise.resolve(0)
           })
         })
-      } as MongoClient;
+      } as unknown as MongoClient;
     });
   }
   clientPromise = (global as Record<string, unknown>)._mongoClientPromise as Promise<MongoClient>;
@@ -39,7 +39,7 @@ if (process.env.NODE_ENV === 'development') {
           countDocuments: () => Promise.resolve(0)
         })
       })
-    } as MongoClient;
+    } as unknown as MongoClient;
   });
 }
 

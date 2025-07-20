@@ -21,7 +21,7 @@ export const handleApiError = (error: unknown) => {
   }
 
   // Error de AWS
-  if (error?.name === 'ConditionalCheckFailedException') {
+  if ((error as any)?.name === 'ConditionalCheckFailedException') {
     return {
       message: 'El recurso no existe o no tienes permiso para acceder',
       code: 'CONDITIONAL_CHECK_FAILED',

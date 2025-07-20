@@ -28,12 +28,12 @@ export function usePublicationNavigation(): UsePublicationNavigationReturn {
   // Determine current view context
   const isOnSearchPage = pathname === '/buscar' || pathname?.startsWith('/buscar');
   const isOnCategoryPage = pathname?.match(/^\/(empleos|inmuebles|vehiculos|servicios|productos|eventos|negocios|comunidad)/);
-  const isDedicatedPage = isOnCategoryPage && !searchParams?.get('p');
-  const isDetailView = searchParams?.get('p') !== null;
+  const isDedicatedPage = Boolean(isOnCategoryPage && !searchParams?.get('p'));
+  const isDetailView = Boolean(searchParams?.get('p') !== null);
 
   // Determine which view should be shown
-  const shouldShowDetailContainer = isOnSearchPage || (isOnCategoryPage && isDetailView);
-  const shouldShowDedicatedPage = isDedicatedPage;
+  const shouldShowDetailContainer = Boolean(isOnSearchPage || (isOnCategoryPage && isDetailView));
+  const shouldShowDedicatedPage = Boolean(isDedicatedPage);
 
   /**
    * Open publication in detail container (sidebar/modal)
@@ -58,8 +58,7 @@ export function usePublicationNavigation(): UsePublicationNavigationReturn {
       undefined,
       publication.categorySlug,
       publication.subcategorySlug || undefined,
-      publication.subSubcategorySlug || undefined,
-      true // Include title for SEO
+      publication.subSubcategorySlug || undefined
     );
     
     // Use push for dedicated pages to create proper browser history

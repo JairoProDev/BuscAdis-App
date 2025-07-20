@@ -3,11 +3,11 @@
 import { useEffect, useRef } from 'react'
 
 // Conditionally import gsap if available
-let gsap: typeof import('gsap').gsap | null = null;
-let ScrollTrigger: typeof import('gsap/ScrollTrigger').ScrollTrigger | null = null;
+let gsap: any = null;
+let ScrollTrigger: any = null;
 try {
-  gsap = import('gsap').then(module => module.gsap);
-  ScrollTrigger = import('gsap/ScrollTrigger').then(module => module.ScrollTrigger);
+  gsap = require('gsap');
+  ScrollTrigger = require('gsap/ScrollTrigger').ScrollTrigger;
   if (gsap && ScrollTrigger) {
     gsap.registerPlugin(ScrollTrigger);
   }

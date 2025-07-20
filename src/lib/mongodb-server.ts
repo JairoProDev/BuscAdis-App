@@ -187,7 +187,7 @@ function createServerMongoClient(client: MongoClient, db: Db): MongoClientInterf
               .sort({ createdAt: -1 })
               .toArray();
             
-            allPublications.push(...publications);
+            allPublications.push(...(publications as any[]));
           } catch (err) {
             LoggingService.getInstance().error(`Error fetching from ${collectionName}`, { error: err instanceof Error ? err.message : String(err), userId });
           }
@@ -195,7 +195,7 @@ function createServerMongoClient(client: MongoClient, db: Db): MongoClientInterf
         
         // Sort by creation date
         allPublications.sort((a, b) => 
-          new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+          new Date(b.createdAt as any).getTime() - new Date(a.createdAt as any).getTime()
         );
         
         return allPublications;
@@ -283,9 +283,9 @@ function buildQuery(filters: PublicationFilters): Record<string, unknown> {
   
   // Price range filter
   if (filters.minPrice !== undefined || filters.maxPrice !== undefined) {
-    query.price = {};
-    if (filters.minPrice !== undefined) query.price.$gte = filters.minPrice;
-    if (filters.maxPrice !== undefined) query.price.$lte = filters.maxPrice;
+    (query.price as any) = {};
+    if (filters.minPrice !== undefined) (query.price as any).$gte = filters.minPrice;
+    if (filters.maxPrice !== undefined) (query.price as any).$lte = filters.maxPrice;
   }
   
   // Location filter
@@ -393,7 +393,11 @@ export const mongoDbInsert = async (
       updatedAt: new Date()
     });
     
-    return { insertedId: result.insertedId, ...document };
+    return { 
+      insertedId: result.insertedId, 
+      acknowledged: result.acknowledged,
+      insertedCount: 1
+    };
   } catch (error) {
     LoggingService.getInstance().error('Error in mongoDbInsert', { error: error instanceof Error ? error.message : String(error), collectionName });
     throw error;

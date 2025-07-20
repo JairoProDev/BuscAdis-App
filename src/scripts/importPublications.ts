@@ -33,7 +33,7 @@ export async function importPublicationsFromText(rawText: string): Promise<{
         const apiData = preparePublicationForAPI(publication);
         
         // Enviar a la API
-        await PublicationsService.createPublication(apiData);
+        await PublicationsService.createPublication(apiData as any);
         
         // Incrementar contador de éxito
         result.imported++;
@@ -82,7 +82,7 @@ async function main() {
         
         if (result.errors.length > 0) {
           console.log('Detalles de errores:');
-          result.errors.forEach((err, i) => {
+          result.errors.forEach((err: any, i) => {
             console.log(`  ${i+1}. ${err.publication}: ${err.error}`);
           });
         }

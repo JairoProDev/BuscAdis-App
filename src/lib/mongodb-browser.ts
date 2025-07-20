@@ -60,7 +60,7 @@ export const mongoFetch = async (endpoint: string, options: MongoFetchOptions = 
         }
         
         const response = await fetch(url, {
-          ...fetchOptions,
+          ...(fetchOptions as any),
           headers,
         });
         
@@ -150,14 +150,14 @@ export const getBrowserMongoClient = () => {
         const response = await mongoFetch(`/api/${collection}`, {
           method: 'GET',
           queryParams: {
-            ...query,
-            ...options,
+            ...(query as Record<string, string>),
+            ...(options as Record<string, string>),
           },
         });
         
-        if (!response.publications && response.error) {
-          Logger.error(`Error finding documents in ${collection}`, { error: response.error });
-          throw new Error(response.errorFriendly || response.error);
+        if (!(response as any).publications && (response as any).error) {
+          Logger.error(`Error finding documents in ${collection}`, { error: (response as any).error });
+          throw new Error((response as any).errorFriendly || (response as any).error);
         }
         
         return response;

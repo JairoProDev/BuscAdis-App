@@ -65,27 +65,27 @@ export class SearchService {
             }
             
             if (params.location) {
-                if (!filter.$or) filter.$or = [];
-                filter.$or.push(
+                if (!(filter.$or as any)) (filter.$or as any) = [];
+                (filter.$or as any).push(
                     { location: { $regex: params.location, $options: 'i' } }
                 );
             }
             
             if (params.minPrice) {
-                filter.price = filter.price || {};
-                filter.price.$gte = Number(params.minPrice);
+                (filter.price as any) = (filter.price as any) || {};
+                (filter.price as any).$gte = Number(params.minPrice);
             }
             
             if (params.maxPrice) {
-                filter.price = filter.price || {};
-                filter.price.$lte = Number(params.maxPrice);
+                (filter.price as any) = (filter.price as any) || {};
+                (filter.price as any).$lte = Number(params.maxPrice);
             }
             
             // Count total matching documents
             const total = await publications.countDocuments(filter);
             
             // Set up sort options
-            let sortOptions: Record<string, number> = { createdAt: -1 }; // Default: newest first
+            let sortOptions: any = { createdAt: -1 }; // Default: newest first
             
             if (params.sortBy) {
                 switch (params.sortBy) {

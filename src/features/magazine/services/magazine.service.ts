@@ -38,7 +38,7 @@ export async function fetchLatestMagazine(): Promise<MagazineMetadata | null> {
     // Transform to the expected interface
     const magazine = latestMagazines[0];
     return {
-      _id: (magazine._id as string)?.toString() || '',
+      _id: (magazine._id as unknown as string)?.toString() || '',
       pdfUrl: magazine.pdfUrl as string,
       fileId: (magazine.fileId as string)?.toString() || '',
       publicationCount: magazine.publicationCount as number,
@@ -66,7 +66,7 @@ export async function getMagazineHistory(): Promise<MagazineMetadata[]> {
     
     // Transform to the expected interface
     return magazines.map((magazine: Record<string, unknown>) => ({
-      _id: (magazine._id as string)?.toString() || '',
+      _id: (magazine._id as unknown as string)?.toString() || '',
       pdfUrl: magazine.pdfUrl as string,
       fileId: (magazine.fileId as string)?.toString() || '',
       publicationCount: magazine.publicationCount as number,
