@@ -250,7 +250,7 @@ export default function ImportPublicationsPage() {
               </thead>
               <tbody className="bg-white divide-y divide-gray-200">
                 {parsedPublications.map((pub, index) => (
-                  <tr key={index}>
+                  <tr key={`pub-${index}-${pub.title.substring(0, 10) || Date.now()}`}>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{pub.title}</td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                       {pub.category}{pub.subcategory ? ` / ${pub.subcategory}` : ''}
@@ -310,7 +310,7 @@ export default function ImportPublicationsPage() {
                 <p className="text-red-700 font-medium">Errores ({importResult.errors.length}):</p>
                 <ul className="list-disc pl-5 text-red-600 text-sm mt-1">
                   {importResult.errors.slice(0, 5).map((err, i) => (
-                    <li key={i}>{err.publication}: {err.error}</li>
+                    <li key={`err-${i}-${err.publication.substring(0, 10) || Date.now()}`}>{err.publication}: {err.error}</li>
                   ))}
                   {importResult.errors.length > 5 && (
                     <li>... y {importResult.errors.length - 5} más</li>

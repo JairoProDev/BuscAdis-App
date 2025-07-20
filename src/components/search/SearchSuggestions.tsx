@@ -333,7 +333,7 @@ export default function SearchSuggestions({
             <ul className="flex flex-wrap gap-1.5">
               {suggestions.slice(0, compact ? 8 : suggestions.length).map((item, index) => (
                 <li 
-                  key={`suggestion-${index}`}
+                  key={`suggestion-${index}-${item.text.substring(0, 10).replace(/\s+/g, '-')}`}
                   data-index={index}
                   onClick={(e) => handleSuggestionClick(e, item.text)}
                   onMouseDown={(e) => e.preventDefault()}
@@ -413,7 +413,7 @@ export default function SearchSuggestions({
                   <div className="flex flex-wrap gap-1.5">
                     {searchHistory.slice(0, compact ? 4 : searchHistory.length).map((item, index) => (
                       <div 
-                        key={`history-${index}`}
+                        key={`history-${index}-${item.text.substring(0, 10).replace(/\s+/g, '-')}`}
                         data-index={suggestions.length + trendingSearches.length + index}
                         className={`flex items-center ${compact ? 'px-2 py-0.5 text-xs' : 'px-3 py-1.5 text-sm'} rounded-full cursor-pointer ${
                           highlightedIndex === (suggestions.length + trendingSearches.length + index)
@@ -441,7 +441,7 @@ export default function SearchSuggestions({
                   <div className="flex flex-wrap gap-1.5">
                     {randomizedAiSuggestions.slice(0, compact ? 4 : 8).map((item, index) => (
                       <button
-                        key={`ai-${index}`}
+                        key={`ai-${index}-${item.text.substring(0, 10).replace(/\s+/g, '-')}`}
                         data-index={item.dataIndex}
                         onClick={(e) => handleSuggestionClick(e, item.text)}
                         onMouseDown={(e) => e.preventDefault()}
@@ -469,7 +469,7 @@ export default function SearchSuggestions({
                   <div className="flex flex-wrap gap-1.5">
                     {trendingSearches.slice(0, compact ? 4 : trendingSearches.length).map((item, index) => (
                       <button 
-                        key={`trending-${index}`}
+                        key={`trending-${index}-${item.text.substring(0, 10).replace(/\s+/g, '-')}`}
                         data-index={suggestions.length + index}
                         onClick={(e) => handleSuggestionClick(e, item.text)}
                         onMouseDown={(e) => e.preventDefault()}
@@ -502,7 +502,7 @@ export default function SearchSuggestions({
                 <div className="space-y-1">
                   {exclusiveOffers.map((offer, index) => (
                     <div 
-                      key={index}
+                      key={`offer-${index}-${offer.substring(0, 10).replace(/\s+/g, '-')}`}
                       className="flex items-center gap-2 text-sm"
                       onMouseDown={(e) => e.preventDefault()}
                     >

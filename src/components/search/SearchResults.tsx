@@ -643,10 +643,7 @@ export default function SearchResults({
       <div className="w-full">
         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
           {Array.from({ length: 6 }).map((_, index) => (
-            <div
-              key={`skeleton-${index}`}
-              className="relative rounded-xl overflow-hidden shadow-lg bg-slate-800/90 backdrop-blur-sm border border-slate-700/50 animate-pulse"
-            >
+            <div key={`skeleton-${index}-${Date.now()}`} className="bg-white dark:bg-gray-800 rounded-lg shadow-md overflow-hidden animate-pulse">
               {/* Shimmer effect for image */}
               <div className="relative aspect-[4/5] bg-slate-700">
                 <div className="absolute inset-0 bg-gradient-to-r from-transparent via-slate-600/20 to-transparent shimmer" />

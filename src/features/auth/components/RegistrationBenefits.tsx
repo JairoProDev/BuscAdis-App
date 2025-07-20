@@ -21,7 +21,7 @@ export default function RegistrationBenefits() {
       </h3>
       <div className="space-y-4">
         {benefits.map((benefit, index) => (
-          <div key={index} className="flex">
+          <div key={`benefit-${index}-${benefit.title.substring(0, 10).replace(/\s+/g, '-')}`} className="flex">
             <svg className="h-6 w-6 text-primary-500 mr-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
             </svg>

@@ -709,11 +709,11 @@ export default function RealTimeSearchEngine({
                       </span>
                     </div>
                     <div className="space-y-1">
-                      {suggestions.map((suggestion) => (
-                        <button
-                          key={suggestion.id}
+                      {suggestions.map((suggestion, index) => (
+                        <div
+                          key={`suggestion-${suggestion.id || index}-${suggestion.text.substring(0, 10)}`}
                           onClick={() => handleSuggestionSelect(suggestion)}
-                          className="w-full text-left p-2 hover:bg-gray-50 dark:hover:bg-gray-700 rounded-lg transition-colors flex items-center gap-3"
+                          className="flex items-center gap-3 p-3 hover:bg-gray-50 dark:hover:bg-gray-700 cursor-pointer transition-colors"
                         >
                           {suggestion.type === 'recent' && (
                             <svg className="h-4 w-4 text-gray-400 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -752,7 +752,7 @@ export default function RealTimeSearchEngine({
                               {suggestion.count}
                             </span>
                           )}
-                        </button>
+                        </div>
                       ))}
                     </div>
                   </div>
@@ -781,7 +781,7 @@ export default function RealTimeSearchEngine({
                     <div className="space-y-1">
                       {searchHistory.slice(0, 5).map((historyItem, index) => (
                         <button
-                          key={index}
+                          key={`history-${index}-${historyItem.substring(0, 10).replace(/\s+/g, '-')}`}
                           onClick={() => setInputValue(historyItem)}
                           className="w-full text-left p-2 hover:bg-gray-50 dark:hover:bg-gray-700 rounded-lg transition-colors flex items-center gap-3"
                         >

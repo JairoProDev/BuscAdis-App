@@ -100,12 +100,10 @@ export default function PublicationGrid({
     
     return (
       <div className={`${skeletonClasses} ${className}`}>
-        {Array.from({ length: getColumnCount() * 3 }).map((_, index) => (
-          <div 
-            key={`skeleton-${index}`} 
-            className={`bg-slate-800 border border-slate-700 rounded-xl overflow-hidden shadow animate-pulse ${
-              viewMode === 'list' ? 'flex flex-row h-32' : ''
-            }`}
+        {Array.from({ length: 8 }).map((_, index) => (
+          <div
+            key={`skeleton-${index}-${Date.now()}`}
+            className="bg-white dark:bg-gray-800 rounded-lg shadow-md overflow-hidden animate-pulse"
           >
             {viewMode === 'list' ? (
               <>

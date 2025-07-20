@@ -99,26 +99,23 @@ export default function ComoFunciona() {
                     </div>
 
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
-                        {steps.map((step) => {
-                            const Icon = step.icon;
-                            return (
-                                <motion.div
-                                    key={step.id}
-                                    initial={{ opacity: 0, y: 20 }}
-                                    animate={{ opacity: 1, y: 0 }}
-                                    transition={{ duration: 0.5, delay: step.id * 0.1 }}
-                                    className="bg-slate-900 rounded-lg p-6 shadow-md border border-teal-500/20"
-                                >
-                                    <div className="bg-teal-900/30 rounded-full h-12 w-12 flex items-center justify-center mb-4">
-                                        <Icon className="h-6 w-6 text-teal-300" />
-                                    </div>
-                                    <h3 className="text-xl font-semibold text-white mb-2">
-                                        {step.id}. {step.title}
-                                    </h3>
-                                    <p className="text-cyan-100/80">{step.description}</p>
-                                </motion.div>
-                            );
-                        })}
+                        {steps.map((step, index) => (
+                            <motion.div
+                                key={`step-${index}-${step.title.substring(0, 10).replace(/\s+/g, '-')}`}
+                                initial={{ opacity: 0, y: 20 }}
+                                animate={{ opacity: 1, y: 0 }}
+                                transition={{ duration: 0.5, delay: step.id * 0.1 }}
+                                className="bg-slate-900 rounded-lg p-6 shadow-md border border-teal-500/20"
+                            >
+                                <div className="bg-teal-900/30 rounded-full h-12 w-12 flex items-center justify-center mb-4">
+                                    <step.icon className="h-6 w-6 text-teal-300" />
+                                </div>
+                                <h3 className="text-xl font-semibold text-white mb-2">
+                                    {step.id}. {step.title}
+                                </h3>
+                                <p className="text-cyan-100/80">{step.description}</p>
+                            </motion.div>
+                        ))}
                     </div>
 
                     <div className="mt-16 text-center">

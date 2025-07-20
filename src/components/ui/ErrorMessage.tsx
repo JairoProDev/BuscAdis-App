@@ -16,7 +16,7 @@ export default function ErrorMessage({ message, onDismiss }: ErrorMessageProps) 
         </div>
         <div className="ml-3">
           {messages.map((msg, index) => (
-            <p key={`error-${index}-${msg.substring(0, 10)}`} className="text-sm text-red-700">
+            <p key={`error-${index}-${msg.substring(0, 20).replace(/\s+/g, '-')}`} className="text-sm text-red-700">
               {msg}
             </p>
           ))}

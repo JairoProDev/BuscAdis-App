@@ -162,7 +162,7 @@ export const ImageUploader: React.FC<ImageUploaderProps> = ({
         >
           <ul className="list-disc list-inside text-sm text-red-600">
             {errors.map((error, index) => (
-              <li key={index}>{error}</li>
+              <li key={`error-${index}-${error.substring(0, 15).replace(/\s+/g, '-')}`}>{error}</li>
             ))}
           </ul>
         </motion.div>

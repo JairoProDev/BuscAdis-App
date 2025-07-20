@@ -64,7 +64,7 @@ export default function HowItWorks() {
                 <div className="absolute inset-0">
                     {Array.from({ length: 20 }).map((_, i) => (
                         <motion.div
-                            key={i}
+                            key={`data-point-${i}-${Date.now()}`}
                             className="absolute w-1 h-1 bg-teal-400/40 rounded-full"
                             initial={{
                                 x: `${Math.random() * 100}%`,
@@ -97,7 +97,7 @@ export default function HowItWorks() {
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
                     {steps.map((step, index) => (
                         <motion.div
-                            key={index}
+                            key={`step-${index}-${step.title.substring(0, 10).replace(/\s+/g, '-')}`}
                             initial={{ opacity: 0, y: 30 }}
                             whileInView={{ opacity: 1, y: 0 }}
                             transition={{ duration: 0.5, delay: index * 0.1 }}
