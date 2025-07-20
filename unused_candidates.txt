@@ -39,7 +39,6 @@ src/lib/models/Publication.js
 src/lib/models/Counter.js
 src/lib/utils.ts
 src/lib/mongodb.ts
-src/lib/aws-config.ts
 src/lib/dbConnect.js
 src/lib/homeMockData.js
 src/lib/constants.js

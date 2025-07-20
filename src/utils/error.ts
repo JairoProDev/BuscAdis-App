@@ -9,11 +9,6 @@ export class AppError extends Error {
   }
 }
 
-interface AWSError {
-  name: string;
-  message: string;
-}
-
 export const handleApiError = (error: unknown) => {
   console.error('API Error:', error);
 
@@ -25,14 +20,7 @@ export const handleApiError = (error: unknown) => {
     };
   }
 
-  // Error de AWS
-  if ((error as AWSError)?.name === 'ConditionalCheckFailedException') {
-    return {
-      message: 'El recurso no existe o no tienes permiso para acceder',
-      code: 'CONDITIONAL_CHECK_FAILED',
-      status: 404
-    };
-  }
+
 
   // Error genérico
   return {

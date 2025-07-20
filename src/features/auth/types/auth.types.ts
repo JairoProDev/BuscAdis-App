@@ -25,6 +25,7 @@ export interface LoginCredentials {
   phone?: string;
   password?: string;
   code?: string;
+  dni?: string;
 }
 
 export interface AuthResponse {

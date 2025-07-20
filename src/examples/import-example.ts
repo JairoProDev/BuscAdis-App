@@ -4,8 +4,9 @@
  */
 
 import { importPublications, BulkPublicationImporter } from '@/scripts/bulk-import-publications'
-
-const fs = require('fs')
+import { Publication } from '@/types/publication'
+import { PublicationImporterConfig } from '@/types/importer'
+import fs from 'fs'
 
 // =============================================================================
 // EJEMPLO 1: IMPORTACIÓN BÁSICA DESDE CSV
@@ -58,7 +59,7 @@ async function importFromText() {
   console.log('🚀 Iniciando importación desde texto plano...')
   
   // Configuración personalizada para texto plano
-  const config = {
+  const config: PublicationImporterConfig = {
     sourceFile: './data/anuncios_texto.txt',
     sourceFormat: 'txt' as const,
     
@@ -169,7 +170,7 @@ async function importFromText() {
 async function importWithCustomValidation() {
   console.log('🚀 Iniciando importación con validaciones personalizadas...')
   
-  const config = {
+  const config: PublicationImporterConfig = {
     sourceFile: './data/anuncios_completos.json',
     sourceFormat: 'json' as const,
     
@@ -260,7 +261,7 @@ async function importWithCustomValidation() {
   if (result.results) {
     const categories = result.results
       .filter(r => r.success && r.publication)
-      .reduce((acc: Record<string, number>, r: any) => {
+      .reduce((acc: Record<string, number>, r: { publication: Publication }) => {
         const cat = (r.publication as { category?: { name?: string } })?.category?.name || 'Sin categoría'
         acc[cat] = (acc[cat] || 0) + 1
         return acc
@@ -282,7 +283,7 @@ async function importWithCustomValidation() {
 export function generateSampleData() {
   const categories = ['inmuebles', 'vehiculos', 'empleos', 'productos', 'servicios']
   const cities = ['Cusco', 'Lima', 'Arequipa', 'Trujillo', 'Chiclayo']
-  const sampleData = []
+  const sampleData: Publication[] = []
   
   for (let i = 0; i < 1000; i++) {
     const category = categories[Math.floor(Math.random() * categories.length)]
@@ -327,7 +328,7 @@ async function importWithMonitoring() {
   const tempFile = './temp/sample_data.json'
   fs.writeFileSync(tempFile, JSON.stringify(sampleData, null, 2))
   
-  const config = {
+  const config: PublicationImporterConfig = {
     sourceFile: tempFile,
     sourceFormat: 'json' as const,
     

@@ -1,6 +1,6 @@
 /**
  * Servicio para el manejo de imágenes
- * Actualmente deshabilitado - requiere configuración de Cloudinary o AWS S3
+ * Actualmente deshabilitado - requiere configuración de Cloudinary
  */
 
 import { v4 as uuidv4 } from 'uuid';
@@ -42,15 +42,6 @@ interface OptimizationOptions {
   format: string;
 }
 
-// Tipos para AWS SDK (deshabilitado por ahora)
-interface AWSClient {
-  send: (command: unknown) => Promise<unknown>;
-}
-
-interface AWSCommand {
-  // Placeholder para comandos AWS - interfaz mínima
-  readonly [key: string]: unknown;
-}
 
 export class ImageService {
   // Servicio deshabilitado - requiere configuración
@@ -69,7 +60,7 @@ export class ImageService {
 
   static async getUploadUrl(_contentType: string) {
     if (this.SERVICE_DISABLED) {
-      throw new Error('Servicio de imágenes deshabilitado. Configure Cloudinary o AWS S3.');
+      throw new Error('Servicio de imágenes deshabilitado. Configure Cloudinary.');
     }
 
     try {
@@ -80,14 +71,12 @@ export class ImageService {
 
       const key = `${currentUser.id}/${uuidv4()}`;
       
-      // Placeholder para AWS S3 (deshabilitado)
-      // const _command: AWSCommand = {} as AWSCommand;
       const signedUrl = null; // Placeholder
       
       // Construir la URL de CloudFront para la imagen
       const imageUrl = this.CLOUDFRONT_DOMAIN 
         ? `https://${this.CLOUDFRONT_DOMAIN}/${key}`
-        : `https://${this.BUCKET_NAME}.s3.amazonaws.com/${key}`;
+        : undefined;
       
       return {
         uploadUrl: signedUrl,
@@ -102,7 +91,7 @@ export class ImageService {
 
   static async uploadImage(file: File) {
     if (this.SERVICE_DISABLED) {
-      throw new Error('Servicio de imágenes deshabilitado. Configure Cloudinary o AWS S3.');
+      throw new Error('Servicio de imágenes deshabilitado. Configure Cloudinary.');
     }
 
     try {
@@ -144,7 +133,7 @@ export class ImageService {
 
   static async deleteImage(key: string) {
     if (this.SERVICE_DISABLED) {
-      throw new Error('Servicio de imágenes deshabilitado. Configure Cloudinary o AWS S3.');
+      throw new Error('Servicio de imágenes deshabilitado. Configure Cloudinary.');
     }
 
     try {
@@ -157,9 +146,7 @@ export class ImageService {
       if (!key.startsWith(`${currentUser.id}/`)) {
         throw new Error('No tienes permiso para eliminar esta imagen');
       }
-      
-      // const _command: AWSCommand = {} as AWSCommand;
-      // const _client: AWSClient = {} as AWSClient;
+
       
       // await client.send(command); // Deshabilitado
       return { success: true };

@@ -12,7 +12,6 @@ import {
 interface AdvancedFiltersProps {
   onFilterChange: (filters: Record<string, unknown>) => void;
   onClose?: () => void;
-  isMobile?: boolean;
   className?: string;
 }
 
@@ -26,7 +25,6 @@ interface ActiveFilter {
 export default function AdvancedFilters({
   onFilterChange,
   onClose,
-  isMobile = false,
   className = ''
 }: AdvancedFiltersProps) {
   const { searchState } = useSearch()

@@ -39,6 +39,7 @@ interface MongoFilter {
 interface SortOptions {
     createdAt?: number;
     price?: number;
+    [key: string]: number | undefined;
 }
 
 export class SearchService {
@@ -127,7 +128,7 @@ export class SearchService {
             const skip = (page - 1) * limit;
             const items = await publications
                 .find(filter)
-                .sort(sortOptions)
+                .sort(sortOptions as Record<string, 1 | -1>)
                 .skip(skip)
                 .limit(limit)
                 .toArray();

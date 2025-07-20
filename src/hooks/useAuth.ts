@@ -1,13 +1,8 @@
 import { useState, useEffect, useCallback } from 'react';
 import { AuthService } from '../services/auth.service';
 import { useRouter } from 'next/navigation';
-import { AuthResponse } from '../features/auth/types/auth.types';
+import { AuthResponse, LoginCredentials } from '../features/auth/types/auth.types';
 import type { AuthUser } from '@/types/api';
-
-interface LoginCredentials {
-  email: string;
-  password: string;
-}
 
 export function useAuth() {
     const [user, setUser] = useState<AuthUser | null>(null);
@@ -39,7 +34,20 @@ export function useAuth() {
     const login = async (credentials: LoginCredentials) => {
         setLoading(true);
         try {
-            const result = await AuthService.login(credentials) as AuthResponse;
+            // Validate that required fields are present
+            if (!credentials.phone || !credentials.dni) {
+                return { 
+                    success: false, 
+                    message: 'Teléfono y DNI son requeridos' 
+                };
+            }
+
+            const authCredentials = {
+                phone: credentials.phone,
+                dni: credentials.dni
+            };
+
+            const result = await AuthService.login(authCredentials) as AuthResponse;
             if (result.error) {
                 return { success: false, message: result.error };
             }

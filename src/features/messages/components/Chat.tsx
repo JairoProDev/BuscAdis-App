@@ -3,7 +3,6 @@
 import { useState, useEffect, useRef } from 'react';
 import { useAuth } from '@/features/auth/hooks/useAuth';
 import { MessagesService } from '../services/messages.service';
-// AWS SDK removed due to missing dependency
 
 interface User {
   id: string;

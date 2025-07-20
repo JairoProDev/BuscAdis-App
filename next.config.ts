@@ -28,7 +28,7 @@ const nextConfig: NextConfig = {
     "@mongodb-js/zstd",
     "@napi-rs/snappy-win32-x64-msvc",
     "snappy",
-    "aws4",
+
     "gcp-metadata",
     "socks",
     "bson",
@@ -45,7 +45,7 @@ const nextConfig: NextConfig = {
       kerberos: "next/dist/compiled/noop",
       "@mongodb-js/zstd": "next/dist/compiled/noop",
       snappy: "next/dist/compiled/noop",
-      aws4: "next/dist/compiled/noop",
+
       "gcp-metadata": "next/dist/compiled/noop",
       "socks": "next/dist/compiled/noop",
     },

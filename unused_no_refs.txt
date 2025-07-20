@@ -3,7 +3,6 @@ src/scripts/delete-categories-collection.js
 src/data/global-marketplace-structure.ts
 src/data/mockPosts.ts
 src/data/mockCategories.ts
-src/lib/aws-config.ts
 src/types/google-maps.d.ts
 src/types/browser-apis.d.ts
 src/examples/historical-data-usage.ts

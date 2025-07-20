@@ -100,12 +100,14 @@ export interface VoiceRecognitionError {
   message: string;
 }
 
-export interface VoiceRecognition {
-  onresult: (event: VoiceRecognitionEvent) => void;
-  onerror: (event: VoiceRecognitionError) => void;
+interface VoiceRecognition {
+  continuous: boolean;
+  interimResults: boolean;
+  lang: string;
+  onend: (() => void) | null;
   start: () => void;
   stop: () => void;
-  abort: () => void;
+  [key: string]: unknown;
 }
 
 interface SupremeSearchEngineProps {
@@ -187,7 +189,7 @@ const InlineFilters = ({
     const newFilters = { ...activeFilters }
     
     if (value === '' || value === null || value === undefined || 
-        (Array.isArray(value) && (value as unknown[]).length === 0)) {
+        (Array.isArray(value) && (value as string[]).length === 0)) {
       delete newFilters[filterId]
     } else {
       newFilters[filterId] = value
@@ -396,11 +398,6 @@ const InlineFilters = ({
   )
 }
 
-// Helper function to convert SearchFilters to Record<string, unknown>
-const convertFiltersForAdvancedFilters = (filters: SearchFilters): Record<string, unknown> => {
-  return filters as Record<string, unknown>;
-};
-
 export default function SupremeSearchEngine({
   onSearch,
   onFilterChange,
@@ -481,13 +478,13 @@ export default function SupremeSearchEngine({
         
         // Configurar propiedades si existen
         if ('continuous' in recognition.current) {
-          (recognition.current as any).continuous = false
+          (recognition.current as VoiceRecognition).continuous = false
         }
         if ('interimResults' in recognition.current) {
-          (recognition.current as any).interimResults = true
+          (recognition.current as VoiceRecognition).interimResults = true
         }
         if ('lang' in recognition.current) {
-          (recognition.current as any).lang = 'es-ES'
+          (recognition.current as VoiceRecognition).lang = 'es-ES'
         }
 
         recognition.current.onresult = (event: VoiceRecognitionEvent) => {
@@ -498,7 +495,7 @@ export default function SupremeSearchEngine({
         }
 
         if ('onend' in recognition.current) {
-          (recognition.current as any).onend = () => {
+          (recognition.current as VoiceRecognition).onend = () => {
             setIsRecording(false)
           }
         }
@@ -570,10 +567,10 @@ export default function SupremeSearchEngine({
     }
 
     if (isRecording) {
-      recognition.current.stop()
+      (recognition.current as VoiceRecognition).stop()
     } else {
       setIsRecording(true)
-      recognition.current.start()
+      (recognition.current as VoiceRecognition).start()
     }
   }
 

@@ -2,7 +2,7 @@
  * Script para importar anuncios desde texto plano
  */
 import { parsePublicationsFromText, preparePublicationForAPI } from '@/utils/publicationParser';
-import { PublicationsService } from '@/services/publications.service';
+import { PublicationsService, CreatePublicationData } from '@/services/publications.service';
 
 interface ImportError {
   publication: string;
@@ -13,6 +13,37 @@ interface ImportResult {
   success: boolean;
   imported: number;
   errors: ImportError[];
+}
+
+/**
+ * Transforma PublicationApiPayload a CreatePublicationData
+ */
+function transformToCreatePublicationData(apiData: any): CreatePublicationData {
+  return {
+    title: apiData.title,
+    description: apiData.description,
+    categorySlug: apiData.category,
+    subcategorySlug: apiData.subcategory,
+    transactionType: 'venta', // Default value
+    value: apiData.price || 0,
+    currency: apiData.currency || 'PEN',
+    valueType: 'fijo', // Default value
+    location: {
+      country: 'Peru',
+      province: apiData.location?.province || 'Cusco',
+      city: apiData.location?.city || 'Cusco',
+      district: apiData.location?.district,
+      address: apiData.location?.address
+    },
+    contact: {
+      phones: apiData.contactPhone ? [apiData.contactPhone] : [],
+      email: apiData.contactEmail,
+      name: apiData.contactName
+    },
+    images: Array.isArray(apiData.images) ? apiData.images.map((img: any) => typeof img === 'string' ? img : img.url) : [],
+    status: 'activo',
+    premium: false
+  };
 }
 
 /**
@@ -39,8 +70,11 @@ export async function importPublicationsFromText(rawText: string): Promise<Impor
         // Preparar datos para la API
         const apiData = preparePublicationForAPI(publication);
         
+        // Transformar a CreatePublicationData
+        const createData = transformToCreatePublicationData(apiData);
+        
         // Enviar a la API
-        await PublicationsService.createPublication(apiData);
+        await PublicationsService.createPublication(createData);
         
         // Incrementar contador de éxito
         result.imported++;

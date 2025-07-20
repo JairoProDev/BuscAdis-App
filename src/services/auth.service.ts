@@ -10,7 +10,7 @@ interface User {
     updatedAt: string;
 }
 
-interface LoginCredentials {
+interface AuthServiceCredentials {
     phone: string;
     dni: string;
 }
@@ -28,7 +28,7 @@ export class AuthService {
         return db.collection('users');
     }
 
-    static async login(credentials: LoginCredentials): Promise<AuthResponse> {
+    static async login(credentials: AuthServiceCredentials): Promise<AuthResponse> {
         try {
             const users = await this.getCollection();
             
@@ -57,7 +57,7 @@ export class AuthService {
         }
     }
 
-    static async register(user: LoginCredentials): Promise<AuthResponse> {
+    static async register(user: AuthServiceCredentials): Promise<AuthResponse> {
         try {
             const users = await this.getCollection();
             

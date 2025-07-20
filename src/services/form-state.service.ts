@@ -104,7 +104,7 @@ export const useFormStore = create<FormState>()(
               [pathArr[0]]: updateDeep(obj[pathArr[0]] as Record<string, unknown>, pathArr.slice(1), val)
             };
           };
-          const updated = updateDeep(state as Record<string, unknown>, path, value);
+          const updated = updateDeep(state as unknown as Record<string, unknown>, path, value);
           return {
             ...(updated as FormData),
             lastSaved: new Date()

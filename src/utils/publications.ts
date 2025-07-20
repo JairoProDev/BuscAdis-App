@@ -88,7 +88,17 @@ export function normalizePublicationData(publication: unknown): PublicationData 
     size: Number((publication as Record<string, unknown>)?.size || 0),
     location: normalizeLocationData(publication),
     images: Array.isArray((publication as Record<string, unknown>)?.images) ? (publication as Record<string, unknown>)?.images as string[] : [],
-    whatsapp: String((publication as Record<string, unknown>)?.whatsapp || (publication as Record<string, unknown>)?.contact?.phones?.[0] || ''),
+    whatsapp: String((publication as Record<string, unknown>)?.whatsapp || 
+      (() => {
+        const contact = (publication as Record<string, unknown>)?.contact;
+        if (contact && typeof contact === 'object' && contact !== null && 'phones' in contact) {
+          const phones = (contact as Record<string, unknown>).phones;
+          if (Array.isArray(phones) && phones.length > 0) {
+            return phones[0];
+          }
+        }
+        return '';
+      })()),
     createdAt: String((publication as Record<string, unknown>)?.createdAt || new Date().toISOString()),
     views: Number((publication as Record<string, unknown>)?.views || 0),
     featured: Boolean((publication as Record<string, unknown>)?.featured || false),
@@ -112,11 +122,11 @@ function normalizeLocationData(location: unknown): PublicationData['location'] {
   
   if (typeof location === 'object' && location !== null) {
     return {
-      reference: (location as Record<string, unknown>)?.reference,
-      district: (location as Record<string, unknown>)?.district || '',
-      province: (location as Record<string, unknown>)?.province || '',
-      city: (location as Record<string, unknown>)?.city || 'Cusco',
-      country: (location as Record<string, unknown>)?.country || 'Perú'
+      reference: String((location as Record<string, unknown>)?.reference || ''),
+      district: String((location as Record<string, unknown>)?.district || ''),
+      province: String((location as Record<string, unknown>)?.province || ''),
+      city: String((location as Record<string, unknown>)?.city || 'Cusco'),
+      country: String((location as Record<string, unknown>)?.country || 'Perú')
     };
   }
   
@@ -132,14 +142,19 @@ function normalizeLocationData(location: unknown): PublicationData['location'] {
  * Checks if a publication has valid images
  */
 export function hasValidImages(publication: PublicationData | unknown): boolean {
-  if (!publication?.images || !Array.isArray(publication.images)) {
+  if (!publication || typeof publication !== 'object' || publication === null) {
     return false;
   }
   
-  return publication.images.length > 0 && 
-    publication.images[0] !== '/images/placeholder-image.jpg' && 
-    publication.images[0] !== '/images/defaults/default.jpg' &&
-    publication.images[0].trim() !== '';
+  const pub = publication as Record<string, unknown>;
+  if (!pub.images || !Array.isArray(pub.images)) {
+    return false;
+  }
+  
+  return pub.images.length > 0 && 
+    pub.images[0] !== '/images/placeholder-image.jpg' && 
+    pub.images[0] !== '/images/defaults/default.jpg' &&
+    String(pub.images[0]).trim() !== '';
 }
 
 /**

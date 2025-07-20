@@ -187,7 +187,22 @@ function createServerMongoClient(client: MongoClient, db: Db): MongoClientInterf
               .sort({ createdAt: -1 })
               .toArray();
             
-            allPublications.push(...(publications as MongoDbDocument[]));
+            // Type guard to ensure documents have required properties and convert MongoDB _id to string
+            const validPublications = publications
+              .filter((doc): doc is Document & { _id: ObjectId; title: string; description: string; categorySlug: string } => 
+                doc && typeof doc === 'object' && 
+                '_id' in doc && doc._id instanceof ObjectId &&
+                'title' in doc && typeof doc.title === 'string' &&
+                'description' in doc && typeof doc.description === 'string' &&
+                'categorySlug' in doc && typeof doc.categorySlug === 'string'
+              )
+              .map(doc => ({
+                ...doc,
+                _id: doc._id.toString(),
+                id: doc._id.toString()
+              } as PublicationDocument));
+            
+            allPublications.push(...validPublications);
           } catch (err) {
             LoggingService.getInstance().error(`Error fetching from ${collectionName}`, { error: err instanceof Error ? err.message : String(err), userId });
           }
@@ -282,10 +297,10 @@ function buildQuery(filters: PublicationFilters): Record<string, unknown> {
   const query: Record<string, unknown> = {};
   
   // Price range filter
-  if (filters.minPrice !== undefined || filters.maxPrice !== undefined) {
+  if (filters.priceMin !== undefined || filters.priceMax !== undefined) {
     query.price = {};
-    if (filters.minPrice !== undefined) (query.price as Record<string, number>).$gte = filters.minPrice;
-    if (filters.maxPrice !== undefined) (query.price as Record<string, number>).$lte = filters.maxPrice;
+    if (filters.priceMin !== undefined) (query.price as Record<string, number>).$gte = filters.priceMin;
+    if (filters.priceMax !== undefined) (query.price as Record<string, number>).$lte = filters.priceMax;
   }
   
   // Location filter
