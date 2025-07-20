@@ -81,7 +81,7 @@ export default function ImageUpload({
       {images.length > 0 && (
         <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
           {images.map((image, index) => (
-            <div key={`image-${index}-${Date.now()}`} className="relative aspect-square">
+            <div key={`image-${index}-${Math.random().toString(36).substr(2, 9)}`} className="relative aspect-square">
               <Image
                 src={image}
                 alt={`Imagen ${index + 1}`}

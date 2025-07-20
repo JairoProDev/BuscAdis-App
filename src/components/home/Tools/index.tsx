@@ -143,7 +143,7 @@ export default function Tools() {
                 return (
                     <div className="h-40 flex items-end justify-between gap-2 p-2">
                         {tool.demo.data.map((value: number, index: number) => (
-                            <div key={index} className="relative flex flex-col items-center">
+                            <div key={`chart-bar-${tool.id}-${index}-${value}`} className="relative flex flex-col items-center">
                                 <motion.div
                                     className={`w-10 sm:w-12 rounded-t-md bg-gradient-to-b ${tool.demo.type === 'chart' ? tool.demo.colors[index % tool.demo.colors.length] : 'from-teal-500 to-cyan-400'}`}
                                     initial={{ height: 0 }}
@@ -178,7 +178,7 @@ export default function Tools() {
                     <div className="space-y-3 p-1">
                         {tool.demo.messages.map((message: string, index: number) => (
                             <motion.div
-                                key={index}
+                                key={`chat-message-${tool.id}-${index}-${message.substring(0, 10).replace(/\s+/g, '-')}`}
                                 className="bg-gradient-to-r from-slate-800/95 to-slate-900/95 p-3 rounded-lg border border-teal-500/30 backdrop-blur-sm text-cyan-100 shadow-lg relative overflow-hidden"
                                 initial={{ opacity: 0, x: -20, y: 10 }}
                                 animate={{
@@ -215,7 +215,7 @@ export default function Tools() {
                     <div className="grid grid-cols-2 gap-3">
                         {tool.demo.events.map((event: string, index: number) => (
                             <motion.div
-                                key={index}
+                                key={`calendar-event-${tool.id}-${index}-${event.substring(0, 15).replace(/\s+/g, '-')}`}
                                 className="bg-gradient-to-r from-slate-800/90 to-slate-900/90 text-cyan-100 p-3 rounded-lg border border-teal-500/30 relative overflow-hidden group"
                                 initial={{ scale: 0 }}
                                 animate={{ scale: isPlaying ? 1 : 0 }}
@@ -293,7 +293,7 @@ export default function Tools() {
                 <div className="absolute inset-0">
                     {Array.from({ length: 12 }).map((_, i) => (
                         <motion.div
-                            key={i}
+                            key={`particle-${i}-${Math.random().toString(36).substr(2, 9)}`}
                             className="absolute w-1 h-1 bg-teal-400/40 rounded-full"
                             initial={{
                                 x: `${Math.random() * 100}%`,

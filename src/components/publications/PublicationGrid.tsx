@@ -102,7 +102,7 @@ export default function PublicationGrid({
       <div className={`${skeletonClasses} ${className}`}>
         {Array.from({ length: 8 }).map((_, index) => (
           <div
-            key={`skeleton-${index}-${Date.now()}`}
+            key={`skeleton-${index}-${Math.random().toString(36).substr(2, 9)}`}
             className="bg-white dark:bg-gray-800 rounded-lg shadow-md overflow-hidden animate-pulse"
           >
             {viewMode === 'list' ? (

@@ -23,7 +23,7 @@ const Slider = React.forwardRef<
     </SliderPrimitive.Track>
     {props.defaultValue?.map((_, i) => (
       <SliderPrimitive.Thumb
-        key={`thumb-${i}-${Date.now()}`}
+        key={`thumb-${i}-${Math.random().toString(36).substr(2, 9)}`}
         className="block h-4 w-4 rounded-full border border-slate-200 bg-white ring-offset-white transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-950 focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 dark:border-slate-50 dark:bg-slate-950 dark:ring-offset-slate-950 dark:focus-visible:ring-slate-300"
       />
     ))}
