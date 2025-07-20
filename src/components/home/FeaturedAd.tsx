@@ -156,7 +156,7 @@ const FeaturedAd = () => {
                 <div className="absolute -bottom-8 left-0 right-0 flex justify-center space-x-2">
                     {featuredAds.map((_, idx) => (
                         <button
-                            key={`indicator-${idx}-${currentIndex}`}
+                            key={`indicator-${idx}`}
                             onClick={() => setCurrentIndex(idx)}
                             className={`w-8 h-1.5 rounded-full transition-all duration-300 ${
                                 idx === currentIndex

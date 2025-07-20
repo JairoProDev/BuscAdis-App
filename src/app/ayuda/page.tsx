@@ -23,8 +23,8 @@ export default function AyudaPage() {
                 </p>
 
                 <div className="max-w-3xl mx-auto space-y-8">
-                    {faqItems.map((item, index) => (
-                        <div key={`help-${index}-${item.question.substring(0, 10).replace(/\s+/g, '-')}`} className="bg-slate-800 rounded-lg p-6 shadow-md border border-teal-500/20">
+                    {faqItems.map((item) => (
+                        <div key={`help-${item.question.substring(0, 20).replace(/\s+/g, '-').toLowerCase()}`} className="bg-slate-800 rounded-lg p-6 shadow-md border border-teal-500/20">
                             <div className="flex items-center space-x-4">
                                 <QuestionMarkCircleIcon className="h-6 w-6 text-teal-300" />
                                 <h3 className="text-xl font-semibold">{item.question}</h3>

@@ -210,13 +210,13 @@ export default function Testimonials() {
               animate={{ x: `-${activeIndex * (100 / itemsPerView.desktop)}%` }}
               transition={{ type: "spring", stiffness: 300, damping: 30 }}
             >
-              {testimonials.map((testimonial, index) => (
+              {testimonials.map((testimonial) => (
                 <motion.div
-                  key={`testimonial-${index}-${testimonial.name.substring(0, 10).replace(/\s+/g, '-')}`}
+                  key={`testimonial-${testimonial.id || testimonial.name.substring(0, 20).replace(/\s+/g, '-').toLowerCase()}`}
                   className="w-full md:w-1/2 lg:w-1/3 flex-shrink-0"
                   initial={{ opacity: 0, scale: 0.9 }}
                   animate={{ opacity: 1, scale: 1 }}
-                  transition={{ duration: 0.5, delay: index * 0.1 }}
+                  transition={{ duration: 0.5 }}
                   whileHover={{ y: -8, transition: { duration: 0.2 } }}
                 >
                   <div className="relative group">
@@ -285,7 +285,7 @@ export default function Testimonials() {
           <div className="flex justify-center mt-10 space-x-3">
             {[...Array(maxIndex + 1)].map((_, index) => (
               <button
-                key={`indicator-${index}-${activeIndex}`}
+                key={`indicator-${index}`}
                 onClick={() => setActiveIndex(index)}
                 className="group"
                 aria-label={`Ver testimonio ${index + 1}`}

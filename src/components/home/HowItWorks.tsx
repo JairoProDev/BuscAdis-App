@@ -95,9 +95,9 @@ export default function HowItWorks() {
                 </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
-                    {steps.map((step, index) => (
+                    {steps.map((step) => (
                         <motion.div
-                            key={`step-${index}-${step.title.substring(0, 10).replace(/\s+/g, '-')}`}
+                            key={`step-${step.title.substring(0, 20).replace(/\s+/g, '-').toLowerCase()}`}
                             initial={{ opacity: 0, y: 30 }}
                             whileInView={{ opacity: 1, y: 0 }}
                             transition={{ duration: 0.5, delay: index * 0.1 }}

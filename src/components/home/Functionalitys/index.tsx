@@ -182,9 +182,9 @@ export default function Functionalitys() {
                 </motion.div>
 
                 <div className="grid lg:grid-cols-3 gap-8">
-                    {functionalitys.map((functionality, idx) => (
+                    {functionalitys.map((functionality) => (
                         <motion.div
-                            key={`functionality-${idx}-${functionality.title.substring(0, 10).replace(/\s+/g, '-')}`}
+                            key={`functionality-${functionality.id}`}
                             initial={{ opacity: 0, scale: 0.9, y: 20 }}
                             animate={{ opacity: 1, scale: 1, y: 0 }}
                             transition={{ duration: 0.6, delay: idx * 0.2 }}
@@ -241,9 +241,9 @@ export default function Functionalitys() {
                                 </p>
 
                                 <div className="grid grid-cols-2 gap-4 mb-8">
-                                    {functionality.stats.map((stat, index) => (
+                                    {functionality.stats.map((stat) => (
                                         <motion.div
-                                            key={`stat-${index}-${functionality.id}`}
+                                            key={`stat-${functionality.id}-${stat.label.replace(/\s+/g, '-').toLowerCase()}`}
                                             className={`text-center p-3 ${
                                                 activeId === functionality.id
                                                     ? 'bg-gradient-to-br from-slate-800 to-slate-900/90'
@@ -268,9 +268,9 @@ export default function Functionalitys() {
                                 </div>
 
                                 <ul className={`space-y-4`}>
-                                    {functionality.features.map((feature, index) => (
+                                    {functionality.features.map((feature) => (
                                         <motion.li
-                                            key={`feature-${index}-${functionality.id}-${feature.substring(0, 10).replace(/\s+/g, '-')}`}
+                                            key={`feature-${functionality.id}-${feature.substring(0, 20).replace(/\s+/g, '-').toLowerCase()}`}
                                             initial={false}
                                             animate={{
                                                 opacity: activeId === functionality.id ? 1 : 0.7,

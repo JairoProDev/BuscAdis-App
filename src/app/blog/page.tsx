@@ -76,7 +76,7 @@ export default function BlogPage() {
                 <div className="absolute inset-0">
                     {Array.from({ length: 15 }).map((_, i) => (
                         <motion.div 
-                            key={i} 
+                            key={`particle-${i}-${Date.now()}`} 
                             className="absolute w-1 h-1 bg-teal-400/40 rounded-full" 
                             initial={{ 
                                 x: `${Math.random() * 100}%`, 
@@ -218,12 +218,11 @@ export default function BlogPage() {
                         </Link>
                     </div>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                        {featuredPosts.map((post, index) => (
+                        {featuredPosts.map((post) => (
                             <PostCard
-                                key={`featured-${index}-${post.slug}`}
+                                key={`featured-${post.slug}`}
                                 post={post}
                                 featured={true}
-                                index={index}
                             />
                         ))}
                     </div>
@@ -259,11 +258,10 @@ export default function BlogPage() {
                     
                     {filteredPosts.length > 0 ? (
                         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-                            {filteredPosts.map((post, index) => (
+                            {filteredPosts.map((post) => (
                                 <PostCard
-                                    key={`post-${index}-${post.slug}`}
+                                    key={`post-${post.slug}`}
                                     post={post}
-                                    index={index}
                                 />
                             ))}
                         </div>

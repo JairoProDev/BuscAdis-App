@@ -249,8 +249,8 @@ export default function ImportPublicationsPage() {
                 </tr>
               </thead>
               <tbody className="bg-white divide-y divide-gray-200">
-                {parsedPublications.map((pub, index) => (
-                  <tr key={`pub-${index}-${pub.title.substring(0, 10).replace(/\s+/g, '-')}`}>
+                {parsedPublications.map((pub) => (
+                  <tr key={`pub-${pub.title.substring(0, 20).replace(/\s+/g, '-').toLowerCase()}`}>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{pub.title}</td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                       {pub.category}{pub.subcategory ? ` / ${pub.subcategory}` : ''}
@@ -309,8 +309,8 @@ export default function ImportPublicationsPage() {
               <div className="mt-2">
                 <p className="text-red-700 font-medium">Errores ({importResult.errors.length}):</p>
                 <ul className="list-disc pl-5 text-red-600 text-sm mt-1">
-                  {importResult.errors.slice(0, 5).map((err, i) => (
-                    <li key={`err-${i}-${err.publication.substring(0, 10).replace(/\s+/g, '-')}`}>{err.publication}: {err.error}</li>
+                  {importResult.errors.slice(0, 5).map((err) => (
+                    <li key={`err-${err.publication.substring(0, 20).replace(/\s+/g, '-').toLowerCase()}`}>{err.publication}: {err.error}</li>
                   ))}
                   {importResult.errors.length > 5 && (
                     <li>... y {importResult.errors.length - 5} más</li>
