@@ -207,7 +207,7 @@ export default function InmuebleDetail({ publication }: InmuebleDetailProps) {
                 <h4 className="font-semibold text-gray-900 dark:text-white mb-3">Características Principales</h4>
                 <div className="space-y-2">
                   {inmuebleData.caracteristicas.map((caracteristica, index) => (
-                    <div key={index} className="flex items-center gap-2">
+                    <div key={`caracteristica-${index}-${caracteristica.substring(0, 15).replace(/\s+/g, '-').toLowerCase()}`} className="flex items-center gap-2">
                       <div className="w-2 h-2 bg-green-500 rounded-full"></div>
                       <span className="text-sm text-gray-700 dark:text-gray-300">{caracteristica}</span>
                     </div>
@@ -218,7 +218,7 @@ export default function InmuebleDetail({ publication }: InmuebleDetailProps) {
                 <h4 className="font-semibold text-gray-900 dark:text-white mb-3">Servicios Incluidos</h4>
                 <div className="space-y-2">
                   {inmuebleData.servicios.map((servicio, index) => (
-                    <div key={index} className="flex items-center gap-2">
+                    <div key={`servicio-${index}-${servicio.substring(0, 15).replace(/\s+/g, '-').toLowerCase()}`} className="flex items-center gap-2">
                       <div className="w-2 h-2 bg-blue-500 rounded-full"></div>
                       <span className="text-sm text-gray-700 dark:text-gray-300">{servicio}</span>
                     </div>

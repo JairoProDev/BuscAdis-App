@@ -108,7 +108,7 @@ export default function ContentRow({
         
         <div className="flex gap-3 overflow-hidden">
           {[...Array(6)].map((_, i) => (
-            <div key={i} className="flex-shrink-0 w-44 lg:w-64 h-64 bg-gray-200 dark:bg-gray-700 rounded-xl animate-pulse"></div>
+            <div key={`skeleton-${i}-${Math.random().toString(36).substr(2, 9)}`} className="flex-shrink-0 w-44 lg:w-64 h-64 bg-gray-200 dark:bg-gray-700 rounded-xl animate-pulse"></div>
           ))}
         </div>
       </div>
@@ -177,7 +177,7 @@ export default function ContentRow({
         >
           {publications.map((publication, index) => (
             <motion.div
-              key={`content-${index}-${publication.title?.substring(0, 10).replace(/\s+/g, '-') || Date.now()}`}
+              key={`content-${publication.id || publication.title?.substring(0, 20).replace(/\s+/g, '-').toLowerCase() || index}`}
               initial={{ opacity: 0, x: 50 }}
               animate={{ opacity: 1, x: 0 }}
               transition={{ delay: index * 0.1, duration: 0.4 }}

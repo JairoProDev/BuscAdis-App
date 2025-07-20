@@ -382,9 +382,9 @@ export default function AdvancedSearchBar({
                 </div>
                 
                 <div className="flex flex-wrap gap-2 mt-3">
-                  {recentSearches.map((item, idx) => (
+                  {recentSearches.map((item) => (
                     <button
-                      key={idx}
+                      key={`recent-${item.text.substring(0, 20).replace(/\s+/g, '-').toLowerCase()}`}
                       onClick={() => {
                         setSearchTerm(item.text)
                         if (item.categoryId) setActiveCategory(item.categoryId)
@@ -421,7 +421,7 @@ export default function AdvancedSearchBar({
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
                   {trendingSearches.map((trend, idx) => (
                     <button
-                      key={idx}
+                      key={`trending-${idx}-${trend.text.substring(0, 15).replace(/\s+/g, '-').toLowerCase()}`}
                       onClick={() => handleSuggestionSelect(trend)}
                       className="flex items-center justify-between p-2 hover:bg-slate-50 dark:hover:bg-slate-700 rounded-lg text-left transition-colors"
                     >
@@ -462,9 +462,9 @@ export default function AdvancedSearchBar({
                 </h3>
                 
                 <div className="space-y-2">
-                  {filteredSuggestions.map((suggestion, idx) => (
+                  {filteredSuggestions.map((suggestion) => (
                     <button
-                      key={idx}
+                      key={`suggestion-${suggestion.text.substring(0, 20).replace(/\s+/g, '-').toLowerCase()}`}
                       onClick={() => handleSuggestionSelect(suggestion)}
                       className="w-full flex items-center justify-between p-3 hover:bg-slate-50 dark:hover:bg-slate-700 rounded-lg text-left transition-colors"
                     >

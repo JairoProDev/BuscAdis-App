@@ -285,7 +285,7 @@ export default function Testimonials() {
           <div className="flex justify-center mt-10 space-x-3">
             {[...Array(maxIndex + 1)].map((_, index) => (
               <button
-                key={`indicator-${index}`}
+                key={`indicator-${index}-${Math.random().toString(36).substr(2, 9)}`}
                 onClick={() => setActiveIndex(index)}
                 className="group"
                 aria-label={`Ver testimonio ${index + 1}`}

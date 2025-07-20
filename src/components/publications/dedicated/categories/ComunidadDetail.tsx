@@ -167,8 +167,8 @@ export default function ComunidadDetail({ publication }: ComunidadDetailProps) {
               <div className="bg-teal-50 dark:bg-teal-900/20 rounded-lg p-4">
                 <h5 className="font-medium text-teal-900 dark:text-teal-300 mb-2">🎯 Temas que tratamos</h5>
                 <div className="flex flex-wrap gap-2">
-                  {comunidadData.temas.map((tema, index) => (
-                    <span key={`tema-${index}-${tema.substring(0, 10).replace(/\s+/g, '-')}`} className="bg-teal-100 dark:bg-teal-800 text-teal-800 dark:text-teal-200 px-3 py-1 rounded-full text-sm">
+                  {comunidadData.temas.map((tema) => (
+                    <span key={`tema-${tema.substring(0, 20).replace(/\s+/g, '-').toLowerCase()}`} className="bg-teal-100 dark:bg-teal-800 text-teal-800 dark:text-teal-200 px-3 py-1 rounded-full text-sm">
                       {tema}
                     </span>
                   ))}
@@ -203,8 +203,8 @@ export default function ComunidadDetail({ publication }: ComunidadDetailProps) {
               <div>
                 <h5 className="font-medium text-gray-900 dark:text-white mb-3">Organizadores</h5>
                 <div className="space-y-2">
-                  {comunidadData.organizadores.map((organizador, index) => (
-                    <div key={`organizador-${index}-${organizador.substring(0, 10).replace(/\s+/g, '-')}`} className="flex items-center gap-2">
+                  {comunidadData.organizadores.map((organizador) => (
+                    <div key={`organizador-${organizador.substring(0, 20).replace(/\s+/g, '-').toLowerCase()}`} className="flex items-center gap-2">
                       <HandRaisedIcon className="w-4 h-4 text-teal-600" />
                       <span className="text-sm text-gray-700 dark:text-gray-300">{organizador}</span>
                     </div>
@@ -219,8 +219,8 @@ export default function ComunidadDetail({ publication }: ComunidadDetailProps) {
               <div>
                 <h4 className="font-semibold text-gray-900 dark:text-white mb-4">Nuestras Actividades</h4>
                 <div className="space-y-4">
-                  {comunidadData.actividades.map((actividad, index) => (
-                    <div key={`actividad-${index}-${actividad.substring(0, 10).replace(/\s+/g, '-')}`} className="bg-gray-50 dark:bg-gray-700 rounded-lg p-4">
+                  {comunidadData.actividades.map((actividad) => (
+                    <div key={`actividad-${actividad.substring(0, 20).replace(/\s+/g, '-').toLowerCase()}`} className="bg-gray-50 dark:bg-gray-700 rounded-lg p-4">
                       <div className="flex items-center gap-3">
                         <SparklesIcon className="w-5 h-5 text-teal-600" />
                         <span className="font-medium text-gray-900 dark:text-white">{actividad}</span>
@@ -232,8 +232,8 @@ export default function ComunidadDetail({ publication }: ComunidadDetailProps) {
               <div>
                 <h5 className="font-medium text-gray-900 dark:text-white mb-3">Beneficios de participar</h5>
                 <div className="space-y-2">
-                  {comunidadData.beneficios.map((beneficio, index) => (
-                    <div key={`beneficio-${index}-${beneficio.substring(0, 10).replace(/\s+/g, '-')}`} className="flex items-center gap-2">
+                  {comunidadData.beneficios.map((beneficio) => (
+                    <div key={`beneficio-${beneficio.substring(0, 20).replace(/\s+/g, '-').toLowerCase()}`} className="flex items-center gap-2">
                       <HeartIcon className="w-4 h-4 text-red-500" />
                       <span className="text-sm text-gray-700 dark:text-gray-300">{beneficio}</span>
                     </div>

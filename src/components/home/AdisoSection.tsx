@@ -62,7 +62,7 @@ export default function AdisoSection({
         <h2 className="text-2xl font-bold mb-4">{title}</h2>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {[1, 2, 3].map(i => (
-            <div key={i} className="h-64 bg-gray-200 rounded-xl animate-pulse"></div>
+            <div key={`skeleton-${i}-${Math.random().toString(36).substr(2, 9)}`} className="h-64 bg-gray-200 rounded-xl animate-pulse"></div>
           ))}
         </div>
       </div>

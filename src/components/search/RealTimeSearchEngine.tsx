@@ -611,7 +611,7 @@ export default function RealTimeSearchEngine({
                       <div className="space-y-1 max-h-32 overflow-y-auto">
                         {searchHistory.slice(0, 4).map((historyItem, index) => (
                           <button
-                            key={index}
+                            key={`mobile-history-${index}-${historyItem.substring(0, 10).replace(/\s+/g, '-')}`}
                             onClick={() => setInputValue(historyItem)}
                             className="w-full text-left p-1.5 hover:bg-gray-50 dark:hover:bg-gray-700 rounded text-xs transition-colors"
                           >

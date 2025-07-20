@@ -219,11 +219,11 @@ const SubcategoriesView: React.FC<SubcategoriesViewProps> = ({ category, onSearc
         </div>
 
         {[1, 2, 3].map((i) => (
-          <div key={i} className="animate-pulse">
+          <div key={`skeleton-row-${i}-${Math.random().toString(36).substr(2, 9)}`} className="animate-pulse">
             <div className="h-8 bg-gray-200 rounded w-64 mb-4"></div>
             <div className="flex gap-4 overflow-hidden">
               {[1, 2, 3, 4].map((j) => (
-                <div key={j} className="flex-shrink-0 w-80">
+                <div key={`skeleton-item-${j}-${Math.random().toString(36).substr(2, 9)}`} className="flex-shrink-0 w-80">
                   <div className="bg-gray-200 rounded-xl h-64 mb-3"></div>
                   <div className="h-4 bg-gray-200 rounded w-3/4 mb-2"></div>
                   <div className="h-4 bg-gray-200 rounded w-1/2"></div>

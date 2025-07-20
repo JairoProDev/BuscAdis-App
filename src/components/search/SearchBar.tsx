@@ -394,7 +394,7 @@ export default function SearchBar({
                   <div className="flex flex-wrap gap-2">
                     {recentSearches.map((term, idx) => (
                       <button
-                        key={idx}
+                        key={`recent-${idx}-${term.substring(0, 10).replace(/\s+/g, '-').toLowerCase()}`}
                         onClick={() => {
                           setSearchTerm(term)
                           onSearch(term)
@@ -420,7 +420,7 @@ export default function SearchBar({
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
                     {trendingSearches.map((trend, idx) => (
                       <button
-                        key={idx}
+                        key={`trending-${idx}-${trend.text.substring(0, 10).replace(/\s+/g, '-').toLowerCase()}`}
                         onClick={() => handleSuggestionSelect(trend)}
                         className="flex items-center justify-between p-2 hover:bg-slate-50 dark:hover:bg-slate-700 rounded-lg text-left transition-colors group"
                       >
@@ -461,7 +461,7 @@ export default function SearchBar({
                   <div className="space-y-2">
                     {filteredSuggestions.map((suggestion, idx) => (
                       <button
-                        key={idx}
+                        key={`suggestion-${idx}-${suggestion.text.substring(0, 10).replace(/\s+/g, '-').toLowerCase()}`}
                         onClick={() => handleSuggestionSelect(suggestion)}
                         className="w-full flex items-center justify-between p-3 hover:bg-slate-50 dark:hover:bg-slate-700 rounded-lg text-left transition-colors"
                       >

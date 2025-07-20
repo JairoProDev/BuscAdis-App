@@ -640,7 +640,7 @@ function Pagination({ currentPage, maxPages, onPageChange }: PaginationProps) {
       </Button>
       
       {getPageNumbers().map((page, index) => (
-        <React.Fragment key={index}>
+        <React.Fragment key={`page-${index}-${page}-${Math.random().toString(36).substr(2, 9)}`}>
           {page === '...' ? (
             <span className="px-3 py-2">...</span>
           ) : (
@@ -686,7 +686,7 @@ function LoadingState() {
         
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
           {Array(6).fill(null).map((_, i) => (
-            <div key={i} className="rounded-lg border border-gray-200 overflow-hidden">
+            <div key={`skeleton-${i}-${Math.random().toString(36).substr(2, 9)}`} className="rounded-lg border border-gray-200 overflow-hidden">
               <Skeleton className="h-48 w-full" />
               <div className="p-4">
                 <Skeleton className="h-6 w-3/4 mb-2" />

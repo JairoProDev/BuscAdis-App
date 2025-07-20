@@ -584,7 +584,7 @@ export default function PublicationModal({ publicationId, isOpen, onClose, initi
                   <div className="absolute bottom-2 left-0 right-0 flex justify-center space-x-2">
                     {pub.images.slice(0, 5).map((_, idx) => (
                       <button 
-                        key={idx} 
+                        key={`indicator-${idx}-${Math.random().toString(36).substr(2, 9)}`} 
                         className={`w-2 h-2 rounded-full ${idx === 0 ? 'bg-blue-500' : 'bg-gray-300 dark:bg-gray-600'}`}
                         aria-label={`Ir a imagen ${idx + 1}`}
                       />

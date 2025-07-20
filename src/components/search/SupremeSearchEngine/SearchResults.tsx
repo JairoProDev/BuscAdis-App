@@ -479,7 +479,7 @@ export default function SearchResults({
             : 'space-y-4'
         }`}>
           {Array(8).fill(null).map((_, i) => (
-            <div key={i} className="bg-white dark:bg-gray-800 rounded-xl shadow-md overflow-hidden animate-pulse">
+            <div key={`skeleton-${i}-${Math.random().toString(36).substr(2, 9)}`} className="bg-white dark:bg-gray-800 rounded-xl shadow-md overflow-hidden animate-pulse">
               <div className={`${viewMode === 'grid' ? 'aspect-[4/3]' : 'h-36 flex'}`}>
                 {viewMode === 'grid' ? (
                   <div className="w-full bg-gray-200 dark:bg-gray-700" />

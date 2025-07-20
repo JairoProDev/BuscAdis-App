@@ -432,7 +432,7 @@ export default function Tools() {
                                             <ul className="grid grid-cols-2 gap-2">
                                                 {tool.features.map((feature, index) => (
                                                     <li
-                                                        key={index}
+                                                        key={`feature-${tool.id}-${feature.substring(0, 20).replace(/\s+/g, '-').toLowerCase()}`}
                                                         className={`flex items-center text-sm ${
                                                             activeTool.id === tool.id ? 'text-teal-300' : 'text-cyan-100/70'
                                                         } group-hover:text-teal-300 transition-colors duration-300`}

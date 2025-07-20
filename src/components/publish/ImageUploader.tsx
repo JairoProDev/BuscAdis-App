@@ -161,8 +161,8 @@ export const ImageUploader: React.FC<ImageUploaderProps> = ({
           className="bg-red-50 p-4 rounded-md"
         >
           <ul className="list-disc list-inside text-sm text-red-600">
-            {errors.map((error, index) => (
-              <li key={`error-${index}-${error.substring(0, 15).replace(/\s+/g, '-')}`}>{error}</li>
+            {errors.map((error) => (
+              <li key={`error-${error.substring(0, 20).replace(/\s+/g, '-').toLowerCase()}`}>{error}</li>
             ))}
           </ul>
         </motion.div>

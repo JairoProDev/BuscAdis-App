@@ -248,7 +248,7 @@ export default function DedicatedPublicationPage({
                     <div className="absolute bottom-4 left-1/2 -translate-x-1/2 flex gap-2">
                       {images.map((_, index) => (
                         <button
-                          key={index}
+                          key={`indicator-${index}-${Math.random().toString(36).substr(2, 9)}`}
                           onClick={() => setCurrentImageIndex(index)}
                           className={`w-2 h-2 rounded-full transition-colors ${
                             index === currentImageIndex ? 'bg-white' : 'bg-white/50'

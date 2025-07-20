@@ -143,8 +143,8 @@ export default function EmpleoDetail({ publication }: EmpleoDetailProps) {
             <div>
               <p className="text-sm text-gray-500 dark:text-gray-400 mb-2">Habilidades requeridas</p>
               <div className="flex flex-wrap gap-2">
-                {empleoData.requisitos.map((requisito, index) => (
-                  <li key={`requisito-${index}-${requisito.substring(0, 10).replace(/\s+/g, '-')}`} className="flex items-center gap-2">
+                {empleoData.requisitos.map((requisito) => (
+                  <li key={`requisito-${requisito.substring(0, 20).replace(/\s+/g, '-').toLowerCase()}`} className="flex items-center gap-2">
                     <CheckCircleIcon className="w-4 h-4 text-green-600" />
                     <span className="text-sm text-gray-700 dark:text-gray-300">{requisito}</span>
                   </li>
@@ -177,8 +177,8 @@ export default function EmpleoDetail({ publication }: EmpleoDetailProps) {
           <div>
             <p className="text-sm text-gray-500 dark:text-gray-400 mb-2">Beneficios adicionales</p>
             <div className="space-y-2">
-              {empleoData.beneficios.map((beneficio, index) => (
-                <div key={`beneficio-${index}-${beneficio.substring(0, 10).replace(/\s+/g, '-')}`} className="flex items-center gap-2">
+              {empleoData.beneficios.map((beneficio) => (
+                <div key={`beneficio-${beneficio.substring(0, 20).replace(/\s+/g, '-').toLowerCase()}`} className="flex items-center gap-2">
                   <div className="w-2 h-2 bg-green-500 rounded-full"></div>
                   <span className="text-sm text-gray-700 dark:text-gray-300">{beneficio}</span>
                 </div>

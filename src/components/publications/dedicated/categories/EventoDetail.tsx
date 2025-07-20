@@ -167,7 +167,7 @@ export default function EventoDetail({ publication }: EventoDetailProps) {
                 <h5 className="font-medium text-pink-900 dark:text-pink-300 mb-2">🎵 Géneros musicales</h5>
                 <div className="flex flex-wrap gap-2">
                   {eventoData.musica.map((genero, index) => (
-                    <span key={index} className="bg-pink-100 dark:bg-pink-800 text-pink-800 dark:text-pink-200 px-3 py-1 rounded-full text-sm">
+                    <span key={`musica-${index}-${genero.substring(0, 10).replace(/\s+/g, '-').toLowerCase()}`} className="bg-pink-100 dark:bg-pink-800 text-pink-800 dark:text-pink-200 px-3 py-1 rounded-full text-sm">
                       {genero}
                     </span>
                   ))}
@@ -205,7 +205,7 @@ export default function EventoDetail({ publication }: EventoDetailProps) {
                 <h5 className="font-medium text-gray-900 dark:text-white mb-3">Servicios incluidos</h5>
                 <div className="space-y-2">
                   {eventoData.servicios.map((servicio, index) => (
-                    <div key={index} className="flex items-center gap-2">
+                    <div key={`servicio-${index}-${servicio.substring(0, 15).replace(/\s+/g, '-').toLowerCase()}`} className="flex items-center gap-2">
                       <div className="w-2 h-2 bg-pink-500 rounded-full"></div>
                       <span className="text-sm text-gray-700 dark:text-gray-300">{servicio}</span>
                     </div>
@@ -240,7 +240,7 @@ export default function EventoDetail({ publication }: EventoDetailProps) {
                 <h5 className="font-medium text-gray-900 dark:text-white mb-3">Incluye</h5>
                 <div className="space-y-2">
                   {eventoData.incluye.map((item, index) => (
-                    <div key={index} className="flex items-center gap-2">
+                    <div key={`incluye-${index}-${item.substring(0, 15).replace(/\s+/g, '-').toLowerCase()}`} className="flex items-center gap-2">
                       <StarIcon className="w-4 h-4 text-yellow-500" />
                       <span className="text-sm text-gray-700 dark:text-gray-300">{item}</span>
                     </div>
