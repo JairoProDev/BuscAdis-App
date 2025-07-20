@@ -101,13 +101,13 @@ export default function FiltersBar({ onFilterChange, className = '' }: FiltersBa
                             <input
                               type="checkbox"
                               value={option.value}
-                              checked={Array.isArray(activeFilters[filter.id]) && activeFilters[filter.id].includes(option.value)}
+                              checked={Array.isArray(activeFilters[filter.id]) && (activeFilters[filter.id] as (string | number)[]).includes(option.value)}
                               onChange={(e) => {
-                                const currentValues = Array.isArray(activeFilters[filter.id]) ? activeFilters[filter.id] : []
+                                const currentValues = Array.isArray(activeFilters[filter.id]) ? (activeFilters[filter.id] as (string | number)[]) : []
                                 if (e.target.checked) {
                                   handleFilterChange(filter.id, [...currentValues, option.value])
                                 } else {
-                                  handleFilterChange(filter.id, currentValues.filter((v: string) => v !== option.value))
+                                  handleFilterChange(filter.id, currentValues.filter((v: string | number) => v !== option.value))
                                 }
                               }}
                               className="text-blue-600"
@@ -122,15 +122,15 @@ export default function FiltersBar({ onFilterChange, className = '' }: FiltersBa
                       <div className="space-y-4">
                         <div>
                           <label className="block text-xs text-gray-600 mb-2">
-                            {filter.format ? filter.format(activeFilters[filter.id] || filter.min || 0) : activeFilters[filter.id] || filter.min}
+                            {filter.format ? filter.format(typeof activeFilters[filter.id] === 'number' ? activeFilters[filter.id] as number : filter.min || 0) : activeFilters[filter.id] || filter.min}
                           </label>
                                                      <input
                              type="range"
                              min={filter.min}
                              max={filter.max}
                              step={filter.step}
-                             value={activeFilters[filter.id] || filter.min}
-                             onChange={(e) => handleFilterChange(filter.id, parseInt(e.target.value))}
+                             value={typeof activeFilters[filter.id] === 'number' ? activeFilters[filter.id] as number : filter.min}
+                             onChange={(e) => handleFilterChange(filter.id, parseInt(e.target.value) || 0)}
                              className="w-full accent-blue-600"
                              aria-label={`Ajustar ${filter.label}`}
                            />

@@ -352,8 +352,7 @@ export default function PublicationModal({ publicationId, isOpen, onClose, initi
       undefined, // No usar slug específico
       categorySlug,
       subcategorySlug,
-      subsubcategorySlug,
-      true // Incluir título en el slug
+      subsubcategorySlug
     );
     
     // Cerrar el modal primero

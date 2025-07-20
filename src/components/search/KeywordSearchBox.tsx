@@ -58,14 +58,12 @@ export default function KeywordSearchBox({
       <EnhancedSearchInput
         initialValue={initialValue}
         onSearch={handleSearch}
-        placeholder={placeholder}
         appearance={appearance}
         autoFocus={autoFocus}
         showSuggestions={true}
         showVoiceSearch={showVoiceSearch}
         showImageSearch={showImageSearch}
         showAiAssist={showAiAssist}
-        isMobile={isMobile}
       />
     </div>
   );

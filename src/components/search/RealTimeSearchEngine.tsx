@@ -192,7 +192,8 @@ export default function RealTimeSearchEngine({
   const containerRef = useRef<HTMLDivElement>(null)
 
   // Búsqueda en tiempo real con debounce
-  const debouncedSearch = debounce(async (query: string) => {
+  const debouncedSearch = debounce(async (...args: unknown[]) => {
+    const query = args[0] as string;
     if (query.length >= 2) {
       setIsLoading(true)
       try {
@@ -205,7 +206,7 @@ export default function RealTimeSearchEngine({
         const quickRes = await fetch(`/api/publications?query=${encodeURIComponent(query)}&category=${selectedCategory}&limit=5`)
         const quickData = await quickRes.json()
         
-        const formattedResults = (quickData.publications || []).map((pub: { id: string; title: string; description: string; category: string; price: number; location: string; image: string }) => ({
+        const formattedResults = (quickData.publications || []).map((pub: { id: string; title: string; description: string; category: string; price: number; location: string; image: string; _id?: string; categorySlug?: string; amount?: number; images?: string[] }) => ({
           id: pub._id || pub.id,
           title: pub.title || 'Sin título',
           description: pub.description || '',
