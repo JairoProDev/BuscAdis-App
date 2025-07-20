@@ -9,7 +9,8 @@ import {
   MapPinIcon,
   CalendarIcon,
   UserGroupIcon,
-  StarIcon
+  StarIcon,
+  CheckCircleIcon
 } from '@heroicons/react/24/outline';
 import { PublicationData } from '@/types/publication';
 import { formatDistanceToNow } from 'date-fns';
@@ -142,13 +143,11 @@ export default function EmpleoDetail({ publication }: EmpleoDetailProps) {
             <div>
               <p className="text-sm text-gray-500 dark:text-gray-400 mb-2">Habilidades requeridas</p>
               <div className="flex flex-wrap gap-2">
-                {empleoData.requisitos.map((req, index) => (
-                  <span
-                    key={index}
-                    className="px-3 py-1 bg-gray-100 dark:bg-gray-700 text-gray-700 dark:text-gray-300 rounded-full text-xs"
-                  >
-                    {req}
-                  </span>
+                {empleoData.requisitos.map((requisito, index) => (
+                  <li key={`requisito-${index}-${requisito.substring(0, 10).replace(/\s+/g, '-')}`} className="flex items-center gap-2">
+                    <CheckCircleIcon className="w-4 h-4 text-green-600" />
+                    <span className="text-sm text-gray-700 dark:text-gray-300">{requisito}</span>
+                  </li>
                 ))}
               </div>
             </div>
@@ -179,7 +178,7 @@ export default function EmpleoDetail({ publication }: EmpleoDetailProps) {
             <p className="text-sm text-gray-500 dark:text-gray-400 mb-2">Beneficios adicionales</p>
             <div className="space-y-2">
               {empleoData.beneficios.map((beneficio, index) => (
-                <div key={index} className="flex items-center gap-2">
+                <div key={`beneficio-${index}-${beneficio.substring(0, 10).replace(/\s+/g, '-')}`} className="flex items-center gap-2">
                   <div className="w-2 h-2 bg-green-500 rounded-full"></div>
                   <span className="text-sm text-gray-700 dark:text-gray-300">{beneficio}</span>
                 </div>

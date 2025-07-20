@@ -26,11 +26,11 @@ export default function PublicationGrid({
   const isMobile = !useMediaQuery('(min-width: 768px)')
   
   // Calculate columns based on viewport and view mode
-  const getColumnCount = () => {
-    if (viewMode === 'list') return 1 // Single column for list mode
-    if (isMobile) return 2 // 2 columns on mobile
-    return 3 // 3 columns on desktop (since we're in split view)
-  }
+  // const getColumnCount = () => {
+  //   if (viewMode === 'list') return 1 // Single column for list mode
+  //   if (isMobile) return 2 // 2 columns on mobile
+  //   return 3 // 3 columns on desktop (since we're in split view)
+  // }
 
   // Get grid classes based on view mode
   const getGridClasses = () => {

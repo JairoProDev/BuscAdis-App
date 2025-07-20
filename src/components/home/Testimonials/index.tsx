@@ -133,7 +133,7 @@ export default function Testimonials() {
         <div className="absolute inset-0">
           {Array.from({ length: 30 }).map((_, i) => (
             <motion.div
-              key={i}
+              key={`particle-${i}-${Date.now()}`}
               className="absolute w-1 h-1 bg-cyan-400/30 rounded-full"
               initial={{ 
                 x: `${Math.random() * 100}%`, 
@@ -212,7 +212,7 @@ export default function Testimonials() {
             >
               {testimonials.map((testimonial, index) => (
                 <motion.div
-                  key={testimonial.id}
+                  key={`testimonial-${index}-${testimonial.name.substring(0, 10).replace(/\s+/g, '-')}`}
                   className="w-full md:w-1/2 lg:w-1/3 flex-shrink-0"
                   initial={{ opacity: 0, scale: 0.9 }}
                   animate={{ opacity: 1, scale: 1 }}
@@ -269,7 +269,7 @@ export default function Testimonials() {
                       <div className="flex text-cyan-300">
                         {[...Array(5)].map((_, i) => (
                           <StarIcon 
-                            key={i} 
+                            key={`star-${testimonial.id}-${i}`} 
                             className={`w-4 h-4 ${i < testimonial.rating ? 'text-teal-400' : 'text-slate-700'}`}
                           />
                         ))}
@@ -285,7 +285,7 @@ export default function Testimonials() {
           <div className="flex justify-center mt-10 space-x-3">
             {[...Array(maxIndex + 1)].map((_, index) => (
               <button
-                key={index}
+                key={`indicator-${index}-${activeIndex}`}
                 onClick={() => setActiveIndex(index)}
                 className="group"
                 aria-label={`Ver testimonio ${index + 1}`}

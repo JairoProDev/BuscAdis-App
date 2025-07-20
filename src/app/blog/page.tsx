@@ -220,7 +220,7 @@ export default function BlogPage() {
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                         {featuredPosts.map((post, index) => (
                             <PostCard
-                                key={post.id}
+                                key={`featured-${index}-${post.slug}`}
                                 post={post}
                                 featured={true}
                                 index={index}
