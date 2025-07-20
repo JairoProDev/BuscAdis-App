@@ -74,7 +74,7 @@ export function ImageGallery({ images, className = '' }: ImageGalleryProps) {
           <div className="grid grid-cols-4 gap-2 mt-2">
             {images.slice(0, 4).map((image, idx) => (
               <div
-                key={`gallery-${idx}-${Math.random().toString(36).substr(2, 9)}`}
+                key={`gallery-${Math.random().toString(36).substr(2, 9)}-${Date.now()}`}
                 onClick={() => openLightbox(idx)}
                 className={`
                   aspect-square rounded-md overflow-hidden cursor-pointer relative

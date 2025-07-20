@@ -191,8 +191,8 @@ export default function ProductoDetail({ publication }: ProductoDetailProps) {
               <div className="bg-orange-50 dark:bg-orange-900/20 rounded-lg p-4">
                 <h5 className="font-medium text-orange-900 dark:text-orange-300 mb-2">📦 Incluye en la caja</h5>
                 <div className="space-y-2">
-                  {productoData.incluye.map((item, index) => (
-                    <div key={`incluye-${index}-${item.substring(0, 15).replace(/\s+/g, '-').toLowerCase()}`} className="flex items-center gap-2">
+                  {productoData.incluye.map((item) => (
+                    <div key={`incluye-${Math.random().toString(36).substr(2, 9)}-${Date.now()}`} className="flex items-center gap-2">
                       <div className="w-2 h-2 bg-orange-500 rounded-full"></div>
                       <span className="text-sm text-orange-800 dark:text-orange-200">{item}</span>
                     </div>
@@ -224,8 +224,8 @@ export default function ProductoDetail({ publication }: ProductoDetailProps) {
               <div>
                 <h5 className="font-medium text-gray-900 dark:text-white mb-3">Características principales</h5>
                 <div className="space-y-2">
-                  {productoData.caracteristicas.map((caracteristica, index) => (
-                    <div key={`caracteristica-${index}-${caracteristica.substring(0, 15).replace(/\s+/g, '-').toLowerCase()}`} className="flex items-center gap-2">
+                  {productoData.caracteristicas.map((caracteristica) => (
+                    <div key={`caracteristica-${Math.random().toString(36).substr(2, 9)}-${Date.now()}`} className="flex items-center gap-2">
                       <div className="w-2 h-2 bg-orange-500 rounded-full"></div>
                       <span className="text-sm text-gray-700 dark:text-gray-300">{caracteristica}</span>
                     </div>

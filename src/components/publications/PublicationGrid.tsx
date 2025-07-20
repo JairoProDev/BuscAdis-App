@@ -4,7 +4,7 @@ import React from 'react'
 import { motion } from 'framer-motion'
 import { Publication } from '@/components/search/SearchResults'
 import PublicationCard from '@/components/publications/PublicationCard'
-import useMediaQuery from '@/hooks/useMediaQuery'
+// import useMediaQuery from '@/hooks/useMediaQuery'
 
 interface PublicationGridProps {
   publications: Publication[]
@@ -23,7 +23,7 @@ export default function PublicationGrid({
   className = '',
   viewMode = 'grid'
 }: PublicationGridProps) {
-  const isMobile = !useMediaQuery('(min-width: 768px)')
+  // const isMobile = !useMediaQuery('(min-width: 768px)')
   
   // Calculate columns based on viewport and view mode
   // const getColumnCount = () => {
@@ -100,9 +100,9 @@ export default function PublicationGrid({
     
     return (
       <div className={`${skeletonClasses} ${className}`}>
-        {Array.from({ length: 8 }).map((_, index) => (
+        {Array.from({ length: 8 }).map(() => (
           <div
-            key={`skeleton-${index}-${Math.random().toString(36).substr(2, 9)}`}
+            key={`skeleton-${Math.random().toString(36).substr(2, 9)}-${Date.now()}`}
             className="bg-white dark:bg-gray-800 rounded-lg shadow-md overflow-hidden animate-pulse"
           >
             {viewMode === 'list' ? (

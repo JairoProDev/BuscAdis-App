@@ -237,7 +237,7 @@ export default function PublicationDetailSidebar({
                     <div className="absolute bottom-4 left-1/2 -translate-x-1/2 flex gap-2">
                       {publication.images!.map((_, index) => (
                         <button
-                          key={`sidebar-indicator-${index}-${Math.random().toString(36).substr(2, 9)}`}
+                          key={`sidebar-indicator-${Math.random().toString(36).substr(2, 9)}-${Date.now()}`}
                           onClick={() => setCurrentImageIndex(index)}
                           className={`w-2 h-2 rounded-full transition-colors ${
                             index === currentImageIndex 

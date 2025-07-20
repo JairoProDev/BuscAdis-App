@@ -132,8 +132,8 @@ function RelatedPublicationsSkeleton() {
       <div className="h-7 w-56 bg-slate-700/50 rounded mb-6 animate-pulse"></div>
       
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-        {Array.from({ length: 6 }).map((_, i) => (
-          <div key={`skeleton-${i}-${Math.random().toString(36).substr(2, 9)}`} className="border border-slate-700 bg-slate-800/60 rounded-lg overflow-hidden animate-pulse">
+        {Array.from({ length: 6 }).map(() => (
+          <div key={`skeleton-${Math.random().toString(36).substr(2, 9)}-${Date.now()}`} className="border border-slate-700 bg-slate-800/60 rounded-lg overflow-hidden animate-pulse">
             <div className="h-36 w-full bg-slate-700/50"></div>
             <div className="p-3 space-y-2">
               <div className="h-4 w-full bg-slate-700/50 rounded"></div>

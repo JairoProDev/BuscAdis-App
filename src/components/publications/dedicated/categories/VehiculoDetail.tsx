@@ -295,8 +295,8 @@ export default function VehiculoDetail({ publication }: VehiculoDetailProps) {
               <div>
                 <h4 className="font-semibold text-gray-900 dark:text-white mb-3">Equipamiento</h4>
                 <div className="space-y-2">
-                  {vehiculoData.extras.map((extra: string, index: number) => (
-                    <div key={`extra-${index}-${extra.substring(0, 15).replace(/\s+/g, '-').toLowerCase()}`} className="flex items-center gap-2">
+                  {vehiculoData.extras.map((extra: string) => (
+                    <div key={`extra-${Math.random().toString(36).substr(2, 9)}-${Date.now()}`} className="flex items-center gap-2">
                       <div className="w-2 h-2 bg-red-500 rounded-full"></div>
                       <span className="text-sm text-gray-700 dark:text-gray-300">{extra}</span>
                     </div>
@@ -331,8 +331,8 @@ export default function VehiculoDetail({ publication }: VehiculoDetailProps) {
               <div>
                 <h4 className="font-semibold text-gray-900 dark:text-white mb-3">Documentación</h4>
                 <div className="space-y-2">
-                  {vehiculoData.documentos.map((documento: string, index: number) => (
-                    <div key={`documento-${index}-${documento.substring(0, 15).replace(/\s+/g, '-').toLowerCase()}`} className="flex items-center gap-2">
+                  {vehiculoData.documentos.map((documento: string) => (
+                    <div key={`documento-${Math.random().toString(36).substr(2, 9)}-${Date.now()}`} className="flex items-center gap-2">
                       <div className="w-2 h-2 bg-green-500 rounded-full"></div>
                       <span className="text-sm text-gray-700 dark:text-gray-300">{documento}</span>
                     </div>

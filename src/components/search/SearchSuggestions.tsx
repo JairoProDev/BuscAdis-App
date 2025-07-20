@@ -331,7 +331,7 @@ export default function SearchSuggestions({
               <h3 className="text-sm font-medium">Sugerencias</h3>
             </div>
             <ul className="flex flex-wrap gap-1.5">
-              {suggestions.slice(0, compact ? 8 : suggestions.length).map((item) => (
+              {suggestions.slice(0, compact ? 8 : suggestions.length).map((item, index) => (
                 <li 
                   key={`suggestion-${Math.random().toString(36).substr(2, 9)}-${Date.now()}`}
                   data-index={index}
@@ -411,7 +411,7 @@ export default function SearchSuggestions({
                     </button>
                   </div>
                   <div className="flex flex-wrap gap-1.5">
-                    {searchHistory.slice(0, compact ? 4 : searchHistory.length).map((item) => (
+                    {searchHistory.slice(0, compact ? 4 : searchHistory.length).map((item, index) => (
                       <div 
                         key={`history-${Math.random().toString(36).substr(2, 9)}-${Date.now()}`}
                         data-index={suggestions.length + trendingSearches.length + index}
@@ -467,7 +467,7 @@ export default function SearchSuggestions({
                     <h3 className="text-sm font-medium">Tendencias</h3>
                   </div>
                   <div className="flex flex-wrap gap-1.5">
-                    {trendingSearches.slice(0, compact ? 4 : trendingSearches.length).map((item) => (
+                    {trendingSearches.slice(0, compact ? 4 : trendingSearches.length).map((item, index) => (
                       <button 
                         key={`trending-${Math.random().toString(36).substr(2, 9)}-${Date.now()}`}
                         data-index={suggestions.length + index}

@@ -168,8 +168,8 @@ export default function NegocioDetail({ publication }: NegocioDetailProps) {
               <div className="bg-indigo-50 dark:bg-indigo-900/20 rounded-lg p-4">
                 <h5 className="font-medium text-indigo-900 dark:text-indigo-300 mb-2">💼 Beneficios incluidos</h5>
                 <div className="space-y-2">
-                  {negocioData.beneficios.map((beneficio, index) => (
-                    <div key={`beneficio-${index}-${beneficio.substring(0, 15).replace(/\s+/g, '-').toLowerCase()}`} className="flex items-center gap-2">
+                  {negocioData.beneficios.map((beneficio) => (
+                    <div key={`beneficio-${Math.random().toString(36).substr(2, 9)}-${Date.now()}`} className="flex items-center gap-2">
                       <div className="w-2 h-2 bg-indigo-500 rounded-full"></div>
                       <span className="text-sm text-indigo-800 dark:text-indigo-200">{beneficio}</span>
                     </div>
@@ -203,8 +203,8 @@ export default function NegocioDetail({ publication }: NegocioDetailProps) {
               <div>
                 <h5 className="font-medium text-gray-900 dark:text-white mb-3">Inversión incluye</h5>
                 <div className="space-y-2">
-                  {negocioData.incluye.map((item, index) => (
-                    <div key={`incluye-${index}-${item.substring(0, 15).replace(/\s+/g, '-').toLowerCase()}`} className="flex items-center gap-2">
+                  {negocioData.incluye.map((item) => (
+                    <div key={`incluye-${Math.random().toString(36).substr(2, 9)}-${Date.now()}`} className="flex items-center gap-2">
                       <div className="w-2 h-2 bg-green-500 rounded-full"></div>
                       <span className="text-sm text-gray-700 dark:text-gray-300">{item}</span>
                     </div>
@@ -238,8 +238,8 @@ export default function NegocioDetail({ publication }: NegocioDetailProps) {
               <div>
                 <h5 className="font-medium text-gray-900 dark:text-white mb-3">Requisitos</h5>
                 <div className="space-y-2">
-                  {negocioData.requisitos.map((requisito, index) => (
-                    <div key={`requisito-${index}-${requisito.substring(0, 15).replace(/\s+/g, '-').toLowerCase()}`} className="flex items-center gap-2">
+                  {negocioData.requisitos.map((requisito) => (
+                    <div key={`requisito-${Math.random().toString(36).substr(2, 9)}-${Date.now()}`} className="flex items-center gap-2">
                       <div className="w-2 h-2 bg-orange-500 rounded-full"></div>
                       <span className="text-sm text-gray-700 dark:text-gray-300">{requisito}</span>
                     </div>

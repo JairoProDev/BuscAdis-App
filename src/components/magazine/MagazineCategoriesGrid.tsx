@@ -44,8 +44,8 @@ export default function MagazineCategoriesGrid() {
   if (isLoading) {
     return (
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-        {[...Array(8)].map((_, index) => (
-          <div key={`skeleton-${index}-${Math.random().toString(36).substr(2, 9)}`} className="h-64">
+        {[...Array(8)].map(() => (
+          <div key={`skeleton-${Math.random().toString(36).substr(2, 9)}-${Date.now()}`} className="h-64">
             <Skeleton className="h-full w-full rounded-xl" />
           </div>
         ))}
