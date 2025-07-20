@@ -156,7 +156,7 @@ export default function AdvancedFilters({
                                 min={filter.min}
                                 max={filter.max}
                                 step={filter.step}
-                                value={activeFilters[filter.id] || filter.min}
+                                value={typeof activeFilters[filter.id] === 'number' ? activeFilters[filter.id] as number : filter.min}
                                 onChange={(e) => handleFilterChange(filter.id, parseInt(e.target.value))}
                                 className="w-full accent-blue-600"
                                 aria-label={`Ajustar ${filter.label}`}
@@ -164,7 +164,7 @@ export default function AdvancedFilters({
                               <div className="flex justify-between text-xs text-gray-500">
                                 <span>{filter.format ? filter.format(filter.min || 0) : filter.min}</span>
                                 <span className="font-medium">
-                                  {filter.format ? filter.format(activeFilters[filter.id] || filter.min || 0) : activeFilters[filter.id] || filter.min}
+                                  {filter.format ? filter.format(typeof activeFilters[filter.id] === 'number' ? activeFilters[filter.id] as number : filter.min || 0) : (typeof activeFilters[filter.id] === 'number' ? activeFilters[filter.id] as number : filter.min)}
                                 </span>
                                 <span>{filter.format ? filter.format(filter.max || 100) : filter.max}</span>
                               </div>
@@ -173,7 +173,7 @@ export default function AdvancedFilters({
 
                           {filter.type === 'select' && (
                             <select
-                              value={activeFilters[filter.id] || ''}
+                              value={typeof activeFilters[filter.id] === 'string' ? activeFilters[filter.id] as string : ''}
                               onChange={(e) => handleFilterChange(filter.id, e.target.value)}
                               className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-700 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-500"
                               aria-label={`Seleccionar ${filter.label}`}
@@ -181,7 +181,7 @@ export default function AdvancedFilters({
                             >
                               <option value="">Seleccionar {filter.label.toLowerCase()}</option>
                               {filter.options?.map((option: { value: unknown; label: string }) => (
-                                <option key={option.value} value={option.value}>
+                                <option key={String(option.value)} value={String(option.value)}>
                                   {option.label}
                                 </option>
                               ))}
@@ -195,7 +195,7 @@ export default function AdvancedFilters({
                                 const isSelected = Array.isArray(value) && value.includes(option.value)
                                 return (
                                   <label
-                                    key={option.value}
+                                    key={String(option.value)}
                                     className="flex items-center gap-2 cursor-pointer p-2 hover:bg-gray-50 dark:hover:bg-gray-700 rounded-lg transition-colors"
                                   >
                                     <input

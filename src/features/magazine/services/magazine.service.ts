@@ -38,12 +38,12 @@ export async function fetchLatestMagazine(): Promise<MagazineMetadata | null> {
     // Transform to the expected interface
     const magazine = latestMagazines[0];
     return {
-      _id: magazine._id.toString(),
-      pdfUrl: magazine.pdfUrl,
-      fileId: magazine.fileId.toString(),
-      publicationCount: magazine.publicationCount,
-      createdAt: magazine.createdAt,
-      filename: magazine.filename
+      _id: (magazine._id as string)?.toString() || '',
+      pdfUrl: magazine.pdfUrl as string,
+      fileId: (magazine.fileId as string)?.toString() || '',
+      publicationCount: magazine.publicationCount as number,
+      createdAt: magazine.createdAt as Date || new Date(),
+      filename: magazine.filename as string
     };
   } catch (error) {
     console.error('[Magazine Service] Error fetching latest magazine:', error);
@@ -66,12 +66,12 @@ export async function getMagazineHistory(): Promise<MagazineMetadata[]> {
     
     // Transform to the expected interface
     return magazines.map((magazine: Record<string, unknown>) => ({
-      _id: magazine._id.toString(),
-      pdfUrl: magazine.pdfUrl,
-      fileId: magazine.fileId.toString(),
-      publicationCount: magazine.publicationCount,
-      createdAt: magazine.createdAt,
-      filename: magazine.filename
+      _id: (magazine._id as string)?.toString() || '',
+      pdfUrl: magazine.pdfUrl as string,
+      fileId: (magazine.fileId as string)?.toString() || '',
+      publicationCount: magazine.publicationCount as number,
+      createdAt: magazine.createdAt as Date || new Date(),
+      filename: magazine.filename as string
     }));
   } catch (error) {
     console.error('[Magazine Service] Error getting magazine history:', error);

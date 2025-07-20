@@ -161,8 +161,8 @@ export default function SearchBar({
 
   const handleVoiceSearch = () => {
     if ('webkitSpeechRecognition' in window || 'SpeechRecognition' in window) {
-      const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-      const recognition = new SpeechRecognition();
+      const SpeechRecognitionConstructor = (window.SpeechRecognition || window.webkitSpeechRecognition) as new () => SpeechRecognition;
+      const recognition = new SpeechRecognitionConstructor();
       
       recognition.lang = 'es-PE';
       recognition.interimResults = false;

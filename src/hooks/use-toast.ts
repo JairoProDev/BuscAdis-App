@@ -29,6 +29,24 @@ interface State {
   toasts: ToasterToast[]
 }
 
+type Action =
+  | {
+      type: "ADD_TOAST"
+      toast: ToasterToast
+    }
+  | {
+      type: "UPDATE_TOAST"
+      toast: Partial<ToasterToast>
+    }
+  | {
+      type: "DISMISS_TOAST"
+      toastId?: string
+    }
+  | {
+      type: "REMOVE_TOAST"
+      toastId?: string
+    }
+
 const toastTimeouts = new Map<string, ReturnType<typeof setTimeout>>()
 
 const addToRemoveQueue = (toastId: string) => {
@@ -131,7 +149,7 @@ function toast({ ...props }: Toast) {
       ...props,
       id,
       open: true,
-      onOpenChange: (open) => {
+      onOpenChange: (open: boolean) => {
         if (!open) dismiss()
       },
     },

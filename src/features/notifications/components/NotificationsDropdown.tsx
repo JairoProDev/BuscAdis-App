@@ -22,8 +22,15 @@ export default function NotificationsDropdown() {
   const loadNotifications = useCallback(async () => {
     try {
       const data = await NotificationsService.getNotifications(user!.id);
-      setNotifications(data);
-      setUnreadCount(data.filter((n: Notification) => !n.read).length);
+      const notificationsData = data.map((doc: any) => ({
+        id: doc._id.toString(),
+        title: doc.title || '',
+        message: doc.message || '',
+        read: doc.read || false,
+        created_at: doc.created_at || new Date().toISOString()
+      }));
+      setNotifications(notificationsData);
+      setUnreadCount(notificationsData.filter((n: Notification) => !n.read).length);
     } catch (error) {
       console.error('Error loading notifications:', error);
     }

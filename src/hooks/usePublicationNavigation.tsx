@@ -28,8 +28,8 @@ export function usePublicationNavigation(): UsePublicationNavigationReturn {
   // Determine current view context
   const isOnSearchPage = pathname === '/buscar' || pathname?.startsWith('/buscar');
   const isOnCategoryPage = pathname?.match(/^\/(empleos|inmuebles|vehiculos|servicios|productos|eventos|negocios|comunidad)/);
-  const isDedicatedPage = isOnCategoryPage && !searchParams.get('p');
-  const isDetailView = searchParams.get('p') !== null;
+  const isDedicatedPage = isOnCategoryPage && !searchParams?.get('p');
+  const isDetailView = searchParams?.get('p') !== null;
 
   // Determine which view should be shown
   const shouldShowDetailContainer = isOnSearchPage || (isOnCategoryPage && isDetailView);

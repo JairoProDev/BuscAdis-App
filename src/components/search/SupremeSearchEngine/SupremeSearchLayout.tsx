@@ -4,7 +4,7 @@ import { useState, useCallback, useEffect } from 'react'
 import { motion } from 'framer-motion'
 import { useSearch } from '@/contexts/SearchContext'
 import SupremeSearchEngine from './index'
-import SearchResults from './SearchResults'
+import SearchResults, { type SearchResult } from './SearchResults'
 
 interface SupremeSearchLayoutProps {
   className?: string
@@ -14,7 +14,7 @@ export default function SupremeSearchLayout({
   className = ''
 }: SupremeSearchLayoutProps) {
   const { searchState } = useSearch()
-  const [results, setResults] = useState<Record<string, unknown>[]>([])
+  const [results, setResults] = useState<SearchResult[]>([])
   const [isLoading, setIsLoading] = useState(false)
   const [totalCount, setTotalCount] = useState(0)
   const [viewMode, setViewMode] = useState<'grid' | 'list' | 'map'>('grid')
@@ -33,40 +33,64 @@ export default function SupremeSearchLayout({
       }
       
       if (query.trim()) searchParams.query = query
-      if (options.category) searchParams.category = options.category
-      if (options.subcategory) searchParams.subcategory = options.subcategory
-      if (options.location) searchParams.location = options.location
+      if (options.category && typeof options.category === 'string') searchParams.category = options.category
+      if (options.subcategory && typeof options.subcategory === 'string') searchParams.subcategory = options.subcategory
+      if (options.location && typeof options.location === 'string') searchParams.location = options.location
       
       console.log('Supreme Search: Searching with params:', searchParams)
       
       const response = await mongoFetch('/api/publications', { queryParams: searchParams })
       
-      if (!response.publications) {
-        throw new Error(response.errorFriendly || 'No se encontraron resultados')
+      if (!response || typeof response !== 'object' || !('publications' in response)) {
+        throw new Error('Respuesta inválida del servidor')
+      }
+      
+      const responseData = response as { publications?: unknown[]; errorFriendly?: string; total?: number }
+      
+      if (!responseData.publications) {
+        throw new Error(responseData.errorFriendly || 'No se encontraron resultados')
       }
       
       // Adaptar resultados de la API al formato esperado
-      const adaptedResults = response.publications.map((pub: Record<string, unknown>, i: number) => ({
-        id: pub._id || `result-${Date.now()}-${i}`,
-        title: pub.title || 'Sin título',
-        description: pub.description || '',
-        price: pub.price || pub.amount || 0,
-        location: typeof pub.location === 'object' 
-          ? `${pub.location.district || pub.location.province || pub.location.city || 'Sin ubicación'}` 
-          : pub.location || 'Sin ubicación',
-        category: pub.categorySlug || pub.category || 'general',
-        image: pub.images?.[0] || `/images/placeholder/listing-${(i % 10) + 1}.jpg`,
-        publishedAt: pub.createdAt || pub.created_at || new Date().toISOString(),
-        views: Math.floor(Math.random() * 1000) + 10, // Temporal hasta que tengamos views reales
-        isFavorite: false,
-        isPromoted: pub.premium || false,
-        isPremium: pub.premium || false,
-        condition: pub.condition || 'Sin especificar',
-        tags: []
-      }))
+      const adaptedResults: SearchResult[] = responseData.publications.map((pub: unknown, i: number) => {
+        const pubData = pub as Record<string, unknown>
+        const location = pubData.location
+        let locationString = 'Sin ubicación'
+        
+        if (location && typeof location === 'object' && location !== null) {
+          const locationObj = location as Record<string, unknown>
+          locationString = `${locationObj.district || locationObj.province || locationObj.city || 'Sin ubicación'}`
+        } else if (typeof location === 'string') {
+          locationString = location
+        }
+        
+        const images = pubData.images
+        let imageUrl = `/images/placeholder/listing-${(i % 10) + 1}.jpg`
+        
+        if (Array.isArray(images) && images.length > 0 && typeof images[0] === 'string') {
+          imageUrl = images[0]
+        }
+        
+        return {
+          id: String(pubData._id || `result-${Date.now()}-${i}`),
+          title: String(pubData.title || 'Sin título'),
+          description: String(pubData.description || ''),
+          price: Number(pubData.price || pubData.amount || 0),
+          location: locationString,
+          category: String(pubData.categorySlug || pubData.category || 'general'),
+          image: imageUrl,
+          publishedAt: String(pubData.createdAt || pubData.created_at || new Date().toISOString()),
+          views: Math.floor(Math.random() * 1000) + 10, // Temporal hasta que tengamos views reales
+          isFavorite: false,
+          isPromoted: Boolean(pubData.premium || false),
+          isPremium: Boolean(pubData.premium || false),
+          condition: String(pubData.condition || 'Sin especificar'),
+          tags: []
+        }
+      })
 
       setResults(adaptedResults)
-      setTotalCount(response.total || adaptedResults.length)
+      setTotalCount(responseData.total || adaptedResults.length)
       
       console.log(`Supreme Search: Found ${adaptedResults.length} results`)
       
@@ -117,13 +141,21 @@ export default function SupremeSearchLayout({
     const sortedResults = [...results].sort((a, b) => {
       switch (sort) {
         case 'date':
-          return new Date(b.publishedAt).getTime() - new Date(a.publishedAt).getTime()
+          const dateA = new Date(String(a.publishedAt || '')).getTime()
+          const dateB = new Date(String(b.publishedAt || '')).getTime()
+          return dateB - dateA
         case 'price-asc':
-          return (a.price || 0) - (b.price || 0)
+          const priceA = typeof a.price === 'number' ? a.price : 0
+          const priceB = typeof b.price === 'number' ? b.price : 0
+          return priceA - priceB
         case 'price-desc':
-          return (b.price || 0) - (a.price || 0)
+          const priceA2 = typeof a.price === 'number' ? a.price : 0
+          const priceB2 = typeof b.price === 'number' ? b.price : 0
+          return priceB2 - priceA2
         case 'views':
-          return b.views - a.views
+          const viewsA = typeof a.views === 'number' ? a.views : 0
+          const viewsB = typeof b.views === 'number' ? b.views : 0
+          return viewsB - viewsA
         default:
           return 0
       }

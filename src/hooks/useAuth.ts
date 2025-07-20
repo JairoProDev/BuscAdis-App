@@ -13,7 +13,7 @@ export function useAuth() {
         try {
             setLoading(true);
             const currentUser = await AuthService.getCurrentUser();
-            setUser(currentUser);
+            setUser(currentUser as AuthUser | null);
         } catch (error) {
             console.error('Error checking session:', error);
             setUser(null);
@@ -31,7 +31,7 @@ export function useAuth() {
         return () => clearInterval(intervalId);
     }, [checkSession]);
 
-    const login = async (credentials: { email: string; password: string }) => {
+    const login = async (credentials: { email: string; password: string } | any) => {
         setLoading(true);
         try {
             const result = await AuthService.login(credentials) as AuthResponse;

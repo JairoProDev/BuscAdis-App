@@ -26,7 +26,7 @@ export class SearchService {
       };
       
       if (params.query) {
-        filter.$or = [
+        (filter as any).$or = [
           { title: { $regex: params.query, $options: 'i' } },
           { description: { $regex: params.query, $options: 'i' } }
         ];
@@ -37,20 +37,20 @@ export class SearchService {
       }
       
       if (params.location) {
-        if (!filter.$or) filter.$or = [];
-        filter.$or.push(
+        if (!(filter as any).$or) (filter as any).$or = [];
+        (filter as any).$or.push(
           { location: { $regex: params.location, $options: 'i' } }
         );
       }
       
       if (params.minPrice) {
-        filter.price = filter.price || {};
-        filter.price.$gte = Number(params.minPrice);
+        (filter as any).price = (filter as any).price || {};
+        (filter as any).price.$gte = Number(params.minPrice);
       }
       
       if (params.maxPrice) {
-        filter.price = filter.price || {};
-        filter.price.$lte = Number(params.maxPrice);
+        (filter as any).price = (filter as any).price || {};
+        (filter as any).price.$lte = Number(params.maxPrice);
       }
       
       // Count total matching documents

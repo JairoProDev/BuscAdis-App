@@ -76,7 +76,7 @@ const CompactCategorySelector = ({
     { 
       id: 'empleos', 
       name: 'Empleos', 
-      iconPath: 'M20.25 14.15v4.25c0 1.094-.787 2.036-1.872 2.18-2.087.277-4.216.42-6.378.42s-4.291-.143-6.378-.42c-1.085-.144-1.872-1.086-1.872-2.18v-4.25m16.5 0a2.18 2.18 0 0 0 .75-1.661V8.706c0-1.081-.768-2.015-1.837-2.175a48.114 48.114 0 0 0-3.413-.387m4.5 8.006c-.194.165-.42.295-.673.38A23.978 23.978 0 0 1 12 15.75c-2.648 0-5.195-.429-7.577-1.22a2.016 2.016 0 0 1-.673-.38m0 0A2.18 2.18 0 0 1 3 12.489V8.706c0-1.081.768-2.015 1.837-2.175a48.111 48.111 0 0 1 3.413-.387m7.5 0V5.25A2.25 2.25 0 0 0 13.5 3h-3a2.25 2.25 0 0 0-2.25 2.25v.894m7.5 0a48.667 48.667 0 0 0-7.5 0M12 12.75h.008v.008H12v-.008Z'
+      iconPath: 'M20.25 14.15v4.25c0 1.094-.787 2.036-1.872 2.18-2.087.277-4.216.42-6.378.42s-4.291-.143-6.378-.42c-1.085-.144-1.872-1.086-1.872-2.18v-4.25m16.5 0a2.18 2.18 0 0 0 .75-1.661V8.706c0-1.081-.768-2.015-1.837-2.175a48.114 48.114 0 0 0-3.413-.387m4.5 8.006c-.194.165-.42.295-.673.38A23.978 23.978 0 0 1 12 15.75c-2.648 0-5.195-.429-7.577-1.22a2.016 2.016 0 01-.673-.38m0 0A2.18 2.18 0 0 1 3 12.489V8.706c0-1.081.768-2.015 1.837-2.175a48.111 48.111 0 0 1 3.413-.387m7.5 0V5.25A2.25 2.25 0 0 0 13.5 3h-3a2.25 2.25 0 0 0-2.25 2.25v.894m7.5 0a48.667 48.667 0 0 0-7.5 0M12 12.75h.008v.008H12v-.008Z'
     },
     { 
       id: 'inmuebles', 
@@ -361,13 +361,13 @@ export default function RealTimeSearchEngine({
 
   const startVoiceSearch = () => {
     if (!('webkitSpeechRecognition' in window) && !('SpeechRecognition' in window)) {
-      setVoiceError('Reconocimiento de voz no disponible');
+      console.error('Reconocimiento de voz no disponible');
       return;
     }
 
     try {
-      const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-      recognitionRef.current = new SpeechRecognition();
+      const SpeechRecognitionConstructor = (window.SpeechRecognition || window.webkitSpeechRecognition) as new () => SpeechRecognition;
+      recognitionRef.current = new SpeechRecognitionConstructor();
       
       recognitionRef.current.lang = 'es-PE';
       recognitionRef.current.interimResults = false;
@@ -376,7 +376,6 @@ export default function RealTimeSearchEngine({
 
       recognitionRef.current.onstart = () => {
         setIsListening(true);
-        setVoiceError('');
       };
 
       recognitionRef.current.onresult = (event: SpeechRecognitionEvent) => {
@@ -388,13 +387,7 @@ export default function RealTimeSearchEngine({
 
       recognitionRef.current.onerror = (event: SpeechRecognitionErrorEvent) => {
         setIsListening(false);
-        if (event.error === 'no-speech') {
-          setVoiceError('No se detectó habla. Intenta de nuevo.');
-        } else if (event.error === 'not-allowed') {
-          setVoiceError('Permisos de micrófono denegados');
-        } else {
-          setVoiceError(`Error: ${event.error}`);
-        }
+        console.error('Error de reconocimiento de voz:', event.error);
       };
 
       recognitionRef.current.onend = () => {
@@ -402,8 +395,8 @@ export default function RealTimeSearchEngine({
       };
 
       recognitionRef.current.start();
-    } catch {
-      setVoiceError('Error iniciando reconocimiento de voz');
+    } catch (error) {
+      console.error('Error iniciando reconocimiento de voz:', error);
       setIsListening(false);
     }
   };
@@ -433,10 +426,8 @@ export default function RealTimeSearchEngine({
           <>
             <div className="flex-shrink-0 pl-3">
               <CompactCategorySelector
-                selectedCategory={selectedCategory}
-                selectedSubcategory={''} // This prop is removed, so pass an empty string or remove the component if not needed
+                selectedCategory={selectedCategory || ''}
                 onCategoryChange={onCategoryChange}
-                onSubcategoryChange={() => {}} // This prop is removed, so pass an empty function
               />
             </div>
             <div className="w-px h-6 bg-gray-300 dark:bg-gray-600"></div>

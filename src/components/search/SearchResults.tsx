@@ -251,8 +251,7 @@ export default function SearchResults({
       publication.slug,
       publication.categorySlug || '',
       publication.subcategory || publication.subcategorySlug || '',
-      publication.subsubcategory || publication.subSubcategorySlug || '',
-      !publication.slug
+      publication.subsubcategory || publication.subSubcategorySlug || ''
     );
 
     return (
@@ -425,10 +424,9 @@ export default function SearchResults({
       publication.id,
       publication.title || '',
       publication.slug,
-      categorySlug,
-      subcategorySlug,
-      subsubcategorySlug,
-      !publication.slug
+      publication.categorySlug || '',
+      publication.subcategory || publication.subcategorySlug || '',
+      publication.subsubcategory || publication.subSubcategorySlug || ''
     );
 
     // Formatear mensaje de WhatsApp

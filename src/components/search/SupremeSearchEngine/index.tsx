@@ -81,6 +81,8 @@ export interface Filter {
   type: 'select' | 'multiselect' | 'range' | 'toggle';
   options?: FilterOption[];
   format?: (value: number) => string;
+  min?: number;
+  max?: number;
 }
 
 export interface CategoryItem {
@@ -186,11 +188,11 @@ const InlineFilters = ({
   
   if (!filters || filters.length === 0) return null
 
-  const handleFilterChange = (filterId: string, value: string | number | boolean | [number, number]) => {
+  const handleFilterChange = (filterId: string, value: string | number | boolean | [number, number] | string[]) => {
     const newFilters = { ...activeFilters }
     
     if (value === '' || value === null || value === undefined || 
-        (Array.isArray(value) && value.length === 0)) {
+        (Array.isArray(value) && (value as unknown[]).length === 0)) {
       delete newFilters[filterId]
     } else {
       newFilters[filterId] = value
@@ -245,7 +247,7 @@ const InlineFilters = ({
               <div className="space-y-2">
                 <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">{filter.label}</label>
                 <select
-                  value={activeFilters[filter.id] || ''}
+                  value={typeof activeFilters[filter.id] === 'string' ? activeFilters[filter.id] as string : ''}
                   onChange={(e) => {
                     handleFilterChange(filter.id, e.target.value)
                     if (e.target.value) {
@@ -270,18 +272,19 @@ const InlineFilters = ({
                 <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">{filter.label}</label>
                 <div className="max-h-40 overflow-y-auto space-y-1">
                   {filter.options?.map((option: FilterOption) => {
-                    const isSelected = (activeFilters[filter.id] || []).includes(option.value)
+                    const filterValue = activeFilters[filter.id]
+                    const isSelected = Array.isArray(filterValue) && filterValue.includes(option.value)
                     return (
                       <label key={option.value} className="flex items-center space-x-2 cursor-pointer">
                         <input
                           type="checkbox"
                           checked={isSelected}
                           onChange={(e) => {
-                            const currentValues = activeFilters[filter.id] || []
+                            const currentValues = Array.isArray(filterValue) ? filterValue : []
                             const newValues = e.target.checked
                               ? [...currentValues, option.value]
-                              : currentValues.filter((v: string) => v !== option.value)
-                            handleFilterChange(filter.id, newValues)
+                              : currentValues.filter((v: unknown) => v !== option.value)
+                            handleFilterChange(filter.id, newValues as string[])
                           }}
                           className="rounded"
                         />
@@ -300,10 +303,17 @@ const InlineFilters = ({
                   <input
                     type="number"
                     placeholder="Min"
-                    value={(activeFilters[filter.id] || [filter.min, filter.max])[0] || ''}
+                    value={(() => {
+                      const filterValue = activeFilters[filter.id]
+                      const defaultValue = [filter.min || 0, filter.max || 100]
+                      const currentValue = Array.isArray(filterValue) ? filterValue : defaultValue
+                      return currentValue[0] || ''
+                    })()}
                     onChange={(e) => {
-                      const currentRange = activeFilters[filter.id] || [filter.min, filter.max]
-                      handleFilterChange(filter.id, [parseInt(e.target.value) || filter.min, currentRange[1]])
+                      const filterValue = activeFilters[filter.id]
+                      const defaultValue = [filter.min || 0, filter.max || 100]
+                      const currentRange = Array.isArray(filterValue) ? filterValue : defaultValue
+                      handleFilterChange(filter.id, [parseInt(e.target.value) || filter.min || 0, currentRange[1] || filter.max || 100])
                     }}
                     className="w-20 px-2 py-1 border border-gray-300 dark:border-slate-600 rounded text-sm"
                   />
@@ -311,16 +321,23 @@ const InlineFilters = ({
                   <input
                     type="number"
                     placeholder="Max"
-                    value={(activeFilters[filter.id] || [filter.min, filter.max])[1] || ''}
+                    value={(() => {
+                      const filterValue = activeFilters[filter.id]
+                      const defaultValue = [filter.min || 0, filter.max || 100]
+                      const currentValue = Array.isArray(filterValue) ? filterValue : defaultValue
+                      return currentValue[1] || ''
+                    })()}
                     onChange={(e) => {
-                      const currentRange = activeFilters[filter.id] || [filter.min, filter.max]
-                      handleFilterChange(filter.id, [currentRange[0], parseInt(e.target.value) || filter.max])
+                      const filterValue = activeFilters[filter.id]
+                      const defaultValue = [filter.min || 0, filter.max || 100]
+                      const currentRange = Array.isArray(filterValue) ? filterValue : defaultValue
+                      handleFilterChange(filter.id, [currentRange[0], parseInt(e.target.value) || filter.max || 100])
                     }}
                     className="w-20 px-2 py-1 border border-gray-300 dark:border-slate-600 rounded text-sm"
                   />
                   {filter.format && (
                     <span className="text-xs text-gray-500">
-                      ({filter.format(filter.min)} - {filter.format(filter.max)})
+                      ({filter.format(filter.min || 0)} - {filter.format(filter.max || 100)})
                     </span>
                   )}
                 </div>
@@ -351,7 +368,7 @@ const InlineFilters = ({
               {activeFilters[filter.id] && (
                 <button
                   onClick={() => {
-                    handleFilterChange(filter.id, null)
+                    handleFilterChange(filter.id, null as unknown as string | number | boolean | [number, number])
                     setOpenFilter(null)
                   }}
                   className="px-3 py-1 text-sm text-red-600 hover:text-red-700"
@@ -369,7 +386,7 @@ const InlineFilters = ({
   return (
     <div className="flex items-center gap-2 overflow-x-auto py-2 hide-scrollbar">
       <div className="flex items-center gap-2 min-w-max">
-        {filters.slice(0, 4).map(renderFilterButton)} {/* Reducido a 4 filtros para móvil */}
+        {filters.slice(0, 4).map((filter: Filter) => renderFilterButton(filter))} {/* Reducido a 4 filtros para móvil */}
       </div>
       
       {/* Overlay to close dropdowns when clicking outside */}
@@ -405,9 +422,9 @@ export default function SupremeSearchEngine({
   
   // Estados para categorías
   const [categorySelection, setCategorySelection] = useState({
-    category: null as string | null,
-    subcategory: null as string | null,
-    subsubcategory: null as string | null
+    category: null as CategoryItem | null,
+    subcategory: null as CategoryItem | null,
+    subsubcategory: null as CategoryItem | null
   })
   const [categoryLevel, setCategoryLevel] = useState<'category' | 'subcategory' | 'subsubcategory'>('category')
 
@@ -436,7 +453,7 @@ export default function SupremeSearchEngine({
         category: searchState.category,
         location: searchState.location
       })
-      setQuickResults(response.results)
+      setQuickResults(response.results as SearchResult[])
       setShowQuickResults(true)
     } catch (error) {
       console.error('Error in quick search:', error)
@@ -457,12 +474,20 @@ export default function SupremeSearchEngine({
   // Inicializar reconocimiento de voz
   useEffect(() => {
     if (typeof window !== 'undefined' && 'webkitSpeechRecognition' in window) {
-      const SpeechRecognition = window.webkitSpeechRecognition || window.SpeechRecognition
-      if (SpeechRecognition) {
-        recognition.current = new SpeechRecognition()
-        recognition.current.continuous = false
-        recognition.current.interimResults = true
-        recognition.current.lang = 'es-ES'
+      const SpeechRecognitionConstructor = (window.webkitSpeechRecognition || window.SpeechRecognition) as new () => VoiceRecognition
+      if (SpeechRecognitionConstructor) {
+        recognition.current = new SpeechRecognitionConstructor()
+        
+        // Configurar propiedades si existen
+        if ('continuous' in recognition.current) {
+          (recognition.current as any).continuous = false
+        }
+        if ('interimResults' in recognition.current) {
+          (recognition.current as any).interimResults = true
+        }
+        if ('lang' in recognition.current) {
+          (recognition.current as any).lang = 'es-ES'
+        }
 
         recognition.current.onresult = (event: VoiceRecognitionEvent) => {
           const transcript = Array.from(event.results)
@@ -471,8 +496,10 @@ export default function SupremeSearchEngine({
           setQuery(transcript)
         }
 
-        recognition.current.onend = () => {
-          setIsRecording(false)
+        if ('onend' in recognition.current) {
+          (recognition.current as any).onend = () => {
+            setIsRecording(false)
+          }
         }
 
         recognition.current.onerror = () => {
@@ -521,7 +548,11 @@ export default function SupremeSearchEngine({
 
     // Ejecutar búsqueda
     if (onSearch) {
-      onSearch(query, searchState)
+      onSearch(query, {
+        category: searchState.category,
+        subcategory: searchState.subcategory,
+        location: searchState.location
+      })
     } else {
       router.push(`/buscar?q=${encodeURIComponent(query)}`)
     }
@@ -644,13 +675,40 @@ export default function SupremeSearchEngine({
     updateSearch({ category: newSelection.category?.id || '' })
   }
 
-  const getCategoryDataForLevel = (level: string) => {
+  const getCategoryDataForLevel = (level: string): CategoryItem[] => {
     if (level === 'category') {
-      return categoriesList
+      return categoriesList.map(cat => ({
+        id: cat.id,
+        name: cat.name,
+        slug: cat.id, // Usar id como slug
+        subcategories: cat.subcategories?.map(sub => ({
+          id: sub.id,
+          name: sub.name,
+          slug: sub.id,
+          subcategories: sub.subSubcategories?.map(subsub => ({
+            id: subsub.id,
+            name: subsub.name,
+            slug: subsub.id
+          }))
+        }))
+      }))
     } else if (level === 'subcategory' && categorySelection.category) {
-      return categorySelection.category.subcategories || []
+      return (categorySelection.category.subcategories || []).map(sub => ({
+        id: sub.id,
+        name: sub.name,
+        slug: sub.id,
+        subcategories: sub.subcategories?.map(subsub => ({
+          id: subsub.id,
+          name: subsub.name,
+          slug: subsub.id
+        }))
+      }))
     } else if (level === 'subsubcategory' && categorySelection.subcategory) {
-      return categorySelection.subcategory.subSubcategories || []
+      return (categorySelection.subcategory.subcategories || []).map(subsub => ({
+        id: subsub.id,
+        name: subsub.name,
+        slug: subsub.id
+      }))
     }
     return []
   }
@@ -783,7 +841,7 @@ export default function SupremeSearchEngine({
         <div className="mt-3">
           <InlineFilters
             category={searchState.category}
-                          activeFilters={searchState as SearchFilters}
+            activeFilters={{} as SearchFilters}
             onFilterChange={onFilterChange || (() => {})}
           />
         </div>
@@ -813,7 +871,7 @@ export default function SupremeSearchEngine({
                     <div className="max-w-full">
                       <InlineFilters
                         category={searchState.category}
-                        activeFilters={searchState as SearchFilters}
+                        activeFilters={{} as SearchFilters}
                         onFilterChange={onFilterChange || (() => {})}
                       />
                     </div>
@@ -1175,15 +1233,9 @@ export default function SupremeSearchEngine({
                             {item.name}
                           </div>
                           
-                          {item.description && categoryLevel === 'category' && (
-                            <p className="text-xs text-slate-500 dark:text-slate-400 line-clamp-2 leading-relaxed">
-                              {item.description}
-                            </p>
-                          )}
-                          
-                          {categoryLevel === 'subcategory' && item.subSubcategories && (
+                          {categoryLevel === 'subcategory' && item.subcategories && (
                             <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
-                              {item.subSubcategories.length} especialidades
+                              {item.subcategories.length} especialidades
                             </p>
                           )}
                         </div>
@@ -1233,7 +1285,7 @@ export default function SupremeSearchEngine({
             className="absolute top-full mt-2 w-full bg-white dark:bg-slate-800 rounded-xl shadow-xl border border-slate-200 dark:border-slate-700 z-50"
           >
             <AdvancedFilters
-              onFilterChange={onFilterChange}
+              onFilterChange={onFilterChange as (filters: Record<string, unknown>) => void}
               onClose={() => setActivePanel(null)}
             />
           </motion.div>
@@ -1273,7 +1325,7 @@ export default function SupremeSearchEngine({
               
               <div className="p-4">
                 <AdvancedFilters
-                  onFilterChange={onFilterChange}
+                  onFilterChange={onFilterChange as (filters: Record<string, unknown>) => void}
                   onClose={() => setShowMobileFilters(false)}
                   isMobile={true}
                 />

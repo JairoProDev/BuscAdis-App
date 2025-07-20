@@ -73,7 +73,7 @@ export default function SearchFilters({
       case 'select':
         return (
           <select
-            value={value || ''}
+            value={typeof value === 'string' ? value : ''}
             onChange={(e) => handleFilterChange(filter.id, e.target.value || null)}
             className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
           >
@@ -110,7 +110,9 @@ export default function SearchFilters({
         )
 
       case 'range':
-        const rangeValue = value || { min: filter.min || 0, max: filter.max || 100 }
+        const rangeValue = (value && typeof value === 'object' && 'min' in value && 'max' in value) 
+          ? value as { min: number; max: number }
+          : { min: filter.min || 0, max: filter.max || 100 };
         return (
           <div className="space-y-3">
             <div className="flex items-center space-x-2">
@@ -161,7 +163,7 @@ export default function SearchFilters({
         return (
           <input
             type="text"
-            value={value || ''}
+            value={typeof value === 'string' ? value : ''}
             onChange={(e) => handleFilterChange(filter.id, e.target.value || null)}
             className="w-full px-3 py-2 border border-gray-300 dark:border-gray-600 rounded-md bg-white dark:bg-gray-700 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
             placeholder={filter.label}

@@ -16,7 +16,7 @@ import {
 import { HeartIcon as HeartSolidIcon } from '@heroicons/react/24/solid'
 import Image from 'next/image'
 
-interface SearchResult {
+export interface SearchResult {
   id: string
   title: string
   description: string

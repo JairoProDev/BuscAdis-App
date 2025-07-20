@@ -100,54 +100,6 @@ export default function SearchSuggestions({
     }
   }, [])
   
-  // Handle keyboard navigation
-  useEffect(() => {
-    const handleKeyDown = (e: KeyboardEvent) => {
-      const allItems = [...suggestions, ...trendingSearches, ...searchHistory, ...aiSuggestions]
-      
-      switch (e.key) {
-        case 'ArrowDown':
-          e.preventDefault()
-          setHighlightedIndex(prev => 
-            prev < allItems.length - 1 ? prev + 1 : 0
-          )
-          break
-        case 'ArrowUp':
-          e.preventDefault()
-          setHighlightedIndex(prev => 
-            prev > 0 ? prev - 1 : allItems.length - 1
-          )
-          break
-        case 'Enter':
-          if (highlightedIndex >= 0 && highlightedIndex < allItems.length) {
-            e.preventDefault()
-            onSelectSuggestion(allItems[highlightedIndex].text)
-          }
-          break
-        case 'Escape':
-          e.preventDefault()
-          setHighlightedIndex(-1)
-          break
-      }
-    }
-    
-    document.addEventListener('keydown', handleKeyDown)
-    return () => document.removeEventListener('keydown', handleKeyDown)
-  }, [suggestions, trendingSearches, searchHistory, highlightedIndex, onSelectSuggestion, aiSuggestions])
-  
-  // Auto-scroll to highlighted item
-  useEffect(() => {
-    if (highlightedIndex >= 0 && suggestionsRef.current) {
-      const highlightedElement = suggestionsRef.current.querySelector(`[data-index="${highlightedIndex}"]`)
-      highlightedElement?.scrollIntoView({ block: 'nearest' })
-    }
-  }, [highlightedIndex])
-  
-  // Reset highlighted index when suggestions change
-  useEffect(() => {
-    setHighlightedIndex(-1)
-  }, [suggestions, trendingSearches, searchHistory])
-  
   // Prepare all items to display
   const allItems = [
     ...(searchTerm ? suggestions.map((item, index) => ({ ...item, dataIndex: index })) : []),
@@ -207,6 +159,64 @@ export default function SearchSuggestions({
     
     return [...inmuebles, ...vehiculos, ...tecnologia, ...hogar, ...empleos, ...servicios];
   }, [allItems.length]);
+
+  // Handle keyboard navigation
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (!suggestionsRef.current) return
+      
+      const totalItems = suggestions.length + trendingSearches.length + searchHistory.length + aiSuggestions.length
+      
+      switch (e.key) {
+        case 'ArrowDown':
+          e.preventDefault()
+          setHighlightedIndex(prev => 
+            prev < totalItems - 1 ? prev + 1 : 0
+          )
+          break
+        case 'ArrowUp':
+          e.preventDefault()
+          setHighlightedIndex(prev => 
+            prev > 0 ? prev - 1 : totalItems - 1
+          )
+          break
+        case 'Enter':
+          e.preventDefault()
+          if (highlightedIndex >= 0) {
+            const allItems = [
+              ...suggestions,
+              ...trendingSearches,
+              ...searchHistory,
+              ...aiSuggestions
+            ]
+            const selectedItem = allItems[highlightedIndex]
+            if (selectedItem) {
+              onSelectSuggestion(selectedItem.text)
+            }
+          }
+          break
+        case 'Escape':
+          e.preventDefault()
+          break
+      }
+    }
+    
+    document.addEventListener('keydown', handleKeyDown)
+    return () => document.removeEventListener('keydown', handleKeyDown)
+  }, [suggestions, trendingSearches, searchHistory, highlightedIndex, onSelectSuggestion, aiSuggestions])
+  
+  // Auto-scroll to highlighted item
+  useEffect(() => {
+    if (highlightedIndex >= 0 && suggestionsRef.current) {
+      const highlightedElement = suggestionsRef.current.querySelector(`[data-index="${highlightedIndex}"]`)
+      highlightedElement?.scrollIntoView({ block: 'nearest' })
+    }
+  }, [highlightedIndex])
+  
+  // Reset highlighted index when suggestions change
+  useEffect(() => {
+    setHighlightedIndex(-1)
+  }, [suggestions, trendingSearches, searchHistory])
   
   // Función para seleccionar aleatoriamente 10 sugerencias de la lista completa
   const getRandomizedAiSuggestions = () => {

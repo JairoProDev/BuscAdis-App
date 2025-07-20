@@ -1,18 +1,10 @@
-// Conditional AWS SDK imports
-const S3Client: unknown = null;
-const PutObjectCommand: unknown = null;
-const DeleteObjectCommand: unknown = null;
-const getSignedUrl: unknown = null;
-
-try {
-  // AWS SDK imports are now handled at the top
-} catch {
-  // AWS SDK not available, service will use fallback methods
-}
+/**
+ * Servicio para el manejo de imágenes
+ * Actualmente deshabilitado - requiere configuración de Cloudinary o AWS S3
+ */
 
 import { v4 as uuidv4 } from 'uuid';
 import { AuthService } from '@/features/auth/services/auth.service';
-import { Logger } from './logging.service';
 
 export interface ImageDimensions {
   width: number;
@@ -50,10 +42,21 @@ interface OptimizationOptions {
   format: string;
 }
 
+// Tipos para AWS SDK (deshabilitado por ahora)
+interface AWSClient {
+  send: (command: unknown) => Promise<unknown>;
+}
+
+interface AWSCommand {
+  // Placeholder para comandos AWS - interfaz mínima
+  readonly [key: string]: unknown;
+}
+
 export class ImageService {
-  private static client = S3Client ? new (S3Client as any)({ region: process.env.NEXT_PUBLIC_AWS_REGION }) : null;
-  private static BUCKET_NAME = process.env.NEXT_PUBLIC_S3_BUCKET_NAME;
-  private static CLOUDFRONT_DOMAIN = process.env.NEXT_PUBLIC_CLOUDFRONT_DOMAIN;
+  // Servicio deshabilitado - requiere configuración
+  private static readonly SERVICE_DISABLED = true;
+  private static readonly BUCKET_NAME = process.env.NEXT_PUBLIC_S3_BUCKET_NAME;
+  private static readonly CLOUDFRONT_DOMAIN = process.env.NEXT_PUBLIC_CLOUDFRONT_DOMAIN;
 
   private static defaultRules: ImageValidationRules = {
     maxSizeInMB: 5,
@@ -64,7 +67,11 @@ export class ImageService {
     allowedTypes: ['image/jpeg', 'image/png', 'image/webp']
   };
 
-  static async getUploadUrl(contentType: string) {
+  static async getUploadUrl(_contentType: string) {
+    if (this.SERVICE_DISABLED) {
+      throw new Error('Servicio de imágenes deshabilitado. Configure Cloudinary o AWS S3.');
+    }
+
     try {
       const currentUser = await AuthService.getCurrentUser();
       if (!currentUser) {
@@ -73,14 +80,9 @@ export class ImageService {
 
       const key = `${currentUser.id}/${uuidv4()}`;
       
-      const command = PutObjectCommand ? new (PutObjectCommand as any)({
-        Bucket: this.BUCKET_NAME,
-        Key: key,
-        ContentType: contentType
-      }) : null;
-
-      // Generar URL presignada que expira en 5 minutos
-      const signedUrl = getSignedUrl && this.client && command ? await (getSignedUrl as any)(this.client, command, { expiresIn: 300 }) : null;
+      // Placeholder para AWS S3 (deshabilitado)
+      const _command: AWSCommand = {} as AWSCommand;
+      const signedUrl = null; // Placeholder
       
       // Construir la URL de CloudFront para la imagen
       const imageUrl = this.CLOUDFRONT_DOMAIN 
@@ -99,6 +101,10 @@ export class ImageService {
   }
 
   static async uploadImage(file: File) {
+    if (this.SERVICE_DISABLED) {
+      throw new Error('Servicio de imágenes deshabilitado. Configure Cloudinary o AWS S3.');
+    }
+
     try {
       // Validar tamaño y tipo
       if (file.size > 5 * 1024 * 1024) { // 5MB max
@@ -113,6 +119,10 @@ export class ImageService {
       const { uploadUrl, imageUrl, key } = await this.getUploadUrl(file.type);
 
       // Subir la imagen directamente a S3 usando la URL presignada
+      if (!uploadUrl) {
+        throw new Error('URL de subida no disponible');
+      }
+      
       const uploadResponse = await fetch(uploadUrl, {
         method: 'PUT',
         body: file,
@@ -133,6 +143,10 @@ export class ImageService {
   }
 
   static async deleteImage(key: string) {
+    if (this.SERVICE_DISABLED) {
+      throw new Error('Servicio de imágenes deshabilitado. Configure Cloudinary o AWS S3.');
+    }
+
     try {
       const currentUser = await AuthService.getCurrentUser();
       if (!currentUser) {
@@ -144,16 +158,10 @@ export class ImageService {
         throw new Error('No tienes permiso para eliminar esta imagen');
       }
       
-      if (!DeleteObjectCommand) {
-        throw new Error('AWS SDK not available');
-      }
+      const _command: AWSCommand = {} as AWSCommand;
+      const _client: AWSClient = {} as AWSClient;
       
-      const command = DeleteObjectCommand ? new (DeleteObjectCommand as any)({
-        Bucket: this.BUCKET_NAME,
-        Key: key
-      }) : null;
-      
-      await this.client.send(command);
+      // await client.send(command); // Deshabilitado
       return { success: true };
     } catch (error) {
       console.error('Error deleting image:', error);
@@ -199,8 +207,7 @@ export class ImageService {
   }
 
   static async optimizeImage(file: File, _options: OptimizationOptions): Promise<File> {
-    // In a real implementation, this would resize and compress the image
-    // For now, we'll just return the original file
+    // Placeholder para optimización de imagen
     return file;
   }
 
@@ -214,36 +221,27 @@ export class ImageService {
         });
       };
       img.onerror = () => {
-        reject(new Error('Error al cargar la imagen'));
+        reject(new Error('No se pudieron obtener las dimensiones de la imagen'));
       };
       img.src = URL.createObjectURL(file);
     });
   }
 
   private static async createPreview(file: File): Promise<string> {
-    return new Promise((resolve, reject) => {
+    return new Promise((resolve) => {
       const reader = new FileReader();
       reader.onload = () => {
         resolve(reader.result as string);
-      };
-      reader.onerror = () => {
-        reject(new Error('Error al crear la vista previa'));
       };
       reader.readAsDataURL(file);
     });
   }
 
   private static async createImageBitmap(file: File): Promise<ImageBitmap> {
-    try {
-      return await createImageBitmap(file);
-    } catch (error) {
-      Logger.error('Error al crear ImageBitmap:', error instanceof Error ? { message: error.message } : { error });
-      throw new Error('Error al procesar la imagen');
-    }
+    return createImageBitmap(file);
   }
 
   static revokeObjectURL(url: string): void {
     URL.revokeObjectURL(url);
-    Logger.debug('URL de objeto revocada');
   }
 }

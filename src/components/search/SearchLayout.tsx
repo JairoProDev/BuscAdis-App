@@ -45,14 +45,14 @@ export default function SearchLayout({
     // Handle search from the search bar
     const handleSearch = (query: string, options: Record<string, unknown> = {}) => {
         if (onSearch) {
-            onSearch(query, options)
+            onSearch(query, options as any)
         }
     }
 
     // Handle filter changes from the filters bar
     const handleFilterChange = (filters: Record<string, unknown>) => {
         if (onFilterChange) {
-            onFilterChange(filters)
+            onFilterChange(filters as Record<string, FilterValue>)
         }
     }
 
@@ -60,7 +60,7 @@ export default function SearchLayout({
         <div className={`min-h-screen bg-gray-50 ${className}`}>
             {/* Sticky Search Container */}
             <StickySearchContainer 
-                onSearch={handleSearch}
+                onSearch={handleSearch as any}
                 onFilterChange={handleFilterChange}
             />
 
