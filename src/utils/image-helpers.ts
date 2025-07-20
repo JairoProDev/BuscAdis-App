@@ -106,7 +106,7 @@ export const validateImage = async (
       if (options.maxHeight && dimensions.height > options.maxHeight) {
         errors.push(`El alto de la imagen (${dimensions.height}px) es mayor que el máximo permitido (${options.maxHeight}px)`);
       }
-    } catch (_error) {
+    } catch {
       errors.push('No se pudieron determinar las dimensiones de la imagen');
     }
   }

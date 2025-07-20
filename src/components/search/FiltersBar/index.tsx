@@ -63,11 +63,11 @@ export default function FiltersBar({ onFilterChange, className = '' }: FiltersBa
                   }`}
                 >
                   <span>{filter.label}</span>
-                  {isActive && activeFilters[filter.id] && (
+                  {isActive && activeFilters[filter.id] !== null && activeFilters[filter.id] !== undefined && (
                     <span className="ml-2 text-xs bg-blue-200 px-2 py-1 rounded-full">
                       {Array.isArray(activeFilters[filter.id]) 
-                        ? `${activeFilters[filter.id].length}`
-                        : activeFilters[filter.id].toString().slice(0, 10)
+                        ? `${(activeFilters[filter.id] as (string | number)[]).length}`
+                        : activeFilters[filter.id]!.toString().slice(0, 10)
                       }
                     </span>
                   )}

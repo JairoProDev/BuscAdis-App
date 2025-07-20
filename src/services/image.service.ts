@@ -1,13 +1,12 @@
 // Conditional AWS SDK imports
-// Conditional AWS SDK imports
-const S3Client: any = null;
-const PutObjectCommand: any = null;
-const DeleteObjectCommand: any = null;
-const getSignedUrl: any = null;
+let S3Client: unknown = null;
+let PutObjectCommand: unknown = null;
+let DeleteObjectCommand: unknown = null;
+let getSignedUrl: unknown = null;
 
 try {
   // AWS SDK imports are now handled at the top
-} catch (_error) {
+} catch {
   // AWS SDK not available, service will use fallback methods
 }
 
@@ -52,7 +51,7 @@ interface OptimizationOptions {
 }
 
 export class ImageService {
-  private static client = new S3Client({ region: process.env.NEXT_PUBLIC_AWS_REGION });
+  private static client = S3Client ? new (S3Client as any)({ region: process.env.NEXT_PUBLIC_AWS_REGION }) : null;
   private static BUCKET_NAME = process.env.NEXT_PUBLIC_S3_BUCKET_NAME;
   private static CLOUDFRONT_DOMAIN = process.env.NEXT_PUBLIC_CLOUDFRONT_DOMAIN;
 
@@ -74,14 +73,14 @@ export class ImageService {
 
       const key = `${currentUser.id}/${uuidv4()}`;
       
-      const command = new PutObjectCommand({
+      const command = PutObjectCommand ? new (PutObjectCommand as any)({
         Bucket: this.BUCKET_NAME,
         Key: key,
         ContentType: contentType
-      });
+      }) : null;
 
       // Generar URL presignada que expira en 5 minutos
-      const signedUrl = await getSignedUrl(this.client, command, { expiresIn: 300 });
+      const signedUrl = getSignedUrl && this.client && command ? await (getSignedUrl as any)(this.client, command, { expiresIn: 300 }) : null;
       
       // Construir la URL de CloudFront para la imagen
       const imageUrl = this.CLOUDFRONT_DOMAIN 
@@ -149,10 +148,10 @@ export class ImageService {
         throw new Error('AWS SDK not available');
       }
       
-      const command = new DeleteObjectCommand({
+      const command = DeleteObjectCommand ? new (DeleteObjectCommand as any)({
         Bucket: this.BUCKET_NAME,
         Key: key
-      });
+      }) : null;
       
       await this.client.send(command);
       return { success: true };

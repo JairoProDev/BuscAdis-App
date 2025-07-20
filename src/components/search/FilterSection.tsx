@@ -81,10 +81,10 @@ export default function FilterSection({
             />
             <div className="flex justify-between text-sm text-slate-300 mt-1">
               <div>
-                {value?.[0] !== undefined ? value[0].toLocaleString() : min.toLocaleString()}
+                {Array.isArray(value) && value[0] !== undefined ? Number(value[0]).toLocaleString() : min.toLocaleString()}
               </div>
               <div>
-                {value?.[1] !== undefined ? value[1].toLocaleString() : max.toLocaleString()}
+                {Array.isArray(value) && value[1] !== undefined ? Number(value[1]).toLocaleString() : max.toLocaleString()}
               </div>
             </div>
           </div>
@@ -94,7 +94,7 @@ export default function FilterSection({
         return (
           <div className="p-3">
             <Select
-              value={value || ''}
+              value={String(value || '')}
               onValueChange={onChange}
             >
               <SelectTrigger className="w-full">
