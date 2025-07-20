@@ -86,7 +86,7 @@ export default function MediaUploader({ files = [], onFilesChange, maxFiles = 10
           <AnimatePresence>
             {files.map((file, index) => (
               <motion.div
-                key={`media-${index}-${file.name?.substring(0, 10) || Date.now()}`}
+                key={`media-${Math.random().toString(36).substr(2, 9)}-${Date.now()}`}
                 initial={{ opacity: 0, scale: 0.8 }}
                 animate={{ opacity: 1, scale: 1 }}
                 exit={{ opacity: 0, scale: 0.8 }}

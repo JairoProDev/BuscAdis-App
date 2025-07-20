@@ -421,7 +421,7 @@ export default function AdvancedSearchBar({
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
                   {trendingSearches.map((trend, idx) => (
                     <button
-                      key={`trending-${idx}-${trend.text.substring(0, 15).replace(/\s+/g, '-').toLowerCase()}`}
+                      key={`trending-${Math.random().toString(36).substr(2, 9)}-${Date.now()}`}
                       onClick={() => handleSuggestionSelect(trend)}
                       className="flex items-center justify-between p-2 hover:bg-slate-50 dark:hover:bg-slate-700 rounded-lg text-left transition-colors"
                     >

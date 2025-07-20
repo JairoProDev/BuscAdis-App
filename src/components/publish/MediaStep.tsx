@@ -132,7 +132,7 @@ export default function MediaStep({ onNext, onBack, formData, updateFormData }: 
           <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
             {localImages.map((image, index) => (
               <div
-                key={`media-preview-${index}-${typeof image === 'string' ? image.substring(0, 10) : image.name?.substring(0, 10) || Date.now()}`}
+                key={`media-preview-${Math.random().toString(36).substr(2, 9)}-${Date.now()}`}
                 className="relative group bg-gray-100 dark:bg-gray-800 rounded-lg p-4 border-2 border-dashed border-gray-300 dark:border-gray-600 hover:border-blue-500 transition-colors"
               >
                 <Image

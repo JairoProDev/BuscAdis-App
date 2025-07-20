@@ -610,9 +610,9 @@ export default function RealTimeSearchEngine({
                       </div>
                       <div className="space-y-1 max-h-32 overflow-y-auto">
                         {searchHistory.slice(0, 4).map((historyItem, index) => (
-                          <button
-                            key={`mobile-history-${index}-${historyItem.substring(0, 10).replace(/\s+/g, '-')}`}
-                            onClick={() => setInputValue(historyItem)}
+                                                  <button
+                          key={`mobile-history-${Math.random().toString(36).substr(2, 9)}-${Date.now()}`}
+                          onClick={() => setInputValue(historyItem)}
                             className="w-full text-left p-1.5 hover:bg-gray-50 dark:hover:bg-gray-700 rounded text-xs transition-colors"
                           >
                             <span className="text-gray-600 dark:text-gray-300 block truncate">
@@ -781,7 +781,7 @@ export default function RealTimeSearchEngine({
                     <div className="space-y-1">
                       {searchHistory.slice(0, 5).map((historyItem, index) => (
                         <button
-                          key={`history-${index}-${historyItem.substring(0, 10).replace(/\s+/g, '-')}`}
+                          key={`history-${Math.random().toString(36).substr(2, 9)}-${Date.now()}`}
                           onClick={() => setInputValue(historyItem)}
                           className="w-full text-left p-2 hover:bg-gray-50 dark:hover:bg-gray-700 rounded-lg transition-colors flex items-center gap-3"
                         >

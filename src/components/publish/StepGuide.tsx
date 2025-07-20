@@ -121,9 +121,9 @@ export default function StepGuide({ steps, onStepClick }: StepGuideProps) {
                       exit={{ opacity: 0, height: 0 }}
                       className="mt-3 space-y-2"
                     >
-                      {step.tips.map((tip, tipIndex) => (
+                      {step.tips.map((tip) => (
                         <div
-                          key={tipIndex}
+                          key={`tip-${Math.random().toString(36).substr(2, 9)}-${Date.now()}`}
                           className="flex items-start gap-2 text-sm text-gray-600"
                         >
                           <LightBulbIcon className="w-4 h-4 text-primary-500 flex-shrink-0 mt-0.5" />

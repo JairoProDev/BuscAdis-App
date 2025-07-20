@@ -235,7 +235,7 @@ export default function Testimonials() {
                                 </div>
                                 <div className="flex items-center space-x-1 text-yellow-400">
                                     {[...Array(5)].map((_, i) => (
-                                        <StarIcon key={`star-${i}-${Math.random().toString(36).substr(2, 9)}`} className={`w-4 h-4 ${i < 5 ? 'fill-yellow-400' : 'text-gray-500'}`} />
+                                        <StarIcon key={`star-${Math.random().toString(36).substr(2, 9)}-${Date.now()}`} className={`w-4 h-4 ${i < 5 ? 'fill-yellow-400' : 'text-gray-500'}`} />
                                     ))}
                                     <span className={`ml-2 text-xs ${primaryLightColor}/70`}>Verificado</span>
                                 </div>

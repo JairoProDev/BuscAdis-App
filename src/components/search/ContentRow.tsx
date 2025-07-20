@@ -107,8 +107,8 @@ export default function ContentRow({
         </div>
         
         <div className="flex gap-3 overflow-hidden">
-          {[...Array(6)].map((_, i) => (
-            <div key={`skeleton-${i}-${Math.random().toString(36).substr(2, 9)}`} className="flex-shrink-0 w-44 lg:w-64 h-64 bg-gray-200 dark:bg-gray-700 rounded-xl animate-pulse"></div>
+          {[...Array(6)].map(() => (
+            <div key={`skeleton-${Math.random().toString(36).substr(2, 9)}-${Date.now()}`} className="flex-shrink-0 w-44 lg:w-64 h-64 bg-gray-200 dark:bg-gray-700 rounded-xl animate-pulse"></div>
           ))}
         </div>
       </div>

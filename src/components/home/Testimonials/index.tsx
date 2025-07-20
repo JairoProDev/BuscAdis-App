@@ -131,9 +131,9 @@ export default function Testimonials() {
         
         {/* Floating particles */}
         <div className="absolute inset-0">
-          {Array.from({ length: 30 }).map((_, i) => (
+          {Array.from({ length: 30 }).map(() => (
             <motion.div
-              key={`particle-${i}-${Math.random().toString(36).substr(2, 9)}`}
+              key={`particle-${Math.random().toString(36).substr(2, 9)}-${Date.now()}`}
               className="absolute w-1 h-1 bg-cyan-400/30 rounded-full"
               initial={{ 
                 x: `${Math.random() * 100}%`, 
@@ -285,7 +285,7 @@ export default function Testimonials() {
           <div className="flex justify-center mt-10 space-x-3">
             {[...Array(maxIndex + 1)].map((_, index) => (
               <button
-                key={`indicator-${index}-${Math.random().toString(36).substr(2, 9)}`}
+                key={`indicator-${Math.random().toString(36).substr(2, 9)}-${Date.now()}`}
                 onClick={() => setActiveIndex(index)}
                 className="group"
                 aria-label={`Ver testimonio ${index + 1}`}

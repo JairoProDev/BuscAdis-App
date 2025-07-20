@@ -723,7 +723,7 @@ export default function PublicarPage() {
                     <div className="flex items-center mt-1">
                       {[...Array(5)].map((_, i) => (
                         <StarIcon
-                          key={`star-${i}-${Math.floor(adQuality / 20)}-${Math.random().toString(36).substr(2, 9)}`}
+                          key={`star-${Math.random().toString(36).substr(2, 9)}-${Date.now()}`}
                           className={`h-4 w-4 ${
                             i < Math.floor(adQuality / 20)
                               ? 'text-yellow-400'

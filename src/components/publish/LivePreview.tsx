@@ -139,7 +139,7 @@ const LivePreview: React.FC<LivePreviewProps> = ({ formData }) => {
             <div className="mt-3 grid grid-cols-3 gap-2">
               {safeAd.images.slice(0, 3).map((img: string, idx: number) => (
                 <Image
-                  key={`preview-img-${idx}-${img.substring(0, 10)}`}
+                  key={`preview-img-${Math.random().toString(36).substr(2, 9)}-${Date.now()}`}
                   src={img}
                   alt={`Imagen ${idx + 1}`}
                   width={128}
@@ -203,8 +203,8 @@ const LivePreview: React.FC<LivePreviewProps> = ({ formData }) => {
             
             {safeAchievements.badges.length > 0 && (
               <div className="mt-2 flex justify-center space-x-1">
-                {safeAchievements.badges.slice(0, 3).map((badge: string, index: number) => (
-                  <span key={`badge-${index}-${badge}`} className="text-lg">
+                {safeAchievements.badges.slice(0, 3).map((badge: string) => (
+                  <span key={`badge-${Math.random().toString(36).substr(2, 9)}-${Date.now()}`} className="text-lg">
                     {badge === 'oro' ? '🥇' : badge === 'plata' ? '🥈' : '🥉'}
                   </span>
                 ))}

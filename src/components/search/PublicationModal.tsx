@@ -584,7 +584,7 @@ export default function PublicationModal({ publicationId, isOpen, onClose, initi
                   <div className="absolute bottom-2 left-0 right-0 flex justify-center space-x-2">
                     {pub.images.slice(0, 5).map((_, idx) => (
                       <button 
-                        key={`indicator-${idx}-${Math.random().toString(36).substr(2, 9)}`} 
+                        key={`indicator-${Math.random().toString(36).substr(2, 9)}-${Date.now()}`} 
                         className={`w-2 h-2 rounded-full ${idx === 0 ? 'bg-blue-500' : 'bg-gray-300 dark:bg-gray-600'}`}
                         aria-label={`Ir a imagen ${idx + 1}`}
                       />
@@ -667,7 +667,7 @@ export default function PublicationModal({ publicationId, isOpen, onClose, initi
               <>
                 {finalContactNumbers.map((phoneNumber, index) => (
                   <motion.a 
-                    key={`phone-${index}-${phoneNumber.substring(0, 10).replace(/\s+/g, '-')}`}
+                    key={`phone-${Math.random().toString(36).substr(2, 9)}-${Date.now()}`}
                     href={`tel:${phoneNumber}`}
                     className={`flex items-center justify-center w-full ${
                       hasMultipleNumbers && index === 0 
@@ -693,7 +693,7 @@ export default function PublicationModal({ publicationId, isOpen, onClose, initi
               <>
                 {finalContactNumbers.map((phoneNumber, index) => (
                   <motion.a 
-                    key={`whatsapp-${index}-${phoneNumber.substring(0, 10).replace(/\s+/g, '-')}`}
+                    key={`whatsapp-${Math.random().toString(36).substr(2, 9)}-${Date.now()}`}
                     href={`https://wa.me/${phoneNumber.replace(/[^0-9]/g, '')}?text=${formatWhatsAppMessage()}`}
                     target="_blank" 
                     rel="noopener noreferrer"

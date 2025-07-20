@@ -42,7 +42,7 @@ const AdPreview: React.FC<AdPreviewProps> = ({ ad, quality }) => {
           <div className="flex items-center">
             {[...Array(5)].map((_, i) => (
               <StarIcon
-                key={`star-${i}-${Math.random().toString(36).substr(2, 9)}`}
+                key={`star-${Math.random().toString(36).substr(2, 9)}-${Date.now()}`}
                 className={`h-4 w-4 ${
                   i < Math.floor(quality / 20) ? 'text-yellow-400' : 'text-gray-300 dark:text-gray-600'
                 }`}

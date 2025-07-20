@@ -48,7 +48,7 @@ const PublicationProgress: React.FC<PublicationProgressProps> = ({
           
           return (
             <div 
-              key={`step-${index}-${step.replace(/\s+/g, '-')}`}
+              key={`step-${Math.random().toString(36).substr(2, 9)}-${Date.now()}`}
               className={`flex flex-col items-center ${onStepClick ? 'cursor-pointer' : ''}`}
               onClick={() => onStepClick && onStepClick(stepNumber)}
             >
