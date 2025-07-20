@@ -111,7 +111,7 @@ export default function Functionalitys() {
                 <div className="absolute inset-0">
                     {Array.from({ length: 20 }).map((_, i) => (
                         <motion.div
-                            key={`data-point-${i}-${Date.now()}`}
+                            key={`data-point-${i}-${Math.random().toString(36).substr(2, 9)}`}
                             className="absolute w-1 h-1 bg-teal-400/40 rounded-full"
                             initial={{
                                 x: `${Math.random() * 100}%`,
@@ -182,7 +182,7 @@ export default function Functionalitys() {
                 </motion.div>
 
                 <div className="grid lg:grid-cols-3 gap-8">
-                    {functionalitys.map((functionality) => (
+                    {functionalitys.map((functionality, idx) => (
                         <motion.div
                             key={`functionality-${functionality.id}`}
                             initial={{ opacity: 0, scale: 0.9, y: 20 }}
@@ -268,7 +268,7 @@ export default function Functionalitys() {
                                 </div>
 
                                 <ul className={`space-y-4`}>
-                                    {functionality.features.map((feature) => (
+                                    {functionality.features.map((feature, index) => (
                                         <motion.li
                                             key={`feature-${functionality.id}-${feature.substring(0, 20).replace(/\s+/g, '-').toLowerCase()}`}
                                             initial={false}

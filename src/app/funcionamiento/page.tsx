@@ -99,9 +99,9 @@ export default function ComoFunciona() {
                     </div>
 
                     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
-                        {steps.map((step, index) => (
+                        {steps.map((step) => (
                             <motion.div
-                                key={`step-${index}-${step.title.substring(0, 10).replace(/\s+/g, '-')}`}
+                                key={`step-${step.id}-${step.title.substring(0, 20).replace(/\s+/g, '-').toLowerCase()}`}
                                 initial={{ opacity: 0, y: 20 }}
                                 animate={{ opacity: 1, y: 0 }}
                                 transition={{ duration: 0.5, delay: step.id * 0.1 }}
@@ -246,17 +246,17 @@ export default function ComoFunciona() {
                     </div>
 
                     <div className="max-w-3xl mx-auto divide-y divide-slate-700">
-                        {faqItems.map((item, index) => (
-                            <div key={index} className="py-6">
+                        {faqItems.map((item) => (
+                            <div key={`faq-${item.question.substring(0, 20).replace(/\s+/g, '-').toLowerCase()}`} className="py-6">
                                 <button
                                     className="flex w-full items-center justify-between text-left"
-                                    onClick={() => setOpenFaq(openFaq === index ? null : index)}
+                                    onClick={() => setOpenFaq(openFaq === faqItems.indexOf(item) ? null : faqItems.indexOf(item))}
                                 >
                                     <h3 className="text-lg font-medium text-white">
                                         {item.question}
                                     </h3>
                                     <span>
-                                        {openFaq === index ? (
+                                        {openFaq === faqItems.indexOf(item) ? (
                                             <svg
                                                 className="h-6 w-6 text-teal-300"
                                                 fill="none"
@@ -287,7 +287,7 @@ export default function ComoFunciona() {
                                         )}
                                     </span>
                                 </button>
-                                {openFaq === index && (
+                                {openFaq === faqItems.indexOf(item) && (
                                     <motion.div
                                         initial={{ opacity: 0, height: 0 }}
                                         animate={{ opacity: 1, height: "auto" }}

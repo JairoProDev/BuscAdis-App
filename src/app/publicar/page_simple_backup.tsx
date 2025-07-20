@@ -723,7 +723,7 @@ export default function PublicarPage() {
                     <div className="flex items-center mt-1">
                       {[...Array(5)].map((_, i) => (
                         <StarIcon
-                          key={`star-${i}-${Math.floor(adQuality / 20)}`}
+                          key={`star-${i}-${Math.floor(adQuality / 20)}-${Date.now()}`}
                           className={`h-4 w-4 ${
                             i < Math.floor(adQuality / 20)
                               ? 'text-yellow-400'
@@ -797,8 +797,8 @@ export default function PublicarPage() {
                       Para continuar, corrige lo siguiente:
                     </h4>
                     <ul className="list-disc list-inside text-red-600 text-sm mt-1">
-                      {validation.errors.map((error, index) => (
-                        <li key={`error-${index}-${error.substring(0, 15).replace(/\s+/g, '-')}`}>• {error}</li>
+                      {validation.errors.map((error) => (
+                        <li key={`error-${error.substring(0, 20).replace(/\s+/g, '-').toLowerCase()}`}>• {error}</li>
                       ))}
                     </ul>
                   </div>
