@@ -5,6 +5,8 @@
 
 import { importPublications, BulkPublicationImporter } from '@/scripts/bulk-import-publications'
 
+const fs = require('fs')
+
 // =============================================================================
 // EJEMPLO 1: IMPORTACIÓN BÁSICA DESDE CSV
 // =============================================================================
@@ -42,8 +44,8 @@ async function importFromCSV() {
   )
   
   console.log(`✅ Importación completada:`)
-  console.log(`   📥 Importados: ${result.imported}`)
-  console.log(`   ❌ Errores: ${result.errors}`)
+  console.log(`   📥 Importados: ${(result as { imported: number }).imported}`)
+  console.log(`   ❌ Errores: ${(result as { errors: unknown[] }).errors}`)
   
   return result
 }
@@ -100,14 +102,14 @@ async function importFromText() {
           // Extraer teléfono con regex
           const phoneRegex = /(\+?51)?[\s-]?9\d{8}/g
           const matches = (row.rawText as string).match(phoneRegex)
-          return matches ? matches[0] : undefined
+          return matches ? matches[0] : ''
         },
         
         email: (row: Record<string, unknown>) => {
           // Extraer email con regex
           const emailRegex = /\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,}\b/g
           const matches = (row.rawText as string).match(emailRegex)
-          return matches ? matches[0] : undefined
+          return matches ? matches[0] : ''
         }
       },
       
@@ -154,8 +156,8 @@ async function importFromText() {
   const result = await importer.import()
   
   console.log(`✅ Importación de texto completada:`)
-  console.log(`   📥 Importados: ${result.imported}`)
-  console.log(`   ❌ Errores: ${result.errors}`)
+  console.log(`   📥 Importados: ${(result as { imported: number }).imported}`)
+  console.log(`   ❌ Errores: ${(result as { errors: number }).errors}`)
   
   return result
 }
@@ -213,16 +215,16 @@ async function importWithCustomValidation() {
       
       // Validaciones personalizadas
       customValidators: {
-        titulo: (value: string) => !!(value && value.length >= 10 && value.length <= 100),
-        descripcion: (value: string) => !!(value && value.length >= 50 && value.length <= 2000),
-        precio: (value: number) => !value || (value > 0 && value < 10000000),
-        telefono: (value: string) => {
-          if (!value) return true // Campo opcional
+        titulo: (value: unknown) => !!(value && typeof value === 'string' && value.length >= 10 && value.length <= 100),
+        descripcion: (value: unknown) => !!(value && typeof value === 'string' && value.length >= 50 && value.length <= 2000),
+        precio: (value: unknown) => !value || (typeof value === 'number' && value > 0 && value < 10000000),
+        telefono: (value: unknown) => {
+          if (!value || typeof value !== 'string') return true // Campo opcional
           const phoneRegex = /^(\+51)?9\d{8}$/
           return phoneRegex.test(value.replace(/\s|-/g, ''))
         },
-        email: (value: string) => {
-          if (!value) return true // Campo opcional
+        email: (value: unknown) => {
+          if (!value || typeof value !== 'string') return true // Campo opcional
           const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
           return emailRegex.test(value)
         }
@@ -258,11 +260,11 @@ async function importWithCustomValidation() {
   if (result.results) {
     const categories = result.results
       .filter(r => r.success && r.publication)
-      .reduce((acc: Record<string, unknown>, r: Record<string, unknown>) => {
+      .reduce((acc: Record<string, number>, r: any) => {
         const cat = (r.publication as { category?: { name?: string } })?.category?.name || 'Sin categoría'
         acc[cat] = (acc[cat] || 0) + 1
         return acc
-      }, {})
+      }, {} as Record<string, number>)
     
     console.log('\n📊 Distribución por categorías:')
     Object.entries(categories).forEach(([cat, count]) => {
@@ -322,7 +324,6 @@ async function importWithMonitoring() {
   const sampleData = generateSampleData()
   
   // Guardar en archivo temporal
-  import fs from 'fs'
   const tempFile = './temp/sample_data.json'
   fs.writeFileSync(tempFile, JSON.stringify(sampleData, null, 2))
   

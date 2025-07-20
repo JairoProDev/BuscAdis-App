@@ -30,6 +30,7 @@ import {
 } from '@/components/icons/categories'
 import Breadcrumbs from '../Breadcrumbs'
 import { getFiltersForCategory } from '@/utils/filterUtils'
+import type { FilterOption, FilterSelectOption } from '@/types/filters'
 
 // Nuevas interfaces para reemplazar 'any'
 export interface SearchOptions {
@@ -67,12 +68,6 @@ export interface SearchResult {
 export interface SearchResponse {
   results: SearchResult[];
   totalCount: number;
-}
-
-export interface FilterOption {
-  value: string;
-  label: string;
-  count?: number;
 }
 
 export interface Filter {
@@ -201,14 +196,14 @@ const InlineFilters = ({
     onFilterChange(newFilters)
   }
 
-  const renderFilterButton = (filter: Filter) => {
+  const renderFilterButton = (filter: FilterOption) => {
     const isActive = activeFilters[filter.id] !== undefined
     const hasValue = activeFilters[filter.id]
     
     let displayValue = ''
     if (hasValue) {
       if (filter.type === 'select' && typeof hasValue === 'string') {
-        const option = filter.options?.find((o: FilterOption) => o.value === hasValue)
+        const option = filter.options?.find((o: FilterSelectOption) => o.value === hasValue)
         displayValue = option ? option.label : hasValue
       } else if (filter.type === 'range' && Array.isArray(hasValue)) {
         displayValue = `${filter.format ? filter.format(Number(hasValue[0])) : hasValue[0]} - ${filter.format ? filter.format(Number(hasValue[1])) : hasValue[1]}`
@@ -258,7 +253,7 @@ const InlineFilters = ({
                   aria-label={filter.label}
                 >
                   <option value="">Todos</option>
-                  {filter.options?.map((option: FilterOption) => (
+                  {filter.options?.map((option: FilterSelectOption) => (
                     <option key={option.value} value={option.value}>
                       {option.label}
                     </option>
@@ -271,9 +266,9 @@ const InlineFilters = ({
               <div className="space-y-2">
                 <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">{filter.label}</label>
                 <div className="max-h-40 overflow-y-auto space-y-1">
-                  {filter.options?.map((option: FilterOption) => {
+                  {filter.options?.map((option: FilterSelectOption) => {
                     const filterValue = activeFilters[filter.id]
-                    const isSelected = Array.isArray(filterValue) && filterValue.includes(option.value)
+                    const isSelected = Array.isArray(filterValue) && (filterValue as string[]).includes(option.value)
                     return (
                       <label key={option.value} className="flex items-center space-x-2 cursor-pointer">
                         <input
@@ -387,7 +382,7 @@ const InlineFilters = ({
   return (
     <div className="flex items-center gap-2 overflow-x-auto py-2 hide-scrollbar">
       <div className="flex items-center gap-2 min-w-max">
-        {filters.slice(0, 4).map((filter: Filter) => renderFilterButton(filter))} {/* Reducido a 4 filtros para móvil */}
+        {filters.slice(0, 4).map((filter: FilterOption) => renderFilterButton(filter))} {/* Reducido a 4 filtros para móvil */}
       </div>
       
       {/* Overlay to close dropdowns when clicking outside */}
