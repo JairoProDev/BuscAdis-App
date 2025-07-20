@@ -28,16 +28,19 @@ const nextConfig: NextConfig = {
     "@mongodb-js/zstd",
     "@napi-rs/snappy-win32-x64-msvc",
     "snappy",
-
     "gcp-metadata",
     "socks",
     "bson",
   ],
 
-  // Turbopack configuration
+  // Turbopack configuration (stable)
   turbopack: {
     rules: {
       "*.node": ["empty"],
+      "*.svg": {
+        loaders: ["@svgr/webpack"],
+        as: "*.js",
+      },
     },
     resolveAlias: {
       // MongoDB dependencies that should be stubbed
@@ -45,18 +48,22 @@ const nextConfig: NextConfig = {
       kerberos: "next/dist/compiled/noop",
       "@mongodb-js/zstd": "next/dist/compiled/noop",
       snappy: "next/dist/compiled/noop",
-
       "gcp-metadata": "next/dist/compiled/noop",
       "socks": "next/dist/compiled/noop",
     },
   },
 
-  // Experimental features
+  // Experimental features for performance
   experimental: {
     serverMinification: true,
+    optimizePackageImports: ['@heroicons/react', 'framer-motion', 'lucide-react'],
+    optimizeCss: true,
+    scrollRestoration: true,
+    // legacyBrowsers: false, // Removed as it's not supported in current Next.js version
+    // browsersListForSwc: true, // Removed as it's not supported in current Next.js version
   },
 
-  // Configure image remote patterns
+  // Configure image optimization
   images: {
     remotePatterns: [
       { protocol: "http", hostname: "localhost" },
@@ -68,50 +75,94 @@ const nextConfig: NextConfig = {
       { protocol: "https", hostname: "res.cloudinary.com" },
       { protocol: "https", hostname: "via.placeholder.com" },
     ],
+    formats: ['image/webp', 'image/avif'],
+    deviceSizes: [640, 750, 828, 1080, 1200, 1920, 2048, 3840],
+    imageSizes: [16, 32, 48, 64, 96, 128, 256, 384],
+    minimumCacheTTL: 60 * 60 * 24 * 30, // 30 days
+    dangerouslyAllowSVG: true,
+    contentSecurityPolicy: "default-src 'self'; script-src 'none'; sandbox;",
   },
 
-  // Provide MongoDB URI via serverRuntimeConfig for server-side only
-  serverRuntimeConfig: {
-    mongodb: {
-      uri: process.env.MONGODB_URI,
-    },
+  // Performance optimizations
+  compiler: {
+    removeConsole: process.env.NODE_ENV === 'production',
   },
 
-  // Webpack config for client-side fallbacks
-  webpack: (config, { isServer }) => {
-    if (!isServer) {
-      // Only apply Node.js fallbacks to client-side bundles
-      config.resolve.fallback = {
-        ...config.resolve.fallback,
-        fs: false,
-        net: false,
-        tls: false,
-        dns: false,
-        child_process: false,
-        "fs/promises": false,
-        "timers/promises": false,
-        path: false,
-        url: false,
-        http: false,
-        https: false,
-        zlib: false,
-        stream: false,
-        crypto: false,
-        "util/types": false,
+  // Compression
+  compress: true,
+
+  // Power by header
+  poweredByHeader: false,
+
+  // Bundle analyzer
+  webpack: (config, { dev, isServer }) => {
+    // Optimize bundle size
+    if (!dev && !isServer) {
+      config.optimization.splitChunks = {
+        chunks: 'all',
+        cacheGroups: {
+          vendor: {
+            test: /[\\/]node_modules[\\/]/,
+            name: 'vendors',
+            chunks: 'all',
+          },
+          common: {
+            name: 'common',
+            minChunks: 2,
+            chunks: 'all',
+            enforce: true,
+          },
+        },
       };
     }
-
-    // Windows casing issue fix for both client and server
-    config.resolve.alias = {
-      ...config.resolve.alias,
-      "@/components/ui/Tabs": "@/components/ui/Tabs-adapter",
-    };
 
     return config;
   },
 
-  // Support for framer-motion
-  transpilePackages: ['framer-motion'],
+  // Headers for performance
+  async headers() {
+    return [
+      {
+        source: '/(.*)',
+        headers: [
+          {
+            key: 'X-Content-Type-Options',
+            value: 'nosniff',
+          },
+          {
+            key: 'X-Frame-Options',
+            value: 'DENY',
+          },
+          {
+            key: 'X-XSS-Protection',
+            value: '1; mode=block',
+          },
+          {
+            key: 'Referrer-Policy',
+            value: 'strict-origin-when-cross-origin',
+          },
+        ],
+      },
+      {
+        source: '/images/(.*)',
+        headers: [
+          {
+            key: 'Cache-Control',
+            value: 'public, max-age=31536000, immutable',
+          },
+        ],
+      },
+      {
+        source: '/api/(.*)',
+        headers: [
+          {
+            key: 'Cache-Control',
+            value: 'public, max-age=300, s-maxage=600',
+          },
+        ],
+      },
+    ];
+  },
 };
 
 export default nextConfig;

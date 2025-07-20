@@ -13,6 +13,7 @@ import LoadingState from '@/components/ui/LoadingState';
 
 import FeaturedListingsSection from '@/components/home/FeaturedListingsSection';
 import BenefitsSection from '@/components/home/BenefitsSection';
+import OptimizedImage from '@/components/ui/OptimizedImage';
 
 export default function InicioPage() {
   const [loading, setLoading] = useState(true);

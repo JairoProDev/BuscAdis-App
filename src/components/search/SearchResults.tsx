@@ -16,6 +16,7 @@ import { generateSeoUrl } from '@/utils/url'
 import { toast } from 'react-hot-toast'
 import { BookmarkOutline } from '@/components/icons/Bookmark'
 import Link from 'next/link'
+import OptimizedImage from '@/components/ui/OptimizedImage';
 
 export interface Publication {
   id: string
@@ -479,17 +480,15 @@ export default function SearchResults({
               <div className="relative w-40 sm:w-48 flex-shrink-0 overflow-hidden h-auto image-container">
                 <div className="absolute inset-0 bg-gradient-to-br from-slate-900/20 to-slate-900/60 z-10" />
                 <div className="relative w-full h-full min-h-[160px]">
-                  <Image
+                  <OptimizedImage
                     src={images[0]}
                     alt={`Imagen de ${publication.title || 'publicación'}`}
                     fill
                     sizes="(max-width: 640px) 30vw, 120px"
-                    className="object-cover transition-transform duration-500 group-hover:scale-110"
-                    onError={(e) => {
-                      console.log(`Image load error for publication ${publication.id}:`, e);
-                      e.currentTarget.src = '/images/placeholder-buscadis.jpg';
-                    }}
+                    className="transition-transform duration-500 group-hover:scale-110"
                     priority={index < 4}
+                    categorySlug={publication.categorySlug}
+                    fallbackSrc="/images/placeholder-buscadis.jpg"
                   />
                 </div>
 

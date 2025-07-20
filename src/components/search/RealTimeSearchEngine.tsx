@@ -6,6 +6,7 @@ import { motion, AnimatePresence } from 'framer-motion'
 import { useSearch } from '@/contexts/SearchContext'
 import { ChevronDownIcon } from '@heroicons/react/24/outline'
 import Image from 'next/image'
+import { useOptimizedQuery } from '@/hooks/useOptimizedQuery';
 
 // Implementación propia de debounce
 function debounce<T extends (...args: unknown[]) => unknown>(func: T, wait: number): T & { cancel: () => void } {
@@ -187,47 +188,52 @@ export default function RealTimeSearchEngine({
   const [quickResults, setQuickResults] = useState<SearchResult[]>([])
   const [isLoading, setIsLoading] = useState(false)
   const [showSuggestions, setShowSuggestions] = useState(false)
-  
-  const inputRef = useRef<HTMLInputElement>(null)
-  const containerRef = useRef<HTMLDivElement>(null)
+  const [selectedIndex, setSelectedIndex] = useState(-1);
+  const inputRef = useRef<HTMLInputElement>(null);
+  const suggestionsRef = useRef<HTMLDivElement>(null);
 
-  // Búsqueda en tiempo real con debounce
+  // Optimized search function with better debouncing
   const debouncedSearch = useMemo(
     () => debounce(async (...args: unknown[]) => {
       const query = args[0] as string;
-      if (query.length >= 2) {
-        setIsLoading(true)
-        try {
-          // Obtener sugerencias
-          const suggestionsRes = await fetch(`/api/search/suggestions?q=${encodeURIComponent(query)}&category=${selectedCategory}&limit=6`)
-          const suggestionsData = await suggestionsRes.json()
-          setSuggestions(suggestionsData.suggestions || [])
+      if (query.length < 2) {
+        setSuggestions([]);
+        setQuickResults([]);
+        return;
+      }
 
-          // Obtener resultados rápidos
-          const quickRes = await fetch(`/api/publications?query=${encodeURIComponent(query)}&category=${selectedCategory}&limit=5`)
-          const quickData = await quickRes.json()
-          
-          const formattedResults = (quickData.publications || []).map((pub: { id: string; title: string; description: string; category: string; price: number; location: string; image: string; _id?: string; categorySlug?: string; amount?: number; images?: string[] }) => ({
-            id: pub._id || pub.id,
-            title: pub.title || 'Sin título',
-            description: pub.description || '',
-            category: pub.categorySlug || pub.category || 'general',
-            price: pub.price || pub.amount || 0,
-            location: pub.location || 'Sin ubicación',
-            image: pub.images?.[0] || '/images/placeholder-image.jpg'
-          }))
-          
-          setQuickResults(formattedResults)
-        } catch {
-          console.error('Error fetching search results');
-          setQuickResults([]);
-          setSuggestions([]);
-        } finally {
-          setIsLoading(false)
-        }
-      } else {
-        setSuggestions([])
-        setQuickResults([])
+      setIsLoading(true);
+      try {
+        // Parallel requests for better performance
+        const [suggestionsRes, quickRes] = await Promise.all([
+          fetch(`/api/search/suggestions?q=${encodeURIComponent(query)}&category=${selectedCategory}&limit=6`),
+          fetch(`/api/publications?query=${encodeURIComponent(query)}&category=${selectedCategory}&limit=5`)
+        ]);
+
+        const [suggestionsData, quickData] = await Promise.all([
+          suggestionsRes.json(),
+          quickRes.json()
+        ]);
+
+        setSuggestions(suggestionsData.suggestions || []);
+        
+        const formattedResults = (quickData.publications || []).map((pub: any) => ({
+          id: pub._id || pub.id,
+          title: pub.title || 'Sin título',
+          description: pub.description || '',
+          category: pub.categorySlug || pub.category || 'general',
+          price: pub.price || pub.amount || 0,
+          location: pub.location || 'Sin ubicación',
+          image: pub.images?.[0] || '/images/placeholder-image.jpg'
+        }));
+        
+        setQuickResults(formattedResults);
+      } catch (error) {
+        console.error('Error fetching search results:', error);
+        setQuickResults([]);
+        setSuggestions([]);
+      } finally {
+        setIsLoading(false);
       }
     }, 300),
     [selectedCategory]
@@ -250,7 +256,7 @@ export default function RealTimeSearchEngine({
   // Manejar clicks fuera del componente
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
-      if (containerRef.current && !containerRef.current.contains(event.target as Node)) {
+      if (suggestionsRef.current && !suggestionsRef.current.contains(event.target as Node)) {
         setShowSuggestions(false)
         setIsInputFocused(false)
       }
@@ -412,7 +418,7 @@ export default function RealTimeSearchEngine({
   };
 
   return (
-    <div ref={containerRef} className="relative w-full max-w-4xl mx-auto">
+    <div ref={suggestionsRef} className="relative w-full max-w-4xl mx-auto">
       {/* Barra de búsqueda principal */}
       <div className={`relative flex items-center ${
         variant === 'header' ? 'h-10' : variant === 'compact' ? 'h-12' : 'h-14'
