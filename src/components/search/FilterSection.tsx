@@ -75,7 +75,7 @@ export default function FilterSection({
               min={min}
               max={max}
               step={step}
-              value={value || [min, max]}
+              value={Array.isArray(value) ? (value as number[]) : [min, max]}
               onValueChange={onChange}
               className="my-6"
             />

@@ -303,7 +303,7 @@ export default function DetailsPanel({
               {Object.entries(publication.attributes).map(([key, value]) => (
                 <div key={key} className="bg-slate-700 p-2 rounded">
                   <div className="text-xs text-slate-400">{key}</div>
-                  <div className="text-sm text-white">{value}</div>
+                  <div className="text-sm text-white">{String(value)}</div>
                 </div>
               ))}
             </div>

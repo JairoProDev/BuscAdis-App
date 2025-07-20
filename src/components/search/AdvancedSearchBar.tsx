@@ -178,9 +178,9 @@ export default function AdvancedSearchBar({
     // Guardar en búsquedas recientes
     const searchItem: SearchHistoryItem = {
       text: query,
-      categoryId: searchOptions.category,
-      subcategoryId: searchOptions.subcategory,
-      subsubcategoryId: searchOptions.subsubcategory
+      categoryId: searchOptions.category as string | undefined,
+      subcategoryId: searchOptions.subcategory as string | undefined,
+      subsubcategoryId: searchOptions.subsubcategory as string | undefined
     }
     
     const updatedSearches = [

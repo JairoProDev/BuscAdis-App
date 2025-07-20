@@ -34,6 +34,36 @@ export default function LocationInput({
   
   // Generate a unique ID for the map container
   const mapContainerId = useMemo(() => `map-container-${Math.random().toString(36).substring(2, 9)}`, [])
+
+  // Reverse geocode to get address from coordinates
+  const reverseGeocode = useCallback(async (lat: number, lng: number) => {
+    const apiKey = process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY
+    
+    if (!apiKey) {
+      console.error('Google Maps API key is missing')
+      return
+    }
+    
+    try {
+      const response = await fetch(
+        `https://maps.googleapis.com/maps/api/geocode/json?latlng=${lat},${lng}&key=${apiKey}`
+      )
+      
+      if (!response.ok) {
+        throw new Error('Geocoding API error')
+      }
+      
+      const data = await response.json()
+      
+      if (data.status === 'OK' && data.results && data.results.length > 0) {
+        const formattedAddress = data.results[0].formatted_address
+        setAddress(formattedAddress)
+        onLocationChange({ address: formattedAddress, coordinates: { lat, lng } })
+      }
+    } catch (error) {
+      console.error('Reverse geocoding error:', error)
+    }
+  }, [onLocationChange])
   
   // Load Google Maps API
   useEffect(() => {
@@ -115,7 +145,6 @@ export default function LocationInput({
             position: newCoords,
             map: mapInstance,
             draggable: true,
-            // animation: google.maps.Animation.DROP, // Removed for simplicity
           })
           
           // Add dragend listener to new marker
@@ -179,7 +208,6 @@ export default function LocationInput({
                 position: result,
                 map,
                 draggable: true,
-                // animation: google.maps.Animation.DROP, // Removed for simplicity
               })
               
               // Add dragend listener
@@ -211,36 +239,6 @@ export default function LocationInput({
     
     performGeocoding()
   }, [debouncedAddress, map, marker, address, onLocationChange, reverseGeocode])
-  
-  // Reverse geocode to get address from coordinates
-  const reverseGeocode = useCallback(async (lat: number, lng: number) => {
-    const apiKey = process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY
-    
-    if (!apiKey) {
-      console.error('Google Maps API key is missing')
-      return
-    }
-    
-    try {
-      const response = await fetch(
-        `https://maps.googleapis.com/maps/api/geocode/json?latlng=${lat},${lng}&key=${apiKey}`
-      )
-      
-      if (!response.ok) {
-        throw new Error('Geocoding API error')
-      }
-      
-      const data = await response.json()
-      
-      if (data.status === 'OK' && data.results && data.results.length > 0) {
-        const formattedAddress = data.results[0].formatted_address
-        setAddress(formattedAddress)
-        onLocationChange({ address: formattedAddress, coordinates: { lat, lng } })
-      }
-    } catch (error) {
-      console.error('Reverse geocoding error:', error)
-    }
-  }, [onLocationChange]);
   
   return (
     <div className={cn("space-y-2", className)}>
