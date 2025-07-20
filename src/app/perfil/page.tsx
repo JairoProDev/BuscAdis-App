@@ -786,7 +786,7 @@ export default function PerfilPage() {
           <label className="block text-sm font-medium text-slate-700 dark:text-slate-300 mb-1.5">Teléfonos / WhatsApp</label>
           <div className="flex flex-col gap-2">
             {phones.map((phone, idx) => (
-              <div key={`phone-${phone.value || `empty-${idx}`}-${idx}`} className="flex items-center gap-2">
+              <div key={`phone-${Math.random().toString(36).substr(2, 9)}-${Date.now()}`} className="flex items-center gap-2">
                 <input type="tel" value={phone.value} onChange={e => setPhones(phones.map((p, i) => i === idx ? { ...p, value: e.target.value } : p))} className="flex-1 px-3 py-2 rounded-lg border border-slate-300 dark:border-slate-600 bg-white/80 dark:bg-slate-800/70" placeholder="Ej: +51 987 654 321" disabled={!isEditing || isSaving} />
                 {phones.length > 1 && isEditing && <button type="button" title="Eliminar número" onClick={() => setPhones(phones.filter((_, i) => i !== idx))} className="p-1.5 rounded-full bg-red-100 hover:bg-red-200"><TrashIcon className="w-4 h-4 text-red-500" /></button>}
               </div>
@@ -802,7 +802,7 @@ export default function PerfilPage() {
         <h2 className="text-lg font-semibold text-teal-400 mb-3 flex items-center gap-2"><GlobeAltIcon className="w-5 h-5" /> Redes sociales</h2>
         <div className="flex flex-col gap-2 mb-2">
           {socialLinks.map((link, idx) => (
-            <div key={`social-${link.type}-${link.url || `empty-${idx}`}-${idx}`} className="flex items-center gap-2">
+            <div key={`social-${Math.random().toString(36).substr(2, 9)}-${Date.now()}`} className="flex items-center gap-2">
               <select value={link.type} title="Tipo de red social" onChange={e => setSocialLinks(socialLinks.map((l, i) => i === idx ? { ...l, type: e.target.value } : l))} className="px-2 py-1 rounded-lg border border-slate-300 dark:border-slate-600 bg-white/80 dark:bg-slate-800/70" disabled={!isEditing || isSaving}>
                 {SOCIALS.map(s => <option key={s.value} value={s.value}>{s.label}</option>)}
               </select>
@@ -855,8 +855,8 @@ export default function PerfilPage() {
         </h2>
         <div className="space-y-3 mb-4">
           {endorsements.length === 0 && <div className="text-slate-400 text-sm">Aún no tienes recomendaciones. ¡Pide a tus contactos que te recomienden!</div>}
-          {endorsements.map((e, i) => (
-            <div key={`endorsement-${e.name}-${e.message.substring(0, 10)}-${i}`} className="bg-slate-800/60 rounded-lg p-3 shadow flex flex-col">
+          {endorsements.map((e) => (
+            <div key={`endorsement-${Math.random().toString(36).substr(2, 9)}-${Date.now()}`} className="bg-slate-800/60 rounded-lg p-3 shadow flex flex-col">
               <span className="font-semibold text-teal-300">{e.name}</span>
               <span className="text-slate-200 text-sm mt-1">{e.message}</span>
             </div>
@@ -912,8 +912,8 @@ export default function PerfilPage() {
             {/* Portfolio file previews */}
             {portfolioPreviews.length > 0 && (
               <div className="mt-3 grid grid-cols-2 sm:grid-cols-3 gap-2">
-                {portfolioPreviews.map((item, index) => (
-                  <div key={`portfolio-${item.file.name}-${item.file.size}-${index}`} className="relative group bg-slate-800/60 rounded-lg p-2 flex flex-col items-center">
+                {portfolioPreviews.map((item) => (
+                  <div key={`portfolio-${Math.random().toString(36).substr(2, 9)}-${Date.now()}`} className="relative group bg-slate-800/60 rounded-lg p-2 flex flex-col items-center">
                     {item.preview === 'generic' ? (
                       <DocumentTextIcon className="w-12 h-12 text-slate-400" />
                     ) : (
@@ -947,8 +947,8 @@ export default function PerfilPage() {
             {/* Verification file previews */}
             {verificationPreviews.length > 0 && (
               <div className="mt-3 grid grid-cols-2 sm:grid-cols-3 gap-2">
-                {verificationPreviews.map((item, index) => (
-                  <div key={`verification-${item.file.name}-${item.file.size}-${index}`} className="relative group bg-slate-800/60 rounded-lg p-2 flex flex-col items-center">
+                {verificationPreviews.map((item) => (
+                  <div key={`verification-${Math.random().toString(36).substr(2, 9)}-${Date.now()}`} className="relative group bg-slate-800/60 rounded-lg p-2 flex flex-col items-center">
                     {item.preview === 'generic' ? (
                       <DocumentTextIcon className="w-12 h-12 text-slate-400" />
                     ) : (

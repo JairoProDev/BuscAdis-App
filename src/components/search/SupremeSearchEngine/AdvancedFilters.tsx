@@ -143,8 +143,8 @@ export default function AdvancedFilters({
               </div>
 
               <div className="max-h-80 overflow-y-auto p-4">
-                {categoryFilters.sections.map((section, sectionIndex) => (
-                  <div key={sectionIndex} className="space-y-4">
+                {categoryFilters.sections.map((section) => (
+                  <div key={`section-${Math.random().toString(36).substr(2, 9)}-${Date.now()}`} className="space-y-4">
                     {section.title && (
                       <h4 className="font-medium text-gray-900 dark:text-white text-sm border-b border-gray-200 dark:border-gray-700 pb-2">
                         {section.title}
