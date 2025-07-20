@@ -1,13 +1,13 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, Suspense, useEffect } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { PhoneInput } from 'react-international-phone';
 import 'react-international-phone/style.css';
 import { AuthService } from '../services/auth.service';
 import { PublicationsService } from '@/services/publications.service';
 
-export default function LoginForm() {
+function LoginFormContent() {
     const router = useRouter();
     const searchParams = useSearchParams();
     const redirectUrl = searchParams?.get('redirect');
@@ -133,5 +133,13 @@ export default function LoginForm() {
                 </button>
             </form>
         </div>
+    );
+}
+
+export default function LoginForm() {
+    return (
+        <Suspense fallback={<div>Cargando...</div>}>
+            <LoginFormContent />
+        </Suspense>
     );
 }

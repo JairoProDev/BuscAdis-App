@@ -1,24 +1,28 @@
 'use client';
 
 import { usePathname, useSearchParams } from 'next/navigation';
-import { useEffect } from 'react';
-import { useGoogleAnalytics } from '@/hooks/useGoogleAnalytics';
+import { useEffect, Suspense } from 'react';
 
-export default function PageViewTracker() {
+function PageViewTrackerContent() {
   const pathname = usePathname();
   const searchParams = useSearchParams();
-  const { trackPageView } = useGoogleAnalytics();
 
   useEffect(() => {
-    if (pathname) {
-      // Construir la URL completa con parámetros de búsqueda
-      const url = searchParams?.size 
-        ? `${pathname}?${searchParams.toString()}`
-        : pathname;
-      
-      trackPageView(url);
+    // Track page view
+    if (typeof window !== 'undefined' && window.gtag) {
+      window.gtag('config', process.env.NEXT_PUBLIC_GA_ID!, {
+        page_path: pathname + (searchParams?.toString() || ''),
+      });
     }
-  }, [pathname, searchParams, trackPageView]);
+  }, [pathname, searchParams]);
 
-  return null; // Este componente no renderiza nada
+  return null;
+}
+
+export default function PageViewTracker() {
+  return (
+    <Suspense fallback={null}>
+      <PageViewTrackerContent />
+    </Suspense>
+  );
 } 
