@@ -331,9 +331,9 @@ export default function SearchSuggestions({
               <h3 className="text-sm font-medium">Sugerencias</h3>
             </div>
             <ul className="flex flex-wrap gap-1.5">
-              {suggestions.slice(0, compact ? 8 : suggestions.length).map((item, index) => (
+              {suggestions.slice(0, compact ? 8 : suggestions.length).map((item) => (
                 <li 
-                  key={`suggestion-${index}-${item.text.substring(0, 10).replace(/\s+/g, '-')}`}
+                  key={`suggestion-${Math.random().toString(36).substr(2, 9)}-${Date.now()}`}
                   data-index={index}
                   onClick={(e) => handleSuggestionClick(e, item.text)}
                   onMouseDown={(e) => e.preventDefault()}
@@ -411,9 +411,9 @@ export default function SearchSuggestions({
                     </button>
                   </div>
                   <div className="flex flex-wrap gap-1.5">
-                    {searchHistory.slice(0, compact ? 4 : searchHistory.length).map((item, index) => (
+                    {searchHistory.slice(0, compact ? 4 : searchHistory.length).map((item) => (
                       <div 
-                        key={`history-${index}-${item.text.substring(0, 10).replace(/\s+/g, '-')}`}
+                        key={`history-${Math.random().toString(36).substr(2, 9)}-${Date.now()}`}
                         data-index={suggestions.length + trendingSearches.length + index}
                         className={`flex items-center ${compact ? 'px-2 py-0.5 text-xs' : 'px-3 py-1.5 text-sm'} rounded-full cursor-pointer ${
                           highlightedIndex === (suggestions.length + trendingSearches.length + index)
@@ -439,9 +439,9 @@ export default function SearchSuggestions({
                     <h3 className="text-sm font-medium">Sugerencias IA</h3>
                   </div>
                   <div className="flex flex-wrap gap-1.5">
-                    {randomizedAiSuggestions.slice(0, compact ? 4 : 8).map((item, index) => (
+                    {randomizedAiSuggestions.slice(0, compact ? 4 : 8).map((item) => (
                       <button
-                        key={`ai-${index}-${item.text.substring(0, 10).replace(/\s+/g, '-')}`}
+                        key={`ai-${Math.random().toString(36).substr(2, 9)}-${Date.now()}`}
                         data-index={item.dataIndex}
                         onClick={(e) => handleSuggestionClick(e, item.text)}
                         onMouseDown={(e) => e.preventDefault()}
@@ -467,9 +467,9 @@ export default function SearchSuggestions({
                     <h3 className="text-sm font-medium">Tendencias</h3>
                   </div>
                   <div className="flex flex-wrap gap-1.5">
-                    {trendingSearches.slice(0, compact ? 4 : trendingSearches.length).map((item, index) => (
+                    {trendingSearches.slice(0, compact ? 4 : trendingSearches.length).map((item) => (
                       <button 
-                        key={`trending-${index}-${item.text.substring(0, 10).replace(/\s+/g, '-')}`}
+                        key={`trending-${Math.random().toString(36).substr(2, 9)}-${Date.now()}`}
                         data-index={suggestions.length + index}
                         onClick={(e) => handleSuggestionClick(e, item.text)}
                         onMouseDown={(e) => e.preventDefault()}
@@ -500,9 +500,9 @@ export default function SearchSuggestions({
                   <h3 className="text-sm font-medium">Ofertas exclusivas</h3>
                 </div>
                 <div className="space-y-1">
-                  {exclusiveOffers.map((offer, index) => (
+                  {exclusiveOffers.map((offer) => (
                     <div 
-                      key={`offer-${index}-${offer.substring(0, 10).replace(/\s+/g, '-')}`}
+                      key={`offer-${Math.random().toString(36).substr(2, 9)}-${Date.now()}`}
                       className="flex items-center gap-2 text-sm"
                       onMouseDown={(e) => e.preventDefault()}
                     >

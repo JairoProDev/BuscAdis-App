@@ -15,8 +15,8 @@ export default function ErrorMessage({ message, onDismiss }: ErrorMessageProps) 
           <XCircleIcon className="h-5 w-5 text-red-400" aria-hidden="true" />
         </div>
         <div className="ml-3">
-          {messages.map((msg, index) => (
-            <p key={`error-${index}-${msg.substring(0, 20).replace(/\s+/g, '-')}`} className="text-sm text-red-700">
+          {messages.map((msg) => (
+            <p key={`error-${Math.random().toString(36).substr(2, 9)}-${Date.now()}`} className="text-sm text-red-700">
               {msg}
             </p>
           ))}

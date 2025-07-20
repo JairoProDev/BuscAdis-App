@@ -73,7 +73,7 @@ export function Carousel({ images, category }: CarouselProps) {
         <div className="absolute bottom-4 left-1/2 -translate-x-1/2 flex space-x-2">
           {processedImages.map((_, index) => (
             <button
-              key={`indicator-${index}-${Math.random().toString(36).substr(2, 9)}`}
+              key={`indicator-${Math.random().toString(36).substr(2, 9)}-${Date.now()}`}
               onClick={() => goToSlide(index)}
               className={`w-3 h-3 rounded-full transition-all ${
                 index === currentIndex ? 'bg-primary-600 w-6' : 'bg-white bg-opacity-60'

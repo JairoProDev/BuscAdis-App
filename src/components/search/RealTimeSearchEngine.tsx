@@ -609,7 +609,7 @@ export default function RealTimeSearchEngine({
                         </span>
                       </div>
                       <div className="space-y-1 max-h-32 overflow-y-auto">
-                        {searchHistory.slice(0, 4).map((historyItem, index) => (
+                        {searchHistory.slice(0, 4).map((historyItem) => (
                                                   <button
                           key={`mobile-history-${Math.random().toString(36).substr(2, 9)}-${Date.now()}`}
                           onClick={() => setInputValue(historyItem)}
@@ -779,7 +779,7 @@ export default function RealTimeSearchEngine({
                       </button>
                     </div>
                     <div className="space-y-1">
-                      {searchHistory.slice(0, 5).map((historyItem, index) => (
+                      {searchHistory.slice(0, 5).map((historyItem) => (
                         <button
                           key={`history-${Math.random().toString(36).substr(2, 9)}-${Date.now()}`}
                           onClick={() => setInputValue(historyItem)}

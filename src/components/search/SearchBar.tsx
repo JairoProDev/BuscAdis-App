@@ -392,7 +392,7 @@ export default function SearchBar({
                   </div>
                   
                   <div className="flex flex-wrap gap-2">
-                    {recentSearches.map((term, idx) => (
+                    {recentSearches.map((term) => (
                       <button
                         key={`recent-${Math.random().toString(36).substr(2, 9)}-${Date.now()}`}
                         onClick={() => {
@@ -459,7 +459,7 @@ export default function SearchBar({
                   </h3>
                   
                   <div className="space-y-2">
-                    {filteredSuggestions.map((suggestion, idx) => (
+                    {filteredSuggestions.map((suggestion) => (
                       <button
                         key={`suggestion-${Math.random().toString(36).substr(2, 9)}-${Date.now()}`}
                         onClick={() => handleSuggestionSelect(suggestion)}
