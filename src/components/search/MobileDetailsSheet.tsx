@@ -165,7 +165,7 @@ export default function MobileDetailsSheet({
                 // Only allow dragging from the handle
                 e.currentTarget.setPointerCapture(e.pointerId)
                 if (sheetRef.current) {
-                  (sheetRef.current as any).__dragHandlers?.onPointerDown(e)
+                  (sheetRef.current as unknown as { __dragHandlers?: { onPointerDown: (e: PointerEvent) => void } }).__dragHandlers?.onPointerDown(e)
                 }
               }}
               onPointerUp={(e) => {

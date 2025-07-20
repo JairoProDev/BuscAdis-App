@@ -219,7 +219,8 @@ export default function RealTimeSearchEngine({
         setQuickResults(formattedResults)
       } catch {
         console.error('Error fetching search results');
-        setResults([]);
+        setQuickResults([]);
+        setSuggestions([]);
       } finally {
         setIsLoading(false)
       }

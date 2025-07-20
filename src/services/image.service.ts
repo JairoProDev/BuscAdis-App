@@ -1,8 +1,8 @@
 // Conditional AWS SDK imports
-let S3Client: unknown = null;
-let PutObjectCommand: unknown = null;
-let DeleteObjectCommand: unknown = null;
-let getSignedUrl: unknown = null;
+const S3Client: unknown = null;
+const PutObjectCommand: unknown = null;
+const DeleteObjectCommand: unknown = null;
+const getSignedUrl: unknown = null;
 
 try {
   // AWS SDK imports are now handled at the top

@@ -28,9 +28,7 @@ export default function KeywordSearchBox({
   autoFocus = false,
   showVoiceSearch = true,
   showImageSearch = true,
-  showAiAssist = true,
-  placeholder = '¿Qué buscas?',
-  isMobile = false,
+  showAiAssist = true
 }: KeywordSearchBoxProps) {
   const router = useRouter();
   
