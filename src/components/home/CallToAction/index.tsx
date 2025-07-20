@@ -55,7 +55,7 @@ export default function CallToAction() {
         <div className="absolute inset-0">
           {Array.from({ length: 20 }).map((_, i) => (
             <motion.div
-              key={i}
+              key={`particle-${i}-${Date.now()}`}
               className="absolute w-1 h-1 bg-teal-400/40 rounded-full"
               initial={{
                 x: `${Math.random() * 100}%`,

@@ -667,7 +667,7 @@ export default function PublicationModal({ publicationId, isOpen, onClose, initi
               <>
                 {finalContactNumbers.map((phoneNumber, index) => (
                   <motion.a 
-                    key={`phone-${index}`}
+                    key={`phone-${index}-${phoneNumber.substring(0, 10).replace(/\s+/g, '-')}`}
                     href={`tel:${phoneNumber}`}
                     className={`flex items-center justify-center w-full ${
                       hasMultipleNumbers && index === 0 
@@ -693,7 +693,7 @@ export default function PublicationModal({ publicationId, isOpen, onClose, initi
               <>
                 {finalContactNumbers.map((phoneNumber, index) => (
                   <motion.a 
-                    key={`whatsapp-${index}`}
+                    key={`whatsapp-${index}-${phoneNumber.substring(0, 10).replace(/\s+/g, '-')}`}
                     href={`https://wa.me/${phoneNumber.replace(/[^0-9]/g, '')}?text=${formatWhatsAppMessage()}`}
                     target="_blank" 
                     rel="noopener noreferrer"

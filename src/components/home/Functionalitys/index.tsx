@@ -111,7 +111,7 @@ export default function Functionalitys() {
                 <div className="absolute inset-0">
                     {Array.from({ length: 20 }).map((_, i) => (
                         <motion.div
-                            key={i}
+                            key={`data-point-${i}-${Date.now()}`}
                             className="absolute w-1 h-1 bg-teal-400/40 rounded-full"
                             initial={{
                                 x: `${Math.random() * 100}%`,
@@ -184,7 +184,7 @@ export default function Functionalitys() {
                 <div className="grid lg:grid-cols-3 gap-8">
                     {functionalitys.map((functionality, idx) => (
                         <motion.div
-                            key={functionality.id}
+                            key={`functionality-${idx}-${functionality.title.substring(0, 10).replace(/\s+/g, '-')}`}
                             initial={{ opacity: 0, scale: 0.9, y: 20 }}
                             animate={{ opacity: 1, scale: 1, y: 0 }}
                             transition={{ duration: 0.6, delay: idx * 0.2 }}
@@ -243,7 +243,7 @@ export default function Functionalitys() {
                                 <div className="grid grid-cols-2 gap-4 mb-8">
                                     {functionality.stats.map((stat, index) => (
                                         <motion.div
-                                            key={index}
+                                            key={`stat-${index}-${functionality.id}`}
                                             className={`text-center p-3 ${
                                                 activeId === functionality.id
                                                     ? 'bg-gradient-to-br from-slate-800 to-slate-900/90'
@@ -270,7 +270,7 @@ export default function Functionalitys() {
                                 <ul className={`space-y-4`}>
                                     {functionality.features.map((feature, index) => (
                                         <motion.li
-                                            key={index}
+                                            key={`feature-${index}-${functionality.id}-${feature.substring(0, 10).replace(/\s+/g, '-')}`}
                                             initial={false}
                                             animate={{
                                                 opacity: activeId === functionality.id ? 1 : 0.7,

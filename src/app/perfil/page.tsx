@@ -913,7 +913,7 @@ export default function PerfilPage() {
             {portfolioPreviews.length > 0 && (
               <div className="mt-3 grid grid-cols-2 sm:grid-cols-3 gap-2">
                 {portfolioPreviews.map((item, index) => (
-                  <div key={index} className="relative group bg-slate-800/60 rounded-lg p-2 flex flex-col items-center">
+                  <div key={`portfolio-${index}-${item.file.name.substring(0, 10).replace(/\s+/g, '-')}`} className="relative group bg-slate-800/60 rounded-lg p-2 flex flex-col items-center">
                     {item.preview === 'generic' ? (
                       <DocumentTextIcon className="w-12 h-12 text-slate-400" />
                     ) : (
@@ -948,7 +948,7 @@ export default function PerfilPage() {
             {verificationPreviews.length > 0 && (
               <div className="mt-3 grid grid-cols-2 sm:grid-cols-3 gap-2">
                 {verificationPreviews.map((item, index) => (
-                  <div key={index} className="relative group bg-slate-800/60 rounded-lg p-2 flex flex-col items-center">
+                  <div key={`verification-${index}-${item.file.name.substring(0, 10).replace(/\s+/g, '-')}`} className="relative group bg-slate-800/60 rounded-lg p-2 flex flex-col items-center">
                     {item.preview === 'generic' ? (
                       <DocumentTextIcon className="w-12 h-12 text-slate-400" />
                     ) : (
