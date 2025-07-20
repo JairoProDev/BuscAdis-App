@@ -35,13 +35,6 @@ interface ImageValidationResult {
   errors: string[];
 }
 
-interface OptimizationOptions {
-  maxWidth: number;
-  maxHeight: number;
-  quality: number;
-  format: string;
-}
-
 
 export class ImageService {
   // Servicio deshabilitado - requiere configuración
@@ -58,7 +51,7 @@ export class ImageService {
     allowedTypes: ['image/jpeg', 'image/png', 'image/webp']
   };
 
-  static async getUploadUrl(_contentType: string) {
+  static async getUploadUrl() {
     if (this.SERVICE_DISABLED) {
       throw new Error('Servicio de imágenes deshabilitado. Configure Cloudinary.');
     }
@@ -105,7 +98,7 @@ export class ImageService {
       }
       
       // Obtener URL presignada
-      const { uploadUrl, imageUrl, key } = await this.getUploadUrl(file.type);
+      const { uploadUrl, imageUrl, key } = await this.getUploadUrl();
 
       // Subir la imagen directamente a S3 usando la URL presignada
       if (!uploadUrl) {
@@ -193,7 +186,7 @@ export class ImageService {
     });
   }
 
-  static async optimizeImage(file: File, _options: OptimizationOptions): Promise<File> {
+  static async optimizeImage(file: File): Promise<File> {
     // Placeholder para optimización de imagen
     return file;
   }

@@ -46,12 +46,7 @@ export const ImageUploader: React.FC<ImageUploaderProps> = ({
 
         try {
           // Optimizar la imagen antes de procesarla
-          const optimizedFile = await ImageService.optimizeImage(file, {
-            maxWidth: 2048,
-            maxHeight: 2048,
-            quality: 0.8,
-            format: 'webp'
-          });
+          const optimizedFile = await ImageService.optimizeImage(file);
 
           const processed = await ImageService.processImage(optimizedFile);
           processedImages.push(processed);

@@ -1,110 +1,46 @@
 'use client'
 
-import { useEffect, useRef } from 'react'
+import { useEffect, useRef } from 'react';
+import { gsap } from 'gsap';
+import { ScrollTrigger } from 'gsap/ScrollTrigger';
 
-// Define GSAP types
-interface GSAP {
-  to: (target: HTMLElement, vars: {
-    transform?: string;
-    ease?: string;
-    duration?: number;
-  }) => void;
-  fromTo: (target: HTMLElement, fromVars: Record<string, unknown>, toVars: Record<string, unknown>) => {
-    kill: () => void;
-  };
-  registerPlugin: (plugin: unknown) => void;
+// Register ScrollTrigger plugin
+if (typeof window !== 'undefined') {
+  gsap.registerPlugin(ScrollTrigger);
 }
 
-interface ScrollTrigger {
-  create: (config: {
-    trigger: HTMLElement;
-    start: string;
-    end: string;
-    onUpdate: (self: { progress: number }) => void;
-  }) => void;
-}
-
-// Conditionally import gsap if available
-let gsap: GSAP | null = null;
-let ScrollTrigger: ScrollTrigger | null = null;
-try {
-  gsap = require('gsap') as GSAP;
-  ScrollTrigger = require('gsap/ScrollTrigger').ScrollTrigger as ScrollTrigger;
-  if (gsap && ScrollTrigger) {
-    gsap.registerPlugin(ScrollTrigger);
-  }
-} catch {
-  // gsap not available, hook will be disabled
-}
-
-interface ParallaxOptions {
-  speed?: number
-  direction?: 'vertical' | 'horizontal'
-  container?: boolean
-}
-
-export function useParallax(options: ParallaxOptions = {}) {
-  const elementRef = useRef<HTMLDivElement>(null)
-  const { speed = 1, direction = 'vertical', container = false } = options
+export function useParallax() {
+  const elementRef = useRef<HTMLElement>(null);
 
   useEffect(() => {
-    if (!gsap || !ScrollTrigger || typeof window === 'undefined') {
-      // Disable parallax effects if gsap is not available or on server
-      return;
-    }
+    if (!elementRef.current || typeof window === 'undefined') return;
 
-    const element = elementRef.current
-    if (!element) return
+    const element = elementRef.current;
 
-    const parallaxEffect = () => {
-      const scrollPosition = window.scrollY
-      const elementPosition = element.offsetTop
-      const viewportHeight = window.innerHeight
-      const elementHeight = element.offsetHeight
-
-      if (
-        scrollPosition + viewportHeight >= elementPosition &&
-        scrollPosition <= elementPosition + elementHeight
-      ) {
-        const distance = (scrollPosition - elementPosition) * speed
-        const transform = direction === 'vertical' 
-          ? `translateY(${distance}px)`
-          : `translateX(${distance}px)`
-        
-        gsap.to(element, {
-          transform,
-          ease: 'none',
-          duration: 0.1
-        })
+    // Create parallax effect
+    const tl = gsap.fromTo(
+      element,
+      { y: 0 },
+      {
+        y: -100,
+        ease: 'none',
+        scrollTrigger: {
+          trigger: element,
+          start: 'top bottom',
+          end: 'bottom top',
+          scrub: true,
+        },
       }
-    }
+    );
 
-    if (container) {
-      ScrollTrigger.create({
-        trigger: element,
-        start: 'top top',
-        end: 'bottom bottom',
-        onUpdate: (self: { progress: number }) => {
-          const progress = self.progress
-          const distance = 100 * progress * speed
-          const transform = direction === 'vertical'
-            ? `translateY(${distance}px)`
-            : `translateX(${distance}px)`
-          
-          gsap.to(element, {
-            transform,
-            ease: 'none',
-            duration: 0.1
-          })
-        }
-      })
-    } else {
-      window.addEventListener('scroll', parallaxEffect)
-      return () => window.removeEventListener('scroll', parallaxEffect)
-    }
-  }, [speed, direction, container])
+    return () => {
+      if (tl) {
+        tl.kill();
+      }
+    };
+  }, []);
 
-  return elementRef
+  return elementRef;
 }
 
 export function useParallaxImage(speed: number = 0.3) {

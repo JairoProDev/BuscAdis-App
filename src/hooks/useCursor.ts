@@ -1,67 +1,44 @@
 'use client'
 
-import { useEffect } from 'react'
-
-// Define GSAP types
-interface GSAP {
-  to: (target: HTMLElement, vars: {
-    x?: number;
-    y?: number;
-    duration?: number;
-    ease?: string;
-  }) => void;
-}
-
-// Conditionally import gsap if available
-let gsap: GSAP | null = null;
-try {
-  gsap = require('gsap') as GSAP;
-} catch {
-  // gsap not available, hook will be disabled
-}
+import { useEffect, useRef } from 'react';
+import { gsap } from 'gsap';
 
 export function useCursor() {
+  const cursorRef = useRef<HTMLElement>(null);
+  const cursorFollowerRef = useRef<HTMLElement>(null);
+
   useEffect(() => {
-    if (!gsap || typeof window === 'undefined') {
-      // Disable cursor effects if gsap is not available or on server
-      return;
-    }
+    if (!cursorRef.current || !cursorFollowerRef.current) return;
 
-    // Initialize cursor
-    const cursor = document.createElement('div');
-    cursor.className = 'custom-cursor';
-    cursor.style.cssText = `
-      position: fixed;
-      width: 20px;
-      height: 20px;
-      border-radius: 50%;
-      background: rgba(255, 255, 255, 0.8);
-      pointer-events: none;
-      z-index: 9999;
-      mix-blend-mode: difference;
-      transform: translate(-50%, -50%);
-    `;
-    document.body.appendChild(cursor);
+    const cursor = cursorRef.current;
+    const cursorFollower = cursorFollowerRef.current;
 
-    // Mouse move handler
-    const onMouseMove = (e: MouseEvent) => {
+    // GSAP animation for cursor
+    gsap.set(cursorFollower, {
+      xPercent: -50,
+      yPercent: -50,
+    });
+
+    const handleMouseMove = (e: MouseEvent) => {
       gsap.to(cursor, {
         x: e.clientX,
         y: e.clientY,
         duration: 0.1,
-        ease: "power2.out"
+      });
+
+      gsap.to(cursorFollower, {
+        x: e.clientX,
+        y: e.clientY,
+        duration: 0.3,
       });
     };
 
-    // Add event listener
-    document.addEventListener('mousemove', onMouseMove);
+    window.addEventListener('mousemove', handleMouseMove);
 
-    // Cleanup
     return () => {
-      document.removeEventListener('mousemove', onMouseMove);
-      if (cursor.parentNode) {
-        cursor.parentNode.removeChild(cursor);
-      }
+      window.removeEventListener('mousemove', handleMouseMove);
     };
   }, []);
+
+  return { cursorRef, cursorFollowerRef };
 } 

@@ -567,10 +567,14 @@ export default function SupremeSearchEngine({
     }
 
     if (isRecording) {
-      (recognition.current as VoiceRecognition).stop()
+      if (typeof (recognition.current as VoiceRecognition).stop === 'function') {
+        (recognition.current as VoiceRecognition).stop();
+      }
     } else {
-      setIsRecording(true)
-      (recognition.current as VoiceRecognition).start()
+      setIsRecording(true);
+      if (typeof (recognition.current as VoiceRecognition).start === 'function') {
+        (recognition.current as VoiceRecognition).start();
+      }
     }
   }
 
@@ -1325,7 +1329,6 @@ export default function SupremeSearchEngine({
                 <AdvancedFilters
                   onFilterChange={onFilterChange ? (filters: Record<string, unknown>) => onFilterChange(filters as SearchFilters) : () => {}}
                   onClose={() => setShowMobileFilters(false)}
-                  isMobile={true}
                 />
               </div>
             </motion.div>

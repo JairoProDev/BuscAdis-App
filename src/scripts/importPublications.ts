@@ -1,7 +1,7 @@
 /**
  * Script para importar anuncios desde texto plano
  */
-import { parsePublicationsFromText, preparePublicationForAPI } from '@/utils/publicationParser';
+import { parsePublicationsFromText, preparePublicationForAPI, PublicationApiPayload } from '@/utils/publicationParser';
 import { PublicationsService, CreatePublicationData } from '@/services/publications.service';
 
 interface ImportError {
@@ -18,7 +18,7 @@ interface ImportResult {
 /**
  * Transforma PublicationApiPayload a CreatePublicationData
  */
-function transformToCreatePublicationData(apiData: any): CreatePublicationData {
+function transformToCreatePublicationData(apiData: PublicationApiPayload): CreatePublicationData {
   return {
     title: apiData.title,
     description: apiData.description,
@@ -31,7 +31,7 @@ function transformToCreatePublicationData(apiData: any): CreatePublicationData {
     location: {
       country: 'Peru',
       province: apiData.location?.province || 'Cusco',
-      city: apiData.location?.city || 'Cusco',
+      city: 'Cusco', // Default city since it's not in PublicationLocation
       district: apiData.location?.district,
       address: apiData.location?.address
     },
@@ -40,7 +40,13 @@ function transformToCreatePublicationData(apiData: any): CreatePublicationData {
       email: apiData.contactEmail,
       name: apiData.contactName
     },
-    images: Array.isArray(apiData.images) ? apiData.images.map((img: any) => typeof img === 'string' ? img : img.url) : [],
+    images: Array.isArray(apiData.images) ? apiData.images.map((img: unknown) => {
+      if (typeof img === 'string') return img;
+      if (typeof img === 'object' && img !== null && 'url' in img) {
+        return (img as { url: string }).url;
+      }
+      return '';
+    }).filter(Boolean) : [],
     status: 'activo',
     premium: false
   };
