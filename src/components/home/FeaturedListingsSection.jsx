@@ -86,12 +86,12 @@ const FeaturedListingsSection = () => {
             <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 relative z-10">
                 {/* Encabezado */}
                 <motion.div
-                    className="flex flex-col sm:flex-row items-start sm:items-center justify-between mb-10 sm:mb-12"
+                    className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 mb-8 sm:mb-12"
                     initial={{ opacity: 0, y: 20 }}
                     animate={inView ? { opacity: 1, y: 0 } : {}}
                     transition={{ duration: 0.6, ease: "easeOut" }}
                 >
-                    <div className="mb-4 sm:mb-0 relative">
+                    <div className="mb-2 sm:mb-0 relative">
                         {/* Premium badge */}
                         <motion.div
                             className="inline-flex items-center px-4 py-1.5 rounded-full bg-gradient-to-r from-slate-800 to-slate-700 text-teal-300 text-sm font-medium mb-3 shadow-lg relative border border-teal-500/20 overflow-hidden"
@@ -104,7 +104,6 @@ const FeaturedListingsSection = () => {
                             <span className="relative z-10">Selección Premium</span>
                             <span className="absolute inset-0 bg-gradient-to-r from-teal-500/0 via-teal-500/20 to-teal-500/0 rounded-full animate-shimmer"></span>
                         </motion.div>
-
                         <motion.h2
                             className="text-3xl sm:text-4xl font-bold mb-2 text-transparent bg-clip-text bg-gradient-to-r from-white via-teal-100 to-white"
                             initial={{ opacity: 0, y: 20 }}
@@ -113,47 +112,38 @@ const FeaturedListingsSection = () => {
                         >
                             Anuncios <span className="bg-clip-text text-transparent bg-gradient-to-r from-teal-300 to-cyan-300">Destacados</span>
                         </motion.h2>
-
                         <motion.div
                             className="h-1 w-24 bg-gradient-to-r from-teal-400 via-cyan-400 to-teal-400 rounded-full mb-4 shadow-[0_0_10px_rgba(20,184,166,0.3)]"
                             initial={{ width: 0, opacity: 0 }}
                             animate={inView ? { width: 96, opacity: 1 } : {}}
                             transition={{ delay: 0.4, duration: 0.6 }}
                         ></motion.div>
-
                         <motion.p
                             className="text-lg text-cyan-100/90 max-w-xl"
                             initial={{ opacity: 0 }}
                             animate={inView ? { opacity: 1 } : {}}
                             transition={{ delay: 0.5, duration: 0.5 }}
                         >
-                            Oportunidades seleccionadas en Cusco y alrededores que podrían
-                            interesarte.
+                            Oportunidades seleccionadas en Cusco y alrededores que podrían interesarte.
                         </motion.p>
                     </div>
-
                     <motion.div
                         initial={{ opacity: 0, scale: 0.9 }}
                         animate={inView ? { opacity: 1, scale: 1 } : {}}
                         transition={{ delay: 0.6, duration: 0.5 }}
-                        className="relative group"
+                        className="relative group flex flex-row gap-3"
                         whileHover={{ scale: 1.03, y: -2 }}
                     >
                         {/* Premium glow effect */}
                         <div className="absolute -inset-1 bg-gradient-to-r from-teal-500 to-cyan-500 rounded-xl blur opacity-30 group-hover:opacity-60 transition-all duration-300"></div>
-
                         <Link
                             href="/buscar?destacado=true"
                             className="inline-flex items-center px-6 py-3 rounded-lg bg-gradient-to-r from-teal-500 to-cyan-500 text-slate-900 font-medium transition-all duration-200 shadow-md hover:shadow-[0_8px_25px_-5px_rgba(20,184,166,0.5)] relative overflow-hidden group/btn z-10"
                         >
-                            {/* Platinum shimmer effect */}
                             <span className="absolute top-0 left-0 w-full h-full bg-gradient-to-r from-white/0 via-white/70 to-white/0 transform -skew-x-30 -translate-x-full group-hover/btn:translate-x-full transition-transform duration-1000 ease-out"></span>
-
                             <span className="relative z-10">Ver Todos los Destacados</span>
                             <ArrowRightIcon className="ml-1.5 h-5 w-5 relative z-10 group-hover/btn:translate-x-1 transition-transform duration-200" />
                         </Link>
-
-                        {/* Additional CTA for Publishing */}
                         <Link
                             href="/publicar"
                             className="inline-flex items-center px-6 py-3 rounded-lg bg-white/10 backdrop-blur-sm border border-teal-400/30 text-white font-medium transition-all duration-200 hover:bg-white/20 hover:border-teal-400/50 relative overflow-hidden group/btn"
@@ -164,7 +154,6 @@ const FeaturedListingsSection = () => {
                         </Link>
                     </motion.div>
                 </motion.div>
-
                 {/* Navigation controls for mobile scrolling - tech styled */}
                 <div className="flex justify-end gap-2 mb-4 lg:hidden">
                     <motion.button
@@ -177,7 +166,6 @@ const FeaturedListingsSection = () => {
                         <ChevronLeftIcon className="h-5 w-5" />
                         <div className="absolute inset-0 rounded-full bg-gradient-to-r from-teal-500/0 via-teal-500/10 to-teal-500/0 opacity-0 group-hover:opacity-100 transition-opacity"></div>
                     </motion.button>
-
                     <motion.button
                         onClick={scrollToRight}
                         className="p-2 rounded-full bg-gradient-to-br from-slate-800 to-slate-900 text-teal-400 shadow-sm hover:shadow-md transition-all duration-200 border border-teal-500/20 hover:border-teal-300/50"
@@ -189,11 +177,10 @@ const FeaturedListingsSection = () => {
                         <div className="absolute inset-0 rounded-full bg-gradient-to-r from-teal-500/0 via-teal-500/10 to-teal-500/0 opacity-0 group-hover:opacity-100 transition-opacity"></div>
                     </motion.button>
                 </div>
-
                 {/* Grid de Anuncios - Con scroll horizontal en móvil */}
                 <motion.div
                     id="featured-listings-container"
-                    className="flex lg:grid lg:grid-cols-4 gap-6 lg:gap-8 overflow-x-auto pb-6 lg:overflow-visible snap-x snap-mandatory lg:snap-none"
+                    className="flex lg:grid lg:grid-cols-4 gap-6 lg:gap-10 overflow-x-auto pb-6 lg:overflow-visible snap-x snap-mandatory lg:snap-none"
                     variants={containerVariants}
                     initial="hidden"
                     animate={inView ? "visible" : "hidden"}
@@ -208,7 +195,6 @@ const FeaturedListingsSection = () => {
                         </div>
                     ))}
                 </motion.div>
-
                 {/* Scroll indicators - tech styled */}
                 <motion.div
                     className="mt-6 flex justify-center gap-1.5 lg:hidden"

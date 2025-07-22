@@ -120,7 +120,7 @@ export default function ContentRow({
   return (
     <div className="mb-8 lg:mb-12">
       {/* Header Section */}
-      <div className="flex items-center justify-between mb-4 lg:mb-6">
+      <div className="flex items-centerna sm:flex-row items-start sm:items-center justify-between gap-4 mb-4 lg:mb-8">
         <div className="space-y-1">
           <h2 className="text-xl lg:text-2xl font-bold text-gray-900 dark:text-white">
             {title}
@@ -131,18 +131,16 @@ export default function ContentRow({
             </p>
           )}
         </div>
-        
         {showViewAll && onViewAll && (
           <button
             onClick={onViewAll}
             className="group flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-teal-600 to-teal-500 hover:from-teal-700 hover:to-teal-600 text-white rounded-lg font-medium transition-all duration-200 hover:shadow-lg"
           >
-            <span className="text-sm lg:text-base">Ver todo</span>
+            <span className="text-sm lg:text-base">Ver más</span>
             <ArrowRightIcon className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
           </button>
         )}
       </div>
-
       {/* Scrollable Content */}
       <div className="relative group">
         {/* Navigation Buttons - Solo en desktop */}
@@ -155,7 +153,6 @@ export default function ContentRow({
             <ChevronLeftIcon className="w-6 h-6 text-gray-700 dark:text-gray-300" />
           </button>
         )}
-
         {canScrollRight && (
           <button
             onClick={scrollRight}
@@ -165,11 +162,10 @@ export default function ContentRow({
             <ChevronRightIcon className="w-6 h-6 text-gray-700 dark:text-gray-300" />
           </button>
         )}
-
         {/* Content Container */}
         <div
           ref={scrollContainerRef}
-          className="flex gap-3 lg:gap-4 overflow-x-auto scrollbar-hide pb-2 scroll-smooth snap-x snap-mandatory"
+          className="flex gap-4 lg:gap-6 overflow-x-auto scrollbar-hide pb-2 scroll-smooth snap-x snap-mandatory"
           style={{
             scrollbarWidth: 'none',
             msOverflowStyle: 'none'
@@ -190,7 +186,6 @@ export default function ContentRow({
               />
             </motion.div>
           ))}
-          
           {/* Ver más card */}
           {showViewAll && onViewAll && publications.length >= 6 && (
             <motion.div
@@ -201,19 +196,10 @@ export default function ContentRow({
             >
               <button
                 onClick={onViewAll}
-                className="w-full h-full min-h-[260px] border-2 border-dashed border-gray-300 dark:border-gray-600 hover:border-teal-500 dark:hover:border-teal-400 rounded-xl flex flex-col items-center justify-center gap-3 transition-all duration-200 hover:bg-gray-50 dark:hover:bg-gray-800/50 group"
+                className="flex flex-col items-center justify-center h-full w-full rounded-xl border-2 border-dashed border-teal-400 text-teal-500 bg-white dark:bg-gray-800 hover:bg-teal-50 dark:hover:bg-teal-900/20 transition-all duration-200 gap-2 p-4"
               >
-                <div className="w-12 h-12 bg-gradient-to-br from-teal-500 to-teal-600 rounded-full flex items-center justify-center group-hover:scale-110 transition-transform">
-                  <ArrowRightIcon className="w-6 h-6 text-white" />
-                </div>
-                <div className="text-center px-2">
-                  <h3 className="text-base font-semibold text-gray-900 dark:text-white mb-1">
-                    Ver todos
-                  </h3>
-                  <p className="text-xs text-gray-600 dark:text-gray-400">
-                    Explorar más en {title}
-                  </p>
-                </div>
+                <ArrowRightIcon className="w-8 h-8" />
+                <span className="font-semibold">Ver más</span>
               </button>
             </motion.div>
           )}

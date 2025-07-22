@@ -300,20 +300,24 @@ export default function PublicationCard({
 
   // Diseño optimizado para modo lista con altura suficiente para todo el contenido
   const cardClasses = viewMode === 'list' 
-    ? `
-        publication-card-list group relative bg-white dark:bg-slate-800 rounded-lg shadow-sm hover:shadow-md 
-        transition-all duration-200 cursor-pointer border border-gray-200 dark:border-slate-700 
-        hover:border-gray-300 dark:hover:border-slate-600 flex flex-row overflow-hidden ${className}
-        ${publication.premium ? 'ring-1 ring-cyan-400 shadow-cyan-400/20' : ''}
-        ${variant === 'featured' ? 'ring-1 ring-blue-500 ring-opacity-50' : ''}
-      `.trim()
-    : `
-        publication-card group relative bg-white dark:bg-slate-800 rounded-lg shadow-md hover:shadow-lg 
-        transition-all duration-300 overflow-hidden cursor-pointer border border-gray-200 dark:border-slate-700 
-        hover:border-gray-300 dark:hover:border-slate-600 flex flex-col ${className}
-        ${publication.premium ? 'ring-2 ring-cyan-400 shadow-cyan-400/30 shadow-xl' : ''}
-        ${variant === 'featured' ? 'ring-2 ring-blue-500 ring-opacity-50' : ''}
-      `.trim();
+    ? [
+        'publication-card-list group relative bg-white dark:bg-slate-800 rounded-lg shadow-sm hover:shadow-md',
+        'transition-all duration-200 cursor-pointer border border-gray-200 dark:border-slate-700',
+        'hover:border-gray-300 dark:hover:border-slate-600 flex flex-row overflow-hidden',
+        className,
+        publication.premium ? 'ring-1 ring-cyan-400 shadow-cyan-400/20' : '',
+        variant === 'featured' ? 'ring-1 ring-blue-500 ring-opacity-50' : '',
+        'p-3 sm:p-4 md:p-5 min-h-[180px] md:min-h-[220px]'
+      ].join(' ')
+    : [
+        'publication-card group relative bg-white dark:bg-slate-800 rounded-lg shadow-md hover:shadow-lg',
+        'transition-all duration-300 overflow-hidden cursor-pointer border border-gray-200 dark:border-slate-700',
+        'hover:border-gray-300 dark:hover:border-slate-600 flex flex-col',
+        className,
+        publication.premium ? 'ring-2 ring-cyan-400 shadow-cyan-400/30 shadow-xl' : '',
+        variant === 'featured' ? 'ring-2 ring-blue-500 ring-opacity-50' : '',
+        'p-3 sm:p-4 md:p-5 min-h-[260px] md:min-h-[320px]'
+      ].join(' ');
 
   return (
     <>
