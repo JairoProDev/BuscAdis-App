@@ -15,7 +15,8 @@ import {
   ShoppingBagIcon,
   CalendarIcon,
   ChartBarIcon,
-  UserGroupIcon
+  UserGroupIcon,
+  PaperAirplaneIcon
 } from '@heroicons/react/24/outline';
 import { HeartIcon as HeartSolidIcon } from '@heroicons/react/24/solid';
 import { WhatsAppIcon } from '@/components/icons';
@@ -298,7 +299,7 @@ export default function PublicationCard({
   const CategoryIcon = categoryIcons[publication.categorySlug] || ShoppingBagIcon;
   const categoryColor = categoryColors[publication.categorySlug] || 'bg-gray-100 text-gray-800';
 
-  // Diseño optimizado para modo lista con altura suficiente para todo el contenido
+  // Ajuste de padding y altura uniforme
   const cardClasses = viewMode === 'list' 
     ? [
         'publication-card-list group relative bg-white dark:bg-slate-800 rounded-lg shadow-sm hover:shadow-md',
@@ -307,7 +308,7 @@ export default function PublicationCard({
         className,
         publication.premium ? 'ring-1 ring-cyan-400 shadow-cyan-400/20' : '',
         variant === 'featured' ? 'ring-1 ring-blue-500 ring-opacity-50' : '',
-        'p-3 sm:p-4 md:p-5 min-h-[180px] md:min-h-[220px]'
+        'p-4 min-h-[340px] md:min-h-[340px] max-h-[340px]'
       ].join(' ')
     : [
         'publication-card group relative bg-white dark:bg-slate-800 rounded-lg shadow-md hover:shadow-lg',
@@ -316,7 +317,7 @@ export default function PublicationCard({
         className,
         publication.premium ? 'ring-2 ring-cyan-400 shadow-cyan-400/30 shadow-xl' : '',
         variant === 'featured' ? 'ring-2 ring-blue-500 ring-opacity-50' : '',
-        'p-3 sm:p-4 md:p-5 min-h-[260px] md:min-h-[320px]'
+        'p-4 min-h-[340px] md:min-h-[340px] max-h-[340px]'
       ].join(' ');
 
   return (
@@ -381,15 +382,11 @@ export default function PublicationCard({
           </div>
 
           {/* Content - Layout completamente diferente para lista */}
-          <div className={`content flex ${
-            viewMode === 'list' 
-              ? 'flex-1 flex-col justify-between min-h-0' 
-              : 'flex-1 min-h-0 flex-col'
-          }`}>
+          <div className={`content flex flex-1 min-h-0 flex-col px-0`}>
             {viewMode === 'list' ? (
               /* Lista optimizada - Layout responsive perfecto */
               <>
-                <div className="flex-1 min-w-0 p-3 flex flex-col justify-between">
+                <div className="flex-1 min-w-0 pl-2 flex flex-col justify-between">
                   {/* Fila 1: Título y favorito */}
                   <div className="flex items-start justify-between mb-2">
                     <h3 className="text-sm md:text-base font-semibold text-gray-900 dark:text-white line-clamp-1 flex-1 mr-2">
@@ -587,24 +584,22 @@ export default function PublicationCard({
             ) : (
               /* Grid mode - Estilo posts de redes sociales */
               <>
-                <div className="p-0 flex flex-col h-full">
+                <div className="p-0 flex flex-col h-full flex-1">
                   {/* Título */}
-                  <h3 className="text-base sm:text-lg font-semibold text-gray-900 dark:text-white mb-2 line-clamp-2 px-2">
+                  <h3 className="text-base sm:text-lg font-semibold text-gray-900 dark:text-white mb-1 line-clamp-2 hyphens-auto px-0" style={{textAlign: 'justify'}}>
                     {formatTitle(publication.title)}
                   </h3>
-
                   {/* Descripción */}
-                  <p className="text-sm text-gray-600 dark:text-gray-400 mb-3 line-clamp-2 flex-grow px-2">
+                  <p className="text-sm text-gray-600 dark:text-gray-400 mb-2 line-clamp-3 hyphens-auto flex-grow px-0" style={{textAlign: 'justify'}}>
                     {formatDescription(publication.description)}
                   </p>
-
-                  {/* Footer de interacciones - Tres botones hermanos iguales */}
-                  <div className="border-t border-gray-200 dark:border-gray-700 mt-auto">
-                    <div className="grid grid-cols-3 gap-1 px-2">
+                  {/* Footer de interacciones */}
+                  <div className="border-t border-gray-200 dark:border-gray-700 mt-auto pt-2">
+                    <div className="grid grid-cols-3 gap-1 px-0">
                       {/* Guardar */}
                       <button
-                        onClick={handleFavoriteToggle}
-                        className="flex flex-col items-center justify-center gap-1 py-3 px-2 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-all duration-200 group"
+                        onClick={(e) => { handleFavoriteToggle(e); if (onPublicationClick) onPublicationClick(publication); }}
+                        className="flex flex-col items-center justify-center gap-1 py-2 px-2 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-all duration-200 group focus:outline-none focus-visible:ring-2 focus-visible:ring-red-400"
                         aria-label="Guardar"
                         title="Guardar"
                       >
@@ -613,50 +608,33 @@ export default function PublicationCard({
                         ) : (
                           <HeartIcon className="w-5 h-5 text-red-500 dark:text-red-400" />
                         )}
-                        <span className="text-xs font-medium text-red-500 dark:text-red-400 hidden sm:block">
-                          Guardar
-                        </span>
+                        <span className="text-xs font-medium text-red-500 dark:text-red-400 hidden sm:block">Guardar</span>
                       </button>
-
-                      {/* Contactar */}
+                      {/* Contactar (CTA destacado) - CENTRO */}
                       <button
-                        onClick={showWhatsApp && publication.whatsapp ? handleWhatsAppClick : undefined}
+                        onClick={(e) => { if (showWhatsApp && publication.whatsapp) handleWhatsAppClick(e); if (onPublicationClick) onPublicationClick(publication); }}
                         disabled={!showWhatsApp || !publication.whatsapp}
-                        className={`flex flex-col items-center justify-center gap-1 py-3 px-2 rounded-lg transition-all duration-200 group ${
-                          showWhatsApp && publication.whatsapp 
-                            ? 'bg-green-500 hover:bg-green-600 dark:bg-green-600 dark:hover:bg-green-500' 
-                            : 'opacity-50 cursor-not-allowed bg-gray-100 dark:bg-gray-800'
+                        className={`flex flex-col items-center justify-center gap-1 py-2 px-2 rounded-lg transition-all duration-200 group focus:outline-none focus-visible:ring-2 focus-visible:ring-green-400 font-semibold ${
+                          showWhatsApp && publication.whatsapp
+                            ? 'hover:bg-green-50 dark:hover:bg-green-900/20 text-green-600 dark:text-green-400'
+                            : 'opacity-50 cursor-not-allowed text-gray-400 dark:text-gray-600'
                         }`}
                         aria-label="Contactar por WhatsApp"
                         title="Contactar por WhatsApp"
                       >
-                        <WhatsAppIcon className={`w-5 h-5 ${
-                          showWhatsApp && publication.whatsapp 
-                            ? 'text-white' 
-                            : 'text-gray-400 dark:text-gray-600'
-                        }`} />
-                        <span className={`text-xs font-medium hidden sm:block ${
-                          showWhatsApp && publication.whatsapp 
-                            ? 'text-white' 
-                            : 'text-gray-400 dark:text-gray-600'
-                        }`}>
-                          Contactar
-                        </span>
+                        <WhatsAppIcon className={`w-5 h-5 ${showWhatsApp && publication.whatsapp ? 'text-green-600 dark:text-green-400' : 'text-gray-400 dark:text-gray-600'}`} />
+                        <span className={`text-xs font-bold ${showWhatsApp && publication.whatsapp ? 'text-green-600 dark:text-green-400' : 'text-gray-400 dark:text-gray-600'} hidden sm:block`}>Contactar</span>
                       </button>
-                      
                       {/* Compartir */}
                       <button
-                        onClick={handleShare}
-                        className="flex flex-col items-center justify-center gap-1 py-3 px-2 hover:bg-blue-50 dark:hover:bg-blue-900/20 rounded-lg transition-all duration-200 group"
+                        onClick={(e) => { handleShare(e); if (onPublicationClick) onPublicationClick(publication); }}
+                        className="flex flex-col items-center justify-center gap-1 py-2 px-2 hover:bg-cyan-50 dark:hover:bg-cyan-900/20 rounded-lg transition-all duration-200 group focus:outline-none focus-visible:ring-2 focus-visible:ring-cyan-400"
                         aria-label="Compartir"
                         title="Compartir"
                       >
-                        <CurvedShareIcon className="w-5 h-5 text-blue-500 dark:text-blue-400" />
-                        <span className="text-xs font-medium text-blue-500 dark:text-blue-400 hidden sm:block">
-                          Compartir
-                        </span>
+                        <PaperAirplaneIcon className="w-5 h-5 text-cyan-500 dark:text-cyan-400" />
+                        <span className="text-xs font-medium text-cyan-500 dark:text-cyan-400 hidden sm:block">Compartir</span>
                       </button>
-
                     </div>
                   </div>
                 </div>

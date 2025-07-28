@@ -1104,14 +1104,15 @@ body {
 }
 
 /* Ensure WhatsApp button is visible if rendered */
-button[aria-label="Contactar por WhatsApp"] {
+/* REMOVED: This CSS was overriding the component styles */
+/* button[aria-label="Contactar por WhatsApp"] {
   @apply absolute bottom-2 right-2 z-20 bg-green-500 hover:bg-green-600 text-white text-xs font-medium px-2 py-1 rounded-full shadow-sm flex items-center transition-opacity duration-200;
-  opacity: 0.9; /* Slightly transparent */
+  opacity: 0.9;
 }
 
 .publication-card:hover button[aria-label="Contactar por WhatsApp"] {
-  opacity: 1; /* Fully visible on hover */
-}
+  opacity: 1;
+} */
 
 /* Grid adjustments */
 .publications-grid {
