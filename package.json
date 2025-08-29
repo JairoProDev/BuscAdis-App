@@ -17,7 +17,10 @@
     "bundle:size": "npm run build && npx @next/bundle-analyzer",
     "optimize:images": "node scripts/optimize-images.js",
     "prebuild": "npm run type-check",
-    "postbuild": "echo 'Build completed successfully!'"
+    "postbuild": "echo 'Build completed successfully!'",
+    "migrate:publications": "ts-node scripts/migrate-existing-publications.ts",
+    "import:historical": "ts-node scripts/import-historical-publications.ts",
+    "import:historical:test": "ts-node scripts/import-historical-publications.ts ./test-pdfs"
   },
   "dependencies": {
     "@emotion/styled": "^11.14.0",

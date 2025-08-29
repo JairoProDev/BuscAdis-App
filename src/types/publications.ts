@@ -26,6 +26,20 @@ export interface Publication {
   userId?: string | null; // ID del usuario creador (si aplica)
   userSince?: Date | null; // Opcional: Fecha desde que el usuario es miembro
 
+  // --- FECHAS HISTÓRICAS Y CADUCIDAD ---
+  /** Fecha real de publicación en la revista original (para publicaciones históricas) */
+  originalPublicationDate?: Date | null;
+  /** Fecha de caducidad del anuncio (3 días después de originalPublicationDate) */
+  expirationDate?: Date | null;
+  /** Indica si es una publicación histórica importada de PDF */
+  isHistoricalPublication?: boolean;
+  /** Número de edición de la revista donde apareció originalmente */
+  magazineEdition?: string | null;
+  /** Año de la revista */
+  magazineYear?: number | null;
+  /** Estado del anuncio: 'active', 'expired', 'archived' */
+  status: 'active' | 'expired' | 'archived';
+
   // --- Contenido Principal ---
   title: string; // Título (Obligatorio)
   description: string; // Descripción (Obligatorio)
@@ -58,7 +72,7 @@ export interface Publication {
     coordinates?: GeoJsonPoint | null;
   };
 
-  // --- Contacto ---
+  // --- Contacto (CON RESTRICCIONES PARA ANUNCIOS CADUCADOS) ---
   contact: {
     /** Array simple de números de teléfono/WhatsApp. Obligatorio al menos uno. */
     phones: string[];
@@ -72,6 +86,10 @@ export interface Publication {
   // --- Metadata del Anuncio Original (PDF) ---
   /** Costo estimado en Soles que pagó el anunciante en la revista original (incluye radio). Null si no se puede estimar. */
   sourceAdCostPEN?: number | null;
+  /** Tamaño del anuncio en la revista original (ej: '1/4 página', '1/2 página', 'página completa') */
+  originalAdSize?: string | null;
+  /** Página donde apareció en la revista */
+  originalPageNumber?: number | null;
 
   // --- Atributos Específicos (Objeto Flexible) ---
   /**
@@ -98,7 +116,6 @@ export interface Publication {
     cantidad_pisos?: number;
     antiguedad_anos?: number;
     caracteristicas_inmueble?: string[]; // ['ascensor', 'terraza', 'piscina', ...]
-    servicios_basicos_disponibles?: boolean;
     documentacion_inmueble?: string[]; // ['titulo_propiedad', 'inscrito_rrpp', ...]
 
     // --- Vehículos ---
