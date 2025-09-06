@@ -35,7 +35,6 @@ const FeaturedAd = () => {
             x: 0,
             transition: {
                 duration: 0.4,
-                ease: "easeInOut",
             },
         },
         exit: {
@@ -43,7 +42,6 @@ const FeaturedAd = () => {
             x: -100, // Siempre sale hacia la izquierda
             transition: {
                 duration: 0.3,
-                ease: "easeInOut",
             },
         },
     };

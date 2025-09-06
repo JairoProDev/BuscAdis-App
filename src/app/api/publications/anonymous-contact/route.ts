@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { MongoClient } from 'mongodb';
+import { MongoClient, ObjectId } from 'mongodb';
 
 const MONGODB_URI = process.env.MONGODB_URI!;
 const MONGODB_DB = process.env.MONGODB_DB || 'buscadis';
@@ -16,7 +16,7 @@ interface AnonymousContactRequest {
 }
 
 interface AnonymousContact {
-  _id?: string;
+  _id?: ObjectId;
   publicationId: string;
   contactInfo: {
     name: string;
@@ -60,7 +60,7 @@ export async function POST(request: NextRequest) {
 
     // Verificar que la publicación existe y está caducada
     const publication = await db.collection('publications').findOne({
-      _id: body.publicationId
+      _id: new ObjectId(body.publicationId)
     });
 
     if (!publication) {

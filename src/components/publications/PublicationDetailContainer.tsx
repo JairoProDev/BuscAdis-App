@@ -50,7 +50,7 @@ const UnifiedPublicationDetail = ({
       y: 0,
       opacity: 1,
       transition: {
-        type: 'spring',
+        type: 'spring' as const,
         damping: 25,
         stiffness: 300,
         duration: 0.3
@@ -60,7 +60,7 @@ const UnifiedPublicationDetail = ({
       y: '100%',
       opacity: 0,
       transition: {
-        type: 'spring',
+        type: 'spring' as const,
         damping: 25,
         stiffness: 300,
         duration: 0.2
@@ -78,7 +78,7 @@ const UnifiedPublicationDetail = ({
       x: 0,
       opacity: 1,
       transition: {
-        type: 'spring',
+        type: 'spring' as const,
         damping: 25,
         stiffness: 300,
         duration: 0.3
@@ -88,7 +88,7 @@ const UnifiedPublicationDetail = ({
       x: '100%',
       opacity: 0,
       transition: {
-        type: 'spring',
+        type: 'spring' as const,
         damping: 25,
         stiffness: 300,
         duration: 0.2
