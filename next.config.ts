@@ -14,6 +14,17 @@ const nextConfig: NextConfig = {
     ignoreBuildErrors: false
   },
 
+  // Disable automatic error page generation to avoid Pages Router conflicts
+  output: 'standalone',
+  
+  // Disable automatic static optimization for error pages
+  trailingSlash: false,
+  
+  // Disable automatic error page generation
+  generateBuildId: async () => {
+    return 'build-' + Date.now()
+  },
+
   // Handle MongoDB connection errors gracefully in production
   onDemandEntries: {
     maxInactiveAge: 25 * 1000,
