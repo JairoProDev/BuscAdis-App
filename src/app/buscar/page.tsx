@@ -798,6 +798,8 @@ function SearchPageContent({ publicationsData, results, setResults, isLoading, s
                         onPublicationClick={(publication) => {
                           console.log('🔍 Opening publication from category row:', publication.title)
                           openPublicationDetail(publication)
+                          // Forzar la apertura del sidebar en desktop
+                          setIsSidebarOpen(true)
                         }}
                         showViewAll={true}
                       />

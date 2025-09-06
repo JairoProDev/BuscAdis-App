@@ -42,6 +42,7 @@ interface ContentRowProps {
   isLoading?: boolean
   showViewAll?: boolean
   onPublicationClick?: (publication: PublicationData) => void
+  isSidebarOpen?: boolean
 }
 
 export default function ContentRow({
@@ -52,7 +53,8 @@ export default function ContentRow({
   // categoryId, // Unused variable
   isLoading = false,
   showViewAll = true,
-  onPublicationClick
+  onPublicationClick,
+  isSidebarOpen = false
 }: ContentRowProps) {
   const [canScrollLeft, setCanScrollLeft] = useState(false)
   const [canScrollRight, setCanScrollRight] = useState(true)
@@ -177,7 +179,7 @@ export default function ContentRow({
               initial={{ opacity: 0, x: 50 }}
               animate={{ opacity: 1, x: 0 }}
               transition={{ delay: index * 0.1, duration: 0.4 }}
-              className="flex-shrink-0 w-44 lg:w-64 snap-start"
+              className={`flex-shrink-0 snap-start ${isSidebarOpen ? 'w-44 lg:w-56' : 'w-44 lg:w-64'}`}
             >
               <PublicationCard
                 publication={publication}
