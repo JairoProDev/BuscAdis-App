@@ -5,8 +5,6 @@ import { motion } from 'framer-motion';
 import { Publication } from '@/types/publications';
 import { formatPublicationDate } from '@/utils/publicationUtils';
 import { 
-  PhoneIcon, 
-  EnvelopeIcon, 
   ExclamationTriangleIcon,
   UserIcon,
   CalendarIcon,
@@ -16,12 +14,10 @@ import { toast } from 'react-hot-toast';
 
 interface ExpiredPublicationCardProps {
   publication: Publication;
-  onAnonymousContact?: (publicationId: string) => void;
 }
 
 export default function ExpiredPublicationCard({ 
-  publication, 
-  onAnonymousContact 
+  publication
 }: ExpiredPublicationCardProps) {
   const [showContactForm, setShowContactForm] = useState(false);
   const [contactForm, setContactForm] = useState({

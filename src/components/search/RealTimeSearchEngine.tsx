@@ -6,7 +6,6 @@ import { motion, AnimatePresence } from 'framer-motion'
 import { useSearch } from '@/contexts/SearchContext'
 import { ChevronDownIcon } from '@heroicons/react/24/outline'
 import Image from 'next/image'
-import { useOptimizedQuery } from '@/hooks/useOptimizedQuery';
 
 // Implementación propia de debounce
 function debounce<T extends (...args: unknown[]) => unknown>(func: T, wait: number): T & { cancel: () => void } {
@@ -188,7 +187,6 @@ export default function RealTimeSearchEngine({
   const [quickResults, setQuickResults] = useState<SearchResult[]>([])
   const [isLoading, setIsLoading] = useState(false)
   const [showSuggestions, setShowSuggestions] = useState(false)
-  const [selectedIndex, setSelectedIndex] = useState(-1);
   const inputRef = useRef<HTMLInputElement>(null);
   const suggestionsRef = useRef<HTMLDivElement>(null);
 

@@ -4,7 +4,6 @@ interface UseOptimizedQueryOptions<T> {
   queryFn: () => Promise<T>;
   enabled?: boolean;
   staleTime?: number;
-  cacheTime?: number;
   retry?: number;
   retryDelay?: number;
 }
@@ -21,7 +20,6 @@ export function useOptimizedQuery<T>({
   queryFn,
   enabled = true,
   staleTime = 5 * 60 * 1000, // 5 minutes
-  cacheTime = 10 * 60 * 1000, // 10 minutes
   retry = 3,
   retryDelay = 1000,
 }: UseOptimizedQueryOptions<T>): UseOptimizedQueryResult<T> {
