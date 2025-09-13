@@ -36,9 +36,10 @@ export async function GET(
     }
     
     const db = await getDb()
-
     const collection = db.collection(COLLECTION)
-    const byId = await collection.findOne({ _id: new ObjectId(id) }).catch(() => null)
+    const numericId = Number(id)
+    const bySeq = Number.isFinite(numericId) ? await collection.findOne({ sequentialId: numericId }) : null
+    const byId = bySeq || await collection.findOne({ _id: new ObjectId(id) }).catch(() => null)
     const byString = byId || (await collection.findOne({ id }))
 
     if (!byString) {
@@ -121,7 +122,7 @@ export async function PUT(
     
     const db = await getDb()
     const collection = db.collection(COLLECTION)
-    const exists = await collection.findOne({ $or: [{ _id: new ObjectId(id) }, { id }] }).catch(() => null)
+    const exists = await collection.findOne({ $or: [{ _id: new ObjectId(id) }, { id }, { sequentialId: Number(id) }] }).catch(() => null)
     if (!exists) {
       return NextResponse.json(
         { error: 'Publication not found' },
@@ -129,10 +130,10 @@ export async function PUT(
       );
     }
     await collection.updateOne(
-      { $or: [{ _id: new ObjectId(id) }, { id }] },
+      { $or: [{ _id: new ObjectId(id) }, { id }, { sequentialId: Number(id) }] },
       { $set: { ...body, updatedAt: new Date() } }
     )
-    const updated = await collection.findOne({ $or: [{ _id: new ObjectId(id) }, { id }] })
+    const updated = await collection.findOne({ $or: [{ _id: new ObjectId(id) }, { id }, { sequentialId: Number(id) }] })
     return NextResponse.json(updated);
   } catch (error) {
     console.error('Error updating publication:', error);
@@ -153,14 +154,14 @@ export async function DELETE(
     
     const db = await getDb()
     const collection = db.collection(COLLECTION)
-    const exists = await collection.findOne({ $or: [{ _id: new ObjectId(id) }, { id }] }).catch(() => null)
+    const exists = await collection.findOne({ $or: [{ _id: new ObjectId(id) }, { id }, { sequentialId: Number(id) }] }).catch(() => null)
     if (!exists) {
       return NextResponse.json(
         { error: 'Publication not found' },
         { status: 404 }
       );
     }
-    await collection.deleteOne({ $or: [{ _id: new ObjectId(id) }, { id }] })
+    await collection.deleteOne({ $or: [{ _id: new ObjectId(id) }, { id }, { sequentialId: Number(id) }] })
     return NextResponse.json({ message: 'Publication deleted successfully' });
   } catch (error) {
     console.error('Error deleting publication:', error);

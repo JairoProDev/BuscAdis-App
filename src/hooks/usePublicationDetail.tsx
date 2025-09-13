@@ -165,6 +165,18 @@ export function PublicationDetailProvider({
     console.log('📱 WhatsApp click - generated URL:', adUrl)
     const template = whatsAppMessageTemplates[publication.categorySlug] || whatsAppMessageTemplates.default
     const message = template(publication, adUrl)
+    // Track contact click if sequentialId available in URL
+    try {
+      const parts = window.location.pathname.split('/')
+      const seq = parts.includes('adisos') ? parts[2] : undefined
+      if (seq) {
+        fetch(`/api/adisos/${encodeURIComponent(seq)}/track`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ event: 'contactClick' })
+        }).catch(() => {})
+      }
+    } catch {}
     window.open(`https://wa.me/${cleanPhone}?text=${encodeURIComponent(message)}`, '_blank')
   }, [generatePublicationUrl])
 

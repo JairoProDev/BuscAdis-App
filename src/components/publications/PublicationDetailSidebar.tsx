@@ -357,7 +357,7 @@ export default function PublicationDetailSidebar({
                 <span>Compartir</span>
               </button>
               <button
-                onClick={() => window.location.href = `/anuncios/${publication.id}/${encodeURIComponent(publication.title)}`}
+                onClick={() => window.location.href = `/adisos/${(publication as any).sequentialId || publication.id}/${encodeURIComponent(publication.title)}`}
                 className="flex-1 flex items-center justify-center gap-2 bg-violet-600 hover:bg-violet-700 text-white py-3 px-2 rounded-lg font-semibold text-base shadow-md transition-all"
                 title="Ver página completa"
               >

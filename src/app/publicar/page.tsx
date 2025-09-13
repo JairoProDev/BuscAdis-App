@@ -3,6 +3,7 @@
 import React, { useState, useCallback, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { PublicationsService, CreatePublicationData } from '@/services/publications.service';
+import { ATTRIBUTES_CONFIG, type AttributeField, type CategoryKey } from '@/data/attributesConfig'
 import CategorySelector from '@/components/publish/CategorySelector';
 import LocationSelector from '@/components/publish/LocationSelector';
 import PriceInput from '@/components/publish/PriceInput';
@@ -58,6 +59,7 @@ function LoadingDisplay({ message }: { message: string }) {
 
 export default function PublicarPage() {
   const [step, setStep] = useState<StepValue>(STEPS.CATEGORY);
+  const [dynamicAttributes, setDynamicAttributes] = useState<Record<string, unknown>>({})
   const [error, setError] = useState<string>('');
   const [success, setSuccess] = useState<boolean>(false);
   const [loading, setLoading] = useState<boolean>(false);
@@ -396,6 +398,13 @@ export default function PublicarPage() {
     }));
   }, [updateAd]);
 
+  // Dynamic attributes from central config
+  const selectedCategoryKey = (ad.categorySlug || 'productos') as CategoryKey
+  const attributeFields: AttributeField[] = ATTRIBUTES_CONFIG[selectedCategoryKey] || []
+  const handleDynamicFieldChange = (key: string, value: unknown) => {
+    setDynamicAttributes(prev => ({ ...prev, [key]: value }))
+  }
+
   // Submit final
   const handleSubmit = useCallback(async () => {
     if (!validateStep(STEPS.PREVIEW)) {
@@ -440,7 +449,7 @@ export default function PublicarPage() {
           visible: true
         },
         images: ad.images || [],
-        attributes: ad.attributes || {},
+        attributes: { ...(ad.attributes || {}), ...dynamicAttributes },
         status: 'active',
         premium: ad.premium || false
       };
@@ -453,7 +462,9 @@ export default function PublicarPage() {
       
       // El API devuelve: { success: true, publication: {...}, message: '...' }
       // Necesitamos extraer el ID de la publicación creada
-      const publicationId = response.publication?.id || response.publication?._id || response.id;
+      const publicationId = response.publication?._id || response.publication?.id || response.id;
+      const sequentialId = response.publication?.sequentialId;
+      const slug = (response.publication?.slug || ad.title || '').toLowerCase().trim().replace(/\s+/g,'-').replace(/[^\w\-]+/g,'').replace(/\-\-+/g,'-');
       
       if (!publicationId) {
         throw new Error('No se pudo obtener el ID de la publicación creada');
@@ -464,6 +475,14 @@ export default function PublicarPage() {
       setPublishedId(publicationId);
       setSuccess(true);
       Logger.info('Publicación creada exitosamente', { id: publicationId });
+      // Redirect directly to the new adiso after a short delay
+      setTimeout(() => {
+        if (sequentialId) {
+          window.location.href = `/adisos/${sequentialId}/${slug}`;
+        } else if (publicationId) {
+          window.location.href = `/adisos/${publicationId}/${slug}`;
+        }
+      }, 600);
     } catch (error) {
       console.error('❌ Error al publicar:', error);
       const errorMessage = error instanceof Error ? error.message : 'Hubo un error al publicar tu anuncio';

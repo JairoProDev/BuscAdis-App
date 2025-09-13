@@ -24,7 +24,7 @@ const SuccessMessage: React.FC<SuccessMessageProps> = ({
       initial={{ opacity: 0, scale: 0.9 }}
       animate={{ opacity: 1, scale: 1 }}
       transition={{ duration: 0.5 }}
-      className="text-center space-y-6"
+      className="text-center space-y-4"
     >
       {/* Icono de éxito animado */}
       <motion.div
@@ -93,7 +93,7 @@ const SuccessMessage: React.FC<SuccessMessageProps> = ({
               navigator.share({
                 title: 'Mi anuncio en BuscAdis',
                 text: 'Mira mi nuevo anuncio',
-                url: `${window.location.origin}/anuncios/${publishedId}`
+                url: `${window.location.origin}/adisos/${publishedId}`
               });
             }
           }}

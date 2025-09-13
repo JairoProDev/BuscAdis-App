@@ -8,77 +8,106 @@ const UnifiedPublicationSchema = new mongoose.Schema(
 
     // Core content
     title: { type: String, required: true, index: true },
-    description: { type: String, required: true, index: "text" },
     slug: { type: String, index: true },
+    description: { type: String, required: true, index: "text" },
+
+    // Status and lifecycle
+    status: { type: String, enum: ["active", "expired", "pending_review", "rejected", "archived"], default: "active", index: true },
+    publicationDate: { type: Date, index: true },
+    validUntil: { type: Date },
 
     // Classification
     category: { type: String, required: true, index: true },
-    subcategory: { type: String, index: true },
-    subsubcategory: { type: String, index: true },
+    subcategories: [{ type: String, index: true }],
 
     // Location
     location: {
-      country: { type: String, index: true },
-      region: { type: String, index: true }, // department/province/state
-      province: { type: String },
-      city: { type: String, index: true },
-      district: { type: String },
+      countryCode: { type: String, index: true },
+      department: { type: String, index: true },
+      province: { type: String, index: true },
+      district: { type: String, index: true },
       address: { type: String },
-      coordinates: {
-        lat: { type: Number },
-        lng: { type: Number },
-      },
+      areaPaths: [{ type: String, index: true }],
+      geo: {
+        type: { type: String, enum: ["Point"], default: "Point" },
+        coordinates: { type: [Number], index: "2dsphere" }
+      }
     },
 
-    // Contact
-    contact: {
+    // Advertiser / contact
+    advertiserType: { type: String, enum: ["company", "individual"], default: "individual" },
+    advertiserId: { type: String, index: true },
+    contactInfo: {
       name: { type: String },
-      phones: [{ type: String }],
-      whatsapp: [{ type: String }],
-      email: [{ type: String }],
-      preferredMethod: { type: String, enum: ["phone", "whatsapp", "email"], default: "phone" },
+      showContactButton: { type: Boolean, default: true },
+      phone: { type: String },
+      email: { type: String }
     },
 
     // Pricing
     pricing: {
       amount: { type: Number },
-      currency: { type: String, default: "PEN" },
-      type: { type: String, enum: ["fixed", "negotiable", "free", "range", "hourly", "monthly"], default: "fixed" },
-      period: { type: String, enum: ["once", "daily", "monthly"] },
-      minAmount: { type: Number },
-      maxAmount: { type: Number },
+      currency: { type: String, default: "PEN" }
     },
 
-    // Media
-    images: [{ type: String }],
-    videos: [{ type: String }],
-
-    // Dynamic attributes per category
+    // Dynamic attributes
     attributes: { type: Map, of: mongoose.Schema.Types.Mixed, default: {} },
 
-    // Source metadata
-    source: {
-      type: { type: String, enum: ["manual", "import", "crawler", "magazine", "api"], default: "manual" },
-      label: { type: String },
-      externalId: { type: String, index: true },
-      originalPublicationDate: { type: Date },
-      extraction: {
-        method: { type: String, enum: ["ai", "manual", "auto"], default: "auto" },
-        confidence: { type: Number },
-        processedAt: { type: Date },
-      },
+    // Media
+    media: [
+      {
+        type: { type: String, enum: ["image", "video", "document"], default: "image" },
+        url: { type: String },
+        isPrimary: { type: Boolean, default: false }
+      }
+    ],
+
+    // Search/AI
+    search: {
+      tags: [{ type: String, index: true }],
+      embedding: [{ type: Number }]
     },
 
-    // Status and lifecycle
-    status: { type: String, enum: ["active", "expired", "archived", "deleted"], default: "active", index: true },
-    premium: { type: Boolean, default: false },
-    views: { type: Number, default: 0 },
+    // Metrics
+    metrics: {
+      impressions: { type: Number, default: 0 },
+      cardClicks: { type: Number, default: 0 },
+      detailViews: { type: Number, default: 0 },
+      shares: { type: Number, default: 0 },
+      saves: { type: Number, default: 0 },
+      contactClicks: { type: Number, default: 0 },
+      chatInteractions: { type: Number, default: 0 }
+    },
+
+    // Source/Distribution/Audit/Moderation
+    source: {
+      type: { type: String, enum: ["web_form", "historical_import", "api", "sales_assisted"], default: "web_form" },
+      historicalImportDetails: {
+        originalPublicationDate: { type: Date },
+        estimatedPaidAmount: { type: Number }
+      }
+    },
+    distribution: [
+      { channel: { type: String }, status: { type: String }, refId: { type: String } }
+    ],
+    audit: {
+      createdBy: { type: String },
+      history: [
+        { changedAt: { type: Date }, changedBy: { type: String }, field: { type: String }, oldValue: { type: mongoose.Schema.Types.Mixed } }
+      ]
+    },
+    moderation: {
+      status: { type: String, enum: ["pending", "approved", "rejected"], default: "approved" },
+      reviewedBy: { type: String },
+      notes: { type: String }
+    },
   },
   { timestamps: true }
 );
 
 // Compound indexes for high-perf queries
-UnifiedPublicationSchema.index({ category: 1, "location.region": 1, createdAt: -1 });
+UnifiedPublicationSchema.index({ category: 1, publicationDate: -1 });
+UnifiedPublicationSchema.index({ status: 1, category: 1, publicationDate: -1 });
 UnifiedPublicationSchema.index({ title: "text", description: "text" });
 UnifiedPublicationSchema.index({ sequentialId: 1 });
 

@@ -297,7 +297,7 @@ export default function RealTimeSearchEngine({
     } else {
       // Navegar al detalle del resultado
       const slug = result.title.toLowerCase().replace(/[^a-z0-9]/g, '-').replace(/-+/g, '-')
-      router.push(`/anuncios/${result.id}/${slug}`)
+      router.push(`/adisos/${result.id}/${slug}`)
     }
   }
 

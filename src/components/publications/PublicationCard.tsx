@@ -21,7 +21,7 @@ import {
 import { HeartIcon as HeartSolidIcon } from '@heroicons/react/24/solid';
 import { WhatsAppIcon } from '@/components/icons';
 import { useMemo } from 'react';
-import { generateSeoUrl } from '@/utils/url';
+import { slugify } from '@/lib/utils';
 import { getDefaultImageByCategory } from '@/utils/image-helpers';
 
 import { PublicationData } from '@/types/publication';
@@ -102,8 +102,11 @@ export default function PublicationCard({
 
   // Generate SEO-friendly URL
   const seoUrl = useMemo(() => {
-    return generateSeoUrl(publication.id, publication.title);
-  }, [publication.id, publication.title]);
+    const slug = slugify(publication.title)
+    const seq = (publication as unknown as { sequentialId?: number }).sequentialId
+    const idForUrl = typeof seq === 'number' ? String(seq) : String(publication.id)
+    return `/adisos/${idForUrl}/${slug}`
+  }, [publication.id, (publication as any).sequentialId, publication.title])
 
   // Format price locally
   const formatPriceLocal = (value: number, currency: string) => {
@@ -289,6 +292,16 @@ export default function PublicationCard({
     e.preventDefault();
     e.stopPropagation();
     
+    // Track card click
+    const seq = (publication as unknown as { sequentialId?: number }).sequentialId
+    if (typeof seq === 'number') {
+      fetch(`/api/adisos/${encodeURIComponent(String(seq))}/track`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ event: 'cardClick' })
+      }).catch(() => {})
+    }
+
     // Call the parent handler if provided
     if (onPublicationClick) {
       onPublicationClick(publication);

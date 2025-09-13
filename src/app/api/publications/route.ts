@@ -218,10 +218,20 @@ export async function POST(request: Request) {
 
     // Preparar documento para inserción
     const now = new Date()
+
+    // Compute next sequentialId atomically using counters collection
+    const counters = db.collection('counters')
+    const seqDoc = await counters.findOneAndUpdate(
+      { _id: 'adisos_sequential' },
+      { $inc: { seq: 1 } },
+      { upsert: true, returnDocument: 'after' }
+    )
+    const sequentialId = (seqDoc.value?.seq as number) || 1
+
     const newPublication = {
       ...data,
       _id: generateObjectId(),
-      id: `pub_${Date.now()}_${Math.random().toString(36).substring(2, 9)}`,
+      sequentialId,
       status: data.status || 'active',
       createdAt: now,
       updatedAt: now,
@@ -235,9 +245,12 @@ export async function POST(request: Request) {
         shares: 0,
         saves: 0
       },
-      metadata: {
-        source: 'web_form',
+      source: {
+        type: 'web_form',
         userAgent: request.headers.get('user-agent') || 'unknown'
+      },
+      metrics: {
+        impressions: 0, cardClicks: 0, detailViews: 0, shares: 0, saves: 0, contactClicks: 0, chatInteractions: 0
       }
     }
 
@@ -251,17 +264,14 @@ export async function POST(request: Request) {
     }
 
     Logger.info('Publication created successfully', { 
-      id: newPublication.id, 
+      sequentialId,
       category: data.category || data.categorySlug,
       collection: UNIFIED_COLLECTION 
     })
 
     return NextResponse.json({
       success: true,
-      publication: {
-        ...newPublication,
-        _id: result.insertedId.toString()
-      },
+      publication: { ...newPublication, _id: result.insertedId.toString() },
       message: 'Publicación creada exitosamente'
     })
 

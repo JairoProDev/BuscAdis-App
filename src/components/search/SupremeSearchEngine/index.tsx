@@ -647,7 +647,7 @@ export default function SupremeSearchEngine({
   }
 
   const handleQuickResultClick = (result: SearchResult) => {
-    router.push(`/anuncios/${result.id}`)
+    router.push(`/adisos/${result.id}`)
   }
 
   const handleSearchFocus = () => {

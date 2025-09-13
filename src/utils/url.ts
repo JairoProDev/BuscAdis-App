@@ -59,8 +59,8 @@ export function generateSeoUrl(
     // Agregar ID al final (requerido para el routing dinámico)
     url += `/${id}`;
   } else {
-    // Fallback para otras categorías: usar /anuncios/[id] que sí existe
-    url = `/anuncios/${id}`;
+    // Fallback para otras categorías: usar /adisos/[id]
+    url = `/adisos/${id}`;
     
     // Opcionalmente agregar título como slug adicional
     if (titleSlug) {

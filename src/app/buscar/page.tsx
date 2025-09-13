@@ -689,7 +689,10 @@ function SearchPageContent({ publicationsData, results, setResults, isLoading, s
         } else if (!pub) {
           // Try to fetch from API
           try {
-            const response = await fetch(`/api/publications/${encodeURIComponent(slug)}`);
+            // Expect URLs like /adisos/{sequentialId}/{slug}
+            const parts = currentPathname.split('/')
+            const seq = parts.length >= 3 ? parts[2] : slug
+            const response = await fetch(`/api/publications/${encodeURIComponent(seq)}`);
             if (response.ok) {
               const data = await response.json();
               if (data && data.publication) {

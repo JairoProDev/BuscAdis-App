@@ -406,7 +406,7 @@ export default function SearchResults({
   // Función para crear mensaje personalizado de WhatsApp
   const createWhatsAppMessage = (category: string, title: string, resultId: string) => {
     const currentUrl = window.location.origin
-    const anuncioUrl = `${currentUrl}/anuncios/${resultId}/${title.toLowerCase().replace(/\s+/g, '-')}`
+    const anuncioUrl = `${currentUrl}/adisos/${resultId}/${title.toLowerCase().replace(/\s+/g, '-')}`
     
     return encodeURIComponent(
       `Hola, vi su anuncio de ${category}: ${anuncioUrl} en BuscaDis y me interesó. ¿Podría brindarme más información, por favor?`

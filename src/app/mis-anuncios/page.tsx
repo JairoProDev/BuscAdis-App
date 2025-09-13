@@ -167,7 +167,7 @@ export default function MyPublicationsPage() {
                     <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                       <div className="flex space-x-2 justify-end">
                         <Link
-                          href={`/anuncios/${publication._id}`}
+                          href={`/adisos/${publication._id}`}
                           className="text-primary-600 hover:text-primary-900"
                           title="Ver anuncio"
                         >
