@@ -658,14 +658,7 @@ export default function PublicarPage() {
             onStepClick={(targetStep) => setStep(targetStep as StepValue)}
             completedFields={completedFields}
           />
-          {/* Barra de progreso visual extra */}
-          <div className="relative w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2.5 mt-2">
-            <div
-              className={`h-2.5 rounded-full transition-all duration-500 ${progress === 100 ? 'bg-green-500' : 'bg-gradient-to-r from-primary-400 to-primary-600 dark:from-primary-500 dark:to-primary-700'}`}
-              style={{ width: `${progress}%` }}
-            />
-            <span className="absolute right-2 top-[-18px] text-xs font-semibold text-gray-700 dark:text-gray-300">{Math.round(progress)}%</span>
-          </div>
+          {/* Eliminada la barra duplicada para evitar dos progresos */}
         </div>
 
         <div className="flex flex-col lg:flex-row gap-6">

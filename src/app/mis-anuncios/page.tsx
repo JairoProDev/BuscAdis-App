@@ -13,7 +13,7 @@ import Image from 'next/image';
 
 export default function MyPublicationsPage() {
   const { user } = useAuth();
-  const [publications, setPublications] = useState<UserPublication[]>([]);
+  const [publications, setPublications] = useState<UserPublication[]>([] as UserPublication[]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [deleteConfirm, setDeleteConfirm] = useState<string | null>(null);
@@ -63,10 +63,18 @@ export default function MyPublicationsPage() {
     );
   }
 
+  if (!Array.isArray(publications)) {
+    return (
+      <div className="container py-16 min-h-screen flex items-center justify-center">
+        <div className="text-gray-600 dark:text-gray-300">No hay datos disponibles todavía.</div>
+      </div>
+    );
+  }
+
   return (
     <div className="container py-8 md:py-12">
       <div className="flex justify-between items-center mb-8">
-        <h1 className="text-2xl md:text-3xl font-bold text-gray-900">Mis anuncios</h1>
+        <h1 className="text-2xl md:text-3xl font-bold text-gray-900 dark:text-gray-100">Mis adisos</h1>
         <Link 
           href="/publicar" 
           className="bg-primary-600 hover:bg-primary-700 text-white py-2 px-4 rounded-lg inline-flex items-center transition-colors"
@@ -83,45 +91,45 @@ export default function MyPublicationsPage() {
       )}
       
       {publications.length === 0 ? (
-        <div className="bg-white rounded-xl shadow-md p-8 text-center">
-          <div className="w-20 h-20 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
+        <div className="bg-white dark:bg-gray-800 rounded-xl shadow-md p-8 text-center border border-gray-200 dark:border-gray-700">
+          <div className="w-20 h-20 bg-gray-100 dark:bg-gray-700 rounded-full flex items-center justify-center mx-auto mb-4">
             <DocumentTextIcon className="w-10 h-10 text-gray-400" />
           </div>
-          <h2 className="text-xl font-semibold text-gray-700 mb-2">No tienes anuncios publicados</h2>
-          <p className="text-gray-500 mb-6">Comienza a publicar tus anuncios para que aparezcan aquí.</p>
+          <h2 className="text-xl font-semibold text-gray-700 dark:text-gray-200 mb-2">Aún no tienes adisos publicados</h2>
+          <p className="text-gray-500 dark:text-gray-400 mb-6">Publica tu primer adiso para comenzar.</p>
           <Link
             href="/publicar"
             className="bg-primary-600 hover:bg-primary-700 text-white py-2 px-6 rounded-lg inline-block transition-colors"
           >
-            Publicar un anuncio
+            Publicar un adiso
           </Link>
         </div>
       ) : (
-        <div className="bg-white rounded-xl shadow-md overflow-hidden">
+        <div className="bg-white dark:bg-gray-800 rounded-xl shadow-md overflow-hidden border border-gray-200 dark:border-gray-700">
           <div className="overflow-x-auto">
-            <table className="min-w-full divide-y divide-gray-200">
-              <thead className="bg-gray-50">
+            <table className="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
+              <thead className="bg-gray-50 dark:bg-gray-900/40">
                 <tr>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                    Anuncio
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                    Adiso
                   </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
                     Estado
                   </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
                     Publicado
                   </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
                     Visitas
                   </th>
-                  <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
+                  <th className="px-6 py-3 text-right text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
                     Acciones
                   </th>
                 </tr>
               </thead>
-              <tbody className="bg-white divide-y divide-gray-200">
+              <tbody className="bg-white dark:bg-gray-800 divide-y divide-gray-200 dark:divide-gray-700">
                 {publications.map((publication) => (
-                  <tr key={publication._id} className="hover:bg-gray-50">
+                  <tr key={publication._id} className="hover:bg-gray-50 dark:hover:bg-gray-900/40">
                     <td className="px-6 py-4 whitespace-nowrap">
                       <div className="flex items-center">
                         <div className="h-10 w-10 flex-shrink-0">
@@ -134,16 +142,16 @@ export default function MyPublicationsPage() {
                               className="h-10 w-10 rounded-md object-cover" 
                             />
                           ) : (
-                            <div className="h-10 w-10 rounded-md bg-gray-200 flex items-center justify-center">
+                            <div className="h-10 w-10 rounded-md bg-gray-200 dark:bg-gray-700 flex items-center justify-center">
                               <PhotoIcon className="h-6 w-6 text-gray-400" />
                             </div>
                           )}
                         </div>
                         <div className="ml-4">
-                          <div className="text-sm font-medium text-gray-900 truncate max-w-xs">
+                          <div className="text-sm font-medium text-gray-900 dark:text-gray-100 truncate max-w-xs">
                             {publication.title}
                           </div>
-                          <div className="text-sm text-gray-500">
+                          <div className="text-sm text-gray-500 dark:text-gray-400">
                             {publication.categorySlug}
                           </div>
                         </div>
@@ -151,17 +159,17 @@ export default function MyPublicationsPage() {
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
                       <span className={`px-2 inline-flex text-xs leading-5 font-semibold rounded-full ${
-                        publication.isActive 
+                        (publication as any).isActive 
                           ? 'bg-green-100 text-green-800' 
                           : 'bg-yellow-100 text-yellow-800'
                       }`}>
-                        {publication.isActive ? 'Activo' : 'Inactivo'}
+                        {(publication as any).isActive ? 'Activo' : 'Inactivo'}
                       </span>
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                      {formatDate(publication.createdAt)}
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
+                      {publication.createdAt ? formatDate(publication.createdAt as unknown as string) : '—'}
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-400">
                       {publication.views || 0}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
@@ -169,21 +177,21 @@ export default function MyPublicationsPage() {
                         <Link
                           href={`/adisos/${publication._id}`}
                           className="text-primary-600 hover:text-primary-900"
-                          title="Ver anuncio"
+                          title="Ver adiso"
                         >
                           <EyeIcon className="h-5 w-5" />
                         </Link>
                         <Link
-                          href={`/mis-anuncios/editar/${publication._id}`}
+                          href={`/mis-adisos/editar/${publication._id}`}
                           className="text-indigo-600 hover:text-indigo-900"
-                          title="Editar anuncio"
+                          title="Editar adiso"
                         >
                           <PencilIcon className="h-5 w-5" />
                         </Link>
                         <button
                           onClick={() => setDeleteConfirm(publication._id)}
                           className="text-red-600 hover:text-red-900"
-                          title="Eliminar anuncio"
+                          title="Eliminar adiso"
                         >
                           <TrashIcon className="h-5 w-5" />
                         </button>

@@ -107,7 +107,7 @@ export default function Footer() {
 
               <div className={`${dividerColor} mt-8 pt-8 text-center ${copyrightTextColor}`}>
                   <p>&copy; {new Date().getFullYear()} BuscAdis. Todos los derechos reservados.</p>
-                  <p>Desarrollado por <a href="https://www.linkedin.com/in/JairoProDev/" target="_blank" rel="noopener noreferrer" className={`${copyrightTextColor} hover:${primaryColor}`}>Jairo Saul Salas Quiñones</a></p>
+                  <p>Desarrollado por <a href="https://www.linkedin.com/in/JairoProDev/" target="_blank" rel="noopener noreferrer" className={`${copyrightTextColor} hover:${primaryColor}`}> @JairoSaulProDev - Jairo Saul Salas Quiñones</a></p>
               </div>
           </div>
       </footer>
