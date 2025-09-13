@@ -413,18 +413,20 @@ export default function PublicarPage() {
       const finalAdData: CreatePublicationData = {
         title: ad.title || '',
         description: ad.description || '',
-        categorySlug: ad.categorySlug || '',
-        subcategorySlug: ad.subcategorySlug,
-        subSubcategorySlug: ad.subSubcategorySlug,
-        transactionType: ad.transactionType || 'venta',
-        value: ad.amount ?? 0,
-        currency: ad.currency || 'PEN',
-        valueType: 'total', // Valor por defecto
+        category: ad.categorySlug || '',
+        subcategory: ad.subcategorySlug || undefined,
+        subsubcategory: ad.subSubcategorySlug || undefined,
+        pricing: {
+          amount: ad.amount ?? undefined,
+          currency: ad.currency || 'PEN',
+          type: 'fixed'
+        },
         location: {
           country: 'PE',
-          province: ad.location?.province || '',
-          city: ad.location?.district || '',
-          district: ad.location?.district,
+          region: ad.location?.province || undefined,
+          province: ad.location?.province || undefined,
+          city: ad.location?.city || undefined,
+          district: ad.location?.district || undefined,
           address: ad.location?.address,
           coordinates: ad.location?.coordinates ? {
             lat: ad.location.coordinates.lat,
@@ -438,6 +440,7 @@ export default function PublicarPage() {
           visible: true
         },
         images: ad.images || [],
+        attributes: ad.attributes || {},
         status: 'active',
         premium: ad.premium || false
       };

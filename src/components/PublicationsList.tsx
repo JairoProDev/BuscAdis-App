@@ -32,8 +32,12 @@ const PublicationsList = () => {
           <li key={publication._id}>
             <h3>{publication.title}</h3>
             <p>{publication.description}</p>
-            <p>Ubicación: {publication.location.city}, {publication.location.country}</p>
-            <p>Precio: {publication.value} {publication.currency}</p>
+            {typeof publication.location === 'object' ? (
+              <p>Ubicación: {publication.location.city || publication.location.district}, {publication.location.country || publication.location.province}</p>
+            ) : (
+              <p>Ubicación: {publication.location}</p>
+            )}
+            <p>Precio: {(publication as any).value ?? (publication as any).amount ?? 0} {publication.currency || (publication as any).pricing?.currency || 'PEN'}</p>
           </li>
         ))}
       </ul>

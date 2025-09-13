@@ -1,35 +1,23 @@
 import { NextRequest, NextResponse } from 'next/server'
-import dbConnect from '@/lib/dbConnect'
-import { getPublicationModel } from '@/lib/models/Publication'
+import { MongoClient, Db, ObjectId } from 'mongodb'
 
 export const dynamic = 'force-dynamic' // Disable caching to ensure data is always fresh
 export const runtime = 'nodejs' // Mark as server-side only
 
-// Helper function to search across all collections
-async function findPublicationInAllCollections(publicationId: string) {
-  const categories = ['inmuebles', 'vehiculos', 'empleos', 'servicios', 'productos', 'eventos', 'negocios', 'comunidad'];
-  
-  for (const category of categories) {
-    try {
-      const model = getPublicationModel(category);
-      const publication = await model.findOne({
-        $or: [
-          { _id: publicationId },
-          { publicationId: publicationId },
-          { id: publicationId }
-        ]
-      }).lean();
-      
-      if (publication) {
-        return { publication, category };
-      }
-    } catch {
-      console.log(`No publication found in ${category} collection`);
-      continue;
-    }
-  }
-  
-  return null;
+const MONGODB_URI = process.env.MONGODB_URI!
+const MONGODB_DB = process.env.MONGODB_DB || 'buscadis'
+const COLLECTION = 'adisos'
+
+let cachedClient: MongoClient | null = null
+let cachedDb: Db | null = null
+
+async function getDb() {
+  if (cachedClient && cachedDb) return cachedDb
+  const client = new MongoClient(MONGODB_URI)
+  await client.connect()
+  cachedClient = client
+  cachedDb = client.db(MONGODB_DB)
+  return cachedDb
 }
 
 export async function GET(
@@ -47,12 +35,13 @@ export async function GET(
       );
     }
     
-    await dbConnect();
-    
-    // Try to find the publication in all collections
-    const result = await findPublicationInAllCollections(id);
-    
-    if (!result) {
+    const db = await getDb()
+
+    const collection = db.collection(COLLECTION)
+    const byId = await collection.findOne({ _id: new ObjectId(id) }).catch(() => null)
+    const byString = byId || (await collection.findOne({ id }))
+
+    if (!byString) {
       // Fallback publication data structure
       const FALLBACK_PUBLICATION = {
         id: id,
@@ -82,10 +71,7 @@ export async function GET(
       return NextResponse.json(FALLBACK_PUBLICATION);
     }
     
-    const { publication: publicationData } = result;
-    
-    // Ensure we have a single publication object (not an array)
-    const publication = Array.isArray(publicationData) ? publicationData[0] : publicationData;
+    const publication = byString
     
     // Format the publication for frontend consumption
     const formattedPublication = {
@@ -133,34 +119,21 @@ export async function PUT(
     const { id } = params;
     const body = await request.json();
     
-    await dbConnect();
-    
-    // Find which collection contains this publication
-    const result = await findPublicationInAllCollections(id);
-    
-    if (!result) {
+    const db = await getDb()
+    const collection = db.collection(COLLECTION)
+    const exists = await collection.findOne({ $or: [{ _id: new ObjectId(id) }, { id }] }).catch(() => null)
+    if (!exists) {
       return NextResponse.json(
         { error: 'Publication not found' },
         { status: 404 }
       );
     }
-    
-    const { category } = result;
-    const model = getPublicationModel(category);
-    
-    const updatedPublication = await model.findOneAndUpdate(
-      {
-        $or: [
-          { _id: id },
-          { publicationId: id },
-          { id: id }
-        ]
-      },
-      { ...body, updatedAt: new Date() },
-      { new: true }
-    );
-    
-    return NextResponse.json(updatedPublication);
+    await collection.updateOne(
+      { $or: [{ _id: new ObjectId(id) }, { id }] },
+      { $set: { ...body, updatedAt: new Date() } }
+    )
+    const updated = await collection.findOne({ $or: [{ _id: new ObjectId(id) }, { id }] })
+    return NextResponse.json(updated);
   } catch (error) {
     console.error('Error updating publication:', error);
     return NextResponse.json(
@@ -178,29 +151,16 @@ export async function DELETE(
     const params = await context.params;
     const { id } = params;
     
-    await dbConnect();
-    
-    // Find which collection contains this publication
-    const result = await findPublicationInAllCollections(id);
-    
-    if (!result) {
+    const db = await getDb()
+    const collection = db.collection(COLLECTION)
+    const exists = await collection.findOne({ $or: [{ _id: new ObjectId(id) }, { id }] }).catch(() => null)
+    if (!exists) {
       return NextResponse.json(
         { error: 'Publication not found' },
         { status: 404 }
       );
     }
-    
-    const { category } = result;
-    const model = getPublicationModel(category);
-    
-    await model.findOneAndDelete({
-      $or: [
-        { _id: id },
-        { publicationId: id },
-        { id: id }
-      ]
-    });
-    
+    await collection.deleteOne({ $or: [{ _id: new ObjectId(id) }, { id }] })
     return NextResponse.json({ message: 'Publication deleted successfully' });
   } catch (error) {
     console.error('Error deleting publication:', error);

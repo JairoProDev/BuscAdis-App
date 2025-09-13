@@ -1,42 +1,89 @@
 import mongoose from "mongoose";
 
-const PublicationSchema = new mongoose.Schema({
-  counterId: { type: Number, unique: true, index: true }, // ID secuencial simple
-  title: { type: String, required: true },
-  slug: { type: String, index: true }, // Para la URL amigable
-  description: { type: String, required: true },
-  categorySlug: { type: String, required: true, index: true },
-  subcategorySlug: { type: String, index: true },
-  subSubcategorySlug: { type: String, index: true }, // Añadir si tienes 3 niveles
-  location: { type: String }, // Simple por ahora
-  contactName: { type: String },
-  contactPhone: { type: String }, // Número WhatsApp del anunciante
-  price: { type: Number },
-  currency: { type: String, default: "PEN" },
-  images: [{ type: String }], // Array de URLs de imágenes
-  status: { type: String, default: "active", index: true },
-  createdAt: { type: Date, default: Date.now },
-  updatedAt: { type: Date, default: Date.now },
-  // Campos para compatibilidad con el sistema existente
-  id: { type: String },
-  _id: { type: String }, // Asegura que _id es string, no ObjectId
-});
+// Unified Publication schema for single global collection `adisos`
+// This schema is flexible and scalable for multiple categories and countries.
+const UnifiedPublicationSchema = new mongoose.Schema(
+  {
+    sequentialId: { type: Number, unique: true, index: true },
 
-// Exportar el modelo
-export const getPublicationModel = (categorySlug) => {
-  const collectionName = `publications_${categorySlug}`;
+    // Core content
+    title: { type: String, required: true, index: true },
+    description: { type: String, required: true, index: "text" },
+    slug: { type: String, index: true },
 
-  // Check if model exists first to prevent model recreation error in development
-  try {
-    return (
-      mongoose.models[collectionName] ||
-      mongoose.model(collectionName, PublicationSchema, collectionName)
-    );
-  } catch (error) {
-    console.error(`Error creating model for ${collectionName}:`, error);
-    // Return existing model if creation fails
-    return mongoose.models[collectionName];
-  }
-};
+    // Classification
+    category: { type: String, required: true, index: true },
+    subcategory: { type: String, index: true },
+    subsubcategory: { type: String, index: true },
 
-export default PublicationSchema;
+    // Location
+    location: {
+      country: { type: String, index: true },
+      region: { type: String, index: true }, // department/province/state
+      province: { type: String },
+      city: { type: String, index: true },
+      district: { type: String },
+      address: { type: String },
+      coordinates: {
+        lat: { type: Number },
+        lng: { type: Number },
+      },
+    },
+
+    // Contact
+    contact: {
+      name: { type: String },
+      phones: [{ type: String }],
+      whatsapp: [{ type: String }],
+      email: [{ type: String }],
+      preferredMethod: { type: String, enum: ["phone", "whatsapp", "email"], default: "phone" },
+    },
+
+    // Pricing
+    pricing: {
+      amount: { type: Number },
+      currency: { type: String, default: "PEN" },
+      type: { type: String, enum: ["fixed", "negotiable", "free", "range", "hourly", "monthly"], default: "fixed" },
+      period: { type: String, enum: ["once", "daily", "monthly"] },
+      minAmount: { type: Number },
+      maxAmount: { type: Number },
+    },
+
+    // Media
+    images: [{ type: String }],
+    videos: [{ type: String }],
+
+    // Dynamic attributes per category
+    attributes: { type: Map, of: mongoose.Schema.Types.Mixed, default: {} },
+
+    // Source metadata
+    source: {
+      type: { type: String, enum: ["manual", "import", "crawler", "magazine", "api"], default: "manual" },
+      label: { type: String },
+      externalId: { type: String, index: true },
+      originalPublicationDate: { type: Date },
+      extraction: {
+        method: { type: String, enum: ["ai", "manual", "auto"], default: "auto" },
+        confidence: { type: Number },
+        processedAt: { type: Date },
+      },
+    },
+
+    // Status and lifecycle
+    status: { type: String, enum: ["active", "expired", "archived", "deleted"], default: "active", index: true },
+    premium: { type: Boolean, default: false },
+    views: { type: Number, default: 0 },
+  },
+  { timestamps: true }
+);
+
+// Compound indexes for high-perf queries
+UnifiedPublicationSchema.index({ category: 1, "location.region": 1, createdAt: -1 });
+UnifiedPublicationSchema.index({ title: "text", description: "text" });
+UnifiedPublicationSchema.index({ sequentialId: 1 });
+
+export const UnifiedPublicationModel =
+  mongoose.models.adisos ||
+  mongoose.model("adisos", UnifiedPublicationSchema, "adisos");
+
+export default UnifiedPublicationModel;

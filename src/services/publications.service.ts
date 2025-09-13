@@ -128,32 +128,31 @@ export interface PublicationFilters {
 export interface CreatePublicationData {
   title: string;
   description: string;
-  categorySlug: string;
-  subcategorySlug?: string;
-  subSubcategorySlug?: string;
-  transactionType: string;
-  value: number;
-  currency: string;
-  valueType: string;
-  size?: number;
-  location: {
-    country: string;
-    province: string;
-    city: string;
+  category: string; // unified
+  subcategory?: string;
+  subsubcategory?: string;
+  pricing?: {
+    amount?: number;
+    currency?: string;
+    type?: 'fixed' | 'negotiable' | 'free' | 'range' | 'hourly' | 'monthly';
+  };
+  location?: {
+    country?: string;
+    region?: string; // department/province
+    province?: string;
+    city?: string;
     district?: string;
     address?: string;
-    coordinates?: {
-      lat: number;
-      lng: number;
-    };
+    coordinates?: { lat: number; lng: number };
   };
-  contact: {
-    phones: string[];
+  contact?: {
+    phones?: string[];
     email?: string;
     name?: string;
     visible?: boolean;
   };
-  images: string[];
+  images?: string[];
+  attributes?: Record<string, unknown>;
   status?: string;
   premium?: boolean;
 }

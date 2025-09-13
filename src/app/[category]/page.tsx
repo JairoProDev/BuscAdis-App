@@ -66,6 +66,7 @@ function CategoryPageContent({ params }: CategoryPageProps) {
     )
   }
 
-  // Renderizar la misma página de búsqueda pero con la categoría preseleccionada
+  // Renderizar la misma página de búsqueda pero con la categoría preseleccionada via query (?category=...)
+  // The search page already reads URL params and calls /api/publications unified endpoint.
   return <SearchPageContent />
 } 

@@ -11,14 +11,7 @@ import { es } from 'date-fns/locale';
 import { getDefaultImageByCategory } from '@/utils/image-helpers';
 import Image from 'next/image';
 import Link from 'next/link';
-import EmpleoDetail from './categories/EmpleoDetail';
-import InmuebleDetail from './categories/InmuebleDetail';
-import VehiculoDetail from './categories/VehiculoDetail';
-import ServicioDetail from './categories/ServicioDetail';
-import ProductoDetail from './categories/ProductoDetail';
-import EventoDetail from './categories/EventoDetail';
-import NegocioDetail from './categories/NegocioDetail';
-import ComunidadDetail from './categories/ComunidadDetail';
+import PublicationAttributes from '../PublicationAttributes'
 
 interface DedicatedPublicationPageProps {
   publication: PublicationData;
@@ -27,74 +20,6 @@ interface DedicatedPublicationPageProps {
   onShare?: () => void;
   onFavorite?: () => void;
 }
-
-// Category-specific configurations
-const categoryConfigs = {
-  empleos: {
-    title: 'Empleo',
-    icon: '💼',
-    color: 'blue',
-    primaryAction: 'Postular',
-    secondaryAction: 'Guardar Empleo',
-    fields: ['salary', 'workType', 'requirements', 'benefits']
-  },
-  inmuebles: {
-    title: 'Inmueble',
-    icon: '🏠',
-    color: 'green',
-    primaryAction: 'Contactar',
-    secondaryAction: 'Programar Visita',
-    fields: ['rooms', 'bathrooms', 'area', 'parking']
-  },
-  vehiculos: {
-    title: 'Vehículo',
-    icon: '🚗',
-    color: 'red',
-    primaryAction: 'Contactar',
-    secondaryAction: 'Ver Detalles',
-    fields: ['year', 'mileage', 'fuel', 'transmission']
-  },
-  servicios: {
-    title: 'Servicio',
-    icon: '🔧',
-    color: 'purple',
-    primaryAction: 'Contratar',
-    secondaryAction: 'Consultar',
-    fields: ['duration', 'availability', 'experience']
-  },
-  productos: {
-    title: 'Producto',
-    icon: '📦',
-    color: 'orange',
-    primaryAction: 'Comprar',
-    secondaryAction: 'Preguntar',
-    fields: ['condition', 'brand', 'warranty']
-  },
-  eventos: {
-    title: 'Evento',
-    icon: '🎉',
-    color: 'pink',
-    primaryAction: 'Participar',
-    secondaryAction: 'Más Info',
-    fields: ['date', 'location', 'capacity']
-  },
-  negocios: {
-    title: 'Negocio',
-    icon: '💼',
-    color: 'indigo',
-    primaryAction: 'Contactar',
-    secondaryAction: 'Ver Más',
-    fields: ['investment', 'roi', 'experience']
-  },
-  comunidad: {
-    title: 'Comunidad',
-    icon: '🤝',
-    color: 'teal',
-    primaryAction: 'Unirse',
-    secondaryAction: 'Compartir',
-    fields: ['members', 'activity', 'location']
-  }
-};
 
 export default function DedicatedPublicationPage({
   publication,
@@ -108,7 +33,6 @@ export default function DedicatedPublicationPage({
   const [isFavorite, setIsFavorite] = useState(false);
   const [showFullDescription, setShowFullDescription] = useState(false);
 
-  const categoryConfig = categoryConfigs[publication.categorySlug as keyof typeof categoryConfigs] || categoryConfigs.productos;
   const images = publication.images?.length > 0 ? publication.images : [getDefaultImageByCategory(publication.categorySlug)];
 
   // Format price
@@ -186,7 +110,7 @@ export default function DedicatedPublicationPage({
               </button>
               <div>
                 <h1 className="text-lg font-semibold text-gray-900 dark:text-white truncate">
-                  {categoryConfig.icon} {categoryConfig.title}
+                  {publication.categorySlug.charAt(0).toUpperCase() + publication.categorySlug.slice(1)}
                 </h1>
                 <p className="text-sm text-gray-500">
                   {formatLocation(publication.location)}
@@ -285,50 +209,7 @@ export default function DedicatedPublicationPage({
 
             {/* Category-Specific Content */}
             <div className="mb-8">
-              {(() => {
-                switch (publication.categorySlug) {
-                  case 'empleos':
-                    return <EmpleoDetail publication={publication} />;
-                  case 'inmuebles':
-                    return <InmuebleDetail publication={publication} />;
-                  case 'vehiculos':
-                    return <VehiculoDetail publication={publication} />;
-                  case 'servicios':
-                    return <ServicioDetail publication={publication} />;
-                  case 'productos':
-                    return <ProductoDetail publication={publication} />;
-                  case 'eventos':
-                    return <EventoDetail publication={publication} />;
-                  case 'negocios':
-                    return <NegocioDetail publication={publication} />;
-                  case 'comunidad':
-                    return <ComunidadDetail publication={publication} />;
-                  default:
-                    /* Default Description for unknown categories */
-                    return (
-                      <div>
-                        <h2 className="text-xl font-semibold text-gray-900 dark:text-white mb-4">
-                          Descripción
-                        </h2>
-                        <div className="bg-white dark:bg-gray-800 rounded-xl p-6">
-                          <p className={`text-gray-700 dark:text-gray-300 leading-relaxed ${
-                            !showFullDescription && publication.description.length > 300 ? 'line-clamp-4' : ''
-                          }`}>
-                            {publication.description}
-                          </p>
-                          {publication.description.length > 300 && (
-                            <button
-                              onClick={() => setShowFullDescription(!showFullDescription)}
-                              className="text-teal-600 hover:text-teal-700 font-medium mt-2"
-                            >
-                              {showFullDescription ? 'Ver menos' : 'Ver más'}
-                            </button>
-                          )}
-                        </div>
-                      </div>
-                    );
-                }
-              })()}
+              <PublicationAttributes publication={publication} />
             </div>
 
             {/* Related Publications */}

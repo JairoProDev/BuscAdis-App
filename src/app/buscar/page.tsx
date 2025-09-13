@@ -340,18 +340,41 @@ function SearchPageContent({ publicationsData, results, setResults, isLoading, s
     
     try {
       const searchParams: Record<string, string> = {
-        sortBy: sortBy
+        sortBy: sortBy === 'recent' ? 'publicationDate' : sortBy
       }
       
       if (query.trim()) searchParams.query = query
       if (typedFilters?.category && typedFilters.category !== 'all') searchParams.category = String(typedFilters.category)
       if (typedFilters?.subcategory) searchParams.subcategory = String(typedFilters.subcategory)
       if (typedFilters?.subsubcategory) searchParams.subsubcategory = String(typedFilters.subsubcategory)
-      if (typedFilters?.location) searchParams.location = String(typedFilters.location)
+      if (typedFilters?.department) searchParams.department = String(typedFilters.department)
+      if (typedFilters?.province) searchParams.province = String(typedFilters.province)
+      if (typedFilters?.city) searchParams.city = String(typedFilters.city)
+      if (typedFilters?.district) searchParams.district = String(typedFilters.district)
+      if (typedFilters?.priceMin) searchParams.minPrice = String(typedFilters.priceMin)
+      if (typedFilters?.priceMax) searchParams.maxPrice = String(typedFilters.priceMax)
       
       // Add active filters to search params
       Object.entries(activeFilters).forEach(([key, value]) => {
-        if (value) searchParams[key] = String(value)
+        if (value === null || value === undefined || value === '') return
+        switch (key) {
+          case 'price': {
+            if (typeof value === 'object' && value && !Array.isArray(value)) {
+              const v = value as Record<string, number>
+              if (typeof v.min === 'number') searchParams.minPrice = String(v.min)
+              if (typeof v.max === 'number') searchParams.maxPrice = String(v.max)
+            }
+            break
+          }
+          case 'district':
+          case 'province':
+          case 'city':
+          case 'department':
+            searchParams[key] = String(value)
+            break
+          default:
+            searchParams[key] = String(value)
+        }
       })
       
       console.log('🔍 Searching with params:', searchParams)

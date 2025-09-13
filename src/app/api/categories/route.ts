@@ -1,24 +1,23 @@
 import { NextResponse } from 'next/server';
 import { getCategoriesWithIcons } from '@/lib/categories';
 
-export const dynamic = 'force-dynamic'; // Disable caching to ensure data is always fresh
+export const dynamic = 'force-dynamic';
 
 export async function GET() {
   try {
-    // Usar el sistema unificado de categorías
+    // Use unified categories configuration (not tied to DB collections)
     const categories = getCategoriesWithIcons();
-    
-    // Formatear para la respuesta de la API
+
     const formattedCategories = categories.map(category => ({
       id: category.id,
       name: category.name,
       description: category.description,
       icon: category.icon,
-      iconName: category.icon, // Para mantener compatibilidad
-      slug: category.id, // Usar id como slug
+      iconName: category.icon,
+      slug: category.id,
       imageUrl: category.imageUrl,
       gradient: category.gradient,
-      count: 0 // Se podría implementar conteo real en el futuro
+      count: 0,
     }));
 
     return NextResponse.json(formattedCategories);
@@ -29,4 +28,6 @@ export async function GET() {
       { status: 500 }
     );
   }
-} 
+}
+
+
