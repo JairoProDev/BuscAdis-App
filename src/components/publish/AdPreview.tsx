@@ -1,223 +1,166 @@
-'use client'
+'use client';
 
-import React from 'react'
-import { motion } from 'framer-motion'
-import { formatPrice } from '@/utils/format'
-import { MapPinIcon, PhoneIcon, EnvelopeIcon, TagIcon, CalendarIcon, StarIcon, EyeIcon } from '@heroicons/react/24/outline'
+import React from 'react';
+import { motion } from 'framer-motion';
+import {
+  EyeIcon,
+  MapPinIcon,
+  PhoneIcon,
+  TagIcon,
+  CalendarIcon,
+} from '@heroicons/react/24/outline';
+import Image from 'next/image';
 import { PublicationFormData } from '@/types/publication';
 
-interface AdPreviewProps {
-  ad: PublicationFormData;
-  quality: number;
+// Helper: Format price
+function formatPrice(amount: number | null) {
+  if (amount === null || isNaN(amount)) return '';
+  return `S/. ${amount.toLocaleString()}`;
 }
 
-const AdPreview: React.FC<AdPreviewProps> = ({ ad, quality }) => {
-  // Verificación defensiva para asegurar que ad esté bien definido
-  if (!ad || typeof ad !== 'object') {
-    return (
-      <div className="bg-gray-50 border border-gray-200 rounded-lg p-6 text-center">
-        <p className="text-gray-500">Datos del anuncio no disponibles</p>
-      </div>
-    );
-  }
+// Helper: Get today string
+function getTodayString() {
+  const today = new Date();
+  return today.toLocaleDateString('es-PE', { day: 'numeric', month: 'short', year: 'numeric' });
+}
 
-  const getQualityBadge = (quality: number) => {
-    if (quality >= 80) return { text: 'Excelente', color: 'bg-green-100 dark:bg-green-900/30 text-green-800 dark:text-green-300' };
-    if (quality >= 60) return { text: 'Bueno', color: 'bg-blue-100 dark:bg-blue-900/30 text-blue-800 dark:text-blue-300' };
-    if (quality >= 40) return { text: 'Regular', color: 'bg-yellow-100 dark:bg-yellow-900/30 text-yellow-800 dark:text-yellow-300' };
-    return { text: 'Básico', color: 'bg-gray-100 dark:bg-gray-700 text-gray-800 dark:text-gray-300' };
+interface AdPreviewProps {
+  formData: PublicationFormData;
+}
+
+const AdPreview: React.FC<AdPreviewProps> = ({ formData }) => {
+  // Defensive: Normalize ad data
+  const safeAd = {
+    title: formData?.title?.trim() || '',
+    description: formData?.description?.trim() || '',
+    categorySlug: formData?.categorySlug || '',
+    subcategorySlug: formData?.subcategorySlug || '',
+    amount: typeof formData?.amount === 'number' ? formData.amount : null,
+    negotiable: !!formData?.negotiable,
+    location: {
+      district: formData?.location?.district || '',
+      province: formData?.location?.province || '',
+      address: formData?.location?.address || '',
+    },
+    contact: {
+      phones: Array.isArray(formData?.contact?.phones) ? formData.contact.phones : [''],
+      email: formData?.contact?.email || '',
+    },
+    images: Array.isArray(formData?.images) ? formData.images : [],
   };
 
-  const qualityBadge = getQualityBadge(quality);
+  // Category/subcategory display
+  const categoryDisplay = [safeAd.categorySlug, safeAd.subcategorySlug].filter(Boolean).join(' / ');
 
   return (
-    <div className="space-y-6">
-      {/* Header con calidad */}
-      <div className="flex items-center justify-between">
-        <h3 className="text-lg font-semibold text-gray-900 dark:text-gray-100">Vista Previa Final</h3>
+    <div className="bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 shadow-lg overflow-hidden">
+      <div className="flex items-center justify-between p-4 border-b border-gray-200 dark:border-gray-700">
+        <h3 className="font-semibold text-gray-900 dark:text-gray-100 flex items-center">
+          <EyeIcon className="w-5 h-5 mr-2 text-gray-600 dark:text-gray-400" />
+          Vista previa del anuncio
+        </h3>
         <div className="flex items-center space-x-2">
-          <span className={`px-3 py-1 rounded-full text-sm font-medium ${qualityBadge.color}`}>
-            {qualityBadge.text} ({quality}%)
-          </span>
-          <div className="flex items-center">
-            {[...Array(5)].map((_, i) => (
-              <StarIcon
-                key={`star-${Math.random().toString(36).substr(2, 9)}-${Date.now()}`}
-                className={`h-4 w-4 ${
-                  i < Math.floor(quality / 20) ? 'text-yellow-400' : 'text-gray-300 dark:text-gray-600'
-                }`}
-              />
-            ))}
-          </div>
+          <span className="text-xs text-gray-500 dark:text-gray-400">En vivo</span>
+          <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse" />
         </div>
       </div>
-
-      {/* Preview card principal */}
+      
       <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-sm overflow-hidden hover:shadow-md transition-shadow"
+        layout
+        className="p-0"
       >
-        {/* Imágenes placeholder */}
-        <div className="aspect-video bg-gradient-to-br from-blue-50 to-purple-50 dark:from-blue-900/20 dark:to-purple-900/20 flex items-center justify-center">
-          {ad.images && Array.isArray(ad.images) && ad.images.length > 0 ? (
-            <div className="text-center">
-              <div className="text-4xl mb-2">📸</div>
-              <p className="text-sm text-gray-600 dark:text-gray-400">{ad.images.length} imagen(es)</p>
-            </div>
-          ) : (
-            <div className="text-center text-gray-400 dark:text-gray-500">
-              <div className="text-4xl mb-2">🖼️</div>
-              <p className="text-sm">Sin imágenes</p>
-            </div>
-          )}
-        </div>
+        {/* Images */}
+        {safeAd.images && safeAd.images.length > 0 ? (
+          <div>
+            <Image
+              src={safeAd.images[0]}
+              alt="Imagen principal"
+              width={400}
+              height={200}
+              className="w-full h-48 object-cover"
+              style={{ background: '#f3f4f6' }}
+            />
+          </div>
+        ) : (
+          <div>
+            <div className="w-full h-48 bg-gray-200 dark:bg-gray-600 animate-pulse" />
+          </div>
+        )}
 
-        <div className="p-6">
-          {/* Header del anuncio */}
-          <div className="flex items-start justify-between mb-4">
-            <div className="flex-1">
-              <h2 className="text-xl font-bold text-gray-900 dark:text-gray-100 mb-2">
-                {ad.title || 'Título del anuncio'}
-              </h2>
-              
-              <div className="flex items-center space-x-4 text-sm text-gray-500 dark:text-gray-400 mb-3">
-                {ad.categorySlug && (
-                  <span className="flex items-center">
-                    <TagIcon className="w-4 h-4 mr-1" />
-                    {ad.categorySlug}
-                  </span>
-                )}
-                
-                <span className="flex items-center">
-                  <CalendarIcon className="w-4 h-4 mr-1" />
-                  Hoy
-                </span>
-                
-                <span className="flex items-center">
-                  <EyeIcon className="w-4 h-4 mr-1" />
-                  0 vistas
-                </span>
-              </div>
-            </div>
-
-            <div className="text-right">
-              <div className="text-2xl font-bold text-blue-600 dark:text-blue-400 mb-1">
-                {formatPrice({ 
-                  amount: ad.amount ?? null, 
-                  currency: ad.currency || 'PEN', 
-                  negotiable: ad.negotiable 
-                })}
-              </div>
-              {ad.negotiable && (
-                <span className="text-sm text-green-600 dark:text-green-400 font-medium">Negociable</span>
-              )}
-            </div>
+        {/* Content */}
+        <div className="p-4">
+          {/* Title */}
+          <div className="mb-2">
+            {safeAd.title ? (
+              <h4 className="font-bold text-lg text-gray-900 dark:text-gray-100 line-clamp-2">{safeAd.title}</h4>
+            ) : (
+              <div className="h-6 bg-gray-200 dark:bg-gray-600 rounded animate-pulse w-2/3" />
+            )}
           </div>
 
-          {/* Descripción */}
+          {/* Price */}
+          <div className="mb-3">
+            {safeAd.amount !== null ? (
+              <div className="text-xl font-bold text-blue-600 dark:text-blue-400">
+                {formatPrice(safeAd.amount)}
+                {safeAd.negotiable && (
+                  <span className="text-sm text-gray-500 dark:text-gray-400 ml-1">(Negociable)</span>
+                )}
+              </div>
+            ) : (
+              <div className="h-6 bg-gray-200 dark:bg-gray-600 rounded w-24 animate-pulse" />
+            )}
+          </div>
+
+          {/* Description */}
           <div className="mb-4">
-            <p className="text-gray-700 dark:text-gray-300 leading-relaxed">
-              {ad.description || 'Descripción del anuncio...'}
-            </p>
+            {safeAd.description ? (
+              <p className="text-sm text-gray-600 dark:text-gray-300 line-clamp-3">{safeAd.description}</p>
+            ) : (
+              <div className="space-y-2">
+                <div className="h-4 bg-gray-200 dark:bg-gray-600 rounded animate-pulse w-5/6" />
+                <div className="h-4 bg-gray-200 dark:bg-gray-600 rounded w-3/4 animate-pulse" />
+              </div>
+            )}
           </div>
 
-          {/* Atributos específicos por categoría */}
-          {ad.attributes && Object.keys(ad.attributes).length > 0 && (
-            <div className="mb-4 p-3 bg-gray-50 dark:bg-gray-700 rounded-lg">
-              <h4 className="font-medium text-gray-900 dark:text-gray-100 mb-2">Características</h4>
-              <div className="grid grid-cols-2 gap-2">
-                {Object.entries(ad.attributes).map(([key, value]) => (
-                  <div key={key} className="text-sm">
-                    <span className="text-gray-600 dark:text-gray-400">{key}:</span>
-                    <span className="ml-1 font-medium text-gray-900 dark:text-gray-100">{String(value)}</span>
-                  </div>
-                ))}
-              </div>
-            </div>
-          )}
-
-          {/* Ubicación */}
-          {(ad.location?.district || ad.location?.province) && (
-            <div className="mb-4 flex items-start">
-              <MapPinIcon className="w-5 h-5 text-gray-400 dark:text-gray-500 mr-2 mt-0.5" />
-              <div>
-                <p className="font-medium text-gray-900 dark:text-gray-100">
-                  {ad.location.district || ad.location.province}
-                </p>
-                {ad.location.address && (
-                  <p className="text-sm text-gray-600 dark:text-gray-400">{ad.location.address}</p>
-                )}
-                {ad.location.referencePoint && (
-                  <p className="text-xs text-gray-500 dark:text-gray-500">Ref: {ad.location.referencePoint}</p>
-                )}
-              </div>
-            </div>
-          )}
-
-          {/* Información de contacto */}
-          <div className="border-t border-gray-200 dark:border-gray-600 pt-4">
-            <h4 className="font-medium text-gray-900 dark:text-gray-100 mb-3">Información de contacto</h4>
-            <div className="space-y-2">
-              {ad.contact?.name && (
-                <div className="flex items-center text-sm">
-                  <span className="font-medium text-gray-700 dark:text-gray-300 w-20">Nombre:</span>
-                  <span className="text-gray-600 dark:text-gray-400">{ad.contact.name}</span>
-                </div>
-              )}
-              
-              {ad.contact?.phones?.[0] && (
-                <div className="flex items-center text-sm">
-                  <PhoneIcon className="w-4 h-4 text-gray-400 dark:text-gray-500 mr-2" />
-                  <span className="font-medium text-gray-700 dark:text-gray-300 w-16">Teléfono:</span>
-                  <span className="text-blue-600 dark:text-blue-400">{ad.contact.phones[0]}</span>
-                </div>
-              )}
-              
-              {ad.contact?.email && (
-                <div className="flex items-center text-sm">
-                  <EnvelopeIcon className="w-4 h-4 text-gray-400 dark:text-gray-500 mr-2" />
-                  <span className="font-medium text-gray-700 dark:text-gray-300 w-16">Email:</span>
-                  <span className="text-blue-600 dark:text-blue-400">{ad.contact.email}</span>
-                </div>
-              )}
-            </div>
-          </div>
-
-          {/* Badge de premium si aplicable */}
-          {ad.premium && (
-            <div className="mt-4 flex justify-end">
-              <span className="px-3 py-1 bg-gradient-to-r from-yellow-400 to-yellow-500 dark:from-yellow-500 dark:to-yellow-600 text-yellow-900 dark:text-yellow-100 text-sm font-medium rounded-full">
-                ⭐ Anuncio Premium
+          {/* Metadata */}
+          <div className="flex flex-wrap gap-2 text-xs text-gray-500 dark:text-gray-400 mb-4">
+            {categoryDisplay && (
+              <span className="flex items-center bg-gray-100 dark:bg-gray-700 px-2 py-1 rounded-full">
+                <TagIcon className="w-3 h-3 mr-1" />
+                {categoryDisplay}
               </span>
-            </div>
-          )}
+            )}
+            {(safeAd.location?.district || safeAd.location?.province) && (
+              <span className="flex items-center bg-gray-100 dark:bg-gray-700 px-2 py-1 rounded-full">
+                <MapPinIcon className="w-3 h-3 mr-1" />
+                {safeAd.location.district || safeAd.location.province}
+              </span>
+            )}
+            <span className="flex items-center bg-gray-100 dark:bg-gray-700 px-2 py-1 rounded-full">
+              <CalendarIcon className="w-3 h-3 mr-1" />
+              {getTodayString()}
+            </span>
+          </div>
+
+          {/* Action Buttons */}
+          <div className="flex gap-2">
+            <button className="flex-1 bg-green-500 hover:bg-green-600 text-white px-4 py-2 rounded-lg flex items-center justify-center gap-2 transition-colors">
+              <PhoneIcon className="w-4 h-4" />
+              Contactar
+            </button>
+            <button className="flex-1 bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-lg flex items-center justify-center gap-2 transition-colors">
+              <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
+                <path d="M15 8a3 3 0 10-2.977-2.63l-4.94 2.47a3 3 0 100 4.319l4.94 2.47a3 3 0 10.895-1.789l-4.94-2.47a3.027 3.027 0 000-.74l4.94-2.47C13.456 7.68 14.19 8 15 8z" />
+              </svg>
+              Compartir
+            </button>
+          </div>
         </div>
       </motion.div>
-
-      {/* Consejos para mejorar */}
-      <div className="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg p-4">
-        <h4 className="font-medium text-blue-900 dark:text-blue-300 mb-2">💡 Consejos para mejorar tu anuncio</h4>
-        <ul className="space-y-1 text-sm text-blue-800 dark:text-blue-300">
-          {(!ad.images || !Array.isArray(ad.images) || ad.images.length === 0) && (
-            <li>• Añade al menos 2-3 imágenes para atraer más compradores</li>
-          )}
-          {ad.title && ad.title.length < 20 && (
-            <li>• Haz el título más descriptivo y específico</li>
-          )}
-          {ad.description && ad.description.length < 100 && (
-            <li>• Amplía la descripción con más detalles</li>
-          )}
-          {!ad.contact?.email && (
-            <li>• Considera añadir un email para más formas de contacto</li>
-          )}
-          {quality < 80 && (
-            <li>• Completa todos los campos para maximizar la visibilidad</li>
-          )}
-        </ul>
-      </div>
     </div>
-  )
-}
+  );
+};
 
-export default AdPreview 
+export default AdPreview;

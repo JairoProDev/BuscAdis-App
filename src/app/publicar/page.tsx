@@ -10,12 +10,10 @@ import PriceInput from '@/components/publish/PriceInput';
 import ContactForm from '@/components/publish/ContactForm';
 import MediaStep from '@/components/publish/MediaStep';
 import AdPreview from '@/components/publish/AdPreview';
-import LivePreview from '@/components/publish/LivePreview';
+import ProgressAchievements from '@/components/publish/ProgressAchievements';
 import PublicationProgress from '@/components/publish/PublicationProgress';
 import StepNavigation from '@/components/publish/StepNavigation';
 import SuccessMessage from '@/components/publish/SuccessMessage';
-import PublishAchievements from '@/components/publish/PublishAchievements';
-import { StarIcon, FireIcon, CheckIcon } from '@heroicons/react/24/solid';
 import { PublicationFormData, PublicationContact } from '@/types/publication';
 import { Logger } from '@/services/logging.service';
 import { categoriesList } from '@/data/categories-data';
@@ -603,17 +601,11 @@ export default function PublicarPage() {
           />
         );
       case STEPS.PREVIEW:
+        console.log('🔍 Rendering PREVIEW step with adQuality:', adQuality);
         return (
           <div className="space-y-6">
-            <AdPreview 
-              ad={ad} 
-              quality={adQuality}
-            />
-            
-            <PublishAchievements 
-              achievements={achievements}
-              quality={adQuality}
-            />
+            <AdPreview formData={ad} />
+            <ProgressAchievements formData={ad} quality={adQuality} />
           </div>
         );
       default:
@@ -633,10 +625,7 @@ export default function PublicarPage() {
           />
           
           <div className="mt-8 bg-white dark:bg-gray-800 shadow rounded-lg p-6 border border-gray-200 dark:border-gray-700">
-            <PublishAchievements 
-              achievements={achievements}
-              quality={adQuality}
-            />
+            <ProgressAchievements formData={ad} quality={adQuality} />
           </div>
         </div>
       </div>
@@ -666,7 +655,7 @@ export default function PublicarPage() {
               <div className="mb-4 bg-blue-50 dark:bg-blue-900/20 border-l-4 border-blue-500 p-3 rounded">
                 <div className="flex">
                   <div className="flex-shrink-0">
-                    <FireIcon className="h-5 w-5 text-blue-600 dark:text-blue-400" />
+                    <div className="h-5 w-5 text-blue-600 dark:text-blue-400">🔥</div>
                   </div>
                   <div className="ml-3">
                     <p className="text-sm text-blue-800 dark:text-blue-300">{renderOptimizationTip()}</p>
@@ -716,12 +705,14 @@ export default function PublicarPage() {
                 <h3 className="text-sm font-semibold text-gray-800 dark:text-gray-200">Calidad del anuncio</h3>
                 <div className="flex items-center">
                   {[1,2,3,4,5].map((star) => (
-                    <StarIcon 
+                    <div 
                       key={star}
                       className={`h-5 w-5 ${star <= Math.ceil(adQuality/20) 
                         ? 'text-yellow-500 dark:text-yellow-400' 
                         : 'text-gray-300 dark:text-gray-600'}`}
-                    />
+                    >
+                      ⭐
+                    </div>
                   ))}
                 </div>
               </div>
@@ -750,102 +741,13 @@ export default function PublicarPage() {
                   </span>
                   <span className="text-xs text-gray-500 dark:text-gray-400">Actualización automática</span>
                 </h3>
-                <LivePreview formData={ad} />
-              </div>
-              
-              <div className="bg-white dark:bg-gray-800 shadow-lg rounded-xl p-5 border border-gray-200 dark:border-gray-700">
-                <h3 className="text-sm font-semibold text-gray-800 dark:text-gray-200 mb-3 flex items-center">
-                  <StarIcon className="h-4 w-4 text-yellow-500 dark:text-yellow-400 mr-1.5" />
-                  Logros desbloqueados
-                </h3>
-                <div className="space-y-3 mb-4">
-                  <div className="flex items-center justify-between">
-                    <span className="text-xs text-gray-600 dark:text-gray-400 flex items-center">
-                      <span className={`h-3 w-3 rounded-full mr-1.5 ${achievements.completed.includes('category') ? 'bg-green-500' : 'bg-gray-200 dark:bg-gray-600'}`}></span>
-                      Categoría seleccionada
-                    </span>
-                    {achievements.completed.includes('category') ? (
-                      <CheckIcon className="h-4 w-4 text-green-500" />
-                    ) : (
-                      <div className="h-4 w-4 rounded-full border border-gray-300 dark:border-gray-600"></div>
-                    )}
-                  </div>
-                  <div className="flex items-center justify-between">
-                    <span className="text-xs text-gray-600 dark:text-gray-400 flex items-center">
-                      <span className={`h-3 w-3 rounded-full mr-1.5 ${achievements.completed.includes('details') ? 'bg-green-500' : 'bg-gray-200 dark:bg-gray-600'}`}></span>
-                      Título y descripción
-                    </span>
-                    {achievements.completed.includes('details') ? (
-                      <CheckIcon className="h-4 w-4 text-green-500" />
-                    ) : (
-                      <div className="h-4 w-4 rounded-full border border-gray-300 dark:border-gray-600"></div>
-                    )}
-                  </div>
-                  <div className="flex items-center justify-between">
-                    <span className="text-xs text-gray-600 dark:text-gray-400 flex items-center">
-                      <span className={`h-3 w-3 rounded-full mr-1.5 ${achievements.completed.includes('location') ? 'bg-green-500' : 'bg-gray-200 dark:bg-gray-600'}`}></span>
-                      Ubicación
-                    </span>
-                    {achievements.completed.includes('location') ? (
-                      <CheckIcon className="h-4 w-4 text-green-500" />
-                    ) : (
-                      <div className="h-4 w-4 rounded-full border border-gray-300 dark:border-gray-600"></div>
-                    )}
-                  </div>
-                  <div className="flex items-center justify-between">
-                    <span className="text-xs text-gray-600 dark:text-gray-400 flex items-center">
-                      <span className={`h-3 w-3 rounded-full mr-1.5 ${achievements.completed.includes('images') ? 'bg-green-500' : 'bg-gray-200 dark:bg-gray-600'}`}></span>
-                      Imágenes (min. 2)
-                    </span>
-                    {achievements.completed.includes('images') ? (
-                      <CheckIcon className="h-4 w-4 text-green-500" />
-                    ) : (
-                      <div className="h-4 w-4 rounded-full border border-gray-300 dark:border-gray-600"></div>
-                    )}
-                  </div>
-                  <div className="flex items-center justify-between">
-                    <span className="text-xs text-gray-600 dark:text-gray-400 flex items-center">
-                      <span className={`h-3 w-3 rounded-full mr-1.5 ${achievements.completed.includes('contact') ? 'bg-green-500' : 'bg-gray-200 dark:bg-gray-600'}`}></span>
-                      Contacto
-                    </span>
-                    {achievements.completed.includes('contact') ? (
-                      <CheckIcon className="h-4 w-4 text-green-500" />
-                    ) : (
-                      <div className="h-4 w-4 rounded-full border border-gray-300 dark:border-gray-600"></div>
-                    )}
-                  </div>
-                </div>
-                <div className="bg-gray-50 dark:bg-gray-700 rounded-lg p-3 flex justify-between items-center">
-                  <div className="flex items-center">
-                    <FireIcon className="h-4 w-4 text-orange-500 mr-1.5" />
-                    <span className="text-xs font-medium text-gray-700 dark:text-gray-300">Puntos acumulados</span>
-                  </div>
-                  <span className="text-xs font-bold bg-gradient-to-r from-primary-500 to-primary-700 text-white px-3 py-1 rounded-full">
-                    {achievements.points} pts
-                  </span>
-                </div>
-                {achievements.badges.length > 0 && (
-                  <div className="mt-3 flex flex-wrap gap-2 justify-center">
-                    {achievements.badges.map((badge) => (
-                      <div key={badge} className="flex flex-col items-center">
-                        <div className={`w-8 h-8 rounded-full flex items-center justify-center ${
-                          badge === 'bronce' ? 'bg-amber-700' : 
-                          badge === 'plata' ? 'bg-gray-400' : 
-                          'bg-yellow-500'
-                        } text-white shadow-md`}>
-                          <CheckIcon className="h-5 w-5" />
-                        </div>
-                        <span className="text-[10px] mt-1 capitalize text-gray-600 dark:text-gray-400">{badge}</span>
-                      </div>
-                    ))}
-                  </div>
-                )}
+                <AdPreview formData={ad} />
               </div>
             </div>
           </div>
         </div>
       </div>
-      
+                  
       {/* Estilos adicionales */}
       <style jsx global>{`
         .custom-scrollbar::-webkit-scrollbar {
