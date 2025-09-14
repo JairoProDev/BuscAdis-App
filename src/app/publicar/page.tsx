@@ -5,7 +5,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { PublicationsService, CreatePublicationData } from '@/services/publications.service';
 import { ATTRIBUTES_CONFIG, type AttributeField, type CategoryKey } from '@/data/attributesConfig'
 import CategorySelector from '@/components/publish/CategorySelector';
-import LocationSelector from '@/components/publish/LocationSelector';
+import LocationSelector, { type LocationInputData } from '@/components/publish/LocationSelector';
 import PriceInput from '@/components/publish/PriceInput';
 import ContactForm from '@/components/publish/ContactForm';
 import MediaStep from '@/components/publish/MediaStep';
@@ -343,16 +343,6 @@ export default function PublicarPage() {
     negotiable?: boolean | null;
   }
 
-  interface LocationData {
-    province?: string;
-    district?: string;
-    address?: string;
-    referencePoint?: string;
-    coordinates?: {
-      lat: number;
-      lng: number;
-    };
-  }
 
   interface ContactData {
     phones?: string[];
@@ -370,14 +360,16 @@ export default function PublicarPage() {
     }));
   }, [updateAd]);
 
-  const handleLocationChange = useCallback((locationData: LocationData) => {
+  const handleLocationChange = useCallback((locationData: LocationInputData) => {
     updateAd((prev: PublicationFormData) => ({
       ...prev,
       location: {
+        countryCode: locationData.countryCode || 'PE',
+        // department: locationData.department || prev.location?.department || 'Cusco',
         province: locationData.province || 'Cusco',
         district: locationData.district || '',
         address: locationData.address || '',
-        referencePoint: locationData.referencePoint || '',
+        referencePoint: locationData.reference || '',
         coordinates: locationData.coordinates ? {
           lat: locationData.coordinates.lat,
           lng: locationData.coordinates.lng
@@ -400,7 +392,7 @@ export default function PublicarPage() {
 
   // Dynamic attributes from central config
   const selectedCategoryKey = (ad.categorySlug || 'productos') as CategoryKey
-  const attributeFields: AttributeField[] = ATTRIBUTES_CONFIG[selectedCategoryKey] || []
+  const attributeFields: AttributeField[] = [...(ATTRIBUTES_CONFIG[selectedCategoryKey] || [])]
   const handleDynamicFieldChange = (key: string, value: unknown) => {
     setDynamicAttributes(prev => ({ ...prev, [key]: value }))
   }
@@ -434,7 +426,7 @@ export default function PublicarPage() {
           country: 'PE',
           region: ad.location?.province || undefined,
           province: ad.location?.province || undefined,
-          city: ad.location?.city || undefined,
+          city: ad.location?.province || undefined,
           district: ad.location?.district || undefined,
           address: ad.location?.address,
           coordinates: ad.location?.coordinates ? {
@@ -531,36 +523,38 @@ export default function PublicarPage() {
       case STEPS.DETAILS:
         return (
           <div className="space-y-6">
-            <div className="space-y-4">
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
-                Título
-              </label>
-              <input
-                type="text"
-                name="title"
-                value={ad.title || ''}
-                onChange={handleSimpleInputChange}
-                className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:ring-primary-500 focus:border-primary-500 dark:focus:ring-primary-400 dark:focus:border-primary-400 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
-                placeholder="Escribe un título descriptivo"
-              />
-            </div>
+            {/* Layout optimizado para desktop: título/descripción/precio a la izquierda, ubicación a la derecha */}
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+              {/* Columna izquierda: Título, Descripción y Precio */}
+              <div className="space-y-6">
+                <div className="space-y-4">
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
+                    Título
+                  </label>
+                  <input
+                    type="text"
+                    name="title"
+                    value={ad.title || ''}
+                    onChange={handleSimpleInputChange}
+                    className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:ring-primary-500 focus:border-primary-500 dark:focus:ring-primary-400 dark:focus:border-primary-400 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
+                    placeholder="Escribe un título descriptivo"
+                  />
+                </div>
 
-            <div className="space-y-4">
-              <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
-                Descripción
-              </label>
-              <textarea
-                name="description"
-                value={ad.description || ''}
-                onChange={handleSimpleInputChange}
-                rows={4}
-                className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:ring-primary-500 focus:border-primary-500 dark:focus:ring-primary-400 dark:focus:border-primary-400 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
-                placeholder="Describe tu publicación en detalle"
-              />
-            </div>
+                <div className="space-y-4">
+                  <label className="block text-sm font-medium text-gray-700 dark:text-gray-300">
+                    Descripción
+                  </label>
+                  <textarea
+                    name="description"
+                    value={ad.description || ''}
+                    onChange={handleSimpleInputChange}
+                    rows={6}
+                    className="w-full px-4 py-2 border border-gray-300 dark:border-gray-600 rounded-md focus:ring-primary-500 focus:border-primary-500 dark:focus:ring-primary-400 dark:focus:border-primary-400 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
+                    placeholder="Describe tu publicación en detalle"
+                  />
+                </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div>
                 <PriceInput
                   initialValue={{
                     amount: ad.amount || null,
@@ -570,14 +564,17 @@ export default function PublicarPage() {
                   onChange={handlePriceChange}
                 />
               </div>
-              
+
+              {/* Columna derecha: Solo Ubicación */}
               <div>
                 <LocationSelector
                   initialValue={{
-                    city: ad.location?.province || '',
-                    country: 'PE',
+                    countryCode: 'PE',
+                    department: 'Cusco',
+                    province: ad.location?.province || 'Cusco',
                     district: ad.location?.district || '',
-                    province: ad.location?.province || '',
+                    address: ad.location?.address || '',
+                    reference: ad.location?.referencePoint || '',
                     coordinates: ad.location?.coordinates ? {
                       lat: ad.location.coordinates.lat,
                       lng: ad.location.coordinates.lng

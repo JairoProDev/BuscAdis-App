@@ -48,10 +48,7 @@ const nextConfig: NextConfig = {
   turbopack: {
     rules: {
       "*.node": ["empty"],
-      "*.svg": {
-        loaders: ["@svgr/webpack"],
-        as: "*.js",
-      },
+      // Dejar que Turbopack maneje SVG/archivos estáticos por defecto para evitar conflictos
     },
     resolveAlias: {
       // MongoDB dependencies that should be stubbed

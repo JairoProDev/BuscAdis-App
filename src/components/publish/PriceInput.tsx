@@ -35,7 +35,7 @@ const PriceInput: React.FC<PriceInputProps> = ({
   const [internalAmount, setInternalAmount] = useState<string>(value?.amount?.toString() || '');
   const [internalCurrency, setInternalCurrency] = useState<'PEN' | 'USD' | null>(value?.currency || 'PEN');
   const [isNegotiable, setIsNegotiable] = useState<boolean>(value?.negotiable || false);
-  const [isFree, setIsFree] = useState<boolean>(value?.amount === 0 && !value?.negotiable); // Estado para gratuito
+  const [isFree, setIsFree] = useState<boolean>(value?.amount === 0 && !value?.negotiable);
 
    // Sincronizar estado interno si las props cambian desde fuera
    useEffect(() => {
@@ -107,7 +107,7 @@ const PriceInput: React.FC<PriceInputProps> = ({
   return (
     <div className={`space-y-4 ${className}`}>
       <label className="block text-sm font-medium text-primary-700 dark:text-primary-300 mb-1">Precio</label>
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 items-end">
+      <div className="grid grid-cols-1 gap-3 items-end">
          {/* Input Amount y Currency */}
          <div className="relative">
             <label htmlFor="amount" className="sr-only">Monto</label>
@@ -122,7 +122,7 @@ const PriceInput: React.FC<PriceInputProps> = ({
                 value={internalAmount}
                 onChange={handleAmountChange}
                 onBlur={handleAmountBlur} // Notificar cambio en blur
-                className={`w-full pl-10 pr-20 py-2 bg-white dark:bg-gray-700 rounded-lg border text-gray-900 dark:text-gray-100 ${isFree ? 'bg-gray-100 dark:bg-gray-600 cursor-not-allowed' : 'border-gray-300 dark:border-gray-600 focus:border-primary-500 dark:focus:border-primary-400 focus:ring-1 focus:ring-primary-500 dark:focus:ring-primary-400'} transition-all`}
+                className={`w-full pl-10 pr-28 py-2 bg-white dark:bg-gray-700 rounded-lg border text-gray-900 dark:text-gray-100 ${isFree ? 'bg-gray-100 dark:bg-gray-600 cursor-not-allowed' : 'border-gray-300 dark:border-gray-600 focus:border-primary-500 dark:focus:border-primary-400 focus:ring-1 focus:ring-primary-500 dark:focus:ring-primary-400'} transition-all`}
                 placeholder="0.00"
                 step="0.01"
                 min="0"
@@ -140,49 +140,23 @@ const PriceInput: React.FC<PriceInputProps> = ({
                     disabled={isFree}
                 >
                     {currencies.map(c => (
-                        <option key={c.code} value={c.code}>{c.code}</option>
+                        <option key={c.code} value={c.code}>{`${c.symbol} ${c.code}`}</option>
                     ))}
                 </select>
             </div>
          </div>
 
-         {/* Checkboxes para Negociable y Gratis */}
-         <div className="flex items-center space-x-4 pt-2 md:pt-0">
-            <div className="flex items-center">
-                <input
-                    id="negotiable"
-                    name="negotiable"
-                    type="checkbox"
-                    checked={isNegotiable}
-                    onChange={handleNegotiableToggle}
-                    className={`h-4 w-4 text-primary-600 border-gray-300 dark:border-gray-600 rounded focus:ring-primary-500 dark:focus:ring-primary-400 ${isFree ? 'opacity-50 cursor-not-allowed' : ''}`}
-                    disabled={isFree}
-                />
-                <label htmlFor="negotiable" className={`ml-2 block text-sm ${isFree ? 'text-gray-400 dark:text-gray-500' : 'text-gray-700 dark:text-gray-300'}`}>
-                    Negociable
-                </label>
-            </div>
-            <div className="flex items-center">
-                 <input
-                     id="free"
-                     name="free"
-                     type="checkbox"
-                     checked={isFree}
-                     onChange={handleFreeToggle}
-                     className={`h-4 w-4 text-green-600 border-gray-300 dark:border-gray-600 rounded focus:ring-green-500 dark:focus:ring-green-400 ${isNegotiable && parseFloat(internalAmount) > 0 ? 'opacity-50 cursor-not-allowed' : ''}`}
-                     disabled={isNegotiable && parseFloat(internalAmount) > 0} // Deshabilitar si es negociable y tiene precio > 0
-                 />
-                 <label htmlFor="free" className={`ml-2 block text-sm ${isNegotiable && parseFloat(internalAmount) > 0 ? 'text-gray-400 dark:text-gray-500' : 'text-gray-700 dark:text-gray-300'}`}>
-                     Gratis
-                 </label>
-            </div>
+         {/* Controles compactos */}
+         <div className="flex items-center justify-between">
+           <div className="text-xs text-gray-500 dark:text-gray-400 italic">
+             {isFree ? 'Se mostrará como Gratis' : (isNegotiable ? 'Precio base negociable' : 'Precio fijo')}
+           </div>
+           <label className="inline-flex items-center gap-2 text-sm text-gray-700 dark:text-gray-300">
+             <span className="mx-2 text-gray-400">|</span>
+             <input type="checkbox" checked={isNegotiable} onChange={handleNegotiableToggle} className="h-4 w-4" disabled={isFree} /> Negociable
+           </label>
          </div>
       </div>
-
-       {/* Vista previa simplificada */}
-       <div className="text-right text-xs text-gray-500 dark:text-gray-400 italic mt-1">
-           {isFree ? "Se mostrará como Gratis" : (isNegotiable ? "Precio base negociable" : "Precio fijo")}
-       </div>
     </div>
   );
 };

@@ -7,10 +7,19 @@ import {
   CheckCircleIcon,
   ArrowLeftIcon,
   TagIcon,
+  BriefcaseIcon,
+  HomeIcon,
+  TruckIcon,
+  WrenchScrewdriverIcon,
+  ShoppingBagIcon,
+  CalendarIcon,
+  ChartBarIcon,
+  UserGroupIcon,
 } from '@heroicons/react/24/outline';
 import { Logger } from '@/services/logging.service'; // Asumiendo que existe
 import { categoriesList } from '@/data/categories-data'; // Ajusta la ruta
 import type { Category, Subcategory, SubSubcategory } from '@/data/categories-data'; // O desde '@/types/categories'
+import { getSubcategoryIcon, getSubSubcategoryEmoji } from '@/components/search/CategorySelector/utils';
 
 // Define la estructura para los datos de categoría seleccionada
 interface CategorySelectionData {
@@ -40,6 +49,7 @@ const CategorySelector: React.FC<CategorySelectorProps> = ({
   // Estado local para almacenar temporalmente la selección en cada nivel ANTES de confirmar
   const [tempCategory, setTempCategory] = useState<Category | null>(null);
   const [tempSubcategory, setTempSubcategory] = useState<Subcategory | null>(null);
+  const [showCatError, setShowCatError] = useState(false)
   
   // Al iniciar, si hay una categoría seleccionada previamente, establece el estado
   useEffect(() => {
@@ -74,6 +84,7 @@ const CategorySelector: React.FC<CategorySelectorProps> = ({
       subcategorySlug: '',
       subSubcategorySlug: null
     });
+    setShowCatError(false)
     
     // Verifica si hay subcategorías
     if (category.subcategories && category.subcategories.length > 0) {
@@ -98,6 +109,7 @@ const CategorySelector: React.FC<CategorySelectorProps> = ({
       subcategorySlug: subcategory.id,
       subSubcategorySlug: null
     });
+    setShowCatError(false)
     
     // Verifica si hay sub-subcategorías *reales* (no solo un array vacío)
     const hasSubSubcategories = subcategory.subSubcategories && subcategory.subSubcategories.length > 0;
@@ -143,6 +155,7 @@ const CategorySelector: React.FC<CategorySelectorProps> = ({
       onCategorySelect(selection);
       Logger.info(`Clasificación final seleccionada: ${tempCategory.name} > ${tempSubcategory.name} > ${subSubcategory.name}`);
     }
+    setShowCatError(false)
   }, [onCategorySelect, tempCategory, tempSubcategory, autoAdvance]);
 
   // --- Callbacks de Navegación UI ---
@@ -196,11 +209,23 @@ const CategorySelector: React.FC<CategorySelectorProps> = ({
     const isSelected = tempCategory?.id === category.id; 
     const hasSubcategories = category.subcategories && category.subcategories.length > 0;
 
+    const iconMap: Record<string, React.ComponentType<any>> = {
+      empleos: BriefcaseIcon,
+      inmuebles: HomeIcon,
+      vehiculos: TruckIcon,
+      servicios: WrenchScrewdriverIcon,
+      productos: ShoppingBagIcon,
+      eventos: CalendarIcon,
+      negocios: ChartBarIcon,
+      comunidad: UserGroupIcon,
+    };
+    const CatIcon = iconMap[category.id] || TagIcon;
+
     return (
       <motion.button
         key={category.id}
         onClick={() => handleCategorySelect(category)}
-        className={`w-full text-left p-4 rounded-xl border-2 transition-all ${
+        className={`w-full text-left p-3 rounded-xl border transition-all ${
           isSelected 
             ? 'border-primary-500 bg-primary-50 dark:bg-primary-900/20 dark:border-primary-400' 
             : 'border-gray-200 dark:border-gray-600 hover:border-primary-200 dark:hover:border-primary-500 bg-white dark:bg-gray-700'
@@ -209,35 +234,30 @@ const CategorySelector: React.FC<CategorySelectorProps> = ({
         whileTap={{ scale: 0.98 }}
       >
         <div className="flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <div className={`p-2 rounded-lg ${
+          <div className="flex items-center gap-2">
+            <div className={`p-1.5 rounded-lg ${
               isSelected 
                 ? 'bg-primary-100 dark:bg-primary-800/50' 
                 : 'bg-gray-100 dark:bg-gray-600'
             }`}>
-              <TagIcon className={`w-6 h-6 ${
+              <CatIcon className={`w-5 h-5 ${
                 isSelected 
                   ? 'text-primary-600 dark:text-primary-400' 
                   : 'text-gray-500 dark:text-gray-300'
               }`} />
             </div>
             <div>
-              <h3 className={`font-medium ${
+              <h3 className={`text-sm font-medium ${
                 isSelected 
                   ? 'text-primary-900 dark:text-primary-100' 
                   : 'text-gray-900 dark:text-gray-100'
               }`}>
                 {category.name}
               </h3>
-              {category.description && (
-                <p className="text-sm text-gray-500 dark:text-gray-400">
-                  {category.description}
-                </p>
-              )}
             </div>
           </div>
           {hasSubcategories && (
-            <ChevronRightIcon className={`w-5 h-5 ${
+            <ChevronRightIcon className={`w-4 h-4 ${
               isSelected 
                 ? 'text-primary-500 dark:text-primary-400' 
                 : 'text-gray-400 dark:text-gray-500'
@@ -256,7 +276,7 @@ const CategorySelector: React.FC<CategorySelectorProps> = ({
       <motion.button
         key={subcategory.id}
         onClick={() => handleSubcategorySelect(subcategory)}
-        className={`w-full text-left p-4 rounded-xl border-2 transition-all ${
+        className={`w-full text-left p-3 rounded-xl border transition-all ${
           isSelected 
             ? 'border-primary-500 bg-primary-50 dark:bg-primary-900/20 dark:border-primary-400' 
             : 'border-gray-200 dark:border-gray-600 hover:border-primary-200 dark:hover:border-primary-500 bg-white dark:bg-gray-700'
@@ -265,20 +285,16 @@ const CategorySelector: React.FC<CategorySelectorProps> = ({
         whileTap={{ scale: 0.98 }}
       >
         <div className="flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <div className={`p-2 rounded-lg ${
+          <div className="flex items-center gap-2">
+            <div className={`p-1.5 rounded-lg ${
               isSelected 
                 ? 'bg-primary-100 dark:bg-primary-800/50' 
                 : 'bg-gray-100 dark:bg-gray-600'
             }`}>
-              <TagIcon className={`w-6 h-6 ${
-                isSelected 
-                  ? 'text-primary-600 dark:text-primary-400' 
-                  : 'text-gray-500 dark:text-gray-300'
-              }`} />
+              <span className="text-base">{subcategory.emoji || '🔹'}</span>
             </div>
             <div>
-              <h3 className={`font-medium ${
+              <h3 className={`text-sm font-medium ${
                 isSelected 
                   ? 'text-primary-900 dark:text-primary-100' 
                   : 'text-gray-900 dark:text-gray-100'
@@ -288,10 +304,10 @@ const CategorySelector: React.FC<CategorySelectorProps> = ({
             </div>
           </div>
           {hasSubSubcategories && (
-            <ChevronRightIcon className={`w-5 h-5 ${
-              isSelected 
-                ? 'text-primary-500 dark:text-primary-400' 
-                : 'text-gray-400 dark:text-gray-500'
+            <ChevronRightIcon className={`w-4 h-4 ${
+                isSelected 
+                  ? 'text-primary-500 dark:text-primary-400' 
+                  : 'text-gray-400 dark:text-gray-500'
             }`} />
           )}
         </div>
@@ -306,7 +322,7 @@ const CategorySelector: React.FC<CategorySelectorProps> = ({
       <motion.button
         key={subSubcategory.id}
         onClick={() => handleSubSubcategorySelect(subSubcategory)}
-        className={`w-full text-left p-4 rounded-xl border-2 transition-all ${
+        className={`w-full text-left p-3 rounded-xl border transition-all ${
           isSelected 
             ? 'border-primary-500 bg-primary-50 dark:bg-primary-900/20 dark:border-primary-400' 
             : 'border-gray-200 dark:border-gray-600 hover:border-primary-200 dark:hover:border-primary-500 bg-white dark:bg-gray-700'
@@ -315,19 +331,15 @@ const CategorySelector: React.FC<CategorySelectorProps> = ({
         whileTap={{ scale: 0.98 }}
       >
         <div className="flex items-center justify-between">
-          <div>
-            <h3 className={`font-medium ${
+          <div className="flex items-center gap-2 min-w-0">
+            <span className="flex-shrink-0 text-base">{(subSubcategory as any).emoji || '🔹'}</span>
+            <h3 className={`text-sm font-medium leading-tight break-words line-clamp-2 ${
               isSelected 
                 ? 'text-primary-900 dark:text-primary-100' 
                 : 'text-gray-900 dark:text-gray-100'
             }`}>
               {subSubcategory.name}
             </h3>
-            {subSubcategory.description && (
-              <p className="text-sm text-gray-500 dark:text-gray-400">
-                {subSubcategory.description}
-              </p>
-            )}
           </div>
           {isSelected && (
             <CheckCircleIcon className="w-5 h-5 text-primary-500 dark:text-primary-400" />
@@ -349,12 +361,12 @@ const CategorySelector: React.FC<CategorySelectorProps> = ({
             animate={{ opacity: 1, x: 0 }}
             exit={{ opacity: 0, x: 30 }}
             transition={{ duration: 0.3 }}
-            className="space-y-4"
+            className="space-y-3"
           >
             <h2 className="text-xl font-semibold text-gray-900 dark:text-gray-100">
               Selecciona una categoría
             </h2>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-2">
               {categoriesList.map(renderCategoryCard)}
             </div>
           </motion.div>
@@ -367,7 +379,7 @@ const CategorySelector: React.FC<CategorySelectorProps> = ({
             animate={{ opacity: 1, x: 0 }}
             exit={{ opacity: 0, x: -30 }}
             transition={{ duration: 0.3 }}
-            className="space-y-4"
+            className="space-y-3"
           >
             <div className="flex items-center justify-between pb-2 border-b border-gray-200 dark:border-gray-600">
               <button
@@ -384,7 +396,7 @@ const CategorySelector: React.FC<CategorySelectorProps> = ({
             <h2 className="text-xl font-semibold text-gray-900 dark:text-gray-100">
               Selecciona una subcategoría
             </h2>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-2">
               {currentSubcategories.length > 0 ? (
                 currentSubcategories.map(renderSubcategoryCard)
               ) : (
@@ -403,7 +415,7 @@ const CategorySelector: React.FC<CategorySelectorProps> = ({
             animate={{ opacity: 1, x: 0 }}
             exit={{ opacity: 0, x: -30 }}
             transition={{ duration: 0.3 }}
-            className="space-y-4"
+            className="space-y-3"
           >
             <div className="flex items-center justify-between pb-2 border-b border-gray-200 dark:border-gray-600">
               <button
@@ -420,7 +432,7 @@ const CategorySelector: React.FC<CategorySelectorProps> = ({
             <h2 className="text-xl font-semibold text-gray-900 dark:text-gray-100">
               Selecciona una sub-subcategoría
             </h2>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-2">
               {currentSubSubcategories.length > 0 ? (
                 currentSubSubcategories.map(renderSubSubcategoryCard)
               ) : (
@@ -433,14 +445,16 @@ const CategorySelector: React.FC<CategorySelectorProps> = ({
         )}
       </AnimatePresence>
       
-      {/* Muestra error si hay selección parcial (p.ej. categoría sin subcategoría) */}
-      {selectedCategory?.categorySlug && !selectedCategory?.subcategorySlug && (
-        <div className="bg-red-50 dark:bg-red-900/20 border-l-4 border-red-500 p-4 my-2">
-          <p className="text-sm text-red-700 dark:text-red-300">
-            Debes seleccionar categoría y subcategoría.
-          </p>
+      {/* Error auto-desvanecible */}
+      {showCatError && (
+        <div className="bg-red-50 dark:bg-red-900/20 border-l-4 border-red-500 p-3 my-2 animate-fade-out">
+          <p className="text-sm text-red-700 dark:text-red-300">Debes seleccionar categoría y subcategoría.</p>
         </div>
       )}
+      <style jsx>{`
+        .animate-fade-out{animation:fadeout 2.5s forwards}
+        @keyframes fadeout{0%{opacity:1}80%{opacity:0.3}100%{opacity:0;display:none}}
+      `}</style>
       
       {/* Muestra selección actual */}
       {selectedCategory?.categorySlug && selectedCategory?.subcategorySlug && (

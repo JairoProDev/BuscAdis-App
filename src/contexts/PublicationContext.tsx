@@ -24,6 +24,8 @@ export interface LocationData {
   country: string;
   district?: string;
   province?: string;
+  department?: string;
+  address?: string;
   reference?: string;
   coordinates?: {
     lat: number;
