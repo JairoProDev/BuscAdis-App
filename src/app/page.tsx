@@ -239,9 +239,9 @@ function HomePageContent() {
                         console.log('🔗 Ver todos clicked for category:', category.id);
                         router.push(`/${category.id}`);
                       }}
-                      onPublicationClick={(publication) => {
+                      onPublicationClick={(publication, urlType) => {
                         console.log('🔍 Opening publication from category row:', publication.title);
-                        openPublicationDetail(publication);
+                        openPublicationDetail(publication, urlType || 'feed');
                         setIsSidebarOpen(true);
                       }}
                       showViewAll={true}

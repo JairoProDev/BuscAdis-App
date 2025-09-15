@@ -37,12 +37,27 @@ export async function GET(
     
     const db = await getDb()
     const collection = db.collection(COLLECTION)
+    
+    // Try different search strategies
+    let publication = null
+    
+    // 1. Try by sequentialId (if numeric)
     const numericId = Number(id)
-    const bySeq = Number.isFinite(numericId) ? await collection.findOne({ sequentialId: numericId }) : null
-    const byId = bySeq || await collection.findOne({ _id: new ObjectId(id) }).catch(() => null)
-    const byString = byId || (await collection.findOne({ id }))
+    if (Number.isFinite(numericId)) {
+      publication = await collection.findOne({ sequentialId: numericId })
+    }
+    
+    // 2. Try by MongoDB ObjectId (if valid ObjectId format)
+    if (!publication && /^[0-9a-fA-F]{24}$/.test(id)) {
+      publication = await collection.findOne({ _id: new ObjectId(id) })
+    }
+    
+    // 3. Try by string id field
+    if (!publication) {
+      publication = await collection.findOne({ id: id })
+    }
 
-    if (!byString) {
+    if (!publication) {
       // Fallback publication data structure
       const FALLBACK_PUBLICATION = {
         id: id,
@@ -72,7 +87,7 @@ export async function GET(
       return NextResponse.json(FALLBACK_PUBLICATION);
     }
     
-    const publication = byString
+    // publication is already defined above
     
     // Format the publication for frontend consumption
     const formattedPublication = {

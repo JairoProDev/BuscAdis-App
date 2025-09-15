@@ -25,14 +25,16 @@ import { slugify } from '@/lib/utils';
 import { getDefaultImageByCategory } from '@/utils/image-helpers';
 
 import { PublicationData } from '@/types/publication';
+import { generateFeedUrl, generateCategoryUrl, generateBusinessUrl } from '@/lib/publications';
 
 interface PublicationCardProps {
   publication: PublicationData;
-  onPublicationClick?: (publication: PublicationData) => void;
+  onPublicationClick?: (publication: PublicationData, urlType?: 'feed' | 'category' | 'business') => void;
   className?: string;
   showWhatsApp?: boolean;
   variant?: 'default' | 'compact' | 'featured';
   viewMode?: 'grid' | 'list';
+  urlType?: 'feed' | 'category' | 'business';
 }
 
 // Mapping de iconos de categorías
@@ -83,7 +85,8 @@ export default function PublicationCard({
   className = '',
   showWhatsApp = true,
   variant = 'default',
-  viewMode = 'grid'
+  viewMode = 'grid',
+  urlType = 'feed'
 }: PublicationCardProps) {
   const [isFavorite, setIsFavorite] = useState(false);
   const [showCopiedMessage, setShowCopiedMessage] = useState(false);
@@ -100,13 +103,18 @@ export default function PublicationCard({
     return () => window.removeEventListener('resize', checkScreenSize);
   }, []); // Removed setIsDesktop from dependency array
 
-  // Generate SEO-friendly URL
+  // Generate SEO-friendly URL based on context
   const seoUrl = useMemo(() => {
-    const slug = slugify(publication.title)
-    const seq = (publication as unknown as { sequentialId?: number }).sequentialId
-    const idForUrl = typeof seq === 'number' ? String(seq) : String(publication.id)
-    return `/adisos/${idForUrl}/${slug}`
-  }, [publication.id, (publication as any).sequentialId, publication.title])
+    switch (urlType) {
+      case 'category':
+        return generateCategoryUrl(publication);
+      case 'business':
+        return generateBusinessUrl(publication);
+      case 'feed':
+      default:
+        return generateFeedUrl(publication);
+    }
+  }, [publication, urlType])
 
   // Format price locally
   const formatPriceLocal = (value: number, currency: string) => {
@@ -302,9 +310,9 @@ export default function PublicationCard({
       }).catch(() => {})
     }
 
-    // Call the parent handler if provided
+    // Call the parent handler if provided with urlType
     if (onPublicationClick) {
-      onPublicationClick(publication);
+      onPublicationClick(publication, urlType);
     }
   };
 
@@ -611,7 +619,7 @@ export default function PublicationCard({
                     <div className="grid grid-cols-3 gap-1 px-0">
                       {/* Guardar */}
                       <button
-                        onClick={(e) => { handleFavoriteToggle(e); if (onPublicationClick) onPublicationClick(publication); }}
+                        onClick={(e) => { handleFavoriteToggle(e); if (onPublicationClick) onPublicationClick(publication, urlType); }}
                         className="flex flex-col items-center justify-center gap-1 py-2 px-2 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-all duration-200 group focus:outline-none focus-visible:ring-2 focus-visible:ring-red-400"
                         aria-label="Guardar"
                         title="Guardar"
@@ -625,7 +633,7 @@ export default function PublicationCard({
                       </button>
                       {/* Contactar (CTA destacado) - CENTRO */}
                       <button
-                        onClick={(e) => { if (showWhatsApp && publication.whatsapp) handleWhatsAppClick(e); if (onPublicationClick) onPublicationClick(publication); }}
+                        onClick={(e) => { if (showWhatsApp && publication.whatsapp) handleWhatsAppClick(e); if (onPublicationClick) onPublicationClick(publication, urlType); }}
                         disabled={!showWhatsApp || !publication.whatsapp}
                         className={`flex flex-col items-center justify-center gap-1 py-2 px-2 rounded-lg transition-all duration-200 group focus:outline-none focus-visible:ring-2 focus-visible:ring-green-400 font-semibold ${
                           showWhatsApp && publication.whatsapp
@@ -640,7 +648,7 @@ export default function PublicationCard({
                       </button>
                       {/* Compartir */}
                       <button
-                        onClick={(e) => { handleShare(e); if (onPublicationClick) onPublicationClick(publication); }}
+                        onClick={(e) => { handleShare(e); if (onPublicationClick) onPublicationClick(publication, urlType); }}
                         className="flex flex-col items-center justify-center gap-1 py-2 px-2 hover:bg-cyan-50 dark:hover:bg-cyan-900/20 rounded-lg transition-all duration-200 group focus:outline-none focus-visible:ring-2 focus-visible:ring-cyan-400"
                         aria-label="Compartir"
                         title="Compartir"

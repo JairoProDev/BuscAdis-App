@@ -1,0 +1,189 @@
+[
+    {
+      "title": "Terreno en Lucre, sector Amaru Pata",
+      "slug": "terreno-en-lucre-sector-amaru-pata",
+      "description": "Terreno agrícola y/o casa de campo de 2524 m² en Sector Amaru Pata. A 1.3 km del Municipio de Lucre-Cusco. Con propia agua de riego, excelente clima, ideal para casa de campo o negocio. Documentos en regla.",
+      "status": "active",
+      "publicationDate": "2025-06-12T10:00:00.000Z",
+      "validUntil": "2025-08-12T23:59:59.000Z",
+      "category": "inmuebles",
+      "subcategories": ["terreno_lote"],
+      "location": {
+        "countryCode": "PE", "department": "Cusco", "province": "Quispicanchi", "district": "Lucre",
+        "address": "Sector Amaru Pata",
+        "areaPaths": ["PE", "PE-CUS", "PE-CUS-QUISPICANCHI", "PE-CUS-QUISPICANCHI-LUCRE"]
+      },
+      "advertiserType": "individual",
+      "contactInfo": { "name": "Contacto de Revista", "showContactButton": true },
+      "pricing": { "amount": 0, "currency": "USD" },
+      "attributes": { "tipoPropiedad": "terreno_lote", "tipoOperacion": "venta", "areaTotal": 2524 },
+      "media": [], "search": {},
+      "metrics": { "impressions": 0, "cardClicks": 0, "detailViews": 0, "shares": 0, "saves": 0, "contactClicks": 0, "chatInteractions": 0 },
+      "source": { "type": "historical_import", "historicalImportDetails": { "originalPublicationDate": "2025-06-12", "estimatedPaidAmount": 45 } },
+      "distribution": [], "audit": {}, "moderation": { "status": "approved" }
+    },
+    {
+      "title": "Profesor(a) de Inglés para clases presenciales y virtuales",
+      "slug": "profesor-de-ingles-clases-presenciales-virtuales",
+      "description": "Se necesita profesor(a) de inglés con experiencia en clases presenciales y virtuales. Buen sueldo, grato ambiente laboral. Presentar C.V. en Av. Huayruropata N° 1310-A, 2do piso, Wanchaq.",
+      "status": "active",
+      "publicationDate": "2025-06-12T10:00:00.000Z",
+      "validUntil": "2025-08-12T23:59:59.000Z",
+      "category": "empleos",
+      "subcategories": ["educacion"],
+      "location": {
+        "countryCode": "PE", "department": "Cusco", "province": "Cusco", "district": "Wanchaq",
+        "address": "Av. Huayruropata N° 1310-A, 2do piso",
+        "areaPaths": ["PE", "PE-CUS", "PE-CUS-CUSCO", "PE-CUS-CUSCO-WANCHAQ"]
+      },
+      "advertiserType": "company",
+      "contactInfo": { "name": "Contacto de Revista", "showContactButton": true },
+      "pricing": { "amount": 0, "currency": "PEN" },
+      "attributes": { "area": "educacion", "tipoContrato": "full_time", "modalidad": "hibrido", "experienciaMinima": "1_anio" },
+      "media": [], "search": {},
+      "metrics": { "impressions": 0, "cardClicks": 0, "detailViews": 0, "shares": 0, "saves": 0, "contactClicks": 0, "chatInteractions": 0 },
+      "source": { "type": "historical_import", "historicalImportDetails": { "originalPublicationDate": "2025-06-12", "estimatedPaidAmount": 25 } },
+      "distribution": [], "audit": {}, "moderation": { "status": "approved" }
+    },
+    {
+      "title": "Vendo Lote de 200 m² en Saylla",
+      "slug": "vendo-lote-de-200-m2-en-saylla",
+      "description": "Vendo lote de 200 m² en Saylla, sector Angostura, a una cuadra de la pista. Cuenta con todos los servicios. Documentos en regla. Trato directo con el propietario. Cel. 984123456 (referencial).",
+      "status": "active",
+      "publicationDate": "2025-06-12T10:00:00.000Z",
+      "validUntil": "2025-08-12T23:59:59.000Z",
+      "category": "inmuebles",
+      "subcategories": ["terreno_lote"],
+      "location": {
+        "countryCode": "PE", "department": "Cusco", "province": "Cusco", "district": "Saylla",
+        "address": "Sector Angostura",
+        "areaPaths": ["PE", "PE-CUS", "PE-CUS-CUSCO", "PE-CUS-CUSCO-SAYLLA"]
+      },
+      "advertiserType": "individual",
+      "contactInfo": { "name": "Propietario", "showContactButton": true },
+      "pricing": { "amount": 38000, "currency": "USD" },
+      "attributes": { "tipoPropiedad": "terreno_lote", "tipoOperacion": "venta", "areaTotal": 200 },
+      "media": [], "search": {},
+      "metrics": { "impressions": 0, "cardClicks": 0, "detailViews": 0, "shares": 0, "saves": 0, "contactClicks": 0, "chatInteractions": 0 },
+      "source": { "type": "historical_import", "historicalImportDetails": { "originalPublicationDate": "2025-06-12", "estimatedPaidAmount": 25 } },
+      "distribution": [], "audit": {}, "moderation": { "status": "approved" }
+    },
+    {
+      "title": "Alquilo Habitación para señorita",
+      "slug": "alquilo-habitacion-para-senorita",
+      "description": "Alquilo habitación amoblada para señorita que estudie o trabaje. Con baño privado, agua caliente, internet, luz. Ubicación por Av. Collasuyo. Cel. 984111222 (referencial).",
+      "status": "active",
+      "publicationDate": "2025-06-12T10:00:00.000Z",
+      "validUntil": "2025-08-12T23:59:59.000Z",
+      "category": "inmuebles",
+      "subcategories": ["habitacion"],
+      "location": {
+        "countryCode": "PE", "department": "Cusco", "province": "Cusco", "district": "Cusco",
+        "address": "Av. Collasuyo",
+        "areaPaths": ["PE", "PE-CUS", "PE-CUS-CUSCO", "PE-CUS-CUSCO-CUSCO"]
+      },
+      "advertiserType": "individual",
+      "contactInfo": { "name": "Contacto de Revista", "showContactButton": true },
+      "pricing": { "amount": 350, "currency": "PEN" },
+      "attributes": { "tipoPropiedad": "habitacion", "tipoOperacion": "alquiler", "amoblado": true, "banos": 1 },
+      "media": [], "search": {},
+      "metrics": { "impressions": 0, "cardClicks": 0, "detailViews": 0, "shares": 0, "saves": 0, "contactClicks": 0, "chatInteractions": 0 },
+      "source": { "type": "historical_import", "historicalImportDetails": { "originalPublicationDate": "2025-06-12", "estimatedPaidAmount": 15 } },
+      "distribution": [], "audit": {}, "moderation": { "status": "approved" }
+    },
+    {
+      "title": "Se necesita personal de cocina y mozos",
+      "slug": "se-necesita-personal-cocina-mozos",
+      "description": "Restaurante turístico en el centro histórico requiere personal de cocina con experiencia y mozos/azafatas con inglés básico. Disponibilidad inmediata. Jr. Arequipa 150. Cel. 951951951 (referencial).",
+      "status": "active",
+      "publicationDate": "2025-06-12T10:00:00.000Z",
+      "validUntil": "2025-08-12T23:59:59.000Z",
+      "category": "empleos",
+      "subcategories": ["gastronomia"],
+      "location": {
+        "countryCode": "PE", "department": "Cusco", "province": "Cusco", "district": "Cusco",
+        "address": "Jr. Arequipa 150",
+        "areaPaths": ["PE", "PE-CUS", "PE-CUS-CUSCO", "PE-CUS-CUSCO-CUSCO"]
+      },
+      "advertiserType": "company",
+      "contactInfo": { "name": "Jefe de Restaurante", "showContactButton": true },
+      "pricing": { "amount": 0, "currency": "PEN" },
+      "attributes": { "area": "gastronomia", "tipoContrato": "full_time", "modalidad": "presencial" },
+      "media": [], "search": {},
+      "metrics": { "impressions": 0, "cardClicks": 0, "detailViews": 0, "shares": 0, "saves": 0, "contactClicks": 0, "chatInteractions": 0 },
+      "source": { "type": "historical_import", "historicalImportDetails": { "originalPublicationDate": "2025-06-12", "estimatedPaidAmount": 25 } },
+      "distribution": [], "audit": {}, "moderation": { "status": "approved" }
+    },
+    {
+      "title": "Traspaso Restaurante en Centro Histórico",
+      "slug": "traspaso-restaurante-centro-historico",
+      "description": "Por motivo de viaje, traspaso restaurante totalmente equipado y en pleno funcionamiento. Ubicado en zona turística del centro histórico. Clientela fija. Interesados llamar al Cel. 999888777 (referencial) para coordinar visita.",
+      "status": "active",
+      "publicationDate": "2025-06-12T10:00:00.000Z",
+      "validUntil": "2025-08-12T23:59:59.000Z",
+      "category": "negocios",
+      "subcategories": ["traspaso"],
+      "location": {
+        "countryCode": "PE", "department": "Cusco", "province": "Cusco", "district": "Cusco",
+        "address": "Centro Histórico",
+        "areaPaths": ["PE", "PE-CUS", "PE-CUS-CUSCO", "PE-CUS-CUSCO-CUSCO"]
+      },
+      "advertiserType": "company",
+      "contactInfo": { "name": "Gerencia", "showContactButton": true },
+      "pricing": { "amount": 25000, "currency": "USD" },
+      "attributes": { "tipoOperacion": "traspaso", "rubro": "Restaurante", "antiguedad": 3 },
+      "media": [], "search": {},
+      "metrics": { "impressions": 0, "cardClicks": 0, "detailViews": 0, "shares": 0, "saves": 0, "contactClicks": 0, "chatInteractions": 0 },
+      "source": { "type": "historical_import", "historicalImportDetails": { "originalPublicationDate": "2025-06-12", "estimatedPaidAmount": 85 } },
+      "distribution": [], "audit": {}, "moderation": { "status": "approved" }
+    },
+    {
+      "title": "Clases de Matemáticas y Física a domicilio",
+      "slug": "clases-matematicas-fisica-domicilio",
+      "description": "Profesor con experiencia ofrece clases de reforzamiento en Matemáticas y Física para nivel escolar y preuniversitario. Metodología garantizada. Clases a domicilio. Cel. 945945945 (referencial).",
+      "status": "active",
+      "publicationDate": "2025-06-12T10:00:00.000Z",
+      "validUntil": "2025-08-12T23:59:59.000Z",
+      "category": "servicios",
+      "subcategories": ["clases_particulares"],
+      "location": {
+        "countryCode": "PE", "department": "Cusco", "province": "Cusco", "district": "Cusco",
+        "address": "Servicio a domicilio",
+        "areaPaths": ["PE", "PE-CUS", "PE-CUS-CUSCO", "PE-CUS-CUSCO-CUSCO"]
+      },
+      "advertiserType": "individual",
+      "contactInfo": { "name": "Profesor Luis", "showContactButton": true },
+      "pricing": { "amount": 30, "currency": "PEN" },
+      "attributes": { "modalidadServicio": "a_domicilio", "experiencia": 5 },
+      "media": [], "search": {},
+      "metrics": { "impressions": 0, "cardClicks": 0, "detailViews": 0, "shares": 0, "saves": 0, "contactClicks": 0, "chatInteractions": 0 },
+      "source": { "type": "historical_import", "historicalImportDetails": { "originalPublicationDate": "2025-06-12", "estimatedPaidAmount": 15 } },
+      "distribution": [], "audit": {}, "moderation": { "status": "approved" }
+    },
+    {
+      "title": "Vendo Camioneta Hyundai Tucson 2020",
+      "slug": "vendo-camioneta-hyundai-tucson-2020",
+      "description": "Ocasión, vendo camioneta SUV Hyundai Tucson del 2020. Modelo full equipo, caja automática secuencial. Poco recorrido, uso de dama. Cero choques. Precio conversable. Cel. 912312312 (referencial).",
+      "status": "active",
+      "publicationDate": "2025-06-12T10:00:00.000Z",
+      "validUntil": "2025-08-12T23:59:59.000Z",
+      "category": "vehiculos",
+      "subcategories": ["camioneta_suv"],
+      "location": {
+        "countryCode": "PE", "department": "Cusco", "province": "Cusco", "district": "San Sebastian",
+        "address": "Urb. Ttio",
+        "areaPaths": ["PE", "PE-CUS", "PE-CUS-CUSCO", "PE-CUS-CUSCO-SANSEBASTIAN"]
+      },
+      "advertiserType": "individual",
+      "contactInfo": { "name": "Sra. Carmen", "showContactButton": true },
+      "pricing": { "amount": 19500, "currency": "USD" },
+      "attributes": {
+        "tipoVehiculo": "camioneta_suv", "condicion": "usado", "marca": "Hyundai", "modelo": "Tucson", "anio": 2020, "kilometraje": 35000,
+        "tipoCombustible": "gasolina", "tipoTransmision": "semiautomatica"
+      },
+      "media": [], "search": {},
+      "metrics": { "impressions": 0, "cardClicks": 0, "detailViews": 0, "shares": 0, "saves": 0, "contactClicks": 0, "chatInteractions": 0 },
+      "source": { "type": "historical_import", "historicalImportDetails": { "originalPublicationDate": "2025-06-12", "estimatedPaidAmount": 45 } },
+      "distribution": [], "audit": {}, "moderation": { "status": "approved" }
+    }
+  ]

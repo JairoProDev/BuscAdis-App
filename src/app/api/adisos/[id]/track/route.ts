@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { MongoClient, Db } from 'mongodb'
+import { MongoClient, Db, ObjectId } from 'mongodb'
 
 const MONGODB_URI = process.env.MONGODB_URI!
 const MONGODB_DB = process.env.MONGODB_DB || 'buscadis'
@@ -36,15 +36,39 @@ export async function POST(request: NextRequest, context: { params: Promise<{ id
       return NextResponse.json({ success: false, message: 'Invalid event' }, { status: 400 })
     }
 
-    const seq = Number(id)
-    if (!Number.isFinite(seq)) {
-      return NextResponse.json({ success: false, message: 'Invalid sequentialId' }, { status: 400 })
+    const db = await getDb()
+    
+    // Try different search strategies to find the publication
+    let publication = null
+    const numericId = Number(id)
+    
+    // 1. Try by sequentialId (if numeric)
+    if (Number.isFinite(numericId)) {
+      publication = await db.collection(COLLECTION).findOne({ sequentialId: numericId })
+    }
+    
+    // 2. Try by MongoDB ObjectId (if valid ObjectId format)
+    if (!publication && /^[0-9a-fA-F]{24}$/.test(id)) {
+      publication = await db.collection(COLLECTION).findOne({ _id: new ObjectId(id) })
+    }
+    
+    // 3. Try by string id field
+    if (!publication) {
+      publication = await db.collection(COLLECTION).findOne({ id: id })
+    }
+    
+    if (!publication) {
+      return NextResponse.json({ success: false, message: 'Adiso not found' }, { status: 404 })
     }
 
-    const db = await getDb()
-    const res = await db.collection(COLLECTION).updateOne({ sequentialId: seq }, { $inc: { [field]: 1 } })
+    // Update metrics using the found publication's ID
+    const updateQuery = publication._id ? { _id: publication._id } : 
+                       publication.sequentialId ? { sequentialId: publication.sequentialId } : 
+                       { id: publication.id }
+    
+    const res = await db.collection(COLLECTION).updateOne(updateQuery, { $inc: { [field]: 1 } })
     if (res.matchedCount === 0) {
-      return NextResponse.json({ success: false, message: 'Adiso not found' }, { status: 404 })
+      return NextResponse.json({ success: false, message: 'Failed to update metrics' }, { status: 500 })
     }
     // Optional interaction log with client metadata
     try {
@@ -53,7 +77,7 @@ export async function POST(request: NextRequest, context: { params: Promise<{ id
       const forwardedFor = request.headers.get('x-forwarded-for') || ''
       const userId = request.headers.get('x-user-id') || ''
       await db.collection('interactions').insertOne({
-        adisoSequentialId: seq,
+        adisoSequentialId: publication.sequentialId || publication._id || publication.id,
         event,
         createdAt: new Date(),
         userId: userId || undefined,

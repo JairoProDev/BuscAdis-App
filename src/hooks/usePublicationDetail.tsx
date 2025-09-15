@@ -8,7 +8,7 @@ import React, {
   useReducer,
 } from 'react'
 import { usePathname, useSearchParams } from 'next/navigation'
-import { generateSeoUrl } from '@/utils/url' // Asegúrate que esta ruta es correcta
+import { generateFeedUrl, generateCategoryUrl, generateBusinessUrl } from '@/lib/publications'
 import useMediaQuery from './useMediaQuery' // Asegúrate que esta ruta es correcta
 import { PublicationData } from '@/types/publication' // Asegúrate que esta ruta es correcta
 
@@ -27,7 +27,7 @@ type PublicationDetailAction =
   | { type: 'SET_STATE_FROM_URL'; payload: PublicationData | null }
 
 interface PublicationDetailContextValue extends PublicationDetailState {
-  openPublicationDetail: (publication: PublicationData) => void
+  openPublicationDetail: (publication: PublicationData, urlType?: 'feed' | 'category' | 'business') => void
   closePublicationDetail: () => void
   isMobile: boolean
   handleWhatsAppClick: (publication: PublicationData) => void
@@ -97,15 +97,23 @@ export function PublicationDetailProvider({
   const isMobile = useMediaQuery('(max-width: 1023px)')
   const [state, dispatch] = useReducer(publicationDetailReducer, initialState)
 
-  const generatePublicationUrl = useCallback((publication: PublicationData) => {
-    const seoUrl = generateSeoUrl(
-      publication.id, 
-      publication.title,
-      undefined, // publicationSlug
-      publication.categorySlug,
-      publication.subcategorySlug || undefined,
-      publication.subSubcategorySlug || undefined
-    )
+  const generatePublicationUrl = useCallback((publication: PublicationData, urlType: 'feed' | 'category' | 'business' = 'feed') => {
+    let seoUrl: string;
+    
+    switch (urlType) {
+      case 'feed':
+        seoUrl = generateFeedUrl(publication);
+        break;
+      case 'category':
+        seoUrl = generateCategoryUrl(publication);
+        break;
+      case 'business':
+        seoUrl = generateBusinessUrl(publication);
+        break;
+      default:
+        seoUrl = generateFeedUrl(publication);
+    }
+    
     console.log('🔗 Generated SEO URL:', seoUrl, 'for publication:', publication.title)
     return seoUrl
   }, [])
@@ -132,18 +140,17 @@ export function PublicationDetailProvider({
     }
   }, [searchParams, publications, state.selectedPublication, pathname, isOnAllowedPage])
 
-  const openPublicationDetail = useCallback((publication: PublicationData) => {
-    console.log('📖 Opening publication detail:', publication.title, 'on page:', pathname)
+  const openPublicationDetail = useCallback((publication: PublicationData, urlType: 'feed' | 'category' | 'business' = 'feed') => {
+    console.log('📖 Opening publication detail:', publication.title, 'on page:', pathname, 'urlType:', urlType)
     dispatch({ type: 'OPEN_DETAIL', payload: publication })
     
-    // Actualizar URL en páginas permitidas
+    // Generar URL según el tipo especificado
     if (isOnAllowedPage) {
-      const currentUrl = new URL(window.location.href)
-      currentUrl.searchParams.set('p', publication.id)
-      console.log('🔗 Updating URL to:', currentUrl.toString())
-      window.history.replaceState(null, '', currentUrl.toString())
+      const newUrl = generatePublicationUrl(publication, urlType);
+      console.log('🔗 Updating URL to:', newUrl)
+      window.history.replaceState(null, '', newUrl);
     }
-  }, [pathname, isOnAllowedPage])
+  }, [pathname, isOnAllowedPage, generatePublicationUrl])
 
   const closePublicationDetail = useCallback(() => {
     console.log('❌ Closing publication detail on page:', pathname)

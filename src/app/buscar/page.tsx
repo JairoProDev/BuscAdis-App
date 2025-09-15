@@ -821,9 +821,9 @@ function SearchPageContent({ publicationsData, results, setResults, isLoading, s
                           console.log('🔗 Navigating to:', categoryUrl)
                           router.push(categoryUrl)
                         }}
-                        onPublicationClick={(publication) => {
+                        onPublicationClick={(publication, urlType) => {
                           console.log('🔍 Opening publication from category row:', publication.title)
-                          openPublicationDetail(publication)
+                          openPublicationDetail(publication, urlType || 'category')
                           // Forzar la apertura del sidebar en desktop
                           setIsSidebarOpen(true)
                         }}

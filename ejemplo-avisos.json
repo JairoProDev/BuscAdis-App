@@ -1,0 +1,119 @@
+[
+  {
+    "title": "Toyota Yaris Sedan 2018 - Unico Dueño",
+    "slug": "toyota-yaris-sedan-2018-unico-dueno",
+    "description": "Se vende auto Toyota Yaris del año 2018 en excelentes condiciones. Uso particular, único dueño. Mantenimientos al día en la casa. Papeles en regla, listo para transferencia. Kilometraje bajo. Solo interesados serios.",
+    "status": "active",
+    "publicationDate": "2025-01-15T10:00:00.000Z",
+    "validUntil": "2025-03-15T23:59:59.000Z",
+    "category": "vehiculos",
+    "subcategories": ["auto", "sedan"],
+    "location": {
+      "countryCode": "PE",
+      "department": "Cusco",
+      "province": "Cusco",
+      "district": "Wanchaq",
+      "address": "Av. de la Cultura 1234",
+      "areaPaths": ["PE", "PE-CUS", "PE-CUS-CUSCO", "PE-CUS-CUSCO-WANCHAQ"]
+    },
+    "advertiserType": "individual",
+    "contactInfo": {
+      "name": "Carlos Vargas",
+      "showContactButton": true
+    },
+    "pricing": {
+      "amount": 13500.00,
+      "currency": "USD"
+    },
+    "attributes": {
+      "tipoVehiculo": "auto",
+      "condicion": "usado",
+      "marca": "Toyota",
+      "modelo": "Yaris",
+      "anio": 2018,
+      "kilometraje": 45000,
+      "tipoCombustible": "gasolina",
+      "tipoTransmision": "mecanica",
+      "unicoDueno": true,
+      "color": "Plata Metálico"
+    },
+    "media": [],
+    "search": {},
+    "metrics": {
+      "impressions": 0,
+      "cardClicks": 0,
+      "detailViews": 0,
+      "shares": 0,
+      "saves": 0,
+      "contactClicks": 0,
+      "chatInteractions": 0
+    },
+    "source": {
+      "type": "web_form"
+    },
+    "distribution": [],
+    "audit": {},
+    "moderation": {
+      "status": "approved"
+    }
+  },
+  {
+    "title": "Departamento 3 dormitorios en Miraflores",
+    "slug": "departamento-3-dormitorios-miraflores",
+    "description": "Hermoso departamento de 3 dormitorios, 2 baños, sala-comedor, cocina integral, balcón con vista al mar. Edificio con seguridad 24/7, estacionamiento, ascensor. Ubicado en una de las mejores zonas de Miraflores.",
+    "status": "active",
+    "publicationDate": "2025-01-15T11:00:00.000Z",
+    "validUntil": "2025-03-15T23:59:59.000Z",
+    "category": "inmuebles",
+    "subcategories": ["departamento", "venta"],
+    "location": {
+      "countryCode": "PE",
+      "department": "Lima",
+      "province": "Lima",
+      "district": "Miraflores",
+      "address": "Av. Larco 1234",
+      "areaPaths": ["PE", "PE-LIM", "PE-LIM-LIMA", "PE-LIM-LIMA-MIRAFLORES"]
+    },
+    "advertiserType": "individual",
+    "contactInfo": {
+      "name": "María González",
+      "showContactButton": true
+    },
+    "pricing": {
+      "amount": 180000.00,
+      "currency": "USD"
+    },
+    "attributes": {
+      "tipoInmueble": "departamento",
+      "operacion": "venta",
+      "dormitorios": 3,
+      "banos": 2,
+      "area": 120,
+      "piso": 8,
+      "ascensor": true,
+      "estacionamiento": true,
+      "seguridad": true,
+      "vista": "mar"
+    },
+    "media": [],
+    "search": {},
+    "metrics": {
+      "impressions": 0,
+      "cardClicks": 0,
+      "detailViews": 0,
+      "shares": 0,
+      "saves": 0,
+      "contactClicks": 0,
+      "chatInteractions": 0
+    },
+    "source": {
+      "type": "web_form"
+    },
+    "distribution": [],
+    "audit": {},
+    "moderation": {
+      "status": "approved"
+    }
+  }
+]
+
