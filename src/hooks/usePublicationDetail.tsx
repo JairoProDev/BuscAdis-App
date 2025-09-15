@@ -100,27 +100,33 @@ export function PublicationDetailProvider({
   const generatePublicationUrl = useCallback((publication: PublicationData, urlType: 'feed' | 'category' | 'business' = 'feed') => {
     let seoUrl: string;
     
-    switch (urlType) {
-      case 'feed':
-        seoUrl = generateFeedUrl(publication);
-        break;
-      case 'category':
-        seoUrl = generateCategoryUrl(publication);
-        break;
-      case 'business':
-        seoUrl = generateBusinessUrl(publication);
-        break;
-      default:
-        seoUrl = generateFeedUrl(publication);
+    // Si estamos en la página principal (/), usar formato simple /[id]
+    // También verificar si estamos en una URL que empieza con /[id] (acceso directo)
+    if (pathname === '/' || (pathname.match(/^\/[a-f0-9]{24}$/))) {
+      seoUrl = `/${publication.id}`;
+    } else {
+      switch (urlType) {
+        case 'feed':
+          seoUrl = generateFeedUrl(publication);
+          break;
+        case 'category':
+          seoUrl = generateCategoryUrl(publication);
+          break;
+        case 'business':
+          seoUrl = generateBusinessUrl(publication);
+          break;
+        default:
+          seoUrl = generateFeedUrl(publication);
+      }
     }
     
-    console.log('🔗 Generated SEO URL:', seoUrl, 'for publication:', publication.title)
+    console.log('🔗 Generated SEO URL:', seoUrl, 'for publication:', publication.title, 'pathname:', pathname, 'urlType:', urlType)
     return seoUrl
-  }, [])
+  }, [pathname])
 
   // Páginas donde permitimos manipulación de URLs
-  const allowedPages = ['/buscar', '/empleos', '/inmuebles', '/vehiculos', '/servicios', '/productos']
-  const isOnAllowedPage = pathname ? allowedPages.some(page => pathname === page || pathname.startsWith(page)) : false
+  const allowedPages = ['/', '/buscar', '/empleos', '/inmuebles', '/vehiculos', '/servicios', '/productos']
+  const isOnAllowedPage = pathname ? allowedPages.some(page => pathname === page || pathname.startsWith(page)) || pathname.match(/^\/[a-f0-9]{24}$/) : false
 
   // Sincronizar con query parameter al cargar la página
   useEffect(() => {
@@ -132,22 +138,20 @@ export function PublicationDetailProvider({
     if (publicationId && publications.length > 0) {
       const publication = publications.find(p => p.id === publicationId)
       console.log('🔗 Found publication:', publication?.title)
-      if (publication && !state.selectedPublication) {
+      if (publication) {
         dispatch({ type: 'SET_STATE_FROM_URL', payload: publication })
       }
-    } else if (!publicationId && state.selectedPublication) {
-      dispatch({ type: 'SET_STATE_FROM_URL', payload: null })
     }
-  }, [searchParams, publications, state.selectedPublication, pathname, isOnAllowedPage])
+  }, [searchParams, publications, pathname, isOnAllowedPage])
 
   const openPublicationDetail = useCallback((publication: PublicationData, urlType: 'feed' | 'category' | 'business' = 'feed') => {
-    console.log('📖 Opening publication detail:', publication.title, 'on page:', pathname, 'urlType:', urlType)
+    console.log('📖 Opening publication detail:', publication.title, 'on page:', pathname, 'urlType:', urlType, 'isOnAllowedPage:', isOnAllowedPage)
     dispatch({ type: 'OPEN_DETAIL', payload: publication })
     
     // Generar URL según el tipo especificado
     if (isOnAllowedPage) {
       const newUrl = generatePublicationUrl(publication, urlType);
-      console.log('🔗 Updating URL to:', newUrl)
+      console.log('🔗 Updating URL to:', newUrl, 'current pathname:', pathname)
       window.history.replaceState(null, '', newUrl);
     }
   }, [pathname, isOnAllowedPage, generatePublicationUrl])
