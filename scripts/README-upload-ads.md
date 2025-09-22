@@ -109,3 +109,5 @@ Todos los demás campos son opcionales y tendrán valores por defecto si no se e
 - Los avisos aparecen inmediatamente en la app
 - El script es idempotente (se puede ejecutar múltiples veces)
 
+
+

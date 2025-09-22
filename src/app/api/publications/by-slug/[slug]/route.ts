@@ -1,12 +1,12 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { connectToDatabase } from '@/lib/mongodb';
+import connectToDatabase from '@/lib/mongodb';
 
 export async function GET(
   request: NextRequest,
-  { params }: { params: { slug: string } }
+  context: { params: Promise<{ slug: string }> }
 ) {
   try {
-    const { slug } = params;
+    const { slug } = await context.params;
     
     if (!slug) {
       return NextResponse.json(
@@ -15,7 +15,7 @@ export async function GET(
       );
     }
 
-    const db = await connectToDatabase();
+    const { db } = await connectToDatabase();
     const collections = [
       'publications_empleos',
       'publications_inmuebles', 

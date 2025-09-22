@@ -171,8 +171,10 @@ export function PublicationDetailProvider({
   }, [])
 
   const goToPublicationPage = useCallback((publication: PublicationData) => {
-    routing.goToPublication(publication)
-  }, [routing])
+    // Navigate directly to the dedicated page using window.location
+    const dedicatedUrl = `/anuncio/${publication.sequentialId || publication.id}`
+    window.location.href = dedicatedUrl
+  }, [])
 
   const handleWhatsAppClick = useCallback((publication: PublicationData) => {
     if (!publication.whatsapp) return

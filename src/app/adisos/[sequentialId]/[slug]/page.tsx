@@ -2,7 +2,7 @@
 
 import React, { useEffect, useState } from 'react'
 import { useParams } from 'next/navigation'
-import PublicationDetailContainer from '@/components/publications/PublicationDetailContainer'
+import DedicatedPublicationPage from '@/components/publications/dedicated/DedicatedPublicationPage'
 import { PublicationData } from '@/types/publication'
 
 export default function AdisoDetailPage() {
@@ -74,11 +74,7 @@ export default function AdisoDetailPage() {
   if (error) return <div className="p-8 text-red-600">{error}</div>
   if (!publication) return null
 
-  return (
-    <div className="min-h-screen">
-      <PublicationDetailContainer publications={[publication]} viewMode="list" renderSidebarInParent={true} />
-    </div>
-  )
+  return <DedicatedPublicationPage publication={publication} />
 }
 
 

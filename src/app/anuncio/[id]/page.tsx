@@ -11,13 +11,13 @@ interface PageProps {
 async function fetchPublication(id: string) {
   try {
     // Intentar por sequentialId primero
-    let response = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL}/api/publications/by-sequential/${id}`, {
+    let response = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000'}/api/publications/by-sequential/${id}`, {
       cache: 'no-store'
     })
     
     if (!response.ok) {
       // Fallback a ID normal
-      response = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL}/api/publications/${id}`, {
+      response = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000'}/api/publications/${id}`, {
         cache: 'no-store'
       })
     }
@@ -86,19 +86,21 @@ export default async function PublicationPage({ params }: PageProps) {
     categorySlug: publication.categorySlug || 'general',
     subcategorySlug: publication.subcategorySlug,
     subSubcategorySlug: publication.subSubcategorySlug,
-    transactionType: publication.transactionType || 'sale',
+    transactionType: 'sale',
     value: publication.price || 0,
     currency: publication.currency || 'PEN',
     valueType: 'fixed',
     size: 0,
     location: publication.location || { district: '', province: '', city: '', country: 'Perú' },
     images: Array.isArray(publication.images) ? publication.images : [],
-    whatsapp: publication.whatsapp || '',
+    whatsapp: publication.contact?.phone || '',
     createdAt: publication.createdAt || new Date().toISOString(),
     views: publication.views || 0,
     featured: !!publication.featured,
     premium: !!publication.premium,
+    attributes: publication.attributes || {},
   }
+  
   
   return <DedicatedPublicationPage publication={formattedPublication} />
 }

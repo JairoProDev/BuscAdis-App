@@ -95,6 +95,15 @@ export default function DedicatedPublicationPage({
     onShare?.();
   };
 
+  const handleWhatsApp = () => {
+    const phone = publication.whatsapp?.replace(/[^0-9]/g, '') || ''
+    const base = `https://wa.me/${phone}`
+    const text = `Hola, vi tu anuncio "${publication.title}" en BuscaDis: ${typeof window !== 'undefined' ? window.location.href : ''}`
+    const url = `${base}?text=${encodeURIComponent(text)}`
+    window.open(url, '_blank')
+    onWhatsAppClick?.()
+  }
+
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-gray-900">
       {/* Header */}
@@ -143,8 +152,62 @@ export default function DedicatedPublicationPage({
       {/* Main Content */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="lg:flex lg:gap-8">
-          {/* Left Column - Images and Details */}
+          {/* Left Column - Details */}
           <div className="lg:w-2/3">
+            {/* Title and Price */}
+            <div className="mb-6">
+              <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-2">
+                {publication.title}
+              </h1>
+              <div className="flex items-center justify-between">
+                <p className="text-2xl font-bold text-teal-600">
+                  {formatPrice(publication.value || 0, publication.currency || 'PEN')}
+                </p>
+                <div className="flex items-center gap-4 text-sm text-gray-500">
+                  <span className="flex items-center gap-1">
+                    <CalendarIcon className="w-4 h-4" />
+                    {formatDate(publication.createdAt)}
+                  </span>
+                  <span className="flex items-center gap-1">
+                    <EyeIcon className="w-4 h-4" />
+                    {publication.views || 0} vistas
+                  </span>
+                </div>
+              </div>
+            </div>
+
+            {/* Description */}
+            <div className="mb-8">
+              <h2 className="text-xl font-semibold text-gray-900 dark:text-white mb-3">Descripción</h2>
+              {publication.description && publication.description.trim().length > 0 ? (
+                <>
+                  <p 
+                    className={`text-gray-700 dark:text-gray-300 whitespace-pre-line leading-relaxed ${showFullDescription ? '' : 'overflow-hidden'}`}
+                    style={!showFullDescription ? {
+                      display: '-webkit-box',
+                      WebkitLineClamp: 5,
+                      WebkitBoxOrient: 'vertical',
+                      overflow: 'hidden'
+                    } : {}}
+                  >
+                    {publication.description}
+                  </p>
+                  {publication.description.length > 100 && (
+                    <button
+                      onClick={() => setShowFullDescription(!showFullDescription)}
+                      className="mt-2 text-teal-700 dark:text-teal-400 font-medium hover:text-teal-800 dark:hover:text-teal-300 transition-colors"
+                    >
+                      {showFullDescription ? 'Ver menos' : 'Leer más'}
+                    </button>
+                  )}
+                </>
+              ) : (
+                <div className="rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 p-4 text-gray-500 dark:text-gray-400">
+                  El publicador no añadió una descripción.
+                </div>
+              )}
+            </div>
+
             {/* Image Gallery */}
             <div className="relative mb-8">
               <div className="aspect-video bg-gray-200 dark:bg-gray-700 rounded-2xl overflow-hidden">
@@ -185,31 +248,16 @@ export default function DedicatedPublicationPage({
               </div>
             </div>
 
-            {/* Title and Price */}
-            <div className="mb-6">
-              <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-2">
-                {publication.title}
-              </h1>
-              <div className="flex items-center justify-between">
-                <p className="text-2xl font-bold text-teal-600">
-                  {formatPrice(publication.value || 0, publication.currency || 'PEN')}
-                </p>
-                <div className="flex items-center gap-4 text-sm text-gray-500">
-                  <span className="flex items-center gap-1">
-                    <CalendarIcon className="w-4 h-4" />
-                    {formatDate(publication.createdAt)}
-                  </span>
-                  <span className="flex items-center gap-1">
-                    <EyeIcon className="w-4 h-4" />
-                    {publication.views || 0} vistas
-                  </span>
-                </div>
-              </div>
-            </div>
-
             {/* Category-Specific Content */}
             <div className="mb-8">
-              <PublicationAttributes publication={publication} />
+              {publication.attributes && Object.keys(publication.attributes).length > 0 && (
+                <>
+                  <div className="mb-3">
+                    <h2 className="text-xl font-semibold text-gray-900 dark:text-white">Características</h2>
+                  </div>
+                  <PublicationAttributes attributes={publication.attributes} />
+                </>
+              )}
             </div>
 
             {/* Related Publications */}
@@ -280,7 +328,7 @@ export default function DedicatedPublicationPage({
                 {/* Action Buttons */}
                 <div className="mt-6 space-y-3">
                   <button
-                    onClick={onWhatsAppClick}
+                    onClick={handleWhatsApp}
                     className="w-full bg-green-600 hover:bg-green-700 text-white py-3 px-4 rounded-xl font-medium transition-colors flex items-center justify-center gap-2"
                   >
                     <WhatsAppIcon className="w-5 h-5" />
