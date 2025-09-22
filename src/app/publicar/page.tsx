@@ -104,7 +104,7 @@ export default function PublicarPage() {
     };
   };
 
-  // Estado principal del anuncio con estructura garantizada
+  // Estado principal del adiso con estructura garantizada
   const [ad, setAd] = useState<PublicationFormData>(() => ensureAdStructure({}));
 
   // Actualizar logros y gamificación
@@ -171,7 +171,7 @@ export default function PublicarPage() {
     return baseProgress + achievementBonus;
   }, [step, achievements.points]);
 
-  // Calidad del anuncio
+  // Calidad del adiso
   const adQuality = useMemo(() => {
     let quality = 0;
     
@@ -281,7 +281,7 @@ export default function PublicarPage() {
     Logger.info(`Retrocediendo al paso ${step - 1}`);
   }, [step]);
 
-  // Actualizar anuncio y logros
+  // Actualizar adiso y logros
   const updateAd = useCallback((newAdData: Partial<PublicationFormData> | ((prev: PublicationFormData) => PublicationFormData)) => {
     setAd(prevAd => {
       const updatedAd = typeof newAdData === 'function' ? newAdData(prevAd) : { ...prevAd, ...newAdData };
@@ -406,7 +406,7 @@ export default function PublicarPage() {
 
     try {
       // Debug: Ver qué datos se están enviando
-      console.log('🚀 Datos del anuncio a enviar:', ad);
+      console.log('🚀 Datos del adiso a enviar:', ad);
       
       // Preparar datos finales para CreatePublicationData
       const finalAdData: CreatePublicationData = {
@@ -475,7 +475,7 @@ export default function PublicarPage() {
       }, 600);
     } catch (error) {
       console.error('❌ Error al publicar:', error);
-      const errorMessage = error instanceof Error ? error.message : 'Hubo un error al publicar tu anuncio';
+      const errorMessage = error instanceof Error ? error.message : 'Hubo un error al publicar tu adiso';
       setError(errorMessage);
       Logger.error('Error al crear publicación', { error });
     } finally {
@@ -487,7 +487,7 @@ export default function PublicarPage() {
   const renderOptimizationTip = useCallback(() => {
     switch (step) {
       case STEPS.CATEGORY:
-        return "Selecciona la categoría más específica para que tu anuncio llegue a los compradores correctos";
+        return "Selecciona la categoría más específica para que tu adiso llegue a los compradores correctos";
       case STEPS.DETAILS:
         return "Un título descriptivo y una descripción detallada aumentan las posibilidades de venta";
       case STEPS.MEDIA:
@@ -497,7 +497,7 @@ export default function PublicarPage() {
       case STEPS.PREVIEW:
         return adQuality >= 80 
           ? "¡Excelente publicación! Tiene todo lo que necesita para destacar" 
-          : "Puedes volver a los pasos anteriores para mejorar la calidad de tu anuncio";
+          : "Puedes volver a los pasos anteriores para mejorar la calidad de tu adiso";
       default:
         return "";
     }
@@ -620,7 +620,7 @@ export default function PublicarPage() {
         <div className="max-w-4xl mx-auto px-4">
           <SuccessMessage 
             title="¡Publicación Exitosa!"
-            message="Tu anuncio ha sido publicado correctamente y ya está visible para miles de usuarios."
+            message="Tu adiso ha sido publicado correctamente y ya está visible para miles de usuarios."
             publishedId={publishedId}
           />
           
@@ -694,7 +694,7 @@ export default function PublicarPage() {
                   onPrevious={handlePrevious}
                   isFirstStep={step === STEPS.CATEGORY}
                   isLastStep={step === STEPS.PREVIEW}
-                  nextText={step === STEPS.PREVIEW ? 'Publicar anuncio' : 'Siguiente'}
+                  nextText={step === STEPS.PREVIEW ? 'Publicar adiso' : 'Siguiente'}
                 />
               )}
             </div>
@@ -702,7 +702,7 @@ export default function PublicarPage() {
             {/* Indicador de calidad */}
             <div className="bg-white dark:bg-gray-800 shadow-lg rounded-xl p-5 mb-6 border border-gray-200 dark:border-gray-700">
               <div className="flex items-center justify-between mb-2">
-                <h3 className="text-sm font-semibold text-gray-800 dark:text-gray-200">Calidad del anuncio</h3>
+                <h3 className="text-sm font-semibold text-gray-800 dark:text-gray-200">Calidad del adiso</h3>
                 <div className="flex items-center">
                   {[1,2,3,4,5].map((star) => (
                     <div 

@@ -13,13 +13,13 @@ export default function PrivacidadPage() {
 
                 <div className="max-w-5xl mx-auto space-y-6">
                     <h2 className="text-2xl font-semibold">1. Información que Recopilamos</h2>
-                    <p className="text-cyan-100/80">Recopilamos información personal como tu nombre, correo electrónico y número de teléfono al registrarte y publicar anuncios.</p>
+                    <p className="text-cyan-100/80">Recopilamos información personal como tu nombre, correo electrónico y número de teléfono al registrarte y publicar adisos.</p>
 
                     <h2 className="text-2xl font-semibold">2. Uso de la Información</h2>
-                    <p className="text-cyan-100/80">Utilizamos tu información para gestionar tu cuenta, mostrar tus anuncios y facilitar la comunicación con otros usuarios.</p>
+                    <p className="text-cyan-100/80">Utilizamos tu información para gestionar tu cuenta, mostrar tus adisos y facilitar la comunicación con otros usuarios.</p>
 
                     <h2 className="text-2xl font-semibold">3. Compartir Información</h2>
-                    <p className="text-cyan-100/80">Compartimos tu información con otros usuarios cuando publicas un anuncio para que puedan contactarte. No compartimos tu información con terceros con fines publicitarios sin tu consentimiento.</p>
+                    <p className="text-cyan-100/80">Compartimos tu información con otros usuarios cuando publicas un adiso para que puedan contactarte. No compartimos tu información con terceros con fines publicitarios sin tu consentimiento.</p>
 
                     <h2 className="text-2xl font-semibold">4. Seguridad de la Información</h2>
                     <p className="text-cyan-100/80">Implementamos medidas de seguridad para proteger tu información personal contra accesos no autorizados.</p>

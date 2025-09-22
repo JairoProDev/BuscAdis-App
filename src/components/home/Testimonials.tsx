@@ -18,7 +18,7 @@ const testimonialsData = [
         category: "Inmuebles"
     },
     {
-        quote: "Vendí mi auto en menos de una semana y a un buen precio. Definitivamente volveré a usar Buscadis para mis anuncios.",
+        quote: "Vendí mi auto en menos de una semana y a un buen precio. Definitivamente volveré a usar Buscadis para mis adisos.",
         author: "Carlos Mendoza",
         location: "Arequipa",
         avatar: "https://randomuser.me/api/portraits/men/46.jpg",
@@ -32,7 +32,7 @@ const testimonialsData = [
         category: "Empleos"
     },
     {
-        quote: "La plataforma es muy intuitiva y fácil de usar. Publiqué mi anuncio de servicios de fontanería en minutos y recibí llamadas al instante.",
+        quote: "La plataforma es muy intuitiva y fácil de usar. Publiqué mi adiso de servicios de fontanería en minutos y recibí llamadas al instante.",
         author: "Roberto Santana",
         location: "Cusco",
         avatar: "https://randomuser.me/api/portraits/men/29.jpg",
@@ -53,14 +53,14 @@ const testimonialsData = [
         category: "Educación"
     },
     {
-        quote: "Mi familia y yo disfrutamos de un tour increíble a Machu Picchu que reservé a través de un anuncio en Buscadis.",
+        quote: "Mi familia y yo disfrutamos de un tour increíble a Machu Picchu que reservé a través de un adiso en Buscadis.",
         author: "Sofia Quispe",
         location: "Puno",
         avatar: "https://randomuser.me/api/portraits/women/18.jpg",
         category: "Turismo"
     },
     {
-        quote: "Adopté un gatito adorable gracias a un anuncio de una protectora local en Buscadis.",
+        quote: "Adopté un gatito adorable gracias a un adiso de una protectora local en Buscadis.",
         author: "Manuel Torres",
         location: "Ica",
         avatar: "https://randomuser.me/api/portraits/men/91.jpg",

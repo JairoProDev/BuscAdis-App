@@ -3,17 +3,17 @@
 import React, {
   createContext,
   useContext,
-  useEffect,
-  useCallback,
   useReducer,
+  useCallback,
+  useEffect,
+  useRef,
 } from 'react'
-import { usePathname, useSearchParams } from 'next/navigation'
-import { generateFeedUrl, generateCategoryUrl, generateBusinessUrl } from '@/lib/publications'
-import useMediaQuery from './useMediaQuery' // Asegúrate que esta ruta es correcta
-import { PublicationData } from '@/types/publication' // Asegúrate que esta ruta es correcta
+import useMediaQuery from './useMediaQuery'
+import { useRouting } from './useRouting'
+import { PublicationData } from '@/types/publication'
 
 // ============================================================================
-// 1. TYPES AND STATE MANAGEMENT
+// TYPES
 // ============================================================================
 
 interface PublicationDetailState {
@@ -24,21 +24,22 @@ interface PublicationDetailState {
 type PublicationDetailAction =
   | { type: 'OPEN_DETAIL'; payload: PublicationData }
   | { type: 'CLOSE_DETAIL' }
-  | { type: 'SET_STATE_FROM_URL'; payload: PublicationData | null }
 
 interface PublicationDetailContextValue extends PublicationDetailState {
-  openPublicationDetail: (publication: PublicationData, urlType?: 'feed' | 'category' | 'business') => void
+  openPublicationDetail: (publication: PublicationData) => void
   closePublicationDetail: () => void
+  goToPublicationPage: (publication: PublicationData) => void
   isMobile: boolean
   handleWhatsAppClick: (publication: PublicationData) => void
   handleShare: (publication: PublicationData) => void
   handleFavorite: (publication: PublicationData) => boolean
-  publications: PublicationData[]
 }
 
-const PublicationDetailContext = createContext<
-  PublicationDetailContextValue | undefined
->(undefined)
+// ============================================================================
+// CONTEXT & REDUCER
+// ============================================================================
+
+const PublicationDetailContext = createContext<PublicationDetailContextValue | undefined>(undefined)
 
 const initialState: PublicationDetailState = {
   selectedPublication: null,
@@ -60,165 +61,156 @@ function publicationDetailReducer(
         selectedPublication: null,
         isDetailOpen: false
       }
-    case 'SET_STATE_FROM_URL':
-      return {
-        selectedPublication: action.payload,
-        isDetailOpen: !!action.payload
-      }
     default:
       return state
   }
 }
 
 // ============================================================================
-// 2. HELPER FUNCTIONS
+// HELPER FUNCTIONS
 // ============================================================================
 
-const whatsAppMessageTemplates: Record<string, (p: PublicationData, url: string) => string> = {
-  empleos: (p, url) => `🔍 Hola, vi su anuncio de *Empleos* en BuscaDis.com y me interesó la oportunidad:\n\n"${p.title}"\n\n🔗 Link: ${url}`,
-  inmuebles: (p, url) => `🏠 Hola, vi su publicación de *Inmuebles* en BuscaDis.com y me interesó:\n\n"${p.title}"\n\n🔗 Link: ${url}`,
-  vehiculos: (p, url) => `🚗 Hola, vi su anuncio de *Vehículos* en BuscaDis.com y me interesó:\n\n"${p.title}"\n\n🔗 Link: ${url}`,
-  default: (p, url) => `👋 Hola, vi su anuncio de *${p.categorySlug.charAt(0).toUpperCase() + p.categorySlug.slice(1)}* en BuscaDis.com:\n\n"${p.title}"\n\n🔗 Link: ${url}`
-};
+const generateWhatsAppMessage = (publication: PublicationData, url: string): string => {
+  const categoryName = publication.categorySlug.charAt(0).toUpperCase() + publication.categorySlug.slice(1)
+  
+  const templates = {
+    empleos: `🔍 Hola, vi su adiso de *${categoryName}* en BuscaDis.com:\n\n"${publication.title}"\n\n¿Podría brindarme más información sobre los requisitos?\n\n🔗 Link: ${url}`,
+    inmuebles: `🏠 Hola, vi su publicación de *${categoryName}* en BuscaDis.com:\n\n"${publication.title}"\n\n¿Podría proporcionarme más detalles?\n\n🔗 Link: ${url}`,
+    vehiculos: `🚗 Hola, vi su adiso de *${categoryName}* en BuscaDis.com:\n\n"${publication.title}"\n\n¿Podría brindarme más información?\n\n🔗 Link: ${url}`,
+    servicios: `🛠️ Hola, vi su oferta de *${categoryName}* en BuscaDis.com:\n\n"${publication.title}"\n\n¿Podría contarme más sobre el servicio?\n\n🔗 Link: ${url}`,
+    productos: `🛍️ Hola, vi su producto en BuscaDis.com:\n\n"${publication.title}"\n\n¿Podría brindarme más información?\n\n🔗 Link: ${url}`
+  }
+  
+  return templates[publication.categorySlug as keyof typeof templates] || 
+         `👋 Hola, vi su adiso en BuscaDis.com:\n\n"${publication.title}"\n\n¿Podría brindarme más información?\n\n🔗 Link: ${url}`
+}
 
 // ============================================================================
-// 3. THE PROVIDER COMPONENT
+// PROVIDER
 // ============================================================================
 
 export function PublicationDetailProvider({
-  children,
-  publications
+  children 
 }: {
   children: React.ReactNode
-  publications: PublicationData[]
 }) {
-  const pathname = usePathname()
-  const searchParams = useSearchParams()
   const isMobile = useMediaQuery('(max-width: 1023px)')
   const [state, dispatch] = useReducer(publicationDetailReducer, initialState)
+  const routing = useRouting()
+  const lastFetchedId = useRef<string | null>(null)
 
-  const generatePublicationUrl = useCallback((publication: PublicationData, urlType: 'feed' | 'category' | 'business' = 'feed') => {
-    let seoUrl: string;
-    
-    // Si estamos en la página principal (/), usar formato simple /[id]
-    // También verificar si estamos en una URL que empieza con /[id] (acceso directo)
-    if (pathname === '/' || (pathname.match(/^\/[a-f0-9]{24}$/))) {
-      seoUrl = `/${publication.id}`;
-    } else {
-      switch (urlType) {
-        case 'feed':
-          seoUrl = generateFeedUrl(publication);
-          break;
-        case 'category':
-          seoUrl = generateCategoryUrl(publication);
-          break;
-        case 'business':
-          seoUrl = generateBusinessUrl(publication);
-          break;
-        default:
-          seoUrl = generateFeedUrl(publication);
+  const fetchAndOpenPublication = useCallback(async (id: string) => {
+    try {
+      // Intentar por sequentialId primero
+      let response = await fetch(`/api/publications/by-sequential/${id}`)
+      if (!response.ok) {
+        // Fallback a ID normal
+        response = await fetch(`/api/publications/${id}`)
       }
-    }
-    
-    console.log('🔗 Generated SEO URL:', seoUrl, 'for publication:', publication.title, 'pathname:', pathname, 'urlType:', urlType)
-    return seoUrl
-  }, [pathname])
-
-  // Páginas donde permitimos manipulación de URLs
-  const allowedPages = ['/', '/buscar', '/empleos', '/inmuebles', '/vehiculos', '/servicios', '/productos']
-  const isOnAllowedPage = pathname ? allowedPages.some(page => pathname === page || pathname.startsWith(page)) || pathname.match(/^\/[a-f0-9]{24}$/) : false
-
-  // Sincronizar con query parameter al cargar la página
-  useEffect(() => {
-    if (!searchParams || !isOnAllowedPage) return
-    
-    const publicationId = searchParams.get('p')
-    console.log('🔗 URL Sync - pathname:', pathname, 'publicationId:', publicationId)
-    
-    if (publicationId && publications.length > 0) {
-      const publication = publications.find(p => p.id === publicationId)
-      console.log('🔗 Found publication:', publication?.title)
-      if (publication) {
-        dispatch({ type: 'SET_STATE_FROM_URL', payload: publication })
+      
+      if (response.ok) {
+        const data = await response.json()
+        if (data.publication) {
+          const publication: PublicationData = {
+            id: data.publication.id,
+            sequentialId: data.publication.sequentialId,
+            title: data.publication.title || 'Sin título',
+            description: data.publication.description || '',
+            categorySlug: data.publication.categorySlug || 'general',
+            subcategorySlug: data.publication.subcategorySlug,
+            subSubcategorySlug: data.publication.subSubcategorySlug,
+            transactionType: data.publication.transactionType || 'sale',
+            value: data.publication.price || 0,
+            currency: data.publication.currency || 'PEN',
+            valueType: 'fixed',
+            size: 0,
+            location: data.publication.location || { district: '', province: '', city: '', country: 'Perú' },
+            images: Array.isArray(data.publication.images) ? data.publication.images : [],
+            whatsapp: data.publication.whatsapp || '',
+            createdAt: data.publication.createdAt || new Date().toISOString(),
+            views: data.publication.views || 0,
+            featured: !!data.publication.featured,
+            premium: !!data.publication.premium,
+          }
+          
+          dispatch({ type: 'OPEN_DETAIL', payload: publication })
+        }
       }
+    } catch (error) {
+      console.error('Error fetching publication:', error)
     }
-  }, [searchParams, publications, pathname, isOnAllowedPage])
+  }, [dispatch])
 
-  const openPublicationDetail = useCallback((publication: PublicationData, urlType: 'feed' | 'category' | 'business' = 'feed') => {
-    console.log('📖 Opening publication detail:', publication.title, 'on page:', pathname, 'urlType:', urlType, 'isOnAllowedPage:', isOnAllowedPage)
+  // Deep linking temporarily disabled to prevent loops
+  // TODO: Re-implement with proper URL synchronization
+  
+  // useEffect(() => {
+  //   if (routing.isPublication && routing.currentPublicationId) {
+  //     const currentId = state.selectedPublication?.sequentialId || state.selectedPublication?.id
+  //     
+  //     if (currentId !== routing.currentPublicationId && 
+  //         lastFetchedId.current !== routing.currentPublicationId) {
+  //       lastFetchedId.current = routing.currentPublicationId
+  //       fetchAndOpenPublication(routing.currentPublicationId)
+  //     }
+  //   }
+  // }, [routing.isPublication, routing.currentPublicationId, fetchAndOpenPublication, state.selectedPublication])
+
+  const openPublicationDetail = useCallback((publication: PublicationData) => {
     dispatch({ type: 'OPEN_DETAIL', payload: publication })
     
-    // Generar URL según el tipo especificado
-    if (isOnAllowedPage) {
-      const newUrl = generatePublicationUrl(publication, urlType);
-      console.log('🔗 Updating URL to:', newUrl, 'current pathname:', pathname)
-      window.history.replaceState(null, '', newUrl);
-    }
-  }, [pathname, isOnAllowedPage, generatePublicationUrl])
+    // URL navigation temporarily disabled to prevent loops
+    // TODO: Re-implement URL synchronization without conflicts
+  }, [])
 
   const closePublicationDetail = useCallback(() => {
-    console.log('❌ Closing publication detail on page:', pathname)
     dispatch({ type: 'CLOSE_DETAIL' })
     
-    // Actualizar URL en páginas permitidas
-    if (isOnAllowedPage) {
-      const currentUrl = new URL(window.location.href)
-      currentUrl.searchParams.delete('p')
-      console.log('🔗 Removing URL param, new URL:', currentUrl.toString())
-      window.history.replaceState(null, '', currentUrl.toString())
-    }
-  }, [pathname, isOnAllowedPage])
+    // URL navigation temporarily disabled to prevent loops
+    // TODO: Re-implement URL synchronization without conflicts
+  }, [])
+
+  const goToPublicationPage = useCallback((publication: PublicationData) => {
+    routing.goToPublication(publication)
+  }, [routing])
 
   const handleWhatsAppClick = useCallback((publication: PublicationData) => {
     if (!publication.whatsapp) return
+    
     const cleanPhone = publication.whatsapp.replace(/[^0-9]/g, '')
-    const adUrl = `${window.location.origin}${generatePublicationUrl(publication)}`
-    console.log('📱 WhatsApp click - generated URL:', adUrl)
-    const template = whatsAppMessageTemplates[publication.categorySlug] || whatsAppMessageTemplates.default
-    const message = template(publication, adUrl)
-    // Track contact click if sequentialId available in URL
-    try {
-      const parts = window.location.pathname.split('/')
-      const seq = parts.includes('adisos') ? parts[2] : undefined
-      if (seq) {
-        fetch(`/api/adisos/${encodeURIComponent(seq)}/track`, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ event: 'contactClick' })
-        }).catch(() => {})
-      }
-    } catch {}
+    const baseUrl = window.location.origin
+    const adUrl = `${baseUrl}/adiso/${publication.sequentialId || publication.id}`
+    const message = generateWhatsAppMessage(publication, adUrl)
+    
     window.open(`https://wa.me/${cleanPhone}?text=${encodeURIComponent(message)}`, '_blank')
-  }, [generatePublicationUrl])
+  }, [])
 
   const handleShare = useCallback((publication: PublicationData) => {
-    const shareUrl = `${window.location.origin}${generatePublicationUrl(publication)}`
-    console.log('🔗 Share click - generated URL:', shareUrl)
+    const baseUrl = window.location.origin
+    const shareUrl = `${baseUrl}/adiso/${publication.sequentialId || publication.id}`
+    
     if (navigator.share) {
       navigator.share({
         title: `${publication.title} - BuscaDis`,
-        text: `${publication.description}\n\nEncuentra más en BuscaDis.com`,
+        text: publication.description,
         url: shareUrl
-      }).catch(err => console.log('Sharing failed:', err))
+      }).catch(() => {})
     } else {
-      // Fallback: copiar al portapapeles
-      navigator.clipboard?.writeText(shareUrl).then(() => {
-        console.log('🔗 URL copied to clipboard')
-      }).catch(err => console.log('Copy failed:', err))
+      navigator.clipboard?.writeText(shareUrl).catch(() => {})
     }
-  }, [generatePublicationUrl])
+  }, [])
 
-  const handleFavorite = useCallback((publication: PublicationData) => {
+  const handleFavorite = useCallback((publication: PublicationData): boolean => {
     try {
       const favorites: string[] = JSON.parse(localStorage.getItem('favorites') || '[]')
       const isFavorite = favorites.includes(publication.id)
       const updatedFavorites = isFavorite
         ? favorites.filter(id => id !== publication.id)
         : [...favorites, publication.id]
+      
       localStorage.setItem('favorites', JSON.stringify(updatedFavorites))
       return !isFavorite
-    } catch (error) {
-      console.error('Error updating favorites:', error)
+    } catch {
       return false
     }
   }, [])
@@ -227,11 +219,11 @@ export function PublicationDetailProvider({
     ...state,
     openPublicationDetail,
     closePublicationDetail,
+    goToPublicationPage,
     isMobile,
     handleWhatsAppClick,
     handleShare,
-    handleFavorite,
-    publications
+    handleFavorite
   }
 
   return (
@@ -242,15 +234,13 @@ export function PublicationDetailProvider({
 }
 
 // ============================================================================
-// 4. THE CUSTOM HOOK
+// HOOK
 // ============================================================================
 
 export function usePublicationDetail() {
   const context = useContext(PublicationDetailContext)
   if (context === undefined) {
-    throw new Error(
-      'usePublicationDetail must be used within a PublicationDetailProvider'
-    )
+    throw new Error('usePublicationDetail must be used within a PublicationDetailProvider')
   }
   return context
 }

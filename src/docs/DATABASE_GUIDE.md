@@ -208,14 +208,14 @@ interface PublicationDocument {
 ```bash
 # Importar desde CSV
 node scripts/bulk-import.js \
-  --source "./data/anuncios_cusco.csv" \
+  --source "./data/adisos_cusco.csv" \
   --format csv \
   --batch-size 100 \
   --enable-ai true
 
 # Importar desde texto plano
 node scripts/bulk-import.js \
-  --source "./data/anuncios.txt" \
+  --source "./data/adisos.txt" \
   --format txt \
   --mapping custom \
   --geocode true
@@ -227,7 +227,7 @@ node scripts/bulk-import.js \
 import { importPublications } from '@/scripts/bulk-import-publications'
 
 const result = await importPublications(
-  './data/anuncios_inmuebles.csv',
+  './data/adisos_inmuebles.csv',
   'BASIC_CSV',
   {
     processing: {
@@ -581,11 +581,11 @@ console.log({
 Esta arquitectura te permitirá:
 
 ✅ **Escalar globalmente** sin problemas de performance
-✅ **Importar millones** de anuncios de manera eficiente  
+✅ **Importar millones** de adisos de manera eficiente  
 ✅ **Competir con gigantes** como Facebook Marketplace
 ✅ **IA de clase mundial** para recomendaciones y búsqueda
 ✅ **Red social** con engagement real
 ✅ **Búsqueda local** ultra-rápida en cualquier país
-✅ **Flexibilidad total** para cualquier tipo de anuncio
+✅ **Flexibilidad total** para cualquier tipo de adiso
 
 ¿Listo para dominar el mundo de los clasificados? 🌍🚀 

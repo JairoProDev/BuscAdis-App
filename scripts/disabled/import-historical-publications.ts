@@ -97,7 +97,7 @@ class HistoricalPublicationImporter {
   }
 
   /**
-   * Procesa un archivo PDF y extrae los anuncios
+   * Procesa un archivo PDF y extrae los adisos
    */
   async processPDFFile(filePath: string): Promise<PDFAdData[]> {
     console.log(`📄 Procesando archivo: ${path.basename(filePath)}`);
@@ -122,13 +122,13 @@ class HistoricalPublicationImporter {
     const [, year, month, day] = dateMatch;
     const publicationDate = new Date(parseInt(year), parseInt(month) - 1, parseInt(day));
     
-    // Simular 650 anuncios por revista
+    // Simular 650 adisos por revista
     const ads: PDFAdData[] = [];
     
     for (let i = 0; i < 650; i++) {
       ads.push({
-        title: `Anuncio ${i + 1} - ${this.getRandomTitle()}`,
-        description: `Descripción del anuncio ${i + 1}. ${this.getRandomDescription()}`,
+        title: `Adiso ${i + 1} - ${this.getRandomTitle()}`,
+        description: `Descripción del adiso ${i + 1}. ${this.getRandomDescription()}`,
         category: this.getRandomCategory(),
         subcategory: this.getRandomSubcategory(),
         price: Math.random() > 0.3 ? Math.floor(Math.random() * 50000) + 100 : undefined,
@@ -225,7 +225,7 @@ class HistoricalPublicationImporter {
       
       try {
         const pdfData = await this.processPDFFile(filePath);
-        console.log(`📄 ${file}: ${pdfData.length} anuncios extraídos`);
+        console.log(`📄 ${file}: ${pdfData.length} adisos extraídos`);
 
         // Convertir y validar
         const validPublications: Publication[] = [];
@@ -256,7 +256,7 @@ class HistoricalPublicationImporter {
             }
           } catch (error) {
             this.stats.failed++;
-            this.stats.errors.push(`Error procesando anuncio: ${error}`);
+            this.stats.errors.push(`Error procesando adiso: ${error}`);
           }
         }
 

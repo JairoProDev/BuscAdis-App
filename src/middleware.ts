@@ -19,7 +19,7 @@ function isTokenExpired(token: string) {
 
 export async function middleware(req: NextRequest) {
   // Rutas protegidas que requieren autenticación
-  const protectedRoutes = ['/publicar', '/mis-anuncios', '/perfil'];
+  const protectedRoutes = ['/publicar', '/mis-adisos', '/perfil'];
   
   // Verificar si la ruta actual requiere autenticación
   const isProtectedRoute = protectedRoutes.some(route => 
@@ -44,7 +44,7 @@ export async function middleware(req: NextRequest) {
 export const config = {
   matcher: [
     '/publicar/:path*',
-    '/mis-anuncios/:path*',
+    '/mis-adisos/:path*',
     '/perfil/:path*',
   ],
 };

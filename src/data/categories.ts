@@ -63,6 +63,6 @@ export const categories = {
     icon: HeartIcon,
     description: 'Animales y accesorios',
     gradient: 'from-orange-500 to-orange-700',
-    stats: ['321 anuncios', 'Veterinarios certificados'],
+    stats: ['321 adisos', 'Veterinarios certificados'],
   },
 } as const; 

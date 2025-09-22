@@ -35,7 +35,7 @@ export const iconMap = {
   AcademicCapIcon: AcademicCapIcon,
 };
 
-// Anuncios destacados
+// Adisos destacados
 export const featuredListings = [
   {
     id: "fl001",
@@ -110,9 +110,9 @@ export const testimonials = [
 
 // Estadísticas de la plataforma
 export const stats = [
-  { id: "s001", name: "Anuncios Activos en Cusco", value: "+50,000" },
+  { id: "s001", name: "Adisos Activos en Cusco", value: "+50,000" },
   { id: "s002", name: "Usuarios Registrados", value: "+120,000" },
-  { id: "s003", name: "Nuevos Anuncios Hoy", value: "+1,500" },
+  { id: "s003", name: "Nuevos Adisos Hoy", value: "+1,500" },
   { id: "s004", name: "Negocios Locales", value: "+6,000" },
 ];
 
@@ -122,14 +122,14 @@ export const benefits = [
     id: "b001",
     title: "Encuentra lo que Buscas",
     description:
-      "Explora miles de anuncios actualizados en todas las categorías: empleo, vivienda, autos y más.",
+      "Explora miles de adisos actualizados en todas las categorías: empleo, vivienda, autos y más.",
     icon: "MapPinIcon",
   },
   {
     id: "b002",
     title: "Publica Fácil y Rápido",
     description:
-      "Crea tu anuncio gratis en minutos y llega a miles de compradores o empleadores potenciales.",
+      "Crea tu adiso gratis en minutos y llega a miles de compradores o empleadores potenciales.",
     icon: "CheckCircleIcon",
   },
   {

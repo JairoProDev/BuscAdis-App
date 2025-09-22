@@ -24,7 +24,7 @@ import { getDefaultImageByCategory } from '@/utils/image-helpers';
 import { formatDistanceToNow } from 'date-fns';
 import { es } from 'date-fns/locale';
 import { PublicationData } from '@/types/publication';
-import { usePublicationNavigation } from '@/hooks/usePublicationNavigation';
+import { usePublicationDetail } from '@/hooks/usePublicationDetail';
 
 interface PublicationDetailSidebarProps {
   publication: PublicationData | null;
@@ -46,7 +46,7 @@ export default function PublicationDetailSidebar({
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [isFavorite, setIsFavorite] = useState(false);
   const [showCopiedMessage, setShowCopiedMessage] = useState(false);
-  const { openDedicatedPage } = usePublicationNavigation();
+  const { goToPublicationPage } = usePublicationDetail();
 
   // Reset image index when publication changes
   useEffect(() => {
@@ -194,7 +194,7 @@ export default function PublicationDetailSidebar({
                   <ShareIcon className="w-5 h-5 text-gray-600 dark:text-gray-400" />
                 </button>
                                                         <button
-                      onClick={() => openDedicatedPage(publication)}
+                      onClick={() => goToPublicationPage(publication)}
                       className="p-2 hover:bg-gray-100 dark:hover:bg-slate-800 rounded-lg transition-colors"
                       title="Ver página completa"
                     >
@@ -357,7 +357,7 @@ export default function PublicationDetailSidebar({
                 <span>Compartir</span>
               </button>
               <button
-                onClick={() => window.location.href = `/adisos/${(publication as any).sequentialId || publication.id}/${encodeURIComponent(publication.title)}`}
+                onClick={() => goToPublicationPage(publication)}
                 className="flex-1 flex items-center justify-center gap-2 bg-violet-600 hover:bg-violet-700 text-white py-3 px-2 rounded-lg font-semibold text-base shadow-md transition-all"
                 title="Ver página completa"
               >

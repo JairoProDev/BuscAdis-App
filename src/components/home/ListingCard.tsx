@@ -107,7 +107,7 @@ const ListingCard: React.FC<ListingCardProps> = ({ listing, index }) => {
     }
   }
 
-  const adUrl = `/anuncio/${listing.id}`;
+  const adUrl = `/adiso/${listing.id}`;
 
   return (
     <motion.div
@@ -149,7 +149,7 @@ const ListingCard: React.FC<ListingCardProps> = ({ listing, index }) => {
             <div className="relative aspect-[16/10] w-full overflow-hidden">
               <Image
                 src={imageSrc}
-                alt={listing.title || "Imagen del anuncio"}
+                alt={listing.title || "Imagen del adiso"}
                 fill
                 sizes="(max-width: 640px) 90vw, (max-width: 1024px) 45vw, 30vw"
                 className="object-cover transition-transform duration-300 ease-out group-hover:scale-105"

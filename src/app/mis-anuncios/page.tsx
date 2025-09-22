@@ -28,7 +28,7 @@ export default function MyPublicationsPage() {
         }
       } catch (err) {
         console.error('Error fetching publications:', err);
-        setError('No se pudieron cargar tus anuncios. Inténtalo de nuevo más tarde.');
+        setError('No se pudieron cargar tus adisos. Inténtalo de nuevo más tarde.');
       } finally {
         setLoading(false);
       }
@@ -44,7 +44,7 @@ export default function MyPublicationsPage() {
       setDeleteConfirm(null);
     } catch (err) {
       console.error('Error deleting publication:', err);
-      setError('No se pudo eliminar el anuncio. Inténtalo de nuevo más tarde.');
+      setError('No se pudo eliminar el adiso. Inténtalo de nuevo más tarde.');
     }
   };
 
@@ -209,9 +209,9 @@ export default function MyPublicationsPage() {
       {deleteConfirm && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
           <div className="bg-white rounded-lg max-w-md w-full p-6">
-            <h3 className="text-lg font-semibold text-gray-900 mb-4">¿Eliminar anuncio?</h3>
+            <h3 className="text-lg font-semibold text-gray-900 mb-4">¿Eliminar adiso?</h3>
             <p className="text-gray-600 mb-6">
-              Esta acción no se puede deshacer. ¿Estás seguro de que deseas eliminar este anuncio?
+              Esta acción no se puede deshacer. ¿Estás seguro de que deseas eliminar este adiso?
             </p>
             <div className="flex space-x-3 justify-end">
               <button

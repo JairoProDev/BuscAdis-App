@@ -305,6 +305,7 @@ export interface PublicationInput {
 
 export interface PublicationData {
   id: string;
+  sequentialId?: number;
   title: string;
   description: string;
   categorySlug: string;
@@ -335,9 +336,9 @@ export interface PublicationData {
 }
 
 /**
- * Función para clasificar anuncios basados en su contenido
- * @param title Título del anuncio
- * @param description Descripción del anuncio
+ * Función para clasificar adisos basados en su contenido
+ * @param title Título del adiso
+ * @param description Descripción del adiso
  * @returns Categorización sugerida
  */
 export function classifyPublication(title: string, description: string): {

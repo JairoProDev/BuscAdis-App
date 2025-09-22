@@ -21,9 +21,9 @@ const steps = [
     },
     {
         id: 2,
-        title: "Publica tu anuncio",
+        title: "Publica tu adiso",
         description:
-            "Crea tu anuncio con fotos, descripción detallada y establece un precio. Puedes publicar en diferentes categorías según tus necesidades.",
+            "Crea tu adiso con fotos, descripción detallada y establece un precio. Puedes publicar en diferentes categorías según tus necesidades.",
         icon: PlusCircleIcon,
     },
     {
@@ -37,26 +37,26 @@ const steps = [
         id: 4,
         title: "Concreta la venta",
         description:
-            "Coordina con el comprador el lugar y forma de pago. Una vez finalizada la transacción, puedes marcar tu anuncio como vendido.",
+            "Coordina con el comprador el lugar y forma de pago. Una vez finalizada la transacción, puedes marcar tu adiso como vendido.",
         icon: CurrencyDollarIcon,
     },
 ];
 
 const faqItems = [
     {
-        question: "¿Cuánto cuesta publicar un anuncio?",
+        question: "¿Cuánto cuesta publicar un adiso?",
         answer:
-            "Publicar un anuncio básico en Buscadis es completamente gratuito. También ofrecemos opciones de promoción pagadas para dar mayor visibilidad a tus anuncios.",
+            "Publicar un adiso básico en Buscadis es completamente gratuito. También ofrecemos opciones de promoción pagadas para dar mayor visibilidad a tus adisos.",
     },
     {
-        question: "¿Cómo destaco mi anuncio sobre los demás?",
+        question: "¿Cómo destaco mi adiso sobre los demás?",
         answer:
-            "Puedes destacar tu anuncio utilizando nuestros paquetes premium que incluyen posicionamiento prioritario, etiquetas destacadas y mayor visibilidad en los resultados de búsqueda.",
+            "Puedes destacar tu adiso utilizando nuestros paquetes premium que incluyen posicionamiento prioritario, etiquetas destacadas y mayor visibilidad en los resultados de búsqueda.",
     },
     {
-        question: "¿Cuánto tiempo permanece activo mi anuncio?",
+        question: "¿Cuánto tiempo permanece activo mi adiso?",
         answer:
-            "Los anuncios gratuitos permanecen activos durante 30 días. Puedes renovarlos manualmente cuando estén por expirar o configurar la renovación automática en tu perfil.",
+            "Los adisos gratuitos permanecen activos durante 30 días. Puedes renovarlos manualmente cuando estén por expirar o configurar la renovación automática en tu perfil.",
     },
     {
         question: "¿Cómo me protege Buscadis de posibles estafas?",
@@ -123,7 +123,7 @@ export default function ComoFunciona() {
                             href="/publicar"
                             className="inline-flex items-center justify-center rounded-md bg-teal-600 px-5 py-3 text-base font-medium text-slate-900 hover:bg-teal-500 focus:outline-none focus:ring-2 focus:ring-teal-600 focus:ring-offset-2"
                         >
-                            Publicar anuncio
+                            Publicar adiso
                         </Link>
                     </div>
                 </div>
@@ -159,7 +159,7 @@ export default function ComoFunciona() {
                                         />
                                     </svg>
                                     <span className="text-cyan-100/80">
-                                        Publicación rápida y sencilla de anuncios
+                                        Publicación rápida y sencilla de adisos
                                     </span>
                                 </li>
                                 <li className="flex items-start">
@@ -213,7 +213,7 @@ export default function ComoFunciona() {
                                         />
                                     </svg>
                                     <span className="text-cyan-100/80">
-                                        Estadísticas detalladas de tus anuncios
+                                        Estadísticas detalladas de tus adisos
                                     </span>
                                 </li>
                             </ul>
@@ -324,7 +324,7 @@ export default function ComoFunciona() {
                             href="/buscar"
                             className="inline-flex items-center justify-center rounded-md border border-white px-5 py-3 text-base font-medium text-white hover:bg-teal-500"
                         >
-                            Explorar anuncios
+                            Explorar adisos
                         </Link>
                     </div>
                 </div>

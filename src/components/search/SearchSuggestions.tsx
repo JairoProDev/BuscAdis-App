@@ -245,9 +245,9 @@ export default function SearchSuggestions({
   
   // Mock exclusive offers
   const exclusiveOffers = [
-    "¡30% descuento en anuncios destacados!",
+    "¡30% descuento en adisos destacados!",
     "Publica gratis durante este fin de semana",
-    "Destaca tu anuncio con fotos premium"
+    "Destaca tu adiso con fotos premium"
   ]
   
   // Calculate max height based on content and compact mode

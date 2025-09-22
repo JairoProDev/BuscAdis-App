@@ -1,6 +1,6 @@
 /**
  * LIMPIAR Y CREAR ANUNCIOS REALISTAS - BUSCADIS
- * Elimina datos actuales y crea 48 anuncios realistas para probar la aplicación
+ * Elimina datos actuales y crea 48 adisos realistas para probar la aplicación
  */
 
 const { MongoClient } = require('mongodb');
@@ -626,7 +626,7 @@ class RealisticDataSeeder {
    * Crear datos realistas
    */
   async createRealisticData() {
-    console.log('\n📝 Creando anuncios realistas...');
+    console.log('\n📝 Creando adisos realistas...');
     
     let totalCreated = 0;
     
@@ -644,7 +644,7 @@ class RealisticDataSeeder {
         const result = await collection.insertMany(documentsToInsert);
         totalCreated += result.insertedCount;
         
-        console.log(`   ✅ ${result.insertedCount} anuncios creados`);
+        console.log(`   ✅ ${result.insertedCount} adisos creados`);
         
         // Mostrar algunos títulos como ejemplo
         documentsToInsert.slice(0, 2).forEach(doc => {
@@ -658,7 +658,7 @@ class RealisticDataSeeder {
     }
     
     this.stats.created = totalCreated;
-    console.log(`\n✅ Total creados: ${totalCreated} anuncios realistas`);
+    console.log(`\n✅ Total creados: ${totalCreated} adisos realistas`);
   }
 
   /**
@@ -783,7 +783,7 @@ class RealisticDataSeeder {
     console.log('\n🎉 PROCESO COMPLETADO');
     console.log('====================');
     console.log(`🗑️  Documentos eliminados: ${this.stats.deleted}`);
-    console.log(`📝 Anuncios creados: ${this.stats.created}`);
+    console.log(`📝 Adisos creados: ${this.stats.created}`);
     console.log(`❌ Errores: ${this.stats.errors.length}`);
     
     if (this.stats.errors.length > 0) {
@@ -795,14 +795,14 @@ class RealisticDataSeeder {
     
     console.log('\n📊 DISTRIBUCIÓN POR CATEGORÍA:');
     Object.keys(REALISTIC_DATA).forEach(category => {
-      console.log(`   ${category}: 6 anuncios`);
+      console.log(`   ${category}: 6 adisos`);
     });
     
     console.log('\n🚀 PRÓXIMOS PASOS:');
     console.log('   1. Abrir la aplicación web');
-    console.log('   2. Verificar que se muestren los anuncios');
+    console.log('   2. Verificar que se muestren los adisos');
     console.log('   3. Probar búsquedas y filtros');
-    console.log('   4. Intentar publicar un nuevo anuncio');
+    console.log('   4. Intentar publicar un nuevo adiso');
     console.log('   5. Verificar que aparezca en la lista');
     
     console.log('\n✅ Base de datos lista para pruebas reales!');

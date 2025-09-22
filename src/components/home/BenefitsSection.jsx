@@ -126,7 +126,7 @@ const BenefitsSection = () => {
                         ></motion.div>
 
                         <p className="text-lg text-cyan-100/90 mb-10 leading-relaxed">
-                            Buscadis no es solo un portal de anuncios; es tu aliado
+                            Buscadis no es solo un portal de adisos; es tu aliado
                             estratégico para encontrar oportunidades y conectar con la
                             comunidad local de forma rápida, segura y efectiva.
                         </p>
@@ -194,7 +194,7 @@ const BenefitsSection = () => {
 
                                 <span className="relative z-10 flex items-center">
                                     <RocketLaunchIcon className="w-5 h-5 mr-2" />
-                                    Publica tu Anuncio Ahora
+                                    Publica tu Adiso Ahora
                                 </span>
                             </Link>
                         </motion.div>
@@ -237,7 +237,7 @@ const BenefitsSection = () => {
                             whileHover={{ y: -5, boxShadow: "0 15px 30px -5px rgba(20,184,166,0.4)" }}
                         >
                             <SparklesIcon className="h-4 w-4 text-cyan-300 mr-2" />
-                            <span>+50,000 Anuncios activos</span>
+                            <span>+50,000 Adisos activos</span>
                         </motion.div>
 
                         <motion.div
@@ -317,7 +317,7 @@ const BenefitsSection = () => {
                             <svg className="w-5 h-5 mr-2 text-teal-300 relative z-10" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
                             </svg>
-                            <span className="relative z-10">Explorar Anuncios</span>
+                            <span className="relative z-10">Explorar Adisos</span>
                         </motion.a>
                     </div>
 

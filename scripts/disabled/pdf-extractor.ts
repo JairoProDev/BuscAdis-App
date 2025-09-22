@@ -51,7 +51,7 @@ class PDFExtractor {
   }
 
   /**
-   * Parsea el texto extraído para identificar anuncios
+   * Parsea el texto extraído para identificar adisos
    */
   parseAdsFromText(text: string, publicationDate: Date): AdExtractionResult[] {
     const ads: AdExtractionResult[] = [];
@@ -65,7 +65,7 @@ class PDFExtractor {
     for (let i = 0; i < lines.length; i++) {
       const line = lines[i].trim();
       
-      // Detectar inicio de anuncio (patrones comunes)
+      // Detectar inicio de adiso (patrones comunes)
       if (this.isAdStart(line)) {
         if (inAd && this.isValidAd(currentAd)) {
           ads.push(this.finalizeAd(currentAd, publicationDate));
@@ -81,10 +81,10 @@ class PDFExtractor {
       }
       
       if (inAd) {
-        // Extraer información del anuncio
+        // Extraer información del adiso
         this.extractAdInfo(line, currentAd);
         
-        // Detectar fin de anuncio
+        // Detectar fin de adiso
         if (this.isAdEnd(line) || this.isNextAdStart(lines, i)) {
           if (this.isValidAd(currentAd)) {
             ads.push(this.finalizeAd(currentAd, publicationDate));
@@ -95,7 +95,7 @@ class PDFExtractor {
       }
     }
     
-    // Agregar último anuncio si existe
+    // Agregar último adiso si existe
     if (inAd && this.isValidAd(currentAd)) {
       ads.push(this.finalizeAd(currentAd, publicationDate));
     }
@@ -104,12 +104,12 @@ class PDFExtractor {
   }
 
   /**
-   * Detecta si una línea es el inicio de un anuncio
+   * Detecta si una línea es el inicio de un adiso
    */
   private isAdStart(line: string): boolean {
     const adStartPatterns = [
       /^(Vendo|Alquilo|Compro|Busco|Ofrezco|Se busca|Cambio|Vendo|Alquilo)/i,
-      /^\d+\./, // Números de anuncio
+      /^\d+\./, // Números de adiso
       /^[A-Z][A-Z\s]{3,}/, // Títulos en mayúsculas
     ];
     
@@ -117,7 +117,7 @@ class PDFExtractor {
   }
 
   /**
-   * Detecta si una línea es el fin de un anuncio
+   * Detecta si una línea es el fin de un adiso
    */
   private isAdEnd(line: string): boolean {
     const adEndPatterns = [
@@ -130,7 +130,7 @@ class PDFExtractor {
   }
 
   /**
-   * Detecta si la siguiente línea es inicio de otro anuncio
+   * Detecta si la siguiente línea es inicio de otro adiso
    */
   private isNextAdStart(lines: string[], currentIndex: number): boolean {
     if (currentIndex + 1 >= lines.length) return false;
@@ -140,7 +140,7 @@ class PDFExtractor {
   }
 
   /**
-   * Extrae información específica de una línea del anuncio
+   * Extrae información específica de una línea del adiso
    */
   private extractAdInfo(line: string, ad: Partial<AdExtractionResult>): void {
     // Extraer teléfonos
@@ -180,7 +180,7 @@ class PDFExtractor {
   }
 
   /**
-   * Valida si un anuncio tiene la información mínima requerida
+   * Valida si un adiso tiene la información mínima requerida
    */
   private isValidAd(ad: Partial<AdExtractionResult>): boolean {
     return !!(
@@ -191,14 +191,14 @@ class PDFExtractor {
   }
 
   /**
-   * Finaliza y limpia un anuncio
+   * Finaliza y limpia un adiso
    */
   private finalizeAd(ad: Partial<AdExtractionResult>, publicationDate: Date): AdExtractionResult {
     // Categorizar automáticamente basándose en el título
     const category = this.categorizeAd(ad.title || '');
     
     return {
-      title: ad.title || 'Anuncio sin título',
+      title: ad.title || 'Adiso sin título',
       description: ad.description || ad.title || 'Sin descripción',
       category: category.main,
       subcategory: category.sub,
@@ -217,7 +217,7 @@ class PDFExtractor {
   }
 
   /**
-   * Categoriza automáticamente un anuncio basándose en su título
+   * Categoriza automáticamente un adiso basándose en su título
    */
   private categorizeAd(title: string): { main: string; sub: string } {
     const lowerTitle = title.toLowerCase();
@@ -306,10 +306,10 @@ class PDFExtractor {
         // Extraer texto del PDF
         const extraction = await this.extractTextFromPDF(filePath);
         
-        // Parsear anuncios
+        // Parsear adisos
         const ads = this.parseAdsFromText(extraction.text, publicationDate);
         
-        console.log(`✅ ${file}: ${ads.length} anuncios extraídos`);
+        console.log(`✅ ${file}: ${ads.length} adisos extraídos`);
         
         allAds.push(...ads);
         
@@ -338,7 +338,7 @@ async function main() {
     
     console.log(`\n📊 RESULTADOS DE EXTRACCIÓN`);
     console.log('==========================');
-    console.log(`Total de anuncios extraídos: ${ads.length}`);
+    console.log(`Total de adisos extraídos: ${ads.length}`);
     
     // Estadísticas por categoría
     const categoryStats: Record<string, number> = {};

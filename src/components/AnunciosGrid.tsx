@@ -23,18 +23,18 @@ interface AdisoData {
   categorySlug?: string;
 }
 
-interface AnunciosGridProps {
-  anuncios: AdisoData[];
+interface AdisosGridProps {
+  adisos: AdisoData[];
 }
 
-const AnunciosGrid = ({ anuncios }: AnunciosGridProps) => {
+const AdisosGrid = ({ adisos }: AdisosGridProps) => {
     return (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {anuncios.map((adiso) => (
+            {adisos.map((adiso) => (
                 <AdisoCard key={adiso.id} adiso={adiso} />
             ))}
         </div>
     );
 };
 
-export default AnunciosGrid;
+export default AdisosGrid;

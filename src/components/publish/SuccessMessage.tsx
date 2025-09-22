@@ -91,8 +91,8 @@ const SuccessMessage: React.FC<SuccessMessageProps> = ({
           onClick={() => {
             if (navigator.share && publishedId) {
               navigator.share({
-                title: 'Mi anuncio en BuscAdis',
-                text: 'Mira mi nuevo anuncio',
+                title: 'Mi adiso en BuscAdis',
+                text: 'Mira mi nuevo adiso',
                 url: `${window.location.origin}/adisos/${publishedId}`
               });
             }
@@ -117,9 +117,9 @@ const SuccessMessage: React.FC<SuccessMessageProps> = ({
       <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 text-left">
         <h3 className="font-semibold text-blue-900 mb-2">💡 ¿Qué sigue?</h3>
         <ul className="space-y-1 text-sm text-blue-800">
-          <li>• Tu anuncio ya está visible para miles de usuarios</li>
+          <li>• Tu adiso ya está visible para miles de usuarios</li>
           <li>• Responde rápido a los mensajes para mejores resultados</li>
-          <li>• Puedes editar o renovar tu anuncio en cualquier momento</li>
+          <li>• Puedes editar o renovar tu adiso en cualquier momento</li>
         </ul>
       </div>
     </motion.div>

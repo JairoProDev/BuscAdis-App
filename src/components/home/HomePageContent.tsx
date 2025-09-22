@@ -49,6 +49,7 @@ export default function HomePageContent({
   const [categoryRows, setCategoryRows] = useState<Record<string, SearchResult[]>>({});
   const [categoryLoading, setCategoryLoading] = useState<Record<string, boolean>>({});
   const [isSidebarOpen, setIsSidebarOpen] = useState<boolean>(false);
+  const [isMounted, setIsMounted] = useState(false);
   
   // Hook del contexto de publicación
   const {
@@ -59,7 +60,7 @@ export default function HomePageContent({
     handleWhatsAppClick,
     handleShare,
     handleFavorite
-  } = usePublicationDetail();
+  } = usePublicationDetail()
 
   // Convert SearchResult to PublicationData format
   const convertToPublicationData = (searchResult: SearchResult): PublicationData => {
@@ -163,17 +164,22 @@ export default function HomePageContent({
       const publication = allPublications.find(p => p.id === preSelectedPublicationId);
       if (publication) {
         console.log('🔍 Pre-selecting publication:', publication.title);
-        openPublicationDetail(publication, 'feed');
+        openPublicationDetail(publication);
         setIsSidebarOpen(true);
       }
     }
-  }, [preSelectedPublicationId, allPublications]);
+  }, [preSelectedPublicationId, allPublications, openPublicationDetail]);
+
+  // Fix hydration mismatch
+  useEffect(() => {
+    setIsMounted(true);
+  }, []);
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 via-blue-50/30 to-purple-50/30 dark:from-gray-900 dark:via-gray-900 dark:to-gray-800">
       {/* Hero Section with Search */}
       <div className="relative bg-gradient-to-r from-teal-600 via-blue-600 to-purple-600 text-white">
-        <div className="absolute inset-0 bg-black/20"></div>
+        {isMounted && <div className="absolute inset-0 bg-black/20"></div>}
         <div className="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 lg:py-24">
           <div className="text-center">
             <motion.h1 
@@ -259,9 +265,8 @@ export default function HomePageContent({
                         console.log('🔗 Ver todos clicked for category:', category.id);
                         router.push(`/${category.id}`);
                       }}
-                      onPublicationClick={(publication, urlType) => {
-                        console.log('🔍 Opening publication from category row:', publication.title);
-                        openPublicationDetail(publication, urlType || 'feed');
+                      onPublicationClick={(publication) => {
+                        openPublicationDetail(publication);
                         setIsSidebarOpen(true);
                       }}
                       showViewAll={true}

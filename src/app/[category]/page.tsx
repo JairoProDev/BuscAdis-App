@@ -1,9 +1,4 @@
-'use client';
-
-import React, { Suspense } from 'react'
-import { notFound } from 'next/navigation'
-import SearchPageContent from '../buscar/page'
-import { isValidCategoryPath } from '@/lib/categories'
+import { redirect } from 'next/navigation'
 
 interface CategoryPageProps {
   params: Promise<{
@@ -11,62 +6,19 @@ interface CategoryPageProps {
   }>
 }
 
-export default function CategoryPage({ params }: CategoryPageProps) {
-  return (
-    <Suspense fallback={
-      <div className="min-h-screen bg-gradient-to-br from-gray-50 to-blue-50 dark:from-gray-900 dark:to-gray-800 flex items-center justify-center">
-        <div className="text-center">
-          <div className="w-16 h-16 border-4 border-teal-500 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
-          <h2 className="text-xl font-semibold text-gray-900 dark:text-white mb-2">
-            Cargando Categoría
-          </h2>
-          <p className="text-gray-600 dark:text-gray-400">
-            Preparando la mejor experiencia para ti...
-          </p>
-        </div>
-      </div>
-    }>
-      <CategoryPageContent params={params} />
-    </Suspense>
-  )
-}
+// Categorías válidas
+const validCategories = [
+  'empleos', 'inmuebles', 'vehiculos', 'servicios', 
+  'productos', 'eventos', 'negocios', 'comunidad'
+]
 
-function CategoryPageContent({ params }: CategoryPageProps) {
-  const [isValid, setIsValid] = React.useState<boolean | null>(null)
-
-  React.useEffect(() => {
-    const resolveParams = async () => {
-      const resolvedParams = await params
-      const categoryId = resolvedParams.category
-      
-      // Validar que la categoría existe
-      const valid = isValidCategoryPath(categoryId)
-      
-      if (!valid) {
-        notFound()
-        return
-      }
-      
-      setIsValid(true)
-    }
-    
-    resolveParams()
-  }, [params])
-
-  if (isValid === null) {
-    return (
-      <div className="min-h-screen bg-gradient-to-br from-gray-50 to-blue-50 dark:from-gray-900 dark:to-gray-800 flex items-center justify-center">
-        <div className="text-center">
-          <div className="w-16 h-16 border-4 border-teal-500 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
-          <h2 className="text-xl font-semibold text-gray-900 dark:text-white mb-2">
-            Validando Categoría
-          </h2>
-        </div>
-      </div>
-    )
+export default async function CategoryPage({ params }: CategoryPageProps) {
+  const { category } = await params
+  
+  if (!validCategories.includes(category)) {
+    redirect('/')
   }
-
-  // Renderizar la misma página de búsqueda pero con la categoría preseleccionada via query (?category=...)
-  // The search page already reads URL params and calls /api/publications unified endpoint.
-  return <SearchPageContent />
-} 
+  
+  // Redirigir a la página de búsqueda con la categoría como parámetro
+  redirect(`/buscar?category=${category}`)
+}

@@ -152,7 +152,7 @@ async function sendNotificationToAdvertiser(publication: any, contactInfo: any) 
     // Simular envío de email
     // await sendEmail({
     //   to: publication.contact.email,
-    //   subject: 'Interés en tu anuncio caducado',
+    //   subject: 'Interés en tu adiso caducado',
     //   template: 'expired-publication-interest',
     //   data: {
     //     publicationTitle: publication.title,

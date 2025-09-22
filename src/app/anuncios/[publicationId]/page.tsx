@@ -6,8 +6,8 @@ import { PublicationsService } from '@/services/publications.service';
 import { generateSeoUrl } from '@/utils/url';
 import LoadingSpinner from '@/components/ui/LoadingSpinner';
 
-// Renombrado para claridad, maneja redirección desde /anuncios/...
-export default function OldAnuncioRedirect() {
+// Renombrado para claridad, maneja redirección desde /adisos/...
+export default function OldAdisoRedirect() {
   const params = useParams();
   const router = useRouter();
   const [loading, setLoading] = useState(true);
@@ -47,14 +47,14 @@ export default function OldAnuncioRedirect() {
           publication.subSubcategorySlug || ''
         );
         
-        console.log(`Redirecting legacy /anuncios/${publicationId} to: ${correctUrl}`);
+        console.log(`Redirecting legacy /adisos/${publicationId} to: ${correctUrl}`);
         
         // Redirect permanently (301) to the new URL
         router.replace(correctUrl); 
         // No establecer setLoading(false) aquí, la redirección se encarga.
         
       } catch (err) {
-        console.error('Error en la redirección desde /anuncios:', err);
+        console.error('Error en la redirección desde /adisos:', err);
         setError('No se pudo encontrar la publicación solicitada o redirigir.');
         setLoading(false);
       }

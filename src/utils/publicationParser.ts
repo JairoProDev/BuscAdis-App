@@ -4,12 +4,12 @@
 import { classifyPublication, PublicationInput } from '@/types/publication';
 
 /**
- * Analiza texto plano de anuncios y los convierte en objetos estructurados
- * @param text Texto plano que contiene varios anuncios
+ * Analiza texto plano de adisos y los convierte en objetos estructurados
+ * @param text Texto plano que contiene varios adisos
  * @returns Array de publicaciones estructuradas
  */
 export function parsePublicationsFromText(text: string): PublicationInput[] {
-  // Dividir el texto en anuncios individuales (suponiendo que están separados por marcadores)
+  // Dividir el texto en adisos individuales (suponiendo que están separados por marcadores)
   const rawAds = text.split(/\s+Convocatoria:|^\s+•|\s+Empresa|^\s+En |^\s+Farmacia|^\s+Maestro|^\s+Alquilo|^\s+Vendo/gm)
     .map(ad => ad.trim())
     .filter(ad => ad.length > 30); // Filtrar fragmentos demasiado cortos
@@ -65,7 +65,7 @@ export function parsePublicationsFromText(text: string): PublicationInput[] {
     // Extraer ubicación
     const locationInfo = {
       province: 'Cusco' as const, // Required property
-      city: 'Cusco', // Default por el contexto de los anuncios
+      city: 'Cusco', // Default por el contexto de los adisos
       region: 'Cusco',
       district: ''
     };

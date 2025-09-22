@@ -118,7 +118,7 @@ export const CategoryCard: React.FC<CategoryCardProps> = ({
             'text-teal-600 dark:text-teal-400 text-xs',
             variant === 'horizontal' ? 'text-left mt-0.5' : 'mt-1'
           )}>
-            {category.count.toLocaleString()} {category.count === 1 ? 'anuncio' : 'anuncios'}
+            {category.count.toLocaleString()} {category.count === 1 ? 'adiso' : 'adisos'}
           </p>
         )}
       </div>

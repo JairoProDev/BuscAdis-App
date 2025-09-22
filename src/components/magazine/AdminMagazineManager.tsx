@@ -146,7 +146,7 @@ export default function AdminMagazineManager() {
                 Fecha de Creación
               </th>
               <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                Anuncios
+                Adisos
               </th>
               <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                 Acciones
@@ -173,7 +173,7 @@ export default function AdminMagazineManager() {
                     <div className="text-sm text-gray-900">{formatDate(magazine.createdAt)}</div>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap">
-                    <div className="text-sm text-gray-900">{magazine.publicationCount} anuncios</div>
+                    <div className="text-sm text-gray-900">{magazine.publicationCount} adisos</div>
                   </td>
                   <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
                     <div className="flex space-x-2">

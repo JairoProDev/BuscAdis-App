@@ -47,7 +47,7 @@ export default function AdisoSection({
         setAdisos(data.publications);
       } catch (err) {
         console.error(`Error fetching ${type} publications:`, err);
-        setError(`No se pudieron cargar los anuncios de ${title}`);
+        setError(`No se pudieron cargar los adisos de ${title}`);
       } finally {
         setLoading(false);
       }
@@ -83,7 +83,7 @@ export default function AdisoSection({
       <div className="my-8">
         <h2 className="text-2xl font-bold mb-4">{title}</h2>
         <div className="p-4 bg-gray-50 text-gray-600 rounded-lg">
-          No hay anuncios disponibles en esta categoría
+          No hay adisos disponibles en esta categoría
         </div>
       </div>
     );

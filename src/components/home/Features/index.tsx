@@ -9,13 +9,13 @@ import { SparklesIcon, ShieldCheckIcon, UserGroupIcon, ChartBarIcon } from '@her
 const features = [
   {
     title: 'Inteligencia Artificial',
-    description: 'Utilizamos algoritmos avanzados de IA para optimizar tus anuncios y conectarte con compradores ideales',
+    description: 'Utilizamos algoritmos avanzados de IA para optimizar tus adisos y conectarte con compradores ideales',
     icon: <SparklesIcon className="w-10 h-10 text-teal-400 group-hover:text-teal-300 transition-colors duration-300" />,
     color: 'from-teal-900 to-emerald-900'
   },
   {
     title: 'Verificación Premium',
-    description: 'Todos nuestros anuncios pasan por un riguroso proceso de verificación para garantizar la máxima calidad',
+    description: 'Todos nuestros adisos pasan por un riguroso proceso de verificación para garantizar la máxima calidad',
     icon: <ShieldCheckIcon className="w-10 h-10 text-cyan-400 group-hover:text-cyan-300 transition-colors duration-300" />,
     color: 'from-cyan-900 to-teal-900'
   },
@@ -27,7 +27,7 @@ const features = [
   },
   {
     title: 'Analytics Avanzados',
-    description: 'Obtén métricas detalladas y análisis en tiempo real del rendimiento de tus anuncios',
+    description: 'Obtén métricas detalladas y análisis en tiempo real del rendimiento de tus adisos',
     icon: <ChartBarIcon className="w-10 h-10 text-cyan-400 group-hover:text-cyan-300 transition-colors duration-300" />,
     color: 'from-cyan-900 to-teal-900'
   }

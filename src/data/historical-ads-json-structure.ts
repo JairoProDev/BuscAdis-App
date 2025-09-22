@@ -5,7 +5,7 @@
 
 export interface HistoricalAdJSON {
   // IDENTIFICACIÓN ÚNICA
-  id: string;                          // UUID único del anuncio
+  id: string;                          // UUID único del adiso
   legacyId?: string;                   // ID del sistema anterior si existe
   
   // METADATOS DE ORIGEN
@@ -137,7 +137,7 @@ export interface HistoricalAdJSON {
   // DETECCIÓN DE DUPLICADOS
   duplicates: {
     isDuplicate: boolean;
-    originalAdId?: string;             // ID del anuncio original
+    originalAdId?: string;             // ID del adiso original
     similarityScore?: number;          // 0-100
     duplicateType: 'exact' | 'similar' | 'variant' | 'repost';
     differences?: string[];            // Diferencias encontradas
@@ -164,7 +164,7 @@ export interface HistoricalAdJSON {
 
   // ANÁLISIS COMPETITIVO
   competition: {
-    competitors: string[];             // IDs de anuncios similares/competidores
+    competitors: string[];             // IDs de adisos similares/competidores
     uniqueSellingPoints: string[];     // Puntos únicos de venta
     competitiveAdvantages: string[];   // Ventajas competitivas
     priceComparison: {
@@ -276,9 +276,9 @@ export interface AITrainingData {
 
 // EJEMPLO DE USO PARA GEMINI/IA EXTRACTION
 export const GEMINI_EXTRACTION_PROMPT = `
-Extrae la siguiente información del texto de anuncio:
+Extrae la siguiente información del texto de adiso:
 1. Título (máximo 60 caracteres)
-2. Descripción (resumen del anuncio)
+2. Descripción (resumen del adiso)
 3. Categoría (inmuebles, empleos, vehiculos, servicios, productos, educacion, salud, turismo, mascotas)
 4. Subcategoría (específica de la categoría)
 5. Tipo (venta, alquiler, servicio, trabajo, etc.)

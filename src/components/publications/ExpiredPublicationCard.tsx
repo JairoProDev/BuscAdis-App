@@ -143,7 +143,7 @@ export default function ExpiredPublicationCard({
             <span className="text-sm font-medium">Información de contacto no disponible</span>
           </div>
           <p className="text-xs text-gray-500 dark:text-gray-400">
-            Este anuncio ha caducado. El contacto del anunciante ya no está disponible.
+            Este adiso ha caducado. El contacto del anunciante ya no está disponible.
           </p>
         </div>
 

@@ -711,7 +711,7 @@ export const filtersByCategory: FiltersByCategory = {
     title: 'Filtros de Comunidad',
     sections: [
       {
-        title: 'Tipo de anuncio',
+        title: 'Tipo de adiso',
         filters: [
           {
             id: 'communityType',
@@ -723,7 +723,7 @@ export const filtersByCategory: FiltersByCategory = {
               { value: 'donation', label: 'Donaciones' },
               { value: 'volunteer', label: 'Voluntariado' },
               { value: 'groups', label: 'Grupos y clubes' },
-              { value: 'announcements', label: 'Anuncios generales' },
+              { value: 'announcements', label: 'Adisos generales' },
               { value: 'recommendations', label: 'Recomendaciones' },
               { value: 'rideshare', label: 'Compartir viajes' },
               { value: 'housing', label: 'Búsqueda de roommates' },

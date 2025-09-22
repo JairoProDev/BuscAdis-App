@@ -84,10 +84,10 @@ export default function MediaStep({ onNext, onBack, formData, updateFormData }: 
     >
       <div className="text-center">
         <h2 className="text-2xl font-bold text-gray-900 mb-2">
-          Agrega imágenes a tu anuncio
+          Agrega imágenes a tu adiso
         </h2>
         <p className="text-gray-600">
-          Las imágenes ayudan a que tu anuncio se vea más atractivo
+          Las imágenes ayudan a que tu adiso se vea más atractivo
         </p>
       </div>
 

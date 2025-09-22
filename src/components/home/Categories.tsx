@@ -106,7 +106,7 @@ export default function Categories() {
                 </div>
                 <h3 className="font-medium text-gray-800">{category.name}</h3>
                 {category.count !== undefined && (
-                  <p className="text-sm text-gray-500 mt-1">{category.count} anuncios</p>
+                  <p className="text-sm text-gray-500 mt-1">{category.count} adisos</p>
                 )}
               </div>
             </Link>

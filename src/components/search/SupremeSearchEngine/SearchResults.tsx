@@ -88,7 +88,7 @@ const ResultCard = ({
           : 'shadow-md hover:shadow-xl border border-gray-100 dark:border-gray-700'
       }`}
       onClick={() => {
-        // Navegar al detalle del anuncio
+        // Navegar al detalle del adiso
         console.log('Navigating to:', result.id)
       }}
     >
@@ -406,10 +406,10 @@ export default function SearchResults({
   // Función para crear mensaje personalizado de WhatsApp
   const createWhatsAppMessage = (category: string, title: string, resultId: string) => {
     const currentUrl = window.location.origin
-    const anuncioUrl = `${currentUrl}/adisos/${resultId}/${title.toLowerCase().replace(/\s+/g, '-')}`
+    const adisoUrl = `${currentUrl}/adisos/${resultId}/${title.toLowerCase().replace(/\s+/g, '-')}`
     
     return encodeURIComponent(
-      `Hola, vi su anuncio de ${category}: ${anuncioUrl} en BuscaDis y me interesó. ¿Podría brindarme más información, por favor?`
+      `Hola, vi su adiso de ${category}: ${adisoUrl} en BuscaDis y me interesó. ¿Podría brindarme más información, por favor?`
     )
   }
 

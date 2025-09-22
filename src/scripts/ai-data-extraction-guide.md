@@ -1,15 +1,15 @@
 # 🤖 GUÍA COMPLETA DE EXTRACCIÓN DE DATOS CON IA
 
-## BuscaDis - Procesamiento de 20,000+ Anuncios Históricos
+## BuscaDis - Procesamiento de 20,000+ Adisos Históricos
 
-Esta guía te ayudará a procesar eficientemente todos los anuncios históricos de las revistas usando IA (Gemini, ChatGPT, Claude, etc.).
+Esta guía te ayudará a procesar eficientemente todos los adisos históricos de las revistas usando IA (Gemini, ChatGPT, Claude, etc.).
 
 ## 📊 VISIÓN GENERAL DEL PROYECTO
 
 ### Números del Proyecto
-- **20,000+ anuncios** desde diciembre 2024
+- **20,000+ adisos** desde diciembre 2024
 - **2 revistas por semana** = 6-8 revistas por mes
-- **650 anuncios promedio** por revista
+- **650 adisos promedio** por revista
 - **Alto porcentaje de repetición** (mismos anunciantes)
 - **Valor estratégico enorme** para entrenamiento de IA
 
@@ -17,7 +17,7 @@ Esta guía te ayudará a procesar eficientemente todos los anuncios históricos 
 1. **🏛️ Sensación de antigüedad y confianza**
 2. **📈 Contenido abundante desde día 1**
 3. **🎯 Funcionalidad de autocompletado inteligente**
-4. **🤖 Entrenamiento de IA para generación de anuncios**
+4. **🤖 Entrenamiento de IA para generación de adisos**
 5. **📊 Análisis de mercado y competencia histórica**
 6. **💰 Identificación de potenciales clientes premium**
 
@@ -42,20 +42,20 @@ de limpieza. Enviar CV a los WhatsApp 979721481,
 ### Paso 2: Prompt Optimizado para IA
 
 ```prompt
-Eres un experto en extracción de datos de anuncios clasificados. 
-Analiza el siguiente texto de anuncios de revista peruana y extrae CADA ANUNCIO INDIVIDUAL.
+Eres un experto en extracción de datos de adisos clasificados. 
+Analiza el siguiente texto de adisos de revista peruana y extrae CADA ANUNCIO INDIVIDUAL.
 
 INSTRUCCIONES:
-1. Separa cada anuncio individual (están separados por espacios o cambios de tema)
-2. Para cada anuncio, extrae la información en formato JSON
+1. Separa cada adiso individual (están separados por espacios o cambios de tema)
+2. Para cada adiso, extrae la información en formato JSON
 3. Si no encuentras algún dato, usa null
 4. Mantén el texto original completo
 
 FORMATO JSON REQUERIDO:
 {
-  "anuncios": [
+  "adisos": [
     {
-      "textoOriginal": "texto completo del anuncio",
+      "textoOriginal": "texto completo del adiso",
       "titulo": "título extraído (máximo 60 caracteres)",
       "descripcion": "descripción resumida",
       "categoria": "inmuebles|empleos|vehiculos|servicios|productos|educacion|salud|turismo|mascotas",
@@ -94,7 +94,7 @@ TEXTO A ANALIZAR:
 
 #### Opción A: Con ChatGPT/Claude
 ```javascript
-// Dividir el texto en lotes de ~500 anuncios
+// Dividir el texto en lotes de ~500 adisos
 const lotes = dividirTextoEnLotes(textoCompleto, 500);
 
 for (let i = 0; i < lotes.length; i++) {
@@ -107,13 +107,13 @@ for (let i = 0; i < lotes.length; i++) {
 ```python
 import google.generativeai as genai
 
-def procesar_anuncios_con_gemini(texto_anuncios):
+def procesar_adisos_con_gemini(texto_adisos):
     model = genai.GenerativeModel('gemini-pro')
     
     prompt = f"""
     [PROMPT OPTIMIZADO AQUÍ]
     
-    TEXTO: {texto_anuncios}
+    TEXTO: {texto_adisos}
     """
     
     response = model.generate_content(prompt)
@@ -133,9 +133,9 @@ def procesar_anuncios_con_gemini(texto_anuncios):
 │   ├── lote_002_procesado.json
 │   └── ...
 ├── /consolidados/
-│   ├── todos_los_anuncios.json
-│   ├── anuncios_deduplicados.json
-│   └── anuncios_para_ia.json
+│   ├── todos_los_adisos.json
+│   ├── adisos_deduplicados.json
+│   └── adisos_para_ia.json
 └── /estadisticas/
     ├── resumen_por_categoria.json
     ├── analisis_contactos.json
@@ -195,20 +195,20 @@ def procesar_anuncios_con_gemini(texto_anuncios):
 
 ### Estrategia de Deduplicación
 ```javascript
-function detectarDuplicados(anuncios) {
+function detectarDuplicados(adisos) {
   const duplicados = [];
   
-  for (let i = 0; i < anuncios.length; i++) {
-    for (let j = i + 1; j < anuncios.length; j++) {
+  for (let i = 0; i < adisos.length; i++) {
+    for (let j = i + 1; j < adisos.length; j++) {
       const similitud = calcularSimilitud(
-        anuncios[i].textoOriginal,
-        anuncios[j].textoOriginal
+        adisos[i].textoOriginal,
+        adisos[j].textoOriginal
       );
       
       if (similitud > 0.85) {
         duplicados.push({
-          original: anuncios[i],
-          duplicado: anuncios[j],
+          original: adisos[i],
+          duplicado: adisos[j],
           similitud: similitud
         });
       }
@@ -222,7 +222,7 @@ function detectarDuplicados(anuncios) {
 ### Criterios de Duplicación
 1. **Exacto**: Texto idéntico (100% similar)
 2. **Casi idéntico**: >95% similar (pequeños cambios)
-3. **Variante**: 85-95% similar (mismo anuncio, diferentes detalles)
+3. **Variante**: 85-95% similar (mismo adiso, diferentes detalles)
 4. **Republicación**: Mismo contacto, mismo tipo, diferente fecha
 
 ## 📊 ANÁLISIS DE DATOS EXTRAÍDOS
@@ -231,8 +231,8 @@ function detectarDuplicados(anuncios) {
 ```javascript
 const estadisticas = {
   resumen_general: {
-    total_anuncios: number,
-    anuncios_unicos: number,
+    total_adisos: number,
+    adisos_unicos: number,
     porcentaje_duplicados: number,
     calidad_promedio: number
   },
@@ -270,7 +270,7 @@ const estadisticas = {
 ```json
 {
   "id": "unique_id",
-  "input": "texto original del anuncio",
+  "input": "texto original del adiso",
   "output": {
     "categoria_predicha": "categoria",
     "titulo_generado": "título optimizado",
@@ -290,11 +290,11 @@ const estadisticas = {
 
 ### Casos de Uso para IA Entrenada
 1. **Autocompletado Inteligente**: Sugerir información basada en historial
-2. **Generación de Anuncios**: Crear anuncios optimizados automáticamente
+2. **Generación de Adisos**: Crear adisos optimizados automáticamente
 3. **Optimización de Precios**: Sugerir precios competitivos
 4. **Mejora de Contenido**: Optimizar títulos y descripciones
-5. **Detección de Spam**: Identificar anuncios de baja calidad
-6. **Recomendaciones Personalizadas**: Mostrar anuncios relevantes
+5. **Detección de Spam**: Identificar adisos de baja calidad
+6. **Recomendaciones Personalizadas**: Mostrar adisos relevantes
 
 ## 🔧 HERRAMIENTAS RECOMENDADAS
 
@@ -323,7 +323,7 @@ const estadisticas = {
 - [ ] Crear scripts de procesamiento
 
 ### Fase 2: Extracción Masiva (3-5 días)
-- [ ] Procesar lotes de 500-1000 anuncios
+- [ ] Procesar lotes de 500-1000 adisos
 - [ ] Validar calidad de extracción
 - [ ] Ajustar prompts según resultados
 - [ ] Consolidar datos extraídos
@@ -370,7 +370,7 @@ const estadisticas = {
 
 Al completar este proceso tendrás:
 
-- ✅ **20,000+ anuncios estructurados** listos para usar
+- ✅ **20,000+ adisos estructurados** listos para usar
 - ✅ **Base de datos robusta** para análisis y IA  
 - ✅ **Vista Netflix** con contenido abundante
 - ✅ **Sistema de autocompletado** inteligente

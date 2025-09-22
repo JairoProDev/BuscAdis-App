@@ -2,21 +2,21 @@
 
 import { useEffect } from 'react';
 import { useParams } from 'next/navigation';
-import OldAnuncioRedirect from '../page';
+import OldAdisoRedirect from '../page';
 
 /**
- * Página que maneja rutas de anuncios genéricos con título en la URL
- * (Redirige desde /anuncios/[publicationId]/[title])
+ * Página que maneja rutas de adisos genéricos con título en la URL
+ * (Redirige desde /adisos/[publicationId]/[title])
  */
-export default function OldAnuncioWithTitleRedirect() {
+export default function OldAdisoWithTitleRedirect() {
   const params = useParams();
   
   // Registrar un pageview para analíticas si es necesario
   useEffect(() => {
     // Si tienes algún código de analítica, puedes ejecutarlo aquí
-    console.log('Pageview: antiguo anuncio con título (redirigiendo)', params);
+    console.log('Pageview: antiguo adiso con título (redirigiendo)', params);
   }, [params]);
 
-  // Reutilizar el componente de redirección principal de /anuncios/[publicationId]
-  return <OldAnuncioRedirect />;
+  // Reutilizar el componente de redirección principal de /adisos/[publicationId]
+  return <OldAdisoRedirect />;
 } 

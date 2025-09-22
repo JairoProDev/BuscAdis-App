@@ -25,16 +25,15 @@ import { slugify } from '@/lib/utils';
 import { getDefaultImageByCategory } from '@/utils/image-helpers';
 
 import { PublicationData } from '@/types/publication';
-import { generateFeedUrl, generateCategoryUrl, generateBusinessUrl } from '@/lib/publications';
+import { generatePublicationUrl } from '@/lib/routing';
 
 interface PublicationCardProps {
   publication: PublicationData;
-  onPublicationClick?: (publication: PublicationData, urlType?: 'feed' | 'category' | 'business') => void;
+  onPublicationClick?: (publication: PublicationData) => void;
   className?: string;
   showWhatsApp?: boolean;
   variant?: 'default' | 'compact' | 'featured';
   viewMode?: 'grid' | 'list';
-  urlType?: 'feed' | 'category' | 'business';
 }
 
 // Mapping de iconos de categorías
@@ -85,8 +84,7 @@ export default function PublicationCard({
   className = '',
   showWhatsApp = true,
   variant = 'default',
-  viewMode = 'grid',
-  urlType = 'feed'
+  viewMode = 'grid'
 }: PublicationCardProps) {
   const [isFavorite, setIsFavorite] = useState(false);
   const [showCopiedMessage, setShowCopiedMessage] = useState(false);
@@ -103,18 +101,10 @@ export default function PublicationCard({
     return () => window.removeEventListener('resize', checkScreenSize);
   }, []); // Removed setIsDesktop from dependency array
 
-  // Generate SEO-friendly URL based on context
+  // Generate SEO-friendly URL
   const seoUrl = useMemo(() => {
-    switch (urlType) {
-      case 'category':
-        return generateCategoryUrl(publication);
-      case 'business':
-        return generateBusinessUrl(publication);
-      case 'feed':
-      default:
-        return generateFeedUrl(publication);
-    }
-  }, [publication, urlType])
+    return generatePublicationUrl(publication);
+  }, [publication])
 
   // Format price locally
   const formatPriceLocal = (value: number, currency: string) => {
@@ -206,22 +196,22 @@ export default function PublicationCard({
     
     switch (publication.categorySlug) {
       case 'empleos':
-        message = `🔍 Hola, vi su anuncio de *${categoryName}* en BuscaDis.com y me interesó mucho la oportunidad:\n\n"${publication.title}"\n\n¿Podría brindarme más información sobre los requisitos y el proceso de selección? Estoy muy interesado/a en aplicar.\n\n🔗 Link del anuncio: ${adUrl}\n\n¡Gracias por su tiempo! 😊`;
+        message = `🔍 Hola, vi su adiso de *${categoryName}* en BuscaDis.com y me interesó mucho la oportunidad:\n\n"${publication.title}"\n\n¿Podría brindarme más información sobre los requisitos y el proceso de selección? Estoy muy interesado/a en aplicar.\n\n🔗 Link del adiso: ${adUrl}\n\n¡Gracias por su tiempo! 😊`;
         break;
       case 'inmuebles':
-        message = `🏠 Hola, vi su publicación de *${categoryName}* en BuscaDis.com y me interesó el inmueble:\n\n"${publication.title}"\n\n¿Podría proporcionarme más detalles sobre las características, disponibilidad y condiciones? Me gustaría coordinar una visita si es posible.\n\n🔗 Link del anuncio: ${adUrl}\n\n¡Quedo atento/a a su respuesta! 😊`;
+        message = `🏠 Hola, vi su publicación de *${categoryName}* en BuscaDis.com y me interesó el inmueble:\n\n"${publication.title}"\n\n¿Podría proporcionarme más detalles sobre las características, disponibilidad y condiciones? Me gustaría coordinar una visita si es posible.\n\n🔗 Link del adiso: ${adUrl}\n\n¡Quedo atento/a a su respuesta! 😊`;
         break;
       case 'vehiculos':
-        message = `🚗 Hola, vi su anuncio de *${categoryName}* en BuscaDis.com y me interesó el vehículo:\n\n"${publication.title}"\n\n¿Podría brindarme más información sobre el estado, historial y documentación? Me gustaría conocer más detalles para una posible compra.\n\n🔗 Link del anuncio: ${adUrl}\n\n¡Gracias por su atención! 😊`;
+        message = `🚗 Hola, vi su adiso de *${categoryName}* en BuscaDis.com y me interesó el vehículo:\n\n"${publication.title}"\n\n¿Podría brindarme más información sobre el estado, historial y documentación? Me gustaría conocer más detalles para una posible compra.\n\n🔗 Link del adiso: ${adUrl}\n\n¡Gracias por su atención! 😊`;
         break;
       case 'servicios':
-        message = `🛠️ Hola, vi su oferta de *${categoryName}* en BuscaDis.com y necesito información sobre:\n\n"${publication.title}"\n\n¿Podría contarme más sobre su experiencia, tarifas y disponibilidad? Estoy interesado/a en contratar este servicio.\n\n🔗 Link del anuncio: ${adUrl}\n\n¡Espero su respuesta! 😊`;
+        message = `🛠️ Hola, vi su oferta de *${categoryName}* en BuscaDis.com y necesito información sobre:\n\n"${publication.title}"\n\n¿Podría contarme más sobre su experiencia, tarifas y disponibilidad? Estoy interesado/a en contratar este servicio.\n\n🔗 Link del adiso: ${adUrl}\n\n¡Espero su respuesta! 😊`;
         break;
       case 'productos':
-        message = `🛍️ Hola, vi su producto en BuscaDis.com y me interesó:\n\n"${publication.title}"\n\n¿Podría brindarme más información sobre las especificaciones, garantía y formas de pago disponibles?\n\n🔗 Link del anuncio: ${adUrl}\n\n¡Gracias! 😊`;
+        message = `🛍️ Hola, vi su producto en BuscaDis.com y me interesó:\n\n"${publication.title}"\n\n¿Podría brindarme más información sobre las especificaciones, garantía y formas de pago disponibles?\n\n🔗 Link del adiso: ${adUrl}\n\n¡Gracias! 😊`;
         break;
       default:
-        message = `👋 Hola, vi su anuncio de *${categoryName}* en BuscaDis.com y me interesó:\n\n"${publication.title}"\n\n¿Podría brindarme más información al respecto? Estoy muy interesado/a.\n\n🔗 Link del anuncio: ${adUrl}\n\n¡Quedo atento/a a su respuesta! 😊`;
+        message = `👋 Hola, vi su adiso de *${categoryName}* en BuscaDis.com y me interesó:\n\n"${publication.title}"\n\n¿Podría brindarme más información al respecto? Estoy muy interesado/a.\n\n🔗 Link del adiso: ${adUrl}\n\n¡Quedo atento/a a su respuesta! 😊`;
     }
     return encodeURIComponent(message);
   };
@@ -300,20 +290,13 @@ export default function PublicationCard({
     e.preventDefault();
     e.stopPropagation();
     
-    // Track card click
-    const seq = (publication as unknown as { sequentialId?: number }).sequentialId
-    if (typeof seq === 'number') {
-      fetch(`/api/adisos/${encodeURIComponent(String(seq))}/track`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ event: 'cardClick' })
-      }).catch(() => {})
-    }
+    // View tracking temporarily disabled to prevent loops
+    // TODO: Re-implement with proper debouncing and error handling
 
-    // Call the parent handler if provided with urlType
-    if (onPublicationClick) {
-      onPublicationClick(publication, urlType);
-    }
+      // Call the parent handler if provided
+      if (onPublicationClick) {
+        onPublicationClick(publication);
+      }
   };
 
   // Get category info

@@ -138,10 +138,10 @@ const ProgressAchievements: React.FC<ProgressAchievementsProps> = ({ formData, q
 
   return (
     <div className="space-y-6">
-      {/* Calidad del anuncio */}
+      {/* Calidad del adiso */}
       <div className="bg-white dark:bg-gray-800 shadow-lg rounded-xl p-5 border border-gray-200 dark:border-gray-700">
         <div className="flex items-center justify-between mb-2">
-          <h3 className="text-sm font-semibold text-gray-800 dark:text-gray-200">Calidad del anuncio</h3>
+          <h3 className="text-sm font-semibold text-gray-800 dark:text-gray-200">Calidad del adiso</h3>
           <div className="flex items-center">
             {[1,2,3,4,5].map((star) => (
               <StarIcon 

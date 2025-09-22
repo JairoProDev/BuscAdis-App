@@ -1,8 +1,8 @@
 export default function RegistrationBenefits() {
   const benefits = [
     {
-      title: 'Gestiona tus anuncios',
-      description: 'Edita, renueva o elimina tus anuncios cuando quieras'
+      title: 'Gestiona tus adisos',
+      description: 'Edita, renueva o elimina tus adisos cuando quieras'
     },
     {
       title: 'Recibe mensajes',
@@ -10,7 +10,7 @@ export default function RegistrationBenefits() {
     },
     {
       title: 'Guarda favoritos',
-      description: 'Guarda los anuncios que te interesan para verlos después'
+      description: 'Guarda los adisos que te interesan para verlos después'
     }
   ];
 

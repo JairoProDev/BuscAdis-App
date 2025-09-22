@@ -41,7 +41,7 @@ export async function generateMetadata({ params }: RouteParams): Promise<Metadat
   
   return {
     title: `Revista de ${categoryName} | Buscadis`,
-    description: `Explora y descarga nuestra revista digital de anuncios clasificados de ${categoryName.toLowerCase()} - Buscadis`
+    description: `Explora y descarga nuestra revista digital de adisos clasificados de ${categoryName.toLowerCase()} - Buscadis`
   };
 }
 

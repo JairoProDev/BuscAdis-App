@@ -47,8 +47,8 @@ export function useNavigation(navItems: NavItem[]) {
         return 'Buscar'
       case '/perfil':
         return 'Mi Perfil'
-      case '/mis-anuncios':
-        return 'Mis Anuncios'
+      case '/mis-adisos':
+        return 'Mis Adisos'
       case '/guardados':
         return 'Guardados'
       case '/mensajes':
@@ -67,7 +67,7 @@ export function useNavigation(navItems: NavItem[]) {
            pathname?.startsWith('/empleos') ||
            pathname?.startsWith('/inmuebles') ||
            pathname?.startsWith('/vehiculos') ||
-           pathname?.startsWith('/anuncios')
+           pathname?.startsWith('/adisos')
   }
 
   return {

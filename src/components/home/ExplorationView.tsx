@@ -51,7 +51,7 @@ const ExplorationView: React.FC<ExplorationViewProps> = ({ onSearch }) => {
           explorationRows.push({
             id: 'premium',
             title: 'Destacados Premium',
-            subtitle: 'Los mejores anuncios con máxima visibilidad',
+            subtitle: 'Los mejores adisos con máxima visibilidad',
             icon: '⭐',
             publications: premiumPubs,
             maxItems: 8
@@ -64,7 +64,7 @@ const ExplorationView: React.FC<ExplorationViewProps> = ({ onSearch }) => {
           explorationRows.push({
             id: 'recent',
             title: 'Recién Publicados',
-            subtitle: 'Los anuncios más nuevos de hoy',
+            subtitle: 'Los adisos más nuevos de hoy',
             icon: '🆕',
             publications: recentPubs,
             maxItems: 12
@@ -146,7 +146,7 @@ const ExplorationView: React.FC<ExplorationViewProps> = ({ onSearch }) => {
   if (rows.length === 0) {
     return (
       <div className="text-center py-12">
-        <p className="text-gray-500">No hay anuncios disponibles</p>
+        <p className="text-gray-500">No hay adisos disponibles</p>
       </div>
     );
   }

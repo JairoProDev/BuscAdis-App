@@ -205,7 +205,7 @@ export default function CallToAction() {
                   {/* Button content */}
                   <div className="relative z-10 flex items-center">
                     <RocketLaunchIcon className="w-6 h-6 mr-2" />
-                    <span>Publicar mi Anuncio</span>
+                    <span>Publicar mi Adiso</span>
                   </div>
                   
                   {/* Premium shimmer effect */}
@@ -229,7 +229,7 @@ export default function CallToAction() {
                 >
                   {/* Button content */}
                   <div className="relative z-10 flex items-center">
-                    <span>Explorar Anuncios</span>
+                    <span>Explorar Adisos</span>
                     <ArrowRightIcon className="w-5 h-5 ml-2 group-hover:translate-x-1 transition-transform duration-300" />
                   </div>
                   

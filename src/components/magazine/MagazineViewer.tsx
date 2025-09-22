@@ -111,7 +111,7 @@ export default function MagazineViewer() {
               <div className="absolute inset-0 bg-blue-100 flex flex-col items-center justify-center p-8 text-center">
                 <h3 className="text-xl font-bold text-blue-800 mb-4">Revista Digital Buscadis</h3>
                 <p className="text-blue-600 text-sm mb-2">Edición: {formatDate(magazine.createdAt)}</p>
-                <p className="text-blue-700">Contiene {magazine.publicationCount} anuncios clasificados</p>
+                <p className="text-blue-700">Contiene {magazine.publicationCount} adisos clasificados</p>
                 <div className="mt-8">
                   <Download className="h-10 w-10 mx-auto text-blue-500" />
                   <p className="text-sm mt-2 text-blue-600">Haz clic en el botón descargar para ver la revista completa</p>
@@ -137,11 +137,11 @@ export default function MagazineViewer() {
                   <span>Última actualización: {formatDate(magazine.createdAt)}</span>
                 </div>
                 <p>
-                  Contiene <strong>{magazine.publicationCount}</strong> anuncios clasificados actualizados.
+                  Contiene <strong>{magazine.publicationCount}</strong> adisos clasificados actualizados.
                 </p>
                 <p className="text-gray-700 mt-4">
                   Nuestra revista digital se actualiza automáticamente con cada nueva publicación.
-                  Descarga la última versión para ver todos los anuncios clasificados.
+                  Descarga la última versión para ver todos los adisos clasificados.
                 </p>
               </div>
             )}

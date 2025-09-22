@@ -302,7 +302,7 @@ export default function Header() {
               <Cog6ToothIcon className={menuItemIconClasses} />
               <span>Mi Perfil</span>
             </Link>
-            <Link href="/mis-anuncios" role="menuitem" className={menuItemClasses} onClick={() => setShowUserMenu(false)}>
+            <Link href="/mis-adisos" role="menuitem" className={menuItemClasses} onClick={() => setShowUserMenu(false)}>
               <SpeakerWaveIcon className={menuItemIconClasses} />
               <span>Mis Publicaciones</span>
             </Link>

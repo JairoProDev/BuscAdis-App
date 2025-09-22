@@ -66,7 +66,7 @@ const features = [
       },
       {
         title: 'IA',
-        buscadis: 'Asistente AI para optimización de anuncios',
+        buscadis: 'Asistente AI para optimización de adisos',
         others: 'Sin asistencia inteligente',
         icon: '🤖'
       },

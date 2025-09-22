@@ -5,11 +5,11 @@ import { QuestionMarkCircleIcon } from '@heroicons/react/24/outline';
 import Link from 'next/link';
 
 const faqItems = [
-    { question: "¿Cómo publico un anuncio?", answer: "Para publicar un anuncio, primero debes registrarte o iniciar sesión en Buscadis. Luego, haz clic en el botón 'Publicar' y sigue los pasos del formulario." },
-    { question: "¿Es gratuito publicar anuncios?", answer: "Sí, la publicación de anuncios básicos es gratuita. Ofrecemos opciones premium para mayor visibilidad." },
-    { question: "¿Cómo busco anuncios?", answer: "Puedes buscar anuncios utilizando la barra de búsqueda en la página principal o explorando por categorías." },
-    { question: "¿Cómo contacto al vendedor?", answer: "En la página del anuncio, encontrarás la información de contacto del vendedor (si la ha proporcionado) o un formulario para enviarle un mensaje." },
-    { question: "¿Qué tipo de anuncios puedo publicar?", answer: "Puedes publicar anuncios de empleos, inmuebles, vehículos, servicios, productos, eventos, educación, turismo, mascotas y negocios." },
+    { question: "¿Cómo publico un adiso?", answer: "Para publicar un adiso, primero debes registrarte o iniciar sesión en Buscadis. Luego, haz clic en el botón 'Publicar' y sigue los pasos del formulario." },
+    { question: "¿Es gratuito publicar adisos?", answer: "Sí, la publicación de adisos básicos es gratuita. Ofrecemos opciones premium para mayor visibilidad." },
+    { question: "¿Cómo busco adisos?", answer: "Puedes buscar adisos utilizando la barra de búsqueda en la página principal o explorando por categorías." },
+    { question: "¿Cómo contacto al vendedor?", answer: "En la página del adiso, encontrarás la información de contacto del vendedor (si la ha proporcionado) o un formulario para enviarle un mensaje." },
+    { question: "¿Qué tipo de adisos puedo publicar?", answer: "Puedes publicar adisos de empleos, inmuebles, vehículos, servicios, productos, eventos, educación, turismo, mascotas y negocios." },
     // Añade más preguntas frecuentes aquí
 ];
 

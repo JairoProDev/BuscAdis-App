@@ -63,7 +63,7 @@ export default function MagazineCategoryCard({
         
         {publicationCount !== undefined && (
           <p className="text-sm text-gray-500 mb-1">
-            {publicationCount} anuncios disponibles
+            {publicationCount} adisos disponibles
           </p>
         )}
         

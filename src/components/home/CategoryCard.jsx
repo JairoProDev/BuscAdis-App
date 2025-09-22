@@ -60,7 +60,7 @@ const CategoryCard = ({ category, index }) => {
                 whileHover={{ scale: 1.05, y: -2 }}
               >
                 <span className="relative">
-                  {category.count}+ anuncios
+                  {category.count}+ adisos
                   {/* Subtle shine effect */}
                   <span className="absolute inset-0 bg-gradient-to-r from-transparent via-teal-400/40 to-transparent rounded-full animate-shimmer"></span>
                 </span>
@@ -118,7 +118,7 @@ const CategoryCard = ({ category, index }) => {
               <p className="text-sm text-teal-100/70 line-clamp-2 mb-3 group-hover:text-teal-100/90 transition-colors duration-300">{category.description}</p>
             </div>
 
-            {/* Botón de "Ver anuncios" - estilo platinum */}
+            {/* Botón de "Ver adisos" - estilo platinum */}
             <motion.div 
               className="mt-auto"
               whileHover={{ scale: 1.03 }}
@@ -129,7 +129,7 @@ const CategoryCard = ({ category, index }) => {
                   transition-all duration-300 relative"
                 whileHover={{ x: 3 }}
               >
-                <span className="relative z-10">Ver anuncios</span>
+                <span className="relative z-10">Ver adisos</span>
                 <svg
                   className="ml-1.5 h-4 w-4 transition-transform duration-300 group-hover:translate-x-1"
                   fill="none"

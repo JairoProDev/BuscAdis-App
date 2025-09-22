@@ -1071,7 +1071,7 @@ function SearchPageContent({ publicationsData, results, setResults, isLoading, s
                         {currentQuery
                           ? (
                               <>
-                                No encontramos anuncios que coincidan con <span className="font-semibold text-teal-700 dark:text-teal-300">&quot;{currentQuery}&quot;</span>.
+                                No encontramos adisos que coincidan con <span className="font-semibold text-teal-700 dark:text-teal-300">&quot;{currentQuery}&quot;</span>.
                                 <br />
                                 <span className="text-sm text-gray-500 dark:text-gray-500">
                                   Prueba ajustando tus filtros, usando palabras clave diferentes o explora todas las oportunidades disponibles.
@@ -1080,7 +1080,7 @@ function SearchPageContent({ publicationsData, results, setResults, isLoading, s
                             )
                           : (
                               <>
-                                Actualmente no hay anuncios publicados en esta categoría o filtro.
+                                Actualmente no hay adisos publicados en esta categoría o filtro.
                                 <br />
                                 <span className="text-sm text-gray-500 dark:text-gray-500">
                                   ¡Vuelve pronto o revisa otras categorías para encontrar lo que buscas!

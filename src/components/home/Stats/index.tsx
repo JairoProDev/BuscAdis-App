@@ -17,7 +17,7 @@ const stats = [
     },
     {
         value: 5000,
-        label: 'Anuncios publicados',
+        label: 'Adisos publicados',
         suffix: '+',
         duration: 2.5,
         icon: <ShoppingBagIcon className="w-6 h-6 text-cyan-300" />,

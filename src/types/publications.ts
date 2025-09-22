@@ -10,7 +10,7 @@ interface GeoJsonPoint {
 }
 
 /**
- * Interfaz principal y UNIFICADA para una Publicación (Anuncio Clasificado) en Buscadis.
+ * Interfaz principal y UNIFICADA para una Publicación (Adiso Clasificado) en Buscadis.
  * Define todos los campos POTENCIALES.
  * REGLA CLAVE: En la instancia real del JSON/documento, solo incluir
  * las claves que tengan un valor. No incluir "key: null" (especialmente en attributes).
@@ -20,7 +20,7 @@ export interface Publication {
   _id?: string; // Opcional: ObjectId de MongoDB (Automático)
   id?: string; // Opcional: String ID, often same as _id or derived
   slug?: string | null; // Opcional: SEO-friendly slug
-  premium?: boolean | null; // Opcional: Indica si es un anuncio premium
+  premium?: boolean | null; // Opcional: Indica si es un adiso premium
   createdAt?: Date; // Fecha de creación (Automático por DB/Backend)
   updatedAt?: Date; // Fecha de actualización (Automático por DB/Backend)
   userId?: string | null; // ID del usuario creador (si aplica)
@@ -29,7 +29,7 @@ export interface Publication {
   // --- FECHAS HISTÓRICAS Y CADUCIDAD ---
   /** Fecha real de publicación en la revista original (para publicaciones históricas) */
   originalPublicationDate?: Date | null;
-  /** Fecha de caducidad del anuncio (3 días después de originalPublicationDate) */
+  /** Fecha de caducidad del adiso (3 días después de originalPublicationDate) */
   expirationDate?: Date | null;
   /** Indica si es una publicación histórica importada de PDF */
   isHistoricalPublication?: boolean;
@@ -37,7 +37,7 @@ export interface Publication {
   magazineEdition?: string | null;
   /** Año de la revista */
   magazineYear?: number | null;
-  /** Estado del anuncio: 'active', 'expired', 'archived' */
+  /** Estado del adiso: 'active', 'expired', 'archived' */
   status: 'active' | 'expired' | 'archived';
 
   // --- Contenido Principal ---
@@ -83,10 +83,10 @@ export interface Publication {
     // website?: string | null; // Eliminado por ahora
   };
 
-  // --- Metadata del Anuncio Original (PDF) ---
+  // --- Metadata del Adiso Original (PDF) ---
   /** Costo estimado en Soles que pagó el anunciante en la revista original (incluye radio). Null si no se puede estimar. */
   sourceAdCostPEN?: number | null;
-  /** Tamaño del anuncio en la revista original (ej: '1/4 página', '1/2 página', 'página completa') */
+  /** Tamaño del adiso en la revista original (ej: '1/4 página', '1/2 página', 'página completa') */
   originalAdSize?: string | null;
   /** Página donde apareció en la revista */
   originalPageNumber?: number | null;

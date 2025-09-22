@@ -12,7 +12,7 @@ const PublicationsList = () => {
         const data = await PublicationsService.getPublications();
         setPublications(data.publications);
       } catch {
-        setError('Error al cargar los anuncios');
+        setError('Error al cargar los adisos');
       } finally {
         setLoading(false);
       }
@@ -26,7 +26,7 @@ const PublicationsList = () => {
 
   return (
     <div>
-      <h2>Anuncios Publicados</h2>
+      <h2>Adisos Publicados</h2>
       <ul>
         {publications.map((publication) => (
           <li key={publication._id}>

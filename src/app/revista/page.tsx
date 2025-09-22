@@ -4,7 +4,7 @@ import MagazineCategoriesGrid from '@/components/magazine/MagazineCategoriesGrid
 
 export const metadata: Metadata = {
   title: 'Revista Digital | Buscadis',
-  description: 'Revistas digitales por categorías - Descarga la última edición con todos los anuncios clasificados',
+  description: 'Revistas digitales por categorías - Descarga la última edición con todos los adisos clasificados',
 };
 
 export default function RevistaMagazinePage() {
@@ -18,12 +18,12 @@ export default function RevistaMagazinePage() {
           
           <div className="max-w-3xl mx-auto">
             <p className="text-xl text-gray-600 mb-6">
-              Explora nuestras revistas digitales por categoría con todos los anuncios clasificados actualizados.
+              Explora nuestras revistas digitales por categoría con todos los adisos clasificados actualizados.
             </p>
             
             <div className="bg-blue-50 rounded-lg p-4 border border-blue-100 inline-block">
               <p className="text-blue-800 text-sm">
-                Nuestras revistas se actualizan automáticamente cuando se publican nuevos anuncios.
+                Nuestras revistas se actualizan automáticamente cuando se publican nuevos adisos.
               </p>
             </div>
           </div>
@@ -55,7 +55,7 @@ export default function RevistaMagazinePage() {
               Revistas Actualizadas
             </h3>
             <p className="text-gray-600">
-              Las revistas se actualizan automáticamente cuando se publican nuevos anuncios.
+              Las revistas se actualizan automáticamente cuando se publican nuevos adisos.
               Encuentra siempre la información más reciente sin esfuerzo.
             </p>
           </div>

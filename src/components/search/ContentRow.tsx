@@ -41,7 +41,7 @@ interface ContentRowProps {
   categoryId?: string
   isLoading?: boolean
   showViewAll?: boolean
-  onPublicationClick?: (publication: PublicationData, urlType?: 'feed' | 'category' | 'business') => void
+  onPublicationClick?: (publication: PublicationData) => void
   isSidebarOpen?: boolean
 }
 
@@ -185,7 +185,7 @@ export default function ContentRow({
                 publication={publication}
                 viewMode="grid"
                 urlType="feed"
-                onPublicationClick={onPublicationClick ? (pub, urlType) => onPublicationClick(pub, urlType) : undefined}
+                onPublicationClick={onPublicationClick}
               />
             </motion.div>
           ))}

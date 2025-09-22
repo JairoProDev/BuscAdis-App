@@ -7,8 +7,8 @@ import Container from '@/components/shared/Container';
 const steps = [
     {
         icon: '✏️',
-        title: 'Crea tu anuncio',
-        description: 'Publica tu anuncio de forma rápida y sencilla. Agrega fotos, descripción y todos los detalles necesarios.'
+        title: 'Crea tu adiso',
+        description: 'Publica tu adiso de forma rápida y sencilla. Agrega fotos, descripción y todos los detalles necesarios.'
     },
     {
         icon: '👀',
@@ -90,7 +90,7 @@ export default function HowItWorks() {
                 <div className="text-center mb-12">
                     <h2 className="text-3xl font-bold text-white mb-4">¿Cómo funciona?</h2>
                     <p className="text-lg text-cyan-100/90 max-w-2xl mx-auto">
-                        Publica un anuncio en minutos y conecta con personas interesadas en lo que ofreces
+                        Publica un adiso en minutos y conecta con personas interesadas en lo que ofreces
                     </p>
                 </div>
 

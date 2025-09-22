@@ -29,7 +29,7 @@ export default function UserGuidance({ step, field, value }: UserGuidanceProps) 
         });
         tips.push({
           id: 'category_tip_2',
-          text: 'Una categoría correcta ayuda a que más personas encuentren tu anuncio',
+          text: 'Una categoría correcta ayuda a que más personas encuentren tu adiso',
           type: 'suggestion'
         });
         break;

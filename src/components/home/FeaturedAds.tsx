@@ -21,7 +21,7 @@ export default function FeaturedAds({ featured = false }: FeaturedAdsProps) {
         setAds(data);
       } catch (err) {
         console.error('Error fetching featured ads:', err);
-        setError('No se pudieron cargar los anuncios destacados');
+        setError('No se pudieron cargar los adisos destacados');
       } finally {
         setLoading(false);
       }
@@ -42,7 +42,7 @@ export default function FeaturedAds({ featured = false }: FeaturedAdsProps) {
   
   if (ads.length === 0) return (
     <div className="p-4 bg-gray-50 text-gray-600 rounded-lg">
-      No hay anuncios destacados disponibles
+      No hay adisos destacados disponibles
     </div>
   );
 

@@ -384,7 +384,7 @@ export default function PublicationModal({ publicationId, isOpen, onClose, initi
       // Crear enlace para descargar
       const link = document.createElement('a');
       link.href = dataUrl;
-      link.download = `buscadis-${publication?.id || 'anuncio'}.png`;
+      link.download = `buscadis-${publication?.id || 'adiso'}.png`;
       link.click();
       
       // Mostrar mensaje de éxito brevemente
@@ -453,12 +453,12 @@ export default function PublicationModal({ publicationId, isOpen, onClose, initi
 
   const shareOnTwitter = () => {
     if (!publication) return;
-    window.open(`https://twitter.com/intent/tweet?text=${encodeURIComponent(`¡Mira este anuncio en BuscaDis: ${publication.title}`)}&url=${encodeURIComponent(window.location.href)}`, '_blank');
+    window.open(`https://twitter.com/intent/tweet?text=${encodeURIComponent(`¡Mira este adiso en BuscaDis: ${publication.title}`)}&url=${encodeURIComponent(window.location.href)}`, '_blank');
   };
 
   const shareOnWhatsApp = () => {
     if (!publication) return;
-    window.open(`https://wa.me/?text=${encodeURIComponent(`¡Mira este anuncio en BuscaDis: ${publication.title} ${window.location.href}`)}`, '_blank');
+    window.open(`https://wa.me/?text=${encodeURIComponent(`¡Mira este adiso en BuscaDis: ${publication.title} ${window.location.href}`)}`, '_blank');
   };
 
   // Renderizar contenido de la publicación

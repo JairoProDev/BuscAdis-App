@@ -51,7 +51,7 @@ const tools: Tool[] = [
     {
         id: 'analytics',
         title: 'Analytics en Tiempo Real',
-        description: 'Monitorea el rendimiento de tus anuncios al instante',
+        description: 'Monitorea el rendimiento de tus adisos al instante',
         icon: <ChartBarIcon className="w-7 h-7 text-teal-400" />,
         features: [
             'Visualización de vistas y clics',
@@ -75,7 +75,7 @@ const tools: Tool[] = [
     {
         id: 'ai',
         title: 'Asistente AI',
-        description: 'Optimiza tus anuncios con inteligencia artificial',
+        description: 'Optimiza tus adisos con inteligencia artificial',
         icon: <CommandLineIcon className="w-7 h-7 text-cyan-400" />,
         features: [
             'Sugerencias de títulos',
@@ -92,7 +92,7 @@ const tools: Tool[] = [
         demo: {
             type: 'chat',
             messages: [
-                'Analizando tu anuncio...',
+                'Analizando tu adiso...',
                 'Título optimizado ✨',
                 'Descripción mejorada 📝',
                 '¡Listo para publicar! 🚀'
@@ -103,7 +103,7 @@ const tools: Tool[] = [
     {
         id: 'automation',
         title: 'Automatización',
-        description: 'Programa y gestiona tus anuncios automáticamente',
+        description: 'Programa y gestiona tus adisos automáticamente',
         icon: <Cog6ToothIcon className="w-7 h-7 text-teal-400" />,
         features: [
             'Publicación programada',
@@ -352,7 +352,7 @@ export default function Tools() {
                     </h2>
 
                     <p className="text-xl text-cyan-100/90 max-w-3xl mx-auto">
-                        Optimiza tus anuncios con nuestras herramientas exclusivas impulsadas por IA
+                        Optimiza tus adisos con nuestras herramientas exclusivas impulsadas por IA
                     </p>
 
                     <motion.div

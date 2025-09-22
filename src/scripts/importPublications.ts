@@ -1,5 +1,5 @@
 /**
- * Script para importar anuncios desde texto plano
+ * Script para importar adisos desde texto plano
  */
 import { parsePublicationsFromText, preparePublicationForAPI, PublicationApiPayload } from '@/utils/publicationParser';
 import { PublicationsService, CreatePublicationData } from '@/services/publications.service';
@@ -53,8 +53,8 @@ function transformToCreatePublicationData(apiData: PublicationApiPayload): Creat
 }
 
 /**
- * Importa anuncios desde texto plano a la base de datos
- * @param rawText Texto plano con anuncios
+ * Importa adisos desde texto plano a la base de datos
+ * @param rawText Texto plano con adisos
  * @returns Resultado de la importación
  */
 export async function importPublicationsFromText(rawText: string): Promise<ImportResult> {

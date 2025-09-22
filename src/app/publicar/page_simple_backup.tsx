@@ -43,7 +43,7 @@ export default function PublicarPage() {
     badges: []
   });
 
-  // Estado principal del anuncio
+  // Estado principal del adiso
   const [ad, setAd] = useState<PublicationFormData>({
     title: '',
     description: '',
@@ -130,7 +130,7 @@ export default function PublicarPage() {
     setAchievements(newAchievements);
   }, [achievements]);
 
-  // Calidad del anuncio
+  // Calidad del adiso
   const adQuality = useMemo(() => {
     let quality = 0;
     
@@ -213,13 +213,13 @@ export default function PublicarPage() {
     };
   }, [step, ad]);
 
-  // Publicar anuncio
+  // Publicar adiso
   const handlePublish = useCallback(async () => {
     setLoading(true);
     setError('');
 
     try {
-      Logger.info('Iniciando publicación de anuncio', { ad });
+      Logger.info('Iniciando publicación de adiso', { ad });
 
       const result = await PublicationsService.createPublication({
         title: ad.title || '',
@@ -254,7 +254,7 @@ export default function PublicarPage() {
         setPublishedId(result.publication?.id || null);
         setSuccess(true);
         
-        Logger.info('Anuncio publicado exitosamente', { 
+        Logger.info('Adiso publicado exitosamente', { 
           id: result.publication?.id,
           title: ad.title 
         });
@@ -275,7 +275,7 @@ export default function PublicarPage() {
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Error inesperado al publicar';
       setError(errorMessage);
-      Logger.error('Error al publicar anuncio', { error: errorMessage, ad });
+      Logger.error('Error al publicar adiso', { error: errorMessage, ad });
     } finally {
       setLoading(false);
     }
@@ -287,8 +287,8 @@ export default function PublicarPage() {
       return (
         <div className="space-y-6">
           <SuccessMessage
-            title="¡Anuncio Publicado Exitosamente!"
-            message="Tu anuncio ha sido publicado y ya está disponible para que otros usuarios lo vean."
+            title="¡Adiso Publicado Exitosamente!"
+            message="Tu adiso ha sido publicado y ya está disponible para que otros usuarios lo vean."
             publishedId={publishedId}
             onNewPublication={() => {
               // Reiniciar formulario
@@ -383,7 +383,7 @@ export default function PublicarPage() {
           <div className="space-y-6">
             <div className="text-center mb-8">
               <h2 className="text-2xl font-bold text-gray-900 mb-2">Selecciona una categoría</h2>
-              <p className="text-gray-600">Elige la categoría que mejor describa tu anuncio</p>
+              <p className="text-gray-600">Elige la categoría que mejor describa tu adiso</p>
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -430,13 +430,13 @@ export default function PublicarPage() {
         return (
           <div className="space-y-6">
             <div className="text-center mb-8">
-              <h2 className="text-2xl font-bold text-gray-900 mb-2">Detalles del anuncio</h2>
+              <h2 className="text-2xl font-bold text-gray-900 mb-2">Detalles del adiso</h2>
               <p className="text-gray-600">Proporciona información clara y atractiva</p>
             </div>
 
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
-                Título del anuncio *
+                Título del adiso *
               </label>
               <input
                 type="text"
@@ -466,7 +466,7 @@ export default function PublicarPage() {
                   setAd(newAd);
                   updateAchievements(newAd);
                 }}
-                placeholder="Describe tu anuncio con todos los detalles importantes..."
+                placeholder="Describe tu adiso con todos los detalles importantes..."
                 className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
                 rows={5}
                 maxLength={1000}
@@ -522,14 +522,14 @@ export default function PublicarPage() {
         return (
           <div className="space-y-6">
             <div className="text-center mb-8">
-              <h2 className="text-2xl font-bold text-gray-900 mb-2">Imágenes del anuncio</h2>
+              <h2 className="text-2xl font-bold text-gray-900 mb-2">Imágenes del adiso</h2>
               <p className="text-gray-600">Las imágenes ayudan a atraer más compradores</p>
             </div>
 
             <div className="border-2 border-dashed border-gray-300 rounded-lg p-8 text-center">
               <div className="text-4xl mb-4">📸</div>
               <h3 className="text-lg font-medium text-gray-900 mb-2">Agrega imágenes</h3>
-              <p className="text-gray-600 mb-4">Sube hasta 10 imágenes de tu anuncio</p>
+              <p className="text-gray-600 mb-4">Sube hasta 10 imágenes de tu adiso</p>
               <button 
                 onClick={() => {
                   const newAd = { ...ad, images: ['placeholder1.jpg', 'placeholder2.jpg'] };
@@ -670,7 +670,7 @@ export default function PublicarPage() {
                     Listo para publicar
                   </h4>
                   <p className="text-sm text-blue-700 mt-1">
-                    Revisa tu anuncio y confirma la publicación. Una vez publicado, 
+                    Revisa tu adiso y confirma la publicación. Una vez publicado, 
                     aparecerá en los resultados de búsqueda.
                   </p>
                 </div>
@@ -691,7 +691,7 @@ export default function PublicarPage() {
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <div className="text-center">
           <div className="w-16 h-16 border-4 border-blue-600 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
-          <h2 className="text-xl font-semibold text-gray-900 mb-2">Publicando tu anuncio...</h2>
+          <h2 className="text-xl font-semibold text-gray-900 mb-2">Publicando tu adiso...</h2>
           <p className="text-gray-600">Esto tomará solo unos segundos</p>
         </div>
       </div>
@@ -707,7 +707,7 @@ export default function PublicarPage() {
             <div className="flex items-center justify-between mb-4">
               <div>
                 <h1 className="text-2xl font-bold text-gray-900">
-                  Publicar Anuncio
+                  Publicar Adiso
                 </h1>
                 <p className="text-gray-600 mt-1">
                   {!success ? STEP_NAMES[step - 1] : 'Completado'}
@@ -788,7 +788,7 @@ export default function PublicarPage() {
                   onPrevious={goToPrevStep}
                   isFirstStep={step === 1}
                   isLastStep={step === STEPS.PREVIEW}
-                  nextText={step === STEPS.PREVIEW ? 'Publicar Anuncio' : 'Siguiente'}
+                  nextText={step === STEPS.PREVIEW ? 'Publicar Adiso' : 'Siguiente'}
                 />
                 
                 {!validation.isValid && validation.errors.length > 0 && (
@@ -820,7 +820,7 @@ export default function PublicarPage() {
               {/* Tips Card */}
               <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
                 <h3 className="font-semibold text-gray-900 mb-4">
-                  💡 Consejos para un mejor anuncio
+                  💡 Consejos para un mejor adiso
                 </h3>
                 <ul className="space-y-3 text-sm text-gray-600">
                   <li className="flex items-start">

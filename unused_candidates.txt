@@ -221,7 +221,7 @@ src/components/shared/Container.tsx
 src/components/shared/EmptyState.tsx
 src/components/shared/LoadingState.tsx
 src/components/shared/ErrorState.tsx
-src/components/AnunciosGrid.tsx
+src/components/AdisosGrid.tsx
 src/components/layout/Header.tsx
 src/components/layout/Breadcrumbs.tsx
 src/components/layout/MobileNavigation.tsx

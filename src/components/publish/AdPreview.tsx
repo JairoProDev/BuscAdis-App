@@ -57,7 +57,7 @@ const AdPreview: React.FC<AdPreviewProps> = ({ formData }) => {
       <div className="flex items-center justify-between p-4 border-b border-gray-200 dark:border-gray-700">
         <h3 className="font-semibold text-gray-900 dark:text-gray-100 flex items-center">
           <EyeIcon className="w-5 h-5 mr-2 text-gray-600 dark:text-gray-400" />
-          Vista previa del anuncio
+          Vista previa del adiso
         </h3>
         <div className="flex items-center space-x-2">
           <span className="text-xs text-gray-500 dark:text-gray-400">En vivo</span>

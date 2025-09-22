@@ -90,7 +90,7 @@ export interface PublicationBulkData {
     tags?: string[] // Tags automáticos de IA
     sentiment?: 'positive' | 'neutral' | 'negative'
     quality?: number // Score de calidad 0-100
-    completeness?: number // Qué tan completo está el anuncio
+    completeness?: number // Qué tan completo está el adiso
     trustScore?: number // Score de confianza
     extractedFeatures?: Record<string, unknown> // Features extraídas por IA
   }

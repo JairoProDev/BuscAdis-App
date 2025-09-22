@@ -95,7 +95,7 @@ export default function PublishGameElements({
         animate={{ opacity: 1 }}
         transition={{ delay: 0.5 }}
       >
-        ¡Cada paso cuenta para crear un anuncio excepcional! 🚀
+        ¡Cada paso cuenta para crear un adiso excepcional! 🚀
       </motion.div>
     </div>
   );

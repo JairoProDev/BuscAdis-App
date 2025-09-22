@@ -253,7 +253,7 @@ const ResultsScreen: FC<{
         setLoading(false)
       })
       .catch(() => {
-        setError('No se pudieron cargar los anuncios. Intenta de nuevo.')
+        setError('No se pudieron cargar los adisos. Intenta de nuevo.')
         setLoading(false)
       })
   }, [selectedCategory, selectedSubcategory, selectedSubSubcategory])
@@ -269,11 +269,11 @@ const ResultsScreen: FC<{
         {subSubcategory ? ` / ${subSubcategory.name}` : ''}
       </h4>
       {loading ? (
-        <div className='text-slate-500 dark:text-slate-400'>Cargando anuncios...</div>
+        <div className='text-slate-500 dark:text-slate-400'>Cargando adisos...</div>
       ) : error ? (
         <div className='text-red-500 dark:text-red-400'>{error}</div>
       ) : ads.length === 0 ? (
-        <div className='text-slate-500 dark:text-slate-400'>No se encontraron anuncios para esta búsqueda.</div>
+        <div className='text-slate-500 dark:text-slate-400'>No se encontraron adisos para esta búsqueda.</div>
       ) : (
         <div className='space-y-4'>
           {ads.map((ad) => (
@@ -287,7 +287,7 @@ const ResultsScreen: FC<{
                   {ad.value ? ` • S/ ${ad.value}` : ''}
                 </div>
               </div>
-              <Link href={`/anuncio/${ad._id}`} target='_blank' rel="noopener noreferrer" className='ml-2 px-3 py-1.5 bg-gradient-to-r from-teal-500 to-cyan-500 text-white rounded-full text-xs'>Ver</Link>
+              <Link href={`/adiso/${ad._id}`} target='_blank' rel="noopener noreferrer" className='ml-2 px-3 py-1.5 bg-gradient-to-r from-teal-500 to-cyan-500 text-white rounded-full text-xs'>Ver</Link>
             </div>
           ))}
         </div>

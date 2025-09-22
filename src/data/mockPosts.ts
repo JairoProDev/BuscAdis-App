@@ -79,9 +79,9 @@ export const tags: Tag[] = [
 export const posts: Post[] = [
   {
     id: '1',
-    title: 'Cómo optimizar tus anuncios para mejor visibilidad',
-    slug: 'como-optimizar-anuncios-mejor-visibilidad',
-    excerpt: 'Descubre las mejores prácticas para que tus anuncios destaquen y alcancen a más compradores potenciales.',
+    title: 'Cómo optimizar tus adisos para mejor visibilidad',
+    slug: 'como-optimizar-adisos-mejor-visibilidad',
+    excerpt: 'Descubre las mejores prácticas para que tus adisos destaquen y alcancen a más compradores potenciales.',
     content: `
       <h2>La importancia de un buen título</h2>
       <p>El título es lo primero que ven los usuarios...</p>
@@ -92,7 +92,7 @@ export const posts: Post[] = [
       <h2>Descripción detallada</h2>
       <p>Una descripción completa ayuda a los compradores...</p>
     `,
-    featuredImage: '/posts/optimizar-anuncios.jpg',
+    featuredImage: '/posts/optimizar-adisos.jpg',
     author: authors[0],
     category: categories[0],
     tags: [tags[0], tags[1]],
@@ -103,10 +103,10 @@ export const posts: Post[] = [
     comments: 8,
     publishedAt: '2024-01-15T10:00:00Z',
     seo: {
-      title: 'Optimización de Anuncios: Guía Completa 2024',
-      description: 'Aprende a optimizar tus anuncios para conseguir más visibilidad y ventas.',
-      keywords: ['optimización', 'anuncios', 'marketing', 'ventas'],
-      ogImage: '/posts/optimizar-anuncios-og.jpg'
+      title: 'Optimización de Adisos: Guía Completa 2024',
+      description: 'Aprende a optimizar tus adisos para conseguir más visibilidad y ventas.',
+      keywords: ['optimización', 'adisos', 'marketing', 'ventas'],
+      ogImage: '/posts/optimizar-adisos-og.jpg'
     },
     status: 'published',
     featured: true,

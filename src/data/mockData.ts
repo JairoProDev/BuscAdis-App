@@ -14,7 +14,7 @@ type MockDataType = {
 
 export const mockData: MockDataType = {
   featured: {
-    title: "Anuncios Destacados",
+    title: "Adisos Destacados",
     categories: [],
     adisos: [
       {

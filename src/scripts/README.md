@@ -29,7 +29,7 @@ Antes de ejecutar cualquier script, asegúrate de tener configurado correctament
 
 ### 1. Limpieza de Base de Datos (`clean-database.js`)
 
-Este script permite eliminar todos los anuncios de la base de datos para empezar desde cero con datos reales.
+Este script permite eliminar todos los adisos de la base de datos para empezar desde cero con datos reales.
 
 #### Uso Básico:
 ```

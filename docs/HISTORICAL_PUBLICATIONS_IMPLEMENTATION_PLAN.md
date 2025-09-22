@@ -5,7 +5,7 @@ Importar y gestionar ~67,600 publicaciones históricas desde las revistas PDF de
 
 ## 📊 Volumen Estimado
 - **104 revistas** (52 semanas × 2 ediciones)
-- **~650 anuncios por revista** = **~67,600 publicaciones**
+- **~650 adisos por revista** = **~67,600 publicaciones**
 - **~99% con contacto telefónico** = **~66,900 con datos de contacto**
 
 ## 🏗️ Arquitectura Implementada
@@ -23,20 +23,20 @@ magazineYear?: number;                 // Año de la revista
 status: 'active' | 'expired' | 'archived'; // Estado actual
 
 // Metadata adicional
-originalAdSize?: string;               // Tamaño del anuncio original
+originalAdSize?: string;               // Tamaño del adiso original
 originalPageNumber?: number;           // Página en la revista
 ```
 
 ### 2. **Sistema de Contacto Anónimo**
 
 #### Funcionalidades:
-- **Ocultar contacto** en anuncios caducados
+- **Ocultar contacto** en adisos caducados
 - **Botón de contacto anónimo** para interesados
 - **Notificación al anunciante** sin revelar datos del interesado
 - **Sistema de renovación** cuando el anunciante paga
 
 #### Flujo:
-1. Usuario ve anuncio caducado
+1. Usuario ve adiso caducado
 2. Hace clic en "Contactar Anónimamente"
 3. Llena formulario con sus datos
 4. Sistema notifica al anunciante
@@ -106,7 +106,7 @@ npm run import:historical ./pdfs
 - Implementar ordenamiento por fecha
 
 #### 3.2 Implementar ExpiredPublicationCard
-- Mostrar anuncios caducados con diseño diferenciado
+- Mostrar adisos caducados con diseño diferenciado
 - Ocultar información de contacto
 - Agregar botón de contacto anónimo
 
@@ -135,13 +135,13 @@ npm run import:historical ./pdfs
 - Precios promedio por categoría
 - Tendencias de precios por mes
 - Distribución geográfica
-- Tamaños de anuncios más populares
+- Tamaños de adisos más populares
 
 #### 2. **Análisis de Comportamiento**
 - Frecuencia de publicación por anunciante
 - Patrones de renovación
 - Horarios de mayor actividad
-- Duración promedio de anuncios
+- Duración promedio de adisos
 
 #### 3. **Análisis de Contenido**
 - Palabras clave más usadas
@@ -160,7 +160,7 @@ npm run analyze:content-patterns
 ## 🔒 Seguridad y Privacidad
 
 ### **Protección de Datos:**
-1. **Contacto oculto** en anuncios caducados
+1. **Contacto oculto** en adisos caducados
 2. **Contacto anónimo** sin revelar datos
 3. **Encriptación** de datos sensibles
 4. **Auditoría** de accesos
@@ -199,7 +199,7 @@ npm run analyze:content-patterns
 ### **Para la Plataforma:**
 - **SEO mejorado** - Más contenido indexable
 - **Engagement** - Más tiempo en la plataforma
-- **Revenue** - Renovaciones de anuncios
+- **Revenue** - Renovaciones de adisos
 - **Data insights** - Información valiosa del mercado
 
 ## 🚨 Consideraciones Importantes

@@ -3,18 +3,18 @@
 ## 📋 ESTADO ACTUAL IDENTIFICADO
 - ✅ Diseño de PublicationCard funciona bien
 - ❌ No implementada vista Netflix/Facebook Marketplace por filas
-- ❌ Anuncios de ejemplo, no conectados a MongoDB Atlas
+- ❌ Adisos de ejemplo, no conectados a MongoDB Atlas
 - ❌ Buscador no funcional con base de datos real
 - ❌ Filtros y categorías no conectados
-- 🔄 201 anuncios actuales en Atlas (a eliminar)
-- 📊 20,000+ anuncios históricos por procesar
+- 🔄 201 adisos actuales en Atlas (a eliminar)
+- 📊 20,000+ adisos históricos por procesar
 
 ## 🎯 FASES DEL ROADMAP
 
 ### FASE 1: PREPARACIÓN Y LIMPIEZA (1-2 días) 🧹
 
 #### 1.1 Respaldo y Limpieza de Datos
-- [ ] **TÚ**: Hacer backup de los 201 anuncios actuales si necesitas
+- [ ] **TÚ**: Hacer backup de los 201 adisos actuales si necesitas
 - [ ] **TÚ**: Limpiar colección de publicaciones en MongoDB Atlas
 - [ ] **TÚ**: Verificar estructura de base de datos actual
 - [ ] **YO**: Crear script de migración para nueva estructura
@@ -22,7 +22,7 @@
 #### 1.2 Preparación de Datos Históricos  
 - [ ] **TÚ**: Organizar archivos de revistas por fechas
 - [ ] **TÚ**: Extraer texto de PDFs de revistas (OCR si es necesario)
-- [ ] **TÚ**: Crear archivo con estructura: fecha_revista + texto_anuncios
+- [ ] **TÚ**: Crear archivo con estructura: fecha_revista + texto_adisos
 - [ ] **YO**: Configurar procesador masivo para tus datos específicos
 
 ### FASE 2: IMPLEMENTACIÓN VISTA NETFLIX (2-3 días) 🎬
@@ -49,15 +49,15 @@
 
 #### 3.1 Extracción con IA
 - [ ] **TÚ**: Usar Gemini/ChatGPT con prompts optimizados que creé
-- [ ] **TÚ**: Procesar lotes de 500-1000 anuncios
+- [ ] **TÚ**: Procesar lotes de 500-1000 adisos
 - [ ] **TÚ**: Validar calidad de extracción en muestras
 - [ ] **YO**: Script para importación masiva a MongoDB
 
-#### 3.2 Estructura de Anuncios Históricos
+#### 3.2 Estructura de Adisos Históricos
 - [ ] **YO**: Implementar sistema de estado (activo/histórico/reactivado)
 - [ ] **YO**: Campo para fecha original vs fecha de reactivación
-- [ ] **YO**: Historial de reactivaciones por anuncio
-- [ ] **YO**: Sistema de ocultación de contactos para anuncios vencidos
+- [ ] **YO**: Historial de reactivaciones por adiso
+- [ ] **YO**: Sistema de ocultación de contactos para adisos vencidos
 
 #### 3.3 Importación y Validación
 - [ ] **YO**: Script de importación con validaciones
@@ -79,25 +79,25 @@
 - [ ] **YO**: Filtros por rango de precios
 - [ ] **YO**: Filtros por fecha de publicación
 
-#### 4.3 Gestión de Estados de Anuncios
-- [ ] **YO**: Lógica para anuncios activos vs históricos
+#### 4.3 Gestión de Estados de Adisos
+- [ ] **YO**: Lógica para adisos activos vs históricos
 - [ ] **YO**: Botones de contacto condicionalmente mostrados
-- [ ] **YO**: Sistema de reactivación de anuncios
+- [ ] **YO**: Sistema de reactivación de adisos
 - [ ] **YO**: Dashboard para gestión de reactivaciones
 
 ### FASE 5: FUNCIONES AVANZADAS (1-2 días) ⚡
 
 #### 5.1 Sistema de Reactivación
-- [ ] **YO**: Interface para reactivar anuncios vencidos
+- [ ] **YO**: Interface para reactivar adisos vencidos
 - [ ] **YO**: Historial de reactivaciones visible
 - [ ] **YO**: Cálculo automático de nuevas fechas de vencimiento
 - [ ] **YO**: Notificaciones de próximo vencimiento
 
 #### 5.2 Analytics y Métricas
-- [ ] **YO**: Tracking de views por anuncio
+- [ ] **YO**: Tracking de views por adiso
 - [ ] **YO**: Métricas por categoría y ubicación
 - [ ] **YO**: Dashboard básico de estadísticas
-- [ ] **YO**: Reportes de anuncios más populares
+- [ ] **YO**: Reportes de adisos más populares
 
 ### FASE 6: TESTING Y OPTIMIZACIÓN (1-2 días) ✅
 
@@ -105,7 +105,7 @@
 - [ ] **AMBOS**: Probar búsqueda con datos reales
 - [ ] **AMBOS**: Validar filtros y categorías
 - [ ] **AMBOS**: Probar vista Netflix en diferentes dispositivos
-- [ ] **AMBOS**: Test de rendimiento con 20k+ anuncios
+- [ ] **AMBOS**: Test de rendimiento con 20k+ adisos
 
 #### 6.2 Optimización
 - [ ] **YO**: Optimizar consultas MongoDB
@@ -119,7 +119,7 @@
 1. **Preparar datos de revistas**:
    ```
    - Organizar por fecha: revista_2024_01_15.txt, revista_2024_01_22.txt, etc.
-   - Cada archivo con el texto completo de anuncios de esa edición
+   - Cada archivo con el texto completo de adisos de esa edición
    - Incluir metadatos: fecha_publicacion, numero_edicion, nombre_revista
    ```
 
@@ -135,11 +135,11 @@
 ### EXTRACCIÓN CON IA (Mañana):
 1. **Usar este prompt con Gemini/ChatGPT**:
 ```
-Eres un experto en extracción de anuncios clasificados peruanos. 
-Procesa esta página de revista "Rueda de Negocios" y extrae CADA anuncio individual.
+Eres un experto en extracción de adisos clasificados peruanos. 
+Procesa esta página de revista "Rueda de Negocios" y extrae CADA adiso individual.
 
 REGLAS IMPORTANTES:
-- Separar cada anuncio claramente
+- Separar cada adiso claramente
 - Mantener texto original completo
 - Extraer información de contacto (teléfonos, WhatsApp, emails)
 - Identificar categoría (inmuebles, empleos, vehículos, servicios, etc.)
@@ -150,9 +150,9 @@ FORMATO JSON REQUERIDO:
 {
   "fecha_revista": "2024-07-25",
   "numero_edicion": "2547",
-  "anuncios": [
+  "adisos": [
     {
-      "texto_original": "texto completo del anuncio",
+      "texto_original": "texto completo del adiso",
       "titulo": "título extraído (max 60 chars)",
       "categoria": "inmuebles|empleos|vehiculos|servicios|productos|educacion|otros",
       "subcategoria": "específica",
@@ -180,14 +180,14 @@ TEXTO DE REVISTA:
 
 ### MAÑANA:
 1. **Script de procesamiento masivo**
-2. **Sistema de estados de anuncios**
+2. **Sistema de estados de adisos**
 3. **Funcionalidad de reactivación**
 4. **Optimizaciones de rendimiento**
 
 ## 📊 ESTRUCTURA DE DATOS FINAL
 
 ```javascript
-// Anuncio en MongoDB
+// Adiso en MongoDB
 {
   _id: ObjectId,
   // DATOS BÁSICOS
@@ -255,7 +255,7 @@ TEXTO DE REVISTA:
 
 ### MVP Completo cuando tengamos:
 - [ ] Vista Netflix funcional con filas por categorías
-- [ ] 20,000+ anuncios históricos procesados e importados  
+- [ ] 20,000+ adisos históricos procesados e importados  
 - [ ] Buscador conectado a base de datos real
 - [ ] Filtros funcionales (categoría, ubicación, precio, fecha)
 - [ ] Sistema de estados (activo/histórico) funcionando
@@ -266,10 +266,10 @@ TEXTO DE REVISTA:
 
 ## 🚨 DECISIONES CRÍTICAS PENDIENTES
 
-1. **¿Elimino los 201 anuncios actuales de Atlas?** ✅ Confirmado
+1. **¿Elimino los 201 adisos actuales de Atlas?** ✅ Confirmado
 2. **¿Mantienes el diseño actual de PublicationCard?** ⏳ Pendiente confirmación
-3. **¿Qué hacer con anuncios sin fecha específica?** ⏳ Pendiente decisión
-4. **¿Costo de reactivación de anuncios históricos?** ⏳ Pendiente definir
+3. **¿Qué hacer con adisos sin fecha específica?** ⏳ Pendiente decisión
+4. **¿Costo de reactivación de adisos históricos?** ⏳ Pendiente definir
 
 ---
 
@@ -282,7 +282,7 @@ TEXTO DE REVISTA:
 4. **YO**: Conecto buscador con base de datos real
 
 ### MAÑANA (Sábado):
-1. **TÚ**: Procesa primeros lotes con IA (500-1000 anuncios)
+1. **TÚ**: Procesa primeros lotes con IA (500-1000 adisos)
 2. **YO**: Script de importación masiva
 3. **AMBOS**: Testing con datos reales
 

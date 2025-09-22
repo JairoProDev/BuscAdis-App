@@ -1,12 +1,12 @@
 # Revista Digital - Funcionalidad de Revista Digital para Buscadis
 
-Esta funcionalidad permite a los usuarios ver y descargar una revista digital que contiene todos los anuncios clasificados de Buscadis en formato PDF.
+Esta funcionalidad permite a los usuarios ver y descargar una revista digital que contiene todos los adisos clasificados de Buscadis en formato PDF.
 
 ## Características
 
 - Generación automática de revista digital en formato PDF
 - Visualización y descarga desde la web
-- Agrupación de anuncios por categorías
+- Agrupación de adisos por categorías
 - Diseño profesional con portada, índice y contenido estructurado
 - Panel de administración para generar nuevas revistas y gestionar las existentes
 
@@ -124,7 +124,7 @@ npm install jspdf jspdf-autotable
 1. Acceder al panel de administración: `/admin/revista`
 2. En esta página se pueden realizar las siguientes acciones:
    - Ver el historial de revistas generadas
-   - Generar una nueva revista con los anuncios actuales
+   - Generar una nueva revista con los adisos actuales
    - Descargar cualquier revista generada anteriormente
    - Eliminar revistas que ya no sean necesarias
 

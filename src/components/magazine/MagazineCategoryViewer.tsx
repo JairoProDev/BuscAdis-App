@@ -241,7 +241,7 @@ export default function MagazineCategoryViewer({ categoryId }: CategoryViewerPro
       <div className="p-6">
         <Tabs defaultValue="browse" className="w-full">
           <TabsList className="grid w-full grid-cols-2 mb-6">
-            <TabsTrigger value="browse">Ver Anuncios</TabsTrigger>
+            <TabsTrigger value="browse">Ver Adisos</TabsTrigger>
             <TabsTrigger value="details">Detalles</TabsTrigger>
           </TabsList>
           
@@ -251,7 +251,7 @@ export default function MagazineCategoryViewer({ categoryId }: CategoryViewerPro
               <div className="relative flex-grow">
                 <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={18} />
                 <Input
-                  placeholder="Buscar anuncios..."
+                  placeholder="Buscar adisos..."
                   className="pl-10"
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
@@ -281,7 +281,7 @@ export default function MagazineCategoryViewer({ categoryId }: CategoryViewerPro
             {/* Conteo de resultados */}
             <div className="flex justify-between items-center mb-4">
               <p className="text-sm text-gray-500">
-                {filteredPublications.length} anuncios encontrados
+                {filteredPublications.length} adisos encontrados
               </p>
               
               {searchQuery && (
@@ -335,10 +335,10 @@ export default function MagazineCategoryViewer({ categoryId }: CategoryViewerPro
               <div className="text-center py-16">
                 <Info size={48} className="mx-auto text-gray-300 mb-4" />
                 <h3 className="text-xl font-semibold text-gray-600 mb-2">
-                  Selecciona un anuncio para ver más detalles
+                  Selecciona un adiso para ver más detalles
                 </h3>
                 <p className="text-gray-500 max-w-md mx-auto">
-                  Haz clic en cualquier anuncio de la lista para ver toda su información
+                  Haz clic en cualquier adiso de la lista para ver toda su información
                 </p>
               </div>
             )}
@@ -372,7 +372,7 @@ function MagazineHeader({ magazine, isGenerating, onGenerate }: MagazineHeaderPr
                 Actualizada: {formatDate(magazine.lastUpdated || magazine.createdAt)}
               </p>
               <p className="text-blue-100">
-                {magazine.publicationCount} anuncios disponibles
+                {magazine.publicationCount} adisos disponibles
               </p>
             </div>
           ) : (
@@ -732,7 +732,7 @@ function NoResultsState({ query }: { query: string }) {
       </h3>
       {query && (
         <p className="text-gray-500 max-w-md mx-auto">
-          No hay anuncios que coincidan con &ldquo;{query}&rdquo;.
+          No hay adisos que coincidan con &ldquo;{query}&rdquo;.
           Intenta con otra búsqueda.
         </p>
       )}

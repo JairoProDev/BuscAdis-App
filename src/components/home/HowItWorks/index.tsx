@@ -23,14 +23,14 @@ const steps = [
   {
     id: 3,
     title: 'Guarda tus favoritos',
-    description: 'Marca tus anuncios favoritos para revisarlos más tarde o compararlos con otras opciones.',
+    description: 'Marca tus adisos favoritos para revisarlos más tarde o compararlos con otras opciones.',
     icon: BookmarkIcon,
     color: 'from-blue-500 to-cyan-400'
   },
   {
     id: 4,
     title: 'Crea alertas personalizadas',
-    description: 'Configura notificaciones para recibir avisos cuando aparezcan nuevos anuncios que te interesen.',
+    description: 'Configura notificaciones para recibir avisos cuando aparezcan nuevos adisos que te interesen.',
     icon: BellIcon, 
     color: 'from-emerald-500 to-green-400'
   },

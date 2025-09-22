@@ -52,7 +52,7 @@ const functionalitys = [
     {
         id: 'facilidad',
         title: 'Súper Fácil',
-        description: 'Publica tu anuncio en menos de 2 minutos',
+        description: 'Publica tu adiso en menos de 2 minutos',
         stats: [
             { value: '2min', label: 'Tiempo promedio' },
             { value: '96%', label: 'Tasa de éxito' }
@@ -170,7 +170,7 @@ export default function Functionalitys() {
                     </h2>
 
                     <p className="text-xl text-cyan-100/90 max-w-3xl mx-auto">
-                        Descubre por qué miles de usuarios eligen BuscAdis para sus anuncios clasificados
+                        Descubre por qué miles de usuarios eligen BuscAdis para sus adisos clasificados
                     </p>
 
                     <motion.div

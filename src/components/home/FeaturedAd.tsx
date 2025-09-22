@@ -161,7 +161,7 @@ const FeaturedAd = () => {
                                     ? "bg-gradient-to-r from-teal-500 to-cyan-500 shadow-[0_0_5px_rgba(20,184,166,0.5)]"
                                     : "bg-slate-600"
                             }`}
-                            aria-label={`Ver anuncio ${idx + 1}`}
+                            aria-label={`Ver adiso ${idx + 1}`}
                         />
                     ))}
                 </div>

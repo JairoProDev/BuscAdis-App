@@ -82,7 +82,7 @@ export interface HistoricalAdAnalysis {
 
   // ANÁLISIS DE COMPETENCIA
   competitorAnalysis: {
-    similarAds: string[];           // IDs de anuncios similares
+    similarAds: string[];           // IDs de adisos similares
     uniqueSellingPoints: string[];  // Puntos únicos de venta
     competitiveAdvantages: string[]; // Ventajas competitivas
     marketPosition: 'premium' | 'mid' | 'budget';
@@ -149,7 +149,7 @@ export const STRATEGIC_INSIGHTS = {
     categoryTrends: "Tendencias por categoría a lo largo del tiempo",
     seasonalPatterns: "Patrones estacionales de publicación",
     priceEvolution: "Evolución de precios por categoría",
-    geographicDistribution: "Distribución geográfica de anuncios",
+    geographicDistribution: "Distribución geográfica de adisos",
     competitorLandscape: "Panorama competitivo por sector"
   },
 
@@ -164,9 +164,9 @@ export const STRATEGIC_INSIGHTS = {
 
   // ANÁLISIS DE CONTENIDO
   contentAnalysis: {
-    effectiveFormats: "Formatos de anuncio más efectivos",
+    effectiveFormats: "Formatos de adiso más efectivos",
     keywordTrends: "Tendencias de palabras clave",
-    successPatterns: "Patrones de éxito en anuncios",
+    successPatterns: "Patrones de éxito en adisos",
     contentQuality: "Análisis de calidad de contenido",
     languagePreferences: "Preferencias de idioma por región"
   },
@@ -246,9 +246,9 @@ export const DATA_EXTRACTION_CONFIG = {
 // CASOS DE USO PARA IA
 export const AI_USE_CASES = {
   adGeneration: {
-    description: "Generación automática de anuncios basada en patrones históricos",
-    trainingData: "Textos de anuncios categorizados por efectividad",
-    expectedOutput: "Anuncios optimizados para conversión"
+    description: "Generación automática de adisos basada en patrones históricos",
+    trainingData: "Textos de adisos categorizados por efectividad",
+    expectedOutput: "Adisos optimizados para conversión"
   },
 
   autoComplete: {
@@ -265,7 +265,7 @@ export const AI_USE_CASES = {
 
   contentModeration: {
     description: "Moderación automática de contenido",
-    trainingData: "Anuncios clasificados como apropiados/inapropiados",
+    trainingData: "Adisos clasificados como apropiados/inapropiados",
     expectedOutput: "Clasificación automática de contenido"
   },
 

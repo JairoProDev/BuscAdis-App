@@ -92,6 +92,7 @@ export async function GET(
     // Format the publication for frontend consumption
     const formattedPublication = {
       id: publication._id || publication.id || id,
+      sequentialId: publication.sequentialId || null,
       title: publication.title || 'Sin título',
       description: publication.description || '',
       price: publication.amount || publication.price || 0,

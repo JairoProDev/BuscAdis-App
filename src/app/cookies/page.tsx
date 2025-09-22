@@ -23,7 +23,7 @@ export default function CookiesPage() {
                         <li><strong>Cookies Esenciales:</strong> Necesarias para el funcionamiento básico del sitio.</li>
                         <li><strong>Cookies de Rendimiento:</strong> Recopilan información sobre cómo utilizas el sitio.</li>
                         <li><strong>Cookies de Funcionalidad:</strong> Recuerdan tus preferencias para mejorar tu experiencia.</li>
-                        <li><strong>Cookies de Publicidad:</strong> Se utilizan para mostrar anuncios relevantes para ti.</li>
+                        <li><strong>Cookies de Publicidad:</strong> Se utilizan para mostrar adisos relevantes para ti.</li>
                     </ul>
 
                     <h2 className="text-2xl font-semibold">4. Gestión de Cookies</h2>

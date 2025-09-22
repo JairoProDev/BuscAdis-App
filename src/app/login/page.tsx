@@ -8,7 +8,7 @@ export default function LoginPage() {
     return (
         <AuthLayout 
             title="Iniciar sesión" 
-            subtitle="Accede a tu cuenta para publicar anuncios"
+            subtitle="Accede a tu cuenta para publicar adisos"
         >
             <LoginForm />
         </AuthLayout>

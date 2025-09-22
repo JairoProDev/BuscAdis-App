@@ -70,7 +70,7 @@ export default function RegisterForm() {
                 <div className="flex flex-col items-center justify-center text-green-600 text-center my-4 animate-fade-in">
                     <CheckCircleIcon className="w-12 h-12 mb-2 animate-bounce" />
                     <div className="font-bold text-lg mb-1">¡Cuenta creada con éxito!</div>
-                    <div className="text-green-700 text-sm mb-2">¡Bienvenido a la comunidad BuscAdis! 🎉<br/>Ya puedes iniciar sesión y empezar a publicar o descubrir anuncios.<br/>Serás redirigido automáticamente...</div>
+                    <div className="text-green-700 text-sm mb-2">¡Bienvenido a la comunidad BuscAdis! 🎉<br/>Ya puedes iniciar sesión y empezar a publicar o descubrir adisos.<br/>Serás redirigido automáticamente...</div>
                     <button
                         className="mt-2 px-4 py-2 rounded-lg bg-gradient-to-r from-teal-500 to-cyan-500 text-white font-semibold shadow hover:from-teal-600 hover:to-cyan-600 transition-colors"
                         onClick={() => router.push('/login')}

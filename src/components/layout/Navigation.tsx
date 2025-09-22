@@ -135,10 +135,10 @@ export default function Header() {
                                             Mi Perfil
                                         </Link>
                                         <Link
-                                            href="/mis-anuncios"
+                                            href="/mis-adisos"
                                             className={`block px-4 py-2 text-sm ${textColor} hover:${hoverTextColor} hover:bg-slate-700`}
                                         >
-                                            Mis Anuncios
+                                            Mis Adisos
                                         </Link>
                                         <Link
                                             href="/guardados"

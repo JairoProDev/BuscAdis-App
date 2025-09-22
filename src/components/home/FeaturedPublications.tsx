@@ -18,7 +18,7 @@ export default function FeaturedPublications() {
         setPublications(data.publications);
       } catch (err) {
         console.error('Error fetching featured publications:', err);
-        setError('No se pudieron cargar los anuncios destacados');
+        setError('No se pudieron cargar los adisos destacados');
       } finally {
         setLoading(false);
       }
@@ -46,7 +46,7 @@ export default function FeaturedPublications() {
   if (publications.length === 0) {
     return (
       <div className="bg-gray-50 border border-gray-100 rounded-xl p-8 text-center">
-        <p className="text-gray-600">No hay anuncios destacados disponibles en este momento.</p>
+        <p className="text-gray-600">No hay adisos destacados disponibles en este momento.</p>
       </div>
     );
   }

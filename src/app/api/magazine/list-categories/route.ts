@@ -61,7 +61,7 @@ const MAGAZINE_CATEGORIES = [
   {
     id: 'comunidad',
     name: 'Comunidad',
-    description: 'Anuncios comunitarios y servicios locales',
+    description: 'Adisos comunitarios y servicios locales',
     icon: 'users',
     collectionName: 'publications_comunidad',
     color: '#795548'

@@ -29,7 +29,7 @@ const testimonials = [
     name: 'Laura Rodríguez',
     role: 'Empresaria',
     image: '/testimonials/laura.jpg',
-    content: 'La mejor plataforma para publicar anuncios. El alcance es impresionante y el soporte es excelente.',
+    content: 'La mejor plataforma para publicar adisos. El alcance es impresionante y el soporte es excelente.',
     rating: 5
   },
   {

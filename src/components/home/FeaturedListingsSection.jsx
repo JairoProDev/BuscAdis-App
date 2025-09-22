@@ -110,7 +110,7 @@ const FeaturedListingsSection = () => {
                             animate={inView ? { opacity: 1, y: 0 } : {}}
                             transition={{ delay: 0.3, duration: 0.5 }}
                         >
-                            Anuncios <span className="bg-clip-text text-transparent bg-gradient-to-r from-teal-300 to-cyan-300">Destacados</span>
+                            Adisos <span className="bg-clip-text text-transparent bg-gradient-to-r from-teal-300 to-cyan-300">Destacados</span>
                         </motion.h2>
                         <motion.div
                             className="h-1 w-24 bg-gradient-to-r from-teal-400 via-cyan-400 to-teal-400 rounded-full mb-4 shadow-[0_0_10px_rgba(20,184,166,0.3)]"
@@ -150,7 +150,7 @@ const FeaturedListingsSection = () => {
                         >
                             <span className="absolute inset-0 bg-gradient-to-r from-teal-500/0 via-teal-500/15 to-teal-500/0 opacity-0 group-hover/btn:opacity-100 transition-opacity duration-300"></span>
                             <SparklesIcon className="h-4 w-4 mr-2 text-teal-300 relative z-10" />
-                            <span className="relative z-10">Destacar mi Anuncio</span>
+                            <span className="relative z-10">Destacar mi Adiso</span>
                         </Link>
                     </motion.div>
                 </motion.div>
@@ -177,7 +177,7 @@ const FeaturedListingsSection = () => {
                         <div className="absolute inset-0 rounded-full bg-gradient-to-r from-teal-500/0 via-teal-500/10 to-teal-500/0 opacity-0 group-hover:opacity-100 transition-opacity"></div>
                     </motion.button>
                 </div>
-                {/* Grid de Anuncios - Con scroll horizontal en móvil */}
+                {/* Grid de Adisos - Con scroll horizontal en móvil */}
                 <motion.div
                     id="featured-listings-container"
                     className="flex lg:grid lg:grid-cols-4 gap-6 lg:gap-10 overflow-x-auto pb-6 lg:overflow-visible snap-x snap-mandatory lg:snap-none"

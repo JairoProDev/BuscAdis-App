@@ -41,7 +41,7 @@ export default function ImportPublicationsPage() {
   // Analizar texto para previsualizar publicaciones
   const handleParseText = () => {
     if (!rawText.trim()) {
-      alert('Por favor, ingresa el texto de los anuncios');
+      alert('Por favor, ingresa el texto de los adisos');
       return;
     }
 
@@ -207,14 +207,14 @@ export default function ImportPublicationsPage() {
       {/* Paso 1: Ingresar texto */}
       {step === 1 && (
         <div className="bg-white rounded-lg shadow-sm p-6 border border-gray-100">
-          <h2 className="text-lg font-semibold text-gray-800 mb-4">Paso 1: Ingresar texto de anuncios</h2>
+          <h2 className="text-lg font-semibold text-gray-800 mb-4">Paso 1: Ingresar texto de adisos</h2>
           <p className="text-gray-600 mb-4">
-            Pega el texto con los anuncios que deseas importar. El sistema analizará el texto y extraerá las publicaciones automáticamente.
+            Pega el texto con los adisos que deseas importar. El sistema analizará el texto y extraerá las publicaciones automáticamente.
           </p>
           
           <textarea
             className="w-full h-64 p-4 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
-            placeholder="Pega aquí el texto con los anuncios..."
+            placeholder="Pega aquí el texto con los adisos..."
             value={rawText}
             onChange={(e) => setRawText(e.target.value)}
           ></textarea>

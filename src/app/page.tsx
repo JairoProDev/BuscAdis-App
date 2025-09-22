@@ -17,6 +17,7 @@ export default function HomePage() {
         if (data.publications) {
           const publications = data.publications.map((pub: any) => ({
             id: pub._id || pub.id,
+            sequentialId: pub.sequentialId,
             title: pub.title || 'Sin título',
             description: pub.description || '',
             categorySlug: pub.categorySlug || 'general',
@@ -51,7 +52,7 @@ export default function HomePage() {
   }, []);
 
   return (
-    <PublicationDetailProvider publications={allPublications}>
+    <PublicationDetailProvider>
       <HomePageContent allPublications={allPublications} />
     </PublicationDetailProvider>
   );
