@@ -821,9 +821,9 @@ function SearchPageContent({ publicationsData, results, setResults, isLoading, s
                           console.log('🔗 Navigating to:', categoryUrl)
                           router.push(categoryUrl)
                         }}
-                        onPublicationClick={(publication, urlType) => {
+                        onPublicationClick={(publication) => {
                           console.log('🔍 Opening publication from category row:', publication.title)
-                          openPublicationDetail(publication, urlType || 'category')
+                          openPublicationDetail(publication)
                           // Forzar la apertura del sidebar en desktop
                           setIsSidebarOpen(true)
                         }}
@@ -1181,7 +1181,7 @@ export default function BuscadorPage() {
   // (puedes mejorar esto con un estado de carga real si lo necesitas)
   // Por ahora, siempre retorna el provider y el contenido
   return (
-    <PublicationDetailProvider publications={results.map(convertToPublicationData)}>
+    <PublicationDetailProvider>
       <SearchPageContent
         publicationsData={results.map(convertToPublicationData)}
         results={results}

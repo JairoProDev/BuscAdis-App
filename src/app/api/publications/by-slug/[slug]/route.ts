@@ -15,7 +15,8 @@ export async function GET(
       );
     }
 
-    const { db } = await connectToDatabase();
+    const client = await connectToDatabase;
+    const db = client.db();
     const collections = [
       'publications_empleos',
       'publications_inmuebles', 
@@ -30,35 +31,23 @@ export async function GET(
     // Crear regex para búsqueda flexible del slug
     const slugRegex = new RegExp(slug.replace(/-/g, '[-\\s]*'), 'i');
 
+    let publication: any = null;
+
     for (const collectionName of collections) {
       const collection = db.collection(collectionName);
-      
-      // Buscar por título que contenga el slug
-      const publications = await collection.find({ 
-        status: 'active',
-        $or: [
-          { title: slugRegex },
-          { 'titleSlug': slug },
-          { 'titleSlug': { $regex: slug, $options: 'i' } }
-        ]
-      }).limit(1).toArray();
-
-      if (publications.length > 0) {
-        const publication = publications[0];
-        // Convertir ObjectId a string
-        publication._id = publication._id.toString();
-        
-        return NextResponse.json({
-          success: true,
-          publication
-        });
+      publication = await collection.findOne({ slug });
+      if (publication) {
+        break;
       }
     }
 
-    return NextResponse.json(
-      { error: 'Publicación no encontrada' },
-      { status: 404 }
-    );
+    if (publication) {
+      // Convert ObjectId to string for JSON serialization
+      publication._id = publication._id.toString();
+      return NextResponse.json(publication);
+    } else {
+      return NextResponse.json({ error: 'Publicación no encontrada' }, { status: 404 });
+    }
   } catch (error) {
     console.error('Error fetching publication by slug:', error);
     return NextResponse.json(

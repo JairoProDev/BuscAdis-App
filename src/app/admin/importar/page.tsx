@@ -2,100 +2,53 @@
 
 import { useState } from 'react';
 import { parsePublicationsFromText } from '@/utils/publicationParser';
-import { PublicationsService } from '@/services/publications.service';
+import { PublicationsService, CreatePublicationData } from '@/services/publications.service';
 import LoadingSpinner from '@/components/ui/LoadingSpinner';
 import { PublicationInput } from '@/types/publication';
-import { CreatePublicationData } from '@/services/publications.service';
-
-interface Publication {
-  title: string;
-  category: string;
-  subcategory?: string;
-  subsubcategory?: string;
-  price: number;
-  price_type: string;
-  contact: {
-    phone?: string;
-    email?: string;
-  };
-}
-
-interface ImportError {
-  publication: string;
-  error: string;
-}
 
 interface ImportResult {
   success: boolean;
   imported: number;
-  errors: ImportError[];
+  errors: { publication: string; error: string }[];
 }
 
-export default function ImportPublicationsPage() {
+export default function ImportarPublicaciones() {
+  const [step, setStep] = useState(1);
   const [rawText, setRawText] = useState('');
-  const [parsedPublications, setParsedPublications] = useState<Publication[]>([]);
+  const [parsedPublications, setParsedPublications] = useState<PublicationInput[]>([]);
   const [importing, setImporting] = useState(false);
   const [importResult, setImportResult] = useState<ImportResult | null>(null);
-  const [step, setStep] = useState(1);
 
-  // Analizar texto para previsualizar publicaciones
+  // Analizar el texto y pasar al siguiente paso
   const handleParseText = () => {
-    if (!rawText.trim()) {
-      alert('Por favor, ingresa el texto de los adisos');
-      return;
-    }
-
     try {
-      const publicationInputs = parsePublicationsFromText(rawText);
-      // Convertir PublicationInput[] a Publication[]
-      const publications: Publication[] = publicationInputs.map(input => ({
-        title: input.title,
-        category: input.category,
-        subcategory: input.subcategory || '',
-        subsubcategory: (input as PublicationInput & { subsubcategory?: string }).subsubcategory || '',
-        price: input.price,
-        price_type: input.currency || 'PEN',
-        contact: {
-          phone: input.contactPhone,
-          email: input.contactEmail
-        }
-      }));
+      const publications = parsePublicationsFromText(rawText);
       setParsedPublications(publications);
       setStep(2);
     } catch (error) {
-      console.error('Error al analizar texto:', error);
-      alert('Error al analizar el texto. Verifica el formato e intenta de nuevo.');
+      console.error('Error al parsear publicaciones:', error);
+      // Aquí podrías mostrar un error al usuario
     }
   };
 
-  // Importar publicaciones analizadas
+  // Importar las publicaciones a la base de datos
   const handleImport = async () => {
-    if (parsedPublications.length === 0) {
-      alert('No hay publicaciones para importar');
-      return;
-    }
-
     setImporting(true);
-    setImportResult(null);
+    const result: ImportResult = { success: false, imported: 0, errors: [] };
 
     try {
-      const result: ImportResult = {
-        success: true,
-        imported: 0,
-        errors: [],
-      };
-
-      // Importar cada publicación
       for (const publication of parsedPublications) {
         try {
-          // Convertir Publication a PublicationInput para preparePublicationForAPI
+          // Convertir a formato de entrada de publicación
           const publicationInput: PublicationInput = {
             title: publication.title,
-            description: publication.title, // Usar título como descripción por defecto
-            category: publication.category,
+            description: publication.description || '',
+            price: publication.price || 0,
+            currency: publication.currency || 'PEN',
+            price_type: publication.price_type || 'exact',
+            category: publication.category || 'otros',
             subcategory: publication.subcategory,
-            price: publication.price,
-            currency: publication.price_type,
+            subsubcategory: publication.subsubcategory,
             location: {
               province: 'Lima', // Valor por defecto
               district: '',
@@ -113,13 +66,13 @@ export default function ImportPublicationsPage() {
           const apiData: CreatePublicationData = {
             title: publicationInput.title,
             description: publicationInput.description,
-            categorySlug: publication.category || '',
-            subcategorySlug: publication.subcategory || '',
-            subSubcategorySlug: publication.subsubcategory || '',
-            transactionType: 'venta', // O deducir según lógica
-            value: publicationInput.price || 0,
-            currency: publicationInput.currency || 'PEN',
-            valueType: 'fixed', // O deducir según lógica
+            category: publication.category || '',
+            subcategory: publication.subcategory || '',
+            subsubcategory: publication.subsubcategory || '',
+            pricing: {
+              amount: publicationInput.price || 0,
+              currency: publicationInput.currency || 'PEN',
+            },
             location: {
               country: 'Perú',
               province: publicationInput.location.province || '',
@@ -339,4 +292,4 @@ export default function ImportPublicationsPage() {
       )}
     </div>
   );
-} 
+}

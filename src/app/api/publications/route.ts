@@ -222,11 +222,11 @@ export async function POST(request: Request) {
     // Compute next sequentialId atomically using counters collection
     const counters = db.collection('counters')
     const seqDoc = await counters.findOneAndUpdate(
-      { _id: 'adisos_sequential' },
+      { _id: 'adisos_sequential' } as any,
       { $inc: { seq: 1 } },
       { upsert: true, returnDocument: 'after' }
     )
-    const sequentialId = (seqDoc.value?.seq as number) || 1
+    const sequentialId = seqDoc?.value?.seq ?? 1;
 
     const newPublication = {
       ...data,

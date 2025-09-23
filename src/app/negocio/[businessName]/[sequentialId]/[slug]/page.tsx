@@ -12,10 +12,10 @@ interface PageProps {
 }
 
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
-  const { businessName, sequentialId, slug } = await params;
+  const { businessName, sequentialId } = await params;
   
   try {
-    const publication = await getPublicationBySlugOrId(sequentialId, slug);
+    const publication = await getPublicationBySlugOrId(sequentialId);
     
     if (!publication) {
       return {
@@ -42,17 +42,17 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
 }
 
 export default async function BusinessAdisoPage({ params }: PageProps) {
-  const { businessName, sequentialId, slug } = await params;
+  const { sequentialId } = await params;
   
   try {
-    const publication = await getPublicationBySlugOrId(sequentialId, slug);
+    const publication = await getPublicationBySlugOrId(sequentialId);
     
     if (!publication) {
       notFound();
     }
 
     // Get related publications (same category)
-    const relatedPublications = await getRelatedPublications(publication.categorySlug, publication.id);
+    const relatedPublications = await getRelatedPublications(publication.categorySlug, publication._id);
 
     return (
       <DedicatedPublicationPage 
