@@ -1,7 +1,16 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 import { Logger } from './logging.service';
-import { Achievement } from '@/components/publish/PublishAchievements';
+
+export interface Achievement {
+  id: string;
+  name: string;
+  description: string;
+  points: number;
+  icon: string;
+  unlocked: boolean;
+  timestamp?: Date;
+}
 
 interface AchievementWithTimestamp extends Achievement {
   timestamp?: Date;
@@ -170,4 +179,4 @@ useAchievements.subscribe((state, prevState) => {
       `Puntos actualizados: ${prevState.totalPoints} → ${state.totalPoints}`
     );
   }
-}); 
+});
