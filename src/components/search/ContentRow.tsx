@@ -184,7 +184,6 @@ export default function ContentRow({
               <PublicationCard
                 publication={publication}
                 viewMode="grid"
-                urlType="feed"
                 onPublicationClick={onPublicationClick}
               />
             </motion.div>

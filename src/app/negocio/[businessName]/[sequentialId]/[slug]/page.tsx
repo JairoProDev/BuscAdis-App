@@ -51,35 +51,14 @@ export default async function BusinessAdisoPage({ params }: PageProps) {
       notFound();
     }
 
-    // Get related publications (same category)
-    const relatedPublications = await getRelatedPublications(publication.categorySlug, publication._id);
-
     return (
       <DedicatedPublicationPage 
         publication={publication}
-        relatedPublications={relatedPublications}
+        relatedPublications={[]}
       />
     );
   } catch (error) {
     console.error('Error loading publication:', error);
     notFound();
-  }
-}
-
-async function getRelatedPublications(categorySlug: string, excludeId: string) {
-  try {
-    const response = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL}/api/publications/related?category=${categorySlug}&id=${excludeId}&limit=4`, {
-      cache: 'no-store'
-    });
-    
-    if (!response.ok) {
-      return [];
-    }
-    
-    const data = await response.json();
-    return data.publications || [];
-  } catch (error) {
-    console.error('Error fetching related publications:', error);
-    return [];
   }
 }

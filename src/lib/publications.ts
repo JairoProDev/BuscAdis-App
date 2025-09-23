@@ -1,38 +1,52 @@
+import connectToDatabase from '@/lib/mongodb';
+import { PublicationData } from '@/types/publication';
 
-import { Publication } from "@/services/publications.service";
-import { notFound } from "next/navigation";
+export async function getPublicationBySlugOrId(identifier: string): Promise<PublicationData | null> {
+  const client = await connectToDatabase;
+  const db = client.db();
+  
+  const isSequentialId = !isNaN(parseInt(identifier, 10));
+  
+  const query = isSequentialId 
+    ? { sequentialId: parseInt(identifier, 10) }
+    : { slug: identifier };
 
-async function fetchPublication(url: string): Promise<Publication | null> {
-  try {
-    const response = await fetch(url, {
-      cache: 'no-store'
-    });
-    if (!response.ok) {
-      return null;
-    }
-    const data = await response.json();
-    return data.publication || data;
-  } catch (error) {
-    console.error(`Error fetching from ${url}:`, error);
+  const publication = await db.collection('publications').findOne(query);
+
+  if (!publication) {
     return null;
   }
-}
 
-export async function getPublicationBySlugOrId(idOrSlug: string): Promise<Publication | null> {
-  const isNumeric = /^\d+$/.test(idOrSlug);
-  let publication: Publication | null = null;
+  // Normalize the data to match PublicationData type
+  const normalizedPublication: PublicationData = {
+    id: publication._id.toString(),
+    sequentialId: publication.sequentialId,
+    title: publication.title,
+    description: publication.description,
+    categorySlug: publication.category,
+    subcategorySlug: publication.subcategory,
+    subSubcategorySlug: publication.subsubcategory,
+    transactionType: publication.transactionType,
+    value: publication.pricing?.price || 0,
+    currency: publication.pricing?.currency || 'USD',
+    valueType: publication.pricing?.priceType || 'exact',
+    size: publication.attributes?.area || 0,
+    location: {
+      reference: publication.location?.address,
+      district: publication.location?.district || '',
+      province: publication.location?.province || '',
+      city: publication.location?.city || '',
+      country: publication.location?.country || '',
+    },
+    images: publication.images || [],
+    whatsapp: publication.contact?.phone || '',
+    createdAt: publication.createdAt?.toISOString() || new Date().toISOString(),
+    updatedAt: publication.updatedAt?.toISOString(),
+    views: publication.statistics?.views || 0,
+    featured: publication.isFeatured,
+    premium: publication.isPremium,
+    attributes: publication.attributes,
+  };
 
-  if (isNumeric) {
-    publication = await fetchPublication(`${process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000'}/api/publications/by-sequential/${idOrSlug}`);
-  }
-
-  if (!publication) {
-    publication = await fetchPublication(`${process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000'}/api/publications/by-slug/${idOrSlug}`);
-  }
-
-  if (!publication) {
-     publication = await fetchPublication(`${process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000'}/api/publications/${idOrSlug}`);
-  }
-
-  return publication;
+  return normalizedPublication;
 }

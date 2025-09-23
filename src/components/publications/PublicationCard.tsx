@@ -216,7 +216,7 @@ export default function PublicationCard({
     }
     
     const encodedMessage = encodeURIComponent(message);
-    const whatsappUrl = `https://wa.me/${publication.contact.phone}?text=${encodedMessage}`;
+    const whatsappUrl = `https://wa.me/${publication.whatsapp}?text=${encodedMessage}`;
     
     window.open(whatsappUrl, '_blank');
   };

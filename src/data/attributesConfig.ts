@@ -284,13 +284,15 @@ export type ModerationStatus = typeof MODERATION_STATUSES[number]
 
 // Utility to obtain a map of key -> label across all categories
 export function buildGlobalLabelMap(): Record<string, string> {
-  const map: Record<string, string> = {}
-  (Object.keys(ATTRIBUTES_CONFIG) as CategoryKey[]).forEach(cat => {
-    ATTRIBUTES_CONFIG[cat].forEach(field => {
-      if (!map[field.key]) map[field.key] = field.label
-    })
-  })
-  return map
+  const map: Record<string, string> = {};
+  (Object.keys(ATTRIBUTES_CONFIG) as CategoryKey[]).forEach((cat: CategoryKey) => {
+    ATTRIBUTES_CONFIG[cat].forEach((field: AttributeField) => {
+      if (!map[field.key]) {
+        map[field.key] = field.label;
+      }
+    });
+  });
+  return map;
 }
 
 

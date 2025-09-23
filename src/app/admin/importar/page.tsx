@@ -45,10 +45,8 @@ export default function ImportarPublicaciones() {
             description: publication.description || '',
             price: publication.price || 0,
             currency: publication.currency || 'PEN',
-            price_type: publication.price_type || 'exact',
             category: publication.category || 'otros',
             subcategory: publication.subcategory,
-            subsubcategory: publication.subsubcategory,
             location: {
               province: 'Lima', // Valor por defecto
               district: '',
@@ -56,9 +54,9 @@ export default function ImportarPublicaciones() {
               referencePoint: '',
               coordinates: null
             },
-            contactName: publication.contact.phone || 'No especificado',
-            contactEmail: publication.contact.email,
-            contactPhone: publication.contact.phone || '',
+            contactName: publication.contactName || 'No especificado',
+            contactEmail: publication.contactEmail,
+            contactPhone: publication.contactPhone || '',
             images: []
           };
           
@@ -68,10 +66,10 @@ export default function ImportarPublicaciones() {
             description: publicationInput.description,
             category: publication.category || '',
             subcategory: publication.subcategory || '',
-            subsubcategory: publication.subsubcategory || '',
             pricing: {
               amount: publicationInput.price || 0,
               currency: publicationInput.currency || 'PEN',
+              type: 'fixed',
             },
             location: {
               country: 'Perú',
@@ -88,8 +86,7 @@ export default function ImportarPublicaciones() {
               visible: true,
             },
             images: [],
-            status: 'active',
-            premium: false,
+            attributes: {},
           };
           await PublicationsService.createPublication(apiData);
           
@@ -209,10 +206,10 @@ export default function ImportarPublicaciones() {
                       {pub.category}{pub.subcategory ? ` / ${pub.subcategory}` : ''}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                      {pub.price > 0 ? `S/ ${pub.price}` : pub.price_type === 'negotiable' ? 'Negociable' : 'No especificado'}
+                      {pub.price > 0 ? `S/ ${pub.price}` : 'No especificado'}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                      {pub.contact.phone || pub.contact.email || 'No especificado'}
+                      {pub.contactPhone || pub.contactEmail || 'No especificado'}
                     </td>
                   </tr>
                 ))}

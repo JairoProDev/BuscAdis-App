@@ -291,7 +291,7 @@ const CategorySelector: React.FC<CategorySelectorProps> = ({
                 ? 'bg-primary-100 dark:bg-primary-800/50' 
                 : 'bg-gray-100 dark:bg-gray-600'
             }`}>
-              <span className="text-base">{subcategory.emoji || '🔹'}</span>
+              <span className="text-base">🔹</span>
             </div>
             <div>
               <h3 className={`text-sm font-medium ${

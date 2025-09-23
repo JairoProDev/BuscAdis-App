@@ -13,6 +13,7 @@ import Image from 'next/image';
 import Link from 'next/link';
 import PublicationAttributes from '../PublicationAttributes';
 import PublicationContact from '../PublicationContact';
+import { generatePublicationUrl } from '@/lib/routing';
 
 interface DedicatedPublicationPageProps {
   publication: PublicationData;
@@ -200,7 +201,7 @@ export default function DedicatedPublicationPage({
             </h2>
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
               {relatedPublications.map((relatedPub) => (
-                <Link key={relatedPub.id} href={`/adiso/${relatedPub.id}/${relatedPub.slug}`} passHref>
+                <Link key={relatedPub.id} href={generatePublicationUrl(relatedPub)} passHref>
                   <a className="block bg-white dark:bg-gray-800 shadow-sm rounded-lg overflow-hidden hover:shadow-md transition-shadow">
                     <div className="relative w-full h-40">
                       <Image

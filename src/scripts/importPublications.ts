@@ -22,33 +22,24 @@ function transformToCreatePublicationData(apiData: PublicationApiPayload): Creat
   return {
     title: apiData.title,
     description: apiData.description,
-    categorySlug: apiData.category,
-    subcategorySlug: apiData.subcategory,
-    transactionType: 'venta', // Default value
-    value: apiData.price || 0,
-    currency: apiData.currency || 'PEN',
-    valueType: 'fijo', // Default value
+    category: apiData.category,
+    subcategory: apiData.subcategory,
+    pricing: {
+      amount: apiData.price || 0,
+      currency: apiData.currency || 'PEN',
+      type: 'fixed', // Default value
+    },
     location: {
       country: 'Peru',
       province: apiData.location?.province || 'Cusco',
       city: 'Cusco', // Default city since it's not in PublicationLocation
       district: apiData.location?.district,
-      address: apiData.location?.address
     },
     contact: {
       phones: apiData.contactPhone ? [apiData.contactPhone] : [],
-      email: apiData.contactEmail,
-      name: apiData.contactName
     },
-    images: Array.isArray(apiData.images) ? apiData.images.map((img: unknown) => {
-      if (typeof img === 'string') return img;
-      if (typeof img === 'object' && img !== null && 'url' in img) {
-        return (img as { url: string }).url;
-      }
-      return '';
-    }).filter(Boolean) : [],
-    status: 'activo',
-    premium: false
+    images: [], // No images from text
+    attributes: {}, // No attributes from text
   };
 }
 
