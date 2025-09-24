@@ -10,24 +10,29 @@ interface PageProps {
 
 async function fetchPublication(id: string) {
   try {
-    // Intentar por sequentialId primero
-    let response = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000'}/api/publications/by-sequential/${id}`, {
-      cache: 'no-store'
-    })
-    
-    if (!response.ok) {
-      // Fallback a ID normal
-      response = await fetch(`${process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000'}/api/publications/${id}`, {
+    // Fetch from both endpoints concurrently
+    const [bySequentialResponse, byIdResponse] = await Promise.all([
+      fetch(`${process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000'}/api/publications/by-sequential/${id}`, {
+        cache: 'no-store'
+      }),
+      fetch(`${process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000'}/api/publications/${id}`, {
         cache: 'no-store'
       })
+    ]);
+    
+    // Try sequential ID response first
+    if (bySequentialResponse.ok) {
+      const data = await bySequentialResponse.json();
+      return data.publication || null;
     }
     
-    if (!response.ok) {
-      return null
+    // Fallback to normal ID
+    if (byIdResponse.ok) {
+      const data = await byIdResponse.json();
+      return data.publication || null;
     }
     
-    const data = await response.json()
-    return data.publication || null
+    return null;
   } catch (error) {
     console.error('Error fetching publication:', error)
     return null
@@ -75,6 +80,19 @@ export default async function PublicationPage({ params }: PageProps) {
   
   if (!publication) {
     notFound()
+  }
+  
+  // Redirect to the canonical URL if we have a sequential ID
+  if (publication.sequentialId) {
+    const slug = publication.title
+      ? publication.title.toLowerCase()
+          .replace(/[^a-z0-9\s-]/g, '')
+          .replace(/\s+/g, '-')
+      : publication.id;
+    
+    return Response.redirect(
+      `${process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000'}/adisos/${publication.sequentialId}/${slug}`
+    )
   }
   
   // Formatear la publicación para el componente
