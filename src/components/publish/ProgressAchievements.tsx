@@ -17,8 +17,7 @@ interface ProgressAchievementsProps {
 }
 
 const ProgressAchievements: React.FC<ProgressAchievementsProps> = ({ formData, quality }) => {
-  // Defensive: Normalize ad data
-  const safeAd = {
+  const safeAd = useMemo(() => ({
     title: formData?.title?.trim() || '',
     description: formData?.description?.trim() || '',
     categorySlug: formData?.categorySlug || '',
@@ -35,10 +34,9 @@ const ProgressAchievements: React.FC<ProgressAchievementsProps> = ({ formData, q
       email: formData?.contact?.email || '',
     },
     images: Array.isArray(formData?.images) ? formData.images : [],
-  };
+  }), [formData]);
 
-  // Completion logic
-  const completionItems = [
+  const completionItems = useMemo(() => [
     {
       key: 'category',
       label: 'Categoría',
@@ -70,7 +68,7 @@ const ProgressAchievements: React.FC<ProgressAchievementsProps> = ({ formData, q
       label: 'Precio',
       completed: safeAd.amount !== null,
     },
-  ];
+  ], [safeAd]);
 
   const completedCount = completionItems.filter((item) => item.completed).length;
   const totalItems = completionItems.length;
@@ -112,7 +110,7 @@ const ProgressAchievements: React.FC<ProgressAchievementsProps> = ({ formData, q
     if (points >= 100) badges.push('oro');
 
     return { completed, points, badges };
-  }, [formData]);
+  }, [completionItems]);
 
   const getBadgeInfo = (badge: string) => {
     switch (badge) {

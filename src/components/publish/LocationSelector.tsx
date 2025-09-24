@@ -71,7 +71,7 @@ const LocationSelector: React.FC<LocationSelectorProps> = ({
       setLocation(newLocation);
       onChange(newLocation);
     }
-  }, [location.countryCode, location.department, onChange]);
+  }, [location, onChange]);
 
   // Initialize Cusco on mount if no initial value
   useEffect(() => {
@@ -85,7 +85,7 @@ const LocationSelector: React.FC<LocationSelectorProps> = ({
       setLocation(newLocation);
       onChange(newLocation);
     }
-  }, []);
+  }, [initialValue, location, onChange]);
 
   // --- Lógica de Derivación de Datos Optimizada con useMemo ---
 

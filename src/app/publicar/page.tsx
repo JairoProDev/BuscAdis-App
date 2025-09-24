@@ -481,7 +481,7 @@ export default function PublicarPage() {
     } finally {
       setLoading(false);
     }
-  }, [ad, validateStep]);
+  }, [ad, validateStep, dynamicAttributes]);
 
   // Renderiza tip de optimización según el paso actual
   const renderOptimizationTip = useCallback(() => {
