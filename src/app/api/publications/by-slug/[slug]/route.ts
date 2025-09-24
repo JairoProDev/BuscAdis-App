@@ -29,7 +29,7 @@ export async function GET(
     ];
 
     // Crear regex para búsqueda flexible del slug
-    const slugRegex = new RegExp(slug.replace(/-/g, '[-\\s]*'), 'i');
+    // const slugRegex = new RegExp(slug.replace(/-/g, '[-\\s]*'), 'i');
 
     let publication: any = null;
 

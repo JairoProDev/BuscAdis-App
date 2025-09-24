@@ -19,7 +19,6 @@ import {
 import { Logger } from '@/services/logging.service'; // Asumiendo que existe
 import { categoriesList } from '@/data/categories-data'; // Ajusta la ruta
 import type { Category, Subcategory, SubSubcategory } from '@/data/categories-data'; // O desde '@/types/categories'
-import { getSubcategoryIcon, getSubSubcategoryEmoji } from '@/components/search/CategorySelector/utils';
 
 // Define la estructura para los datos de categoría seleccionada
 interface CategorySelectionData {

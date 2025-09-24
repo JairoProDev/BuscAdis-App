@@ -2,7 +2,7 @@
 'use client'
 
 import React, { useState, useEffect, useCallback, useMemo } from 'react'
-import { MapPinIcon, GlobeAltIcon, MapIcon, BuildingOffice2Icon, CheckIcon, ArrowsPointingOutIcon, SunIcon } from '@heroicons/react/24/outline'
+import { MapPinIcon, CheckIcon, ArrowsPointingOutIcon, SunIcon } from '@heroicons/react/24/outline'
 import { Logger } from '@/services/logging.service'
 import { peruLocations, type Department, type Province, type District } from '@/data/peru-locations'
 

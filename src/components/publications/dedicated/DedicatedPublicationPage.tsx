@@ -2,9 +2,8 @@
 
 import React, { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { HeartIcon, ShareIcon, EyeIcon, MapPinIcon, ArrowLeftIcon, ChevronLeftIcon, ChevronRightIcon, CalendarIcon } from '@heroicons/react/24/outline';
+import { HeartIcon, ShareIcon, MapPinIcon, ArrowLeftIcon, ChevronLeftIcon, ChevronRightIcon, CalendarIcon } from '@heroicons/react/24/outline';
 import { HeartIcon as HeartSolidIcon } from '@heroicons/react/24/solid';
-import { WhatsAppIcon } from '@/components/icons';
 import { PublicationData } from '@/types/publication';
 import { formatDistanceToNow } from 'date-fns';
 import { es } from 'date-fns/locale';
@@ -18,9 +17,9 @@ import { generatePublicationUrl } from '@/lib/routing';
 interface DedicatedPublicationPageProps {
   publication: PublicationData;
   relatedPublications?: PublicationData[];
-  onWhatsAppClick?: () => void;
   onShare?: () => void;
   onFavorite?: () => void;
+  onWhatsAppClick?: () => void;
 }
 
 export default function DedicatedPublicationPage({

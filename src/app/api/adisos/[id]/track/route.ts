@@ -90,8 +90,9 @@ export async function POST(request: NextRequest, context: { params: Promise<{ id
       })
     } catch {}
     return NextResponse.json({ success: true })
-  } catch (e) {
-    return NextResponse.json({ success: false, message: 'Server error' }, { status: 500 })
+  } catch (error) {
+    console.error('Tracking error:', error);
+    return NextResponse.json({ success: false, message: 'Server error' }, { status: 500 });
   }
 }
 

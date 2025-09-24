@@ -390,10 +390,10 @@ export default function PublicarPage() {
 
   // Dynamic attributes from central config
   const selectedCategoryKey = (ad.categorySlug || 'productos') as CategoryKey
-  const attributeFields: AttributeField[] = [...(ATTRIBUTES_CONFIG[selectedCategoryKey] || [])]
-  const handleDynamicFieldChange = (key: string, value: unknown) => {
-    setDynamicAttributes(prev => ({ ...prev, [key]: value }))
-  }
+  // const attributeFields: AttributeField[] = [...(ATTRIBUTES_CONFIG[selectedCategoryKey] || [])]
+  // const handleDynamicFieldChange = (key: string, value: unknown) => {
+  //   setDynamicAttributes(prev => ({ ...prev, [key]: value }))
+  // }
 
   // Submit final
   const handleSubmit = useCallback(async () => {

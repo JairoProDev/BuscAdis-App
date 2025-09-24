@@ -31,7 +31,8 @@ export async function GET(request: NextRequest) {
       .sort({ createdAt: -1 })
       .toArray()
     return NextResponse.json({ adisos })
-  } catch (e) {
+  } catch (error) {
+    console.error('Error fetching user adisos:', error);
     return NextResponse.json({ message: 'Server error' }, { status: 500 })
   }
 }

@@ -61,8 +61,9 @@ export default function AdisoDetailPage() {
         } else {
           setError('Adiso no encontrado')
         }
-      } catch (e) {
-        setError('Error cargando adiso')
+      } catch (error) {
+        console.error('Error loading publication:', error);
+        setError('Error cargando adiso');
       } finally {
         setLoading(false)
       }

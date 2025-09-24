@@ -53,7 +53,7 @@ export default function PublicationAttributes({ attributes, className = '' }: Pu
   }
 
   const entries = Object.entries(attributes)
-    .filter(([_, v]) => v !== null && v !== undefined && formatValue(v) !== '')
+    .filter(([, v]) => v !== null && v !== undefined && formatValue(v) !== '')
 
   if (entries.length === 0) return null
 

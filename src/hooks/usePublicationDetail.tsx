@@ -5,7 +5,6 @@ import React, {
   useContext,
   useReducer,
   useCallback,
-  useEffect,
   useRef,
 } from 'react'
 import useMediaQuery from './useMediaQuery'

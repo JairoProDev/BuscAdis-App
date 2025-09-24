@@ -6,7 +6,6 @@ import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { 
   HeartIcon,
-  EyeIcon,
   MapPinIcon,
   BriefcaseIcon,
   HomeIcon,
@@ -21,7 +20,6 @@ import {
 import { HeartIcon as HeartSolidIcon } from '@heroicons/react/24/solid';
 import { WhatsAppIcon } from '@/components/icons';
 import { useMemo } from 'react';
-import { slugify } from '@/lib/utils';
 import { getDefaultImageByCategory } from '@/utils/image-helpers';
 
 import { PublicationData } from '@/types/publication';
@@ -78,12 +76,27 @@ const CurvedShareIcon = ({ className }: { className?: string }) => (
   </svg>
 )
 
+interface CategoryTagProps {
+  categorySlug: string;
+}
+
+const CategoryTag: React.FC<CategoryTagProps> = ({ categorySlug }) => {
+  const Icon = categoryIcons[categorySlug] || PaperAirplaneIcon;
+  const colors = categoryColors[categorySlug] || 'bg-gray-100 text-gray-800';
+  
+  return (
+    <div className={`absolute top-3 left-3 text-xs font-bold px-2.5 py-1 rounded-full flex items-center gap-1.5 ${colors}`}>
+      <Icon className="w-3.5 h-3.5" />
+      <span>{categorySlug.charAt(0).toUpperCase() + categorySlug.slice(1)}</span>
+    </div>
+  );
+};
+
 export default function PublicationCard({
   publication,
   onPublicationClick,
   className = '',
   showWhatsApp = true,
-  variant = 'default',
   viewMode = 'grid'
 }: PublicationCardProps) {
   const [isFavorite, setIsFavorite] = useState(false);
@@ -248,18 +261,6 @@ export default function PublicationCard({
     // Aquí iría la lógica para guardar en localStorage o en el backend
   };
 
-  const CategoryTag = () => {
-    const Icon = categoryIcons[publication.categorySlug] || PaperAirplaneIcon;
-    const colors = categoryColors[publication.categorySlug] || 'bg-gray-100 text-gray-800';
-    
-    return (
-      <div className={`absolute top-3 left-3 text-xs font-bold px-2.5 py-1 rounded-full flex items-center gap-1.5 ${colors}`}>
-        <Icon className="w-3.5 h-3.5" />
-        <span>{publication.categorySlug.charAt(0).toUpperCase() + publication.categorySlug.slice(1)}</span>
-      </div>
-    );
-  };
-
   if (viewMode === 'list') {
     return (
       <motion.div
@@ -279,7 +280,7 @@ export default function PublicationCard({
               sizes="(max-width: 768px) 33vw, (max-width: 1024px) 25vw, 200px"
             />
           </a>
-          <CategoryTag />
+          <CategoryTag categorySlug={publication.categorySlug} />
         </div>
 
         {/* Content */}
@@ -344,7 +345,7 @@ export default function PublicationCard({
             sizes="(max-width: 640px) 100vw, (max-width: 768px) 50vw, (max-width: 1024px) 33vw, 25vw"
           />
         </a>
-        <CategoryTag />
+        <CategoryTag categorySlug={publication.categorySlug} />
         <div className="absolute top-2 right-2 flex flex-col gap-2">
           <button onClick={handleFavorite} className="bg-black/30 p-2 rounded-full text-white hover:bg-black/50 transition-colors">
             {isFavorite ? <HeartSolidIcon className="w-5 h-5" /> : <HeartIcon className="w-5 h-5" />}

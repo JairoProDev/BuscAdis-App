@@ -33,7 +33,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
         images: publication.images?.length ? [publication.images[0]] : [],
       },
     };
-  } catch (error) {
+  } catch {
     return {
       title: 'Error - BuscAdis',
       description: 'Ocurrió un error al cargar el adiso.'

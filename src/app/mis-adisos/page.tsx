@@ -25,7 +25,8 @@ export default function MisAdisosPage() {
         const res = await fetch('/api/user/adisos')
         const data = await res.json()
         setItems(Array.isArray(data?.adisos) ? data.adisos : [])
-      } catch (e) {
+      } catch (error) {
+        console.error('Error loading adisos:', error);
         setError('Error cargando tus adisos')
       }
     }
