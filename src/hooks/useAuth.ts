@@ -1,85 +1,69 @@
-import { useState, useEffect, useCallback } from 'react';
-import { AuthService } from '../services/auth.service';
+import { useEffect } from 'react';
+import { useAuthStore } from '@/services/auth.service.client';
 import { useRouter } from 'next/navigation';
-import { AuthResponse, LoginCredentials } from '../features/auth/types/auth.types';
-import type { AuthUser } from '@/types/api';
+import { LoginCredentials } from '@/features/auth/types/auth.types';
 
 export function useAuth() {
-    const [user, setUser] = useState<AuthUser | null>(null);
-    const [loading, setLoading] = useState(true);
+    const {
+        user,
+        token,
+        isAuthenticated,
+        isLoading,
+        error,
+        login: loginAction,
+        logout: logoutAction,
+        fetchUser,
+    } = useAuthStore();
+    
     const router = useRouter();
 
-    const checkSession = useCallback(async () => {
-        try {
-            setLoading(true);
-            const currentUser = await AuthService.getCurrentUser();
-            setUser(currentUser as AuthUser | null);
-        } catch (error) {
-            console.error('Error checking session:', error);
-            setUser(null);
-        } finally {
-            setLoading(false);
-        }
-    }, []);
-
     useEffect(() => {
-        checkSession();
-
-        // Verificar la sesión cada 15 minutos
-        const intervalId = setInterval(checkSession, 15 * 60 * 1000);
-
-        return () => clearInterval(intervalId);
-    }, [checkSession]);
+        if (!token && !isLoading) {
+            // If there's no token and we're not loading,
+            // there's no session to check.
+            return;
+        }
+        if (token && !user && !isLoading) {
+            fetchUser();
+        }
+    }, [token, user, isLoading, fetchUser]);
 
     const login = async (credentials: LoginCredentials) => {
-        setLoading(true);
         try {
-            // Validate that required fields are present
-            if (!credentials.phone || !credentials.dni) {
-                return { 
-                    success: false, 
-                    message: 'Teléfono y DNI son requeridos' 
-                };
+            // The actual login logic should now be an API call
+            const response = await fetch('/api/auth/login', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(credentials),
+            });
+
+            const data = await response.json();
+
+            if (!response.ok) {
+                return { success: false, message: data.message || 'Error durante el inicio de sesión' };
             }
 
-            const authCredentials = {
-                phone: credentials.phone,
-                dni: credentials.dni
-            };
-
-            const result = await AuthService.login(authCredentials) as AuthResponse;
-            if (result.error) {
-                return { success: false, message: result.error };
-            }
-            await checkSession();
+            await loginAction(data.token);
+            router.push('/mis-adisos');
             return { success: true };
-        } catch (error) {
-            console.error('Error during login:', error);
-            return {
-                success: false,
-                message: error instanceof Error ? error.message : 'Error durante el inicio de sesión'
-            };
-        } finally {
-            setLoading(false);
+        } catch (err) {
+            console.error('Error during login:', err);
+            const message = err instanceof Error ? err.message : 'Error de red o servidor';
+            return { success: false, message };
         }
     };
 
-    const logout = async () => {
-        try {
-            await AuthService.logout();
-            setUser(null);
-            router.push('/');
-        } catch (error) {
-            console.error('Error during logout:', error);
-        }
+    const logout = () => {
+        logoutAction();
+        router.push('/');
     };
 
     return {
         user,
-        loading,
-        isAuthenticated: !!user,
+        loading: isLoading,
+        isAuthenticated,
+        error,
         login,
         logout,
-        checkSession
     };
 }
