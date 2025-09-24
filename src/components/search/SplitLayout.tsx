@@ -344,7 +344,7 @@ export function SplitLayout({
                   variant="outline" 
                   size="sm" 
                   className="mt-2 mr-2"
-                  onClick={() => window.location.href = `/adisos/${selectedPublication.id}/${selectedPublication.title}`}
+                  onClick={() => window.location.href = `/adiso/${selectedPublication.id}`}
                 >
                   Ver detalles
                 </Button>

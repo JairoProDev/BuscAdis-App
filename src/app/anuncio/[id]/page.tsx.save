@@ -1,0 +1,230 @@
+wsl -e bash -ic 'cd ~/proyectos/BuscaDis && content="\"use client\";
+
+import React from \"react\";
+import { notFound } from \"next/navigation\";
+import { useParams } from \"next/navigation\";
+import DedicatedPublicationPage from \"@/components/publications/dedicated/DedicatedPublicationPage\";
+import { PublicationData } from \"@/types/publication\";
+
+interface Publication extends PublicationData {
+  id: string;
+}
+
+export default function PublicationPage() {
+  const { id } = useParams();
+  const [publication, setPublication] = React.useState<Publication | null>(null);
+  const [loading, setLoading] = React.useState(true);
+  const [error, setError] = React.useState<string | null>(null);
+
+  React.useEffect(() => {
+    const fetchPublication = async () => {
+      try {
+        const response = await fetch(\`/api/publications/\${id}\`);
+        if (!response.ok) throw new Error(\"No se pudo cargar la publicación\");
+        const data = await response.json();
+        setPublication(data.publication);
+      } catch (e) {
+        setError((e as Error).message);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    if (id) {
+      fetchPublication();
+    }
+  }, [id]);
+
+  if (loading) {
+    return <div>Cargando...</div>;
+  }
+
+  if (error || !publication) {
+    notFound();
+  }
+
+  const formattedPublication = {
+    id: id,
+    title: publication.title || \"Sin título\",
+    description: publication.description || \"\",
+    categorySlug: publication.categorySlug || \"general\",
+    subcategorySlug: publication.subcategorySlug || \"\",
+    subSubcategorySlug: publication.subSubcategorySlug || \"\",
+    transactionType: \"sale\",
+    value: publication.price || 0,
+    currency: publication.currency || \"PEN\",
+    valueType: \"fixed\",
+    size: 0,
+    location: {
+      district: publication.location?.district || \"\",
+      province: publication.location?.province || \"\",
+      city: publication.location?.city || \"\",
+      country: publication.location?.country || \"Perú\"
+    },
+    images: Array.isArray(publication.images) ? publication.images : [],
+    whatsapp: publication.contact?.phone || \"\",
+    createdAt: publication.createdAt || new Date().toISOString(),
+    views: typeof publication.views === \"number\" ? publication.views : 0,
+    featured: Boolean(publication.featured),
+    premium: Boolean(publication.premium),
+    attributes: publication.attributes || {}
+  };
+
+  return <DedicatedPublicationPage publication={formattedPublication} />;
+}" && echo "$content" > src/app/anuncio/[id]/page.tsx'
+wsl -e bash -ic 'cd ~/proyectos/BuscaDis && npm run dev'
+wsl -e bash -ic 'cd ~/proyectos/BuscaDis && cat src/app/anuncio/[id]/page.tsx'
+wsl -e bash -ic 'cd ~/proyectos/BuscaDis && echo "\"use client\";
+
+import React from \"react\";
+import { notFound } from \"next/navigation\";
+import { useParams } from \"next/navigation\";
+import DedicatedPublicationPage from \"@/components/publications/dedicated/DedicatedPublicationPage\";
+import { PublicationData } from \"@/types/publication\";
+
+interface Publication extends PublicationData {
+  id: string;
+}
+
+export default function PublicationPage() {
+  const { id } = useParams();
+  const [publication, setPublication] = React.useState<Publication | null>(null);
+  const [loading, setLoading] = React.useState(true);
+  const [error, setError] = React.useState<string | null>(null);
+
+  React.useEffect(() => {
+    const fetchPublication = async () => {
+      try {
+        const response = await fetch(\`/api/publications/\${id}\`);
+        if (!response.ok) throw new Error(\"No se pudo cargar la publicación\");
+        const data = await response.json();
+        setPublication(data.publication);
+      } catch (e) {
+        setError((e as Error).message);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    if (id) {
+      fetchPublication();
+    }
+  }, [id]);
+
+  if (loading) {
+    return <div>Cargando...</div>;
+  }
+
+  if (error || !publication) {
+    notFound();
+  }
+
+  const formattedPublication = {
+    id: id,
+    title: publication.title || \"Sin título\",
+    description: publication.description || \"\",
+    categorySlug: publication.categorySlug || \"general\",
+    subcategorySlug: publication.subcategorySlug || \"\",
+    subSubcategorySlug: publication.subSubcategorySlug || \"\",
+    transactionType: \"sale\",
+    value: publication.price || 0,
+    currency: publication.currency || \"PEN\",
+    valueType: \"fixed\",
+    size: 0,
+    location: {
+      district: publication.location?.district || \"\",
+      province: publication.location?.province || \"\",
+      city: publication.location?.city || \"\",
+      country: publication.location?.country || \"Perú\"
+    },
+    images: Array.isArray(publication.images) ? publication.images : [],
+    whatsapp: publication.contact?.phone || \"\",
+    createdAt: publication.createdAt || new Date().toISOString(),
+    views: typeof publication.views === \"number\" ? publication.views : 0,
+    featured: Boolean(publication.featured),
+    premium: Boolean(publication.premium),
+    attributes: publication.attributes || {}
+  };
+
+  return <DedicatedPublicationPage publication={formattedPublication} />;
+}" > /tmp/page.tsx && cp /tmp/page.tsx src/app/anuncio/[id]/page.tsx'
+wsl -e bash -ic 'cd ~/proyectos/BuscaDis && ls -l src/app/anuncio/[id]/page.tsx && cat src/app/anuncio/[id]/page.tsx'
+wsl -e bash -ic 'cd ~ && echo "use client" > temp.tsx && cat temp.tsx'
+@'
+"use client";
+
+import React from "react";
+import { notFound } from "next/navigation";
+import { useParams } from "next/navigation";
+import DedicatedPublicationPage from "@/components/publications/dedicated/DedicatedPublicationPage";
+import { PublicationData } from "@/types/publication";
+
+interface Publication extends PublicationData {
+  id: string;
+}
+
+export default function PublicationPage() {
+  const { id } = useParams();
+  const [publication, setPublication] = React.useState<Publication | null>(null);
+  const [loading, setLoading] = React.useState(true);
+  const [error, setError] = React.useState<string | null>(null);
+
+  React.useEffect(() => {
+    const fetchPublication = async () => {
+      try {
+        const response = await fetch(`/api/publications/${id}`);
+        if (!response.ok) throw new Error("No se pudo cargar la publicación");
+        const data = await response.json();
+        setPublication(data.publication);
+      } catch (e) {
+        setError((e as Error).message);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    if (id) {
+      fetchPublication();
+    }
+  }, [id]);
+
+  if (loading) {
+    return <div>Cargando...</div>;
+  }
+
+  if (error || !publication) {
+    notFound();
+  }
+
+  const formattedPublication = {
+    id: id,
+    title: publication.title || "Sin título",
+    description: publication.description || "",
+    categorySlug: publication.categorySlug || "general",
+    subcategorySlug: publication.subcategorySlug || "",
+    subSubcategorySlug: publication.subSubcategorySlug || "",
+    transactionType: "sale",
+    value: publication.price || 0,
+    currency: publication.currency || "PEN",
+    valueType: "fixed",
+    size: 0,
+    location: {
+      district: publication.location?.district || "",
+      province: publication.location?.province || "",
+      city: publication.location?.city || "",
+      country: publication.location?.country || "Perú"
+    },
+    images: Array.isArray(publication.images) ? publication.images : [],
+    whatsapp: publication.contact?.phone || "",
+    createdAt: publication.createdAt || new Date().toISOString(),
+    views: typeof publication.views === "number" ? publication.views : 0,
+    featured: Boolean(publication.featured),
+    premium: Boolean(publication.premium),
+    attributes: publication.attributes || {}
+  };
+
+  return <DedicatedPublicationPage publication={formattedPublication} />;
+}
+'@ | Set-Content \\wsl.localhost\Ubuntu\home\jairoprodev\proyectos\BuscaDis\src\app\anuncio\[id]\page.tsx
+Get-Content \\wsl.localhost\Ubuntu\home\jairoprodev\proyectos\BuscaDis\src\app\anuncio\[id]\page.tsx
+

@@ -171,7 +171,7 @@ export function PublicationDetailProvider({
 
   const goToPublicationPage = useCallback((publication: PublicationData) => {
     // Navigate directly to the dedicated page using window.location
-    const dedicatedUrl = `/adiso/${publication.sequentialId || publication.id}`
+    const dedicatedUrl = `/adiso/${publication.id}`
     window.location.href = dedicatedUrl
   }, [])
 
@@ -180,7 +180,7 @@ export function PublicationDetailProvider({
     
     const cleanPhone = publication.whatsapp.replace(/[^0-9]/g, '')
     const baseUrl = window.location.origin
-    const adUrl = `${baseUrl}/adiso/${publication.sequentialId || publication.id}`
+    const adUrl = `${baseUrl}/adiso/${publication.id}`
     const message = generateWhatsAppMessage(publication, adUrl)
     
     window.open(`https://wa.me/${cleanPhone}?text=${encodeURIComponent(message)}`, '_blank')
@@ -188,7 +188,7 @@ export function PublicationDetailProvider({
 
   const handleShare = useCallback((publication: PublicationData) => {
     const baseUrl = window.location.origin
-    const shareUrl = `${baseUrl}/adiso/${publication.sequentialId || publication.id}`
+    const shareUrl = `${baseUrl}/adiso/${publication.id}`
     
     if (navigator.share) {
       navigator.share({

@@ -173,7 +173,7 @@ const UnifiedPublicationDetail = ({
                   <span>Compartir</span>
                 </button>
                 <button
-                  onClick={() => window.location.href = `/adisos/${(publication as any).sequentialId || publication.id}/${encodeURIComponent(publication.title)}`}
+                  onClick={() => window.location.href = `/adiso/${publication.id}`}
                   className="flex-1 flex items-center justify-center gap-2 bg-violet-600 hover:bg-violet-700 text-white py-3 px-2 rounded-lg font-semibold text-base shadow-md transition-all"
                 >
                   <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
