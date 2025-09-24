@@ -23,7 +23,7 @@ export default function ProtectedRoute({
         router.push('/');
       }
     }
-  }, [isAuthenticated, loading, requireAuth, router]);
+  }, [isAuthenticated, loading, requireAuth, router, pathname]);
 
   if (loading) {
     return (

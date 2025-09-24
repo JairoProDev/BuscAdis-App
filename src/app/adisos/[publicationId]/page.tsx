@@ -69,7 +69,7 @@ export default function OldAdisoRedirect() {
 
     fetchAndRedirect();
 
-  }, [id, publicationId, router]); // Añadir publicationId a las dependencias
+  }, [id, publicationId, router, pathname]); // Añadir publicationId a las dependencias y pathname para cumplir lint
   
   // Mostrar estado de carga o error mientras se procesa la redirección
   if (loading) {

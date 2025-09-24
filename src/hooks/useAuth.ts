@@ -26,7 +26,7 @@ export function useAuth() {
         if (token && !user && !isLoading) {
             fetchUser();
         }
-    }, [token, user, isLoading]);
+    }, [token, user, isLoading, fetchUser]);
 
     const login = async (credentials: LoginCredentials) => {
         try {
