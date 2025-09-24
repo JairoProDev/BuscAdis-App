@@ -171,7 +171,7 @@ export function PublicationDetailProvider({
 
   const goToPublicationPage = useCallback((publication: PublicationData) => {
     // Navigate directly to the dedicated page using window.location
-    const dedicatedUrl = `/anuncio/${publication.sequentialId || publication.id}`
+    const dedicatedUrl = `/adiso/${publication.sequentialId || publication.id}`
     window.location.href = dedicatedUrl
   }, [])
 

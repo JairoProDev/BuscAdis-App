@@ -16,9 +16,9 @@ const validCategories = [
 export default async function CategoryPublicationPage({ params }: CategoryPublicationPageProps) {
   const { category, id } = await params
   
-  // Si es 'anuncio' o 'adiso', redirigir a la ruta correcta
-  if (category === 'anuncio' || category === 'adiso') {
-    redirect(`/anuncio/${id}`)
+  // Si es 'adiso' o 'adiso', redirigir a la ruta correcta
+  if (category === 'adiso' || category === 'adiso') {
+    redirect(`/adiso/${id}`)
   }
   
   if (!validCategories.includes(category)) {
