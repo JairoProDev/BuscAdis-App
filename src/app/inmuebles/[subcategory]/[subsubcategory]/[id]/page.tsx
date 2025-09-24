@@ -348,7 +348,7 @@ export default function InmuebleDetailPage({ params }: { params: Promise<{ id: s
     };
 
     fetchPublication();
-  }, [params]);
+  }, []);
 
   if (loading) {
     return (

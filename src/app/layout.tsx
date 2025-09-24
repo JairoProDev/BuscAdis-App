@@ -52,8 +52,8 @@ export default function RootLayout({ children }: { children: ReactNode }) {
         <link rel="dns-prefetch" href="//res.cloudinary.com" />
         <link rel="dns-prefetch" href="//randomuser.me" />
         
-        {/* Service Worker registration script */}
-        <script
+        {/* Service Worker registration script - TEMPORARILY DISABLED */}
+        {/* <script
           dangerouslySetInnerHTML={{
             __html: `
               if ('serviceWorker' in navigator) {
@@ -69,12 +69,12 @@ export default function RootLayout({ children }: { children: ReactNode }) {
               }
             `,
           }}
-        />
+        /> */}
       </head>
       <body className={`${inter.className} antialiased`}>
-        {/* Google Analytics */}
-        <GoogleAnalytics measurementId={ANALYTICS_CONFIG.GOOGLE_ANALYTICS_ID} />
-        <PageViewTracker />
+        {/* Google Analytics - TEMPORARILY DISABLED */}
+        {/* <GoogleAnalytics measurementId={ANALYTICS_CONFIG.GOOGLE_ANALYTICS_ID} />
+        <PageViewTracker /> */}
         
         <ThemeProvider>
           <SearchProvider>

@@ -563,7 +563,7 @@ function SearchPageContent({ publicationsData, results, setResults, isLoading, s
       setSelectedSubSubcategory('')
       setActiveFilters({})
     }
-  }, [currentPathname, selectedCategory, selectedSubcategory, selectedSubSubcategory, setSelectedCategory, setSelectedSubcategory, setSelectedSubSubcategory, setActiveFilters, setHasSearched])
+  }, [currentPathname, selectedCategory, selectedSubcategory, selectedSubSubcategory])
 
   // Realizar búsqueda automática cuando cambie la categoría desde URL
   useEffect(() => {
@@ -624,7 +624,7 @@ function SearchPageContent({ publicationsData, results, setResults, isLoading, s
       
       searchDirectly()
     }
-  }, [selectedCategory, selectedSubcategory, selectedSubSubcategory, hasSearched, sortBy, lastSearchCategory, setIsLoading, setResults, setTotalCount, currentQuery])
+  }, [selectedCategory, selectedSubcategory, selectedSubSubcategory, hasSearched, sortBy, lastSearchCategory, currentQuery])
 
   // Cargar todas las categorías al montar el componente (Time To Value = 0)
   useEffect(() => {
@@ -714,7 +714,7 @@ function SearchPageContent({ publicationsData, results, setResults, isLoading, s
     };
     
     handleDeepLinking();
-  }, [currentPathname, results, selectedPublication, openPublicationDetail]);
+  }, [currentPathname, results, selectedPublication]);
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 via-blue-50/30 to-purple-50/30 dark:from-gray-900 dark:via-gray-900 dark:to-gray-800">

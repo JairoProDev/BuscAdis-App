@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { useParams, useRouter } from 'next/navigation';
+import { useParams, useRouter, usePathname } from 'next/navigation';
 import { PublicationsService } from '@/services/publications.service';
 import { generateSeoUrl } from '@/utils/url';
 import LoadingSpinner from '@/components/ui/LoadingSpinner';
@@ -10,6 +10,7 @@ import LoadingSpinner from '@/components/ui/LoadingSpinner';
 export default function OldAdisoRedirect() {
   const params = useParams();
   const router = useRouter();
+  const pathname = usePathname();
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   
@@ -48,9 +49,15 @@ export default function OldAdisoRedirect() {
         );
         
         console.log(`Redirecting legacy /adisos/${publicationId} to: ${correctUrl}`);
-        
-        // Redirect permanently (301) to the new URL
-        router.replace(correctUrl); 
+
+        // Avoid redirect loop: only redirect if URL actually changes
+        const normalize = (url: string) => url.replace(/\/$/, '');
+        if (normalize(pathname || '') !== normalize(correctUrl)) {
+          router.replace(correctUrl);
+        } else {
+          // Already at the correct URL; stop loading to prevent flicker
+          setLoading(false);
+        }
         // No establecer setLoading(false) aquí, la redirección se encarga.
         
       } catch (err) {
