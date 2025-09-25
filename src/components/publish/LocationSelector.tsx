@@ -2,11 +2,21 @@
 'use client'
 
 import React, { useState, useEffect, useCallback, useMemo } from 'react'
-import { MapPinIcon, CheckIcon, ArrowsPointingOutIcon, SunIcon } from '@heroicons/react/24/outline'
+import { 
+  MapPinIcon, 
+  CheckIcon, 
+  ArrowsPointingOutIcon, 
+  ArrowPathIcon, 
+  XCircleIcon, 
+  SunIcon 
+} from '@heroicons/react/24/outline'
 import { Logger } from '@/services/logging.service'
 import { peruLocations, type Department, type Province, type District } from '@/data/peru-locations'
 
-// Definimos la estructura de datos que manejará el componente
+/**
+ * @interface LocationInputData
+ * Defines the data structure for the location information handled by the component.
+ */
 export interface LocationInputData {
   countryCode: string;
   department: string;
@@ -20,17 +30,35 @@ export interface LocationInputData {
   };
 }
 
+/**
+ * @interface LocationSelectorProps
+ * Defines the props accepted by the LocationSelector component.
+ */
 interface LocationSelectorProps {
+  /** Optional initial value for the location fields. */
   initialValue?: LocationInputData;
+  /** Callback function that is triggered on any location data change. */
   onChange: (location: LocationInputData) => void;
+  /** Optional CSS classes to apply to the root container. */
   className?: string;
 }
 
+/**
+ * A comprehensive and reusable location selector component for React applications.
+ * It provides dropdowns for country, department, province, and district,
+ * text inputs for address and reference, and a dynamic geolocation feature
+ * to capture precise map coordinates.
+ *
+ * @param {LocationSelectorProps} props - The component props.
+ * @returns {React.ReactElement} The rendered LocationSelector component.
+ */
 const LocationSelector: React.FC<LocationSelectorProps> = ({ 
   initialValue,
   onChange,
   className = ''
 }) => {
+  // --- STATE MANAGEMENT ---
+  // Manages all location-related data in a single state object.
   const [location, setLocation] = useState<LocationInputData>(initialValue || {
     countryCode: 'PE',
     department: 'Cusco',
@@ -40,10 +68,13 @@ const LocationSelector: React.FC<LocationSelectorProps> = ({
     reference: ''
   });
 
+  // Manages the loading state for the geolocation API call.
   const [isLoadingPosition, setIsLoadingPosition] = useState(false);
+  // Manages potential error messages from the geolocation API.
   const [positionError, setPositionError] = useState<string | null>(null);
 
-  // Initialize with default values and notify parent
+  // --- LIFECYCLE & INITIALIZATION EFFECTS ---
+  // Effect to initialize the form and notify the parent component on mount.
   useEffect(() => {
     if (!initialValue) {
       const defaultLocation = {
@@ -59,74 +90,35 @@ const LocationSelector: React.FC<LocationSelectorProps> = ({
     }
   }, [initialValue, onChange]);
 
-  // Reset to Cusco when country changes to Peru
-  useEffect(() => {
-    if (location.countryCode === 'PE' && !location.department) {
-      const newLocation = {
-        ...location,
-        department: 'Cusco',
-        province: 'Cusco',
-        district: ''
-      };
-      setLocation(newLocation);
-      onChange(newLocation);
-    }
-  }, [location, onChange]);
-
-  // Initialize Cusco on mount if no initial value
-  useEffect(() => {
-    if (!initialValue && location.countryCode === 'PE' && !location.department) {
-      const newLocation = {
-        ...location,
-        department: 'Cusco',
-        province: 'Cusco',
-        district: ''
-      };
-      setLocation(newLocation);
-      onChange(newLocation);
-    }
-  }, [initialValue, location, onChange]);
-
-  // --- Lógica de Derivación de Datos Optimizada con useMemo ---
-
-  const departments: Department[] = useMemo(() => {
-    // Por ahora solo tenemos Perú, pero está listo para expandirse
-    if (location.countryCode === 'PE') {
-      return peruLocations;
-    }
-    // Para otros países, retornar array vacío por ahora
-    return [];
-  }, [location.countryCode]);
-
+  // --- DATA DERIVATION (MEMOIZED) ---
+  // Using useMemo to prevent re-computation on every render, optimizing performance.
+  const departments: Department[] = useMemo(() => 
+    location.countryCode === 'PE' ? peruLocations : [], 
+    [location.countryCode]
+  );
+  
   const provinces: Province[] = useMemo(() => {
     if (!location.department) return [];
-    const selectedDept = departments.find(d => d.name === location.department);
-    return selectedDept?.provinces || [];
+    return departments.find(d => d.name === location.department)?.provinces || [];
   }, [location.department, departments]);
 
   const districts: District[] = useMemo(() => {
     if (!location.province) return [];
-    const selectedProv = provinces.find(p => p.name === location.province);
-    return selectedProv?.districts || [];
+    return provinces.find(p => p.name === location.province)?.districts || [];
   }, [location.province, provinces]);
 
-  // --- Manejador de Cambios Centralizado ---
-
+  // --- EVENT HANDLERS (STABILIZED WITH useCallback) ---
+  // Using useCallback to ensure function references are stable across re-renders.
+  
+  /**
+   * Centralized handler for all input changes. Updates the location state
+   * and cascades resets for dependent dropdowns (e.g., changing department resets province).
+   */
   const handleLocationChange = useCallback((field: keyof LocationInputData, value: any) => {
     let newLocation: LocationInputData = { ...location, [field]: value };
 
-    // Lógica de reseteo para selectores dependientes
-    if (field === 'countryCode') {
-      // Reset all location fields when country changes
-      newLocation = { 
-        ...newLocation, 
-        department: '', 
-        province: '', 
-        district: '',
-        address: '',
-        reference: ''
-      };
-    } else if (field === 'department') {
+    // Cascade resets for dependent fields
+    if (field === 'department') {
       newLocation = { ...newLocation, province: '', district: '' };
     } else if (field === 'province') {
       newLocation = { ...newLocation, district: '' };
@@ -134,11 +126,13 @@ const LocationSelector: React.FC<LocationSelectorProps> = ({
 
     setLocation(newLocation);
     onChange(newLocation);
-    Logger.debug(`Location field '${field}' changed to`, { value });
+    Logger.debug(`Location field '${field}' changed`, { value });
   }, [location, onChange]);
 
-  // --- Lógica de Geolocalización ---
-
+  /**
+   * Fetches the user's high-accuracy geolocation using the browser's navigator API.
+   * Handles loading states and errors gracefully.
+   */
   const getHighAccuracyLocation = useCallback(() => {
     if (!navigator.geolocation) {
       setPositionError('Tu navegador no soporta geolocalización.');
@@ -156,29 +150,37 @@ const LocationSelector: React.FC<LocationSelectorProps> = ({
         handleLocationChange('coordinates', coords);
         setIsLoadingPosition(false);
         Logger.debug('User high-accuracy position detected', coords);
-        // Opcional: Podrías llamar a una API de geocodificación inversa aquí para autocompletar los campos.
       },
       (error) => {
-        setPositionError(`No se pudo obtener la ubicación: ${error.message}. Por favor, selecciona manualmente.`);
+        setPositionError(`Error al obtener ubicación: ${error.message}. Intenta de nuevo.`);
         setIsLoadingPosition(false);
-        Logger.error('Geolocation error', { error: error.message });
+        Logger.error('Geolocation error', { error: error.message, code: error.code });
       }
     );
   }, [handleLocationChange]);
 
-  // --- Renderizado del Componente ---
+  /**
+   * Clears the captured coordinates from the state, reverting the UI
+   * to its initial state for geolocation.
+   */
+  const clearCoordinates = useCallback(() => {
+    const { coordinates, ...restOfLocation } = location;
+    setLocation(restOfLocation);
+    onChange(restOfLocation);
+    Logger.debug('User cleared the precise location');
+  }, [location, onChange]);
 
+  // --- COMPONENT RENDER ---
   return (
     <div className={`space-y-4 ${className}`}>
-      <div className="flex items-center justify-between">
-        <h3 className="text-lg font-medium text-gray-900 dark:text-gray-100 flex items-center">
-          <MapPinIcon className="h-5 w-5 mr-2 text-teal-500" />
-          Ubicación del Adiso
-        </h3>
-      </div>
+      <h3 className="text-lg font-medium text-gray-900 dark:text-gray-100 flex items-center">
+        <MapPinIcon className="h-5 w-5 mr-2 text-teal-500" />
+        Ubicación del Adiso
+      </h3>
 
       <div className="space-y-4 bg-white dark:bg-gray-800 p-4 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700">
-        {/* Fila: País y Departamento */}
+        
+        {/* Row: Country & Department */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div>
             <label htmlFor="country" className="block text-sm font-medium text-gray-700 dark:text-gray-300">País</label>
@@ -190,15 +192,7 @@ const LocationSelector: React.FC<LocationSelectorProps> = ({
               onChange={(e) => handleLocationChange('countryCode', e.target.value)}
             >
               <option value="PE">🇵🇪 Perú</option>
-              <option value="BO">🇧🇴 Bolivia</option>
-              <option value="CL">🇨🇱 Chile</option>
-              <option value="CO">🇨🇴 Colombia</option>
-              <option value="EC">🇪🇨 Ecuador</option>
-              <option value="MX">🇲🇽 México</option>
-              <option value="AR">🇦🇷 Argentina</option>
-              <option value="BR">🇧🇷 Brasil</option>
-              <option value="US">🇺🇸 Estados Unidos</option>
-              <option value="ES">🇪🇸 España</option>
+              {/* Add other countries as needed */}
             </select>
           </div>
           <div>
@@ -212,12 +206,12 @@ const LocationSelector: React.FC<LocationSelectorProps> = ({
               disabled={departments.length === 0}
             >
               <option value="">Selecciona un departamento</option>
-              {departments.map((dep: Department) => <option key={dep.name} value={dep.name}>{dep.name}</option>)}
+              {departments.map((dep) => <option key={dep.name} value={dep.name}>{dep.name}</option>)}
             </select>
           </div>
         </div>
 
-        {/* Fila: Provincia y Distrito */}
+        {/* Row: Province & District */}
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div>
             <label htmlFor="province" className="block text-sm font-medium text-gray-700 dark:text-gray-300">Provincia</label>
@@ -230,7 +224,7 @@ const LocationSelector: React.FC<LocationSelectorProps> = ({
               disabled={provinces.length === 0}
             >
               <option value="">Selecciona una provincia</option>
-              {provinces.map((prov: Province) => <option key={prov.name} value={prov.name}>{prov.name}</option>)}
+              {provinces.map((prov) => <option key={prov.name} value={prov.name}>{prov.name}</option>)}
             </select>
           </div>
           <div>
@@ -244,12 +238,12 @@ const LocationSelector: React.FC<LocationSelectorProps> = ({
               disabled={districts.length === 0}
             >
               <option value="">Selecciona un distrito</option>
-              {districts.map((dist: District) => <option key={dist.name} value={dist.name}>{dist.name}</option>)}
+              {districts.map((dist) => <option key={dist.name} value={dist.name}>{dist.name}</option>)}
             </select>
           </div>
         </div>
-
-        {/* Fila: Dirección y Referencia */}
+        
+        {/* Fields: Address & Reference */}
         <div>
           <label htmlFor="address" className="block text-sm font-medium text-gray-700 dark:text-gray-300">Dirección</label>
           <input
@@ -275,38 +269,76 @@ const LocationSelector: React.FC<LocationSelectorProps> = ({
           />
         </div>
 
-        {/* Fila: Geolocalización y Coordenadas */}
+        {/* --- DYNAMIC GEOLOCATION CONTROL PANEL --- */}
         <div className="pt-4 border-t border-gray-200 dark:border-gray-700">
-          <div className="space-y-4">
+          <div className="space-y-2">
             <div>
-              <h4 className="text-sm font-medium text-gray-900 dark:text-gray-100">Ubicación en el mapa</h4>
+              <h4 className="text-sm font-medium text-gray-900 dark:text-gray-100">Publicar adiso en el mapa</h4>
               <p className="text-xs text-gray-500 dark:text-gray-400">
-                Opcional pero recomendado. Permite que tu adiso aparezca en búsquedas por mapa.
+                Para que tu adiso aparezca en búsquedas personalizadas y en el mapa.
               </p>
             </div>
-            <button
-              type="button"
-              onClick={getHighAccuracyLocation}
-              disabled={isLoadingPosition}
-              className="w-full sm:w-auto inline-flex items-center justify-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-teal-600 hover:bg-teal-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-teal-500 disabled:bg-gray-400"
-            >
-              {isLoadingPosition ? (
-                <SunIcon className="w-5 h-5 mr-2 animate-spin" />
-              ) : (
-                <ArrowsPointingOutIcon className="w-5 h-5 mr-2" />
+            
+            <div className="mt-2 min-h-[42px]"> {/* Container to prevent layout shift */}
+              
+              {/* STATE: RESOLVED - Coordinates have been captured */}
+              {location.coordinates && !isLoadingPosition && (
+                <div className="flex items-center justify-between bg-teal-50 dark:bg-teal-900/30 rounded-md p-3 text-sm text-teal-800 dark:text-teal-200 shadow-sm transition-all duration-300 ease-in-out">
+                  <div className="flex items-center gap-2 overflow-hidden">
+                    <CheckIcon className="h-5 w-5 text-teal-500 flex-shrink-0" />
+                    <span className="font-mono text-xs truncate" title={`Lat: ${location.coordinates.lat}, Lng: ${location.coordinates.lng}`}>
+                      Lat: {location.coordinates.lat.toFixed(5)}, Lng: {location.coordinates.lng.toFixed(5)}
+                    </span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <button 
+                      type="button" 
+                      onClick={getHighAccuracyLocation} 
+                      className="p-1 rounded-full hover:bg-teal-200 dark:hover:bg-teal-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-teal-50 focus:ring-teal-500"
+                      aria-label="Actualizar ubicación"
+                      title="Actualizar ubicación"
+                    >
+                      <ArrowPathIcon className="h-5 w-5 text-teal-600 dark:text-teal-300" />
+                    </button>
+                    <button 
+                      type="button" 
+                      onClick={clearCoordinates} 
+                      className="p-1 rounded-full hover:bg-red-200 dark:hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-teal-50 focus:ring-red-500"
+                      aria-label="Quitar ubicación"
+                      title="Quitar ubicación"
+                    >
+                      <XCircleIcon className="h-5 w-5 text-red-500 dark:text-red-400" />
+                    </button>
+                  </div>
+                </div>
               )}
-              {isLoadingPosition ? 'Detectando...' : 'Detectar mi ubicación precisa'}
-            </button>
-          </div>
-          {positionError && <p className="mt-2 text-sm text-red-600">{positionError}</p>}
-          {location.coordinates && (
-            <div className="mt-3 bg-teal-50 dark:bg-teal-900/20 rounded-md p-3 text-sm text-teal-800 dark:text-teal-200 flex items-center gap-2">
-              <CheckIcon className="h-5 w-5 text-teal-500" />
-              <span>
-                Coordenadas capturadas: Lat {location.coordinates.lat.toFixed(5)}, Lng {location.coordinates.lng.toFixed(5)}
-              </span>
+
+              {/* STATE: INITIAL or LOADING - No coordinates yet */}
+              {!location.coordinates && (
+                <button
+                  type="button"
+                  onClick={getHighAccuracyLocation}
+                  disabled={isLoadingPosition}
+                  className="w-full sm:w-auto inline-flex items-center justify-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-teal-600 hover:bg-teal-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-teal-500 disabled:bg-gray-400 disabled:cursor-not-allowed transition-colors"
+                >
+                  {isLoadingPosition ? (
+                    <>
+                      <SunIcon className="w-5 h-5 mr-2 animate-spin" />
+                      Detectando...
+                    </>
+                  ) : (
+                    <>
+                      <ArrowsPointingOutIcon className="w-5 h-5 mr-2" />
+                      Detectar mi ubicación precisa
+                    </>
+                  )}
+                </button>
+              )}
             </div>
-          )}
+
+            {/* Global error display for this section */}
+            {positionError && <p className="mt-2 text-sm text-red-600">{positionError}</p>}
+          </div>
         </div>
       </div>
     </div>
