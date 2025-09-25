@@ -1,34 +1,20 @@
 import { NextResponse } from 'next/server';
-import { mongoDbQuery } from '@/lib/mongodb-server';
+import { fetchLatestMagazine } from '@/features/magazine/services/magazine.service';
 
 export async function GET() {
   try {
-    // Find all magazines ordered by creation date (newest first)
-    const magazineResults = await mongoDbQuery('magazines', {}, { 
-      sort: { createdAt: -1 } 
-    });
-    const magazines = Array.isArray(magazineResults) ? magazineResults : [];
+    const latestMagazine = await fetchLatestMagazine();
     
-    if (magazines.length === 0) {
-      return NextResponse.json({ magazines: [] });
+    if (!latestMagazine) {
+      return NextResponse.json({ message: 'No magazines found' }, { status: 404 });
     }
     
-    // Transform to the expected interface
-    const formattedMagazines = magazines.map(magazine => ({
-      _id: magazine._id?.toString() || '',
-      pdfUrl: magazine.pdfUrl,
-      fileId: magazine.fileId?.toString() || '',
-      publicationCount: magazine.publicationCount,
-      createdAt: magazine.createdAt,
-      filename: magazine.filename
-    }));
-    
-    return NextResponse.json({ magazines: formattedMagazines });
+    return NextResponse.json({ magazine: latestMagazine });
   } catch (error) {
-    console.error('[Magazine API] Error fetching magazines:', error);
+    console.error('[Magazine API] Error fetching latest magazine:', error);
     return NextResponse.json(
-      { message: 'Error fetching magazines', error: (error as Error).message },
+      { message: 'Error fetching latest magazine', error: (error as Error).message },
       { status: 500 }
     );
   }
-} 
+}

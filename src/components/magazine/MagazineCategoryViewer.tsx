@@ -154,20 +154,24 @@ export default function MagazineCategoryViewer({ categoryId }: CategoryViewerPro
       setIsGenerating(true);
       setError(null);
       
-      const response = await fetch(`/api/magazine/generate-category/${categoryId}`, {
+      const response = await fetch('/api/magazine/generate', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'
-        }
+        },
+        body: JSON.stringify({ categoryId })
       });
       
       if (!response.ok) {
-        throw new Error('Error al generar la revista');
+        const errorData = await response.json();
+        throw new Error(errorData.message || 'Error al generar la revista');
       }
       
       const data = await response.json();
       
-      if (data.success) {
+      if (data.fileId && data.pdfUrl) {
+        // Trigger download of the generated PDF
+        window.location.href = data.pdfUrl;
         setMagazine({
           _id: data.magazineId,
           categoryId: data.categoryId,

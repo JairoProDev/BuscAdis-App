@@ -48,6 +48,9 @@ export interface Publication {
   // --- Clasificación Jerárquica ---
   categorySlug: string; // Slug categoría (Obligatorio, ej: 'inmuebles')
   subcategorySlug: string; // Slug subcategoría (Obligatorio, ej: 'departamentos')
+  
+  // --- Precio y Detalles Comerciales ---
+  price?: number | null; // Precio en soles (puede ser null para "a consultar")
   subSubcategorySlug?: string | null; // Slug sub-subcategoría (Opcional, ej: 'duplex')
 
   // --- Precio / Valor ---
