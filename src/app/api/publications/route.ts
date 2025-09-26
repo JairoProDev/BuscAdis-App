@@ -56,7 +56,8 @@ export async function GET(request: Request) {
     const sortBy = searchParams.get('sortBy') || 'publicationDate'
     const page = parseInt(searchParams.get('page') || '1')
     const limit = parseInt(searchParams.get('limit') || '20')
-    const status = searchParams.get('status') || 'active'
+    // Important: do NOT force a default status in production. Only filter when explicitly provided.
+    const status = searchParams.get('status') || ''
     const premium = searchParams.get('premium') || ''
 
     Logger.debug('Search parameters', { 
@@ -105,6 +106,7 @@ export async function GET(request: Request) {
     }
 
     const mongoQuery = buildQuery()
+    Logger.debug('Mongo query for /api/publications', { mongoQuery })
 
     const collection = db.collection(UNIFIED_COLLECTION)
 
@@ -164,7 +166,8 @@ export async function GET(request: Request) {
       total: totalCount, 
       page, 
       category: category || 'all',
-      searchQuery 
+      searchQuery,
+      appliedQuery: mongoQuery
     })
 
     return NextResponse.json({

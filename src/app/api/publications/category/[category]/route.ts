@@ -59,7 +59,8 @@ export async function GET(
     const sortBy = searchParams.get('sortBy') || 'recent'
     const page = parseInt(searchParams.get('page') || '1')
     const limit = parseInt(searchParams.get('limit') || '20')
-    const status = searchParams.get('status') || 'active'
+    // Do not force default status; only filter if provided
+    const status = searchParams.get('status') || ''
     const premium = searchParams.get('premium') || ''
 
     Logger.debug('Search parameters', {
@@ -170,6 +171,7 @@ export async function GET(
 
     // Execute query
     const skip = (page - 1) * limit
+    Logger.debug('Mongo query for /api/publications/category', { query })
     const [publications, total] = await Promise.all([
       collection.find(query).sort(sort).skip(skip).limit(limit).toArray(),
       collection.countDocuments(query)
