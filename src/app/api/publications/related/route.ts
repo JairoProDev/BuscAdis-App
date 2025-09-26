@@ -1,40 +1,46 @@
 import { NextResponse } from 'next/server'
-import { mongoDbQuery } from '@/lib/mongodb-server'
+import { MongoClient, Db } from 'mongodb'
+import { Logger } from '@/services/logging.service'
 
 export const dynamic = 'force-dynamic' // Disable caching to ensure data is always fresh
 export const runtime = 'nodejs' // Mark as server-side only
 
-// Debug flag
-const DEBUG = true;
+// Configuración de MongoDB
+const MONGODB_URI = process.env.MONGODB_URI!
+const MONGODB_DB = process.env.MONGODB_DB || 'buscadis'
+const UNIFIED_COLLECTION = 'adisos'
 
-function logDebug(message: string, data?: unknown) {
-  if (DEBUG) {
-    console.log(`[Related Publications API Debug] ${message}`, data ? data : '');
+// Cache de conexión
+let cachedClient: MongoClient | null = null
+let cachedDb: Db | null = null
+
+async function connectToDatabase() {
+  if (cachedClient && cachedDb) {
+    return { client: cachedClient, db: cachedDb }
+  }
+
+  try {
+    const client = new MongoClient(MONGODB_URI)
+    await client.connect()
+    
+    const db = client.db(MONGODB_DB)
+    
+    cachedClient = client
+    cachedDb = db
+    
+    Logger.info('Connected to MongoDB successfully')
+    return { client, db }
+  } catch (error) {
+    Logger.error('Failed to connect to MongoDB', { error })
+    throw error
   }
 }
-
-function logError(message: string, error: unknown) {
-  console.error(`[Related Publications API Error] ${message}:`, error);
-  if (error && typeof error === 'object' && 'stack' in error) {
-    console.error('Stack:', (error as Error).stack);
-  }
-}
-
-// Mapeo de categorías a colecciones
-const CATEGORY_COLLECTIONS: Record<string, string> = {
-  empleos: 'publications_empleos',
-  inmuebles: 'publications_inmuebles',
-  vehiculos: 'publications_vehiculos',
-  servicios: 'publications_servicios',
-  productos: 'publications_productos',
-  eventos: 'publications_eventos',
-  negocios: 'publications_negocios',
-  comunidad: 'publications_comunidad',
-};
 
 // Endpoint para obtener publicaciones relacionadas
 export async function GET(request: Request) {
   try {
+    Logger.debug('GET /api/publications/related received')
+    
     // Obtener parámetros de la consulta
     const url = new URL(request.url);
     const category = url.searchParams.get('category');
@@ -49,51 +55,44 @@ export async function GET(request: Request) {
       );
     }
     
-    // Verificar si la categoría existe
-    if (!(category in CATEGORY_COLLECTIONS)) {
-      return NextResponse.json(
-        { error: `Invalid category: ${category}` },
-        { status: 400 }
-      );
-    }
+    // Conectar a la base de datos
+    const { db } = await connectToDatabase()
+    const collection = db.collection(UNIFIED_COLLECTION)
     
-    // Obtener la colección correspondiente a la categoría
-    const collectionName = CATEGORY_COLLECTIONS[category];
+    // Crear la consulta para excluir la publicación actual y filtrar por categoría
+    const query: Record<string, unknown> = {
+      category: category // Filtrar por categoría (empleos, inmuebles, etc.)
+    };
     
-    // Crear la consulta para excluir la publicación actual
-    const query: Record<string, unknown> = {};
     if (excludeId) {
-      query.id = { $ne: excludeId };
+      query._id = { $ne: excludeId };
     }
     
     // Determinar el límite de resultados
     const limit = limitParam ? parseInt(limitParam, 10) : 6;
     
-    logDebug(`Buscando publicaciones relacionadas en categoría ${category}`, {
-      collection: collectionName,
+    Logger.debug('Related publications query', {
+      category,
       excludeId,
-      limit
+      limit,
+      query
     });
     
     // Ejecutar la consulta
-    const results = await mongoDbQuery(
-      collectionName,
-      query,
-      {
-        limit,
-        sort: { created_at: -1 } // Ordenar por fecha de creación, más recientes primero
-      }
-    );
+    const results = await collection
+      .find(query)
+      .sort({ createdAt: -1 }) // Ordenar por fecha de creación, más recientes primero
+      .limit(limit)
+      .toArray();
     
-    if (!Array.isArray(results)) {
-      return NextResponse.json([]);
-    }
-    
-    logDebug(`Se encontraron ${results.length} publicaciones relacionadas`);
+    Logger.info(`Found ${results.length} related publications for category ${category}`, {
+      category,
+      total: results.length
+    });
     
     return NextResponse.json(results);
   } catch (error) {
-    logError('Error al obtener publicaciones relacionadas', error);
+    Logger.error('Error al obtener publicaciones relacionadas', { error });
     
     // En caso de error, devolver un array vacío para no romper la UI
     return NextResponse.json(

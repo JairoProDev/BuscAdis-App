@@ -1,9 +1,41 @@
 import { NextResponse } from 'next/server'
-import { mongoDbQuery } from '@/lib/mongodb-server'
+import { MongoClient, Db } from 'mongodb'
+import { Logger } from '@/services/logging.service'
 import type { PublicationDocument } from '@/types/api'
 
 export const dynamic = 'force-dynamic' // Disable caching to ensure data is always fresh
 export const runtime = 'nodejs' // Mark as server-side only
+
+// Configuración de MongoDB
+const MONGODB_URI = process.env.MONGODB_URI!
+const MONGODB_DB = process.env.MONGODB_DB || 'buscadis'
+const UNIFIED_COLLECTION = 'adisos'
+
+// Cache de conexión
+let cachedClient: MongoClient | null = null
+let cachedDb: Db | null = null
+
+async function connectToDatabase() {
+  if (cachedClient && cachedDb) {
+    return { client: cachedClient, db: cachedDb }
+  }
+
+  try {
+    const client = new MongoClient(MONGODB_URI)
+    await client.connect()
+    
+    const db = client.db(MONGODB_DB)
+    
+    cachedClient = client
+    cachedDb = db
+    
+    Logger.info('Connected to MongoDB successfully')
+    return { client, db }
+  } catch (error) {
+    Logger.error('Failed to connect to MongoDB', { error })
+    throw error
+  }
+}
 
 export async function GET(
   request: Request,
@@ -20,59 +52,45 @@ export async function GET(
       )
     }
     
-    // Search across all publication collections
-    const collections = [
-      'publications_inmuebles',
-      'publications_vehiculos', 
-      'publications_empleos',
-      'publications_servicios',
-      'publications_productos',
-      'publications_eventos',
-      'publications_negocios',
-      'publications_comunidad'
-    ]
+    Logger.debug('GET /api/users/[userId]/publications received', { userId })
     
-    const allPublications: PublicationDocument[] = []
+    const { db } = await connectToDatabase()
+    const collection = db.collection(UNIFIED_COLLECTION)
     
-    for (const collectionName of collections) {
-      try {
-        const publicationsResult = await mongoDbQuery(collectionName, { 
-          $or: [
-            { userId: userId },
-            { 'contact.userId': userId },
-            { 'contact.email': userId } // In case userId is actually an email
-          ]
-        }, { sort: { createdAt: -1 } })
-        
-        const publications = Array.isArray(publicationsResult) ? publicationsResult : []
-        
-        // Add category information to each publication
-        const category = collectionName.replace('publications_', '')
-        const categorizedPublications = publications.map((pub) => ({
-          ...(pub as unknown as PublicationDocument),
-          id: pub._id?.toString?.() ?? '',
-          categoryString: category, // don't overwrite the object 'category' if it exists
-          collection: collectionName
-        }))
-        
-        allPublications.push(...categorizedPublications)
-      } catch (error) {
-        console.log(`Error searching in ${collectionName}:`, error)
-        continue
-      }
+    // Search in unified collection for user publications
+    const query = { 
+      $or: [
+        { userId: userId },
+        { 'contact.userId': userId },
+        { 'contact.email': userId } // In case userId is actually an email
+      ]
     }
     
-    // Sort all publications by creation date
-    allPublications.sort((a, b) => 
-      new Date((a as { createdAt?: string | Date })?.createdAt ?? 0).getTime() - new Date((b as { createdAt?: string | Date })?.createdAt ?? 0).getTime()
-    )
+    Logger.debug('User publications query', { userId, query })
+    
+    const publications = await collection
+      .find(query)
+      .sort({ createdAt: -1 })
+      .toArray()
+    
+    const formattedPublications = publications.map((pub) => ({
+      ...(pub as unknown as PublicationDocument),
+      id: pub._id?.toString?.() ?? '',
+      categoryString: pub.category || '',
+      collection: UNIFIED_COLLECTION
+    }))
+    
+    Logger.info(`Found ${formattedPublications.length} publications for user ${userId}`, {
+      userId,
+      total: formattedPublications.length
+    })
     
     return NextResponse.json({
-      publications: allPublications,
-      total: allPublications.length
+      publications: formattedPublications,
+      total: formattedPublications.length
     })
   } catch (error) {
-    console.error('Error fetching user publications:', error)
+    Logger.error('Error fetching user publications', { error, userId })
     return NextResponse.json(
       { error: 'Internal server error' },
       { status: 500 }
