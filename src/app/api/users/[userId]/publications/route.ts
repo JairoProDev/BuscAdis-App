@@ -41,9 +41,9 @@ export async function GET(
   request: Request,
   context: { params: Promise<{ userId: string }> }
 ) {
+  const params = await context.params
+  const { userId } = params
   try {
-    const params = await context.params
-    const { userId } = params
     
     if (!userId) {
       return NextResponse.json(

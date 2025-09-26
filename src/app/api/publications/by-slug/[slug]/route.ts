@@ -40,8 +40,8 @@ export async function GET(
   request: NextRequest,
   context: { params: Promise<{ slug: string }> }
 ) {
+  const { slug } = await context.params;
   try {
-    const { slug } = await context.params;
     
     if (!slug) {
       return NextResponse.json(
@@ -64,15 +64,18 @@ export async function GET(
     });
 
     if (publication) {
-      // Convert ObjectId to string for JSON serialization
-      publication._id = publication._id.toString();
+      // Create a serialized copy without mutating the Mongo document types
+      const serialized = {
+        ...publication,
+        _id: (publication as { _id?: { toString?: () => string } })._id?.toString?.() ?? ''
+      } as Record<string, unknown>
       
       Logger.info(`Found publication by slug: ${slug}`, {
-        id: publication._id,
-        category: publication.category
+        id: serialized._id as string,
+        category: (serialized.category as string) || ''
       });
       
-      return NextResponse.json(publication);
+      return NextResponse.json(serialized);
     } else {
       Logger.info(`Publication not found by slug: ${slug}`);
       return NextResponse.json({ error: 'Publicación no encontrada' }, { status: 404 });
