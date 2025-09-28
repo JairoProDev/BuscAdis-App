@@ -279,14 +279,15 @@ cp data/pdfs-originales/2023-01-15_revista_cusco_01.pdf data/pdfs-test/
 ### Base de Datos
 ```
 buscadis/
-├── publications_inmuebles     (8,245 docs)
-├── publications_empleos       (6,780 docs)
-├── publications_vehiculos     (4,890 docs)
-├── publications_servicios     (3,450 docs)
-├── publications_productos     (2,890 docs)
-├── publications_eventos       (1,890 docs)
-├── publications_comunidad     (1,120 docs)
-└── publications_negocios      (611 docs)
+└── adisos                     (29,876 docs - unified collection)
+    ├── category: inmuebles     (8,245 docs)
+    ├── category: empleos       (6,780 docs)
+    ├── category: vehiculos     (4,890 docs)
+    ├── category: servicios     (3,450 docs)
+    ├── category: productos     (2,890 docs)
+    ├── category: eventos       (1,890 docs)
+    ├── category: comunidad     (1,120 docs)
+    └── category: negocios      (611 docs)
 ```
 
 ### Documento de Ejemplo
@@ -298,7 +299,9 @@ buscadis/
   "description": "Hermosa casa colonial de 3 habitaciones...",
   "slug": "casa-venta-san-blas-3-habitaciones",
   
+  "category": "inmuebles",
   "categorySlug": "inmuebles",
+  "subcategory": "casas",
   "subcategorySlug": "casas",
   
   "location": "San Blas, Cusco",

@@ -153,71 +153,64 @@ export async function GET(request: Request) {
           count: item.count as number
         })))
 
-        // 2. Sugerencias de títulos de publicaciones existentes
-        const CATEGORY_COLLECTIONS = {
-          inmuebles: 'publications_inmuebles',
-          empleos: 'publications_empleos', 
-          vehiculos: 'publications_vehiculos',
-          servicios: 'publications_servicios',
-          productos: 'publications_productos',
-          eventos: 'publications_eventos',
-          comunidad: 'publications_comunidad',
-          negocios: 'publications_negocios'
-        }
-
-        const collections = category && CATEGORY_COLLECTIONS[category as keyof typeof CATEGORY_COLLECTIONS]
-          ? [CATEGORY_COLLECTIONS[category as keyof typeof CATEGORY_COLLECTIONS]]
-          : Object.values(CATEGORY_COLLECTIONS)
-
-        for (const collectionName of collections.slice(0, 3)) { // Limitar a 3 colecciones para performance
-          try {
-            const collection = db.collection(collectionName)
-            
-            const publicationSuggestions = await collection.aggregate([
-              {
-                $match: {
-                  $or: [
-                    { title: { $regex: query, $options: 'i' } },
-                    { description: { $regex: query, $options: 'i' } }
-                  ],
-                  status: 'active'
-                }
-              },
-              {
-                $project: {
-                  title: 1,
-                  words: { $split: ['$title', ' '] }
-                }
-              },
-              { $unwind: '$words' },
-              {
-                $match: {
-                  words: { $regex: `^${query}`, $options: 'i' }
-                }
-              },
-              {
-                $group: {
-                  _id: { $toLower: '$words' },
-                  count: { $sum: 1 },
-                  examples: { $addToSet: '$title' }
-                }
-              },
-              { $sort: { count: -1 } },
-              { $limit: 2 }
-            ]).toArray()
-
-            suggestions.push(...publicationSuggestions.map((item: Record<string, unknown>): Suggestion => ({
-              id: `word-${item._id as string}`,
-              text: item._id as string,
-              type: 'ai',
-              score: item.count as number,
-              category: collectionName.replace('publications_', ''),
-              examples: (item.examples as string[]).slice(0, 2)
-            })))
-
-          } catch (err) {
-            console.warn(`Error searching in ${collectionName}:`, err)
+        // 2. Sugerencias de títulos de publicaciones existentes desde la colección unificada
+        try {
+          const collection = db.collection('adisos')
+          
+          // Construir filtro de categoría si se especifica
+          const matchFilter: Record<string, unknown> = {
+            $or: [
+              { title: { $regex: query, $options: 'i' } },
+              { description: { $regex: query, $options: 'i' } }
+            ],
+            status: 'active'
           }
+
+          // Agregar filtro de categoría si se especifica
+          if (category) {
+            matchFilter.category = category
+          }
+          
+          const publicationSuggestions = await collection.aggregate([
+            {
+              $match: matchFilter
+            },
+            {
+              $project: {
+                title: 1,
+                category: 1,
+                words: { $split: ['$title', ' '] }
+              }
+            },
+            { $unwind: '$words' },
+            {
+              $match: {
+                words: { $regex: `^${query}`, $options: 'i' }
+              }
+            },
+            {
+              $group: {
+                _id: { $toLower: '$words' },
+                count: { $sum: 1 },
+                examples: { $addToSet: '$title' },
+                categories: { $addToSet: '$category' }
+              }
+            },
+            { $sort: { count: -1 } },
+            { $limit: 5 }
+          ]).toArray()
+
+          suggestions.push(...publicationSuggestions.map((item: Record<string, unknown>): Suggestion => ({
+            id: `word-${item._id as string}`,
+            text: item._id as string,
+            type: 'ai',
+            score: item.count as number,
+            category: Array.isArray(item.categories) ? item.categories[0] as string : undefined,
+            examples: (item.examples as string[]).slice(0, 2)
+          })))
+
+        } catch (err) {
+          console.warn('Error searching in unified adisos collection:', err)
         }
 
       } catch (dbError) {
