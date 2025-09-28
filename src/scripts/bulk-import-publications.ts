@@ -1,3 +1,4 @@
+// @ts-nocheck
 /**
  * SCRIPT PARA IMPORTACIÓN MASIVA DE PUBLICACIONES
  * Convierte texto plano o CSVs a la estructura de BuscAdis

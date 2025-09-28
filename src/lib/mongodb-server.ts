@@ -44,7 +44,7 @@ export interface PublicationDocument extends MongoDbDocument {
 export interface MongoClientInterface {
   db: (name?: string) => Db;
   close: () => Promise<void>;
-  fetchPublications: (category: string, page?: number, limit?: number, filters?: PublicationFilters) => Promise<{ publications: PublicationDocument[]; totalCount: number }>;
+  fetchPublications: (category: string, page?: number, limit?: number, filters?: PublicationFilters) => Promise<{ publications: Document[]; totalCount: number }>;
   createPublication: (data: any) => Promise<PublicationDocument>;
   updatePublication: (id: string, data: any) => Promise<PublicationDocument | null>;
   deletePublication: (id: string) => Promise<boolean>;
@@ -163,6 +163,9 @@ export const getServerMongoClient = async (): Promise<MongoClientInterface> => {
 
 function createServerMongoClient(client: MongoClient, db: Db): MongoClientInterface {
   return {
+    db: (name?: string) => db,
+    close: async () => await client.close(),
+    
     async fetchPublications(
       category: string,
       page = 1,
@@ -206,69 +209,10 @@ function createServerMongoClient(client: MongoClient, db: Db): MongoClientInterf
       }
     },
     
-    async fetchPublicationById(id: string, category: string) {
-      try {
-        const collectionName = getCollectionName(category);
-        const collection = db.collection(collectionName);
-        return await collection.findOne({ _id: new ObjectId(id) });
-      } catch (error) {
-        LoggingService.getInstance().error('Error fetching publication by ID', { error: error instanceof Error ? error.message : String(error), id, category });
-        return null;
-      }
-    },
     
-    async fetchPublicationsByUser(userId: string) {
+    async createPublication(data: any) {
       try {
-        const allPublications: PublicationDocument[] = [];
-        
-        // Search across all category collections
-        for (const collectionName of Object.values(COLLECTIONS)) {
-          try {
-            const collection = db.collection(collectionName);
-            const publications = await collection
-              .find({ userId })
-              .sort({ createdAt: -1 })
-              .toArray();
-            
-            // Type guard to ensure documents have required properties and convert MongoDB _id to string
-            const validPublications = publications
-              .filter((doc): doc is Document & { _id: ObjectId; title: string; description: string; category: string } => 
-                doc && typeof doc === 'object' && 
-                '_id' in doc && doc._id instanceof ObjectId &&
-                'title' in doc && typeof doc.title === 'string' &&
-                'description' in doc && typeof doc.description === 'string' &&
-                ('category' in doc && typeof doc.category === 'string')
-              )
-              .map(doc => ({
-                ...doc,
-                _id: doc._id.toString(),
-                id: doc._id.toString(),
-                category: doc.category,
-                createdAt: doc.createdAt || new Date(),
-                updatedAt: doc.updatedAt || new Date()
-              } as PublicationDocument));
-            
-            allPublications.push(...validPublications);
-          } catch (err) {
-            LoggingService.getInstance().error(`Error fetching from ${collectionName}`, { error: err instanceof Error ? err.message : String(err), userId });
-          }
-        }
-        
-        // Sort by creation date
-        allPublications.sort((a, b) => 
-          new Date(b.createdAt as Date).getTime() - new Date(a.createdAt as Date).getTime()
-        );
-        
-        return allPublications;
-      } catch (error) {
-        LoggingService.getInstance().error('Error fetching publications by user', { error: error instanceof Error ? error.message : String(error), userId });
-        return [];
-      }
-    },
-    
-    async createPublication(data: PublicationDocument) {
-      try {
-        const collectionName = getCollectionName(data.categorySlug);
+        const collectionName = COLLECTIONS.ADISOS;
         const collection = db.collection(collectionName);
         
         const publicationData = {
@@ -279,16 +223,16 @@ function createServerMongoClient(client: MongoClient, db: Db): MongoClientInterf
         };
         
         const result = await collection.insertOne(publicationData);
-        return { ...publicationData, _id: result.insertedId };
+        return { ...publicationData, _id: result.insertedId } as PublicationDocument;
       } catch (error) {
         LoggingService.getInstance().error('Error creating publication', { error: error instanceof Error ? error.message : String(error), data });
         throw error;
       }
     },
     
-    async updatePublication(id: string, category: string, data: Partial<PublicationDocument>) {
+    async updatePublication(id: string, data: any) {
       try {
-        const collectionName = getCollectionName(category);
+        const collectionName = COLLECTIONS.ADISOS;
         const collection = db.collection(collectionName);
         
         const updateData = {
@@ -301,23 +245,59 @@ function createServerMongoClient(client: MongoClient, db: Db): MongoClientInterf
           { $set: updateData }
         );
         
-        return result.matchedCount > 0;
+        if (result.matchedCount > 0) {
+          return await collection.findOne({ _id: new ObjectId(id) }) as PublicationDocument | null;
+        }
+        return null;
       } catch (error) {
-        LoggingService.getInstance().error('Error updating publication', { error: error instanceof Error ? error.message : String(error), id, category });
+        LoggingService.getInstance().error('Error updating publication', { error: error instanceof Error ? error.message : String(error), id });
         throw error;
       }
     },
     
-    async deletePublication(id: string, category: string) {
+    async deletePublication(id: string) {
       try {
-        const collectionName = getCollectionName(category);
+        const collectionName = COLLECTIONS.ADISOS;
         const collection = db.collection(collectionName);
         
         const result = await collection.deleteOne({ _id: new ObjectId(id) });
         return result.deletedCount > 0;
       } catch (error) {
-        LoggingService.getInstance().error('Error deleting publication', { error: error instanceof Error ? error.message : String(error), id, category });
+        LoggingService.getInstance().error('Error deleting publication', { error: error instanceof Error ? error.message : String(error), id });
         throw error;
+      }
+    },
+
+    async getPublicationById(id: string) {
+      try {
+        const collectionName = COLLECTIONS.ADISOS;
+        const collection = db.collection(collectionName);
+        const result = await collection.findOne({ _id: new ObjectId(id) });
+        return result as PublicationDocument | null;
+      } catch (error) {
+        LoggingService.getInstance().error('Error getting publication by ID', { error: error instanceof Error ? error.message : String(error), id });
+        return null;
+      }
+    },
+
+    async searchPublications(query: string, filters: PublicationFilters = {}) {
+      try {
+        const collectionName = COLLECTIONS.ADISOS;
+        const collection = db.collection(collectionName);
+        
+        const searchQuery = {
+          ...buildQuery(filters),
+          $or: [
+            { title: { $regex: query, $options: 'i' } },
+            { description: { $regex: query, $options: 'i' } }
+          ]
+        };
+        
+        const results = await collection.find(searchQuery).limit(20).toArray();
+        return results as PublicationDocument[];
+      } catch (error) {
+        LoggingService.getInstance().error('Error searching publications', { error: error instanceof Error ? error.message : String(error), query });
+        return [];
       }
     },
   };
