@@ -521,5 +521,32 @@ export interface AuditLog {
   userAgent: string;
 }
 
-// Re-export PublicationDocument from database architecture
-export type { PublicationDocument } from '@/data/database-architecture'; 
+// PublicationDocument interface
+export interface PublicationDocument {
+  _id?: string;
+  title: string;
+  description: string;
+  category: string;
+  subcategory?: string;
+  location?: {
+    district?: string;
+    province?: string;
+    city?: string;
+    country?: string;
+  };
+  pricing?: {
+    amount: number;
+    currency: string;
+  };
+  contact?: {
+    phones?: string[];
+    email?: string;
+    name?: string;
+  };
+  images?: string[];
+  status?: string;
+  premium?: boolean;
+  views?: number;
+  createdAt: Date;
+  updatedAt: Date;
+} 

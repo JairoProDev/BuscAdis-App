@@ -4,7 +4,6 @@
  */
 
 import { MongoClient, ObjectId, Db, Document } from 'mongodb';
-import { MongoClientInterface, PublicationDocument, COLLECTIONS } from './mongodb-shared';
 import { LoggingService } from '@/services/logging.service';
 
 // Nuevas interfaces para reemplazar 'any'
@@ -13,6 +12,50 @@ export interface MongoDbDocument extends Document {
   createdAt?: Date;
   updatedAt?: Date;
 }
+
+export interface PublicationDocument extends MongoDbDocument {
+  title: string;
+  description: string;
+  category: string;
+  subcategory?: string;
+  location?: {
+    district?: string;
+    province?: string;
+    city?: string;
+    country?: string;
+  };
+  pricing?: {
+    amount: number;
+    currency: string;
+  };
+  contact?: {
+    phones?: string[];
+    email?: string;
+    name?: string;
+  };
+  images?: string[];
+  status?: string;
+  premium?: boolean;
+  views?: number;
+  createdAt: Date;
+  updatedAt: Date;
+}
+
+export interface MongoClientInterface {
+  db: (name?: string) => Db;
+  close: () => Promise<void>;
+  fetchPublications: (category: string, page?: number, limit?: number, filters?: PublicationFilters) => Promise<{ publications: PublicationDocument[]; totalCount: number }>;
+  createPublication: (data: any) => Promise<PublicationDocument>;
+  updatePublication: (id: string, data: any) => Promise<PublicationDocument | null>;
+  deletePublication: (id: string) => Promise<boolean>;
+  getPublicationById: (id: string) => Promise<PublicationDocument | null>;
+  searchPublications: (query: string, filters?: PublicationFilters) => Promise<PublicationDocument[]>;
+}
+
+export const COLLECTIONS = {
+  ADISOS: 'adisos',
+  USERS: 'users',
+} as const;
 
 export interface PublicationFilters {
   category?: string;
@@ -189,17 +232,20 @@ function createServerMongoClient(client: MongoClient, db: Db): MongoClientInterf
             
             // Type guard to ensure documents have required properties and convert MongoDB _id to string
             const validPublications = publications
-              .filter((doc): doc is Document & { _id: ObjectId; title: string; description: string; categorySlug: string } => 
+              .filter((doc): doc is Document & { _id: ObjectId; title: string; description: string; category: string } => 
                 doc && typeof doc === 'object' && 
                 '_id' in doc && doc._id instanceof ObjectId &&
                 'title' in doc && typeof doc.title === 'string' &&
                 'description' in doc && typeof doc.description === 'string' &&
-                'categorySlug' in doc && typeof doc.categorySlug === 'string'
+                ('category' in doc && typeof doc.category === 'string')
               )
               .map(doc => ({
                 ...doc,
                 _id: doc._id.toString(),
-                id: doc._id.toString()
+                id: doc._id.toString(),
+                category: doc.category,
+                createdAt: doc.createdAt || new Date(),
+                updatedAt: doc.updatedAt || new Date()
               } as PublicationDocument));
             
             allPublications.push(...validPublications);
@@ -279,18 +325,8 @@ function createServerMongoClient(client: MongoClient, db: Db): MongoClientInterf
 
 // Helper functions
 function getCollectionName(category: string): string {
-  const categoryMap: { [key: string]: string } = {
-    'inmuebles': COLLECTIONS.PUBLICATIONS_INMUEBLES,
-    'vehiculos': COLLECTIONS.PUBLICATIONS_VEHICULOS,
-    'empleos': COLLECTIONS.PUBLICATIONS_EMPLEOS,
-    'servicios': COLLECTIONS.PUBLICATIONS_SERVICIOS,
-    'productos': COLLECTIONS.PUBLICATIONS_PRODUCTOS,
-    'eventos': COLLECTIONS.PUBLICATIONS_EVENTOS,
-    'negocios': COLLECTIONS.PUBLICATIONS_NEGOCIOS,
-    'comunidad': COLLECTIONS.PUBLICATIONS_COMUNIDAD,
-  };
-  
-  return categoryMap[category] || COLLECTIONS.PUBLICATIONS_INMUEBLES;
+  // Always use the unified adisos collection
+  return COLLECTIONS.ADISOS;
 }
 
 function buildQuery(filters: PublicationFilters): Record<string, unknown> {

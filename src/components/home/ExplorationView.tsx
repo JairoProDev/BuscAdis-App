@@ -220,36 +220,36 @@ const ExplorationRowComponent: React.FC<ExplorationRowProps> = ({ row, onSearch 
   };
 
   // Adaptador robusto para trabajar con los datos reales de tu API
-  const adaptPublication = (publication: PublicationDocument) => ({
+  const adaptPublication = (publication: any) => ({
     id: publication.id || publication._id || 'unknown',
     title: publication.title || 'Sin título',
     description: publication.description || '',
-    categorySlug: publication.category?.slug || 'general',
-    subcategorySlug: publication.subcategory?.slug || null,
-    subSubcategorySlug: publication.subsubcategory?.slug || null,
-    transactionType: publication.pricing?.type || 'venta',
-    value: publication.pricing?.amount ?? 0,
-    currency: publication.pricing?.currency || 'PEN',
-    valueType: publication.pricing?.type || 'fixed',
+    categorySlug: publication.category || 'general',
+    subcategorySlug: publication.subcategory || null,
+    subSubcategorySlug: publication.subsubcategory || null,
+    transactionType: 'venta',
+    value: publication.price || publication.amount || publication.pricing?.amount || 0,
+    currency: publication.currency || publication.pricing?.currency || 'PEN',
+    valueType: 'fixed',
     size: 1, // Not present, set default
     location: {
       country: publication.location?.country || 'Perú',
-      province: publication.location?.region || 'Cusco',
+      province: publication.province || publication.location?.province || 'Cusco',
       city: publication.location?.city || 'Cusco',
-      district: publication.location?.district || '',
+      district: publication.district || publication.location?.district || '',
       address: publication.location?.address || ''
     },
     contact: {
-      phones: publication.contact?.methods?.filter(m => m.type === 'phone' || m.type === 'whatsapp').map(m => m.value) || [],
-      email: publication.contact?.methods?.find(m => m.type === 'email')?.value || null,
-      name: publication.userProfile?.displayName || null
+      phones: publication.contactPhone ? [publication.contactPhone] : publication.contact?.phones || [],
+      email: publication.contact?.email || null,
+      name: publication.contactName || publication.contact?.name || null
     },
-    images: publication.media?.images?.map(img => img.url) || ['/images/placeholder-image.jpg'],
-    status: publication.status?.current || 'active',
-    premium: publication.status?.visibility === 'premium' || false,
-    whatsapp: publication.contact?.methods?.find(m => m.type === 'whatsapp')?.value || '',
-    createdAt: publication.timestamps?.createdAt?.toString() || new Date().toISOString(),
-    views: publication.engagement?.views || 0
+    images: publication.images || ['/images/placeholder-image.jpg'],
+    status: publication.status || 'active',
+    premium: publication.premium || false,
+    whatsapp: publication.whatsapp || publication.contactPhone || '',
+    createdAt: publication.createdAt?.toString() || new Date().toISOString(),
+    views: publication.views || 0
   });
 
   return (

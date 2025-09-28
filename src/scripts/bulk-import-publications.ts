@@ -6,11 +6,54 @@
 import fs from 'fs'
 import { MongoClient } from 'mongodb'
 import { Logger } from '@/services/logging.service'
-import { PublicationBulkData, PublicationDocument } from '@/data/database-architecture'
 
 // =============================================================================
 // 1. CONFIGURACIÓN DEL IMPORTADOR
 // =============================================================================
+
+export interface PublicationBulkData {
+  title: string;
+  description: string;
+  category: string;
+  subcategory?: string;
+  location?: string;
+  price?: number;
+  currency?: string;
+  contactPhone?: string;
+  contactName?: string;
+  images?: string[];
+  status?: string;
+  premium?: boolean;
+}
+
+export interface PublicationDocument {
+  _id?: string;
+  title: string;
+  description: string;
+  category: string;
+  subcategory?: string;
+  location?: {
+    district?: string;
+    province?: string;
+    city?: string;
+    country?: string;
+  };
+  pricing?: {
+    amount: number;
+    currency: string;
+  };
+  contact?: {
+    phones?: string[];
+    email?: string;
+    name?: string;
+  };
+  images?: string[];
+  status?: string;
+  premium?: boolean;
+  views?: number;
+  createdAt: Date;
+  updatedAt: Date;
+}
 
 interface ImportConfig {
   sourceFile: string
@@ -469,7 +512,7 @@ export class BulkPublicationImporter {
       } : undefined,
       
       media: {
-        images: data.media?.images?.map(url => ({
+        images: data.media?.images?.map((url: any) => ({
           url,
           type: 'image' as const,
           alt: data.title
