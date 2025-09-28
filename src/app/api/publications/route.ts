@@ -6,6 +6,8 @@ import type { SortDirection } from 'mongodb';
 export const dynamic = 'force-dynamic'
 export const runtime = 'nodejs'
 
+// Force redeployment - fix production issue
+
 // Configuración de MongoDB
 const MONGODB_URI = process.env.MONGODB_URI!
 const MONGODB_DB = process.env.MONGODB_DB || 'buscadis'
