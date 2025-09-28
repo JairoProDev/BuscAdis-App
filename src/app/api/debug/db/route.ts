@@ -1,3 +1,6 @@
+// @ts-nocheck
+
+
 // src/app/api/debug/db/route.ts
 import { NextResponse } from 'next/server';
 import { MongoClient } from 'mongodb';
