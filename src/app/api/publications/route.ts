@@ -39,10 +39,21 @@ async function connectToDatabase() {
   }
 }
 
+// Logging function
+function log(message: string, data?: any) {
+  console.log(`[PUBLICATIONS-API] ${new Date().toISOString()}: ${message}`, data || '');
+}
+
 export async function GET(request: Request) {
+  log('=== PUBLICATIONS API CALLED ===');
+  log('Request URL:', request.url);
+  log('Environment:', process.env.NODE_ENV);
+  
   try {
     Logger.debug('GET /api/publications received')
     const { searchParams } = new URL(request.url)
+    
+    log('Search params:', Object.fromEntries(searchParams.entries()));
 
     // Extract query parameters
     const category = searchParams.get('category') || ''
@@ -108,13 +119,21 @@ export async function GET(request: Request) {
     }
 
     const mongoQuery = buildQuery()
+    log('MongoDB query built:', mongoQuery)
     Logger.debug('Mongo query for /api/publications', { mongoQuery })
 
+    log('Connecting to MongoDB...');
+    const { client, db } = await connectToDatabase()
+    log('MongoDB connected successfully')
+    
     const collection = db.collection(UNIFIED_COLLECTION)
+    log('Collection created:', UNIFIED_COLLECTION)
 
     // Paginación
     const skip = (page - 1) * limit
+    log('Pagination - skip:', skip, 'limit:', limit)
 
+    log('Executing MongoDB query...');
     const [publications, total] = await Promise.all([
       collection
         .find(mongoQuery)
@@ -124,9 +143,17 @@ export async function GET(request: Request) {
         .toArray(),
       collection.countDocuments(mongoQuery)
     ])
+    
+    log('MongoDB query results:', {
+      publicationsFound: publications.length,
+      totalCount: total
+    })
 
     allPublications = (publications as Record<string, unknown>[]) || []
     totalCount = total || 0
+    
+    await client.close()
+    log('MongoDB connection closed')
 
     // Formatear datos para el frontend
     const formattedPublications = allPublications.map(p => {
@@ -172,27 +199,59 @@ export async function GET(request: Request) {
       appliedQuery: mongoQuery
     })
 
-    return NextResponse.json({
+    const response = {
       publications: formattedPublications,
       total: totalCount,
       page: page,
       pages: Math.ceil(totalCount / limit),
       success: true,
-      hasMore: page * limit < totalCount
-    })
+      hasMore: page * limit < totalCount,
+      debug: {
+        environment: process.env.NODE_ENV,
+        vercelRegion: process.env.VERCEL_REGION,
+        nodeVersion: process.version,
+        timestamp: new Date().toISOString()
+      }
+    }
+    
+    log('Final response prepared:', {
+      total: totalCount, 
+      returned: formattedPublications.length,
+      page,
+      pages: Math.ceil(totalCount / limit)
+    });
+
+    log('Returning response...');
+    return NextResponse.json(response)
 
   } catch (error) {
+    log('ERROR OCCURRED:', {
+      message: error.message,
+      stack: error.stack,
+      name: error.name
+    });
+    
     Logger.error('Critical error in GET /api/publications', { error })
     
-    return NextResponse.json({
+    const errorResponse = {
       publications: [],
       total: 0,
       page: 1,
       pages: 1,
       success: false,
       error: 'Error interno del servidor',
-      hasMore: false
-    }, { status: 500 })
+      hasMore: false,
+      debug: {
+        environment: process.env.NODE_ENV,
+        vercelRegion: process.env.VERCEL_REGION,
+        nodeVersion: process.version,
+        timestamp: new Date().toISOString(),
+        errorMessage: error.message
+      }
+    };
+    
+    log('Returning error response:', errorResponse);
+    return NextResponse.json(errorResponse, { status: 500 })
   }
 }
 

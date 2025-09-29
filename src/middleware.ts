@@ -1,50 +1,22 @@
-import { NextResponse } from 'next/server';
-import type { NextRequest } from 'next/server';
+// @ts-nocheck
 
-function parseJwt(token: string) {
-  try {
-    return JSON.parse(atob(token.split('.')[1]));
-  } catch {
-    return null;
-  }
-}
+import { NextResponse } from 'next/server'
+import type { NextRequest } from 'next/server'
 
-function isTokenExpired(token: string) {
-  const payload = parseJwt(token);
-  if (!payload || !payload.exp) return true;
+export function middleware(request: NextRequest) {
+  console.log(`[MIDDLEWARE] ${new Date().toISOString()}: ${request.method} ${request.url}`);
   
-  const now = Math.floor(Date.now() / 1000);
-  return payload.exp < now;
-}
-
-export async function middleware(req: NextRequest) {
-  // Rutas protegidas que requieren autenticación
-  const protectedRoutes = ['/publicar', '/mis-adisos', '/perfil'];
-  
-  // Verificar si la ruta actual requiere autenticación
-  const isProtectedRoute = protectedRoutes.some(route => 
-    req.nextUrl.pathname.startsWith(route)
-  );
-  
-  if (isProtectedRoute) {
-    // Obtener tokens de las cookies
-    const idToken = req.cookies.get('idToken')?.value;
-    
-    // Verificar si el token existe y no está expirado
-    if (!idToken || isTokenExpired(idToken)) {
-      // En lugar de redirigir, permitimos que la página se cargue
-      // El componente de la página manejará mostrar el modal de login
-      return NextResponse.next();
-    }
+  // Log API requests specifically
+  if (request.url.includes('/api/')) {
+    console.log(`[MIDDLEWARE] API Request: ${request.url}`);
+    console.log(`[MIDDLEWARE] Request headers:`, Object.fromEntries(request.headers.entries()));
   }
   
-  return NextResponse.next();
+  return NextResponse.next()
 }
 
 export const config = {
   matcher: [
-    '/publicar/:path*',
-    '/mis-adisos/:path*',
-    '/perfil/:path*',
+    '/((?!_next/static|_next/image|favicon.ico).*)',
   ],
-};
+}
