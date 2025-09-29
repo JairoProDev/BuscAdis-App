@@ -77,9 +77,7 @@ export async function GET(request: Request) {
       category, subcategory, subsubcategory, searchQuery, department, province, city, district, minPrice, maxPrice, sortBy, page, limit, status, premium
     })
 
-    // Conectar a la base de datos
-    const { db } = await connectToDatabase()
-
+    // Variables para almacenar resultados
     let allPublications: Record<string, unknown>[] = []
     let totalCount = 0
 
@@ -123,15 +121,15 @@ export async function GET(request: Request) {
     Logger.debug('Mongo query for /api/publications', { mongoQuery })
 
     log('Connecting to MongoDB...');
-    const { client, db } = await connectToDatabase()
+    const { client, db: mongoDb } = await connectToDatabase()
     log('MongoDB connected successfully')
     
-    const collection = db.collection(UNIFIED_COLLECTION)
+    const collection = mongoDb.collection(UNIFIED_COLLECTION)
     log('Collection created:', UNIFIED_COLLECTION)
 
     // Paginación
     const skip = (page - 1) * limit
-    log('Pagination - skip:', skip, 'limit:', limit)
+    log('Pagination - skip: ' + skip + ', limit: ' + limit)
 
     log('Executing MongoDB query...');
     const [publications, total] = await Promise.all([
@@ -225,10 +223,11 @@ export async function GET(request: Request) {
     return NextResponse.json(response)
 
   } catch (error) {
+    const errorObj = error as Error;
     log('ERROR OCCURRED:', {
-      message: error.message,
-      stack: error.stack,
-      name: error.name
+      message: errorObj.message,
+      stack: errorObj.stack,
+      name: errorObj.name
     });
     
     Logger.error('Critical error in GET /api/publications', { error })
@@ -246,7 +245,7 @@ export async function GET(request: Request) {
         vercelRegion: process.env.VERCEL_REGION,
         nodeVersion: process.version,
         timestamp: new Date().toISOString(),
-        errorMessage: error.message
+        errorMessage: errorObj.message
       }
     };
     
