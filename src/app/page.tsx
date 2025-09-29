@@ -1,12 +1,12 @@
-export const dynamic = 'force-dynamic'
-export const runtime = 'nodejs';
-
 'use client';
 
 import React, { useState, useEffect } from 'react';
 import { PublicationDetailProvider } from '@/hooks/usePublicationDetail';
 import { PublicationData } from '@/types/publication';
 import HomePageContent from '@/components/home/HomePageContent';
+
+export const dynamic = 'force-dynamic';
+export const runtime = 'nodejs';
 
 export default function HomePage() {
   const [allPublications, setAllPublications] = useState<PublicationData[]>([]);
