@@ -5,6 +5,8 @@ import type { SortDirection } from 'mongodb';
 
 export const dynamic = 'force-dynamic'
 export const runtime = 'nodejs'
+export const revalidate = 0 // Disable caching completely
+export const fetchCache = 'force-no-store'
 
 /**
  * API Route: Publications
