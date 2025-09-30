@@ -150,8 +150,9 @@ export async function GET(request: Request) {
     allPublications = (publications as Record<string, unknown>[]) || []
     totalCount = total || 0
     
-    await client.close()
-    log('MongoDB connection closed')
+    // NO cerrar el cliente - se mantiene en cache para reutilización
+    // await client.close()
+    log('MongoDB query completed (connection kept alive for reuse)')
 
     // Formatear datos para el frontend
     const formattedPublications = allPublications.map(p => {
