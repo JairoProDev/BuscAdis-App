@@ -15,6 +15,11 @@ const validCategories = [
 export default async function CategoryPage({ params }: CategoryPageProps) {
   const { category } = await params
   
+  // Never intercept API routes
+  if (category.startsWith('api')) {
+    redirect('/')
+  }
+  
   if (!validCategories.includes(category)) {
     redirect('/')
   }
