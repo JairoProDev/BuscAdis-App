@@ -29,23 +29,38 @@ let cachedDb: Db | null = null
 
 async function connectToDatabase() {
   if (cachedClient && cachedDb) {
+    Logger.info('Using cached MongoDB connection')
     return { client: cachedClient, db: cachedDb }
   }
 
   try {
+    Logger.info('Creating new MongoDB connection...', {
+      hasUri: !!MONGODB_URI,
+      dbName: MONGODB_DB
+    })
+    
     const client = new MongoClient(MONGODB_URI)
     await client.connect()
     
     const db = client.db(MONGODB_DB)
     
+    // Test the connection
+    await db.admin().ping()
+    
     cachedClient = client
     cachedDb = db
     
-    Logger.info('Connected to MongoDB successfully')
+    Logger.info('Connected to MongoDB successfully', { dbName: MONGODB_DB })
     return { client, db }
   } catch (error) {
-    Logger.error('Failed to connect to MongoDB', { error })
-    throw error
+    const err = error as Error
+    Logger.error('Failed to connect to MongoDB', { 
+      error: err.message,
+      name: err.name,
+      hasUri: !!MONGODB_URI,
+      dbName: MONGODB_DB
+    })
+    throw new Error(`MongoDB connection failed: ${err.message}`)
   }
 }
 
