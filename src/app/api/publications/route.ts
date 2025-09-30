@@ -6,7 +6,15 @@ import type { SortDirection } from 'mongodb';
 export const dynamic = 'force-dynamic'
 export const runtime = 'nodejs'
 
-// Force redeployment - fix production issue
+/**
+ * API Route: Publications
+ * 
+ * Handles GET and POST requests for publications.
+ * Uses MongoDB connection pooling for optimal performance.
+ * 
+ * IMPORTANT: The MongoDB client connection is cached and reused across requests.
+ * Do NOT close the client after each request as it will break the connection pool.
+ */
 
 // Configuración de MongoDB
 const MONGODB_URI = process.env.MONGODB_URI!
@@ -39,21 +47,15 @@ async function connectToDatabase() {
   }
 }
 
-// Logging function
-function log(message: string, data?: any) {
-  console.log(`[PUBLICATIONS-API] ${new Date().toISOString()}: ${message}`, data || '');
-}
-
 export async function GET(request: Request) {
-  log('=== PUBLICATIONS API CALLED ===');
-  log('Request URL:', request.url);
-  log('Environment:', process.env.NODE_ENV);
+  const isDev = process.env.NODE_ENV === 'development';
   
   try {
-    Logger.debug('GET /api/publications received')
     const { searchParams } = new URL(request.url)
     
-    log('Search params:', Object.fromEntries(searchParams.entries()));
+    if (isDev) {
+      Logger.debug('GET /api/publications', { params: Object.fromEntries(searchParams.entries()) })
+    }
 
     // Extract query parameters
     const category = searchParams.get('category') || ''
@@ -73,9 +75,12 @@ export async function GET(request: Request) {
     const status = searchParams.get('status') || ''
     const premium = searchParams.get('premium') || ''
 
-    Logger.debug('Search parameters', { 
-      category, subcategory, subsubcategory, searchQuery, department, province, city, district, minPrice, maxPrice, sortBy, page, limit, status, premium
-    })
+    // Log only in development
+    if (isDev) {
+      Logger.debug('Search parameters', { 
+        category, subcategory, subsubcategory, searchQuery, department, province, city, district, minPrice, maxPrice, sortBy, page, limit, status, premium
+      })
+    }
 
     // Variables para almacenar resultados
     let allPublications: Record<string, unknown>[] = []
@@ -117,21 +122,12 @@ export async function GET(request: Request) {
     }
 
     const mongoQuery = buildQuery()
-    log('MongoDB query built:', mongoQuery)
-    Logger.debug('Mongo query for /api/publications', { mongoQuery })
-
-    log('Connecting to MongoDB...');
-    const { client, db: mongoDb } = await connectToDatabase()
-    log('MongoDB connected successfully')
     
+    const { db: mongoDb } = await connectToDatabase()
     const collection = mongoDb.collection(UNIFIED_COLLECTION)
-    log('Collection created:', UNIFIED_COLLECTION)
 
     // Paginación
     const skip = (page - 1) * limit
-    log('Pagination - skip: ' + skip + ', limit: ' + limit)
-
-    log('Executing MongoDB query...');
     const [publications, total] = await Promise.all([
       collection
         .find(mongoQuery)
@@ -142,17 +138,10 @@ export async function GET(request: Request) {
       collection.countDocuments(mongoQuery)
     ])
     
-    log('MongoDB query results:', {
-      publicationsFound: publications.length,
-      totalCount: total
-    })
-
     allPublications = (publications as Record<string, unknown>[]) || []
     totalCount = total || 0
     
-    // NO cerrar el cliente - se mantiene en cache para reutilización
-    // await client.close()
-    log('MongoDB query completed (connection kept alive for reuse)')
+    // Connection pooling: client is cached and reused, no need to close
 
     // Formatear datos para el frontend
     const formattedPublications = allPublications.map(p => {
@@ -190,68 +179,40 @@ export async function GET(request: Request) {
       }
     })
 
-    Logger.info(`Returning ${formattedPublications.length} publications`, { 
-      total: totalCount, 
-      page, 
-      category: category || 'all',
-      searchQuery,
-      appliedQuery: mongoQuery
-    })
+    if (isDev) {
+      Logger.info(`Returning ${formattedPublications.length} publications`, { 
+        total: totalCount, 
+        page, 
+        category: category || 'all'
+      })
+    }
 
-    const response = {
+    return NextResponse.json({
       publications: formattedPublications,
       total: totalCount,
       page: page,
       pages: Math.ceil(totalCount / limit),
       success: true,
-      hasMore: page * limit < totalCount,
-      debug: {
-        environment: process.env.NODE_ENV,
-        vercelRegion: process.env.VERCEL_REGION,
-        nodeVersion: process.version,
-        timestamp: new Date().toISOString()
-      }
-    }
-    
-    log('Final response prepared:', {
-      total: totalCount, 
-      returned: formattedPublications.length,
-      page,
-      pages: Math.ceil(totalCount / limit)
-    });
-
-    log('Returning response...');
-    return NextResponse.json(response)
+      hasMore: page * limit < totalCount
+    })
 
   } catch (error) {
     const errorObj = error as Error;
-    log('ERROR OCCURRED:', {
-      message: errorObj.message,
-      stack: errorObj.stack,
-      name: errorObj.name
-    });
     
-    Logger.error('Critical error in GET /api/publications', { error })
+    Logger.error('Critical error in GET /api/publications', { 
+      error: errorObj.message,
+      stack: isDev ? errorObj.stack : undefined
+    })
     
-    const errorResponse = {
+    return NextResponse.json({
       publications: [],
       total: 0,
       page: 1,
       pages: 1,
       success: false,
       error: 'Error interno del servidor',
-      hasMore: false,
-      debug: {
-        environment: process.env.NODE_ENV,
-        vercelRegion: process.env.VERCEL_REGION,
-        nodeVersion: process.version,
-        timestamp: new Date().toISOString(),
-        errorMessage: errorObj.message
-      }
-    };
-    
-    log('Returning error response:', errorResponse);
-    return NextResponse.json(errorResponse, { status: 500 })
+      hasMore: false
+    }, { status: 500 })
   }
 }
 
