@@ -187,7 +187,7 @@ export async function GET(request: Request) {
       })
     }
 
-    return NextResponse.json({
+    const response = NextResponse.json({
       publications: formattedPublications,
       total: totalCount,
       page: page,
@@ -195,6 +195,14 @@ export async function GET(request: Request) {
       success: true,
       hasMore: page * limit < totalCount
     })
+
+    // Force no cache - critical for Vercel deployment
+    response.headers.set('Cache-Control', 'no-store, no-cache, must-revalidate, proxy-revalidate')
+    response.headers.set('Pragma', 'no-cache')
+    response.headers.set('Expires', '0')
+    response.headers.set('Surrogate-Control', 'no-store')
+
+    return response
 
   } catch (error) {
     const errorObj = error as Error;
