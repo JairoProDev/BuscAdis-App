@@ -129,10 +129,12 @@ export async function GET(request: Request) {
       if (city) query['location.city'] = { $regex: city, $options: 'i' }
       if (district) query['location.district'] = { $regex: district, $options: 'i' }
 
-      // Texto
+      // Texto - usar regex en lugar de $text para evitar errores de índice
       if (searchQuery) {
-        // Prefer $text if index exists, fallback to regex
-        query.$text = { $search: searchQuery }
+        query.$or = [
+          { title: { $regex: searchQuery, $options: 'i' } },
+          { description: { $regex: searchQuery, $options: 'i' } }
+        ]
       }
 
       // Precio
@@ -147,11 +149,16 @@ export async function GET(request: Request) {
 
     const mongoQuery = buildQuery()
     
+    Logger.info('MongoDB query built:', { query: JSON.stringify(mongoQuery) })
+    
     const { db: mongoDb } = await connectToDatabase()
     const collection = mongoDb.collection(UNIFIED_COLLECTION)
 
     // Paginación
     const skip = (page - 1) * limit
+    
+    Logger.info('Executing MongoDB query...',{ skip, limit })
+    
     const [publications, total] = await Promise.all([
       collection
         .find(mongoQuery)
@@ -161,6 +168,8 @@ export async function GET(request: Request) {
         .toArray(),
       collection.countDocuments(mongoQuery)
     ])
+    
+    Logger.info('MongoDB query completed', { found: publications?.length, total })
     
     allPublications = (publications as Record<string, unknown>[]) || []
     totalCount = total || 0
