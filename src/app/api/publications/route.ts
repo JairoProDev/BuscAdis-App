@@ -53,6 +53,13 @@ export async function GET(request: Request) {
   const isDev = process.env.NODE_ENV === 'development';
   
   try {
+    // Quick connection test
+    Logger.info('API called', {
+      env: process.env.NODE_ENV,
+      hasMongoUri: !!process.env.MONGODB_URI,
+      mongoDb: process.env.MONGODB_DB
+    })
+    
     const { searchParams } = new URL(request.url)
     
     if (isDev) {
