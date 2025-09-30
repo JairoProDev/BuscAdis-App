@@ -11,10 +11,21 @@ export async function GET() {
     const uri = process.env.MONGODB_URI!
     const dbName = process.env.MONGODB_DB || 'buscadis'
     
-    console.log('🔄 Connecting to MongoDB...')
-    const client = new MongoClient(uri)
+    console.log('🔄 Connecting to MongoDB...', { 
+      env: process.env.NODE_ENV,
+      hasUri: !!uri,
+      uriStart: uri?.substring(0, 20)
+    })
+    
+    // Force shorter timeout for debugging
+    const client = new MongoClient(uri, {
+      serverSelectionTimeoutMS: 5000, // 5 seconds max
+      connectTimeoutMS: 5000
+    })
+    
+    console.log('⏳ Attempting connection...')
     await client.connect()
-    console.log('✅ Connected!')
+    console.log('✅ Connected in', Date.now() - startTime, 'ms')
     
     const db = client.db(dbName)
     
@@ -79,13 +90,26 @@ export async function GET() {
     
   } catch (error) {
     const err = error as Error
-    console.error('❌ Error:', err.message)
+    const elapsed = Date.now() - startTime
+    
+    console.error('❌ Error:', err.message, 'after', elapsed, 'ms')
+    console.error('Error name:', err.name)
+    console.error('Error stack:', err.stack)
     
     return NextResponse.json({
       success: false,
       error: err.message,
-      stack: err.stack,
-      env: process.env.NODE_ENV
-    }, { status: 500 })
+      errorName: err.name,
+      elapsed: `${elapsed}ms`,
+      env: process.env.NODE_ENV,
+      hasMongoUri: !!process.env.MONGODB_URI,
+      mongoDb: process.env.MONGODB_DB
+    }, { 
+      status: 500,
+      headers: {
+        'Cache-Control': 'no-store, no-cache, must-revalidate',
+        'Pragma': 'no-cache'
+      }
+    })
   }
 }
