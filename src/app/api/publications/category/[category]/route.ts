@@ -178,32 +178,53 @@ export async function GET(
     ])
 
     // Format publications
-    const formattedPublications = publications.map(pub => ({
-      id: pub._id?.toString() || pub.id,
-      title: pub.title || 'Sin título',
-      description: pub.description || '',
-      value: pub.value || pub.amount || 0,
-      currency: pub.currency || 'PEN',
-      categorySlug: pub.categorySlug || pub.category || '',
-      subcategorySlug: pub.subcategorySlug || pub.subcategory || null,
-      subSubcategorySlug: pub.subSubcategorySlug || pub.subsubcategory || null,
-      location: pub.location || { city: '', country: 'Perú' },
-      contact: pub.contact || {
-        name: pub.contactName || '',
-        phone: pub.contactPhone || '',
-        email: pub.contactEmail || ''
-      },
-      images: Array.isArray(pub.images) ? pub.images : [],
-      status: pub.status || 'active',
-      premium: pub.premium || false,
-      createdAt: pub.createdAt || pub.created_at || new Date().toISOString(),
-      updatedAt: pub.updatedAt || pub.updated_at || pub.createdAt || new Date().toISOString(),
-      views: pub.views || 0,
-      featured: pub.featured || false,
-      attributes: pub.attributes || {},
-      isActive: pub.isActive !== false,
-      sequentialId: pub.sequentialId
-    }))
+    const formattedPublications = publications.map(pub => {
+      const pricing = pub.pricing || {}
+      const loc = pub.location || {}
+      const contact = pub.contact || {}
+      
+      return {
+        id: pub._id?.toString() || pub.id,
+        title: pub.title || 'Sin título',
+        description: pub.description || '',
+        value: pricing.amount || pub.value || pub.amount || 0,
+        price: pricing.amount || pub.value || pub.amount || 0,
+        amount: pricing.amount || pub.value || pub.amount || 0,
+        currency: pricing.currency || pub.currency || 'PEN',
+        categorySlug: pub.categorySlug || pub.category || '',
+        subcategorySlug: pub.subcategorySlug || pub.subcategory || null,
+        subSubcategorySlug: pub.subSubcategorySlug || pub.subsubcategory || null,
+        // Location as structured object
+        location: {
+          reference: loc.reference || loc.address || '',
+          district: loc.district || '',
+          province: loc.province || loc.region || '',
+          city: loc.city || loc.department || 'Cusco',
+          country: loc.country || (loc.countryCode === 'PE' ? 'Perú' : 'Perú')
+        },
+        fullLocation: loc,
+        locationString: [loc.district, loc.province || loc.region, loc.city || loc.department]
+          .filter(Boolean)
+          .join(', ') || 'Cusco, Perú',
+        contact: {
+          name: contact.name || pub.contactName || '',
+          phone: Array.isArray(contact.phones) ? contact.phones[0] : (contact.phone || pub.contactPhone || ''),
+          email: contact.email || pub.contactEmail || '',
+          phones: Array.isArray(contact.phones) ? contact.phones : []
+        },
+        whatsapp: Array.isArray(contact.phones) ? contact.phones[0] : (contact.phone || pub.contactPhone || ''),
+        images: Array.isArray(pub.images) ? pub.images : [],
+        status: pub.status || 'active',
+        premium: pub.premium || false,
+        createdAt: pub.createdAt || pub.created_at || new Date().toISOString(),
+        updatedAt: pub.updatedAt || pub.updated_at || pub.createdAt || new Date().toISOString(),
+        views: pub.views || 0,
+        featured: pub.featured || false,
+        attributes: pub.attributes || {},
+        isActive: pub.isActive !== false,
+        sequentialId: pub.sequentialId
+      }
+    })
 
     Logger.info('Returning publications', {
       total,

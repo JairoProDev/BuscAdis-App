@@ -224,23 +224,36 @@ export async function GET(request: Request) {
         categorySlug: (anyDoc.category as string) || '',
         subcategory: (anyDoc.subcategory as string) || '',
         subsubcategory: (anyDoc.subsubcategory as string) || '',
-        location: [loc.district, (loc.province as string) || (loc.region as string), loc.city]
-          .filter(Boolean)
-          .join(', ') || 'Cusco',
+        // Location as structured object
+        location: {
+          reference: (loc.reference as string) || (loc.address as string) || '',
+          district: (loc.district as string) || '',
+          province: ((loc.province as string) || (loc.region as string) || '') as string,
+          city: (loc.city as string) || (loc.department as string) || 'Cusco',
+          country: (loc.country as string) || (loc.countryCode as string) === 'PE' ? 'Perú' : 'Perú'
+        },
+        // Keep fullLocation for backwards compatibility
         fullLocation: loc,
+        // Location string for simple display
+        locationString: [loc.district, (loc.province as string) || (loc.region as string), (loc.city as string) || (loc.department as string)]
+          .filter(Boolean)
+          .join(', ') || 'Cusco, Perú',
         price: pricing.amount ?? (anyDoc.price as number | undefined) ?? 0,
+        value: pricing.amount ?? (anyDoc.price as number | undefined) ?? 0,
         amount: pricing.amount ?? 0,
         currency: pricing.currency || (anyDoc.currency as string) || 'PEN',
         images: Array.isArray(anyDoc.images) && (anyDoc.images as unknown[])?.length
           ? (anyDoc.images as string[])
-          : ['/images/placeholder-image.jpg'],
+          : [],
         status: (anyDoc.status as string) || 'active',
         createdAt: (anyDoc.source as { originalPublicationDate?: string } | undefined)?.originalPublicationDate || (anyDoc.createdAt as string) || new Date().toISOString(),
         contactName: (contact.name as string) || 'Contacto',
         contactPhone: Array.isArray(contact.phones) ? (contact.phones as string[])[0] || '' : '',
+        whatsapp: Array.isArray(contact.phones) ? (contact.phones as string[])[0] || '' : '',
         district: (loc.district as string) || '',
         province: ((loc.province as string) || (loc.region as string) || '') as string,
-        negotiable: (anyDoc.negotiable as boolean) || false
+        negotiable: (anyDoc.negotiable as boolean) || false,
+        description: (anyDoc.description as string) || ''
       }
     })
 

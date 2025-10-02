@@ -316,13 +316,20 @@ export default function PublicationCard({
           <div>
             {/* Title */}
             <a href={seoUrl} onClick={(e) => { e.preventDefault(); onPublicationClick?.(publication); }} className="block mb-2">
-              <h3 className="font-bold text-lg leading-tight hover:text-blue-600 transition-colors duration-200">
+              <h3 className="font-bold text-lg leading-tight hover:text-blue-600 transition-colors duration-200 line-clamp-2">
                 {formatTitle(publication.title)}
               </h3>
             </a>
             
+            {/* Description */}
+            {publication.description && (
+              <p className="text-sm text-gray-600 dark:text-gray-400 mb-2 line-clamp-2">
+                {formatDescription(publication.description)}
+              </p>
+            )}
+            
             {/* Location */}
-            <div className="flex items-center text-sm text-gray-500 mb-3">
+            <div className="flex items-center text-sm text-gray-500 mb-1">
               <MapPinIcon className="w-4 h-4 mr-1.5 text-gray-400 flex-shrink-0" />
               <span className="truncate">{formatLocation(publication.location)}</span>
             </div>
@@ -395,13 +402,20 @@ export default function PublicationCard({
         <div>
           {/* Title */}
           <a href={seoUrl} onClick={(e) => { e.preventDefault(); onPublicationClick?.(publication); }} className="block mb-2">
-            <h3 className="font-bold text-lg leading-tight hover:text-blue-600 transition-colors duration-200 truncate">
+            <h3 className="font-bold text-lg leading-tight hover:text-blue-600 transition-colors duration-200 line-clamp-2">
               {formatTitle(publication.title)}
             </h3>
           </a>
           
+          {/* Description */}
+          {publication.description && (
+            <p className="text-sm text-gray-600 dark:text-gray-400 mb-2 line-clamp-2">
+              {formatDescription(publication.description)}
+            </p>
+          )}
+          
           {/* Location */}
-          <div className="flex items-center text-sm text-gray-500 mb-3">
+          <div className="flex items-center text-sm text-gray-500 mb-1">
             <MapPinIcon className="w-4 h-4 mr-1.5 text-gray-400 flex-shrink-0" />
             <span className="truncate">{formatLocation(publication.location)}</span>
           </div>
