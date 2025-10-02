@@ -16,9 +16,10 @@ import type { Metadata } from 'next';
 import GoogleAnalytics from '@/components/analytics/GoogleAnalytics';
 import PageViewTracker from '@/components/analytics/PageViewTracker';
 import { ANALYTICS_CONFIG } from '@/config/analytics';
+import { Analytics } from '@vercel/analytics/react';
+import { SpeedInsights } from '@vercel/speed-insights/next';
 // import { Providers } from '@/components/providers/Providers';
 // import { Analytics } from '@/components/analytics/Analytics';
-// import { SpeedInsights } from '@vercel/speed-insights/next';
 
 const inter = Inter({ subsets: ['latin'] });
 
@@ -97,6 +98,8 @@ export default function RootLayout({ children }: { children: ReactNode }) {
             </PublicationProvider>
           </SearchProvider>
         </ThemeProvider>
+        <Analytics />
+        <SpeedInsights />
       </body>
     </html>
   );
