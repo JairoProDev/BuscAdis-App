@@ -21,12 +21,7 @@ import { SpeedInsights } from '@vercel/speed-insights/next';
 // import { Providers } from '@/components/providers/Providers';
 // import { Analytics } from '@/components/analytics/Analytics';
 
-// Extend Window interface for gtag
-declare global {
-  interface Window {
-    gtag?: (command: string, action: string, params?: Record<string, any>) => void;
-  }
-}
+// gtag interface is declared in useGoogleAnalytics.ts
 
 const inter = Inter({ subsets: ['latin'] });
 

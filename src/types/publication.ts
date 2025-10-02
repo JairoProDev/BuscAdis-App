@@ -96,6 +96,9 @@ export interface PublicationLocation {
   district?: string;
   address?: string;
   referencePoint?: string;
+  reference?: string;
+  city?: string;
+  country?: string;
   coordinates?: GeoCoordinates | null;
 }
 

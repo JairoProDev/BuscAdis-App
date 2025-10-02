@@ -420,7 +420,7 @@ export default function PublicationCard({
                 onClick={handlePriceInquiry}
                 className="text-xl font-extrabold text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 transition-colors cursor-pointer"
               >
-                ¿Precio?
+                {publication.categorySlug === 'empleos' ? '¿Sueldo?' : '¿Precio?'}
               </button>
             )}
           </div>
@@ -517,7 +517,7 @@ export default function PublicationCard({
               onClick={handlePriceInquiry}
               className="text-xl font-extrabold text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 transition-colors cursor-pointer"
             >
-              ¿Precio?
+              {publication.categorySlug === 'empleos' ? '¿Sueldo?' : '¿Precio?'}
             </button>
           )}
         </div>

@@ -44,12 +44,18 @@ export default function PublicationGrid({
   const convertToPublicationData = (pub: Publication) => {
     // Preserve the location object as-is from API
     const location = pub.location && typeof pub.location === 'object' 
-      ? pub.location 
+      ? {
+          reference: pub.location.reference || '',
+          district: pub.location.district || 'Distrito no especificado',
+          province: pub.location.province || pub.location.region || '',
+          city: pub.location.city || 'Cusco',
+          country: pub.location.country || 'Perú'
+        }
       : {
           reference: '',
-          district: pub.location || '',
+          district: pub.location || 'Distrito no especificado',
           province: '',
-          city: '',
+          city: 'Cusco',
           country: 'Perú'
         }
 
@@ -61,13 +67,13 @@ export default function PublicationGrid({
       subcategorySlug: pub.subcategorySlug || null,
       subSubcategorySlug: pub.subSubcategorySlug || null,
       transactionType: 'venta', // Default value since Publication doesn't have this
-      value: pub.value || pub.price || 0,
+      value: pub.price || 0,
       currency: pub.currency || 'PEN',
       valueType: 'fixed', // Default value since Publication doesn't have this
       size: 0, // Default value since Publication doesn't have this
       location: location,
       images: pub.images || [],
-      whatsapp: pub.whatsapp || pub.contactPhone || '',
+      whatsapp: pub.contactPhone || '',
       createdAt: pub.createdAt || new Date().toISOString(),
       views: pub.views || 0,
       featured: false, // Default value since Publication doesn't have this

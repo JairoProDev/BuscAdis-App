@@ -67,6 +67,8 @@ interface ExtendedLocation {
   province?: string;
   address?: string;
   neighborhood?: string;
+  country?: string;
+  reference?: string;
 }
 
 // Formato de precio
