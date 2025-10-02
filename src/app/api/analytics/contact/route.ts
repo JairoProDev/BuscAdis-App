@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { connectToDatabase } from '@/lib/mongodb-server';
+import { mongoDbInsert, getMongoClient } from '@/lib/mongodb-server';
 
 export async function POST(request: NextRequest) {
   try {
@@ -13,7 +13,8 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    const { db } = await connectToDatabase();
+    const client = await getMongoClient();
+    const db = client.db();
     const collection = db.collection('analytics');
 
     // Create analytics record
@@ -59,7 +60,8 @@ export async function POST(request: NextRequest) {
 
 export async function GET(request: NextRequest) {
   try {
-    const { db } = await connectToDatabase();
+    const client = await getMongoClient();
+    const db = client.db();
     const collection = db.collection('analytics');
 
     const { searchParams } = new URL(request.url);
