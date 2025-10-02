@@ -126,6 +126,59 @@ export default function PublicationCard({
     return `${currency === 'USD' ? '$' : 'S/'} ${value.toLocaleString()}`;
   };
 
+  // Handle price inquiry message
+  const handlePriceInquiry = () => {
+    // Track price inquiry click for analytics
+    if (typeof window !== 'undefined') {
+      window.gtag?.('event', 'price_inquiry', {
+        'publication_id': publication.id,
+        'category': publication.categorySlug,
+        'location': publication.location?.district || 'unknown'
+      });
+      
+      fetch('/api/analytics/contact', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          publicationId: publication.id,
+          category: publication.categorySlug,
+          action: 'price_inquiry',
+          timestamp: new Date().toISOString()
+        })
+      }).catch(err => console.log('Analytics error:', err));
+    }
+
+    const baseUrl = typeof window !== 'undefined' ? window.location.origin : '';
+    const adUrl = `${baseUrl}${seoUrl}`;
+    const categoryName = publication.categorySlug.charAt(0).toUpperCase() + publication.categorySlug.slice(1);
+    
+    let priceType = 'precio';
+    switch (publication.categorySlug) {
+      case 'empleos':
+        priceType = 'sueldo';
+        break;
+      case 'inmuebles':
+        priceType = 'alquiler o precio';
+        break;
+      case 'vehiculos':
+        priceType = 'precio';
+        break;
+      case 'servicios':
+        priceType = 'costo del servicio';
+        break;
+      default:
+        priceType = 'precio';
+        break;
+    }
+
+    const message = `👋 ¡Hola! Vi su adiso de *${categoryName}* en BuscaDis.com y me interesa mucho:\n\n"${publication.title}"\n\nMe gustaría saber cuál es el ${priceType}. ¿Podría brindarme esa información?\n\n🔗 Link del adiso: ${adUrl}\n\n¡Gracias! 😊`;
+    
+    const encodedMessage = encodeURIComponent(message);
+    const whatsappUrl = `https://wa.me/${publication.whatsapp}?text=${encodedMessage}`;
+    
+    window.open(whatsappUrl, '_blank');
+  };
+
   // Format location - solo mostrar distrito en el card para optimizar clicks
   const formatLocation = (location: PublicationData['location']) => {
     if (!location) return 'Distrito no especificado';
@@ -344,21 +397,32 @@ export default function PublicationCard({
               </p>
             )}
             
-            {/* Location */}
-            <div className="flex items-center text-sm text-gray-500 mb-1">
-              <MapPinIcon className="w-4 h-4 mr-1.5 text-gray-400 flex-shrink-0" />
-              <span className="truncate">{formatLocation(publication.location)}</span>
+            {/* Location and Date */}
+            <div className="flex items-center justify-between text-sm text-gray-500 mb-2">
+              <div className="flex items-center">
+                <MapPinIcon className="w-4 h-4 mr-1.5 text-gray-400 flex-shrink-0" />
+                <span className="truncate">{formatLocation(publication.location)}</span>
+              </div>
+              <div className="text-xs text-gray-400 dark:text-gray-500 flex-shrink-0">
+                {formatExactDateTime(publication.createdAt)}
+              </div>
             </div>
           </div>
 
-          {/* Price and Date */}
-          <div className="flex justify-between items-end">
-            <div className="text-xl font-extrabold text-blue-600 dark:text-blue-400">
-              {formatPriceLocal(publication.value, publication.currency)}
-            </div>
-            <div className="text-xs text-gray-400 dark:text-gray-500">
-              {formatExactDateTime(publication.createdAt)}
-            </div>
+          {/* Price */}
+          <div className="mt-2">
+            {formatPriceLocal(publication.value, publication.currency) ? (
+              <div className="text-xl font-extrabold text-blue-600 dark:text-blue-400">
+                {formatPriceLocal(publication.value, publication.currency)}
+              </div>
+            ) : (
+              <button
+                onClick={handlePriceInquiry}
+                className="text-xl font-extrabold text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 transition-colors cursor-pointer"
+              >
+                ¿Precio?
+              </button>
+            )}
           </div>
         </div>
 
@@ -430,21 +494,32 @@ export default function PublicationCard({
             </p>
           )}
           
-          {/* Location */}
-          <div className="flex items-center text-sm text-gray-500 mb-1">
-            <MapPinIcon className="w-4 h-4 mr-1.5 text-gray-400 flex-shrink-0" />
-            <span className="truncate">{formatLocation(publication.location)}</span>
+          {/* Location and Date */}
+          <div className="flex items-center justify-between text-sm text-gray-500 mb-2">
+            <div className="flex items-center">
+              <MapPinIcon className="w-4 h-4 mr-1.5 text-gray-400 flex-shrink-0" />
+              <span className="truncate">{formatLocation(publication.location)}</span>
+            </div>
+            <div className="text-xs text-gray-400 dark:text-gray-500 flex-shrink-0">
+              {formatExactDateTime(publication.createdAt)}
+            </div>
           </div>
         </div>
 
-        {/* Price and Date */}
-        <div className="flex justify-between items-end mt-2">
-          <div className="text-xl font-extrabold text-blue-600 dark:text-blue-400">
-            {formatPriceLocal(publication.value, publication.currency)}
-          </div>
-          <div className="text-xs text-gray-400 dark:text-gray-500">
-            {formatExactDateTime(publication.createdAt)}
-          </div>
+        {/* Price */}
+        <div className="mt-2">
+          {formatPriceLocal(publication.value, publication.currency) ? (
+            <div className="text-xl font-extrabold text-blue-600 dark:text-blue-400">
+              {formatPriceLocal(publication.value, publication.currency)}
+            </div>
+          ) : (
+            <button
+              onClick={handlePriceInquiry}
+              className="text-xl font-extrabold text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 transition-colors cursor-pointer"
+            >
+              ¿Precio?
+            </button>
+          )}
         </div>
       </div>
 
