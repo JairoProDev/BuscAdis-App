@@ -113,15 +113,40 @@ export async function GET(request: Request) {
     // Construir query de filtros
     const buildQuery = () => {
       const query: Record<string, unknown> = {}
+      const andConditions: Record<string, unknown>[] = []
 
       // Estado y premium
       if (status) query.status = status
       if (premium) query.premium = premium === 'true'
 
-      // Clasificación
-      if (category && category !== 'all') query.category = category
-      if (subcategory) query.subcategory = subcategory
-      if (subsubcategory) query.subsubcategory = subsubcategory
+      // Clasificación - support both flat and nested category structure
+      if (category && category !== 'all') {
+        andConditions.push({
+          $or: [
+            { category: category },
+            { 'category.slug': category },
+            { 'category.id': category }
+          ]
+        })
+      }
+      if (subcategory) {
+        andConditions.push({
+          $or: [
+            { subcategory: subcategory },
+            { 'subcategory.slug': subcategory },
+            { 'subcategory.id': subcategory }
+          ]
+        })
+      }
+      if (subsubcategory) {
+        andConditions.push({
+          $or: [
+            { subsubcategory: subsubcategory },
+            { 'subsubcategory.slug': subsubcategory },
+            { 'subsubcategory.id': subsubcategory }
+          ]
+        })
+      }
 
       // Ubicación
       if (department) query['location.region'] = { $regex: department, $options: 'i' }
@@ -131,10 +156,17 @@ export async function GET(request: Request) {
 
       // Texto - usar regex en lugar de $text para evitar errores de índice
       if (searchQuery) {
-        query.$or = [
-          { title: { $regex: searchQuery, $options: 'i' } },
-          { description: { $regex: searchQuery, $options: 'i' } }
-        ]
+        andConditions.push({
+          $or: [
+            { title: { $regex: searchQuery, $options: 'i' } },
+            { description: { $regex: searchQuery, $options: 'i' } }
+          ]
+        })
+      }
+      
+      // Combine all $and conditions
+      if (andConditions.length > 0) {
+        query.$and = andConditions
       }
 
       // Precio
