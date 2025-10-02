@@ -640,13 +640,54 @@ export default function PublicationModal({ publicationId, isOpen, onClose, initi
               </div>
             </div>
             
-            <div className="flex items-center text-gray-600 dark:text-slate-300 text-sm mb-3 bg-gray-100 dark:bg-slate-700 px-2 py-1 rounded-lg inline-block">
-              <MapPinIcon className="w-4 h-4 mr-1 flex-shrink-0" />
-              <span>
-                {typeof pub.location === 'string' 
-                  ? pub.location 
-                  : pub.location?.district || pub.location?.province || 'Ubicación no especificada'}
-              </span>
+            {/* Location with map button */}
+            <div className="mb-3">
+              <div className="flex items-center text-gray-600 dark:text-slate-300 text-sm mb-2 bg-gray-100 dark:bg-slate-700 px-3 py-2 rounded-lg">
+                <MapPinIcon className="w-4 h-4 mr-2 flex-shrink-0 text-blue-500" />
+                <div className="flex-1">
+                  <span className="font-medium">Ubicación:</span>
+                  <div className="text-sm mt-1">
+                    {pub.location?.reference && (
+                      <div className="text-gray-700 dark:text-gray-300">
+                        <span className="font-medium">Dirección:</span> {pub.location.reference}
+                      </div>
+                    )}
+                    {pub.location?.district && (
+                      <div className="text-gray-700 dark:text-gray-300">
+                        <span className="font-medium">Distrito:</span> {pub.location.district}
+                      </div>
+                    )}
+                    {pub.location?.province && (
+                      <div className="text-gray-700 dark:text-gray-300">
+                        <span className="font-medium">Provincia:</span> {pub.location.province}
+                      </div>
+                    )}
+                    {pub.location?.city && (
+                      <div className="text-gray-700 dark:text-gray-300">
+                        <span className="font-medium">Ciudad:</span> {pub.location.city}
+                      </div>
+                    )}
+                  </div>
+                </div>
+                {(pub.location?.reference || pub.location?.district) && (
+                  <button
+                    onClick={() => {
+                      const address = [
+                        pub.location?.reference,
+                        pub.location?.district,
+                        pub.location?.province,
+                        pub.location?.city,
+                        'Perú'
+                      ].filter(Boolean).join(', ');
+                      const mapsUrl = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(address)}`;
+                      window.open(mapsUrl, '_blank');
+                    }}
+                    className="ml-2 px-3 py-1 bg-blue-500 text-white text-xs rounded-md hover:bg-blue-600 transition-colors"
+                  >
+                    Ver en mapa
+                  </button>
+                )}
+              </div>
             </div>
             
             <div className="mb-4 bg-gray-50 dark:bg-slate-700/50 p-3 rounded-lg">

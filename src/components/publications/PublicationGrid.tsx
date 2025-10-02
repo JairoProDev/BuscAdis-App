@@ -42,33 +42,16 @@ export default function PublicationGrid({
 
   // Convert Publication to PublicationData format for PublicationCard
   const convertToPublicationData = (pub: Publication) => {
-    // Helper to safely convert location
-    const convertLocation = (loc: Publication['location']) => {
-      if (typeof loc === 'string') {
-        return {
-          district: loc,
+    // Preserve the location object as-is from API
+    const location = pub.location && typeof pub.location === 'object' 
+      ? pub.location 
+      : {
+          reference: '',
+          district: pub.location || '',
           province: '',
           city: '',
           country: 'Perú'
         }
-      }
-      
-      if (loc && typeof loc === 'object') {
-        return {
-          district: loc.district || '',
-          province: loc.province || '',
-          city: loc.city || '',
-          country: 'Perú'
-        }
-      }
-      
-      return {
-        district: '',
-        province: '',
-        city: '',
-        country: 'Perú'
-      }
-    }
 
     return {
       id: pub.id,
@@ -78,13 +61,13 @@ export default function PublicationGrid({
       subcategorySlug: pub.subcategorySlug || null,
       subSubcategorySlug: pub.subSubcategorySlug || null,
       transactionType: 'venta', // Default value since Publication doesn't have this
-      value: pub.price || 0,
+      value: pub.value || pub.price || 0,
       currency: pub.currency || 'PEN',
       valueType: 'fixed', // Default value since Publication doesn't have this
       size: 0, // Default value since Publication doesn't have this
-      location: convertLocation(pub.location),
+      location: location,
       images: pub.images || [],
-      whatsapp: pub.contactPhone || '',
+      whatsapp: pub.whatsapp || pub.contactPhone || '',
       createdAt: pub.createdAt || new Date().toISOString(),
       views: pub.views || 0,
       featured: false, // Default value since Publication doesn't have this

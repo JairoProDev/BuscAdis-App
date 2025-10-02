@@ -126,19 +126,13 @@ export default function PublicationCard({
     return `${currency === 'USD' ? '$' : 'S/'} ${value.toLocaleString()}`;
   };
 
-  // Format location - mostrar ubicación completa
+  // Format location - solo mostrar distrito en el card para optimizar clicks
   const formatLocation = (location: PublicationData['location']) => {
-    if (!location) return 'Ubicación no especificada';
+    if (!location) return 'Distrito no especificado';
     
-    // Mostrar ubicación completa: Referencia → Distrito → Provincia → Departamento → País
-    const parts = [];
-    if (location.reference) parts.push(location.reference);
-    if (location.district) parts.push(location.district);
-    if (location.province) parts.push(location.province);
-    if (location.city) parts.push(location.city);
-    if (location.country) parts.push(location.country);
-    
-    return parts.length > 0 ? parts.join(', ') : 'Ubicación no especificada';
+    // En el card solo mostrar el distrito para maximizar clicks
+    // El usuario verá la ubicación completa al hacer click
+    return location.district || 'Distrito no especificado';
   };
 
   // Format title - siempre en mayúsculas
@@ -226,8 +220,30 @@ export default function PublicationCard({
     });
   };
 
-  // Create enhanced personalized WhatsApp message
+  // Create enhanced personalized WhatsApp message with analytics tracking
   const createEnhancedWhatsAppMessage = () => {
+    // Track contact click for analytics
+    if (typeof window !== 'undefined') {
+      // Send analytics event
+      window.gtag?.('event', 'contact_click', {
+        'publication_id': publication.id,
+        'category': publication.categorySlug,
+        'location': publication.location?.district || 'unknown'
+      });
+      
+      // Custom analytics for BuscaDis
+      fetch('/api/analytics/contact', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          publicationId: publication.id,
+          category: publication.categorySlug,
+          action: 'contact_click',
+          timestamp: new Date().toISOString()
+        })
+      }).catch(err => console.log('Analytics error:', err));
+    }
+    
     const baseUrl = typeof window !== 'undefined' ? window.location.origin : '';
     const adUrl = `${baseUrl}${seoUrl}`;
     
@@ -432,15 +448,15 @@ export default function PublicationCard({
         </div>
       </div>
 
-      {/* WhatsApp Button (optional) */}
+      {/* WhatsApp Button (optimized for maximum clicks) */}
       {showWhatsApp && (
         <div className="p-3 border-t border-gray-100 dark:border-gray-700">
           <button 
             onClick={createEnhancedWhatsAppMessage}
-            className="w-full flex items-center justify-center gap-2 bg-green-500 text-white font-bold py-2.5 rounded-lg hover:bg-green-600 transition-colors duration-300"
+            className="w-full flex items-center justify-center gap-3 bg-green-500 text-white font-bold py-3.5 rounded-lg hover:bg-green-600 active:bg-green-700 transform hover:scale-[1.02] transition-all duration-200 shadow-lg hover:shadow-xl"
           >
-            <WhatsAppIcon className="w-5 h-5" />
-            <span>Contactar</span>
+            <WhatsAppIcon className="w-6 h-6" />
+            <span className="text-lg">Contactar</span>
           </button>
         </div>
       )}
