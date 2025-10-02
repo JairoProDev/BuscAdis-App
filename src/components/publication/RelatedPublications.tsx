@@ -1,10 +1,11 @@
 'use client';
 
-import React from 'react';
+import React, { useState } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { formatPrice } from '@/utils/format';
 import { generateSeoUrl } from '@/utils/url';
+import { getDefaultImageByCategory } from '@/utils/image-helpers';
 
 interface PublicationData {
   id: string;
@@ -59,6 +60,8 @@ export default function RelatedPublications({
 }
 
 function RelatedPublicationCard({ publication, category }: { publication: PublicationData, category: string }) {
+  const [imageError, setImageError] = useState(false);
+  
   const { 
     id, 
     title, 
@@ -79,9 +82,30 @@ function RelatedPublicationCard({ publication, category }: { publication: Public
     subsubcategory || undefined
   );
   
-  const thumbnailImage = images && images.length > 0 
-    ? images[0] 
-    : `/images/placeholder/${category}.jpg`;
+  // Get thumbnail image with validation
+  const getThumbnailImage = () => {
+    if (imageError) {
+      return getDefaultImageByCategory(category);
+    }
+    
+    const firstImage = images?.[0];
+    
+    if (firstImage && 
+        firstImage.trim() !== '' && 
+        !firstImage.includes('undefined') && 
+        !firstImage.includes('null')) {
+      return firstImage;
+    }
+    
+    return getDefaultImageByCategory(category);
+  };
+  
+  const thumbnailImage = getThumbnailImage();
+  
+  const handleImageError = () => {
+    console.log('[RelatedPublicationCard] Image load error, falling back to default');
+    setImageError(true);
+  };
     
   const locationText = typeof location === 'string' 
     ? location 
@@ -97,6 +121,7 @@ function RelatedPublicationCard({ publication, category }: { publication: Public
             fill
             sizes="(max-width: 640px) 100vw, (max-width: 768px) 50vw, 33vw"
             className="object-cover"
+            onError={handleImageError}
           />
         </div>
         

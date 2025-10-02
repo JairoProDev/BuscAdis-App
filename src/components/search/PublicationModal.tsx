@@ -483,7 +483,7 @@ export default function PublicationModal({ publicationId, isOpen, onClose, initi
     const publicationCurrency = pub.currency || 'PEN';
     const publicationCategory = pub.categorySlug || '';
     
-    // Check if publication has images
+    // Check if publication has images with proper validation
     const hasImages = pub.images && 
                      pub.images.length > 0 && 
                      !pub.images.every(url => url.includes('placeholder'));
@@ -491,10 +491,22 @@ export default function PublicationModal({ publicationId, isOpen, onClose, initi
     // Obtener imagen predeterminada según la categoría
     const defaultImage = getDefaultImageByCategory(publicationCategory);
     
-    // Use a safe image URL - asegurarse de usar la misma imagen que en la tarjeta de publicación
-    const imageUrl = hasImages && pub.images && pub.images[0] 
-      ? pub.images[0] 
-      : defaultImage;
+    // Get valid image URL with fallback
+    const getImageUrl = () => {
+      const firstImage = pub.images?.[0];
+      
+      if (firstImage && 
+          firstImage.trim() !== '' && 
+          !firstImage.includes('undefined') && 
+          !firstImage.includes('null') &&
+          !firstImage.includes('placeholder')) {
+        return firstImage;
+      }
+      
+      return defaultImage;
+    };
+    
+    const imageUrl = getImageUrl();
 
     // Prepare contact numbers list - SIMPLIFICADO Y MEJORADO
     const contactNumbers: string[] = [];

@@ -101,6 +101,7 @@ export default function PublicationCard({
 }: PublicationCardProps) {
   const [isFavorite, setIsFavorite] = useState(false);
   const [showCopiedMessage, setShowCopiedMessage] = useState(false);
+  const [imageError, setImageError] = useState(false);
 
   // Hook para detectar tamaño de pantalla
   useEffect(() => {
@@ -170,8 +171,34 @@ export default function PublicationCard({
     return cleanDescription;
   };
 
-  // Get main image
-  const mainImage = publication.images?.[0] || getDefaultImageByCategory(publication.categorySlug);
+  // Get main image with proper validation
+  const getMainImage = () => {
+    // If image failed to load, use default
+    if (imageError) {
+      return getDefaultImageByCategory(publication.categorySlug);
+    }
+    
+    const firstImage = publication.images?.[0];
+    
+    // Check if we have a valid image URL
+    if (firstImage && 
+        firstImage.trim() !== '' && 
+        !firstImage.includes('undefined') && 
+        !firstImage.includes('null')) {
+      return firstImage;
+    }
+    
+    // Fallback to category default image
+    return getDefaultImageByCategory(publication.categorySlug);
+  };
+  
+  const mainImage = getMainImage();
+  
+  // Handle image load error
+  const handleImageError = () => {
+    console.log('[PublicationCard] Image load error, falling back to default');
+    setImageError(true);
+  };
 
   // Format exact date and time with precise relative time
   const formatExactDateTime = (date: string) => {
@@ -278,6 +305,7 @@ export default function PublicationCard({
               fill
               className="object-cover"
               sizes="(max-width: 768px) 33vw, (max-width: 1024px) 25vw, 200px"
+              onError={handleImageError}
             />
           </a>
           <CategoryTag categorySlug={publication.categorySlug} />
@@ -343,6 +371,7 @@ export default function PublicationCard({
             fill
             className="object-cover absolute top-0 left-0 w-full h-full"
             sizes="(max-width: 640px) 100vw, (max-width: 768px) 50vw, (max-width: 1024px) 33vw, 25vw"
+            onError={handleImageError}
           />
         </a>
         <CategoryTag categorySlug={publication.categorySlug} />
