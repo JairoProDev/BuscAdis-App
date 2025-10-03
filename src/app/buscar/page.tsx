@@ -238,12 +238,31 @@ function SearchPageContent({ publicationsData, results, setResults, isLoading, s
   
   // Inicializar estados con valores de URL si están disponibles
   const [selectedCategory, setSelectedCategory] = useState<string>(() => {
-    if (currentPathname && currentPathname !== '/buscar') {
-      const parsed = parseCategoryUrl(currentPathname)
-      return parsed.categoryId || 'all'
+    if (typeof window !== 'undefined') {
+      const urlParams = new URLSearchParams(window.location.search);
+      const category = urlParams.get('category');
+      console.log('🔍 Initial category from URL:', category);
+      return category || 'all';
     }
     return 'all'
   })
+  
+  // Debug: Log selected category changes
+  useEffect(() => {
+    console.log('🔍 Selected category changed:', selectedCategory);
+  }, [selectedCategory]);
+  
+  // Update selected category when URL changes
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const urlParams = new URLSearchParams(window.location.search);
+      const category = urlParams.get('category');
+      if (category && category !== selectedCategory) {
+        console.log('🔍 Updating category from URL:', category);
+        setSelectedCategory(category);
+      }
+    }
+  }, [selectedCategory]);
   const [selectedSubcategory, setSelectedSubcategory] = useState<string>(() => {
     if (currentPathname && currentPathname !== '/buscar') {
       const parsed = parseCategoryUrl(currentPathname)
@@ -739,7 +758,7 @@ function SearchPageContent({ publicationsData, results, setResults, isLoading, s
           {/* Filters Row Mejorado - Fusionando selectores con estado activo */}
           {(selectedCategory && selectedCategory !== 'all') && (
             <div className="pb-1 overflow-visible">
-              <div className="flex items-center gap-3 overflow-x-auto overflow-y-visible scrollbar-thin scrollbar-thumb-gray-300 dark:scrollbar-thumb-gray-600 scrollbar-track-transparent justify-start md:justify-center">
+              <div className="flex items-center gap-3 overflow-x-auto overflow-y-visible scrollbar-thin scrollbar-thumb-gray-300 dark:scrollbar-thumb-gray-600 scrollbar-track-transparent justify-start">
                 {/* Selector de Subcategorías */}
                 <div className="flex-shrink-0">
                   <EnhancedFilterSelector
@@ -751,17 +770,17 @@ function SearchPageContent({ publicationsData, results, setResults, isLoading, s
                   />
                 </div>
 
-                {/* Filtros dinámicos según categoría */}
+                {/* Filtros dinámicos según categoría - TODOS los filtros */}
                 {(() => {
                   const categoryConfig = filtersByCategory[selectedCategory]
                   if (!categoryConfig) return null
                   
-                  const selectFilters = categoryConfig.sections
+                  // Obtener TODOS los filtros, no solo los primeros 4
+                  const allFilters = categoryConfig.sections
                     .flatMap(section => section.filters)
                     .filter(filter => filter.type === 'select')
-                    .slice(0, 4)
                   
-                  return selectFilters.map(filter => (
+                  return allFilters.map(filter => (
                     <div key={filter.id} className="flex-shrink-0">
                       <EnhancedFilterSelector
                         label={filter.label}
@@ -781,11 +800,22 @@ function SearchPageContent({ publicationsData, results, setResults, isLoading, s
                     </div>
                   ))
                 })()}
+                
+                {/* Botón Limpiar Filtros */}
+                <div className="flex-shrink-0 ml-4">
+                  <button
+                    onClick={() => setActiveFilters({})}
+                    className="text-sm text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 transition-colors whitespace-nowrap px-3 py-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800"
+                  >
+                    Limpiar todos los filtros
+                  </button>
+                </div>
               </div>
             </div>
           )}
         </div>
       </div>
+
 
       {/* Main Content */}
       <div className="max-w-7xl mx-auto px-2 sm:px-4 lg:px-8 pt-2 pb-2">

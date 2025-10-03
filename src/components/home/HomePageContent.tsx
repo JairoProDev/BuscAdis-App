@@ -50,6 +50,8 @@ export default function HomePageContent({
   const [categoryLoading, setCategoryLoading] = useState<Record<string, boolean>>({});
   const [isSidebarOpen, setIsSidebarOpen] = useState<boolean>(false);
   
+
+  
   // Hook del contexto de publicación
   const {
     selectedPublication,
@@ -260,6 +262,7 @@ export default function HomePageContent({
                 />
               </div>
             </motion.div>
+
 
             {/* Indicadores de confianza (opcional - descomenta si tienes las métricas) */}
             {/*
