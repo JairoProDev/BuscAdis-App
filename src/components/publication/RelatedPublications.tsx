@@ -6,22 +6,7 @@ import Image from 'next/image';
 import { formatPrice } from '@/utils/format';
 import { generateSeoUrl } from '@/utils/url';
 import { getDefaultImageByCategory } from '@/utils/image-helpers';
-
-interface PublicationData {
-  id: string;
-  title: string;
-  price: number;
-  price_type: string;
-  images: string[];
-  location: {
-    city: string;
-    region?: string;
-  };
-  created_at: string;
-  category?: string;
-  subcategory?: string;
-  subsubcategory?: string;
-}
+import { PublicationData } from '@/types';
 
 interface RelatedPublicationsProps {
   publications: PublicationData[];

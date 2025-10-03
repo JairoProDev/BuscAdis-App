@@ -3,42 +3,7 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { ChevronLeft, ChevronRight, ArrowLeft } from 'lucide-react';
 import PublicationCard from '@/components/publications/PublicationCard';
-
-// Nuevas interfaces para reemplazar 'any'
-export interface PublicationData {
-  id?: string;
-  _id?: string;
-  title?: string;
-  description?: string;
-  categorySlug?: string;
-  subcategory?: string;
-  subcategorySlug?: string;
-  subSubcategorySlug?: string;
-  transactionType?: string;
-  price?: number;
-  value?: number;
-  currency?: string;
-  valueType?: string;
-  size?: number;
-  location?: {
-    city?: string;
-    district?: string;
-    address?: string;
-  } | string;
-  contactPhone?: string;
-  contactEmail?: string;
-  contactName?: string;
-  contact?: {
-    phones?: string[];
-  };
-  images?: string[];
-  status?: string;
-  premium?: boolean;
-  whatsapp?: string;
-  createdAt?: string;
-  created_at?: string;
-  views?: number;
-}
+import { PublicationData } from '@/types';
 
 export interface SearchOptions {
   category?: string;

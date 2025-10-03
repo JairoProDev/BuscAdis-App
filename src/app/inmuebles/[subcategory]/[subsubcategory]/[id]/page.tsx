@@ -20,34 +20,7 @@ import {
   KeyIcon
 } from '@heroicons/react/24/outline';
 import RelatedPublications from '@/components/publication/RelatedPublications';
-
-// Renombrar la interfaz Publication para evitar conflictos
-interface PublicationData {
-  id: string;
-  title: string;
-  description: string;
-  price: number;
-  price_type: string;
-  images: string[];
-  location: {
-    city: string;
-    region?: string;
-    country?: string;
-  };
-  contact: {
-    whatsapp?: string;
-    email?: string;
-    phone?: string;
-    name?: string;
-  };
-  created_at: string;
-  views?: number;
-  category?: string;
-  categorySlug?: string;
-  subcategory?: string;
-  subsubcategory?: string;
-  attributes?: Record<string, string | number | boolean>;
-}
+import { PublicationData } from '@/types';
 
 // Función para mapear de Publication a PublicationData
 function mapPublicationToPublicationData(pub: Publication): PublicationData {
