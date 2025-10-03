@@ -465,13 +465,11 @@ export default function PublicarPage() {
       setPublishedId(publicationId);
       setSuccess(true);
       Logger.info('Publicación creada exitosamente', { id: publicationId });
-      // Redirect directly to the new adiso after a short delay
+      // Redirect directly to the new adiso dedicated page after a short delay
       setTimeout(() => {
-        if (sequentialId) {
-          window.location.href = `/adisos/${sequentialId}/${slug}`;
-        } else if (publicationId) {
-          window.location.href = `/adisos/${publicationId}/${slug}`;
-        }
+        // Use the correct dedicated page URL format: /adiso/{id}
+        const dedicatedUrl = `/adiso/${publicationId}`;
+        window.location.href = dedicatedUrl;
       }, 600);
     } catch (error) {
       console.error('❌ Error al publicar:', error);

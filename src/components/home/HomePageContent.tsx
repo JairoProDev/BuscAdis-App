@@ -374,10 +374,10 @@ export default function HomePageContent({
             </motion.div>
           </div>
 
-          {/* Desktop Sidebar - Optimizado para scroll fluido */}
+          {/* Desktop Sidebar - Fixed position that follows user scroll */}
           {isSidebarOpen && selectedPublication && (
             <div className="hidden lg:block lg:w-1/2 lg:flex-shrink-0">
-              <div className="sticky top-20 h-fit max-h-[calc(100vh-96px)] overflow-y-auto bg-white dark:bg-gray-900 rounded-2xl shadow-2xl border border-gray-200 dark:border-gray-700 w-full">
+              <div className="fixed right-4 top-24 w-[calc(50%-1rem)] max-w-lg h-[calc(100vh-6rem)] overflow-y-auto bg-white dark:bg-gray-900 rounded-2xl shadow-2xl border border-gray-200 dark:border-gray-700 z-40">
                 <PublicationDetailSidebar 
                   publication={selectedPublication}
                   isOpen={isDetailOpen}

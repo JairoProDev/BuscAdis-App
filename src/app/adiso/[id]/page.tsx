@@ -1,7 +1,8 @@
 import { notFound } from 'next/navigation'
 import type { Metadata } from 'next'
 import { getPublicationBySlugOrId } from '@/lib/publications'
-import DedicatedPublicationPage from '@/components/publications/dedicated/DedicatedPublicationPage'
+import { RelatedPublicationsService } from '@/services/related-publications.service'
+import EnhancedDedicatedPage from '@/components/publications/dedicated/EnhancedDedicatedPage'
 
 interface PageProps {
   params: Promise<{ id: string }>
@@ -37,10 +38,13 @@ export default async function AdisoPage({ params }: PageProps) {
       notFound()
     }
 
+    // Fetch related publications
+    const relatedPublications = await RelatedPublicationsService.getRelatedPublications(publication, 6)
+
     return (
-      <DedicatedPublicationPage 
+      <EnhancedDedicatedPage 
         publication={publication!}
-        relatedPublications={[]}
+        relatedPublications={relatedPublications}
       />
     )
   } catch (error) {
