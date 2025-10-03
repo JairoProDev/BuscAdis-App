@@ -245,11 +245,7 @@ export default function RealTimeSearchEngine({
       setSuggestions([])
       setQuickResults([])
     }
-    
-    return () => {
-      debouncedSearch.cancel()
-    }
-  }, [inputValue, debouncedSearch])
+  }, [inputValue]) // Removido debouncedSearch de las dependencias
 
   // Manejar clicks fuera del componente
   useEffect(() => {

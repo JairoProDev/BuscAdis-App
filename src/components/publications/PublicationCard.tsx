@@ -366,27 +366,42 @@ export default function PublicationCard({
         transition={{ duration: 0.3 }}
         className={`bg-white dark:bg-gray-800 rounded-lg shadow-md hover:shadow-xl transition-shadow duration-300 overflow-hidden flex flex-row ${className}`}
       >
-        {/* Image container */}
-        <div className="w-1/3 flex-shrink-0 relative">
+        {/* Image container - Más compacto */}
+        <div className="w-1/4 flex-shrink-0 relative min-h-[120px]">
           <a href={seoUrl} onClick={(e) => { e.preventDefault(); onPublicationClick?.(publication); }} className="block h-full">
             <Image
               src={mainImage}
               alt={publication.title}
               fill
               className="object-cover"
-              sizes="(max-width: 768px) 33vw, (max-width: 1024px) 25vw, 200px"
+              sizes="(max-width: 768px) 33vw, (max-width: 1024px) 25vw, 150px"
               onError={handleImageError}
             />
           </a>
           <CategoryTag categorySlug={publication.categorySlug} />
+          
+          {/* Botones de interacción encima de la imagen como en vista de cuadrícula */}
+          <div className="absolute top-2 right-2 flex flex-col gap-1">
+            <button onClick={handleFavorite} className="bg-black/30 p-1.5 rounded-full text-white hover:bg-black/50 transition-colors">
+              {isFavorite ? <HeartSolidIcon className="w-4 h-4" /> : <HeartIcon className="w-4 h-4" />}
+            </button>
+            <button onClick={handleShare} className="bg-black/30 p-1.5 rounded-full text-white hover:bg-black/50 transition-colors">
+              <CurvedShareIcon className="w-4 h-4" />
+            </button>
+          </div>
+          {showCopiedMessage && (
+            <div className="absolute bottom-2 left-1/2 -translate-x-1/2 bg-black/70 text-white text-xs px-2 py-1 rounded-md">
+              ¡Enlace copiado!
+            </div>
+          )}
         </div>
 
-        {/* Content */}
-        <div className="p-4 flex-1 flex flex-col justify-between">
-          <div>
-            {/* Title */}
+        {/* Content - Más espacio para texto */}
+        <div className="p-4 flex-1 flex flex-col justify-between min-h-[120px]">
+          <div className="flex-1">
+            {/* Title - Más espacio */}
             <a href={seoUrl} onClick={(e) => { e.preventDefault(); onPublicationClick?.(publication); }} className="block mb-2">
-              <h3 className="font-bold text-lg leading-tight hover:text-blue-600 transition-colors duration-200 line-clamp-2">
+              <h3 className="font-bold text-lg leading-tight hover:text-blue-600 transition-colors duration-200 line-clamp-3">
                 {formatTitle(publication.title)}
               </h3>
             </a>
@@ -399,21 +414,20 @@ export default function PublicationCard({
               {publication.featured && (
                 <FeaturedBadge size="sm" />
               )}
-              {/* Add boost badge if publication is boosted */}
               {publication.premium && (
                 <BoostBadge size="sm" />
               )}
             </div>
             
-            {/* Description */}
+            {/* Description - Más espacio */}
             {publication.description && (
-              <p className="text-sm text-gray-600 dark:text-gray-400 mb-2 line-clamp-2">
+              <p className="text-sm text-gray-600 dark:text-gray-400 mb-3 line-clamp-3">
                 {formatDescription(publication.description)}
               </p>
             )}
             
             {/* Location and Date */}
-            <div className="flex items-center justify-between text-sm text-gray-500 mb-2">
+            <div className="flex items-center justify-between text-sm text-gray-500 mb-3">
               <div className="flex items-center">
                 <MapPinIcon className="w-4 h-4 mr-1.5 text-gray-400 flex-shrink-0" />
                 <span className="truncate">{formatLocation(publication.location)}</span>
@@ -424,33 +438,34 @@ export default function PublicationCard({
             </div>
           </div>
 
-          {/* Price */}
-          <div className="mt-2">
-            {formatPriceLocal(publication.value, publication.currency) ? (
-              <div className="text-xl font-extrabold text-blue-600 dark:text-blue-400">
-                {formatPriceLocal(publication.value, publication.currency)}
-              </div>
-            ) : (
-              <button
-                onClick={handlePriceInquiry}
-                className="text-xl font-extrabold text-[#00B6E3] dark:text-[#00B6E3] hover:text-[#009fc7] dark:hover:text-[#00b6e3] transition-colors cursor-pointer"
+          {/* Price y Contact Button en la misma línea */}
+          <div className="flex items-center justify-between">
+            <div>
+              {formatPriceLocal(publication.value, publication.currency) ? (
+                <div className="text-xl font-extrabold text-blue-600 dark:text-blue-400">
+                  {formatPriceLocal(publication.value, publication.currency)}
+                </div>
+              ) : (
+                <button
+                  onClick={handlePriceInquiry}
+                  className="text-xl font-extrabold text-[#00B6E3] dark:text-[#00B6E3] hover:text-[#009fc7] dark:hover:text-[#00b6e3] transition-colors cursor-pointer"
+                >
+                  {publication.categorySlug === 'empleos' ? '¿Sueldo?' : '¿Precio?'}
+                </button>
+              )}
+            </div>
+            
+            {/* Contact Button al lado del precio */}
+            {showWhatsApp && (
+              <button 
+                onClick={createEnhancedWhatsAppMessage} 
+                className="flex items-center gap-2 px-4 py-2 bg-green-500 hover:bg-green-600 text-white rounded-lg transition-colors text-sm font-medium"
               >
-                {publication.categorySlug === 'empleos' ? '¿Sueldo?' : '¿Precio?'}
+                <WhatsAppIcon className="w-4 h-4" />
+                Contactar
               </button>
             )}
           </div>
-        </div>
-
-        {/* Actions */}
-        <div className="flex flex-col justify-center items-center p-3 border-l border-gray-200 dark:border-gray-700">
-          <button onClick={handleFavorite} className="p-2 rounded-full hover:bg-red-50 dark:hover:bg-gray-700 transition-colors mb-2">
-            {isFavorite ? <HeartSolidIcon className="w-6 h-6 text-red-500" /> : <HeartIcon className="w-6 h-6 text-gray-500" />}
-          </button>
-          {showWhatsApp && (
-            <button onClick={createEnhancedWhatsAppMessage} className="p-2 rounded-full hover:bg-green-50 dark:hover:bg-gray-700 transition-colors">
-              <WhatsAppIcon className="w-6 h-6 text-green-500" />
-            </button>
-          )}
         </div>
       </motion.div>
     );

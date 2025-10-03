@@ -55,18 +55,31 @@ const EnhancedFilterSelector = ({
   value, 
   options,
   onChange,
-  placeholder
+  placeholder,
+  isMultiSelect = false
 }: {
   label: string
   value: FilterValue
   options: Array<{value: string, label: string}>
   onChange: (value: FilterValue) => void
   placeholder: string
+  isMultiSelect?: boolean
 }) => {
   const [isOpen, setIsOpen] = useState(false)
   const buttonRef = useRef<HTMLButtonElement>(null)
-  const selectedOption = options.find(option => option.value === value)
-  const hasValue = value && value !== ''
+  
+  // Manejar tanto valores simples como arrays para multiselect
+  const selectedOption = isMultiSelect 
+    ? null // Para multiselect, no mostramos una opción específica
+    : options.find(option => option.value === value)
+    
+  const hasValue = isMultiSelect
+    ? Array.isArray(value) && value.length > 0
+    : value && value !== ''
+    
+  const selectedOptions = isMultiSelect && Array.isArray(value)
+    ? options.filter(option => value.includes(option.value))
+    : []
   
   const handleClose = useCallback(() => {
     setIsOpen(false)
@@ -89,7 +102,12 @@ const EnhancedFilterSelector = ({
         }`}
       >
         <span className="text-sm font-medium">
-          {selectedOption ? selectedOption.label : placeholder}
+          {isMultiSelect 
+            ? (selectedOptions.length > 0 
+                ? `${selectedOptions.length} seleccionado${selectedOptions.length > 1 ? 's' : ''}`
+                : placeholder)
+            : (selectedOption ? selectedOption.label : placeholder)
+          }
         </span>
         {hasValue && (
           <span
@@ -115,25 +133,79 @@ const EnhancedFilterSelector = ({
         buttonRef={buttonRef.current}
         onClose={handleClose}
       >
-        <button
-          onClick={() => handleOptionSelect(null)}
-          className="w-full flex items-start px-4 py-2 text-sm text-left hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors text-gray-700 dark:text-gray-300"
-        >
-          {placeholder}
-        </button>
-        {options.map((option) => (
-          <button
-            key={option.value}
-            onClick={() => handleOptionSelect(option.value)}
-            className={`w-full flex items-start px-4 py-2 text-sm text-left hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors ${
-              value === option.value 
-                ? 'bg-teal-50 dark:bg-teal-900/20 text-teal-700 dark:text-teal-300' 
-                : 'text-gray-700 dark:text-gray-300'
-            }`}
-          >
-            {option.label}
-          </button>
-        ))}
+        {!isMultiSelect ? (
+          <>
+            <button
+              onClick={() => handleOptionSelect(null)}
+              className="w-full flex items-start px-4 py-2 text-sm text-left hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors text-gray-700 dark:text-gray-300"
+            >
+              {placeholder}
+            </button>
+            {options.map((option) => (
+              <button
+                key={option.value}
+                onClick={() => handleOptionSelect(option.value)}
+                className={`w-full flex items-start px-4 py-2 text-sm text-left hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors ${
+                  value === option.value 
+                    ? 'bg-teal-50 dark:bg-teal-900/20 text-teal-700 dark:text-teal-300' 
+                    : 'text-gray-700 dark:text-gray-300'
+                }`}
+              >
+                {option.label}
+              </button>
+            ))}
+          </>
+        ) : (
+          <>
+            <div className="p-3 border-b border-gray-200 dark:border-gray-700">
+              <div className="flex items-center justify-between">
+                <span className="text-sm font-medium text-gray-700 dark:text-gray-300">
+                  Seleccionar opciones
+                </span>
+                {selectedOptions.length > 0 && (
+                  <button
+                    onClick={() => onChange([])}
+                    className="text-xs text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200"
+                  >
+                    Limpiar
+                  </button>
+                )}
+              </div>
+            </div>
+            <div className="max-h-60 overflow-y-auto">
+              {options.map((option) => {
+                const isSelected = Array.isArray(value) && value.includes(option.value)
+                return (
+                  <label
+                    key={option.value}
+                    className="flex items-center px-4 py-2 hover:bg-gray-50 dark:hover:bg-gray-700 cursor-pointer"
+                  >
+                    <input
+                      type="checkbox"
+                      checked={isSelected}
+                      onChange={() => {
+                        if (!Array.isArray(value)) {
+                          onChange([option.value])
+                          return
+                        }
+                        
+                        if (isSelected) {
+                          onChange(value.filter(v => v !== option.value))
+                        } else {
+                          onChange([...value, option.value])
+                        }
+                      }}
+                      className="mr-3 rounded border-gray-300 text-teal-600 focus:ring-teal-500"
+                    />
+                    <span className="text-sm text-gray-700 dark:text-gray-300">
+                      {option.label}
+                    </span>
+                  </label>
+                )
+              })}
+            </div>
+          </>
+        )}
       </DropdownPortal>
     </div>
   )
@@ -262,7 +334,7 @@ function SearchPageContent({ publicationsData, results, setResults, isLoading, s
         setSelectedCategory(category);
       }
     }
-  }, [selectedCategory]);
+  }, [router.asPath]); // Cambiar dependencia a router.asPath para evitar bucle infinito
   const [selectedSubcategory, setSelectedSubcategory] = useState<string>(() => {
     if (currentPathname && currentPathname !== '/buscar') {
       const parsed = parseCategoryUrl(currentPathname)
@@ -775,10 +847,10 @@ function SearchPageContent({ publicationsData, results, setResults, isLoading, s
                   const categoryConfig = filtersByCategory[selectedCategory]
                   if (!categoryConfig) return null
                   
-                  // Obtener TODOS los filtros, no solo los primeros 4
+                  // Obtener TODOS los filtros de tipo select y multiselect
                   const allFilters = categoryConfig.sections
                     .flatMap(section => section.filters)
-                    .filter(filter => filter.type === 'select')
+                    .filter(filter => filter.type === 'select' || filter.type === 'multiselect')
                   
                   return allFilters.map(filter => (
                     <div key={filter.id} className="flex-shrink-0">
@@ -788,7 +860,8 @@ function SearchPageContent({ publicationsData, results, setResults, isLoading, s
                         options={filter.options || []}
                         onChange={(value) => {
                           const newFilters = { ...activeFilters }
-                          if (value === null || value === undefined || value === '') {
+                          if (value === null || value === undefined || value === '' || 
+                              (Array.isArray(value) && value.length === 0)) {
                             delete newFilters[filter.id]
                           } else {
                             newFilters[filter.id] = value
@@ -796,6 +869,7 @@ function SearchPageContent({ publicationsData, results, setResults, isLoading, s
                           handleFiltersChange(newFilters)
                         }}
                         placeholder={`Cualquier ${filter.label.toLowerCase()}`}
+                        isMultiSelect={filter.type === 'multiselect'}
                       />
                     </div>
                   ))
