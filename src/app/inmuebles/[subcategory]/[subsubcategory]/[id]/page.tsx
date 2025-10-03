@@ -15,9 +15,7 @@ import {
   MapPinIcon,
   CalendarIcon,
   EyeIcon,
-  Squares2X2Icon,
-  HomeIcon,
-  KeyIcon
+  Squares2X2Icon
 } from '@heroicons/react/24/outline';
 import RelatedPublications from '@/components/publication/RelatedPublications';
 import { PublicationData } from '@/types';
@@ -28,27 +26,27 @@ function mapPublicationToPublicationData(pub: Publication): PublicationData {
     id: pub._id,
     title: pub.title,
     description: pub.description,
-    price: pub.value,
-    price_type: pub.valueType,
-    images: pub.images,
+    categorySlug: pub.categorySlug,
+    subcategorySlug: pub.subcategorySlug || null,
+    subSubcategorySlug: pub.subSubcategorySlug || null,
+    transactionType: 'venta', // Default value
+    value: pub.value,
+    currency: 'PEN', // Default currency
+    valueType: pub.valueType,
+    size: pub.size || 0,
     location: {
+      district: pub.location.district || '',
       city: pub.location.city,
-      region: pub.location.province,
+      province: pub.location.province,
       country: pub.location.country,
     },
-    contact: {
-      whatsapp: pub.contact.phones?.[0] || '',
-      email: pub.contact.email,
-      phone: pub.contact.phones?.[0],
-      name: pub.contact.name,
-    },
-    created_at: pub.createdAt,
-    views: pub.views,
-    category: pub.categorySlug,
-    categorySlug: pub.categorySlug,
-    subcategory: pub.subcategorySlug,
-    subsubcategory: pub.subSubcategorySlug,
-    attributes: pub.size ? { area: pub.size } : undefined,
+    images: pub.images,
+    whatsapp: pub.contact.phones?.[0] || '',
+    createdAt: pub.createdAt,
+    updatedAt: pub.updatedAt,
+    views: pub.views || 0,
+    featured: false, // Default value since Publication doesn't have featured
+    premium: pub.premium || false,
   };
 }
 
@@ -65,7 +63,7 @@ function InmuebleDetailPageContent({ publication: initialPublication }: { public
       try {
         const relatedData = await PublicationsService.getRelatedPublications(
           publication.id,
-          publication.categorySlug || publication.category || 'general'
+          publication.categorySlug || 'general'
         );
         setRelatedPublications(relatedData || []);
       } catch (err) {
@@ -115,8 +113,8 @@ function InmuebleDetailPageContent({ publication: initialPublication }: { public
 
   // Extraer datos para facilitar el acceso
   const { 
-    title, description, price, images, 
-    location, contact, created_at: createdAt, views, attributes 
+    title, description, value, images, 
+    location, whatsapp, createdAt, views, size 
   } = publication;
 
   return (
@@ -151,7 +149,7 @@ function InmuebleDetailPageContent({ publication: initialPublication }: { public
               
               <div className="flex flex-wrap items-center justify-between gap-4 mb-6">
                 <div className="text-2xl font-bold text-blue-600">
-                  {formatPrice({ amount: price, currency: 'PEN' })}
+                  {formatPrice({ amount: value, currency: 'PEN' })}
                 </div>
                 
                 <div className="flex items-center gap-6">
@@ -162,7 +160,7 @@ function InmuebleDetailPageContent({ publication: initialPublication }: { public
                   
                   <div className="flex items-center text-gray-500 text-sm">
                     <MapPinIcon className="w-4 h-4 mr-1" />
-                    <span>{location.city}{location.region ? `, ${location.region}` : ''}</span>
+                    <span>{location.city}{location.province ? `, ${location.province}` : ''}</span>
                   </div>
                   
                   {views !== undefined && (
@@ -181,30 +179,14 @@ function InmuebleDetailPageContent({ publication: initialPublication }: { public
               </div>
               
               {/* Características específicas de inmuebles */}
-              {attributes && (
+              {size > 0 && (
                 <div className="mt-6 border-t pt-6">
                   <h2 className="text-xl font-semibold mb-4">Características</h2>
                   <div className="grid grid-cols-2 md:grid-cols-3 gap-4 text-sm">
-                    {attributes.area && (
-                      <div className="flex items-center text-gray-600">
-                        <Squares2X2Icon className="w-4 h-4 mr-2 text-blue-500" />
-                        <span>Área: {String(attributes.area)} m²</span>
-                      </div>
-                    )}
-                    {attributes.bedrooms && (
-                      <div className="flex items-center text-gray-600">
-                        <HomeIcon className="w-4 h-4 mr-2 text-blue-500" />
-                        <span>Habitaciones: {String(attributes.bedrooms)}</span>
-                      </div>
-                    )}
-                    {attributes.bathrooms && (
-                      <div className="flex items-center text-gray-600">
-                        {/* Icono para baños (puedes añadir uno) */}
-                        <KeyIcon className="w-4 h-4 mr-2 text-blue-500" /> 
-                        <span>Baños: {String(attributes.bathrooms)}</span>
-                      </div>
-                    )}
-                    {/* Agrega más atributos aquí si existen */}
+                    <div className="flex items-center text-gray-600">
+                      <Squares2X2Icon className="w-4 h-4 mr-2 text-blue-500" />
+                      <span>Área: {String(size)} m²</span>
+                    </div>
                   </div>
                 </div>
               )}
@@ -216,15 +198,12 @@ function InmuebleDetailPageContent({ publication: initialPublication }: { public
             {/* Información del vendedor */}
             <div className="bg-white rounded-lg shadow-sm p-6 border border-gray-100">
               <h2 className="text-xl font-semibold mb-4">Contactar al Vendedor</h2>
-              {contact.name && (
-                <p className="text-lg font-medium text-gray-800 mb-2">{contact.name}</p>
-              )}
               
               <div className="space-y-3">
                 {/* Botón de WhatsApp */}
-                {contact.whatsapp && (
+                {whatsapp && (
                   <a
-                    href={`https://wa.me/${contact.whatsapp.replace(/[^0-9]/g, '')}?text=${formatWhatsAppMessage()}`}
+                    href={`https://wa.me/${whatsapp.replace(/[^0-9]/g, '')}?text=${formatWhatsAppMessage()}`}
                     target="_blank"
                     rel="noopener noreferrer"
                     className="flex items-center justify-center w-full bg-gradient-to-r from-green-500 to-green-600 hover:from-green-600 hover:to-green-700 text-white py-3 px-4 rounded-lg font-medium transition-all shadow-md"
@@ -234,31 +213,6 @@ function InmuebleDetailPageContent({ publication: initialPublication }: { public
                   </a>
                 )}
                 
-                {/* Botón de Llamar */}
-                {contact.phone && (
-                  <a
-                    href={`tel:${contact.phone}`}
-                    className="flex items-center justify-center w-full bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white py-3 px-4 rounded-lg font-medium transition-all shadow-md"
-                  >
-                    <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z" />
-                    </svg>
-                    Llamar
-                  </a>
-                )}
-                
-                {/* Botón de Email (si existe) */}
-                {contact.email && (
-                  <a
-                    href={`mailto:${contact.email}`}
-                    className="flex items-center justify-center w-full bg-gray-100 hover:bg-gray-200 text-gray-800 py-3 px-4 rounded-lg font-medium transition-all shadow-sm border border-gray-200"
-                  >
-                    <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
-                    </svg>
-                    Enviar Email
-                  </a>
-                )}
               </div>
             </div>
 

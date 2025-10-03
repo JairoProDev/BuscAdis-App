@@ -8,7 +8,7 @@
  * 4. CDN cache for static assets
  */
 
-import { Redis } from 'ioredis';
+// import { Redis } from 'ioredis'; // Disabled for now
 
 // ============================================================================
 // CONFIGURATION
@@ -115,16 +115,17 @@ class MemoryCache {
 // ============================================================================
 
 class RedisCache {
-  private redis: Redis | null = null;
+  private redis: any | null = null;
 
   constructor() {
-    if (CACHE_CONFIG.enableRedis && CACHE_CONFIG.redisUrl) {
-      this.redis = new Redis(CACHE_CONFIG.redisUrl, {
-        retryDelayOnFailover: 100,
-        maxRetriesPerRequest: 3,
-        lazyConnect: true,
-      });
-    }
+    // Redis disabled for now
+    // if (CACHE_CONFIG.enableRedis && CACHE_CONFIG.redisUrl) {
+    //   this.redis = new Redis(CACHE_CONFIG.redisUrl, {
+    //     retryDelayOnFailover: 100,
+    //     maxRetriesPerRequest: 3,
+    //     lazyConnect: true,
+    //   });
+    // }
   }
 
   async set(key: string, value: any, ttl: number = CACHE_CONFIG.defaultTTL): Promise<void> {

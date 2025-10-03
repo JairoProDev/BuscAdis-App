@@ -21,6 +21,7 @@ import { HeartIcon as HeartSolidIcon } from '@heroicons/react/24/solid';
 import { WhatsAppIcon } from '@/components/icons';
 import { useMemo } from 'react';
 import { getDefaultImageByCategory } from '@/utils/image-helpers';
+import { BadgeStack, PlanBadge, BoostBadge, FeaturedBadge } from '@/components/premium/PremiumBadge';
 
 import { PublicationData } from '@/types/publication';
 import { generatePublicationUrl } from '@/lib/routing';
@@ -390,6 +391,20 @@ export default function PublicationCard({
               </h3>
             </a>
             
+            {/* Premium Badges */}
+            <div className="flex items-center gap-2 mb-2">
+              {publication.premium && (
+                <PlanBadge plan="premium" size="sm" />
+              )}
+              {publication.featured && (
+                <FeaturedBadge size="sm" />
+              )}
+              {/* Add boost badge if publication is boosted */}
+              {publication.premium && (
+                <BoostBadge size="sm" />
+              )}
+            </div>
+            
             {/* Description */}
             {publication.description && (
               <p className="text-sm text-gray-600 dark:text-gray-400 mb-2 line-clamp-2">
@@ -486,6 +501,20 @@ export default function PublicationCard({
               {formatTitle(publication.title)}
             </h3>
           </a>
+          
+          {/* Premium Badges */}
+          <div className="flex items-center gap-2 mb-2">
+            {publication.premium && (
+              <PlanBadge plan="premium" size="sm" />
+            )}
+            {publication.featured && (
+              <FeaturedBadge size="sm" />
+            )}
+            {/* Add boost badge if publication is boosted */}
+            {publication.premium && (
+              <BoostBadge size="sm" />
+            )}
+          </div>
           
           {/* Description */}
           {publication.description && (

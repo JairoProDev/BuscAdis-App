@@ -50,12 +50,12 @@ function RelatedPublicationCard({ publication, category }: { publication: Public
   const { 
     id, 
     title, 
-    price, 
-    price_type, 
+    value, 
+    valueType, 
     images, 
     location, 
-    subcategory,
-    subsubcategory 
+    subcategorySlug,
+    subSubcategorySlug 
   } = publication;
   
   const url = generateSeoUrl(
@@ -63,8 +63,8 @@ function RelatedPublicationCard({ publication, category }: { publication: Public
     title,
     undefined, // publicationSlug
     category,
-    subcategory || undefined,
-    subsubcategory || undefined
+    subcategorySlug || undefined,
+    subSubcategorySlug || undefined
   );
   
   // Get thumbnail image with validation
@@ -94,7 +94,7 @@ function RelatedPublicationCard({ publication, category }: { publication: Public
     
   const locationText = typeof location === 'string' 
     ? location 
-    : `${location?.city || ''}${location?.region ? `, ${location.region}` : ''}`;
+    : `${location?.city || ''}${location?.province ? `, ${location.province}` : ''}`;
 
   return (
     <Link href={url} className="block group">
@@ -117,7 +117,7 @@ function RelatedPublicationCard({ publication, category }: { publication: Public
           
           <div className="mt-2 flex items-center justify-between">
             <p className="text-blue-600 font-medium">
-              {formatPrice({ amount: price, currency: 'PEN', negotiable: price_type === 'negotiable' })}
+              {formatPrice({ amount: value, currency: 'PEN', negotiable: valueType === 'negotiable' })}
             </p>
             
             <p className="text-xs text-gray-500">

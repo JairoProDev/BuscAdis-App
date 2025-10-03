@@ -32,14 +32,14 @@ export interface SubcategoriesViewProps {
 
 // Adaptador robusto para trabajar con los datos reales de tu API
 const adaptPublication = (publication: PublicationData) => ({
-  id: publication.id || publication._id || 'unknown',
+  id: publication.id || 'unknown',
   title: publication.title || 'Sin título',
   description: publication.description || '',
   categorySlug: publication.categorySlug || 'general',
-  subcategorySlug: publication.subcategory || publication.subcategorySlug || null,
+  subcategorySlug: publication.subcategorySlug || null,
   subSubcategorySlug: publication.subSubcategorySlug || null,
   transactionType: publication.transactionType || 'venta',
-  value: publication.price || publication.value || 0,
+  value: publication.value || 0,
   currency: publication.currency || 'PEN',
   valueType: publication.valueType || 'fijo',
   size: publication.size || 1,
@@ -48,20 +48,14 @@ const adaptPublication = (publication: PublicationData) => ({
     province: 'Cusco',
     city: typeof publication.location === 'object' ? publication.location?.city || 'Cusco' : publication.location || 'Cusco',
     district: typeof publication.location === 'object' ? publication.location?.district || '' : '',
-    address: typeof publication.location === 'object' ? publication.location?.address || '' : ''
   },
-  contact: {
-    phones: publication.contactPhone ? [publication.contactPhone] : ['900000000'],
-    email: publication.contactEmail || null,
-    name: publication.contactName || null
-  },
+  whatsapp: publication.whatsapp || '900000000',
   images: (publication.images && Array.isArray(publication.images)) 
     ? publication.images 
     : ['/images/placeholder-image.jpg'],
   status: publication.status || 'active',
   premium: publication.premium || false,
-  whatsapp: publication.contact?.phones?.[0] || publication.whatsapp || '900000000',
-  createdAt: publication.createdAt || publication.created_at || new Date().toISOString(),
+  createdAt: publication.createdAt || new Date().toISOString(),
   views: publication.views || 0
 });
 
@@ -354,7 +348,7 @@ const SubcategoryRowComponent: React.FC<SubcategoryRowProps> = ({ row, onSearch,
           style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
         >
           {row.publications.slice(0, row.maxItems).map((publication: PublicationData) => (
-            <div key={publication.id || publication._id || Math.random()} className="flex-shrink-0 w-80">
+            <div key={publication.id || Math.random()} className="flex-shrink-0 w-80">
               <PublicationCard 
                 publication={adaptPublication(publication)}
               />

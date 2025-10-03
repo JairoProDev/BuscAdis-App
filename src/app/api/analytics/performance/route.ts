@@ -45,7 +45,7 @@ export async function POST(request: NextRequest) {
     const data: PerformanceMetric | PerformanceReport = await request.json();
     
     // Validate required fields
-    if (!data.name && !data.sessionId) {
+    if (!('name' in data) && !('sessionId' in data)) {
       return NextResponse.json(
         { error: 'Missing required fields' },
         { status: 400 }
@@ -253,7 +253,7 @@ async function getAggregatedStats(db: any, query: any): Promise<any> {
     ]).toArray();
     
     // Calculate rating percentages
-    const statsWithRatings = stats.map(stat => {
+    const statsWithRatings = stats.map((stat: any) => {
       const total = stat.ratings.length;
       const ratingCounts = stat.ratings.reduce((acc: any, rating: string) => {
         acc[rating] = (acc[rating] || 0) + 1;

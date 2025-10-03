@@ -172,8 +172,9 @@ class CoreWebVitalsMonitor {
       const observer = new PerformanceObserver((list) => {
         const entries = list.getEntries();
         entries.forEach((entry) => {
-          if (entry.responseStart > 0) {
-            this.metrics.TTFB = entry.responseStart - entry.requestStart;
+          const navEntry = entry as PerformanceNavigationTiming;
+          if (navEntry.responseStart > 0) {
+            this.metrics.TTFB = navEntry.responseStart - navEntry.requestStart;
             this.reportMetric('TTFB', this.metrics.TTFB);
           }
         });

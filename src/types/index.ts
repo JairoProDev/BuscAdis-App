@@ -263,8 +263,7 @@ export type Currency = 'PEN' | 'USD' | 'EUR';
 // ============================================================================
 
 export type { 
-  Publication,
-  ExtendedLocation 
+  Publication
 } from '../components/search/SearchResults';
 
 export type { 

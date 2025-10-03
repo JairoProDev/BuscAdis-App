@@ -485,11 +485,11 @@ export default function SearchResults({
                   <OptimizedImage
                     src={images[0]}
                     alt={`Imagen de ${publication.title || 'publicación'}`}
-                    fill
+                    width={120}
+                    height={120}
                     sizes="(max-width: 640px) 30vw, 120px"
                     className="transition-transform duration-500 group-hover:scale-110"
                     priority={index < 4}
-                    categorySlug={publication.categorySlug}
                     fallbackSrc="/images/placeholder-buscadis.jpg"
                   />
                 </div>

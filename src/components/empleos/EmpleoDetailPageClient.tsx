@@ -18,23 +18,7 @@ import {
 } from '@heroicons/react/24/outline';
 import RelatedPublications from '@/components/publication/RelatedPublications';
 import { PublicationData as EmploymentPublicationData } from '@/types/publication';
-
-// Interface for related publications that matches RelatedPublications component
-interface RelatedPublicationData {
-  id: string;
-  title: string;
-  price: number;
-  price_type: string;
-  images: string[];
-  location: {
-    city: string;
-    region?: string;
-  };
-  created_at: string;
-  category?: string;
-  subcategory?: string;
-  subsubcategory?: string;
-}
+import { PublicationData } from '@/types';
 
 interface EmpleoDetailPageClientProps {
   id: string;
@@ -44,7 +28,7 @@ export default function EmpleoDetailPageClient({ id }: EmpleoDetailPageClientPro
   const router = useRouter();
   const [publication, setPublication] = useState<EmploymentPublicationData | null>(null);
   const [loading, setLoading] = useState(true);
-  const [relatedPublications, setRelatedPublications] = useState<RelatedPublicationData[]>([]);
+  const [relatedPublications, setRelatedPublications] = useState<PublicationData[]>([]);
 
   useEffect(() => {
     const fetchPublication = async () => {
