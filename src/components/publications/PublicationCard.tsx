@@ -366,26 +366,26 @@ export default function PublicationCard({
         transition={{ duration: 0.3 }}
         className={`bg-white dark:bg-gray-800 rounded-lg shadow-md hover:shadow-xl transition-shadow duration-300 overflow-hidden flex flex-row ${className}`}
       >
-        {/* Image container - Más compacto */}
-        <div className="w-1/4 flex-shrink-0 relative min-h-[120px]">
+        {/* Image container - Más ancho para evitar que se vea aplastada */}
+        <div className="w-1/3 flex-shrink-0 relative min-h-[140px]">
           <a href={seoUrl} onClick={(e) => { e.preventDefault(); onPublicationClick?.(publication); }} className="block h-full">
             <Image
               src={mainImage}
               alt={publication.title}
               fill
               className="object-cover"
-              sizes="(max-width: 768px) 33vw, (max-width: 1024px) 25vw, 150px"
+              sizes="(max-width: 768px) 40vw, (max-width: 1024px) 30vw, 200px"
               onError={handleImageError}
             />
           </a>
           <CategoryTag categorySlug={publication.categorySlug} />
           
-          {/* Botones de interacción encima de la imagen como en vista de cuadrícula */}
+          {/* Botones de interacción - Mejor posicionamiento para evitar superposición */}
           <div className="absolute top-2 right-2 flex flex-col gap-1">
-            <button onClick={handleFavorite} className="bg-black/30 p-1.5 rounded-full text-white hover:bg-black/50 transition-colors">
+            <button onClick={handleFavorite} className="bg-black/40 p-1.5 rounded-full text-white hover:bg-black/60 transition-colors backdrop-blur-sm">
               {isFavorite ? <HeartSolidIcon className="w-4 h-4" /> : <HeartIcon className="w-4 h-4" />}
             </button>
-            <button onClick={handleShare} className="bg-black/30 p-1.5 rounded-full text-white hover:bg-black/50 transition-colors">
+            <button onClick={handleShare} className="bg-black/40 p-1.5 rounded-full text-white hover:bg-black/60 transition-colors backdrop-blur-sm">
               <CurvedShareIcon className="w-4 h-4" />
             </button>
           </div>
@@ -396,12 +396,12 @@ export default function PublicationCard({
           )}
         </div>
 
-        {/* Content - Más espacio para texto */}
-        <div className="p-4 flex-1 flex flex-col justify-between min-h-[120px]">
+        {/* Content - Ajustado a la nueva altura de imagen */}
+        <div className="p-4 flex-1 flex flex-col justify-between min-h-[140px]">
           <div className="flex-1">
-            {/* Title - Más espacio */}
+            {/* Title - Solo 1 línea en vista de lista */}
             <a href={seoUrl} onClick={(e) => { e.preventDefault(); onPublicationClick?.(publication); }} className="block mb-2">
-              <h3 className="font-bold text-lg leading-tight hover:text-blue-600 transition-colors duration-200 line-clamp-3">
+              <h3 className="font-bold text-lg leading-tight hover:text-blue-600 transition-colors duration-200 line-clamp-1">
                 {formatTitle(publication.title)}
               </h3>
             </a>
@@ -419,9 +419,9 @@ export default function PublicationCard({
               )}
             </div>
             
-            {/* Description - Más espacio */}
+            {/* Description - Solo 2 líneas en vista de lista */}
             {publication.description && (
-              <p className="text-sm text-gray-600 dark:text-gray-400 mb-3 line-clamp-3">
+              <p className="text-sm text-gray-600 dark:text-gray-400 mb-3 line-clamp-2">
                 {formatDescription(publication.description)}
               </p>
             )}
