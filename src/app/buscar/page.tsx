@@ -23,6 +23,7 @@ import { PublicationData } from '@/types/publication'
 import PublicationDetailContainer from '@/components/publications/PublicationDetailContainer'
 import { PublicationDetailProvider, usePublicationDetail } from '@/hooks/usePublicationDetail'
 import PublicationDetailSidebar from '@/components/publications/PublicationDetailSidebar'
+import CategorySelector from '@/components/home/CategorySelector'
 
 interface SearchResult {
   id: string;
@@ -40,7 +41,7 @@ interface SearchResult {
 
 type ViewMode = 'grid' | 'list'
 type SortOption = 'recent' | 'price-asc' | 'price-desc' | 'views' | 'distance'
-type FilterValue = string | number | boolean | null | undefined;
+type FilterValue = string | number | boolean | null | undefined | (string | number)[];
 
 const sortOptions = [
   { value: 'recent', label: 'Más recientes', icon: '🕒' },
@@ -78,7 +79,7 @@ const EnhancedFilterSelector = ({
     : value && value !== ''
     
   const selectedOptions = isMultiSelect && Array.isArray(value)
-    ? options.filter(option => value.includes(option.value))
+    ? options.filter(option => value.includes(option.value as string | number))
     : []
   
   const handleClose = useCallback(() => {
@@ -174,7 +175,7 @@ const EnhancedFilterSelector = ({
             </div>
             <div className="max-h-60 overflow-y-auto">
               {options.map((option) => {
-                const isSelected = Array.isArray(value) && value.includes(option.value)
+                const isSelected = Array.isArray(value) && value.includes(option.value as string | number)
                 return (
                   <label
                     key={option.value}
@@ -334,7 +335,7 @@ function SearchPageContent({ publicationsData, results, setResults, isLoading, s
         setSelectedCategory(category);
       }
     }
-  }, [router.asPath]); // Cambiar dependencia a router.asPath para evitar bucle infinito
+  }, [currentPathname]); // Usar currentPathname en lugar de router.asPath
   const [selectedSubcategory, setSelectedSubcategory] = useState<string>(() => {
     if (currentPathname && currentPathname !== '/buscar') {
       const parsed = parseCategoryUrl(currentPathname)
@@ -522,16 +523,18 @@ function SearchPageContent({ publicationsData, results, setResults, isLoading, s
     if (category === 'all') {
       console.log('🔄 Navigating to: /buscar')
       router.push('/buscar')
+      setHasSearched(false) // Para mostrar las filas de categorías
     } else {
       const categoryUrl = generateCategoryUrl(category)
       console.log('🔄 Navigating to:', categoryUrl)
       router.push(categoryUrl)
+      setHasSearched(true) // Para mostrar los resultados y filtros
     }
     
     handleSearch(currentQuery, {
       category: category === 'all' ? undefined : category
     })
-  }, [currentQuery, handleSearch, router, setSelectedCategory, setSelectedSubcategory, setSelectedSubSubcategory, setActiveFilters, setLastSearchCategory])
+  }, [currentQuery, handleSearch, router, setSelectedCategory, setSelectedSubcategory, setSelectedSubSubcategory, setActiveFilters, setLastSearchCategory, setHasSearched])
 
   const handleSubcategoryChange = useCallback((subcategory: string) => {
     setSelectedSubcategory(subcategory)
@@ -826,11 +829,15 @@ function SearchPageContent({ publicationsData, results, setResults, isLoading, s
               onSubcategoryChange={handleSubcategoryChange}
             />
           </div>
+        </div>
+      </div>
 
-          {/* Filters Row Mejorado - Fusionando selectores con estado activo */}
-          {(selectedCategory && selectedCategory !== 'all') && (
-            <div className="pb-1 overflow-visible">
-              <div className="flex items-center gap-3 overflow-x-auto overflow-y-visible scrollbar-thin scrollbar-thumb-gray-300 dark:scrollbar-thumb-gray-600 scrollbar-track-transparent justify-start">
+
+      {/* Filters Row Mejorado - Fusionando selectores con estado activo */}
+      {(selectedCategory && selectedCategory !== 'all') && (
+        <div className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-xl border-b border-gray-200/50 dark:border-gray-700/50 shadow-sm">
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3">
+            <div className="flex items-center gap-3 overflow-x-auto overflow-y-visible scrollbar-thin scrollbar-thumb-gray-300 dark:scrollbar-thumb-gray-600 scrollbar-track-transparent justify-start">
                 {/* Selector de Subcategorías */}
                 <div className="flex-shrink-0">
                   <EnhancedFilterSelector
@@ -884,12 +891,10 @@ function SearchPageContent({ publicationsData, results, setResults, isLoading, s
                     Limpiar todos los filtros
                   </button>
                 </div>
-              </div>
             </div>
-          )}
+          </div>
         </div>
-      </div>
-
+      )}
 
       {/* Main Content */}
       <div className="max-w-7xl mx-auto px-2 sm:px-4 lg:px-8 pt-2 pb-2">

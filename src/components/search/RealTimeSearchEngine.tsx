@@ -65,49 +65,81 @@ const CompactCategorySelector = ({
   selectedCategory: string
   onCategoryChange: (category: string) => void
 }) => {
-  const [isOpen, setIsOpen] = useState(false)
+  const [showCategoryBar, setShowCategoryBar] = useState(false)
   
   const categories = [
     { 
       id: 'all', 
-      name: 'Todas', 
-      iconPath: 'M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10'
+      name: 'Todos', 
+      icon: '🌐',
+      color: 'from-blue-500 to-cyan-500',
+      bgColor: 'bg-blue-50 hover:bg-blue-100',
+      borderColor: 'border-blue-200 hover:border-blue-300'
     },
     { 
       id: 'empleos', 
       name: 'Empleos', 
-      iconPath: 'M20.25 14.15v4.25c0 1.094-.787 2.036-1.872 2.18-2.087.277-4.216.42-6.378.42s-4.291-.143-6.378-.42c-1.085-.144-1.872-1.086-1.872-2.18v-4.25m16.5 0a2.18 2.18 0 0 0 .75-1.661V8.706c0-1.081-.768-2.015-1.837-2.175a48.114 48.114 0 0 0-3.413-.387m4.5 8.006c-.194.165-.42.295-.673.38A23.978 23.978 0 0 1 12 15.75c-2.648 0-5.195-.429-7.577-1.22a2.016 2.016 0 01-.673-.38m0 0A2.18 2.18 0 0 1 3 12.489V8.706c0-1.081.768-2.015 1.837-2.175a48.111 48.111 0 0 1 3.413-.387m7.5 0V5.25A2.25 2.25 0 0 0 13.5 3h-3a2.25 2.25 0 0 0-2.25 2.25v.894m7.5 0a48.667 48.667 0 0 0-7.5 0M12 12.75h.008v.008H12v-.008Z'
+      icon: '💼',
+      color: 'from-emerald-500 to-teal-500',
+      bgColor: 'bg-emerald-50 hover:bg-emerald-100',
+      borderColor: 'border-emerald-200 hover:border-emerald-300'
     },
     { 
       id: 'inmuebles', 
       name: 'Inmuebles', 
-      iconPath: 'M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6'
+      icon: '🏠',
+      color: 'from-orange-500 to-amber-500',
+      bgColor: 'bg-orange-50 hover:bg-orange-100',
+      borderColor: 'border-orange-200 hover:border-orange-300'
     },
     { 
       id: 'vehiculos', 
       name: 'Vehículos', 
-      iconPath: 'M7 17a2 2 0 11-4 0 2 2 0 014 0zM21 17a2 2 0 11-4 0 2 2 0 014 0zM5 17h2m4 0h4m4 0h2v-3a1 1 0 00-1-1h-1l-1-2a1 1 0 00-.9-.6H9.9a1 1 0 00-.9.6l-1 2H7a1 1 0 00-1 1v3z'
+      icon: '🚛',
+      color: 'from-red-500 to-rose-500',
+      bgColor: 'bg-red-50 hover:bg-red-100',
+      borderColor: 'border-red-200 hover:border-red-300'
     },
     { 
       id: 'servicios', 
       name: 'Servicios', 
-      iconPath: 'M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z M15 12a3 3 0 11-6 0 3 3 0 016 0z'
+      icon: '🔧',
+      color: 'from-purple-500 to-violet-500',
+      bgColor: 'bg-purple-50 hover:bg-purple-100',
+      borderColor: 'border-purple-200 hover:border-purple-300'
     },
     { 
       id: 'productos', 
       name: 'Productos', 
-      iconPath: 'M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4'
-    },
-    { 
-      id: 'eventos', 
-      name: 'Eventos', 
-      iconPath: 'M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z'
+      icon: '🛍️',
+      color: 'from-green-500 to-emerald-500',
+      bgColor: 'bg-green-50 hover:bg-green-100',
+      borderColor: 'border-green-200 hover:border-green-300'
     },
     { 
       id: 'negocios', 
       name: 'Negocios', 
-      iconPath: 'M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4'
+      icon: '📊',
+      color: 'from-indigo-500 to-blue-500',
+      bgColor: 'bg-indigo-50 hover:bg-indigo-100',
+      borderColor: 'border-indigo-200 hover:border-indigo-300'
     },
+    { 
+      id: 'eventos', 
+      name: 'Eventos', 
+      icon: '📅',
+      color: 'from-pink-500 to-rose-500',
+      bgColor: 'bg-pink-50 hover:bg-pink-100',
+      borderColor: 'border-pink-200 hover:border-pink-300'
+    },
+    { 
+      id: 'comunidad', 
+      name: 'Comunidad', 
+      icon: '👥',
+      color: 'from-teal-500 to-cyan-500',
+      bgColor: 'bg-teal-50 hover:bg-teal-100',
+      borderColor: 'border-teal-200 hover:border-teal-300'
+    }
   ]
   
   const currentCategory = categories.find(cat => cat.id === selectedCategory) || categories[0]
@@ -115,54 +147,74 @@ const CompactCategorySelector = ({
   return (
     <div className="relative">
       <button
-        onClick={() => setIsOpen(!isOpen)}
-        className="flex items-center gap-1 sm:gap-2 px-2 sm:px-3 py-2 text-gray-600 dark:text-gray-300 hover:text-teal-600 dark:hover:text-teal-400 transition-colors rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700/50"
+        onClick={() => setShowCategoryBar(!showCategoryBar)}
+        className={`flex items-center gap-1 sm:gap-2 px-2 sm:px-3 py-2 transition-colors rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700/50 ${currentCategory.bgColor} ${currentCategory.borderColor} border-2`}
         title="Seleccionar categoría"
       >
-        {/* Icono apropiado en lugar de emoji lupa */}
-        <svg className="w-4 h-4 sm:w-5 sm:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
-        </svg>
-        <span className="hidden sm:inline text-sm max-w-[80px] truncate">
+        <div className={`w-6 h-6 rounded-full flex items-center justify-center bg-gradient-to-br ${currentCategory.color}`}>
+          <span className="text-white text-sm">{currentCategory.icon}</span>
+        </div>
+        <span className="hidden sm:inline text-sm max-w-[80px] truncate font-medium">
           {currentCategory.name}
         </span>
-        <ChevronDownIcon className={`w-3 h-3 sm:w-4 sm:h-4 transition-transform ${isOpen ? 'rotate-180' : ''}`} />
+        <ChevronDownIcon className={`w-3 h-3 sm:w-4 sm:h-4 transition-transform ${showCategoryBar ? 'rotate-180' : ''}`} />
       </button>
 
       <AnimatePresence>
-        {isOpen && (
-          <>
-            <div 
-              className="fixed inset-0 z-40" 
-              onClick={() => setIsOpen(false)}
-            />
+        {showCategoryBar && (
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -20 }}
+            transition={{ duration: 0.3 }}
+            className="fixed inset-0 z-40 bg-black/20 backdrop-blur-sm"
+            onClick={() => setShowCategoryBar(false)}
+          >
             <motion.div
-              initial={{ opacity: 0, y: -10 }}
+              initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -10 }}
-              className="absolute top-full left-0 mt-2 w-48 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-lg z-50 max-h-64 overflow-y-auto"
+              exit={{ opacity: 0, y: -20 }}
+              transition={{ duration: 0.3 }}
+              className="absolute top-full left-0 mt-2 w-full bg-white/80 dark:bg-gray-800/80 backdrop-blur-xl border border-gray-200/50 dark:border-gray-700/50 shadow-sm"
+              onClick={(e) => e.stopPropagation()}
             >
-              {categories.map((category) => (
-                <button
-                  key={category.id}
-                  onClick={() => {
-                    onCategoryChange(category.id)
-                    setIsOpen(false)
-                  }}
-                  className={`w-full flex items-center gap-3 px-4 py-2 text-left hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors text-sm ${
-                    selectedCategory === category.id || (category.id === 'all' && selectedCategory === 'all')
-                      ? 'bg-teal-50 dark:bg-teal-900/20 text-teal-600 dark:text-teal-400' 
-                      : 'text-gray-700 dark:text-gray-300'
-                  }`}
-                >
-                  <svg className="w-5 h-5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d={category.iconPath} />
-                  </svg>
-                  <span>{category.name}</span>
-                </button>
-              ))}
+              <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
+                <div className="relative">
+                  <div className="flex gap-4 overflow-x-auto scrollbar-thin scrollbar-thumb-gray-300 dark:scrollbar-thumb-gray-600 scrollbar-track-transparent pb-2 justify-center lg:justify-start">
+                    {categories.map((category) => {
+                      const isSelected = selectedCategory === category.id || (category.id === 'all' && selectedCategory === 'all')
+                      return (
+                        <button
+                          key={category.id}
+                          onClick={() => {
+                            onCategoryChange(category.id)
+                            setShowCategoryBar(false)
+                          }}
+                          className={`flex-shrink-0 w-20 h-20 rounded-xl border-2 transition-all duration-300 
+                            flex flex-col items-center justify-center gap-2
+                            ${isSelected 
+                              ? `${category.bgColor} ${category.borderColor} shadow-lg scale-105 ring-2 ring-teal-500/50` 
+                              : `${category.bgColor} ${category.borderColor} hover:scale-105 hover:shadow-md hover:ring-2 hover:ring-teal-300/50`
+                            }`}
+                        >
+                          <div className={`w-8 h-8 rounded-full flex items-center justify-center bg-gradient-to-br ${category.color}`}>
+                            <span className="text-white text-sm">{category.icon}</span>
+                          </div>
+                          <span className={`text-xs font-medium text-center leading-tight ${
+                            isSelected 
+                              ? 'text-gray-900 dark:text-white' 
+                              : 'text-gray-700 dark:text-gray-300'
+                          }`}>
+                            {category.name}
+                          </span>
+                        </button>
+                      )
+                    })}
+                  </div>
+                </div>
+              </div>
             </motion.div>
-          </>
+          </motion.div>
         )}
       </AnimatePresence>
     </div>
