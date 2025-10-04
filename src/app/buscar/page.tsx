@@ -2,7 +2,7 @@
 'use client'
 
 import React, { useState, useEffect, useCallback, useRef } from 'react'
-import { usePathname, useRouter } from 'next/navigation'
+import { usePathname, useRouter, useSearchParams } from 'next/navigation'
 import { motion } from 'framer-motion'
 import { 
   Squares2X2Icon, 
@@ -308,17 +308,18 @@ function SearchPageContent({ publicationsData, results, setResults, isLoading, s
 }) {
   const currentPathname = usePathname()
   const router = useRouter()
+  const searchParams = useSearchParams()
   
-  // Inicializar estados con valores de URL si están disponibles
-  const [selectedCategory, setSelectedCategory] = useState<string>(() => {
-    if (typeof window !== 'undefined') {
-      const urlParams = new URLSearchParams(window.location.search);
-      const category = urlParams.get('category');
-      console.log('🔍 Initial category from URL:', category);
-      return category || 'all';
-    }
-    return 'all'
-  })
+  // Obtener categoría directamente de los search params
+  const categoryFromUrl = searchParams.get('category')
+  const [selectedCategory, setSelectedCategory] = useState<string>(categoryFromUrl || 'all')
+  
+  // Actualizar selectedCategory cuando cambie la URL
+  useEffect(() => {
+    const newCategory = categoryFromUrl || 'all'
+    console.log('🔍 Category changed from URL:', newCategory)
+    setSelectedCategory(newCategory)
+  }, [categoryFromUrl])
   
   // Debug: Log selected category changes
   useEffect(() => {
@@ -649,15 +650,8 @@ function SearchPageContent({ publicationsData, results, setResults, isLoading, s
           setHasSearched(true)
         }
       }
-    } else if (currentPathname === '/buscar' && selectedCategory !== 'all') {
-      // Si estamos en /buscar pero hay categoría seleccionada, limpiar
-      console.log('🔄 Clearing category for /buscar')
-      setSelectedCategory('all')
-      setSelectedSubcategory('')
-      setSelectedSubSubcategory('')
-      setActiveFilters({})
     }
-  }, [currentPathname, selectedCategory, selectedSubcategory, selectedSubSubcategory, setHasSearched, setSelectedCategory, setSelectedSubcategory, setSelectedSubSubcategory, setActiveFilters])
+  }, [currentPathname, selectedCategory, selectedSubcategory, selectedSubSubcategory])
 
   // Realizar búsqueda automática cuando cambie la categoría desde URL
   useEffect(() => {
@@ -817,7 +811,7 @@ function SearchPageContent({ publicationsData, results, setResults, isLoading, s
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-1 overflow-visible">
           
           {/* Main Search Bar */}
-          <div className="mb-3 search-input">
+          <div className="search-input">
             <RealTimeSearchEngine 
               onSearch={handleSearch}
               variant="page"
@@ -974,78 +968,81 @@ function SearchPageContent({ publicationsData, results, setResults, isLoading, s
             {/* Search Results */}
             {hasSearched && (
               <div className={`space-y-4 ${isSidebarOpen ? 'lg:flex lg:gap-6 lg:items-start lg:h-full' : ''}`}>
-                {/* Columna izquierda: Breadcrumbs, Título, Controles y Publicaciones */}
+                {/* Columna izquierda: Breadcrumbs, Controles y Publicaciones */}
                 <div className={`${isSidebarOpen ? 'lg:w-1/2 lg:flex-shrink-0' : 'w-full'} space-y-4`}>
-                  {/* Breadcrumbs en área de resultados */}
-                  {(selectedCategory && selectedCategory !== 'all') && (
-                    <div className="mb-2">
-                      <nav className="flex items-center space-x-2 text-sm text-gray-600 dark:text-gray-400">
-                        <button
-                          onClick={() => handleCategoryChange('all')}
-                          className="hover:text-teal-600 dark:hover:text-teal-400 transition-colors"
-                        >
-                          Inicio
-                        </button>
-                        <span className="text-gray-400">/</span>
-                        <button
-                          onClick={() => {
-                            setSelectedSubcategory('')
-                            setSelectedSubSubcategory('')
-                          }}
-                          className={`transition-colors ${
-                            !selectedSubcategory 
-                              ? 'text-teal-600 dark:text-teal-400 font-medium' 
-                              : 'hover:text-teal-600 dark:hover:text-teal-400'
-                          }`}
-                        >
-                          {(() => {
-                            const categoryNames: Record<string, string> = {
-                              'inmuebles': 'Inmuebles',
-                              'vehiculos': 'Vehículos', 
-                              'empleos': 'Empleos',
-                              'servicios': 'Servicios',
-                              'productos': 'Productos',
-                              'eventos': 'Eventos',
-                              'comunidad': 'Comunidad',
-                              'negocios': 'Negocios'
-                            }
-                            return categoryNames[selectedCategory] || selectedCategory
-                          })()}
-                        </button>
-                        {selectedSubcategory && (
-                          <>
-                            <span className="text-gray-400">/</span>
-                            <button
-                              onClick={() => setSelectedSubSubcategory('')}
-                              className={`transition-colors ${
-                                !selectedSubSubcategory 
-                                  ? 'text-teal-600 dark:text-teal-400 font-medium' 
-                                  : 'hover:text-teal-600 dark:hover:text-teal-400'
-                              }`}
-                            >
-                              {getSubcategories(selectedCategory).find(sub => sub.id === selectedSubcategory)?.name}
-                            </button>
-                          </>
-                        )}
-                        {selectedSubSubcategory && (
-                          <>
-                            <span className="text-gray-400">/</span>
-                            <span className="text-teal-600 dark:text-teal-400 font-medium">
-                              {selectedSubSubcategory}
-                            </span>
-                          </>
-                        )}
-                      </nav>
-                    </div>
-                  )}
-
                   {/* Search Stats and Controls - Layout responsive mejorado */}
                   <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between">
-                    {/* Título y stats - Siempre en la parte superior */}
+                    {/* Breadcrumbs y stats - Siempre en la parte superior */}
                     <div className="flex-shrink-0">
-                      <h2 className="text-xl sm:text-2xl font-bold text-gray-900 dark:text-white">
-                        {currentQuery ? `Resultados para "${currentQuery}"` : 'Todas las oportunidades'}
-                      </h2>
+                      {/* Breadcrumbs en área de resultados */}
+                      {(selectedCategory && selectedCategory !== 'all') ? (
+                        <nav className="flex items-center space-x-2 text-sm text-gray-600 dark:text-gray-400 mb-1">
+                          <button
+                            onClick={() => handleCategoryChange('all')}
+                            className="hover:text-teal-600 dark:hover:text-teal-400 transition-colors"
+                          >
+                            Inicio
+                          </button>
+                          <span className="text-gray-400">/</span>
+                          <button
+                            onClick={() => {
+                              setSelectedSubcategory('')
+                              setSelectedSubSubcategory('')
+                            }}
+                            className={`transition-colors ${
+                              !selectedSubcategory 
+                                ? 'text-teal-600 dark:text-teal-400 font-medium' 
+                                : 'hover:text-teal-600 dark:hover:text-teal-400'
+                            }`}
+                          >
+                            {(() => {
+                              const categoryNames: Record<string, string> = {
+                                'inmuebles': 'Inmuebles',
+                                'vehiculos': 'Vehículos', 
+                                'empleos': 'Empleos',
+                                'servicios': 'Servicios',
+                                'productos': 'Productos',
+                                'eventos': 'Eventos',
+                                'comunidad': 'Comunidad',
+                                'negocios': 'Negocios'
+                              }
+                              return categoryNames[selectedCategory] || selectedCategory
+                            })()}
+                          </button>
+                          {selectedSubcategory && (
+                            <>
+                              <span className="text-gray-400">/</span>
+                              <button
+                                onClick={() => setSelectedSubSubcategory('')}
+                                className={`transition-colors ${
+                                  !selectedSubSubcategory 
+                                    ? 'text-teal-600 dark:text-teal-400 font-medium' 
+                                    : 'hover:text-teal-600 dark:hover:text-teal-400'
+                                }`}
+                              >
+                                {getSubcategories(selectedCategory).find(sub => sub.id === selectedSubcategory)?.name}
+                              </button>
+                            </>
+                          )}
+                          {selectedSubSubcategory && (
+                            <>
+                              <span className="text-gray-400">/</span>
+                              <span className="text-teal-600 dark:text-teal-400 font-medium">
+                                {selectedSubSubcategory}
+                              </span>
+                            </>
+                          )}
+                        </nav>
+                      ) : (
+                        <nav className="flex items-center space-x-2 text-sm text-gray-600 dark:text-gray-400 mb-1">
+                          <button
+                            onClick={() => handleCategoryChange('all')}
+                            className="hover:text-teal-600 dark:hover:text-teal-400 transition-colors font-medium"
+                          >
+                            Inicio
+                          </button>
+                        </nav>
+                      )}
                       <p className="text-sm sm:text-base text-gray-600 dark:text-gray-400">
                         {isLoading ? 'Buscando...' : `${totalCount.toLocaleString()} resultados encontrados`}
                       </p>

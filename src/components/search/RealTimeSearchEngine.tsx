@@ -60,12 +60,15 @@ interface RealTimeSearchEngineProps {
 // Componente CompactCategorySelector interno mejorado
 const CompactCategorySelector = ({ 
   selectedCategory, 
-  onCategoryChange
+  onCategoryChange,
+  showCategoryBar,
+  setShowCategoryBar
 }: {
   selectedCategory: string
   onCategoryChange: (category: string) => void
+  showCategoryBar: boolean
+  setShowCategoryBar: (show: boolean) => void
 }) => {
-  const [showCategoryBar, setShowCategoryBar] = useState(false)
   
   const categories = [
     { 
@@ -160,63 +163,6 @@ const CompactCategorySelector = ({
         <ChevronDownIcon className={`w-3 h-3 sm:w-4 sm:h-4 transition-transform ${showCategoryBar ? 'rotate-180' : ''}`} />
       </button>
 
-      <AnimatePresence>
-        {showCategoryBar && (
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -20 }}
-            transition={{ duration: 0.3 }}
-            className="fixed inset-0 z-40 bg-black/20 backdrop-blur-sm"
-            onClick={() => setShowCategoryBar(false)}
-          >
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -20 }}
-              transition={{ duration: 0.3 }}
-              className="absolute top-full left-0 mt-2 w-full bg-white/80 dark:bg-gray-800/80 backdrop-blur-xl border border-gray-200/50 dark:border-gray-700/50 shadow-sm"
-              onClick={(e) => e.stopPropagation()}
-            >
-              <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
-                <div className="relative">
-                  <div className="flex gap-4 overflow-x-auto scrollbar-thin scrollbar-thumb-gray-300 dark:scrollbar-thumb-gray-600 scrollbar-track-transparent pb-2 justify-center lg:justify-start">
-                    {categories.map((category) => {
-                      const isSelected = selectedCategory === category.id || (category.id === 'all' && selectedCategory === 'all')
-                      return (
-                        <button
-                          key={category.id}
-                          onClick={() => {
-                            onCategoryChange(category.id)
-                            setShowCategoryBar(false)
-                          }}
-                          className={`flex-shrink-0 w-20 h-20 rounded-xl border-2 transition-all duration-300 
-                            flex flex-col items-center justify-center gap-2
-                            ${isSelected 
-                              ? `${category.bgColor} ${category.borderColor} shadow-lg scale-105 ring-2 ring-teal-500/50` 
-                              : `${category.bgColor} ${category.borderColor} hover:scale-105 hover:shadow-md hover:ring-2 hover:ring-teal-300/50`
-                            }`}
-                        >
-                          <div className={`w-8 h-8 rounded-full flex items-center justify-center bg-gradient-to-br ${category.color}`}>
-                            <span className="text-white text-sm">{category.icon}</span>
-                          </div>
-                          <span className={`text-xs font-medium text-center leading-tight ${
-                            isSelected 
-                              ? 'text-gray-900 dark:text-white' 
-                              : 'text-gray-700 dark:text-gray-300'
-                          }`}>
-                            {category.name}
-                          </span>
-                        </button>
-                      )
-                    })}
-                  </div>
-                </div>
-              </div>
-            </motion.div>
-          </motion.div>
-        )}
-      </AnimatePresence>
     </div>
   )
 }
@@ -232,6 +178,7 @@ export default function RealTimeSearchEngine({
 }: RealTimeSearchEngineProps) {
   const router = useRouter()
   const { addRecentSearch, trackSearch } = useSearch()
+  const [showCategoryBar, setShowCategoryBar] = useState(false)
   
   const [inputValue, setInputValue] = useState('')
   const [isInputFocused, setIsInputFocused] = useState(false)
@@ -464,7 +411,8 @@ export default function RealTimeSearchEngine({
   };
 
   return (
-    <div ref={suggestionsRef} className="relative w-full max-w-4xl mx-auto">
+    <>
+      <div ref={suggestionsRef} className="relative w-full max-w-4xl mx-auto">
       {/* Barra de búsqueda principal */}
       <div className={`relative flex items-center ${
         variant === 'header' ? 'h-10' : variant === 'compact' ? 'h-12' : 'h-14'
@@ -483,6 +431,8 @@ export default function RealTimeSearchEngine({
               <CompactCategorySelector
                 selectedCategory={selectedCategory || ''}
                 onCategoryChange={onCategoryChange}
+                showCategoryBar={showCategoryBar}
+                setShowCategoryBar={setShowCategoryBar}
               />
             </div>
             <div className="w-px h-6 bg-gray-300 dark:bg-gray-600"></div>
@@ -939,5 +889,130 @@ export default function RealTimeSearchEngine({
         )}
       </AnimatePresence>
     </div>
+
+    {/* Barra de categorías que aparece cuando se activa */}
+    <AnimatePresence>
+      {showCategoryBar && (
+        <motion.div
+          initial={{ opacity: 0, height: 0 }}
+          animate={{ opacity: 1, height: "auto" }}
+          exit={{ opacity: 0, height: 0 }}
+          transition={{ duration: 0.3, ease: "easeInOut" }}
+          className="w-full bg-white/80 dark:bg-gray-800/80 border border-gray-200/50 dark:border-gray-700/50 shadow-sm overflow-hidden"
+        >
+          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
+            <div className="relative">
+              <div className="flex gap-4 overflow-x-auto scrollbar-thin scrollbar-thumb-gray-300 dark:scrollbar-thumb-gray-600 scrollbar-track-transparent pb-2 justify-center lg:justify-start">
+                {[
+                  { 
+                    id: 'all', 
+                    name: 'Todos', 
+                    icon: '🌐',
+                    color: 'from-blue-500 to-cyan-500',
+                    bgColor: 'bg-blue-50 hover:bg-blue-100',
+                    borderColor: 'border-blue-200 hover:border-blue-300'
+                  },
+                  { 
+                    id: 'empleos', 
+                    name: 'Empleos', 
+                    icon: '💼',
+                    color: 'from-emerald-500 to-teal-500',
+                    bgColor: 'bg-emerald-50 hover:bg-emerald-100',
+                    borderColor: 'border-emerald-200 hover:border-emerald-300'
+                  },
+                  { 
+                    id: 'inmuebles', 
+                    name: 'Inmuebles', 
+                    icon: '🏠',
+                    color: 'from-orange-500 to-amber-500',
+                    bgColor: 'bg-orange-50 hover:bg-orange-100',
+                    borderColor: 'border-orange-200 hover:border-orange-300'
+                  },
+                  { 
+                    id: 'vehiculos', 
+                    name: 'Vehículos', 
+                    icon: '🚛',
+                    color: 'from-red-500 to-rose-500',
+                    bgColor: 'bg-red-50 hover:bg-red-100',
+                    borderColor: 'border-red-200 hover:border-red-300'
+                  },
+                  { 
+                    id: 'servicios', 
+                    name: 'Servicios', 
+                    icon: '🔧',
+                    color: 'from-purple-500 to-violet-500',
+                    bgColor: 'bg-purple-50 hover:bg-purple-100',
+                    borderColor: 'border-purple-200 hover:border-purple-300'
+                  },
+                  { 
+                    id: 'productos', 
+                    name: 'Productos', 
+                    icon: '🛍️',
+                    color: 'from-green-500 to-emerald-500',
+                    bgColor: 'bg-green-50 hover:bg-green-100',
+                    borderColor: 'border-green-200 hover:border-green-300'
+                  },
+                  { 
+                    id: 'negocios', 
+                    name: 'Negocios', 
+                    icon: '📊',
+                    color: 'from-indigo-500 to-blue-500',
+                    bgColor: 'bg-indigo-50 hover:bg-indigo-100',
+                    borderColor: 'border-indigo-200 hover:border-indigo-300'
+                  },
+                  { 
+                    id: 'eventos', 
+                    name: 'Eventos', 
+                    icon: '📅',
+                    color: 'from-pink-500 to-rose-500',
+                    bgColor: 'bg-pink-50 hover:bg-pink-100',
+                    borderColor: 'border-pink-200 hover:border-pink-300'
+                  },
+                  { 
+                    id: 'comunidad', 
+                    name: 'Comunidad', 
+                    icon: '👥',
+                    color: 'from-teal-500 to-cyan-500',
+                    bgColor: 'bg-teal-50 hover:bg-teal-100',
+                    borderColor: 'border-teal-200 hover:border-teal-300'
+                  }
+                ].map((category) => {
+                  const isSelected = selectedCategory === category.id || (category.id === 'all' && selectedCategory === 'all')
+                  return (
+                    <button
+                      key={category.id}
+                      onClick={() => {
+                        if (onCategoryChange) {
+                          onCategoryChange(category.id)
+                        }
+                        setShowCategoryBar(false)
+                      }}
+                      className={`flex-shrink-0 w-20 h-20 rounded-xl border-2 transition-all duration-300 
+                        flex flex-col items-center justify-center gap-2
+                        ${isSelected 
+                          ? `${category.bgColor} ${category.borderColor} shadow-lg scale-105 ring-2 ring-teal-500/50` 
+                          : `${category.bgColor} ${category.borderColor} hover:scale-105 hover:shadow-md hover:ring-2 hover:ring-teal-300/50`
+                        }`}
+                    >
+                      <div className={`w-8 h-8 rounded-full flex items-center justify-center bg-gradient-to-br ${category.color}`}>
+                        <span className="text-white text-sm">{category.icon}</span>
+                      </div>
+                      <span className={`text-xs font-medium text-center leading-tight ${
+                        isSelected 
+                          ? 'text-gray-900 dark:text-white' 
+                          : 'text-gray-700 dark:text-gray-300'
+                      }`}>
+                        {category.name}
+                      </span>
+                    </button>
+                  )
+                })}
+              </div>
+            </div>
+          </div>
+        </motion.div>
+      )}
+    </AnimatePresence>
+    </>
   )
 } 
