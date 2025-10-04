@@ -900,9 +900,24 @@ export default function RealTimeSearchEngine({
           transition={{ duration: 0.3, ease: "easeInOut" }}
           className="w-full bg-white/80 dark:bg-gray-800/80 border border-gray-200/50 dark:border-gray-700/50 shadow-sm overflow-hidden"
         >
-          <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
+          <div className="max-w-7xl mx-auto pt-2">
             <div className="relative">
-              <div className="flex gap-4 overflow-x-auto scrollbar-thin scrollbar-thumb-gray-300 dark:scrollbar-thumb-gray-600 scrollbar-track-transparent pb-2 justify-center lg:justify-start">
+              <div
+                className="
+                  flex gap-4 overflow-x-auto scrollbar-thin scrollbar-thumb-gray-300 dark:scrollbar-thumb-gray-600 scrollbar-track-transparent pt-2 pb-2
+                  justify-start
+                  lg:justify-center
+                  pl-4 pr-4
+                  -mx-4
+                  lg:mx-0 lg:pl-0 lg:pr-0
+                  snap-x
+                "
+                style={{
+                  WebkitOverflowScrolling: 'touch',
+                  scrollPaddingLeft: '1rem',
+                  scrollSnapType: 'x mandatory',
+                }}
+              >
                 {[
                   { 
                     id: 'all', 
