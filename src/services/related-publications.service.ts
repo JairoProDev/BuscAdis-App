@@ -1,3 +1,4 @@
+import { ObjectId } from 'mongodb';
 import { PublicationData } from '@/types/publication';
 import { getMongoClient } from '@/lib/mongodb-server';
 
@@ -13,11 +14,17 @@ export class RelatedPublicationsService {
       const client = await getMongoClient();
       const db = client.db(process.env.MONGODB_DB || 'buscadis');
       
-      // Build query criteria
+      // Build query criteria - handle both ObjectId and sequentialId
       const query: any = {
-        _id: { $ne: currentPublication._id }, // Exclude current publication
         status: 'active'
       };
+      
+      // Exclude current publication - handle both _id (ObjectId) and sequentialId (number)
+      if (ObjectId.isValid(currentPublication.id)) {
+        query._id = { $ne: new ObjectId(currentPublication.id) };
+      } else if (currentPublication.sequentialId) {
+        query.sequentialId = { $ne: currentPublication.sequentialId };
+      }
 
       // Add category filter
       if (currentPublication.categorySlug) {
@@ -49,11 +56,17 @@ export class RelatedPublicationsService {
 
       // If we don't have enough results, expand the search
       if (relatedPublications.length < limit) {
-        const expandedQuery = {
-          _id: { $ne: currentPublication._id },
+        const expandedQuery: any = {
           status: 'active',
           categorySlug: currentPublication.categorySlug
         };
+        
+        // Exclude current publication
+        if (ObjectId.isValid(currentPublication.id)) {
+          expandedQuery._id = { $ne: new ObjectId(currentPublication.id) };
+        } else if (currentPublication.sequentialId) {
+          expandedQuery.sequentialId = { $ne: currentPublication.sequentialId };
+        }
 
         const expandedResults = await db
           .collection('publications')
@@ -67,10 +80,16 @@ export class RelatedPublicationsService {
 
       // If still not enough, get any active publications
       if (relatedPublications.length < limit) {
-        const fallbackQuery = {
-          _id: { $ne: currentPublication._id },
+        const fallbackQuery: any = {
           status: 'active'
         };
+        
+        // Exclude current publication
+        if (ObjectId.isValid(currentPublication.id)) {
+          fallbackQuery._id = { $ne: new ObjectId(currentPublication.id) };
+        } else if (currentPublication.sequentialId) {
+          fallbackQuery.sequentialId = { $ne: currentPublication.sequentialId };
+        }
 
         const fallbackResults = await db
           .collection('publications')
@@ -89,8 +108,11 @@ export class RelatedPublicationsService {
         sequentialId: pub.sequentialId,
         title: pub.title,
         description: pub.description,
+        transactionType: pub.transactionType || 'venta',
         value: pub.value || 0,
         currency: pub.currency || 'PEN',
+        valueType: pub.valueType || 'fixed',
+        size: pub.size || 0,
         categorySlug: pub.categorySlug,
         subcategorySlug: pub.subcategorySlug,
         subSubcategorySlug: pub.subSubcategorySlug,
@@ -151,8 +173,11 @@ export class RelatedPublicationsService {
         sequentialId: pub.sequentialId,
         title: pub.title,
         description: pub.description,
+        transactionType: pub.transactionType || 'venta',
         value: pub.value || 0,
         currency: pub.currency || 'PEN',
+        valueType: pub.valueType || 'fixed',
+        size: pub.size || 0,
         categorySlug: pub.categorySlug,
         subcategorySlug: pub.subcategorySlug,
         subSubcategorySlug: pub.subSubcategorySlug,
