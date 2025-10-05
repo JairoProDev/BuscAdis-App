@@ -310,9 +310,45 @@ function SearchPageContent({ publicationsData, results, setResults, isLoading, s
   const router = useRouter()
   const searchParams = useSearchParams()
   
-  // Obtener categoría directamente de los search params
-  const categoryFromUrl = searchParams.get('category')
-  const [selectedCategory, setSelectedCategory] = useState<string>(categoryFromUrl || 'all')
+  // Obtener categoría desde pathname (e.g., /inmuebles) o search params (e.g., /buscar?category=inmuebles)
+  const getCategoryFromUrl = () => {
+    // Si estamos en /buscar, obtener de query params
+    if (currentPathname === '/buscar') {
+      return searchParams.get('category') || 'all'
+    }
+    
+    // Si estamos en /{category}, obtener del pathname
+    const pathSegments = currentPathname.split('/').filter(Boolean)
+    const validCategories = ['empleos', 'inmuebles', 'vehiculos', 'servicios', 'productos', 'eventos', 'negocios', 'comunidad']
+    
+    if (pathSegments.length > 0 && validCategories.includes(pathSegments[0])) {
+      return pathSegments[0]
+    }
+    
+    return 'all'
+  }
+  
+  // Obtener ID de publicación desde pathname (e.g., /inmuebles/123)
+  const getPublicationIdFromUrl = () => {
+    const pathSegments = currentPathname.split('/').filter(Boolean)
+    const validCategories = ['empleos', 'inmuebles', 'vehiculos', 'servicios', 'productos', 'eventos', 'negocios', 'comunidad']
+    
+    // Si la URL es /category/id o /category/id/slug
+    if (pathSegments.length >= 2 && validCategories.includes(pathSegments[0])) {
+      const potentialId = pathSegments[1]
+      // Verificar si es un número (ID)
+      if (!isNaN(Number(potentialId)) || potentialId.match(/^[0-9a-f]{24}$/i)) {
+        return potentialId
+      }
+    }
+    
+    // También verificar si viene en los search params
+    return searchParams.get('selectedId') || null
+  }
+  
+  const categoryFromUrl = getCategoryFromUrl()
+  const publicationIdFromUrl = getPublicationIdFromUrl()
+  const [selectedCategory, setSelectedCategory] = useState<string>(categoryFromUrl)
   
   // Actualizar selectedCategory cuando cambie la URL
   useEffect(() => {
@@ -336,7 +372,7 @@ function SearchPageContent({ publicationsData, results, setResults, isLoading, s
         setSelectedCategory(category);
       }
     }
-  }, [currentPathname]); // Usar currentPathname en lugar de router.asPath
+  }, [currentPathname, selectedCategory]); // Usar currentPathname en lugar de router.asPath
   const [selectedSubcategory, setSelectedSubcategory] = useState<string>(() => {
     if (currentPathname && currentPathname !== '/buscar') {
       const parsed = parseCategoryUrl(currentPathname)
@@ -381,12 +417,62 @@ function SearchPageContent({ publicationsData, results, setResults, isLoading, s
   const {
     selectedPublication,
     isDetailOpen,
-    openPublicationDetail,
-    closePublicationDetail,
+    openPublicationDetail: originalOpenPublicationDetail,
+    closePublicationDetail: originalClosePublicationDetail,
     handleWhatsAppClick,
     handleShare,
     handleFavorite
   } = usePublicationDetail();
+
+  // Envolver openPublicationDetail para actualizar la URL
+  const openPublicationDetail = useCallback((publication: PublicationData) => {
+    originalOpenPublicationDetail(publication);
+    
+    // Actualizar URL con el anuncio seleccionado
+    const publicationId = publication.sequentialId || publication.id;
+    const category = selectedCategory && selectedCategory !== 'all' ? selectedCategory : publication.categorySlug;
+    
+    // Construir URL limpia: /category/id
+    const newUrl = `/${category}/${publicationId}`;
+    router.replace(newUrl, { scroll: false });
+  }, [originalOpenPublicationDetail, selectedCategory, router]);
+
+  // Envolver closePublicationDetail para actualizar la URL
+  const closePublicationDetail = useCallback(() => {
+    originalClosePublicationDetail();
+    
+    // Volver a la URL de categoría sin el ID del anuncio
+    const baseUrl = selectedCategory && selectedCategory !== 'all' ? `/${selectedCategory}` : '/buscar';
+    router.replace(baseUrl, { scroll: false });
+  }, [originalClosePublicationDetail, selectedCategory, router]);
+
+  // Abrir publicación cuando hay ID en la URL
+  useEffect(() => {
+    if (publicationIdFromUrl && results.length > 0) {
+      // Buscar la publicación en los resultados
+      const allPublications = results.map(convertToPublicationData)
+      const publication = allPublications.find(p => 
+        String(p.sequentialId) === String(publicationIdFromUrl) || 
+        String(p.id) === String(publicationIdFromUrl)
+      )
+      
+      if (publication && (!selectedPublication || selectedPublication.id !== publication.id)) {
+        console.log('🔍 Opening publication from URL:', publicationIdFromUrl)
+        originalOpenPublicationDetail(publication)
+      } else if (!publication && !isLoading) {
+        // Si no está en los resultados, intentar cargarla de la API
+        console.log('🔍 Publication not in results, fetching from API:', publicationIdFromUrl)
+        fetch(`/api/publications/${encodeURIComponent(publicationIdFromUrl)}`)
+          .then(res => res.json())
+          .then(data => {
+            if (data && !data.error) {
+              originalOpenPublicationDetail(data)
+            }
+          })
+          .catch(err => console.error('Error loading publication:', err))
+      }
+    }
+  }, [publicationIdFromUrl, results, selectedPublication, isLoading, originalOpenPublicationDetail])
 
   // Convert SearchResult to PublicationData format
   const convertToPublicationData = (searchResult: SearchResult): PublicationData => {
@@ -525,6 +611,10 @@ function SearchPageContent({ publicationsData, results, setResults, isLoading, s
       console.log('🔄 Navigating to: /buscar')
       router.push('/buscar')
       setHasSearched(false) // Para mostrar las filas de categorías
+    } else if (category) {
+      // Usar URL limpia: /inmuebles en lugar de /buscar?category=inmuebles
+      console.log('🔄 Navigating to:', `/${category}`)
+      router.push(`/${category}`)
     } else {
       const categoryUrl = generateCategoryUrl(category)
       console.log('🔄 Navigating to:', categoryUrl)
@@ -563,8 +653,33 @@ function SearchPageContent({ publicationsData, results, setResults, isLoading, s
     })
   }, [currentQuery, selectedCategory, handleSearch, router, setSelectedSubcategory, setSelectedSubSubcategory, setActiveFilters, setLastSearchCategory])
 
+  const updateUrlWithFilters = useCallback((filters: Record<string, FilterValue>) => {
+    // Construir URL con filtros
+    const params = new URLSearchParams()
+    
+    // Agregar filtros a la URL
+    Object.entries(filters).forEach(([key, value]) => {
+      if (value !== null && value !== undefined && value !== '') {
+        if (Array.isArray(value)) {
+          value.forEach(v => params.append(key, String(v)))
+        } else {
+          params.set(key, String(value))
+        }
+      }
+    })
+    
+    // Construir la URL final
+    const baseUrl = selectedCategory && selectedCategory !== 'all' ? `/${selectedCategory}` : '/buscar'
+    const queryString = params.toString()
+    const newUrl = queryString ? `${baseUrl}?${queryString}` : baseUrl
+    
+    // Actualizar URL sin recargar
+    router.replace(newUrl, { scroll: false })
+  }, [selectedCategory, router])
+
   const handleFiltersChange = useCallback((filters: Record<string, FilterValue>) => {
     setActiveFilters(filters)
+    updateUrlWithFilters(filters)
     
     handleSearch(currentQuery, {
       category: selectedCategory === 'all' ? undefined : selectedCategory,
@@ -572,7 +687,7 @@ function SearchPageContent({ publicationsData, results, setResults, isLoading, s
       subsubcategory: selectedSubSubcategory || undefined,
       ...filters
     })
-  }, [currentQuery, selectedCategory, selectedSubcategory, selectedSubSubcategory, handleSearch, setActiveFilters])
+  }, [currentQuery, selectedCategory, selectedSubcategory, selectedSubSubcategory, handleSearch, setActiveFilters, updateUrlWithFilters])
 
   const handleSortChange = useCallback((newSort: SortOption) => {
     setSortBy(newSort)
@@ -651,7 +766,8 @@ function SearchPageContent({ publicationsData, results, setResults, isLoading, s
         }
       }
     }
-  }, [currentPathname, selectedCategory, selectedSubcategory, selectedSubSubcategory])
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [currentPathname, selectedCategory, selectedSubcategory, selectedSubSubcategory]) // setHasSearched is a setState function that doesn't change
 
   // Realizar búsqueda automática cuando cambie la categoría desde URL
   useEffect(() => {

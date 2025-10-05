@@ -107,11 +107,11 @@ export default function CategorySelector({
     if (onCategorySelect) {
       onCategorySelect(categoryId);
     } else {
-      // Navegar a la página de búsqueda con la categoría seleccionada
+      // Navegar a la página de búsqueda con la categoría seleccionada (URL limpia y SEO-friendly)
       if (categoryId === 'all') {
         router.push('/buscar');
       } else {
-        router.push(`/buscar?category=${categoryId}`);
+        router.push(`/${categoryId}`);
       }
     }
   };
@@ -161,9 +161,9 @@ export default function CategorySelector({
                         `}>
                           {typeof category.icon === 'string' ? (
                             <span className="text-white text-lg">{category.icon}</span>
-                          ) : (
+                          ) : IconComponent ? (
                             <IconComponent className="w-5 h-5 text-white" />
-                          )}
+                          ) : null}
                         </div>
                         
                         {/* Category Name */}

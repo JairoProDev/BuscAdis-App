@@ -1,9 +1,12 @@
+import { Metadata } from 'next'
 import { redirect } from 'next/navigation'
+import CategorySearchPageClient from './CategorySearchPageClient'
 
 interface CategoryPageProps {
   params: Promise<{
     category: string
   }>
+  searchParams?: Promise<{ [key: string]: string | string[] | undefined }>
 }
 
 // Categorías válidas
@@ -12,7 +15,28 @@ const validCategories = [
   'productos', 'eventos', 'negocios', 'comunidad'
 ]
 
-export default async function CategoryPage({ params }: CategoryPageProps) {
+const categoryNames: Record<string, string> = {
+  empleos: 'Empleos',
+  inmuebles: 'Inmuebles',
+  vehiculos: 'Vehículos',
+  servicios: 'Servicios',
+  productos: 'Productos',
+  eventos: 'Eventos',
+  negocios: 'Negocios',
+  comunidad: 'Comunidad'
+}
+
+export async function generateMetadata({ params }: CategoryPageProps): Promise<Metadata> {
+  const { category } = await params
+  const categoryName = categoryNames[category] || 'Búsqueda'
+  
+  return {
+    title: `${categoryName} - BuscAdis`,
+    description: `Encuentra los mejores ${categoryName.toLowerCase()} en tu zona. Publica y busca gratis en BuscAdis.`,
+  }
+}
+
+export default async function CategoryPage({ params, searchParams }: CategoryPageProps) {
   const { category } = await params
   
   // Never intercept API routes
@@ -24,6 +48,8 @@ export default async function CategoryPage({ params }: CategoryPageProps) {
     redirect('/')
   }
   
-  // Redirigir a la página de búsqueda con la categoría como parámetro
-  redirect(`/buscar?category=${category}`)
+  const resolvedSearchParams = searchParams ? await searchParams : {}
+  
+  // Renderizar la página de búsqueda con la categoría desde la URL
+  return <CategorySearchPageClient category={category} searchParams={resolvedSearchParams} />
 }

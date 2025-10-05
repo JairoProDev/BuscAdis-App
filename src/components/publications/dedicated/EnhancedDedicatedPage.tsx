@@ -148,8 +148,7 @@ export default function EnhancedDedicatedPage({
       // Show success toast
       toast({
         title: "Éxito",
-        description: "Enlace copiado al portapapeles",
-        type: "default"
+        description: "Enlace copiado al portapapeles"
       });
     }
     onShare?.();
@@ -295,9 +294,9 @@ export default function EnhancedDedicatedPage({
                 </button>
               )}
               
-              {publication.phone && (
+              {publication.whatsapp && (
                 <button
-                  onClick={() => window.open(`tel:${publication.phone}`, '_self')}
+                  onClick={() => window.open(`tel:${publication.whatsapp}`, '_self')}
                   className="w-full flex items-center justify-center gap-3 bg-blue-500 hover:bg-blue-600 text-white py-3 px-4 rounded-lg font-semibold transition-colors"
                 >
                   <PhoneIcon className="w-6 h-6" />
@@ -373,8 +372,7 @@ export default function EnhancedDedicatedPage({
                 onClick={() => {
                   toast({
                     title: "Reporte enviado",
-                    description: "Tu reporte ha sido enviado correctamente",
-                    type: "default"
+                    description: "Tu reporte ha sido enviado correctamente"
                   });
                   setShowReportModal(false);
                 }}

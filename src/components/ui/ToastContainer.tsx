@@ -1,6 +1,6 @@
 'use client'
 
-import Toast from './Toast'
+import { Toast, ToastClose, ToastDescription, ToastTitle } from './Toast'
 
 interface ToastProps {
   id: string
@@ -19,14 +19,11 @@ export default function ToastContainer({ toasts, removeToast }: ToastContainerPr
   return (
     <div className="fixed bottom-4 right-4 flex flex-col gap-2 z-50">
       {toasts.map((toast) => (
-        <Toast
-          key={toast.id}
-          id={toast.id}
-          title={toast.title}
-          message={toast.message}
-          type={toast.type}
-          onRemove={removeToast}
-        />
+        <Toast key={toast.id} variant={toast.type === 'error' ? 'destructive' : 'default'}>
+          {toast.title && <ToastTitle>{toast.title}</ToastTitle>}
+          <ToastDescription>{toast.message}</ToastDescription>
+          <ToastClose onClick={() => removeToast(toast.id)} />
+        </Toast>
       ))}
     </div>
   )

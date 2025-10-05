@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { ObjectId } from 'mongodb';
 import { getMongoClient } from '@/lib/mongodb-server';
-import { Logger } from '@/lib/logger';
+import { Logger } from '@/services/logging.service';
 
 export async function POST(
   request: NextRequest,
@@ -26,8 +27,16 @@ export async function POST(
       ? { $inc: { 'engagement.saves': 1 } }
       : { $inc: { 'engagement.saves': -1 } };
 
+    // Try to use sequentialId first, fallback to ObjectId
+    let query: Record<string, unknown>;
+    if (ObjectId.isValid(id)) {
+      query = { _id: new ObjectId(id) };
+    } else {
+      query = { sequentialId: parseInt(id, 10) };
+    }
+
     const result = await collection.updateOne(
-      { _id: id },
+      query,
       updateOperation
     );
 
