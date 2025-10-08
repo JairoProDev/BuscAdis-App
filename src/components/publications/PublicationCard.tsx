@@ -512,7 +512,7 @@ export default function PublicationCard({
         <div>
           {/* Title */}
           <a href={seoUrl} onClick={(e) => { e.preventDefault(); onPublicationClick?.(publication); }} className="block mb-2">
-            <h3 className="font-bold text-lg leading-tight hover:text-blue-600 transition-colors duration-200 line-clamp-2">
+            <h3 className="font-bold text-sm leading-tight hover:text-blue-600 transition-colors duration-200 line-clamp-2">
               {formatTitle(publication.title)}
             </h3>
           </a>
@@ -532,53 +532,56 @@ export default function PublicationCard({
           </div>
           
           {/* Description */}
+          {/*
           {publication.description && (
             <p className="text-sm text-gray-600 dark:text-gray-400 mb-2 line-clamp-2">
               {formatDescription(publication.description)}
             </p>
           )}
-          
+          */}
           {/* Location and Date */}
           <div className="flex items-center justify-between text-sm text-gray-500 mb-2">
             <div className="flex items-center">
               <MapPinIcon className="w-4 h-4 mr-1.5 text-gray-400 flex-shrink-0" />
               <span className="truncate">{formatLocation(publication.location)}</span>
             </div>
-            <div className="text-xs text-gray-400 dark:text-gray-500 flex-shrink-0">
+            <div className="flex items-center text-xs text-gray-400 dark:text-gray-500 flex-shrink-0">
+              <CalendarIcon className="w-4 h-4 mr-1 text-gray-400 flex-shrink-0" />
               {formatExactDateTime(publication.createdAt)}
             </div>
           </div>
         </div>
 
-        {/* Price */}
-        <div className="mt-2">
+        {/* Price and WhatsApp Button (side by side on desktop) */}
+        <div className="mt-2 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+          {/* Price */}
           {formatPriceLocal(publication.value, publication.currency) ? (
-            <div className="text-xl font-extrabold text-blue-600 dark:text-blue-400">
+            <div className="text-base font-extrabold text-blue-600 dark:text-blue-400">
               {formatPriceLocal(publication.value, publication.currency)}
             </div>
           ) : (
             <button
               onClick={handlePriceInquiry}
-              className="text-xl font-extrabold text-[#00B6E3] dark:text-[#00B6E3] hover:text-[#009fc7] dark:hover:text-[#00b6e3] transition-colors cursor-pointer"
-              >
+              className="text-base font-extrabold text-[#00B6E3] dark:text-[#00B6E3] hover:text-[#009fc7] dark:hover:text-[#00b6e3] transition-colors cursor-pointer px-2 py-1 rounded"
+              style={{ minWidth: '90px' }}
+            >
               {publication.categorySlug === 'empleos' ? '¿Sueldo?' : '¿Precio?'}
+            </button>
+          )}
+
+          {/* WhatsApp Button (side by side on desktop, full width on mobile) */}
+          {showWhatsApp && (
+            <button 
+              onClick={createEnhancedWhatsAppMessage}
+              className="w-full sm:w-auto flex items-center justify-center gap-2 bg-green-500 text-white font-bold py-2 px-4 rounded-md hover:bg-green-600 active:bg-green-700 transform hover:scale-[1.02] transition-all duration-200 shadow-md hover:shadow-lg mt-2 sm:mt-0"
+              style={{ minWidth: '110px' }}
+            >
+              <WhatsAppIcon className="w-6 h-6 min-w-[1.5rem] min-h-[1.5rem]" />
+              <span className="text-base">Contactar</span>
             </button>
           )}
         </div>
       </div>
-
-      {/* WhatsApp Button (optimized for maximum clicks) */}
-      {showWhatsApp && (
-        <div className="p-3 border-t border-gray-100 dark:border-gray-700">
-          <button 
-            onClick={createEnhancedWhatsAppMessage}
-            className="w-full flex items-center justify-center gap-3 bg-green-500 text-white font-bold py-3.5 rounded-lg hover:bg-green-600 active:bg-green-700 transform hover:scale-[1.02] transition-all duration-200 shadow-lg hover:shadow-xl"
-          >
-            <WhatsAppIcon className="w-6 h-6" />
-            <span className="text-lg">Contactar</span>
-          </button>
-        </div>
-      )}
     </motion.div>
   );
 }
