@@ -99,16 +99,6 @@ export default function DedicatedPublicationPage({
   return (
     <div className="bg-gray-50 dark:bg-gray-900 min-h-screen">
       <div className="max-w-4xl mx-auto">
-        {/* Back Button */}
-        <div className="py-4 px-4 sm:px-0">
-          <button 
-            onClick={() => router.back()}
-            className="flex items-center gap-2 text-sm font-medium text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white"
-          >
-            <ArrowLeftIcon className="w-4 h-4" />
-            Volver
-          </button>
-        </div>
 
         <div className="bg-white dark:bg-gray-800 shadow-md rounded-lg overflow-hidden">
           {/* Image Gallery */}

@@ -189,6 +189,8 @@ export const getDefaultImageByCategory = (category?: string): string => {
       return '/images/placeholder/negocios.jpg';
     case 'comunidad':
       return '/images/placeholder/comunidad.jpg';
+    case 'productos':
+      return '/images/placeholder/productos.jpg';
     default:
       return '/images/placeholder/productos.jpg';
   }

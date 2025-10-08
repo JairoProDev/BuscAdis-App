@@ -29,7 +29,7 @@ export default function OptimizedImage({
 }: OptimizedImageProps) {
   
   // Fallback image if src is invalid
-  const imageSrc = src || getDefaultImageByCategory(categorySlug || 'general');
+  const imageSrc = src || getDefaultImageByCategory(categorySlug);
   
   // Optimize alt text for SEO
   const optimizedAlt = alt || `Imagen de ${categorySlug || 'publicación'}`;

@@ -2,6 +2,7 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { MapPinIcon, StarIcon } from '@heroicons/react/24/solid';
 import { generateSeoUrl } from '@/utils/url';
+import { getDefaultImageByCategory } from '@/utils/image-helpers';
 
 interface AdisoLocation {
   city?: string;
@@ -64,7 +65,7 @@ export default function AdisoCard({ adiso, featured = false }: AdisoCardProps) {
   }
 
   // Demás propiedades con valores predeterminados
-  const image = adiso.image || '/images/placeholder-buscadis.jpg';
+  const image = adiso.image || getDefaultImageByCategory(adiso.category || adiso.categorySlug);
   const isPremium = !!adiso.is_premium || featured;
   const isVerified = !!adiso.is_verified;
   const rating = adiso.rating || 0;
@@ -88,7 +89,7 @@ export default function AdisoCard({ adiso, featured = false }: AdisoCardProps) {
               onError={(e) => {
                 // Fallback a una imagen predeterminada en caso de error
                 const target = e.target as HTMLImageElement;
-                target.src = '/images/placeholder-buscadis.jpg';
+                target.src = getDefaultImageByCategory(adiso.category || adiso.categorySlug);
               }}
             />
           </div>

@@ -61,7 +61,7 @@ export default function OptimizedImage({
   lazy = true,
   onLoad,
   onError,
-  fallbackSrc = '/images/placeholder-buscadis.jpg',
+  fallbackSrc,
   showLoader = false,
   aspectRatio,
   objectFit = 'cover',

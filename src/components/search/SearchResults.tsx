@@ -17,6 +17,7 @@ import { toast } from 'react-hot-toast'
 import { BookmarkOutline } from '@/components/icons/Bookmark'
 import Link from 'next/link'
 import OptimizedImage from '@/components/ui/OptimizedImage';
+import { getDefaultImageByCategory } from '@/utils/image-helpers';
 
 export interface Publication {
   id: string
@@ -273,23 +274,21 @@ export default function SearchResults({
           className="block w-full h-full"
           onClick={(e) => handlePublicationClick(publication, e)}
         >
-          {/* Image Container - Only show if has valid images */}
-          {hasImages && publication.images && (
-            <div className="relative aspect-[4/5] overflow-hidden">
-              <div className="absolute inset-0 bg-gradient-to-b from-black/0 via-black/0 to-black/80 z-10" />
-              <Image
-                src={publication.images[0]}
-                alt={`Imagen de ${publication.title || 'publicación'}`}
-                fill
-                sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw"
-                className="object-cover transition-transform duration-500 group-hover:scale-105"
-                priority={index < 4}
-              />
-            </div>
-          )}
+          {/* Image Container - Always show image (real or default) */}
+          <div className="relative aspect-[4/5] overflow-hidden">
+            <div className="absolute inset-0 bg-gradient-to-b from-black/0 via-black/0 to-black/80 z-10" />
+            <Image
+              src={hasImages && publication.images ? publication.images[0] : getDefaultImageByCategory(publication.categorySlug)}
+              alt={`Imagen de ${publication.title || 'publicación'}`}
+              fill
+              sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw"
+              className="object-cover transition-transform duration-500 group-hover:scale-105"
+              priority={index < 4}
+            />
+          </div>
 
           {/* Content */}
-          <div className={`p-4 ${!hasImages ? 'h-full' : ''} flex flex-col`}>
+          <div className="p-4 flex flex-col">
             {/* Title and Save Button Row */}
             <div className="flex items-start justify-between gap-2 mb-2">
               <h3 className="text-lg font-semibold text-white line-clamp-2 flex-1">
@@ -477,20 +476,19 @@ export default function SearchResults({
           onClick={(e) => handlePublicationClick(publication, e)}
         >
           <div className="relative flex flex-row bg-slate-800 rounded-xl overflow-hidden shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1 h-full">
-            {/* Imagen - Solo mostrar si hay imágenes válidas */}
-            {hasImages && (
-              <div className="relative w-40 sm:w-48 flex-shrink-0 overflow-hidden h-auto image-container">
-                <div className="absolute inset-0 bg-gradient-to-br from-slate-900/20 to-slate-900/60 z-10" />
-                <div className="relative w-full h-full min-h-[160px]">
-                  <OptimizedImage
-                    src={images[0]}
+            {/* Imagen - Siempre mostrar (real o por defecto) */}
+            <div className="relative w-40 sm:w-48 flex-shrink-0 overflow-hidden h-auto image-container">
+              <div className="absolute inset-0 bg-gradient-to-br from-slate-900/20 to-slate-900/60 z-10" />
+              <div className="relative w-full h-full min-h-[160px]">
+                <OptimizedImage
+                  src={hasImages && images ? images[0] : getDefaultImageByCategory(publication.categorySlug)}
                     alt={`Imagen de ${publication.title || 'publicación'}`}
                     width={120}
                     height={120}
                     sizes="(max-width: 640px) 30vw, 120px"
                     className="transition-transform duration-500 group-hover:scale-110"
                     priority={index < 4}
-                    fallbackSrc="/images/placeholder-buscadis.jpg"
+                    fallbackSrc={getDefaultImageByCategory(publication.categorySlug)}
                   />
                 </div>
 
@@ -532,10 +530,9 @@ export default function SearchResults({
                   </button>
                 )}
               </div>
-            )}
 
-            {/* Contenido - Ajustamos el padding y layout según si hay imagen o no */}
-            <div className={`flex-1 p-4 flex flex-col justify-between min-h-[160px] ${!hasImages ? 'pl-6' : ''}`}>
+            {/* Contenido */}
+            <div className="flex-1 p-4 flex flex-col justify-between min-h-[160px]">
               <div>
                 <div className="flex justify-between items-start mb-1">
                   <h3 className="text-lg font-semibold text-white line-clamp-1 group-hover:text-teal-300 transition-colors">
@@ -573,13 +570,12 @@ export default function SearchResults({
                   {publication.description}
                 </p>
 
-                {/* Badges cuando no hay imagen - Mostrarlos en el contenido */}
-                {!hasImages && (
-                  <div className="flex flex-wrap gap-2 mb-2">
-                    {publication.subsubcategory && (
-                      <span className="bg-blue-600 text-white text-xs font-medium px-2 py-0.5 rounded-full shadow-lg">
-                        {publication.subsubcategory}
-                      </span>
+                {/* Badges */}
+                <div className="flex flex-wrap gap-2 mb-2">
+                  {publication.subsubcategory && (
+                    <span className="bg-blue-600 text-white text-xs font-medium px-2 py-0.5 rounded-full shadow-lg">
+                      {publication.subsubcategory}
+                    </span>
                     )}
 
                     {isPremium && (
@@ -595,8 +591,7 @@ export default function SearchResults({
                         <span className="hidden sm:inline">Nuevo</span>
                       </span>
                     )}
-                  </div>
-                )}
+                </div>
               </div>
 
               <div className="flex items-center justify-between mt-auto"> {/* mt-auto to push to bottom */}

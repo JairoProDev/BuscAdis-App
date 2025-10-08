@@ -556,7 +556,7 @@ export default function PublicationCard({
         <div className="mt-2 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
           {/* Price */}
           {formatPriceLocal(publication.value, publication.currency) ? (
-            <div className="text-base font-extrabold text-blue-600 dark:text-blue-400">
+            <div className="text-sm font-extrabold text-blue-600 dark:text-blue-400">
               {formatPriceLocal(publication.value, publication.currency)}
             </div>
           ) : (

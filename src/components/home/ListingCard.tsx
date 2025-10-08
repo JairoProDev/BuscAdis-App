@@ -6,6 +6,7 @@ import { motion } from "framer-motion";
 import { MapPinIcon, ClockIcon } from "@heroicons/react/24/outline";
 import { SparklesIcon } from "@heroicons/react/24/solid";
 import { useEffect } from "react";
+import { getDefaultImageByCategory } from "@/utils/image-helpers";
 
 // Helper function to get relative date
 const getRelativeDate = (dateString?: string): string => {
@@ -91,7 +92,7 @@ const ListingCard: React.FC<ListingCardProps> = ({ listing, index }) => {
     },
   };
 
-  const imageSrc = listing.image || "/images/placeholder-buscadis.jpg";
+  const imageSrc = listing.image || getDefaultImageByCategory(listing.category);
   
   let formattedPrice = "Consultar";
   if (listing.price !== null && listing.price !== undefined) {

@@ -29,7 +29,13 @@ import {
   MagnifyingGlassIcon,
   ExclamationTriangleIcon,
   CheckCircleIcon,
-  XMarkIcon
+  XMarkIcon,
+  HomeIcon,
+  BriefcaseIcon,
+  WrenchScrewdriverIcon,
+  ShoppingBagIcon,
+  BuildingStorefrontIcon,
+  UserGroupIcon
 } from '@heroicons/react/24/outline';
 import { 
   HeartIcon as HeartSolidIcon,
@@ -43,6 +49,25 @@ import { getDefaultImageByCategory } from '@/utils/image-helpers';
 import PublicationAttributes from '../PublicationAttributes';
 import PublicationContact from '../PublicationContact';
 import { useToast } from '@/components/ui/use-toast';
+import { getClassificationNames } from '@/data/categories-data';
+
+// Mapeo de iconos por categoría
+const CATEGORY_ICONS: Record<string, React.ElementType> = {
+  'empleos': BriefcaseIcon,
+  'inmuebles': HomeIcon,
+  'vehiculos': TruckIcon,
+  'servicios': WrenchScrewdriverIcon,
+  'productos': ShoppingBagIcon,
+  'eventos': CalendarIcon,
+  'negocios': BuildingStorefrontIcon,
+  'comunidad': UserGroupIcon,
+  'default': ShoppingBagIcon
+};
+
+// Función para obtener el icono de categoría
+const getCategoryIcon = (categorySlug: string) => {
+  return CATEGORY_ICONS[categorySlug] || CATEGORY_ICONS.default;
+};
 
 interface EnhancedDedicatedPageProps {
   publication: PublicationData;
@@ -393,19 +418,77 @@ export default function EnhancedDedicatedPage({
       <div className="bg-white dark:bg-gray-800 shadow-sm border-b border-gray-200 dark:border-gray-700">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="py-4">
-            <nav className="flex items-center space-x-2 text-sm">
-              <Link href="/" className="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200">
-                Inicio
-              </Link>
-              <ChevronRightIcon className="w-4 h-4 text-gray-400" />
-              <Link href={`/${publication.categorySlug}`} className="text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 capitalize">
-                {publication.categorySlug}
-              </Link>
-              <ChevronRightIcon className="w-4 h-4 text-gray-400" />
-              <span className="text-gray-900 dark:text-white font-medium truncate max-w-xs">
-                {publication.title}
-              </span>
-            </nav>
+            <div className="flex items-center">
+              {/* Botón Volver */}
+              <button 
+                onClick={() => router.back()}
+                className="flex items-center gap-2 text-sm font-medium text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white transition-colors"
+              >
+                <ArrowLeftIcon className="w-4 h-4" />
+                Volver
+              </button>
+              
+              {/* Separador entre Volver y Breadcrumbs */}
+              <span className="mx-3 hidden sm:inline-block" aria-hidden="true"></span>
+              
+              {/* Breadcrumbs */}
+              <nav className="flex items-center space-x-2 text-sm" aria-label="Breadcrumb">
+                {/* Inicio */}
+                <Link href="/" className="flex items-center gap-1 text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 transition-colors">
+                  <HomeIcon className="w-4 h-4" />
+                  <span className="ml-0.5">Inicio</span>
+                </Link>
+                <ChevronRightIcon className="w-4 h-4 text-gray-400" />
+                
+                {/* Category Link */}
+                {(() => {
+                  const CategoryIcon = getCategoryIcon(publication.categorySlug);
+                  return (
+                    <Link 
+                      href={`/${publication.categorySlug}`} 
+                      className="flex items-center gap-1 text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 transition-colors capitalize"
+                    >
+                      <CategoryIcon className="w-4 h-4" />
+                      {getClassificationNames(publication.categorySlug).categoryName || publication.categorySlug}
+                    </Link>
+                  );
+                })()}
+                
+                {/* Subcategory Link (if exists) */}
+                {publication.subcategorySlug && (
+                  <>
+                    <ChevronRightIcon className="w-4 h-4 text-gray-400" />
+                    <Link 
+                      href={`/${publication.categorySlug}/${publication.subcategorySlug}`} 
+                      className="flex items-center gap-1 text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 transition-colors capitalize"
+                    >
+                      <DocumentTextIcon className="w-4 h-4" />
+                      {getClassificationNames(publication.categorySlug, publication.subcategorySlug).subcategoryName || publication.subcategorySlug}
+                    </Link>
+                  </>
+                )}
+                
+                {/* Sub-subcategory Link (if exists) */}
+                {publication.subSubcategorySlug && (
+                  <>
+                    <ChevronRightIcon className="w-4 h-4 text-gray-400" />
+                    <Link 
+                      href={`/${publication.categorySlug}/${publication.subcategorySlug}/${publication.subSubcategorySlug}`} 
+                      className="flex items-center gap-1 text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-200 transition-colors capitalize"
+                    >
+                      <DocumentTextIcon className="w-4 h-4" />
+                      {getClassificationNames(publication.categorySlug, publication.subcategorySlug, publication.subSubcategorySlug).subSubcategoryName || publication.subSubcategorySlug}
+                    </Link>
+                  </>
+                )}
+                
+                <ChevronRightIcon className="w-4 h-4 text-gray-400" />
+                <span className="flex items-center gap-1 text-gray-900 dark:text-white font-medium truncate max-w-xs" aria-current="page">
+                  <DocumentTextIcon className="w-4 h-4 flex-shrink-0" />
+                  {publication.title}
+                </span>
+              </nav>
+            </div>
           </div>
         </div>
       </div>
@@ -414,14 +497,6 @@ export default function EnhancedDedicatedPage({
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
           {/* Main Content */}
           <div className="lg:col-span-2 space-y-6">
-            {/* Back Button */}
-            <button 
-              onClick={() => router.back()}
-              className="flex items-center gap-2 text-sm font-medium text-gray-600 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white transition-colors"
-            >
-              <ArrowLeftIcon className="w-4 h-4" />
-              Volver
-            </button>
 
             {/* Enhanced Image Gallery */}
             <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-lg overflow-hidden">
