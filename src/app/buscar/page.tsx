@@ -27,6 +27,7 @@ import CategorySelector from '@/components/home/CategorySelector'
 
 interface SearchResult {
   id: string;
+  sequentialId?: number;
   title: string;
   description: string;
   category: string;
@@ -434,6 +435,7 @@ function SearchPageContent({ publicationsData, results, setResults, isLoading, s
     
     // Construir URL limpia: /category/id
     const newUrl = `/${category}/${publicationId}`;
+    console.log('🔗 Actualizando URL a:', newUrl, { publicationId, category, publication });
     router.replace(newUrl, { scroll: false });
   }, [originalOpenPublicationDetail, selectedCategory, router]);
 
@@ -485,6 +487,7 @@ function SearchPageContent({ publicationsData, results, setResults, isLoading, s
     }
     return {
       id: searchResult.id,
+      sequentialId: searchResult.sequentialId, // Incluir sequentialId para URLs
       title: searchResult.title,
       description: searchResult.description,
       categorySlug: searchResult.category ? searchResult.category.toLowerCase() : 'general',
@@ -1374,6 +1377,7 @@ export default function BuscadorPage() {
     }
     return {
       id: searchResult.id,
+      sequentialId: searchResult.sequentialId, // Incluir sequentialId para URLs
       title: searchResult.title,
       description: searchResult.description,
       categorySlug: searchResult.category ? searchResult.category.toLowerCase() : 'general',

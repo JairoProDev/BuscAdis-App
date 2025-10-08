@@ -220,6 +220,7 @@ export async function GET(request: Request) {
         ...anyDoc,
         id,
         _id: id,
+        sequentialId: (anyDoc.sequentialId as number) || undefined,
         category: (anyDoc.category as string) || (anyDoc.categorySlug as string) || '',
         categorySlug: (anyDoc.category as string) || '',
         subcategory: (anyDoc.subcategory as string) || '',
