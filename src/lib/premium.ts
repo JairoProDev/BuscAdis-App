@@ -9,7 +9,7 @@
  * 5. Automatic plan management
  */
 
-import { PremiumPlan, PremiumFeature, PremiumLimits } from '@/types';
+import { PremiumPlan, PremiumFeature } from '@/types';
 
 // ============================================================================
 // PREMIUM PLANS CONFIGURATION

@@ -1,8 +1,7 @@
 'use client';
 
 import React, { useState } from 'react';
-import { useRouter } from 'next/navigation';
-import { HeartIcon, ShareIcon, MapPinIcon, ArrowLeftIcon, ChevronLeftIcon, ChevronRightIcon, CalendarIcon } from '@heroicons/react/24/outline';
+import { HeartIcon, ShareIcon, MapPinIcon, ChevronLeftIcon, ChevronRightIcon, CalendarIcon } from '@heroicons/react/24/outline';
 import { HeartIcon as HeartSolidIcon } from '@heroicons/react/24/solid';
 import { PublicationData } from '@/types/publication';
 import { formatDistanceToNow } from 'date-fns';
@@ -19,17 +18,14 @@ interface DedicatedPublicationPageProps {
   relatedPublications?: PublicationData[];
   onShare?: () => void;
   onFavorite?: () => void;
-  onWhatsAppClick?: () => void;
 }
 
 export default function DedicatedPublicationPage({
   publication,
   relatedPublications = [],
-  onWhatsAppClick,
   onShare,
   onFavorite
 }: DedicatedPublicationPageProps) {
-  const router = useRouter();
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const [isFavorite, setIsFavorite] = useState(false);
   const [showFullDescription, setShowFullDescription] = useState(false);

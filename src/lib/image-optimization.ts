@@ -9,7 +9,7 @@
  * 5. CDN optimization
  */
 
-import { CacheKeys, cache } from './cache';
+import { cache } from './cache';
 
 // ============================================================================
 // CONFIGURATION

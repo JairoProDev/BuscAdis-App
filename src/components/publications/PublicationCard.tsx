@@ -21,7 +21,7 @@ import { HeartIcon as HeartSolidIcon } from '@heroicons/react/24/solid';
 import { WhatsAppIcon } from '@/components/icons';
 import { useMemo } from 'react';
 import { getDefaultImageByCategory } from '@/utils/image-helpers';
-import { BadgeStack, PlanBadge, BoostBadge, FeaturedBadge } from '@/components/premium/PremiumBadge';
+import { PlanBadge, BoostBadge, FeaturedBadge } from '@/components/premium/PremiumBadge';
 
 import { PublicationData } from '@/types/publication';
 import { generatePublicationUrl } from '@/lib/routing';
@@ -45,18 +45,6 @@ const categoryIcons: Record<string, React.ElementType> = {
   eventos: CalendarIcon,
   negocios: ChartBarIcon,
   comunidad: UserGroupIcon,
-}
-
-// Colores de categorías
-const categoryColors: Record<string, string> = {
-  empleos: 'bg-blue-100 text-blue-800',
-  inmuebles: 'bg-green-100 text-green-800',
-  vehiculos: 'bg-orange-100 text-orange-800',
-  servicios: 'bg-purple-100 text-purple-800',
-  productos: 'bg-pink-100 text-pink-800',
-  eventos: 'bg-yellow-100 text-yellow-800',
-  negocios: 'bg-indigo-100 text-indigo-800',
-  comunidad: 'bg-teal-100 text-teal-800',
 }
 
 // Componente SVG para flecha curveada de compartir (estilo Facebook/TikTok)

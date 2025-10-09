@@ -94,14 +94,6 @@ const PriceInput: React.FC<PriceInputProps> = ({
     notifyChange(internalAmount, internalCurrency, newNegotiable, false);
   }, [isNegotiable, internalAmount, internalCurrency, notifyChange]);
 
-  const handleFreeToggle = useCallback(() => {
-    const newFree = !isFree;
-    setIsFree(newFree);
-    setIsNegotiable(false); // No puede ser gratis y negociable
-    setInternalAmount(newFree ? '0' : ''); // Poner 0 si es gratis, limpiar si no
-    notifyChange(newFree ? '0' : internalAmount, internalCurrency, false, newFree);
-  }, [isFree, internalAmount, internalCurrency, notifyChange]);
-
   const currentSymbol = currencies.find(c => c.code === internalCurrency)?.symbol || '';
 
   return (

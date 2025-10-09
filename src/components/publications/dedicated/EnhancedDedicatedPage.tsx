@@ -15,19 +15,13 @@ import {
   CalendarIcon,
   EyeIcon,
   PhoneIcon,
-  ChatBubbleLeftRightIcon,
   FlagIcon,
   StarIcon,
   ShieldCheckIcon,
   TruckIcon,
-  CreditCardIcon,
-  ClockIcon,
   UserIcon,
-  BuildingOfficeIcon,
   DocumentTextIcon,
-  PhotoIcon,
   MagnifyingGlassIcon,
-  ExclamationTriangleIcon,
   CheckCircleIcon,
   XMarkIcon,
   HomeIcon,
@@ -39,7 +33,6 @@ import {
 } from '@heroicons/react/24/outline';
 import { 
   HeartIcon as HeartSolidIcon,
-  StarIcon as StarSolidIcon,
   ChatBubbleLeftRightIcon as ChatSolidIcon
 } from '@heroicons/react/24/solid';
 import { PublicationData } from '@/types/publication';
@@ -551,7 +544,7 @@ export default function EnhancedDedicatedPage({
                   <div className="flex space-x-2 overflow-x-auto">
                     {images.map((image, index) => (
                       <button
-                        key={index}
+                        key={`image-${image}-${index}`}
                         onClick={() => setCurrentImageIndex(index)}
                         className={`relative w-16 h-16 rounded-lg overflow-hidden flex-shrink-0 border-2 transition-all ${
                           index === currentImageIndex 

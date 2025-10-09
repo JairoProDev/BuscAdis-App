@@ -43,7 +43,7 @@ const PublicationProgress: React.FC<PublicationProgressProps> = ({
           const isCurrent = stepNumber === currentStep;
           return (
             <div 
-              key={`step-${index}`}
+              key={`step-${step}-${stepNumber}`}
               className={`flex items-center gap-1 ${onStepClick ? 'cursor-pointer' : ''}`}
               onClick={() => onStepClick && onStepClick(stepNumber)}
             >

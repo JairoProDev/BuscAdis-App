@@ -164,6 +164,7 @@ const LocationSelector: React.FC<LocationSelectorProps> = ({
    * to its initial state for geolocation.
    */
   const clearCoordinates = useCallback(() => {
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const { coordinates, ...restOfLocation } = location;
     setLocation(restOfLocation);
     onChange(restOfLocation);

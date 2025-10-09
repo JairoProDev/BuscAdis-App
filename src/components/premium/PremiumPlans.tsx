@@ -11,9 +11,9 @@
 
 'use client';
 
-import React, { useState } from 'react';
+import React from 'react';
 import { motion } from 'framer-motion';
-import { CheckIcon, XMarkIcon, StarIcon, RocketLaunchIcon } from '@heroicons/react/24/outline';
+import { CheckIcon, StarIcon, RocketLaunchIcon } from '@heroicons/react/24/outline';
 import { premiumSystem } from '@/lib/premium';
 
 // ============================================================================
@@ -64,8 +64,6 @@ interface PlanCardProps {
 // ============================================================================
 
 function PlanCard({ plan, isCurrentPlan, isPopular, onSelect, variant = 'full' }: PlanCardProps) {
-  const [isHovered, setIsHovered] = useState(false);
-
   const cardVariants = {
     initial: { scale: 1, y: 0 },
     hover: { scale: 1.02, y: -5 },
@@ -113,8 +111,6 @@ function PlanCard({ plan, isCurrentPlan, isPopular, onSelect, variant = 'full' }
         whileHover="hover"
         whileTap="tap"
         onClick={() => onSelect(plan.id)}
-        onHoverStart={() => setIsHovered(true)}
-        onHoverEnd={() => setIsHovered(false)}
       >
         {isPopular && (
           <div className="absolute -top-3 left-1/2 transform -translate-x-1/2">
@@ -195,8 +191,6 @@ function PlanCard({ plan, isCurrentPlan, isPopular, onSelect, variant = 'full' }
       whileHover="hover"
       whileTap="tap"
       onClick={() => onSelect(plan.id)}
-      onHoverStart={() => setIsHovered(true)}
-      onHoverEnd={() => setIsHovered(false)}
     >
       {isPopular && (
         <div className="absolute -top-4 left-1/2 transform -translate-x-1/2">
@@ -277,12 +271,9 @@ export default function PremiumPlans({
   variant = 'full',
   className = ''
 }: PremiumPlansProps) {
-  const [selectedPlan, setSelectedPlan] = useState<string | null>(null);
-
   const handlePlanSelect = (planId: string) => {
     if (planId === currentPlan) return;
     
-    setSelectedPlan(planId);
     onPlanSelect?.(planId);
   };
 

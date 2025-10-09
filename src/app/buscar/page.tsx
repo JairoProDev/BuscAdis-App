@@ -23,7 +23,6 @@ import { PublicationData } from '@/types/publication'
 import PublicationDetailContainer from '@/components/publications/PublicationDetailContainer'
 import { PublicationDetailProvider, usePublicationDetail } from '@/hooks/usePublicationDetail'
 import PublicationDetailSidebar from '@/components/publications/PublicationDetailSidebar'
-import CategorySelector from '@/components/home/CategorySelector'
 
 interface SearchResult {
   id: string;

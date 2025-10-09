@@ -75,7 +75,7 @@ const ProgressAchievements: React.FC<ProgressAchievementsProps> = ({ formData, q
   const achievements = useMemo(() => {
     const completed: string[] = [];
     let points = 0;
-    let badges: string[] = [];
+    const badges: string[] = [];
 
     if (completionItems[0].completed) {
       completed.push('category');

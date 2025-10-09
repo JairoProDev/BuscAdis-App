@@ -139,7 +139,7 @@ export default function PullToRefresh({
           y.set(0);
           setCurrentY(0);
         }
-      } catch (error) {
+      } catch {
         setRefreshState({ status: 'error', progress: 1 });
         
         setTimeout(() => {

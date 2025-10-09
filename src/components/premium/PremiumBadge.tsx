@@ -219,21 +219,6 @@ export default function PremiumBadge({
   const sizeConfig = sizeConfigs[size];
   const IconComponent = config.icon;
 
-  // Animation variants
-  const animationVariants = {
-    initial: { scale: 1, rotate: 0 },
-    animate: animated && 'animation' in config && config.animation ? {
-      scale: config.animation.scale || 1,
-      rotate: config.animation.rotate || 0,
-      transition: {
-        duration: config.animation.duration || 0.3,
-        repeat: Infinity,
-        repeatType: 'reverse' as const,
-        ease: 'easeInOut'
-      }
-    } : { scale: 1, rotate: 0 }
-  };
-
   const badgeContent = (
     <div className={`
       inline-flex items-center 
@@ -382,9 +367,9 @@ export function BadgeStack({
 
   return (
     <div className={`flex items-center space-x-1 ${className}`}>
-      {visibleBadges.map((badge, index) => (
+      {visibleBadges.map((badge) => (
         <PremiumBadge
-          key={`${badge.type}-${badge.plan || 'default'}-${index}`}
+          key={`${badge.type}-${badge.plan || 'default'}`}
           type={badge.type}
           plan={badge.plan}
           size={size}

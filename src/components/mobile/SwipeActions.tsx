@@ -11,7 +11,7 @@
 
 'use client';
 
-import React, { useState, useRef, useCallback } from 'react';
+import React, { useState, useCallback } from 'react';
 import { motion, PanInfo, useMotionValue, useTransform } from 'framer-motion';
 import {
   HeartIcon,
@@ -189,7 +189,7 @@ export default function SwipeActions({
 
     return (
       <div className={`absolute top-0 bottom-0 flex ${direction === 'left' ? 'left-0' : 'right-0'}`}>
-        {actions.map((action, index) => {
+        {actions.map((action) => {
           const IconComponent = action.icon;
           const colors = actionColors[action.color];
           const isActionActive = activeAction === action.id;
