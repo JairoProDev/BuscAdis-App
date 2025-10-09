@@ -520,7 +520,7 @@ export default function SearchResults({
                 {publication.contactPhone && (
                   <button
                     onClick={handleWhatsAppClick}
-                    className="absolute bottom-2 left-2 z-20 bg-green-500 hover:bg-green-600 text-white text-xs font-medium px-2 py-0.5 rounded-full shadow-sm flex items-center"
+                    className="absolute bottom-2 left-2 z-20 bg-[#14b8a6] hover:bg-[#0d9488] text-white text-xs font-medium px-2 py-0.5 rounded-full shadow-sm flex items-center"
                     aria-label="Contactar por WhatsApp"
                   >
                     <svg className="w-3 h-3 mr-1" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true">
@@ -535,7 +535,7 @@ export default function SearchResults({
             <div className="flex-1 p-4 flex flex-col justify-between min-h-[160px]">
               <div>
                 <div className="flex justify-between items-start mb-1">
-                  <h3 className="text-lg font-semibold text-white line-clamp-1 group-hover:text-teal-300 transition-colors">
+                  <h3 className="text-lg font-semibold text-white line-clamp-1 group-hover:text-[#14b8a6] transition-colors">
                     {publication.title}
                   </h3>
                   {/* Interaction buttons for list view - e.g. Save button */}
@@ -610,7 +610,7 @@ export default function SearchResults({
                   publication.contactPhone && ( // Show "Consultar precio" only if phone exists and no price
                     <button
                       onClick={handleWhatsAppClick}
-                      className="bg-green-500 hover:bg-green-600 text-white text-xs font-medium px-3 py-1 rounded-lg shadow-sm flex items-center"
+                      className="bg-[#14b8a6] hover:bg-[#0d9488] text-white text-xs font-medium px-3 py-1 rounded-lg shadow-sm flex items-center"
                       aria-label="Consultar precio por WhatsApp"
                     >
                       <svg className="w-3 h-3 mr-1" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true">

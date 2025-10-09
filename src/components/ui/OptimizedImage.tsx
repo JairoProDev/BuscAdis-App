@@ -116,7 +116,7 @@ export default function OptimizedImage({
   // ============================================================================
   
   const getOptimizedSrc = useCallback(() => {
-    if (!isInView) return fallbackSrc;
+    if (!isInView) return fallbackSrc || src;
     
     // Generate optimized URLs based on dimensions
     const targetWidth = width || 800;
@@ -131,7 +131,7 @@ export default function OptimizedImage({
     // Get best format supported by browser
     const bestFormat = imageOptimizer.getBestImageFormat();
     return optimizedUrls[bestFormat] || optimizedUrls.jpeg;
-  }, [isInView, imageState.currentSrc, width, height, fallbackSrc]);
+  }, [isInView, imageState.currentSrc, width, height, fallbackSrc, src]);
   
   const generateSrcSet = useCallback(() => {
     if (!isInView) return undefined;
@@ -155,8 +155,8 @@ export default function OptimizedImage({
   }, [onLoad]);
   
   const handleError = useCallback(() => {
-    if (imageState.currentSrc === fallbackSrc) {
-      // Already using fallback, show error state
+    if (imageState.currentSrc === fallbackSrc || !fallbackSrc) {
+      // Already using fallback or no fallback available, show error state
       setImageState(prev => ({ ...prev, error: true }));
       setIsLoading(false);
       onError?.();

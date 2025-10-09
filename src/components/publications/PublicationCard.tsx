@@ -83,12 +83,11 @@ interface CategoryTagProps {
 
 const CategoryTag: React.FC<CategoryTagProps> = ({ categorySlug }) => {
   const Icon = categoryIcons[categorySlug] || PaperAirplaneIcon;
-  const colors = categoryColors[categorySlug] || 'bg-gray-100 text-gray-800';
   
   return (
-    <div className={`absolute top-3 left-3 text-xs font-bold px-2.5 py-1 rounded-full flex items-center gap-1.5 ${colors}`}>
+    <div className="absolute top-3 left-3 text-xs font-bold px-2.5 py-1 rounded-lg flex items-center gap-1.5 bg-slate-800/90 text-white border border-slate-700/50 backdrop-blur-sm">
       <Icon className="w-3.5 h-3.5" />
-      <span>{categorySlug.charAt(0).toUpperCase() + categorySlug.slice(1)}</span>
+      <span>{categorySlug.toUpperCase()}</span>
     </div>
   );
 };
@@ -477,7 +476,7 @@ export default function PublicationCard({
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.3 }}
-      className={`bg-white dark:bg-gray-800 rounded-lg shadow-md hover:shadow-xl transition-shadow duration-300 overflow-hidden flex flex-col ${className}`}
+      className={`bg-slate-800 dark:bg-slate-900 rounded-xl shadow-lg hover:shadow-2xl transition-all duration-300 overflow-hidden flex flex-col border border-slate-700/50 ${className}`}
     >
       {/* Image container */}
       <div className="relative w-full" style={{ paddingBottom: '75%' /* 4:3 aspect ratio */ }}>
@@ -508,11 +507,11 @@ export default function PublicationCard({
       </div>
 
       {/* Content */}
-      <div className="p-4 flex-1 flex flex-col justify-between">
+      <div className="p-4 flex-1 flex flex-col justify-between bg-slate-800 dark:bg-slate-900">
         <div>
           {/* Title */}
           <a href={seoUrl} onClick={(e) => { e.preventDefault(); onPublicationClick?.(publication); }} className="block mb-2">
-            <h3 className="font-bold text-sm leading-tight hover:text-[#14b8a6] transition-colors duration-200 line-clamp-2">
+            <h3 className="font-bold text-sm leading-tight text-white hover:text-[#14b8a6] transition-colors duration-200 line-clamp-2">
               {formatTitle(publication.title)}
             </h3>
           </a>
@@ -540,12 +539,12 @@ export default function PublicationCard({
           )}
           */}
           {/* Location and Date */}
-          <div className="flex items-center justify-between text-sm text-gray-500 mb-2">
+          <div className="flex items-center justify-between text-sm text-gray-300 mb-2">
             <div className="flex items-center">
               <MapPinIcon className="w-4 h-4 mr-1.5 text-gray-400 flex-shrink-0" />
               <span className="truncate">{formatLocation(publication.location)}</span>
             </div>
-            <div className="flex items-center text-xs text-gray-400 dark:text-gray-500 flex-shrink-0">
+            <div className="flex items-center text-xs text-gray-400 flex-shrink-0">
               <CalendarIcon className="w-4 h-4 mr-1 text-gray-400 flex-shrink-0" />
               {formatExactDateTime(publication.createdAt)}
             </div>
@@ -573,7 +572,7 @@ export default function PublicationCard({
           {showWhatsApp && (
             <button 
               onClick={createEnhancedWhatsAppMessage}
-              className="w-full sm:w-auto flex items-center justify-center gap-2 bg-green-500 text-white font-bold py-2 px-4 rounded-md hover:bg-green-600 active:bg-green-700 transform hover:scale-[1.02] transition-all duration-200 shadow-md hover:shadow-lg mt-2 sm:mt-0"
+              className="w-full sm:w-auto flex items-center justify-center gap-2 bg-[#14b8a6] text-white font-bold py-2 px-4 rounded-lg hover:bg-[#0d9488] active:bg-[#0f766e] transform hover:scale-[1.02] transition-all duration-200 shadow-md hover:shadow-lg mt-2 sm:mt-0"
               style={{ minWidth: '110px' }}
             >
               <WhatsAppIcon className="w-6 h-6 min-w-[1.5rem] min-h-[1.5rem]" />
