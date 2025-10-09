@@ -331,7 +331,7 @@ const CategorySelector: React.FC<CategorySelectorProps> = ({
       >
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2 min-w-0">
-            <span className="flex-shrink-0 text-base">{(subSubcategory as Record<string, unknown>).emoji || '🔹'}</span>
+            <span className="flex-shrink-0 text-base">{((subSubcategory as unknown as Record<string, unknown>).emoji as string) || '🔹'}</span>
             <h3 className={`text-sm font-medium leading-tight break-words line-clamp-2 ${
               isSelected 
                 ? 'text-primary-900 dark:text-primary-100' 

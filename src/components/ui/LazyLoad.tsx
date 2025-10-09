@@ -76,6 +76,7 @@ export function withLazyLoad<P extends object>(
   return function LazyLoadedComponent(props: P) {
     return (
       <Suspense fallback={fallback || <LoadingSpinner size="md" />}>
+        {/* @ts-expect-error - Props spread with generic types in lazy components */}
         <LazyComponent {...props} />
       </Suspense>
     );

@@ -37,7 +37,7 @@ const PublicationsList = () => {
             ) : (
               <p>Ubicación: {publication.location}</p>
             )}
-            <p>Precio: {(publication as Record<string, unknown>).value ?? (publication as Record<string, unknown>).amount ?? 0} {publication.currency || ((publication as Record<string, unknown>).pricing as Record<string, unknown> | undefined)?.currency || 'PEN'}</p>
+            <p>Precio: {((publication as unknown as Record<string, unknown>).value as number) ?? ((publication as unknown as Record<string, unknown>).amount as number) ?? 0} {publication.currency || (((publication as unknown as Record<string, unknown>).pricing as Record<string, unknown> | undefined)?.currency as string) || 'PEN'}</p>
           </li>
         ))}
       </ul>

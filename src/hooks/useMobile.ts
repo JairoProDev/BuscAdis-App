@@ -422,12 +422,12 @@ export function useNetworkStatus(): {
 
     const updateNetworkStatus = () => {
       const nav = navigator as unknown as Record<string, unknown>;
-      const connection = nav.connection || nav.mozConnection || nav.webkitConnection;
+      const connection = (nav.connection || nav.mozConnection || nav.webkitConnection) as Record<string, unknown> | undefined;
       
       setNetworkStatus({
         isOnline: navigator.onLine,
-        connectionType: connection?.effectiveType || 'unknown',
-        downlink: connection?.downlink || 0
+        connectionType: (connection?.effectiveType as string) || 'unknown',
+        downlink: (connection?.downlink as number) || 0
       });
     };
 
@@ -437,17 +437,17 @@ export function useNetworkStatus(): {
     window.addEventListener('offline', updateNetworkStatus);
     
     const nav = navigator as unknown as Record<string, unknown>;
-    const connection = nav.connection;
-    if (connection) {
-      connection.addEventListener('change', updateNetworkStatus);
+    const connection = nav.connection as Record<string, unknown> | undefined;
+    if (connection && typeof connection.addEventListener === 'function') {
+      (connection.addEventListener as (event: string, handler: () => void) => void)('change', updateNetworkStatus);
     }
 
     return () => {
       window.removeEventListener('online', updateNetworkStatus);
       window.removeEventListener('offline', updateNetworkStatus);
       
-      if (connection) {
-        connection.removeEventListener('change', updateNetworkStatus);
+      if (connection && typeof connection.removeEventListener === 'function') {
+        (connection.removeEventListener as (event: string, handler: () => void) => void)('change', updateNetworkStatus);
       }
     };
   }, []);
