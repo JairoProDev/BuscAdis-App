@@ -345,7 +345,7 @@ export class BulkPublicationImporter {
         results.push({
           success: true,
           rowIndex,
-          publicationId: publication._id,
+          publicationId: publication._id as string | undefined,
           publication,
           originalData: rowData
         })
@@ -739,7 +739,7 @@ export class BulkPublicationImporter {
   }
   
   // Insertar en base de datos
-  private async insertPublication(publication: PublicationDocument): Promise<void> {
+  private async insertPublication(publication: Record<string, unknown>): Promise<void> {
     if (!this.db) return
     
     // Determinar colección basada en ubicación
