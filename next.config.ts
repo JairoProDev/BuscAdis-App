@@ -68,8 +68,6 @@ const nextConfig: NextConfig = {
     optimizeCss: true,
     scrollRestoration: true,
     webpackBuildWorker: true,
-    // Target modern browsers only
-    browsersListForSwc: true,
   },
 
   // Configure image optimization

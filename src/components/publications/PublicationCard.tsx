@@ -86,7 +86,8 @@ export default function PublicationCard({
   onPublicationClick,
   className = '',
   showWhatsApp = true,
-  viewMode = 'grid'
+  viewMode = 'grid',
+  index = 0
 }: PublicationCardProps) {
   const [isFavorite, setIsFavorite] = useState(false);
   const [showCopiedMessage, setShowCopiedMessage] = useState(false);
@@ -476,6 +477,8 @@ export default function PublicationCard({
             fill
             className="object-cover absolute top-0 left-0 w-full h-full"
             sizes="(max-width: 640px) 100vw, (max-width: 768px) 50vw, (max-width: 1024px) 33vw, 25vw"
+            priority={index < 6} // Priority loading for first 6 images
+            loading={index < 6 ? 'eager' : 'lazy'}
             onError={handleImageError}
           />
         </a>

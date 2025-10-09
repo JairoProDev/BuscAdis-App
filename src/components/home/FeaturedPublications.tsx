@@ -53,8 +53,8 @@ export default function FeaturedPublications() {
 
   return (
     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-      {publications.map((publication) => (
-        <PublicationCard key={publication._id} publication={{
+      {publications.map((publication, index) => (
+        <PublicationCard key={publication._id} index={index} publication={{
           id: publication._id,
           title: publication.title,
           description: publication.description,
