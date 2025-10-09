@@ -140,7 +140,7 @@ const ListingCard: React.FC<ListingCardProps> = ({ listing, index }) => {
                     flex items-center relative overflow-hidden"
                   whileHover={{ scale: 1.03, y: -1, transition: { duration: 0.1 } }}
                 >
-                  <SparklesIcon className="h-3 w-3 mr-1 text-cyan-200" />
+                  <SparklesIcon className="h-3 w-3 mr-1 text-[#14b8a6]" />
                   <span className="relative z-10">Premium</span>
                   <span className="absolute inset-0 bg-gradient-to-r from-white/0 via-white/25 to-white/0 animate-shimmer mix-blend-lighten opacity-75"></span>
                 </motion.span>

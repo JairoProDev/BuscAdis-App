@@ -311,7 +311,7 @@ body {
   /* Grid mode - Altura automática con contenido completo */
   .publication-card:not(.list-mode) {
     height: auto !important;
-    min-height: 200px !important;
+    min-height: auto !important;
     max-height: none !important;
     display: flex;
     flex-direction: column;
@@ -320,14 +320,14 @@ body {
 
   @media (min-width: 640px) {
     .publication-card:not(.list-mode) {
-      min-height: 220px !important;
+      min-height: auto !important;
       max-height: none !important;
     }
   }
 
   @media (min-width: 768px) {
     .publication-card:not(.list-mode) {
-      min-height: 240px !important;
+      min-height: auto !important;
       max-height: none !important;
     }
   }
@@ -481,7 +481,7 @@ body {
       max-width: 100%;
       width: 100%;
       height: auto !important;
-      min-height: 200px !important;
+      min-height: auto !important;
       max-height: none !important;
     }
     
@@ -1133,18 +1133,18 @@ body {
 .lg\:grid-cols-3 > div {
   /* Altura automática para mostrar todo el contenido */
   height: auto !important;
-  min-height: 200px !important;
+  min-height: auto !important;
   max-height: none !important;
   overflow: visible !important;
   box-sizing: border-box !important;
 }
 
-/* Mobile: altura mínima pero sin restricción máxima */
+/* Mobile: altura automática sin restricciones mínimas */
 @media (max-width: 639px) {
   .publication-card:not(.publication-no-image),
   .publications-grid > div,
   .grid.grid-cols-2 > div {
-    min-height: 180px !important;
+    min-height: auto !important;
     max-height: none !important;
   }
 }

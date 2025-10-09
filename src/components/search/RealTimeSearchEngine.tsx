@@ -473,7 +473,7 @@ export default function RealTimeSearchEngine({
               className={`relative p-2 rounded-full transition-all duration-300 ${
                 isListening
                   ? 'bg-red-500/10 hover:bg-red-500/20 text-red-600 dark:text-red-400' 
-                  : 'bg-blue-500/10 hover:bg-blue-500/20 text-blue-600 dark:text-blue-400 hover:scale-105'
+                  : 'bg-blue-500/10 hover:bg-blue-500/20 text-[#14b8a6] dark:text-blue-400 hover:scale-105'
               }`}
               title={isListening ? 'Detener grabación - Click para parar' : 'Buscar por voz'}
             >
@@ -666,7 +666,7 @@ export default function RealTimeSearchEngine({
                               {result.description}
                             </p>
                             <div className="flex items-center gap-2 mt-1">
-                              <span className="text-sm font-bold text-blue-600">
+                              <span className="text-sm font-bold text-[#14b8a6]">
                                 S/ {result.price.toLocaleString()}
                               </span>
                               <span className="text-xs text-gray-500 flex items-center gap-1">
@@ -683,7 +683,7 @@ export default function RealTimeSearchEngine({
                       
                       <button
                         onClick={() => performSearch()}
-                        className="w-full p-2 text-center text-sm text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-900/20 rounded-lg transition-colors font-medium"
+                        className="w-full p-2 text-center text-sm text-[#14b8a6] hover:bg-blue-50 dark:hover:bg-blue-900/20 rounded-lg transition-colors font-medium"
                       >
                         Ver todos los resultados →
                       </button>
@@ -838,7 +838,7 @@ export default function RealTimeSearchEngine({
                               {result.description}
                             </p>
                             <div className="flex items-center gap-2 mt-1">
-                              <span className="text-sm font-bold text-blue-600">
+                              <span className="text-sm font-bold text-[#14b8a6]">
                                 S/ {result.price.toLocaleString()}
                               </span>
                               <span className="text-xs text-gray-500 flex items-center gap-1">
@@ -855,7 +855,7 @@ export default function RealTimeSearchEngine({
                       
                       <button
                         onClick={() => performSearch()}
-                        className="w-full p-2 text-center text-sm text-blue-600 hover:bg-blue-50 dark:hover:bg-blue-900/20 rounded-lg transition-colors font-medium"
+                        className="w-full p-2 text-center text-sm text-[#14b8a6] hover:bg-blue-50 dark:hover:bg-blue-900/20 rounded-lg transition-colors font-medium"
                       >
                         Ver todos los resultados →
                       </button>

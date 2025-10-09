@@ -401,7 +401,7 @@ export default function PublicationCard({
           <div className="flex-1">
             {/* Title - Solo 1 línea en vista de lista */}
             <a href={seoUrl} onClick={(e) => { e.preventDefault(); onPublicationClick?.(publication); }} className="block mb-2">
-              <h3 className="font-bold text-lg leading-tight hover:text-blue-600 transition-colors duration-200 line-clamp-1">
+              <h3 className="font-bold text-lg leading-tight hover:text-[#14b8a6] transition-colors duration-200 line-clamp-1">
                 {formatTitle(publication.title)}
               </h3>
             </a>
@@ -442,13 +442,13 @@ export default function PublicationCard({
           <div className="flex items-center justify-between">
             <div>
               {formatPriceLocal(publication.value, publication.currency) ? (
-                <div className="text-xl font-extrabold text-blue-600 dark:text-blue-400">
+                <div className="text-xl font-extrabold text-[#14b8a6] dark:text-[#14b8a6]">
                   {formatPriceLocal(publication.value, publication.currency)}
                 </div>
               ) : (
                 <button
                   onClick={handlePriceInquiry}
-                  className="text-xl font-extrabold text-[#00B6E3] dark:text-[#00B6E3] hover:text-[#009fc7] dark:hover:text-[#00b6e3] transition-colors cursor-pointer"
+                  className="text-xl font-extrabold text-[#14b8a6] dark:text-[#14b8a6] hover:text-[#0d9488] dark:hover:text-[#0d9488] transition-colors cursor-pointer"
                 >
                   {publication.categorySlug === 'empleos' ? '¿Sueldo?' : '¿Precio?'}
                 </button>
@@ -512,7 +512,7 @@ export default function PublicationCard({
         <div>
           {/* Title */}
           <a href={seoUrl} onClick={(e) => { e.preventDefault(); onPublicationClick?.(publication); }} className="block mb-2">
-            <h3 className="font-bold text-sm leading-tight hover:text-blue-600 transition-colors duration-200 line-clamp-2">
+            <h3 className="font-bold text-sm leading-tight hover:text-[#14b8a6] transition-colors duration-200 line-clamp-2">
               {formatTitle(publication.title)}
             </h3>
           </a>
@@ -556,13 +556,13 @@ export default function PublicationCard({
         <div className="mt-2 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
           {/* Price */}
           {formatPriceLocal(publication.value, publication.currency) ? (
-            <div className="text-sm font-extrabold text-blue-600 dark:text-blue-400">
+            <div className="text-sm font-extrabold text-[#14b8a6] dark:text-[#14b8a6]">
               {formatPriceLocal(publication.value, publication.currency)}
             </div>
           ) : (
             <button
               onClick={handlePriceInquiry}
-              className="text-base font-extrabold text-[#00B6E3] dark:text-[#00B6E3] hover:text-[#009fc7] dark:hover:text-[#00b6e3] transition-colors cursor-pointer px-2 py-1 rounded"
+              className="text-base font-extrabold text-[#14b8a6] dark:text-[#14b8a6] hover:text-[#0d9488] dark:hover:text-[#0d9488] transition-colors cursor-pointer px-2 py-1 rounded"
               style={{ minWidth: '90px' }}
             >
               {publication.categorySlug === 'empleos' ? '¿Sueldo?' : '¿Precio?'}

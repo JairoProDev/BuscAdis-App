@@ -603,7 +603,7 @@ export default function SearchResults({
                 </div>
 
                 {formatPrice(publication.price, publication.currency) ? (
-                  <span className="bg-slate-900/80 backdrop-blur-sm text-white text-sm font-bold px-3 py-1 rounded-lg shadow-lg">
+                  <span className="bg-slate-900/80 backdrop-blur-sm text-[#14b8a6] text-sm font-bold px-3 py-1 rounded-lg shadow-lg">
                     {formatPrice(publication.price, publication.currency)}
                   </span>
                 ) : (

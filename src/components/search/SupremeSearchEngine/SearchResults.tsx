@@ -159,12 +159,12 @@ const ResultCard = ({
       <div className={`flex-1 p-4 ${isGridView ? '' : 'flex flex-col justify-between'} relative z-10`}>
         {/* Title and Price */}
         <div className="mb-2">
-          <h3 className="font-bold text-gray-900 dark:text-white text-base line-clamp-2 mb-1 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">
+          <h3 className="font-bold text-gray-900 dark:text-white text-base line-clamp-2 mb-1 group-hover:text-[#14b8a6] dark:group-hover:text-[#14b8a6] transition-colors">
             {result.title}
           </h3>
           
           {result.price && (
-            <div className="text-xl font-bold text-green-600 dark:text-green-400">
+            <div className="text-xl font-bold text-[#14b8a6] dark:text-[#14b8a6]">
               {formatPrice(result.price)}
             </div>
           )}
