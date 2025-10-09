@@ -132,7 +132,7 @@ export async function POST(request: NextRequest) {
 /**
  * Envía notificación al anunciante sobre el interés en su publicación caducada
  */
-async function sendNotificationToAdvertiser(publication: any, contactInfo: any) {
+async function sendNotificationToAdvertiser(publication: Record<string, unknown>, contactInfo: Record<string, unknown>) {
   try {
     // Aquí implementarías el envío real de notificaciones
     // Por ejemplo, usando servicios como SendGrid, Twilio, etc.

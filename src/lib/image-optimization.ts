@@ -192,7 +192,7 @@ export async function getImageMetadata(url: string): Promise<ImageMetadata | nul
   // Try cache first
   const cached = await cache.get(cacheKey);
   if (cached) {
-    return cached;
+    return cached as ImageMetadata;
   }
   
   // Generate metadata (this would typically call an API)

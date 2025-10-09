@@ -18,32 +18,35 @@ export default function HomePage() {
         const response = await fetch('/api/publications?limit=50');
         const data = await response.json();
         if (data.publications) {
-          const publications = data.publications.map((pub: any) => ({
-            id: pub._id || pub.id,
-            sequentialId: pub.sequentialId,
-            title: pub.title || 'Sin título',
-            description: pub.description || '',
-            categorySlug: pub.categorySlug || 'general',
-            subcategorySlug: null,
-            subSubcategorySlug: null,
-            transactionType: 'venta',
-            value: pub.price || pub.amount || 0,
-            currency: 'PEN',
-            valueType: 'fixed',
-            size: 0,
-            location: {
-              district: pub.location?.district || '',
-              province: pub.location?.province || '',
-              city: pub.location?.city || 'Cusco',
-              country: 'Perú'
-            },
-            images: pub.images || ['/images/placeholder-image.jpg'],
-            whatsapp: pub.whatsapp || '51987654321',
-            createdAt: pub.createdAt || new Date().toISOString(),
-            views: pub.views || 0,
-            featured: pub.featured || false,
-            premium: pub.premium || false,
-          }));
+          const publications = data.publications.map((pub: Record<string, unknown>) => {
+            const loc = pub.location as Record<string, string> | undefined;
+            return {
+              id: pub._id || pub.id,
+              sequentialId: pub.sequentialId,
+              title: pub.title || 'Sin título',
+              description: pub.description || '',
+              categorySlug: pub.categorySlug || 'general',
+              subcategorySlug: null,
+              subSubcategorySlug: null,
+              transactionType: 'venta',
+              value: pub.price || pub.amount || 0,
+              currency: 'PEN',
+              valueType: 'fixed',
+              size: 0,
+              location: {
+                district: loc?.district || '',
+                province: loc?.province || '',
+                city: loc?.city || 'Cusco',
+                country: 'Perú'
+              },
+              images: pub.images || ['/images/placeholder-image.jpg'],
+              whatsapp: pub.whatsapp || '51987654321',
+              createdAt: pub.createdAt || new Date().toISOString(),
+              views: pub.views || 0,
+              featured: pub.featured || false,
+              premium: pub.premium || false,
+            };
+          });
           setAllPublications(publications);
         }
       } catch (error) {

@@ -6,6 +6,7 @@
 
 import { NextRequest, NextResponse } from 'next/server';
 import { getMongoClient } from '@/lib/mongodb-server';
+import type { Db } from 'mongodb';
 
 // ============================================================================
 // INTERFACES
@@ -20,7 +21,7 @@ interface PerformanceMetric {
   userAgent: string;
   sessionId?: string;
   userId?: string;
-  metadata?: Record<string, any>;
+  metadata?: Record<string, unknown>;
 }
 
 interface PerformanceReport {
@@ -107,15 +108,16 @@ export async function GET(request: NextRequest) {
     const collection = db.collection('performance_metrics');
 
     // Build query
-    const query: any = {};
+    const query: Record<string, unknown> = {};
     if (sessionId) query.sessionId = sessionId;
     if (userId) query.userId = userId;
     if (metric) query.name = metric;
     
     if (startDate || endDate) {
-      query.timestamp = {};
-      if (startDate) query.timestamp.$gte = new Date(startDate).getTime();
-      if (endDate) query.timestamp.$lte = new Date(endDate).getTime();
+      const timestampFilter: Record<string, number> = {};
+      if (startDate) timestampFilter.$gte = new Date(startDate).getTime();
+      if (endDate) timestampFilter.$lte = new Date(endDate).getTime();
+      query.timestamp = timestampFilter;
     }
 
     // Get metrics
@@ -148,7 +150,7 @@ export async function GET(request: NextRequest) {
 // HELPER FUNCTIONS
 // ============================================================================
 
-async function updateAggregatedMetrics(db: any, data: PerformanceMetric | PerformanceReport): Promise<void> {
+async function updateAggregatedMetrics(db: Db, data: PerformanceMetric | PerformanceReport): Promise<void> {
   try {
     const aggregatedCollection = db.collection('performance_aggregated');
     
@@ -223,7 +225,7 @@ async function updateAggregatedMetrics(db: any, data: PerformanceMetric | Perfor
   }
 }
 
-async function getAggregatedStats(db: any, query: any): Promise<any> {
+async function getAggregatedStats(db: Db, query: Record<string, unknown>): Promise<unknown> {
   try {
     const collection = db.collection('performance_metrics');
     const aggregatedCollection = db.collection('performance_aggregated');
@@ -253,9 +255,9 @@ async function getAggregatedStats(db: any, query: any): Promise<any> {
     ]).toArray();
     
     // Calculate rating percentages
-    const statsWithRatings = stats.map((stat: any) => {
-      const total = stat.ratings.length;
-      const ratingCounts = stat.ratings.reduce((acc: any, rating: string) => {
+    const statsWithRatings = stats.map((stat: Record<string, unknown>) => {
+      const total = (stat.ratings as string[]).length;
+      const ratingCounts = (stat.ratings as string[]).reduce((acc: Record<string, number>, rating: string) => {
         acc[rating] = (acc[rating] || 0) + 1;
         return acc;
       }, {});

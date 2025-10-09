@@ -1,4 +1,3 @@
-// @ts-nocheck
 /**
  * SCRIPT PARA IMPORTACIÓN MASIVA DE PUBLICACIONES
  * Convierte texto plano o CSVs a la estructura de BuscAdis
@@ -17,14 +16,38 @@ export interface PublicationBulkData {
   description: string;
   category: string;
   subcategory?: string;
-  location?: string;
-  price?: number;
-  currency?: string;
-  contactPhone?: string;
-  contactName?: string;
-  images?: string[];
-  status?: string;
-  premium?: boolean;
+  location: {
+    country: string;
+    region: string;
+    city: string;
+    district?: string;
+    coordinates?: {
+      lat: number;
+      lng: number;
+    };
+    timezone?: string;
+  };
+  contact?: {
+    phones?: string[];
+    whatsapp?: string[];
+    email?: string[];
+  };
+  pricing?: {
+    price?: number;
+    currency?: string;
+    type?: 'fixed' | 'negotiable' | 'range' | 'hourly' | 'monthly' | 'free' | 'exchange';
+  };
+  media?: {
+    images?: string[];
+    mainImage?: string;
+  };
+  metadata: {
+    source?: string;
+    language: string;
+    publishDate?: string;
+    status?: string;
+    visibility?: string;
+  };
 }
 
 export interface PublicationDocument {
@@ -513,7 +536,7 @@ export class BulkPublicationImporter {
       } : undefined,
       
       media: {
-        images: data.media?.images?.map((url: any) => ({
+        images: data.media?.images?.map((url: string) => ({
           url,
           type: 'image' as const,
           alt: data.title

@@ -62,8 +62,8 @@ export async function GET() {
       adisosData = {
         count,
         sampleId: sample?._id?.toString(),
-        sampleCategory: (sample as any)?.category,
-        sampleTitle: (sample as any)?.title
+        sampleCategory: (sample as Record<string, unknown>)?.category,
+        sampleTitle: (sample as Record<string, unknown>)?.title
       }
     }
     

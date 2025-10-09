@@ -35,7 +35,7 @@ export interface PublicationData {
   contactPhone?: string;
   contactEmail?: string;
   status?: 'active' | 'expired' | 'draft' | 'sold';
-  attributes?: Record<string, any>;
+  attributes?: Record<string, unknown>;
 }
 
 export interface PublicationLocation {
@@ -54,7 +54,7 @@ export interface PublicationLocation {
 // API TYPES
 // ============================================================================
 
-export interface ApiResponse<T = any> {
+export interface ApiResponse<T = unknown> {
   success: boolean;
   data?: T;
   error?: string;
@@ -156,7 +156,7 @@ export interface AnalyticsEvent {
   type: 'view' | 'contact' | 'search' | 'favorite' | 'share';
   publicationId?: string;
   userId?: string;
-  metadata?: Record<string, any>;
+  metadata?: Record<string, unknown>;
   timestamp: string;
   userAgent?: string;
   ip?: string;
@@ -276,20 +276,22 @@ export type {
 // TYPE GUARDS
 // ============================================================================
 
-export function isPublicationData(obj: any): obj is PublicationData {
-  return obj && 
-    typeof obj.id === 'string' &&
-    typeof obj.title === 'string' &&
-    typeof obj.description === 'string' &&
-    typeof obj.categorySlug === 'string';
+export function isPublicationData(obj: unknown): obj is PublicationData {
+  if (typeof obj !== 'object' || obj === null) return false;
+  const o = obj as Record<string, unknown>;
+  return typeof o.id === 'string' &&
+    typeof o.title === 'string' &&
+    typeof o.description === 'string' &&
+    typeof o.categorySlug === 'string';
 }
 
-export function isPremiumPlan(obj: any): obj is PremiumPlan {
-  return obj &&
-    typeof obj.id === 'string' &&
-    typeof obj.name === 'string' &&
-    typeof obj.price === 'number' &&
-    Array.isArray(obj.features);
+export function isPremiumPlan(obj: unknown): obj is PremiumPlan {
+  if (typeof obj !== 'object' || obj === null) return false;
+  const o = obj as Record<string, unknown>;
+  return typeof o.id === 'string' &&
+    typeof o.name === 'string' &&
+    typeof o.price === 'number' &&
+    Array.isArray(o.features);
 }
 
 export function isValidCategorySlug(slug: string): slug is CategorySlug {

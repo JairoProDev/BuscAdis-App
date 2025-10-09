@@ -5,10 +5,8 @@ import React, {
   useContext,
   useReducer,
   useCallback,
-  useRef,
 } from 'react'
 import useMediaQuery from './useMediaQuery'
-import { useRouting } from './useRouting'
 import { PublicationData } from '@/types/publication'
 
 // ============================================================================
@@ -95,65 +93,6 @@ export function PublicationDetailProvider({
 }) {
   const isMobile = useMediaQuery('(max-width: 1023px)')
   const [state, dispatch] = useReducer(publicationDetailReducer, initialState)
-  const routing = useRouting()
-  const lastFetchedId = useRef<string | null>(null)
-
-  const fetchAndOpenPublication = useCallback(async (id: string) => {
-    try {
-      // Intentar por sequentialId primero
-      let response = await fetch(`/api/publications/by-sequential/${id}`)
-      if (!response.ok) {
-        // Fallback a ID normal
-        response = await fetch(`/api/publications/${id}`)
-      }
-      
-      if (response.ok) {
-        const data = await response.json()
-        if (data.publication) {
-          const publication: PublicationData = {
-            id: data.publication.id,
-            sequentialId: data.publication.sequentialId,
-            title: data.publication.title || 'Sin título',
-            description: data.publication.description || '',
-            categorySlug: data.publication.categorySlug || 'general',
-            subcategorySlug: data.publication.subcategorySlug,
-            subSubcategorySlug: data.publication.subSubcategorySlug,
-            transactionType: data.publication.transactionType || 'sale',
-            value: data.publication.price || 0,
-            currency: data.publication.currency || 'PEN',
-            valueType: 'fixed',
-            size: 0,
-            location: data.publication.location || { district: '', province: '', city: '', country: 'Perú' },
-            images: Array.isArray(data.publication.images) ? data.publication.images : [],
-            whatsapp: data.publication.whatsapp || '',
-            createdAt: data.publication.createdAt || new Date().toISOString(),
-            views: data.publication.views || 0,
-            featured: !!data.publication.featured,
-            premium: !!data.publication.premium,
-          }
-          
-          dispatch({ type: 'OPEN_DETAIL', payload: publication })
-        }
-      }
-    } catch (error) {
-      console.error('Error fetching publication:', error)
-    }
-  }, [dispatch])
-
-  // Deep linking temporarily disabled to prevent loops
-  // TODO: Re-implement with proper URL synchronization
-  
-  // useEffect(() => {
-  //   if (routing.isPublication && routing.currentPublicationId) {
-  //     const currentId = state.selectedPublication?.sequentialId || state.selectedPublication?.id
-  //     
-  //     if (currentId !== routing.currentPublicationId && 
-  //         lastFetchedId.current !== routing.currentPublicationId) {
-  //       lastFetchedId.current = routing.currentPublicationId
-  //       fetchAndOpenPublication(routing.currentPublicationId)
-  //     }
-  //   }
-  // }, [routing.isPublication, routing.currentPublicationId, fetchAndOpenPublication, state.selectedPublication])
 
   const openPublicationDetail = useCallback((publication: PublicationData) => {
     dispatch({ type: 'OPEN_DETAIL', payload: publication })

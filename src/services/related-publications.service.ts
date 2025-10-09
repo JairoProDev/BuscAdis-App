@@ -15,7 +15,7 @@ export class RelatedPublicationsService {
       const db = client.db(process.env.MONGODB_DB || 'buscadis');
       
       // Build query criteria - handle both ObjectId and sequentialId
-      const query: any = {
+      const query: Record<string, unknown> = {
         status: 'active'
       };
       
@@ -56,7 +56,7 @@ export class RelatedPublicationsService {
 
       // If we don't have enough results, expand the search
       if (relatedPublications.length < limit) {
-        const expandedQuery: any = {
+        const expandedQuery: Record<string, unknown> = {
           status: 'active',
           categorySlug: currentPublication.categorySlug
         };
@@ -80,7 +80,7 @@ export class RelatedPublicationsService {
 
       // If still not enough, get any active publications
       if (relatedPublications.length < limit) {
-        const fallbackQuery: any = {
+        const fallbackQuery: Record<string, unknown> = {
           status: 'active'
         };
         
@@ -211,8 +211,8 @@ export class RelatedPublicationsService {
    * Get recently viewed publications (if user tracking is available)
    */
   static async getRecentlyViewed(
-    userId?: string,
-    limit: number = 4
+    /* userId?: string,
+    limit: number = 4 */
   ): Promise<PublicationData[]> {
     // This would require user tracking implementation
     // For now, return empty array

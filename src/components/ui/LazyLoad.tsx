@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState, useEffect, useRef, Suspense, lazy } from 'react';
+import NextImage from 'next/image';
 import LoadingSpinner from './LoadingSpinner';
 
 interface LazyLoadProps {
@@ -75,7 +76,7 @@ export function withLazyLoad<P extends object>(
   return function LazyLoadedComponent(props: P) {
     return (
       <Suspense fallback={fallback || <LoadingSpinner size="md" />}>
-        <LazyComponent {...(props as any)} />
+        <LazyComponent {...props} />
       </Suspense>
     );
   };
@@ -162,12 +163,12 @@ export function LazyImage({
   }
 
   return (
-    <img
+    <NextImage
       src={imageSrc}
       alt={alt}
       className={className}
-      width={width}
-      height={height}
+      width={width || 800}
+      height={height || 600}
       loading={priority ? 'eager' : 'lazy'}
     />
   );

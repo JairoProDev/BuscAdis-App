@@ -116,7 +116,8 @@ export function validateHistoricalPublication(publication: Partial<Publication>)
   return requiredFields.every(field => {
     const value = publication[field as keyof Publication];
     if (field === 'contact') {
-      return value && typeof value === 'object' && 'phones' in value && Array.isArray((value as any).phones) && (value as any).phones.length > 0;
+      const contact = value as Record<string, unknown> | undefined;
+      return contact && typeof contact === 'object' && 'phones' in contact && Array.isArray(contact.phones) && (contact.phones as unknown[]).length > 0;
     }
     return value !== undefined && value !== null && value !== '';
   });

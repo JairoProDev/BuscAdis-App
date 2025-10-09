@@ -133,16 +133,6 @@ export default function OptimizedImage({
     return optimizedUrls[bestFormat] || optimizedUrls.jpeg;
   }, [isInView, imageState.currentSrc, width, height, fallbackSrc, src]);
   
-  const generateSrcSet = useCallback(() => {
-    if (!isInView) return undefined;
-    
-    const bestFormat = imageOptimizer.getBestImageFormat();
-    return imageOptimizer.generateResponsiveSrcSet(
-      imageState.currentSrc,
-      bestFormat,
-      [400, 800, 1200, 1600]
-    );
-  }, [isInView, imageState.currentSrc]);
   
   // ============================================================================
   // EVENT HANDLERS

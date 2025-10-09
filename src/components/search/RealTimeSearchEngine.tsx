@@ -163,6 +163,40 @@ const CompactCategorySelector = ({
         <ChevronDownIcon className={`w-3 h-3 sm:w-4 sm:h-4 transition-transform ${showCategoryBar ? 'rotate-180' : ''}`} />
       </button>
 
+      {/* Dropdown de categorías */}
+      {showCategoryBar && (
+        <div className="absolute top-full left-0 mt-2 w-72 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-600 rounded-xl shadow-xl z-50 overflow-hidden">
+          <div className="p-4">
+            <div className="grid grid-cols-3 gap-2">
+              {categories.map((category) => {
+                const isSelected = selectedCategory === category.id || (category.id === 'all' && selectedCategory === 'all')
+                return (
+                  <button
+                    key={category.id}
+                    onClick={() => {
+                      onCategoryChange(category.id)
+                      setShowCategoryBar(false)
+                    }}
+                    className={`flex-shrink-0 w-20 h-20 rounded-xl border-2 transition-all duration-300 
+                      flex flex-col items-center justify-center gap-2
+                      ${isSelected 
+                        ? `${category.bgColor} ${category.borderColor} shadow-lg` 
+                        : 'bg-white dark:bg-gray-700 border-gray-200 dark:border-gray-600 hover:border-gray-300 dark:hover:border-gray-500'
+                      }`}
+                  >
+                    <div className={`w-8 h-8 rounded-full flex items-center justify-center bg-gradient-to-br ${category.color}`}>
+                      <span className="text-white text-sm">{category.icon}</span>
+                    </div>
+                    <span className="text-xs font-medium text-gray-700 dark:text-gray-300 text-center leading-tight">
+                      {category.name}
+                    </span>
+                  </button>
+                )
+              })}
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   )
 }
@@ -214,14 +248,14 @@ export default function RealTimeSearchEngine({
 
         setSuggestions(suggestionsData.suggestions || []);
         
-        const formattedResults = (quickData.publications || []).map((pub: any) => ({
+        const formattedResults = (quickData.publications || []).map((pub: Record<string, unknown>) => ({
           id: pub._id || pub.id,
           title: pub.title || 'Sin título',
           description: pub.description || '',
           category: pub.categorySlug || pub.category || 'general',
           price: pub.price || pub.amount || 0,
           location: pub.location || 'Sin ubicación',
-          image: pub.images?.[0] || '/images/placeholder-image.jpg'
+          image: (pub.images as string[] | undefined)?.[0] || '/images/placeholder-image.jpg'
         }));
         
         setQuickResults(formattedResults);
@@ -711,9 +745,9 @@ export default function RealTimeSearchEngine({
                       </span>
                     </div>
                     <div className="space-y-1">
-                      {suggestions.map((suggestion, index) => (
+                      {suggestions.map((suggestion) => (
                         <div
-                          key={`suggestion-${suggestion.id || index}-${suggestion.text.substring(0, 10)}`}
+                          key={`suggestion-${suggestion.id || suggestion.text}-${suggestion.type}`}
                           onClick={() => handleSuggestionSelect(suggestion)}
                           className="flex items-center gap-3 p-3 hover:bg-gray-50 dark:hover:bg-gray-700 cursor-pointer transition-colors"
                         >

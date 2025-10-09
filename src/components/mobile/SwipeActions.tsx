@@ -105,7 +105,7 @@ export default function SwipeActions({
     onSwipeStart?.();
   }, [disabled, onSwipeStart]);
 
-  const handleDrag = useCallback((event: any, info: PanInfo) => {
+  const handleDrag = useCallback((event: unknown, info: PanInfo) => {
     if (disabled) return;
     
     const deltaX = info.offset.x;
@@ -139,7 +139,7 @@ export default function SwipeActions({
     }
   }, [disabled, leftActions, rightActions, threshold]);
 
-  const handleDragEnd = useCallback((event: any, info: PanInfo) => {
+  const handleDragEnd = useCallback((event: unknown, info: PanInfo) => {
     if (disabled) return;
     
     setIsDragging(false);

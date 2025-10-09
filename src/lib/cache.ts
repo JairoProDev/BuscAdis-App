@@ -35,10 +35,10 @@ const CACHE_CONFIG: CacheConfig = {
 // ============================================================================
 
 class MemoryCache {
-  private cache = new Map<string, { value: any; expiry: number }>();
+  private cache = new Map<string, { value: unknown; expiry: number }>();
   private size = 0;
 
-  set(key: string, value: any, ttl: number = CACHE_CONFIG.defaultTTL): void {
+  set(key: string, value: unknown, ttl: number = CACHE_CONFIG.defaultTTL): void {
     // Remove expired entries
     this.cleanup();
     
@@ -58,7 +58,7 @@ class MemoryCache {
     this.size += entrySize;
   }
 
-  get(key: string): any | null {
+  get(key: string): unknown | null {
     const entry = this.cache.get(key);
     if (!entry) return null;
     
@@ -114,8 +114,15 @@ class MemoryCache {
 // REDIS CACHE IMPLEMENTATION
 // ============================================================================
 
+interface RedisClient {
+  setex(key: string, ttl: number, value: string): Promise<string>;
+  get(key: string): Promise<string | null>;
+  del(key: string): Promise<number>;
+  flushdb(): Promise<string>;
+}
+
 class RedisCache {
-  private redis: any | null = null;
+  private redis: RedisClient | null = null;
 
   constructor() {
     // Redis disabled for now
@@ -128,7 +135,7 @@ class RedisCache {
     // }
   }
 
-  async set(key: string, value: any, ttl: number = CACHE_CONFIG.defaultTTL): Promise<void> {
+  async set(key: string, value: unknown, ttl: number = CACHE_CONFIG.defaultTTL): Promise<void> {
     if (!this.redis) return;
     
     try {
@@ -139,7 +146,7 @@ class RedisCache {
     }
   }
 
-  async get(key: string): Promise<any | null> {
+  async get(key: string): Promise<unknown | null> {
     if (!this.redis) return null;
     
     try {
@@ -185,7 +192,7 @@ class UnifiedCache {
     this.redisCache = new RedisCache();
   }
 
-  async set(key: string, value: any, ttl?: number): Promise<void> {
+  async set(key: string, value: unknown, ttl?: number): Promise<void> {
     const cacheTTL = ttl || CACHE_CONFIG.defaultTTL;
     
     // Set in memory cache
@@ -199,7 +206,7 @@ class UnifiedCache {
     }
   }
 
-  async get(key: string): Promise<any | null> {
+  async get(key: string): Promise<unknown | null> {
     // Try memory cache first (fastest)
     if (CACHE_CONFIG.enableMemoryCache) {
       const memoryValue = this.memoryCache.get(key);
@@ -257,7 +264,7 @@ class UnifiedCache {
 
 export const CacheKeys = {
   // Publications
-  publications: (filters: Record<string, any>) => 
+  publications: (filters: Record<string, unknown>) => 
     `pub:${JSON.stringify(filters)}`,
   
   publicationById: (id: string) => 
@@ -267,7 +274,7 @@ export const CacheKeys = {
     `pub:cat:${category}:${limit}`,
   
   // Search
-  searchResults: (query: string, filters: Record<string, any>) => 
+  searchResults: (query: string, filters: Record<string, unknown>) => 
     `search:${btoa(JSON.stringify({ query, filters }))}`,
   
   // Analytics
@@ -291,11 +298,11 @@ export const CacheKeys = {
 // CACHE DECORATORS
 // ============================================================================
 
-export function withCache<T extends any[], R>(
+export function withCache<T extends unknown[], R>(
   keyGenerator: (...args: T) => string,
   ttl?: number
 ) {
-  return function (target: any, propertyName: string, descriptor: PropertyDescriptor) {
+  return function (target: unknown, propertyName: string, descriptor: PropertyDescriptor) {
     const method = descriptor.value;
     
     descriptor.value = async function (...args: T): Promise<R> {
@@ -304,7 +311,7 @@ export function withCache<T extends any[], R>(
       // Try to get from cache
       const cached = await cache.get(key);
       if (cached !== null) {
-        return cached;
+        return cached as R;
       }
       
       // Execute method and cache result

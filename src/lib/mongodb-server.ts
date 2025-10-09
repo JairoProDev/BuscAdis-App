@@ -42,11 +42,11 @@ export interface PublicationDocument extends MongoDbDocument {
 }
 
 export interface MongoClientInterface {
-  db: (name?: string) => Db;
+  db: () => Db;
   close: () => Promise<void>;
   fetchPublications: (category: string, page?: number, limit?: number, filters?: PublicationFilters) => Promise<{ publications: Document[]; totalCount: number }>;
-  createPublication: (data: any) => Promise<PublicationDocument>;
-  updatePublication: (id: string, data: any) => Promise<PublicationDocument | null>;
+  createPublication: (data: Record<string, unknown>) => Promise<PublicationDocument>;
+  updatePublication: (id: string, data: Record<string, unknown>) => Promise<PublicationDocument | null>;
   deletePublication: (id: string) => Promise<boolean>;
   getPublicationById: (id: string) => Promise<PublicationDocument | null>;
   searchPublications: (query: string, filters?: PublicationFilters) => Promise<PublicationDocument[]>;
@@ -163,7 +163,7 @@ export const getServerMongoClient = async (): Promise<MongoClientInterface> => {
 
 function createServerMongoClient(client: MongoClient, db: Db): MongoClientInterface {
   return {
-    db: (name?: string) => db,
+    db: () => db,
     close: async () => await client.close(),
     
     async fetchPublications(
@@ -173,8 +173,8 @@ function createServerMongoClient(client: MongoClient, db: Db): MongoClientInterf
       filters: PublicationFilters = {},
     ) {
       try {
-        // Determine which collection to use based on category
-        const collectionName = getCollectionName(category);
+        // Always use the unified adisos collection
+        const collectionName = getCollectionName();
         
         // Check if the collection exists
         const collections = await db.listCollections({ name: collectionName }).toArray();
@@ -210,7 +210,7 @@ function createServerMongoClient(client: MongoClient, db: Db): MongoClientInterf
     },
     
     
-    async createPublication(data: any) {
+    async createPublication(data: Record<string, unknown>) {
       try {
         const collectionName = COLLECTIONS.ADISOS;
         const collection = db.collection(collectionName);
@@ -230,7 +230,7 @@ function createServerMongoClient(client: MongoClient, db: Db): MongoClientInterf
       }
     },
     
-    async updatePublication(id: string, data: any) {
+    async updatePublication(id: string, data: Record<string, unknown>) {
       try {
         const collectionName = COLLECTIONS.ADISOS;
         const collection = db.collection(collectionName);
@@ -304,7 +304,7 @@ function createServerMongoClient(client: MongoClient, db: Db): MongoClientInterf
 }
 
 // Helper functions
-function getCollectionName(category: string): string {
+function getCollectionName(): string {
   // Always use the unified adisos collection
   return COLLECTIONS.ADISOS;
 }

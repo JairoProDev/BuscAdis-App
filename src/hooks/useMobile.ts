@@ -421,7 +421,8 @@ export function useNetworkStatus(): {
     if (typeof window === 'undefined') return;
 
     const updateNetworkStatus = () => {
-      const connection = (navigator as any).connection || (navigator as any).mozConnection || (navigator as any).webkitConnection;
+      const nav = navigator as unknown as Record<string, unknown>;
+      const connection = nav.connection || nav.mozConnection || nav.webkitConnection;
       
       setNetworkStatus({
         isOnline: navigator.onLine,
@@ -435,7 +436,8 @@ export function useNetworkStatus(): {
     window.addEventListener('online', updateNetworkStatus);
     window.addEventListener('offline', updateNetworkStatus);
     
-    const connection = (navigator as any).connection;
+    const nav = navigator as unknown as Record<string, unknown>;
+    const connection = nav.connection;
     if (connection) {
       connection.addEventListener('change', updateNetworkStatus);
     }

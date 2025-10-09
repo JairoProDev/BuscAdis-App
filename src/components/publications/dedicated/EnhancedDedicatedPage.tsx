@@ -91,16 +91,19 @@ export default function EnhancedDedicatedPage({
   const imageModalRef = useRef<HTMLDivElement>(null);
   const { toast } = useToast();
 
-  const images = publication.images?.length > 0 ? publication.images : [getDefaultImageByCategory(publication.categorySlug)];
+  const images = React.useMemo(() => 
+    publication.images?.length > 0 ? publication.images : [getDefaultImageByCategory(publication.categorySlug)],
+    [publication.images, publication.categorySlug]
+  );
 
   // Format price with enhanced styling
-  const formatPrice = (value: number, currency: string) => {
+  const formatPrice = React.useCallback((value: number, currency: string) => {
     if (!value || value === 0) return 'Precio a consultar';
     return `${currency === 'USD' ? '$' : 'S/'} ${value.toLocaleString()}`;
-  };
+  }, []);
 
   // Format location with enhanced display
-  const formatLocation = (location: PublicationData['location']) => {
+  const formatLocation = React.useCallback((location: PublicationData['location']) => {
     if (!location) return 'Ubicación no especificada';
     
     const parts = [];
@@ -109,25 +112,25 @@ export default function EnhancedDedicatedPage({
     if (location.city) parts.push(location.city);
     
     return parts.length > 0 ? parts.join(', ') : 'Ubicación no especificada';
-  };
+  }, []);
 
   // Format date with relative time
-  const formatDate = (date: string) => {
+  const formatDate = React.useCallback((date: string) => {
     try {
       return formatDistanceToNow(new Date(date), { addSuffix: true, locale: es });
     } catch {
       return 'Hace algunos días';
     }
-  };
+  }, []);
 
   // Handle image navigation
-  const nextImage = () => {
+  const nextImage = React.useCallback(() => {
     setCurrentImageIndex((prev) => (prev + 1) % images.length);
-  };
+  }, [images.length]);
 
-  const prevImage = () => {
+  const prevImage = React.useCallback(() => {
     setCurrentImageIndex((prev) => (prev - 1 + images.length) % images.length);
-  };
+  }, [images.length]);
 
   // Handle favorite toggle with animation
   const handleFavoriteToggle = async () => {
@@ -174,7 +177,7 @@ export default function EnhancedDedicatedPage({
   };
 
   // WhatsApp contact handler
-  const handleWhatsAppContact = () => {
+  const handleWhatsAppContact = React.useCallback(() => {
     if (!publication.whatsapp) return;
     
     const cleanPhone = publication.whatsapp.replace(/[^0-9]/g, '');
@@ -184,7 +187,7 @@ export default function EnhancedDedicatedPage({
     
     window.open(`https://wa.me/${cleanPhone}?text=${encodeURIComponent(message)}`, '_blank');
     onWhatsAppClick?.();
-  };
+  }, [publication.whatsapp, publication.id, publication.title, onWhatsAppClick]);
 
   // Toast notification is now handled by useToast hook
 
@@ -219,8 +222,8 @@ export default function EnhancedDedicatedPage({
     trackView();
   }, [publication.id]);
 
-  // Enhanced image modal
-  const ImageModal = () => (
+  // Enhanced image modal - moved outside render
+  const ImageModal = React.useMemo(() => (
     <AnimatePresence>
       {showImageModal && (
         <motion.div
@@ -277,10 +280,10 @@ export default function EnhancedDedicatedPage({
         </motion.div>
       )}
     </AnimatePresence>
-  );
+  ), [showImageModal, images, currentImageIndex, publication.title, prevImage, nextImage]);
 
-  // Enhanced contact modal
-  const ContactModal = () => (
+  // Enhanced contact modal - moved outside render
+  const ContactModal = React.useMemo(() => (
     <AnimatePresence>
       {showContactModal && (
         <motion.div
@@ -333,10 +336,10 @@ export default function EnhancedDedicatedPage({
         </motion.div>
       )}
     </AnimatePresence>
-  );
+  ), [showContactModal, publication.whatsapp, handleWhatsAppContact]);
 
-  // Report modal
-  const ReportModal = () => (
+  // Report modal - moved outside render
+  const ReportModal = React.useMemo(() => (
     <AnimatePresence>
       {showReportModal && (
         <motion.div
@@ -403,7 +406,7 @@ export default function EnhancedDedicatedPage({
         </motion.div>
       )}
     </AnimatePresence>
-  );
+  ), [showReportModal, toast]);
 
   return (
     <div className="bg-gray-50 dark:bg-gray-900 min-h-screen">
@@ -544,7 +547,7 @@ export default function EnhancedDedicatedPage({
                   <div className="flex space-x-2 overflow-x-auto">
                     {images.map((image, index) => (
                       <button
-                        key={`image-${image}-${index}`}
+                        key={`thumbnail-${image}`}
                         onClick={() => setCurrentImageIndex(index)}
                         className={`relative w-16 h-16 rounded-lg overflow-hidden flex-shrink-0 border-2 transition-all ${
                           index === currentImageIndex 
@@ -781,9 +784,9 @@ export default function EnhancedDedicatedPage({
       </div>
 
       {/* Modals */}
-      <ImageModal />
-      <ContactModal />
-      <ReportModal />
+      {ImageModal}
+      {ContactModal}
+      {ReportModal}
     </div>
   );
 }

@@ -60,7 +60,7 @@ export default function PerformanceMonitor({
       const entries = list.getEntries();
       
       entries.forEach((entry) => {
-        const fid = (entry as any).processingStart - entry.startTime;
+        const fid = (entry as unknown as Record<string, unknown>).processingStart as number - entry.startTime;
         setMetrics(prev => ({ ...prev, fid }));
         onMetricsUpdate?.({ ...metrics, fid });
       });
@@ -77,9 +77,10 @@ export default function PerformanceMonitor({
     const observer = new PerformanceObserver((list) => {
       const entries = list.getEntries();
       
-      entries.forEach((entry: any) => {
-        if (!entry.hadRecentInput) {
-          clsValue += entry.value;
+      entries.forEach((entry) => {
+        const e = entry as unknown as Record<string, unknown>;
+        if (!e.hadRecentInput) {
+          clsValue += e.value as number;
           setMetrics(prev => ({ ...prev, cls: clsValue }));
           onMetricsUpdate?.({ ...metrics, cls: clsValue });
         }
@@ -96,9 +97,10 @@ export default function PerformanceMonitor({
     const observer = new PerformanceObserver((list) => {
       const entries = list.getEntries();
       
-      entries.forEach((entry: any) => {
-        if (entry.entryType === 'navigation') {
-          const ttfb = entry.responseStart - entry.requestStart;
+      entries.forEach((entry) => {
+        const e = entry as unknown as Record<string, unknown>;
+        if (e.entryType === 'navigation') {
+          const ttfb = (e.responseStart as number) - (e.requestStart as number);
           setMetrics(prev => ({ ...prev, ttfb }));
           onMetricsUpdate?.({ ...metrics, ttfb });
         }

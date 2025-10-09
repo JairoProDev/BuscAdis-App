@@ -114,7 +114,7 @@ const LocationSelector: React.FC<LocationSelectorProps> = ({
    * Centralized handler for all input changes. Updates the location state
    * and cascades resets for dependent dropdowns (e.g., changing department resets province).
    */
-  const handleLocationChange = useCallback((field: keyof LocationInputData, value: any) => {
+  const handleLocationChange = useCallback((field: keyof LocationInputData, value: string | number | { lat: number; lng: number }) => {
     let newLocation: LocationInputData = { ...location, [field]: value };
 
     // Cascade resets for dependent fields

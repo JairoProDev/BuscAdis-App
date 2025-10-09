@@ -85,7 +85,7 @@ export async function GET(
     const collection = db.collection(UNIFIED_COLLECTION)
 
     // Build query
-    const query: any = {}
+    const query: Record<string, unknown> = {}
 
     // Category filter
     if (category && category !== 'all') {
@@ -126,13 +126,14 @@ export async function GET(
 
     // Price filters
     if (minPrice || maxPrice) {
-      query.value = {}
+      const valueFilter: Record<string, number> = {};
       if (minPrice) {
-        query.value.$gte = parseFloat(minPrice)
+        valueFilter.$gte = parseFloat(minPrice)
       }
       if (maxPrice) {
-        query.value.$lte = parseFloat(maxPrice)
+        valueFilter.$lte = parseFloat(maxPrice)
       }
+      query.value = valueFilter;
     }
 
     // Status filter
@@ -148,7 +149,7 @@ export async function GET(
     }
 
     // Build sort
-    let sort: any = {}
+    let sort: Record<string, 1 | -1> = {}
     switch (sortBy) {
       case 'recent':
         sort = { createdAt: -1 }

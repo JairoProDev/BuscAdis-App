@@ -220,37 +220,44 @@ const ExplorationRowComponent: React.FC<ExplorationRowProps> = ({ row, onSearch 
   };
 
   // Adaptador robusto para trabajar con los datos reales de tu API
-  const adaptPublication = (publication: any) => ({
-    id: publication.id || publication._id || 'unknown',
-    title: publication.title || 'Sin título',
-    description: publication.description || '',
-    categorySlug: publication.category || 'general',
-    subcategorySlug: publication.subcategory || null,
-    subSubcategorySlug: publication.subsubcategory || null,
-    transactionType: 'venta',
-    value: publication.price || publication.amount || publication.pricing?.amount || 0,
-    currency: publication.currency || publication.pricing?.currency || 'PEN',
-    valueType: 'fixed',
-    size: 1, // Not present, set default
-    location: {
-      country: publication.location?.country || 'Perú',
-      province: publication.province || publication.location?.province || 'Cusco',
-      city: publication.location?.city || 'Cusco',
-      district: publication.district || publication.location?.district || '',
-      address: publication.location?.address || ''
-    },
-    contact: {
-      phones: publication.contactPhone ? [publication.contactPhone] : publication.contact?.phones || [],
-      email: publication.contact?.email || null,
-      name: publication.contactName || publication.contact?.name || null
-    },
-    images: publication.images || ['/images/placeholder-image.jpg'],
-    status: publication.status || 'active',
-    premium: publication.premium || false,
-    whatsapp: publication.whatsapp || publication.contactPhone || '',
-    createdAt: publication.createdAt?.toString() || new Date().toISOString(),
-    views: publication.views || 0
-  });
+  const adaptPublication = (publication: Record<string, unknown> | PublicationDocument) => {
+    const pub = publication as Record<string, unknown>;
+    const pricing = pub.pricing as Record<string, unknown> | undefined;
+    const location = pub.location as Record<string, string> | undefined;
+    const contact = pub.contact as Record<string, unknown> | undefined;
+    
+    return {
+      id: String(pub.id || pub._id || 'unknown'),
+      title: String(pub.title || 'Sin título'),
+      description: String(pub.description || ''),
+      categorySlug: String(pub.category || 'general'),
+      subcategorySlug: pub.subcategory ? String(pub.subcategory) : null,
+      subSubcategorySlug: pub.subsubcategory ? String(pub.subsubcategory) : null,
+      transactionType: 'venta' as const,
+      value: Number(pub.price || pub.amount || pricing?.amount || 0),
+      currency: String(pub.currency || pricing?.currency || 'PEN'),
+      valueType: 'fixed' as const,
+      size: 1, // Not present, set default
+      location: {
+        country: String(location?.country || 'Perú'),
+        province: String(pub.province || location?.province || 'Cusco'),
+        city: String(location?.city || 'Cusco'),
+        district: String(pub.district || location?.district || ''),
+        address: String(location?.address || '')
+      },
+      contact: {
+        phones: pub.contactPhone ? [String(pub.contactPhone)] : (contact?.phones as string[] || []),
+        email: contact?.email ? String(contact.email) : null,
+        name: pub.contactName ? String(pub.contactName) : (contact?.name ? String(contact.name) : null)
+      },
+      images: (pub.images as string[] || ['/images/placeholder-image.jpg']),
+      status: String(pub.status || 'active'),
+      premium: Boolean(pub.premium || false),
+      whatsapp: String(pub.whatsapp || pub.contactPhone || ''),
+      createdAt: String(pub.createdAt?.toString() || new Date().toISOString()),
+      views: Number(pub.views || 0)
+    };
+  };
 
   return (
     <div className="mb-8">

@@ -109,8 +109,9 @@ class CoreWebVitalsMonitor {
     try {
       const observer = new PerformanceObserver((list) => {
         const entries = list.getEntries();
-        entries.forEach((entry: any) => {
-          this.metrics.FID = entry.processingStart - entry.startTime;
+        entries.forEach((entry) => {
+          const e = entry as unknown as Record<string, unknown>;
+          this.metrics.FID = (e.processingStart as number) - entry.startTime;
           this.reportMetric('FID', this.metrics.FID);
         });
       });
@@ -130,9 +131,10 @@ class CoreWebVitalsMonitor {
     try {
       const observer = new PerformanceObserver((list) => {
         const entries = list.getEntries();
-        entries.forEach((entry: any) => {
-          if (!entry.hadRecentInput) {
-            clsValue += entry.value;
+        entries.forEach((entry) => {
+          const e = entry as unknown as Record<string, unknown>;
+          if (!e.hadRecentInput) {
+            clsValue += e.value as number;
             this.metrics.CLS = clsValue;
             this.reportMetric('CLS', clsValue);
           }

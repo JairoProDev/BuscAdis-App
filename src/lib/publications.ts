@@ -9,7 +9,7 @@ export async function getPublicationBySlugOrId(identifier: string): Promise<Publ
   const db = client.db(process.env.MONGODB_DB || 'buscadis');
   const collection = db.collection('adisos');
 
-  let publication: any = null;
+  let publication: Record<string, unknown> | null = null;
 
   // 1) Try by Mongo ObjectId
   if (ObjectId.isValid(cleanIdentifier)) {
@@ -48,34 +48,41 @@ export async function getPublicationBySlugOrId(identifier: string): Promise<Publ
   }
 
   // Normalize the data to match PublicationData type
+  const pub = publication as Record<string, unknown>;
+  const pricing = pub.pricing as Record<string, unknown> | undefined;
+  const location = pub.location as Record<string, string> | undefined;
+  const contact = pub.contact as Record<string, string> | undefined;
+  const attributes = pub.attributes as Record<string, unknown> | undefined;
+  const statistics = pub.statistics as Record<string, number> | undefined;
+  
   const normalizedPublication: PublicationData = {
-    id: publication._id.toString(),
-    sequentialId: publication.sequentialId,
-    title: publication.title,
-    description: publication.description,
-    categorySlug: publication.category,
-    subcategorySlug: publication.subcategory,
-    subSubcategorySlug: publication.subsubcategory,
-    transactionType: publication.transactionType,
-    value: publication.pricing?.price || 0,
-    currency: publication.pricing?.currency || 'USD',
-    valueType: publication.pricing?.priceType || 'exact',
-    size: publication.attributes?.area || 0,
+    id: (pub._id as ObjectId).toString(),
+    sequentialId: pub.sequentialId as number | undefined,
+    title: pub.title as string,
+    description: pub.description as string,
+    categorySlug: pub.category as string,
+    subcategorySlug: (pub.subcategory as string | null | undefined) || null,
+    subSubcategorySlug: (pub.subsubcategory as string | null | undefined) || null,
+    transactionType: pub.transactionType as string,
+    value: (pricing?.price as number) || 0,
+    currency: (pricing?.currency as string) || 'USD',
+    valueType: (pricing?.priceType as string) || 'exact',
+    size: (attributes?.area as number) || 0,
     location: {
-      reference: publication.location?.address,
-      district: publication.location?.district || '',
-      province: publication.location?.province || '',
-      city: publication.location?.city || '',
-      country: publication.location?.country || '',
+      reference: location?.address,
+      district: location?.district || '',
+      province: location?.province || '',
+      city: location?.city || '',
+      country: location?.country || '',
     },
-    images: publication.images || [],
-    whatsapp: publication.contact?.phone || '',
-    createdAt: publication.createdAt?.toISOString() || new Date().toISOString(),
-    updatedAt: publication.updatedAt?.toISOString(),
-    views: publication.statistics?.views || 0,
-    featured: publication.isFeatured,
-    premium: publication.isPremium,
-    attributes: publication.attributes,
+    images: (pub.images as string[]) || [],
+    whatsapp: contact?.phone || '',
+    createdAt: (pub.createdAt as Date)?.toISOString() || new Date().toISOString(),
+    updatedAt: (pub.updatedAt as Date)?.toISOString(),
+    views: statistics?.views || 0,
+    featured: pub.isFeatured as boolean | undefined,
+    premium: pub.isPremium as boolean | undefined,
+    attributes: attributes,
   };
 
   return normalizedPublication;

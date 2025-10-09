@@ -70,7 +70,7 @@ export async function GET(request: NextRequest) {
     const limit = parseInt(searchParams.get('limit') || '100');
 
     // Build query
-    const query: any = {};
+    const query: Record<string, unknown> = {};
     if (publicationId) query.publicationId = publicationId;
     if (category) query.category = category;
 

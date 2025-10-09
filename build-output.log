@@ -1,0 +1,92 @@
+
+> app-buscadis@0.1.0 prebuild
+> node scripts/check-images.js
+
+🔍 Verificando imágenes...
+
+✅ /images/placeholder-image.jpg - Existe
+✅ /images/placeholder-buscadis.jpg - Existe
+
+📁 Imágenes en /images/placeholder/ (11 archivos):
+  - blog-placeholder.jpg
+  - blog-placeholder.svg
+  - comunidad.jpg
+  - empleos.jpg
+  - eventos.jpg
+  - inmuebles.jpg
+  - negocios.jpg
+  - no-results.svg
+  - productos.jpg
+  - servicios.jpg
+  - vehiculos.jpg
+
+📁 Imágenes en /images/listings/ (2 archivos):
+  - cocinero.jpg
+  - terreno-urubamba.jpg
+
+✅ Verificación completada
+
+> app-buscadis@0.1.0 build
+> next build
+
+   ▲ Next.js 15.5.3
+   - Environments: .env.local
+   - Experiments (use with caution):
+     ✓ optimizeCss
+     ✓ scrollRestoration
+     · optimizePackageImports
+
+   Creating an optimized production build ...
+ ✓ Compiled successfully in 7.6s
+   Linting and checking validity of types ...
+
+Failed to compile.
+
+./src/app/_debug/route.ts
+65:36  Warning: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+66:33  Warning: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+
+./src/app/api/publications/route.ts
+337:39  Warning: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+
+./src/app/mis-anuncios/page.tsx
+162:41  Warning: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+166:42  Warning: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+
+./src/components/PublicationsList.tsx
+40:41  Warning: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+40:71  Warning: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+40:130  Warning: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+
+./src/components/mobile/MobileBottomNavigation.tsx
+316:43  Warning: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+324:43  Warning: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+
+./src/components/publications/dedicated/EnhancedDedicatedPage.tsx
+94:9  Error: The 'images' conditional could make the dependencies of useMemo Hook (at line 280) change on every render. To fix this, wrap the initialization of 'images' in its own useMemo() Hook.  react-hooks/exhaustive-deps
+124:9  Error: The 'nextImage' function makes the dependencies of useMemo Hook (at line 280) change on every render. To fix this, wrap the definition of 'nextImage' in its own useCallback() Hook.  react-hooks/exhaustive-deps
+128:9  Error: The 'prevImage' function makes the dependencies of useMemo Hook (at line 280) change on every render. To fix this, wrap the definition of 'prevImage' in its own useCallback() Hook.  react-hooks/exhaustive-deps
+177:9  Error: The 'handleWhatsAppContact' function makes the dependencies of useMemo Hook (at line 336) change on every render. To fix this, wrap the definition of 'handleWhatsAppContact' in its own useCallback() Hook.  react-hooks/exhaustive-deps
+547:30  Warning: Do not use Array index in keys  react/no-array-index-key
+
+./src/components/publish/CategorySelector.tsx
+211:55  Warning: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+334:75  Warning: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+
+./src/components/ui/LazyLoad.tsx
+79:38  Warning: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+
+./src/hooks/useMobile.ts
+424:40  Warning: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+424:73  Warning: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+424:109  Warning: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+438:38  Warning: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+
+./src/lib/premium.ts
+292:29  Warning: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+
+./src/utils/publicationUtils.ts
+119:97  Warning: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+119:123  Warning: Unexpected any. Specify a different type.  @typescript-eslint/no-explicit-any
+
+info  - Need to disable some ESLint rules? Learn more here: https://nextjs.org/docs/app/api-reference/config/eslint#disabling-rules

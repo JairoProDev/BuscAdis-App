@@ -289,7 +289,7 @@ export interface PaymentRequest {
   amount: number;
   currency: string;
   paymentMethod: 'card' | 'paypal' | 'bank_transfer';
-  metadata?: Record<string, any>;
+  metadata?: Record<string, unknown>;
 }
 
 export interface PaymentResult {
@@ -329,12 +329,12 @@ class PaymentProcessor {
     }
   }
 
-  async verifyPayment(transactionId: string): Promise<boolean> {
+  async verifyPayment(/* transactionId: string */): Promise<boolean> {
     try {
       // This would verify with the payment provider
       // For now, we'll simulate verification
       return Math.random() > 0.1; // 90% success rate for simulation
-    } catch (error) {
+    } catch {
       return false;
     }
   }
@@ -361,7 +361,7 @@ export interface PremiumAnalytics {
 }
 
 class PremiumAnalyticsManager {
-  async trackPremiumUsage(userId: string, action: string, metadata?: any): Promise<void> {
+  async trackPremiumUsage(userId: string, action: string, metadata?: Record<string, unknown>): Promise<void> {
     try {
       // Store premium usage analytics
       const usage = {

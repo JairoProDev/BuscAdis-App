@@ -148,7 +148,7 @@ export default function ContentRow({
         >
           {publications.map((publication, index) => (
             <motion.div
-              key={`content-${publication.id || publication.title?.substring(0, 20).replace(/\s+/g, '-').toLowerCase() || index}`}
+              key={`content-${publication.id || publication.title?.substring(0, 20).replace(/\s+/g, '-').toLowerCase()}`}
               initial={{ opacity: 0, x: 50 }}
               animate={{ opacity: 1, x: 0 }}
               transition={{ delay: index * 0.1, duration: 0.4 }}
