@@ -1,14 +1,25 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-import { motion } from 'framer-motion';
+import Image from 'next/image';
+import dynamic from 'next/dynamic';
 import { useRouter } from 'next/navigation';
 import { usePublicationDetail } from '@/hooks/usePublicationDetail';
 import ContentRow from '@/components/search/ContentRow';
 import { PublicationData } from '@/types/publication';
 import RealTimeSearchEngine from '@/components/search/RealTimeSearchEngine';
-import PublicationDetailSidebar from '@/components/publications/PublicationDetailSidebar';
-import PublicationDetailContainer from '@/components/publications/PublicationDetailContainer';
+import { motion } from 'framer-motion';
+
+// Dynamic imports for heavy components
+const PublicationDetailSidebar = dynamic(
+  () => import('@/components/publications/PublicationDetailSidebar'),
+  { ssr: false, loading: () => <div className="animate-pulse bg-gray-200 rounded-lg h-96" /> }
+);
+
+const PublicationDetailContainer = dynamic(
+  () => import('@/components/publications/PublicationDetailContainer'),
+  { ssr: false, loading: () => <div className="animate-pulse bg-gray-200 rounded-lg h-32" /> }
+);
 
 interface SearchResult {
   id: string;
@@ -177,10 +188,15 @@ export default function HomePageContent({
       <div className="relative text-white overflow-hidden">
         {/* Fondo fotográfico andino optimizado */}
         <div className="absolute inset-0 w-full h-full">
-          <img
+          <Image
             src="/images/hero-cusco-background.webp"
             alt="Paisaje andino de Cusco"
-            className="w-full h-full object-cover object-center"
+            fill
+            priority
+            fetchPriority="high"
+            sizes="100vw"
+            quality={75}
+            className="object-cover object-center"
             loading="eager"
             draggable={false}
           />

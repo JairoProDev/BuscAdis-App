@@ -1,0 +1,46 @@
+{
+  "jsc": {
+    "target": "es2020",
+    "parser": {
+      "syntax": "typescript",
+      "tsx": true,
+      "decorators": true,
+      "dynamicImport": true
+    },
+    "transform": {
+      "react": {
+        "runtime": "automatic",
+        "pragma": "React.createElement",
+        "pragmaFrag": "React.Fragment",
+        "throwIfNamespace": true,
+        "development": false,
+        "useBuiltins": false
+      },
+      "legacyDecorator": true,
+      "decoratorMetadata": false
+    },
+    "loose": false,
+    "externalHelpers": false,
+    "keepClassNames": false
+  },
+  "module": {
+    "type": "es6",
+    "strict": false,
+    "strictMode": true,
+    "lazy": false,
+    "noInterop": false
+  },
+  "minify": true,
+  "env": {
+    "targets": {
+      "chrome": "87",
+      "firefox": "78",
+      "safari": "14",
+      "edge": "88"
+    },
+    "mode": "usage",
+    "coreJs": "3.26.1"
+  },
+  "sourceMaps": false,
+  "inlineSourcesContent": false
+}
