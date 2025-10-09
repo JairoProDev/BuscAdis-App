@@ -20,7 +20,7 @@ export default function Footer() {
           <div className="container mx-auto px-4">
               <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
                   <div>
-                      <h4 className="text-lg font-bold mb-4">{primaryColor === 'text-teal-400' ? <span className={primaryColor}>Revista Digital</span> : 'Magazine'}</h4>
+                      <h3 className="text-lg font-bold mb-4">{primaryColor === 'text-teal-400' ? <span className={primaryColor}>Revista Digital</span> : 'Magazine'}</h3>
                       <p className={`${textColor}/80 mb-4`}>
                           Suscríbete para recibir contenido de valor, ofertas exclusivas y novedades.
                       </p>
@@ -39,7 +39,7 @@ export default function Footer() {
                           </div>
 
                           <div className="space-y-2">
-                              <label className="flex items-center space-x-2 text-gray-400">
+                              <label className="flex items-center space-x-2 text-gray-600">
                                   <input
                                       type="checkbox"
                                       className={`form-checkbox rounded text-teal-500 focus:ring-teal-500 bg-slate-700 border-slate-600`}
@@ -47,7 +47,7 @@ export default function Footer() {
                                   <span>Recibir por correo electrónico</span>
                               </label>
 
-                              <label className="flex items-center space-x-2 text-gray-400">
+                              <label className="flex items-center space-x-2 text-gray-600">
                                   <input
                                       type="checkbox"
                                       className={`form-checkbox rounded text-teal-500 focus:ring-teal-500 bg-slate-700 border-slate-600`}
@@ -65,7 +65,7 @@ export default function Footer() {
                       </form>
                   </div>
                   <div>
-                      <h4 className="text-lg font-bold mb-4">{primaryColor === 'text-teal-400' ? <span className={primaryColor}>Categorías</span> : 'Categorías'}</h4>
+                      <h3 className="text-lg font-bold mb-4">{primaryColor === 'text-teal-400' ? <span className={primaryColor}>Categorías</span> : 'Categorías'}</h3>
                       <div className="grid grid-cols-2 gap-x-4">
                           <ul className="space-y-2">
                               <li><Link href="/empleos" className={`${textColor}/80 hover:${primaryColor} flex items-center`}>💼 Empleos</Link></li>
@@ -85,7 +85,7 @@ export default function Footer() {
                   </div>
 
                   <div>
-                      <h4 className="text-lg font-bold mb-4">{primaryColor === 'text-teal-400' ? <span className={primaryColor}>Soporte</span> : 'Soporte'}</h4>
+                      <h3 className="text-lg font-bold mb-4">{primaryColor === 'text-teal-400' ? <span className={primaryColor}>Soporte</span> : 'Soporte'}</h3>
                       <ul className="space-y-2">
                           <li><Link href="/ayuda" className={`${textColor}/80 hover:${primaryColor}`}>Centro de Ayuda</Link></li>
                           <li><Link href="/contacto" className={`${textColor}/80 hover:${primaryColor}`}>Contacto</Link></li>
@@ -95,7 +95,7 @@ export default function Footer() {
                   </div>
 
                   <div>
-                      <h4 className="text-lg font-bold mb-4">{primaryColor === 'text-teal-400' ? <span className={primaryColor}>Legal</span> : 'Legal'}</h4>
+                      <h3 className="text-lg font-bold mb-4">{primaryColor === 'text-teal-400' ? <span className={primaryColor}>Legal</span> : 'Legal'}</h3>
                       <ul className="space-y-2">
                           <li><Link href="/terminos" className={`${textColor}/80 hover:${primaryColor}`}>Términos y Condiciones</Link></li>
                           <li><Link href="/privacidad" className={`${textColor}/80 hover:${primaryColor}`}>Política de Privacidad</Link></li>

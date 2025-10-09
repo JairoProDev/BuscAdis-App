@@ -516,12 +516,14 @@ export default function EnhancedDedicatedPage({
                     <button 
                       onClick={prevImage} 
                       className="absolute left-4 top-1/2 -translate-y-1/2 bg-black/40 text-white p-2 rounded-full hover:bg-black/60 transition-all opacity-0 group-hover:opacity-100"
+                      aria-label="Imagen anterior"
                     >
                       <ChevronLeftIcon className="w-6 h-6" />
                     </button>
                     <button 
                       onClick={nextImage} 
                       className="absolute right-4 top-1/2 -translate-y-1/2 bg-black/40 text-white p-2 rounded-full hover:bg-black/60 transition-all opacity-0 group-hover:opacity-100"
+                      aria-label="Imagen siguiente"
                     >
                       <ChevronRightIcon className="w-6 h-6" />
                     </button>

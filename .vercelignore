@@ -88,8 +88,9 @@ temp/
 ehthumbs.db
 Thumbs.db
 
-# Scripts disabled
-scripts/disabled/
+# Scripts folder (exclude from deployment)
+scripts/
+!scripts/check-images.js
 
 # Documentation
 *.md

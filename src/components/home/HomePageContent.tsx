@@ -184,6 +184,9 @@ export default function HomePageContent({
             fill
             className="object-cover object-center"
             priority
+            fetchPriority="high"
+            sizes="(max-width: 768px) 100vw, (max-width: 1024px) 100vw, 100vw"
+            quality={80}
             draggable={false}
           />
           {/* Overlay con degradado estratégico para legibilidad */}

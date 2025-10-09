@@ -47,10 +47,17 @@ export default function RootLayout({ children }: { children: ReactNode }) {
         <link rel="preload" href="/fonts/inter-var.woff2" as="font" type="font/woff2" crossOrigin="anonymous" />
         <link rel="preload" href="/images/placeholder-buscadis.jpg" as="image" />
         
-        {/* DNS prefetch for external domains */}
+        {/* DNS prefetch and preconnect for external domains */}
         <link rel="dns-prefetch" href="//images.unsplash.com" />
         <link rel="dns-prefetch" href="//res.cloudinary.com" />
         <link rel="dns-prefetch" href="//randomuser.me" />
+        
+        {/* Preconnect to critical origins */}
+        <link rel="preconnect" href="https://res.cloudinary.com" />
+        <link rel="preconnect" href="https://images.unsplash.com" />
+        
+        {/* Preload hero image */}
+        <link rel="preload" href="/images/hero-cusco-background.webp" as="image" type="image/webp" />
         
         {/* Service Worker registration script - TEMPORARILY DISABLED */}
         {/* <script

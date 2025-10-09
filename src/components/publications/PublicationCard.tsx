@@ -33,6 +33,7 @@ interface PublicationCardProps {
   showWhatsApp?: boolean;
   variant?: 'default' | 'compact' | 'featured';
   viewMode?: 'grid' | 'list';
+  index?: number; // Add index for priority loading
 }
 
 // Mapping de iconos de categorías
@@ -419,7 +420,7 @@ export default function PublicationCard({
                 <MapPinIcon className="w-4 h-4 mr-1.5 text-gray-400 flex-shrink-0" />
                 <span className="truncate">{formatLocation(publication.location)}</span>
               </div>
-              <div className="text-xs text-gray-400 dark:text-gray-500 flex-shrink-0">
+              <div className="text-xs text-gray-600 dark:text-gray-400 flex-shrink-0">
                 {formatExactDateTime(publication.createdAt)}
               </div>
             </div>
@@ -480,10 +481,10 @@ export default function PublicationCard({
         </a>
         <CategoryTag categorySlug={publication.categorySlug} />
         <div className="absolute top-2 right-2 flex flex-col gap-2">
-          <button onClick={handleFavorite} className="bg-black/30 p-2 rounded-full text-white hover:bg-black/50 transition-colors">
+          <button onClick={handleFavorite} className="bg-black/30 p-2 rounded-full text-white hover:bg-black/50 transition-colors" aria-label={isFavorite ? "Quitar de favoritos" : "Agregar a favoritos"}>
             {isFavorite ? <HeartSolidIcon className="w-5 h-5" /> : <HeartIcon className="w-5 h-5" />}
           </button>
-          <button onClick={handleShare} className="bg-black/30 p-2 rounded-full text-white hover:bg-black/50 transition-colors">
+          <button onClick={handleShare} className="bg-black/30 p-2 rounded-full text-white hover:bg-black/50 transition-colors" aria-label="Compartir publicación">
             <CurvedShareIcon className="w-5 h-5" />
           </button>
         </div>

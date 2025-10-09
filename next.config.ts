@@ -64,11 +64,12 @@ const nextConfig: NextConfig = {
   // Experimental features for performance
   experimental: {
     serverMinification: true,
-    optimizePackageImports: ['@heroicons/react', 'framer-motion', 'lucide-react'],
+    optimizePackageImports: ['@heroicons/react', 'framer-motion', 'lucide-react', 'lodash-es'],
     optimizeCss: true,
     scrollRestoration: true,
-    // legacyBrowsers: false, // Removed as it's not supported in current Next.js version
-    // browsersListForSwc: true, // Removed as it's not supported in current Next.js version
+    webpackBuildWorker: true,
+    // Target modern browsers only
+    browsersListForSwc: true,
   },
 
   // Configure image optimization
@@ -97,6 +98,7 @@ const nextConfig: NextConfig = {
   // Performance optimizations
   compiler: {
     removeConsole: process.env.NODE_ENV === 'production',
+    reactRemoveProperties: process.env.NODE_ENV === 'production',
   },
 
   // Compression
@@ -130,7 +132,7 @@ const nextConfig: NextConfig = {
     return config;
   },
 
-  // Headers for performance
+  // Headers for performance and security
   async headers() {
     return [
       {
@@ -151,6 +153,26 @@ const nextConfig: NextConfig = {
           {
             key: 'Referrer-Policy',
             value: 'strict-origin-when-cross-origin',
+          },
+          {
+            key: 'Strict-Transport-Security',
+            value: 'max-age=63072000; includeSubDomains; preload',
+          },
+          {
+            key: 'Content-Security-Policy',
+            value: "default-src 'self'; script-src 'self' 'unsafe-eval' 'unsafe-inline' *.vercel-insights.com *.vercel.com; style-src 'self' 'unsafe-inline'; img-src 'self' data: https:; font-src 'self' data:; connect-src 'self' *.vercel.com; frame-ancestors 'none'; base-uri 'self'; form-action 'self'",
+          },
+          {
+            key: 'Cross-Origin-Opener-Policy',
+            value: 'same-origin',
+          },
+          {
+            key: 'Cross-Origin-Embedder-Policy',
+            value: 'require-corp',
+          },
+          {
+            key: 'Permissions-Policy',
+            value: 'camera=(), microphone=(), geolocation=(), interest-cohort=()',
           },
         ],
       },
