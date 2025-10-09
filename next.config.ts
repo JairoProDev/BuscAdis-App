@@ -64,11 +64,11 @@ const nextConfig: NextConfig = {
   // Experimental features for performance
   experimental: {
     serverMinification: true,
-    optimizePackageImports: ['@heroicons/react', 'framer-motion', 'lucide-react', 'lodash-es'],
+    optimizePackageImports: ['@heroicons/react', 'framer-motion', 'lucide-react'],
     optimizeCss: true,
-    scrollRestoration: true,
-    webpackBuildWorker: true,
+    scrollRestoration: true
   },
+
 
   // Configure image optimization
   images: {
@@ -105,23 +105,53 @@ const nextConfig: NextConfig = {
   // Power by header
   poweredByHeader: false,
 
-  // Bundle analyzer
+  // Bundle analyzer with granular chunk splitting
   webpack: (config, { dev, isServer }) => {
-    // Optimize bundle size
+    // Optimize bundle size with granular chunk splitting
     if (!dev && !isServer) {
       config.optimization.splitChunks = {
         chunks: 'all',
+        maxInitialRequests: 30,
+        maxAsyncRequests: 30,
         cacheGroups: {
+          react: {
+            test: /[\\/]node_modules[\\/](react|react-dom)[\\/]/,
+            name: 'react',
+            priority: 20,
+            chunks: 'all',
+          },
+          framer: {
+            test: /[\\/]node_modules[\\/]framer-motion[\\/]/,
+            name: 'framer-motion',
+            priority: 15,
+            chunks: 'all',
+          },
+          heroicons: {
+            test: /[\\/]node_modules[\\/]@heroicons[\\/]/,
+            name: 'heroicons',
+            priority: 15,
+            chunks: 'all',
+          },
+          lucide: {
+            test: /[\\/]node_modules[\\/]lucide-react[\\/]/,
+            name: 'lucide-react',
+            priority: 15,
+            chunks: 'all',
+          },
           vendor: {
             test: /[\\/]node_modules[\\/]/,
             name: 'vendors',
+            priority: 10,
             chunks: 'all',
+            maxSize: 244000, // 244KB max per chunk
           },
           common: {
             name: 'common',
             minChunks: 2,
+            priority: 5,
             chunks: 'all',
-            enforce: true,
+            reuseExistingChunk: true,
+            maxSize: 244000, // 244KB max per chunk
           },
         },
       };

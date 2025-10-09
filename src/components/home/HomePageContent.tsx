@@ -2,14 +2,25 @@
 
 import React, { useState, useEffect } from 'react';
 import Image from 'next/image';
-import { motion } from 'framer-motion';
+import dynamic from 'next/dynamic';
 import { useRouter } from 'next/navigation';
 import { usePublicationDetail } from '@/hooks/usePublicationDetail';
 import ContentRow from '@/components/search/ContentRow';
 import { PublicationData } from '@/types/publication';
 import RealTimeSearchEngine from '@/components/search/RealTimeSearchEngine';
-import PublicationDetailSidebar from '@/components/publications/PublicationDetailSidebar';
-import PublicationDetailContainer from '@/components/publications/PublicationDetailContainer';
+
+// Dynamic imports for heavy components
+const PublicationDetailSidebar = dynamic(
+  () => import('@/components/publications/PublicationDetailSidebar'),
+  { ssr: false, loading: () => <div className="animate-pulse bg-gray-200 rounded-lg h-96" /> }
+);
+
+const PublicationDetailContainer = dynamic(
+  () => import('@/components/publications/PublicationDetailContainer'),
+  { ssr: false, loading: () => <div className="animate-pulse bg-gray-200 rounded-lg h-32" /> }
+);
+
+import { motion } from 'framer-motion';
 
 interface SearchResult {
   id: string;
@@ -182,11 +193,12 @@ export default function HomePageContent({
             src="/images/hero-cusco-background.webp"
             alt="Paisaje andino de Cusco"
             fill
-            className="object-cover object-center"
             priority
             fetchPriority="high"
-            sizes="(max-width: 768px) 100vw, (max-width: 1024px) 100vw, 100vw"
-            quality={80}
+            sizes="100vw"
+            quality={75}
+            className="object-cover object-center"
+            loading="eager"
             draggable={false}
           />
           {/* Overlay con degradado estratégico para legibilidad */}
