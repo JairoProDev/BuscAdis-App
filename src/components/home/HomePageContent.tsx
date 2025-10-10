@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
+import Image from 'next/image';
 import { motion } from 'framer-motion';
 import { useRouter } from 'next/navigation';
 import { usePublicationDetail } from '@/hooks/usePublicationDetail';
@@ -177,10 +178,15 @@ export default function HomePageContent({
       <div className="relative text-white overflow-hidden">
         {/* Fondo fotográfico andino optimizado */}
         <div className="absolute inset-0 w-full h-full">
-          <img
+          <Image
             src="/images/hero-cusco-background.webp"
             alt="Paisaje andino de Cusco"
-            className="w-full h-full object-cover object-center"
+            fill
+            priority
+            fetchPriority="high"
+            sizes="100vw"
+            quality={75}
+            className="object-cover object-center"
             loading="eager"
             draggable={false}
           />

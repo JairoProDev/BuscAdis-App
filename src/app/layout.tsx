@@ -49,6 +49,7 @@ export default function RootLayout({ children }: { children: ReactNode }) {
         {/* Preload critical resources */}
         <link rel="preload" href="/fonts/inter-var.woff2" as="font" type="font/woff2" crossOrigin="anonymous" />
         <link rel="preload" href="/images/placeholder-buscadis.jpg" as="image" />
+        <link rel="preload" href="/images/hero-cusco-background.webp" as="image" type="image/webp" />
         
         {/* DNS prefetch for external domains */}
         <link rel="dns-prefetch" href="//images.unsplash.com" />
