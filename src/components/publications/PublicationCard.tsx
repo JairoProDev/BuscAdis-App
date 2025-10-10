@@ -511,7 +511,7 @@ export default function PublicationCard({
         <div>
           {/* Title */}
           <a href={seoUrl} onClick={(e) => { e.preventDefault(); onPublicationClick?.(publication); }} className="block mb-2">
-            <h3 className="font-bold text-sm leading-tight text-white hover:text-[#14b8a6] transition-colors duration-200 line-clamp-2">
+            <h3 className="font-bold text-sm leading-tight text-slate-900 dark:text-white hover:text-[#14b8a6] transition-colors duration-200 line-clamp-2">
               {formatTitle(publication.title)}
             </h3>
           </a>
