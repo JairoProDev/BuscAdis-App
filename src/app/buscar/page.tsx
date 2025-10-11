@@ -13,7 +13,6 @@ import RealTimeSearchEngine from '@/components/search/RealTimeSearchEngine'
 // import EnhancedSearchInput from '@/components/search/EnhancedSearchInput'
 // import SearchFilters from '@/components/search/SearchFilters'
 // import PublicationCard from '@/components/publications/PublicationCard'
-// import CategorySelector from '@/components/search/CategorySelector'
 import ContentRow from '@/components/search/ContentRow'
 import { parseCategoryUrl, getSubcategories, generateCategoryUrl } from '@/lib/categories'
 import { filtersByCategory } from '@/data/filterConfig'
@@ -23,7 +22,6 @@ import { PublicationData } from '@/types/publication'
 import PublicationDetailContainer from '@/components/publications/PublicationDetailContainer'
 import { PublicationDetailProvider, usePublicationDetail } from '@/hooks/usePublicationDetail'
 import PublicationDetailSidebar from '@/components/publications/PublicationDetailSidebar'
-import CategorySelector from '@/components/home/CategorySelector'
 
 interface SearchResult {
   id: string;
