@@ -21,8 +21,6 @@ const PublicationDetailContainer = dynamic(
   { ssr: false, loading: () => <div className="animate-pulse bg-gray-200 rounded-lg h-32" /> }
 );
 
-import { motion } from 'framer-motion';
-
 interface SearchResult {
   id: string;
   title: string;
