@@ -44,22 +44,22 @@ const nextConfig: NextConfig = {
     "bson",
   ],
 
-  // Turbopack configuration (stable)
-  turbopack: {
-    rules: {
-      "*.node": ["empty"],
-      // Dejar que Turbopack maneje SVG/archivos estáticos por defecto para evitar conflictos
-    },
-    resolveAlias: {
-      // MongoDB dependencies that should be stubbed
-      "mongodb-client-encryption": "next/dist/compiled/noop",
-      kerberos: "next/dist/compiled/noop",
-      "@mongodb-js/zstd": "next/dist/compiled/noop",
-      snappy: "next/dist/compiled/noop",
-      "gcp-metadata": "next/dist/compiled/noop",
-      "socks": "next/dist/compiled/noop",
-    },
-  },
+  // Turbopack configuration (temporarily disabled due to build issues)
+  // turbopack: {
+  //   rules: {
+  //     "*.node": ["empty"],
+  //     // Dejar que Turbopack maneje SVG/archivos estáticos por defecto para evitar conflictos
+  //   },
+  //   resolveAlias: {
+  //     // MongoDB dependencies that should be stubbed
+  //     "mongodb-client-encryption": "next/dist/compiled/noop",
+  //     kerberos: "next/dist/compiled/noop",
+  //     "@mongodb-js/zstd": "next/dist/compiled/noop",
+  //     snappy: "next/dist/compiled/noop",
+  //     "gcp-metadata": "next/dist/compiled/noop",
+  //     "socks": "next/dist/compiled/noop",
+  //   },
+  // },
 
   // Experimental features for performance
   experimental: {

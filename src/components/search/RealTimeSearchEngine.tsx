@@ -76,72 +76,72 @@ const CompactCategorySelector = ({
       name: 'Todos', 
       icon: '🌐',
       color: 'from-blue-500 to-cyan-500',
-      bgColor: 'bg-blue-50 hover:bg-blue-100',
-      borderColor: 'border-blue-200 hover:border-blue-300'
+      bgColor: 'bg-blue-50 hover:bg-blue-100 dark:bg-slate-800 dark:hover:bg-slate-700',
+      borderColor: 'border-blue-200 hover:border-blue-300 dark:border-slate-600 dark:hover:border-slate-500'
     },
     { 
       id: 'empleos', 
       name: 'Empleos', 
       icon: '💼',
       color: 'from-emerald-500 to-teal-500',
-      bgColor: 'bg-emerald-50 hover:bg-emerald-100',
-      borderColor: 'border-emerald-200 hover:border-emerald-300'
+      bgColor: 'bg-emerald-50 hover:bg-emerald-100 dark:bg-slate-800 dark:hover:bg-slate-700',
+      borderColor: 'border-emerald-200 hover:border-emerald-300 dark:border-slate-600 dark:hover:border-slate-500'
     },
     { 
       id: 'inmuebles', 
       name: 'Inmuebles', 
       icon: '🏠',
       color: 'from-orange-500 to-amber-500',
-      bgColor: 'bg-orange-50 hover:bg-orange-100',
-      borderColor: 'border-orange-200 hover:border-orange-300'
+      bgColor: 'bg-orange-50 hover:bg-orange-100 dark:bg-slate-800 dark:hover:bg-slate-700',
+      borderColor: 'border-orange-200 hover:border-orange-300 dark:border-slate-600 dark:hover:border-slate-500'
     },
     { 
       id: 'vehiculos', 
       name: 'Vehículos', 
       icon: '🚛',
       color: 'from-red-500 to-rose-500',
-      bgColor: 'bg-red-50 hover:bg-red-100',
-      borderColor: 'border-red-200 hover:border-red-300'
+      bgColor: 'bg-red-50 hover:bg-red-100 dark:bg-slate-800 dark:hover:bg-slate-700',
+      borderColor: 'border-red-200 hover:border-red-300 dark:border-slate-600 dark:hover:border-slate-500'
     },
     { 
       id: 'servicios', 
       name: 'Servicios', 
       icon: '🔧',
       color: 'from-purple-500 to-violet-500',
-      bgColor: 'bg-purple-50 hover:bg-purple-100',
-      borderColor: 'border-purple-200 hover:border-purple-300'
+      bgColor: 'bg-purple-50 hover:bg-purple-100 dark:bg-slate-800 dark:hover:bg-slate-700',
+      borderColor: 'border-purple-200 hover:border-purple-300 dark:border-slate-600 dark:hover:border-slate-500'
     },
     { 
       id: 'productos', 
       name: 'Productos', 
       icon: '🛍️',
       color: 'from-green-500 to-emerald-500',
-      bgColor: 'bg-green-50 hover:bg-green-100',
-      borderColor: 'border-green-200 hover:border-green-300'
+      bgColor: 'bg-green-50 hover:bg-green-100 dark:bg-slate-800 dark:hover:bg-slate-700',
+      borderColor: 'border-green-200 hover:border-green-300 dark:border-slate-600 dark:hover:border-slate-500'
     },
     { 
       id: 'negocios', 
-      name: 'Negocios', 
+      name: '🚀 NEGOCIOS TEST 🚀', 
       icon: '📊',
       color: 'from-indigo-500 to-blue-500',
-      bgColor: 'bg-indigo-50 hover:bg-indigo-100',
-      borderColor: 'border-indigo-200 hover:border-indigo-300'
+      bgColor: 'bg-indigo-50 hover:bg-indigo-100 dark:bg-slate-800 dark:hover:bg-slate-700',
+      borderColor: 'border-indigo-200 hover:border-indigo-300 dark:border-slate-600 dark:hover:border-slate-500'
     },
     { 
       id: 'eventos', 
       name: 'Eventos', 
       icon: '📅',
       color: 'from-pink-500 to-rose-500',
-      bgColor: 'bg-pink-50 hover:bg-pink-100',
-      borderColor: 'border-pink-200 hover:border-pink-300'
+      bgColor: 'bg-pink-50 hover:bg-pink-100 dark:bg-slate-800 dark:hover:bg-slate-700',
+      borderColor: 'border-pink-200 hover:border-pink-300 dark:border-slate-600 dark:hover:border-slate-500'
     },
     { 
       id: 'comunidad', 
       name: 'Comunidad', 
       icon: '👥',
       color: 'from-teal-500 to-cyan-500',
-      bgColor: 'bg-teal-50 hover:bg-teal-100',
-      borderColor: 'border-teal-200 hover:border-teal-300'
+      bgColor: 'bg-teal-50 hover:bg-teal-100 dark:bg-slate-800 dark:hover:bg-slate-700',
+      borderColor: 'border-teal-200 hover:border-teal-300 dark:border-slate-600 dark:hover:border-slate-500'
     }
   ]
   
@@ -248,15 +248,33 @@ export default function RealTimeSearchEngine({
 
         setSuggestions(suggestionsData.suggestions || []);
         
-        const formattedResults = (quickData.publications || []).map((pub: Record<string, unknown>) => ({
-          id: pub._id || pub.id,
-          title: pub.title || 'Sin título',
-          description: pub.description || '',
-          category: pub.categorySlug || pub.category || 'general',
-          price: pub.price || pub.amount || 0,
-          location: pub.location || 'Sin ubicación',
-          image: (pub.images as string[] | undefined)?.[0] || '/images/placeholder-image.jpg'
-        }));
+        const formattedResults = (quickData.publications || []).map((pub: any) => {
+          // Convertir location object a string si es necesario
+          let locationString = 'Sin ubicación';
+          if (pub.location) {
+            if (typeof pub.location === 'string') {
+              locationString = pub.location;
+            } else if (typeof pub.location === 'object' && pub.location !== null) {
+              const parts = [
+                pub.location.district,
+                pub.location.province,
+                pub.location.city,
+                pub.location.country
+              ].filter(Boolean);
+              locationString = parts.length > 0 ? parts.join(', ') : 'Sin ubicación';
+            }
+          }
+
+          return {
+            id: pub._id || pub.id,
+            title: pub.title || 'Sin título',
+            description: pub.description || '',
+            category: pub.categorySlug || pub.category || 'general',
+            price: pub.price || pub.amount || 0,
+            location: locationString,
+            image: pub.images?.[0] || '/images/placeholder-image.jpg'
+          };
+        });
         
         setQuickResults(formattedResults);
       } catch (error) {
@@ -958,72 +976,72 @@ export default function RealTimeSearchEngine({
                     name: 'Todos', 
                     icon: '🌐',
                     color: 'from-blue-500 to-cyan-500',
-                    bgColor: 'bg-blue-50 hover:bg-blue-100',
-                    borderColor: 'border-blue-200 hover:border-blue-300'
+                    bgColor: 'bg-blue-50 hover:bg-blue-100 dark:bg-slate-800 dark:hover:bg-slate-700',
+                    borderColor: 'border-blue-200 hover:border-blue-300 dark:border-slate-600 dark:hover:border-slate-500'
                   },
                   { 
                     id: 'empleos', 
                     name: 'Empleos', 
                     icon: '💼',
                     color: 'from-emerald-500 to-teal-500',
-                    bgColor: 'bg-emerald-50 hover:bg-emerald-100',
-                    borderColor: 'border-emerald-200 hover:border-emerald-300'
+                    bgColor: 'bg-emerald-50 hover:bg-emerald-100 dark:bg-slate-800 dark:hover:bg-slate-700',
+                    borderColor: 'border-emerald-200 hover:border-emerald-300 dark:border-slate-600 dark:hover:border-slate-500'
                   },
                   { 
                     id: 'inmuebles', 
                     name: 'Inmuebles', 
                     icon: '🏠',
                     color: 'from-orange-500 to-amber-500',
-                    bgColor: 'bg-orange-50 hover:bg-orange-100',
-                    borderColor: 'border-orange-200 hover:border-orange-300'
+                    bgColor: 'bg-orange-50 hover:bg-orange-100 dark:bg-slate-800 dark:hover:bg-slate-700',
+                    borderColor: 'border-orange-200 hover:border-orange-300 dark:border-slate-600 dark:hover:border-slate-500'
                   },
                   { 
                     id: 'vehiculos', 
                     name: 'Vehículos', 
                     icon: '🚛',
                     color: 'from-red-500 to-rose-500',
-                    bgColor: 'bg-red-50 hover:bg-red-100',
-                    borderColor: 'border-red-200 hover:border-red-300'
+                    bgColor: 'bg-red-50 hover:bg-red-100 dark:bg-slate-800 dark:hover:bg-slate-700',
+                    borderColor: 'border-red-200 hover:border-red-300 dark:border-slate-600 dark:hover:border-slate-500'
                   },
                   { 
                     id: 'servicios', 
                     name: 'Servicios', 
                     icon: '🔧',
                     color: 'from-purple-500 to-violet-500',
-                    bgColor: 'bg-purple-50 hover:bg-purple-100',
-                    borderColor: 'border-purple-200 hover:border-purple-300'
+                    bgColor: 'bg-purple-50 hover:bg-purple-100 dark:bg-slate-800 dark:hover:bg-slate-700',
+                    borderColor: 'border-purple-200 hover:border-purple-300 dark:border-slate-600 dark:hover:border-slate-500'
                   },
                   { 
                     id: 'productos', 
                     name: 'Productos', 
                     icon: '🛍️',
                     color: 'from-green-500 to-emerald-500',
-                    bgColor: 'bg-green-50 hover:bg-green-100',
-                    borderColor: 'border-green-200 hover:border-green-300'
+                    bgColor: 'bg-green-50 hover:bg-green-100 dark:bg-slate-800 dark:hover:bg-slate-700',
+                    borderColor: 'border-green-200 hover:border-green-300 dark:border-slate-600 dark:hover:border-slate-500'
                   },
                   { 
                     id: 'negocios', 
                     name: 'Negocios', 
                     icon: '📊',
                     color: 'from-indigo-500 to-blue-500',
-                    bgColor: 'bg-indigo-50 hover:bg-indigo-100',
-                    borderColor: 'border-indigo-200 hover:border-indigo-300'
+                    bgColor: 'bg-indigo-50 hover:bg-indigo-100 dark:bg-slate-800 dark:hover:bg-slate-700',
+                    borderColor: 'border-indigo-200 hover:border-indigo-300 dark:border-slate-600 dark:hover:border-slate-500'
                   },
                   { 
                     id: 'eventos', 
                     name: 'Eventos', 
                     icon: '📅',
                     color: 'from-pink-500 to-rose-500',
-                    bgColor: 'bg-pink-50 hover:bg-pink-100',
-                    borderColor: 'border-pink-200 hover:border-pink-300'
+                    bgColor: 'bg-pink-50 hover:bg-pink-100 dark:bg-slate-800 dark:hover:bg-slate-700',
+                    borderColor: 'border-pink-200 hover:border-pink-300 dark:border-slate-600 dark:hover:border-slate-500'
                   },
                   { 
                     id: 'comunidad', 
                     name: 'Comunidad', 
                     icon: '👥',
                     color: 'from-teal-500 to-cyan-500',
-                    bgColor: 'bg-teal-50 hover:bg-teal-100',
-                    borderColor: 'border-teal-200 hover:border-teal-300'
+                    bgColor: 'bg-teal-50 hover:bg-teal-100 dark:bg-slate-800 dark:hover:bg-slate-700',
+                    borderColor: 'border-teal-200 hover:border-teal-300 dark:border-slate-600 dark:hover:border-slate-500'
                   }
                 ].map((category) => {
                   const isSelected = selectedCategory === category.id || (category.id === 'all' && selectedCategory === 'all')

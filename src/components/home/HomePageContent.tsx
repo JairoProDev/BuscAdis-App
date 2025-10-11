@@ -8,6 +8,7 @@ import { usePublicationDetail } from '@/hooks/usePublicationDetail';
 import ContentRow from '@/components/search/ContentRow';
 import { PublicationData } from '@/types/publication';
 import RealTimeSearchEngine from '@/components/search/RealTimeSearchEngine';
+import { motion } from 'framer-motion';
 
 // Dynamic imports for heavy components
 const PublicationDetailSidebar = dynamic(
