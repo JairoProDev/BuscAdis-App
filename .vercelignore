@@ -88,7 +88,7 @@ temp/
 ehthumbs.db
 Thumbs.db
 
-# Scripts folder (exclude from deployment)
+# Scripts folder (exclude from deployment) - Updated to include check-images.js
 scripts/*
 !scripts/check-images.js
 
