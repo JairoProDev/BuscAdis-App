@@ -12,10 +12,7 @@
 'use client';
 
 import React, { useState, useEffect } from 'react';
-<<<<<<< HEAD
-=======
 // import Link from 'next/link';
->>>>>>> dev
 import { usePathname } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
