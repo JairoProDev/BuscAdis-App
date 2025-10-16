@@ -946,9 +946,9 @@ function SearchPageContent({ publicationsData, results, setResults, isLoading, s
 
       {/* Filters Row Mejorado - Fusionando selectores con estado activo */}
       {(selectedCategory && selectedCategory !== 'all') && (
-        <div className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-xl border-b border-gray-200/50 dark:border-gray-700/50 shadow-sm">
+        <div className="border-b border-gray-200/50 dark:border-gray-700/50 shadow-sm bg-transparent">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3">
-            <div className="flex items-center gap-3 overflow-x-auto overflow-y-visible scrollbar-thin scrollbar-thumb-gray-300 dark:scrollbar-thumb-gray-600 scrollbar-track-transparent justify-start">
+            <div className="flex items-center gap-3 overflow-x-auto overflow-y-visible scrollbar-thin scrollbar-thumb-gray-300 dark:scrollbar-thumb-gray-600 scrollbar-track-transparent justify-start bg-transparent">
                 {/* Selector de Subcategorías */}
                 <div className="flex-shrink-0">
                   <EnhancedFilterSelector
