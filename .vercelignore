@@ -89,7 +89,7 @@ ehthumbs.db
 Thumbs.db
 
 # Scripts folder (exclude from deployment)
-scripts/
+scripts/*
 !scripts/check-images.js
 
 # Documentation
