@@ -13,6 +13,12 @@ import { PublicationProvider } from '@/contexts/PublicationContext';
 import { SearchProvider } from '@/contexts/SearchContext';
 import { ReactNode } from 'react';
 import type { Metadata } from 'next';
+<<<<<<< HEAD
+=======
+// import GoogleAnalytics from '@/components/analytics/GoogleAnalytics';
+// import PageViewTracker from '@/components/analytics/PageViewTracker';
+// import { ANALYTICS_CONFIG } from '@/config/analytics';
+>>>>>>> dev
 import { Analytics } from '@vercel/analytics/react';
 import { SpeedInsights } from '@vercel/speed-insights/next';
 // import { Providers } from '@/components/providers/Providers';

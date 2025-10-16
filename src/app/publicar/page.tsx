@@ -3,6 +3,10 @@
 import React, { useState, useCallback, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { PublicationsService, CreatePublicationData } from '@/services/publications.service';
+<<<<<<< HEAD
+=======
+import { type CategoryKey } from '@/data/attributesConfig'
+>>>>>>> dev
 import CategorySelector from '@/components/publish/CategorySelector';
 import LocationSelector, { type LocationInputData } from '@/components/publish/LocationSelector';
 import PriceInput from '@/components/publish/PriceInput';

@@ -156,7 +156,7 @@ export default function PublicationDetailSidebar({
             className="relative h-full w-full bg-white dark:bg-slate-900 shadow-xl border border-gray-200 dark:border-slate-700 overflow-hidden rounded-lg"
           >
             {/* Header */}
-            <div className="flex items-center justify-between p-2 border-b border-gray-200 dark:border-slate-700 bg-white dark:bg-slate-900 sticky top-0 z-10">
+            <div className="flex items-center justify-between p-2 border-b border-gray-200 dark:border-slate-700 bg-white dark:bg-slate-900 relative z-10">
               <div className="flex items-center gap-3">
                 <button
                   onClick={onClose}

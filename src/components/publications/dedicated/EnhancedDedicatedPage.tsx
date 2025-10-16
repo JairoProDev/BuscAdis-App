@@ -84,10 +84,8 @@ export default function EnhancedDedicatedPage({
   const [showImageModal, setShowImageModal] = useState(false);
   const [showContactModal, setShowContactModal] = useState(false);
   const [showReportModal, setShowReportModal] = useState(false);
-  const [isSticky, setIsSticky] = useState(false);
   const [viewCount, setViewCount] = useState(publication.views || 0);
   const [isLoading, setIsLoading] = useState(false);
-  const stickyRef = useRef<HTMLDivElement>(null);
   const imageModalRef = useRef<HTMLDivElement>(null);
   const { toast } = useToast();
 
@@ -187,7 +185,7 @@ export default function EnhancedDedicatedPage({
     
     window.open(`https://wa.me/${cleanPhone}?text=${encodeURIComponent(message)}`, '_blank');
     onWhatsAppClick?.();
-  }, [publication.whatsapp, publication.id, publication.title, onWhatsAppClick]);
+  };
 
   // Toast notification is now handled by useToast hook
 
@@ -222,8 +220,8 @@ export default function EnhancedDedicatedPage({
     trackView();
   }, [publication.id]);
 
-  // Enhanced image modal - moved outside render
-  const ImageModal = React.useMemo(() => (
+  // Enhanced image modal
+  const ImageModal = () => (
     <AnimatePresence>
       {showImageModal && (
         <motion.div
@@ -280,10 +278,10 @@ export default function EnhancedDedicatedPage({
         </motion.div>
       )}
     </AnimatePresence>
-  ), [showImageModal, images, currentImageIndex, publication.title, prevImage, nextImage]);
+  );
 
-  // Enhanced contact modal - moved outside render
-  const ContactModal = React.useMemo(() => (
+  // Enhanced contact modal
+  const ContactModal = () => (
     <AnimatePresence>
       {showContactModal && (
         <motion.div
@@ -336,10 +334,10 @@ export default function EnhancedDedicatedPage({
         </motion.div>
       )}
     </AnimatePresence>
-  ), [showContactModal, publication.whatsapp, handleWhatsAppContact]);
+  );
 
-  // Report modal - moved outside render
-  const ReportModal = React.useMemo(() => (
+  // Report modal
+  const ReportModal = () => (
     <AnimatePresence>
       {showReportModal && (
         <motion.div
@@ -406,7 +404,7 @@ export default function EnhancedDedicatedPage({
         </motion.div>
       )}
     </AnimatePresence>
-  ), [showReportModal, toast]);
+  );
 
   return (
     <div className="bg-gray-50 dark:bg-gray-900 min-h-screen">
@@ -549,7 +547,7 @@ export default function EnhancedDedicatedPage({
                   <div className="flex space-x-2 overflow-x-auto">
                     {images.map((image, index) => (
                       <button
-                        key={`thumbnail-${image}`}
+                        key={index}
                         onClick={() => setCurrentImageIndex(index)}
                         className={`relative w-16 h-16 rounded-lg overflow-hidden flex-shrink-0 border-2 transition-all ${
                           index === currentImageIndex 
@@ -684,10 +682,7 @@ export default function EnhancedDedicatedPage({
 
           {/* Enhanced Sticky Sidebar */}
           <div className="lg:col-span-1">
-            <div 
-              ref={stickyRef}
-              className={`space-y-6 ${isSticky ? 'lg:sticky lg:top-24' : ''}`}
-            >
+            <div className="space-y-6 sticky-sidebar sticky-container">
               {/* Contact Card */}
               <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-lg p-6 border border-gray-200 dark:border-gray-700">
                 <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
@@ -786,9 +781,222 @@ export default function EnhancedDedicatedPage({
       </div>
 
       {/* Modals */}
-      {ImageModal}
-      {ContactModal}
-      {ReportModal}
+      <ImageModal />
+      <ContactModal />
+      <ReportModal />
     </div>
   );
 }
+
+// Enhanced image modal
+const ImageModal = ({ showImageModal, setShowImageModal, images, currentImageIndex, setCurrentImageIndex, publication, imageModalRef }: {
+  showImageModal: boolean;
+  setShowImageModal: (show: boolean) => void;
+  images: string[];
+  currentImageIndex: number;
+  setCurrentImageIndex: React.Dispatch<React.SetStateAction<number>>;
+  publication: PublicationData;
+  imageModalRef: React.RefObject<HTMLDivElement>;
+}) => {
+  const nextImage = () => {
+    setCurrentImageIndex((prev) => (prev + 1) % images.length);
+  };
+
+  const prevImage = () => {
+    setCurrentImageIndex((prev) => (prev - 1 + images.length) % images.length);
+  };
+
+  return (
+    <AnimatePresence>
+      {showImageModal && (
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          className="fixed inset-0 bg-black/90 z-50 flex items-center justify-center p-4"
+          onClick={() => setShowImageModal(false)}
+        >
+          <motion.div
+            initial={{ scale: 0.8, opacity: 0 }}
+            animate={{ scale: 1, opacity: 1 }}
+            exit={{ scale: 0.8, opacity: 0 }}
+            className="relative max-w-4xl max-h-full"
+            onClick={(e) => e.stopPropagation()}
+            ref={imageModalRef}
+          >
+            <button
+              onClick={() => setShowImageModal(false)}
+              className="absolute top-4 right-4 z-10 bg-black/50 text-white p-2 rounded-full hover:bg-black/70 transition-colors"
+            >
+              <XMarkIcon className="w-6 h-6" />
+            </button>
+            
+            <Image
+              src={images[currentImageIndex]}
+              alt={publication.title}
+              width={800}
+              height={600}
+              className="object-contain max-w-full max-h-full rounded-lg"
+            />
+            
+            {images.length > 1 && (
+              <>
+                <button
+                  onClick={prevImage}
+                  className="absolute left-4 top-1/2 -translate-y-1/2 bg-black/50 text-white p-2 rounded-full hover:bg-black/70 transition-colors"
+                >
+                  <ChevronLeftIcon className="w-6 h-6" />
+                </button>
+                <button
+                  onClick={nextImage}
+                  className="absolute right-4 top-1/2 -translate-y-1/2 bg-black/50 text-white p-2 rounded-full hover:bg-black/70 transition-colors"
+                >
+                  <ChevronRightIcon className="w-6 h-6" />
+                </button>
+              </>
+            )}
+            
+            <div className="absolute bottom-4 left-1/2 -translate-x-1/2 bg-black/50 text-white text-sm px-3 py-1 rounded-full">
+              {currentImageIndex + 1} / {images.length}
+            </div>
+          </motion.div>
+        </motion.div>
+      )}
+    </AnimatePresence>
+  );
+};
+
+// Enhanced contact modal
+const ContactModal = ({ showContactModal, setShowContactModal, publication, handleWhatsAppContact }: {
+  showContactModal: boolean;
+  setShowContactModal: (show: boolean) => void;
+  publication: PublicationData;
+  handleWhatsAppContact: () => void;
+}) => (
+  <AnimatePresence>
+    {showContactModal && (
+      <motion.div
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        exit={{ opacity: 0 }}
+        className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4"
+        onClick={() => setShowContactModal(false)}
+      >
+        <motion.div
+          initial={{ scale: 0.9, opacity: 0 }}
+          animate={{ scale: 1, opacity: 1 }}
+          exit={{ scale: 0.9, opacity: 0 }}
+          className="bg-white dark:bg-gray-800 rounded-2xl p-6 max-w-md w-full"
+          onClick={(e) => e.stopPropagation()}
+        >
+          <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-4">
+            Contactar al vendedor
+          </h3>
+          
+          <div className="space-y-3">
+            {publication.whatsapp && (
+              <button
+                onClick={handleWhatsAppContact}
+                className="w-full flex items-center justify-center gap-3 bg-green-500 hover:bg-green-600 text-white py-3 px-4 rounded-lg font-semibold transition-colors"
+              >
+                <ChatSolidIcon className="w-6 h-6" />
+                WhatsApp
+              </button>
+            )}
+            
+            {publication.whatsapp && (
+              <button
+                onClick={() => window.open(`tel:${publication.whatsapp}`, '_self')}
+                className="w-full flex items-center justify-center gap-3 bg-blue-500 hover:bg-blue-600 text-white py-3 px-4 rounded-lg font-semibold transition-colors"
+              >
+                <PhoneIcon className="w-6 h-6" />
+                Llamar
+              </button>
+            )}
+            
+            <button
+              onClick={() => setShowContactModal(false)}
+              className="w-full bg-gray-200 hover:bg-gray-300 dark:bg-gray-700 dark:hover:bg-gray-600 text-gray-800 dark:text-gray-200 py-3 px-4 rounded-lg font-semibold transition-colors"
+            >
+              Cancelar
+            </button>
+          </div>
+        </motion.div>
+      </motion.div>
+    )}
+  </AnimatePresence>
+);
+
+// Report modal
+const ReportModal = ({ showReportModal, setShowReportModal, toast }: {
+  showReportModal: boolean;
+  setShowReportModal: (show: boolean) => void;
+  toast: ReturnType<typeof useToast>['toast'];
+}) => (
+  <AnimatePresence>
+    {showReportModal && (
+      <motion.div
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        exit={{ opacity: 0 }}
+        className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4"
+        onClick={() => setShowReportModal(false)}
+      >
+        <motion.div
+          initial={{ scale: 0.9, opacity: 0 }}
+          animate={{ scale: 1, opacity: 1 }}
+          exit={{ scale: 0.9, opacity: 0 }}
+          className="bg-white dark:bg-gray-800 rounded-2xl p-6 max-w-md w-full"
+          onClick={(e) => e.stopPropagation()}
+        >
+          <h3 className="text-xl font-bold text-gray-900 dark:text-white mb-4">
+            Reportar anuncio
+          </h3>
+          
+          <div className="space-y-3">
+            <button className="w-full text-left p-3 rounded-lg border border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
+              <div className="font-semibold text-gray-900 dark:text-white">Contenido inapropiado</div>
+              <div className="text-sm text-gray-500 dark:text-gray-400">El anuncio contiene contenido ofensivo o inapropiado</div>
+            </button>
+            
+            <button className="w-full text-left p-3 rounded-lg border border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
+              <div className="font-semibold text-gray-900 dark:text-white">Información falsa</div>
+              <div className="text-sm text-gray-500 dark:text-gray-400">La información del anuncio es incorrecta o engañosa</div>
+            </button>
+            
+            <button className="w-full text-left p-3 rounded-lg border border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
+              <div className="font-semibold text-gray-900 dark:text-white">Spam</div>
+              <div className="text-sm text-gray-500 dark:text-gray-400">Este anuncio es spam o contenido no deseado</div>
+            </button>
+            
+            <button className="w-full text-left p-3 rounded-lg border border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors">
+              <div className="font-semibold text-gray-900 dark:text-white">Otro motivo</div>
+              <div className="text-sm text-gray-500 dark:text-gray-400">Tengo otro motivo para reportar este anuncio</div>
+            </button>
+          </div>
+          
+          <div className="flex gap-3 mt-6">
+            <button
+              onClick={() => setShowReportModal(false)}
+              className="flex-1 bg-gray-200 hover:bg-gray-300 dark:bg-gray-700 dark:hover:bg-gray-600 text-gray-800 dark:text-gray-200 py-2 px-4 rounded-lg font-semibold transition-colors"
+            >
+              Cancelar
+            </button>
+            <button
+              onClick={() => {
+                toast({
+                  title: "Reporte enviado",
+                  description: "Tu reporte ha sido enviado correctamente"
+                });
+                setShowReportModal(false);
+              }}
+              className="flex-1 bg-red-500 hover:bg-red-600 text-white py-2 px-4 rounded-lg font-semibold transition-colors"
+            >
+              Reportar
+            </button>
+          </div>
+        </motion.div>
+      </motion.div>
+    )}
+  </AnimatePresence>
+);
