@@ -3,7 +3,7 @@
 import React, { useState, useCallback, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { PublicationsService, CreatePublicationData } from '@/services/publications.service';
-import { ATTRIBUTES_CONFIG, type AttributeField, type CategoryKey } from '@/data/attributesConfig'
+import { type CategoryKey } from '@/data/attributesConfig'
 import CategorySelector from '@/components/publish/CategorySelector';
 import LocationSelector, { type LocationInputData } from '@/components/publish/LocationSelector';
 import PriceInput from '@/components/publish/PriceInput';
