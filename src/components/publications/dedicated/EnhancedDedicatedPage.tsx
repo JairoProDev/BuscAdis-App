@@ -91,10 +91,8 @@ export default function EnhancedDedicatedPage({
   const [showImageModal, setShowImageModal] = useState(false);
   const [showContactModal, setShowContactModal] = useState(false);
   const [showReportModal, setShowReportModal] = useState(false);
-  const [isSticky, setIsSticky] = useState(false);
   const [viewCount, setViewCount] = useState(publication.views || 0);
   const [isLoading, setIsLoading] = useState(false);
-  const stickyRef = useRef<HTMLDivElement>(null);
   const imageModalRef = useRef<HTMLDivElement>(null);
   const { toast } = useToast();
 
@@ -195,18 +193,6 @@ export default function EnhancedDedicatedPage({
 
   // Toast notification is now handled by useToast hook
 
-  // Handle sticky behavior
-  useEffect(() => {
-    const handleScroll = () => {
-      if (stickyRef.current) {
-        const rect = stickyRef.current.getBoundingClientRect();
-        setIsSticky(rect.top <= 80);
-      }
-    };
-
-    window.addEventListener('scroll', handleScroll);
-    return () => window.removeEventListener('scroll', handleScroll);
-  }, []);
 
   // Track view count
   useEffect(() => {
@@ -686,10 +672,7 @@ export default function EnhancedDedicatedPage({
 
           {/* Enhanced Sticky Sidebar */}
           <div className="lg:col-span-1">
-            <div 
-              ref={stickyRef}
-              className={`space-y-6 ${isSticky ? 'lg:sticky lg:top-24' : ''}`}
-            >
+            <div className="space-y-6 sticky-sidebar sticky-container">
               {/* Contact Card */}
               <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-lg p-6 border border-gray-200 dark:border-gray-700">
                 <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">

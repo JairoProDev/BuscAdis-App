@@ -38,9 +38,9 @@ export default function StickySearchContainer({
   }, [])
 
   return (
-    <div className={`w-full z-40 transition-all duration-300 ${
+    <div className={`w-full z-40 transition-all duration-300 ease-out ${
       isSticky 
-        ? 'fixed top-0 left-0 right-0 shadow-lg' 
+        ? 'fixed top-0 left-0 right-0 shadow-lg transform-gpu' 
         : 'relative'
     } ${className}`}>
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
