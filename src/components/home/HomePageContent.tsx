@@ -244,7 +244,7 @@ export default function HomePageContent({
             >
               Miles de {' '}
               <span className="font-bold text-[#00B6E3] drop-shadow-lg">oportunidades</span>{' '}
-              esperando por ti en{' '}
+               en{' '}
               <span className="font-bold text-[#00B6E3] drop-shadow-lg">Buscadis</span>
             </motion.h1>
 
