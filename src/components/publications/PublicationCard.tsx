@@ -551,8 +551,8 @@ export default function PublicationCard({
           </div>
         </div>
 
-        {/* Price and WhatsApp Button (side by side on desktop) */}
-        <div className="mt-2 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+        {/* Price and WhatsApp Button (always side by side) */}
+        <div className="mt-2 flex items-center justify-between gap-2">
           {/* Price */}
           {formatPriceLocal(publication.value, publication.currency) ? (
             <div className="text-sm font-extrabold text-[#14b8a6] dark:text-[#14b8a6]">
@@ -568,11 +568,11 @@ export default function PublicationCard({
             </button>
           )}
 
-          {/* WhatsApp Button (side by side on desktop, full width on mobile) */}
+          {/* WhatsApp Button (always side by side) */}
           {showWhatsApp && (
             <button 
               onClick={createEnhancedWhatsAppMessage}
-              className="w-full sm:w-auto flex items-center justify-center gap-2 bg-[#14b8a6] text-white font-bold py-2 px-4 rounded-lg hover:bg-[#0d9488] active:bg-[#0f766e] transform hover:scale-[1.02] transition-all duration-200 shadow-md hover:shadow-lg mt-2 sm:mt-0"
+              className="flex items-center justify-center gap-2 bg-[#14b8a6] text-white font-bold py-2 px-4 rounded-lg hover:bg-[#0d9488] active:bg-[#0f766e] transform hover:scale-[1.02] transition-all duration-200 shadow-md hover:shadow-lg"
               style={{ minWidth: '110px' }}
             >
               <WhatsAppIcon className="w-6 h-6 min-w-[1.5rem] min-h-[1.5rem]" />

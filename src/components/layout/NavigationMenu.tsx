@@ -53,7 +53,7 @@ export default function NavigationMenu({
     const publishButtonClasses = "bg-gradient-to-r from-teal-500 to-cyan-500 hover:from-teal-600 hover:to-cyan-600 text-slate-900 dark:text-white shadow-md hover:shadow-lg transition-all duration-300"
 
     return (
-      <nav className={`hidden md:flex flex-1 justify-center space-x-1 lg:space-x-2 ${className}`} role="navigation" aria-label="Navegación principal">
+      <nav className={`flex flex-1 justify-center space-x-1 lg:space-x-2 ${className}`} role="navigation" aria-label="Navegación principal">
         {NAV_ITEMS.map((item) => {
           const isActive = isActiveRoute(item.path)
           const Icon = item.icon

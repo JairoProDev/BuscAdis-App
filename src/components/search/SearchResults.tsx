@@ -342,14 +342,44 @@ export default function SearchResults({
 
             {/* Footer Info */}
             <div className="mt-auto space-y-2">
-              {/* Price */}
-              {formatPrice(publication.price, publication.currency) && (
-                <div className="flex items-center justify-between">
+              {/* Price and Contact Button */}
+              <div className="flex items-center justify-between">
+                {formatPrice(publication.price, publication.currency) ? (
                   <span className="text-lg font-semibold text-teal-400">
                     {formatPrice(publication.price, publication.currency)}
                   </span>
-                </div>
-              )}
+                ) : (
+                  <span className="text-lg font-semibold text-teal-400">
+                    Consultar precio
+                  </span>
+                )}
+                
+                {/* Contact Button al lado del precio */}
+                {(() => {
+                  const phone = publication.contactPhone;
+                  if (typeof phone !== 'string' || !phone) return null;
+                  
+                  return (
+                    <button
+                      onClick={(e) => {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        const cleanPhone = phone.replace(/[^0-9]/g, '');
+                        const message = encodeURIComponent(
+                          `Hola, me interesa tu publicación "${publication.title}" en BuscaDis`
+                        );
+                        window.open(`https://wa.me/${cleanPhone}?text=${message}`, '_blank');
+                      }}
+                      className="bg-green-500 hover:bg-green-600 text-white text-sm font-medium px-3 py-2 rounded-lg shadow-sm flex items-center transition-colors"
+                    >
+                      <svg className="w-4 h-4 mr-2" fill="currentColor" viewBox="0 0 24 24">
+                        <path d="M17.415 14.382c-.298-.149-1.759-.867-2.031-.967-.272-.099-.47-.148-.669.15-.198.296-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.019-.458.13-.606.134-.133.297-.347.446-.52.149-.174.198-.298.297-.497.1-.198.05-.371-.025-.52-.074-.149-.669-1.612-.916-2.207-.242-.579-.486-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.064 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.57-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z" />
+                      </svg>
+                      <span>Contactar</span>
+                    </button>
+                  );
+                })()}
+              </div>
 
               {/* Location and Date */}
               <div className="flex items-center justify-between text-sm">
@@ -363,32 +393,6 @@ export default function SearchResults({
                   {formatRelativeTime(publication.createdAt)}
                 </span>
               </div>
-
-              {/* Contact Button */}
-              {(() => {
-                const phone = publication.contactPhone;
-                if (typeof phone !== 'string' || !phone) return null;
-                
-                return (
-                  <button
-                    onClick={(e) => {
-                      e.preventDefault();
-                      e.stopPropagation();
-                      const cleanPhone = phone.replace(/[^0-9]/g, '');
-                      const message = encodeURIComponent(
-                        `Hola, me interesa tu publicación "${publication.title}" en BuscaDis`
-                      );
-                      window.open(`https://wa.me/${cleanPhone}?text=${message}`, '_blank');
-                    }}
-                    className="w-full mt-3 bg-green-500 hover:bg-green-600 text-white text-sm font-medium px-3 py-2 rounded-lg shadow-sm flex items-center justify-center transition-colors"
-                  >
-                    <svg className="w-4 h-4 mr-2" fill="currentColor" viewBox="0 0 24 24">
-                      <path d="M17.415 14.382c-.298-.149-1.759-.867-2.031-.967-.272-.099-.47-.148-.669.15-.198.296-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.019-.458.13-.606.134-.133.297-.347.446-.52.149-.174.198-.298.297-.497.1-.198.05-.371-.025-.52-.074-.149-.669-1.612-.916-2.207-.242-.579-.486-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.064 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.57-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z" />
-                    </svg>
-                    <span>Contactar</span>
-                  </button>
-                );
-              })()}
             </div>
           </div>
         </Link>
@@ -517,19 +521,6 @@ export default function SearchResults({
                   )}
                 </div>
 
-                {/* WhatsApp Button for List View */}
-                {publication.contactPhone && (
-                  <button
-                    onClick={handleWhatsAppClick}
-                    className="absolute bottom-2 left-2 z-20 bg-[#14b8a6] hover:bg-[#0d9488] text-white text-xs font-medium px-2 py-0.5 rounded-full shadow-sm flex items-center"
-                    aria-label="Contactar por WhatsApp"
-                  >
-                    <svg className="w-3 h-3 mr-1" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true">
-                      <path d="M17.415 14.382c-.298-.149-1.759-.867-2.031-.967-.272-.099-.47-.148-.669.15-.198.296-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.019-.458.13-.606.134-.133.297-.347.446-.52.149-.174.198-.298.297-.497.1-.198.05-.371-.025-.52-.074-.149-.669-1.612-.916-2.207-.242-.579-.486-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.064 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.57-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z" />
-                    </svg>
-                    <span className="hidden sm:inline">Contactar</span>
-                  </button>
-                )}
               </div>
 
             {/* Contenido */}
@@ -603,24 +594,40 @@ export default function SearchResults({
                   </span>
                 </div>
 
-                {formatPrice(publication.price, publication.currency) ? (
-                  <span className="bg-slate-900/80 backdrop-blur-sm text-[#14b8a6] text-sm font-bold px-3 py-1 rounded-lg shadow-lg">
-                    {formatPrice(publication.price, publication.currency)}
-                  </span>
-                ) : (
-                  publication.contactPhone && ( // Show "Consultar precio" only if phone exists and no price
+                <div className="flex items-center gap-2">
+                  {formatPrice(publication.price, publication.currency) ? (
+                    <span className="bg-slate-900/80 backdrop-blur-sm text-[#14b8a6] text-sm font-bold px-3 py-1 rounded-lg shadow-lg">
+                      {formatPrice(publication.price, publication.currency)}
+                    </span>
+                  ) : (
+                    publication.contactPhone && ( // Show "Consultar precio" only if phone exists and no price
+                      <button
+                        onClick={handleWhatsAppClick}
+                        className="bg-[#14b8a6] hover:bg-[#0d9488] text-white text-xs font-medium px-3 py-1 rounded-lg shadow-sm flex items-center"
+                        aria-label="Consultar precio por WhatsApp"
+                      >
+                        <svg className="w-3 h-3 mr-1" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                          <path d="M17.415 14.382c-.298-.149-1.759-.867-2.031-.967-.272-.099-.47-.148-.669.15-.198.296-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.019-.458.13-.606.134-.133.297-.347.446-.52.149-.174.198-.298.297-.497.1-.198.05-.371-.025-.52-.074-.149-.669-1.612-.916-2.207-.242-.579-.486-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.064 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.57-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z" />
+                        </svg>
+                        <span>Consultar precio</span>
+                      </button>
+                    )
+                  )}
+                  
+                  {/* Botón Contactar al lado del precio */}
+                  {publication.contactPhone && (
                     <button
                       onClick={handleWhatsAppClick}
-                      className="bg-[#14b8a6] hover:bg-[#0d9488] text-white text-xs font-medium px-3 py-1 rounded-lg shadow-sm flex items-center"
-                      aria-label="Consultar precio por WhatsApp"
+                      className="bg-green-500 hover:bg-green-600 text-white text-xs font-medium px-3 py-1 rounded-lg shadow-sm flex items-center"
+                      aria-label="Contactar por WhatsApp"
                     >
                       <svg className="w-3 h-3 mr-1" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true">
                         <path d="M17.415 14.382c-.298-.149-1.759-.867-2.031-.967-.272-.099-.47-.148-.669.15-.198.296-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.019-.458.13-.606.134-.133.297-.347.446-.52.149-.174.198-.298.297-.497.1-.198.05-.371-.025-.52-.074-.149-.669-1.612-.916-2.207-.242-.579-.486-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.064 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.57-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347z" />
                       </svg>
-                      <span>Consultar precio</span>
+                      <span>Contactar</span>
                     </button>
-                  )
-                )}
+                  )}
+                </div>
               </div>
             </div>
           </div>
